@@ -1,5 +1,9 @@
 # Étude économique FLOW — contrat de travail courant
 
+## Communication
+
+- Tutoyer l’utilisateur dans les échanges.
+
 ## Autorités et finalité
 
 - Étude d’opportunité pour un Go / No Go, sans engagement forfaitaire. Présenter les résultats et partis pris actuels ; les récits de correction restent dans les audits.
