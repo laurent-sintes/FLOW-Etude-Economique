@@ -1,0 +1,116 @@
+id: coherence-build-integration-run-mco
+date: '2026-10-26'
+titre: Audit de cohérence — Build Core System / Intégration / Run & MCO
+presentation:
+  total: Dépenses sur dix ans, en euros HT — sommes exactes au centime
+  colonnes: [Option, Build Core System, Intégration, Run & MCO cumulé, Total]
+  sections:
+    portee: Périmètre de l’audit
+    corrections: Corrections effectuées
+    separation_verifiee: Séparation vérifiée
+    points_a_qualifier: Frontières économiques à clarifier
+    controles: Vérifications réalisées
+  labels:
+    constat: Constat
+    correction: Correction
+    impact: Effet
+    risque: Risque de recouvrement ou d’omission
+    action: Suite recommandée
+    sensibilite: Sensibilité isolée
+    source: Référence
+  preuves: Preuves détaillées des calculs
+conclusion: Les calculs se réconcilient au centime sur les cinq options et les horizons 3, 5, 7 et 10 ans. Aucun double compte arithmétique n’est identifié dans le scénario actuel. Des frontières économiques restent à rapprocher des livrables financés ; leur résolution ne peut pas être remplacée par un retrait automatique de charges.
+portee:
+  - YAML actifs et adaptateur de calibration ; trois Make, deux Buy, 88 capacités et un socle transverse.
+  - Valorisation des scénarios bas, central et haut ; quinze années de service comme intermédiaire distinct.
+  - Projection sur dix ans depuis le départ commun ; horizons 3, 5, 7 et 10 ans, annuités et réalisation restant à financer.
+  - Application, ventilation annuelle, synthèse sponsor, passage des offres à l’enveloppe et paramètres de simulation.
+  - Les preuves commerciales existantes sont utilisées ; pas de nouvelle démonstration produit ni de validation contractuelle.
+corrections:
+  - id: C04
+    titre: Un cumul ne porte plus un libellé annuel
+    constat: Le détail du total sur dix ans et la comparaison aux horizons réutilisaient le nom MCO annuel & run pour des dépenses cumulées.
+    correction: Le nom canonique devient Run & MCO. La période est portée par le tableau, l’horizon et l’unité. Le total annuel à pleine capacité reste une notion distincte.
+    fichiers: [source/glossaire.yaml, source/glossaire.md]
+  - id: C01
+    titre: Conservation exacte des budgets répartis
+    constat: L’arrondi indépendant des annuités modifiait le build Java de +0,01 €, .NET de −0,02 € et Rust de +0,01 €. Le total Microsoft de l’année 4 différait de −0,01 € de la somme de ses postes.
+    correction: Répartition par différences de cumuls arrondis en décimal ; total annuel égal à la somme des trois postes publiés. Total économique calculé depuis ses sous-totaux publiés. Base annuelle monétaire fixée au centime avant indexation et pilotage.
+    impact: Aucune hypothèse, durée ou offre modifiée. Effets de quelques centimes ; aucun changement de classement.
+    fichiers: [tools/project_investment.py, tools/calculate_costs.py, tools/test_cost_separation.py]
+  - id: C02
+    titre: Ancienne explication SAP retirée
+    constat: Les limites du plan annonçaient encore 16,644 M€ d’intégration SAP et décrivaient des compléments génériques comme inclus dans le repère Make, alors que les données actives les avaient retirés.
+    correction: Suppression du montant recopié ; renvoi au résultat calculé et description correcte des exclusions du repère Make. Les anciennes ancres CSF de calibration sont marquées historiques.
+    fichiers: [source/plan-investissement.yaml, source/calibration-couts.yaml]
+  - id: C03
+    titre: Résultats et traçabilité actualisés
+    correction: Régénération des deux résultats YAML et des intermédiaires JSON ; vérification des empreintes, conservation des témoins antérieurs et ajout d’un audit indépendant reproductible.
+    fichiers: [source/couts-15-ans.yaml, source/investissements-10-ans.yaml, tools/audit_cost_separation.py]
+separation_verifiee:
+  - objet: Build Core System
+    regle: Les 89 lignes fonctionnelles des trois Make sont valorisées une fois. Le frontend est commun ; le réemploi n’obtient pas une seconde remise. Les plages de travaux ne reçoivent pas aussi le facteur global JH. Buy ne reconstruit pas le standard ; son build est sans objet.
+  - objet: Intégration Make
+    regle: Le repère SAP retraité et bonifié remplace le chiffrage par activités dans le scénario sponsor. Le contrepoint de 1,345 à 1,822 M€ n’est jamais additionné au budget de 9,889 M€. Ce contrepoint reste celui de l’intermédiaire à quinze années de service, distinct du scénario sponsor.
+  - objet: Intégration Buy
+    regle: Les prix fournisseurs remplacent les JH diagnostiques INT-001 à INT-013. Les provisions identifiées sont ajoutées une fois avec pilotage sur leur seule assiette. Aucun pilotage supplémentaire sur le prix fournisseur.
+  - objet: Support Microsoft
+    regle: Les 90 k€ Unified / Project Quality sont affectés une seule fois à l’intégration ; aucun renouvellement annuel n’est ajouté.
+  - objet: Run & MCO
+    regle: Les travaux estimés et les forfaits sont exclusifs. Les forfaits SAP de 250, 450 et 350 k€ remplacent les activités correspondantes. Le maintien du produit standard est inclus dans l’abonnement. Les évolutions client restent distinctes de la roadmap éditeur.
+  - objet: Achats techniques
+    regle: L’offre éditeur groupée reste unique. Aucun cloud standard n’est ajouté à l’hébergement déjà inclus ; les provisions cloud, iPaaS et droits complémentaires portent seulement les achats séparés retenus. Aucune ventilation fictive des forfaits Buy.
+  - objet: Calendrier
+    regle: Build puis intégration en Make ; intégration immédiate en Buy. Services après intégration, abonnements Buy dès le départ. Une année de service et une année du projet ne sont pas interchangeables. Le financement initial restant exclut le MCO futur.
+  - objet: Application et simulation
+    regle: Synthèse, comparaisons et annuités consomment le même moteur. Les détails annuels et le total sur dix ans utilisent les mêmes trois postes. Les paramètres de simulation remplacent leur référence ; ils ne s’y ajoutent pas. Le paramètre SAP propage une seule fois son effet au Make via le bonus.
+points_a_qualifier:
+  - id: R05
+    priorite: moyenne
+    titre: Formation et industrialisation dans le contrepoint Make par activités
+    constat: INT-012 finance déjà la formation des utilisateurs clés et le transfert applicatif. Le calcul ajoute 120 JH d’accompagnement, justifiés comme distincts d’une formation technique, alors que cette séparation n’est pas établie dans le catalogue. Le transverse générique inclut aussi une chaîne CI/CD tandis que INT-009 décrit la chaîne initiale entière.
+    risque: Recouvrement possible dans le chiffrage par activités et le total économique à quinze années de service. Aucun effet direct sur les totaux sponsor actuels, puisque le repère SAP remplace ce chiffrage d’intégration.
+    action: Séparer explicitement formation générique, formation au contexte Beaumanoir et accompagnement additionnel ; distinguer chaîne de fabrication du produit et chaîne de déploiement client. Ne retenir deux charges que pour deux livrables distincts.
+    sensibilite: Le supplément d’accompagnement représente 73 656 € pour Java, 80 256 € pour .NET et 93 456 € pour Rust, pilotage compris. Aucun montant de recouvrement CI/CD n’est démontré.
+    source: source/calibration-couts.yaml#couts_communs/justification_accompagnement
+  - id: R01
+    priorite: haute
+    titre: Contenu du repère SAP transposé à l’intégration Make
+    constat: Le retrait Finance/FP&A est explicite et les compléments génériques additionnels actuellement retenus sont nuls. En revanche, les lots Delaware restants contiennent des travaux de core model, configuration, interfaces et développements dont la transposition à Make n’est pas ventilée par livrable.
+    risque: Un mécanisme déjà financé dans le build Make pourrait encore être implicitement financé par le proxy ; aucun montant de double compte n’est démontré.
+    action: "Rapprocher les livrables des lots avec Core générique, réalisation Beaumanoir et systèmes conservés avant de modifier l’ancre. Ne pas soustraire l’ensemble des développements SAP : une partie relève bien de l’intégration."
+    source: source/plan-investissement.yaml#integration_make
+  - id: R02
+    priorite: moyenne
+    titre: Qualification client ajoutée aux offres Buy
+    constat: Les 120 JH Microsoft et 80 JH SAP sont conservés en supplément alors que SIT/UAT, tests et bascule existent déjà dans les forfaits. La justification mentionne encore des mécanismes FLOW ajoutés ; le registre ne retient plus de développement générique démontré.
+    risque: Recouvrement possible avec INT-009 et INT-010 inclus ; absence de double addition informatique, mais complément de prestation non démontré séparément.
+    action: Décrire le corpus de recette et l’automatisation supplémentaires, avec livrable distinct. Si déjà inclus, retirer le complément et son pilotage une seule fois ; pour SAP, mettre aussi à jour l’ancre Make.
+    sensibilite: Retrait de 86 856 € pour Microsoft, 88 704 € pour SAP et, par propagation, 79 833,60 € pour chaque Make. Aucun retrait appliqué à la référence.
+    source: source/chiffrage/chiffrage-sap.yaml#integration
+  - id: R03
+    priorite: haute
+    titre: Maintien du Core pendant l’intégration Make
+    constat: Le build finit au mois 48 ; l’intégration finit au mois 82. Le modèle ne déclenche les services annuels qu’au mois 82 et finance la stabilisation dans l’intégration. L’entretien générique et les évolutions du Core durant ces 34 mois n’ont pas de ligne autonome.
+    risque: Sous-financement si ces travaux ne sont pas dans le dispositif d’intégration ; double compte si on ajoute un MCO séparé alors qu’ils y sont déjà financés.
+    action: Préciser la responsabilité produit et les travaux couverts durant la transition. La sensibilité applique 100 % du service Core actuel pendant cette période, sans présumer une montée en charge réelle.
+    sensibilite: Java +750 163,03 €, .NET +877 928,75 €, Rust +1 534 956,26 € sur dix ans. Sensibilité isolée, non ajoutée au budget retenu.
+    source: source/plan-investissement.yaml#repartition
+  - id: R04
+    priorite: moyenne
+    titre: Provisions techniques et modules ouverts
+    constat: Préparation, capacité cloud, iPaaS, Power Platform et audits sont distincts dans le calcul. Leur caractère additionnel dépend néanmoins du panier réellement acheté. Les sept points Buy ouverts restent non chiffrés, et ne prouvent donc pas une équivalence commerciale complète.
+    action: Remplacer les provisions par les prix et inclusions confirmés, sans cumuler les deux ; conserver les points non chiffrés près des totaux. Cette vérification ne justifie ni prix nul ni reconstruction automatique.
+    source: source/qualification-buy.yaml
+controles:
+  audit_independant: 712 contrôles réussis, dont décomposition mensuelle indépendante à fractions exactes, sommes monétaires, inclusions, projections et variantes de paramètres.
+  regression: 55 tests Python réussis ; conservation des centimes, durées fractionnaires, calibration, charges Buy incluses multipliées par 100 sans coût ajouté, application et grille métier.
+  cycle: Catalogues communs, dix fichiers de cycle par stack, rôles, tarifs, empreintes, inclusions et prix RFI validés.
+  reperes: Les résultats historiques arrondis sont comparés avec une tolérance explicite de deux centimes ; les résultats courants doivent se conserver exactement au centime.
+artefacts:
+  rapport: audits/2026-10-26-coherence-couts.html
+  preuves: audits/2026-10-26-coherence-couts-preuves.json
+  avant: audits/2026-10-26-coherence-couts-avant.json
+  reproduction: tools/audit_cost_separation.py
+  archives: archives/coherence-couts-2026-10-26/
+  application: http://127.0.0.1:8766/

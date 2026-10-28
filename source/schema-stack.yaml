@@ -1,0 +1,384 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Stack FLOW — schéma commun Make / Buy
+type: object
+additionalProperties: false
+required:
+- version_schema
+- id
+- nom
+- strategie
+- date_documentation
+- description
+- conventions
+- elements
+- interventions
+- points_ouverts
+- sources
+properties:
+  version_schema:
+    const: 1
+  id:
+    enum:
+    - microsoft-buy
+    - sap-buy
+    - java-spring-make
+    - rust-make
+    - dotnet-make
+  nom:
+    type: string
+    minLength: 1
+  strategie:
+    enum:
+    - make
+    - buy
+  date_documentation:
+    type: string
+    pattern: ^\d{4}-\d{2}-\d{2}$
+  description:
+    type: string
+    minLength: 1
+  conventions:
+    type: array
+    items:
+      type: string
+      minLength: 1
+  elements:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - nom
+      - couche
+      - edition
+      - description
+      - deploiement
+      - fondement
+      - licence
+      - tarification
+      - limites
+      - sources
+      properties:
+        id:
+          type: string
+          minLength: 1
+        nom:
+          type: string
+          minLength: 1
+        couche:
+          enum:
+          - iaas
+          - paas
+          - ipaas
+          - runtime
+          - framework
+          - moteur_metier
+          - progiciel
+          - donnees
+          - messagerie
+          - securite
+          - observabilite
+          - interface
+          - outillage
+        edition:
+          type:
+          - string
+          - 'null'
+        description:
+          type: string
+          minLength: 1
+        deploiement:
+          enum:
+          - bibliotheque
+          - service_autogere
+          - service_cloud
+          - service_editeur
+          - extension_progiciel
+        fondement:
+          enum:
+          - etude_client
+          - proposition
+          - a_preciser
+        licence:
+          type:
+          - string
+          - 'null'
+        tarification:
+          type: object
+          additionalProperties: false
+          required:
+          - regime
+          - assiette
+          - inclus_dans
+          - precision
+          properties:
+            regime:
+              enum:
+              - sans_redevance
+              - payant
+              - inclus
+              - a_confirmer
+            assiette:
+              type:
+              - string
+              - 'null'
+            inclus_dans:
+              type: array
+              items:
+                type: string
+                minLength: 1
+            precision:
+              type: string
+              minLength: 1
+        limites:
+          type: string
+          minLength: 1
+        sources:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
+  interventions:
+    type: object
+    additionalProperties: false
+    required:
+    - unite
+    - marche
+    - mode_achat
+    - profil_comparable
+    - base_geographique
+    - tarifs
+    - activites
+    - regle
+    - limites
+    - repere_esn
+    properties:
+      unite:
+        const: EUR_HT_par_JH
+      marche:
+        const: France
+      mode_achat:
+        const: freelance_direct
+      profil_comparable:
+        type: string
+        minLength: 1
+      base_geographique:
+        type: string
+        minLength: 1
+      tarifs:
+        type: object
+        additionalProperties: false
+        required:
+        - expert
+        - qa
+        - architecte
+        - support_utilisateur
+        properties:
+          expert:
+            type: object
+            additionalProperties: false
+            required:
+            - bas
+            - reference
+            - haut
+            - nature
+            - niveau_preuve
+            - justification
+            - sources
+            properties:
+              bas:
+                type: number
+                exclusiveMinimum: 0
+              reference:
+                type: number
+                exclusiveMinimum: 0
+              haut:
+                type: number
+                exclusiveMinimum: 0
+              nature:
+                enum:
+                - hypothese_de_cadrage
+              niveau_preuve:
+                enum:
+                - faible
+                - intermediaire
+                - fort
+              justification:
+                type: string
+                minLength: 1
+              sources:
+                type: array
+                minItems: 1
+                items:
+                  type: string
+                  minLength: 1
+          qa:
+            $ref: '#/properties/interventions/properties/tarifs/properties/expert'
+          architecte:
+            $ref: '#/properties/interventions/properties/tarifs/properties/expert'
+          support_utilisateur:
+            type: object
+            additionalProperties: false
+            required:
+            - bas
+            - reference
+            - haut
+            - nature
+            - niveau_preuve
+            - justification
+            - sources
+            properties:
+              bas:
+                type: number
+                exclusiveMinimum: 0
+              reference:
+                type: number
+                exclusiveMinimum: 0
+              haut:
+                type: number
+                exclusiveMinimum: 0
+              nature:
+                enum:
+                - hypothese_de_cadrage
+              niveau_preuve:
+                enum:
+                - faible
+                - intermediaire
+                - fort
+              justification:
+                type: string
+                minLength: 1
+              sources:
+                type: array
+                minItems: 1
+                items:
+                  type: string
+                  minLength: 1
+      activites:
+        type: object
+        additionalProperties: false
+        required:
+        - developpement
+        - integration
+        - support_n3
+        - support_n1
+        properties:
+          developpement:
+            type: object
+            additionalProperties: false
+            required:
+            - tarif
+            - perimetre
+            properties:
+              tarif:
+                enum:
+                - expert
+                - support_utilisateur
+              perimetre:
+                type: string
+                minLength: 1
+          integration:
+            type: object
+            additionalProperties: false
+            required:
+            - tarif
+            - perimetre
+            properties:
+              tarif:
+                enum:
+                - expert
+                - support_utilisateur
+              perimetre:
+                type: string
+                minLength: 1
+          support_n3:
+            type: object
+            additionalProperties: false
+            required:
+            - tarif
+            - perimetre
+            properties:
+              tarif:
+                enum:
+                - expert
+                - support_utilisateur
+              perimetre:
+                type: string
+                minLength: 1
+          support_n1:
+            type: object
+            additionalProperties: false
+            required:
+            - tarif
+            - perimetre
+            properties:
+              tarif:
+                enum:
+                - expert
+                - support_utilisateur
+              perimetre:
+                type: string
+                minLength: 1
+      regle:
+        type: string
+        minLength: 1
+      limites:
+        type: string
+        minLength: 1
+      repere_esn:
+        type: object
+        additionalProperties: false
+        required:
+        - tjm_eur_ht
+        - precision
+        - sources
+        properties:
+          tjm_eur_ht:
+            type:
+            - number
+            - 'null'
+            exclusiveMinimum: 0
+          precision:
+            type: string
+            minLength: 1
+          sources:
+            type: array
+            items:
+              type: string
+              minLength: 1
+  points_ouverts:
+    type: array
+    items:
+      type: string
+      minLength: 1
+  sources:
+    type: object
+    minProperties: 1
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      required:
+      - titre
+      - nature
+      - reference
+      - repere
+      properties:
+        titre:
+          type: string
+          minLength: 1
+        nature:
+          enum:
+          - documentation_officielle
+          - etude_client
+          - analyse_interne
+          - barometre
+          - annonce
+          - hypothese
+        reference:
+          type: string
+          minLength: 1
+        repere:
+          type: string

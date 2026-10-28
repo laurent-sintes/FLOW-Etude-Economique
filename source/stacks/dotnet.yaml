@@ -1,0 +1,400 @@
+# Modèle source éditable. Même schéma pour Make et Buy.
+version_schema: 1
+id: dotnet-make
+nom: .NET / ASP.NET Core
+strategie: make
+date_documentation: '2026-10-22'
+description: Backend C#/.NET, moteurs de workflow et règles .NET, API C# d’OR-Tools et frontend React.
+conventions:
+- Description d’une stack de travail, sans chiffrage global ni calendrier.
+- Les prix de produits sont à qualifier ; les TJM rémunèrent les interventions humaines.
+- Un composant inclus est financé par un autre élément, pas gratuit.
+- Les composants proposés ne valent pas décision d’achat ou validation d’architecture.
+elements:
+- id: iaas
+  nom: IaaS cloud — fournisseur à sélectionner
+  couche: iaas
+  edition: null
+  description: Calcul, réseau, stockage, sauvegardes et ressources de reprise nécessaires à la plateforme.
+  deploiement: service_cloud
+  fondement: a_preciser
+  licence: null
+  tarification:
+    regime: payant
+    assiette: Ressources et consommation
+    inclus_dans: []
+    precision: Aucun montant ni fournisseur retenu à cette étape.
+  limites: Fournisseur, région, capacités et engagements de service ouverts. Ne pas ajouter une seconde fois les
+    ressources incluses dans un PaaS managé.
+  sources:
+  - CADRE
+- id: kubernetes
+  nom: Kubernetes
+  couche: paas
+  edition: null
+  description: Orchestration des conteneurs, déploiement et redémarrage des services.
+  deploiement: service_autogere
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Socle d’exécution proposé, pas un PaaS clé en main. Administration, sécurité et CI/CD restent à assembler.
+  sources:
+  - K8S
+- id: postgresql
+  nom: PostgreSQL
+  couche: donnees
+  edition: null
+  description: Base relationnelle transactionnelle pour le Core et ses moteurs.
+  deploiement: service_autogere
+  fondement: proposition
+  licence: PostgreSQL
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Le schéma métier, les politiques de concurrence, la haute disponibilité et les sauvegardes restent à
+    concevoir.
+  sources:
+  - PG
+- id: rabbitmq
+  nom: RabbitMQ
+  couche: messagerie
+  edition: Community
+  description: Files de messages et routage asynchrone entre services.
+  deploiement: service_autogere
+  fondement: proposition
+  licence: MPL-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Ne garantit pas à lui seul une opération métier exactement une fois. Contrats, idempotence et reprise
+    restent à réaliser.
+  sources:
+  - RABBIT
+- id: keycloak
+  nom: Keycloak
+  couche: securite
+  edition: null
+  description: Authentification, fédération d’identité et protocoles OIDC / SAML.
+  deploiement: service_autogere
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Service externe écrit en Java. Les autorisations métier et l’intégration à l’identité Beaumanoir restent
+    à traiter.
+  sources:
+  - KEYCLOAK
+- id: otel
+  nom: OpenTelemetry Collector
+  couche: observabilite
+  edition: null
+  description: Collecte et export des traces, métriques et journaux.
+  deploiement: service_autogere
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Le stockage, la consultation, les alertes et l’exploitation des données de supervision ne sont pas fournis
+    par le collecteur seul.
+  sources:
+  - OTEL
+- id: react
+  nom: React
+  couche: interface
+  edition: null
+  description: Bibliothèque commune de réalisation des interfaces web des trois options Make.
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: MIT
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Les écrans métier, formulaires, droits et parcours ne sont pas fournis. Les consoles techniques des OSS
+    ne remplacent pas ce frontend.
+  sources:
+  - REACT
+- id: ipaas
+  nom: Azure Logic Apps
+  couche: ipaas
+  edition: Plan à préciser
+  description: Plateforme externe de connecteurs et de flux pour les échanges avec le SI.
+  deploiement: service_cloud
+  fondement: proposition
+  licence: Propriétaire
+  tarification:
+    regime: payant
+    assiette: Plan, exécutions, connecteurs et capacités
+    inclus_dans: []
+    precision: Service payant distinct du Core. Les quotas et connecteurs inclus dépendent du plan ; aucun montant
+      retenu.
+  limites: Proposition commune, à confronter à l’iPaaS existant. Les mappings, contrats et contrôles métier restent
+    à développer. Ne remplace pas les moteurs du Core.
+  sources:
+  - LOGIC
+  - CADRE
+- id: dotnet
+  nom: .NET / ASP.NET Core
+  couche: framework
+  edition: Open source
+  description: Runtime .NET et framework web pour les API et services C#.
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: MIT
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: La disponibilité du framework ne fournit pas le modèle métier du Core. Édition de l’IDE et support commercial
+    à distinguer.
+  sources:
+  - DOTNET
+  - ASPNET
+- id: elsa
+  nom: Elsa Workflows
+  couche: moteur_metier
+  edition: Core 3.9 et Studio OSS
+  description: Exécution persistante de workflows .NET, modélisation et tâches humaines documentées dans Core.
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: MIT
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Ne pas supposer une équivalence CMMN complète avec Flowable. Dossiers, étapes discrétionnaires, délégations
+    et écrans métier nécessitent une analyse de couverture.
+  sources:
+  - ELSA
+  - ELSA_TASKS
+- id: nrules
+  nom: NRules
+  couche: moteur_metier
+  edition: null
+  description: Moteur d’inférence .NET fondé sur Rete, avec règles exprimées en C#.
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: MIT
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Ne fournit pas à lui seul la totalité d’un BRMS métier, une interface low-code ou une équivalence de
+    toutes les fonctions Drools.
+  sources:
+  - NRULES
+- id: ortools
+  nom: Google OR-Tools
+  couche: moteur_metier
+  edition: OSS, API C#
+  description: Solveurs d’optimisation et de contraintes utilisables depuis l’API C#.
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Moteur natif C++ avec bindings C#, pas implémentation pure .NET. Modèles de contraintes, packaging natif
+    et validation restent à réaliser.
+  sources:
+  - ORTOOLS
+- id: rebus
+  nom: Rebus
+  couche: framework
+  edition: Bibliothèque OSS
+  description: 'Bus applicatif .NET : traitement de messages, reprises et sagas.'
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: MIT
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Ne remplace ni les fonctions d’un iPaaS, ni un moteur de Case Management. Distinguer la bibliothèque
+    OSS des outils commerciaux de supervision.
+  sources:
+  - REBUS
+interventions:
+  unite: EUR_HT_par_JH
+  marche: France
+  mode_achat: freelance_direct
+  profil_comparable: Intervenant autonome expérimenté ; hors direction de projet, architecte transverse et astreinte.
+  base_geographique: France ; grilles Paris utilisées lorsqu’une ventilation existe. Pas de coefficient régional
+    automatique.
+  tarifs:
+    expert:
+      bas: 500
+      reference: 600
+      haut: 650
+      nature: hypothese_de_cadrage
+      niveau_preuve: intermediaire
+      justification: Référence arrondie dans la grille .NET senior Paris 500–650 de Silkhom 2025. Le même baromètre
+        donne une médiane globale identique à Java ; ce choix de cadrage ne prouve pas une prime universelle .NET.
+      sources:
+      - SILKHOM
+    qa:
+      bas: 500
+      reference: 550
+      haut: 650
+      nature: hypothese_de_cadrage
+      niveau_preuve: faible
+      justification: QA senior Paris Silkhom 2025, 530–700 €/JH. Même référence que Java ; aucun écart .NET démontré.
+      sources:
+      - SILKHOM
+    architecte:
+      bas: 850
+      reference: 900
+      haut: 1000
+      nature: hypothese_de_cadrage
+      niveau_preuve: faible
+      justification: ForTeam Architecture SI et Tech Lead 850–1 000 €/JH confirmé et 920–1 180 senior/expert. Même référence que Java faute d'écart .NET démontré.
+      sources:
+      - FORTEAM
+    support_utilisateur:
+      bas: 400
+      reference: 425
+      haut: 450
+      nature: hypothese_de_cadrage
+      niveau_preuve: intermediaire
+      justification: Accueil et diagnostic de premier niveau. Grille support applicatif senior Paris, Silkhom 2025.
+        Hors expertise propre au progiciel ou au langage.
+      sources:
+      - SILKHOM
+  activites:
+    developpement:
+      tarif: expert
+      perimetre: Architecture applicative, conception, code et tests du Core.
+    integration:
+      tarif: expert
+      perimetre: Configuration, adaptations fonctionnelles, intégration technique et flux par un spécialiste autonome.
+    support_n3:
+      tarif: expert
+      perimetre: Diagnostic expert et correction des composants ou extensions sous responsabilité client.
+    support_n1:
+      tarif: support_utilisateur
+      perimetre: Réception, qualification et résolution de premier niveau ; escalade des incidents complexes.
+  regle: Même tarif pour développement, intégration et support N3 à qualification équivalente. Aucun écart systématique
+    par activité n’est établi par les sources retenues.
+  limites: Les bornes sont une plage de cadrage, pas un intervalle statistique. La référence n’est pas une moyenne
+    observée. Hors marge ESN additionnelle, forfait de support éditeur, SLA, astreintes et remises de volume.
+  repere_esn:
+    tjm_eur_ht: null
+    precision: Aucun tarif ESN comparable suffisamment documenté retenu. Ne pas appliquer une marge forfaitaire
+      au tarif freelance.
+    sources:
+    - CADRE
+points_ouverts:
+- Versions et compatibilité des composants à sélectionner avant tout engagement.
+- Fournisseur IaaS, option Kubernetes managée ou autogérée, sauvegardes et reprise à qualifier.
+- Choix iPaaS à confronter au SI existant ; Logic Apps est une proposition, pas une décision utilisateur.
+- Chaîne CI/CD, gestion des secrets, stockage de supervision et contrats de support à préciser.
+- Les coûts logiciels et cloud ne sont pas chiffrés ; aucune gratuité globale n’est déduite des licences OSS.
+- 'CMMN et case management à qualifier : Elsa ne vaut pas preuve de couverture équivalente à Flowable.'
+- OR-Tools implique un moteur C++ ; si le critère devient du code intégralement managé C#, reconsidérer ce choix.
+sources:
+  CADRE:
+    titre: Choix de modélisation de cette première version
+    nature: hypothese
+    reference: AGENTS.md
+    repere: Reprise du modèle en YAML ; proposition à préciser, pas décision d’architecture validée
+  LOGIC:
+    titre: Tarification Azure Logic Apps
+    nature: documentation_officielle
+    reference: https://azure.microsoft.com/en-us/pricing/details/logic-apps/
+    repere: Métriques selon plan et connecteurs ; aucun prix catalogue recopié
+  K8S:
+    titre: Kubernetes
+    nature: documentation_officielle
+    reference: https://github.com/kubernetes/kubernetes
+    repere: ''
+  PG:
+    titre: Licence PostgreSQL
+    nature: documentation_officielle
+    reference: https://www.postgresql.org/about/licence/
+    repere: ''
+  RABBIT:
+    titre: RabbitMQ Server
+    nature: documentation_officielle
+    reference: https://github.com/rabbitmq/rabbitmq-server
+    repere: ''
+  KEYCLOAK:
+    titre: Keycloak
+    nature: documentation_officielle
+    reference: https://github.com/keycloak/keycloak
+    repere: ''
+  OTEL:
+    titre: OpenTelemetry Collector
+    nature: documentation_officielle
+    reference: https://github.com/open-telemetry/opentelemetry-collector
+    repere: ''
+  REACT:
+    titre: React
+    nature: documentation_officielle
+    reference: https://github.com/react/react
+    repere: ''
+  DOTNET:
+    titre: Licences .NET
+    nature: documentation_officielle
+    reference: https://github.com/dotnet/core/blob/main/license-information.md
+    repere: ''
+  ASPNET:
+    titre: Licence ASP.NET Core
+    nature: documentation_officielle
+    reference: https://github.com/dotnet/aspnetcore/blob/main/LICENSE.txt
+    repere: ''
+  ELSA:
+    titre: Elsa Workflows
+    nature: documentation_officielle
+    reference: https://github.com/elsa-workflows/elsa-core
+    repere: ''
+  ELSA_TASKS:
+    titre: Elsa Core, BPMN et tâches humaines
+    nature: documentation_officielle
+    reference: https://www.elsaworkflows.io/get-started
+    repere: Documentation de la version 3.9 ; ne pas présumer une couverture CMMN complète
+  NRULES:
+    titre: NRules
+    nature: documentation_officielle
+    reference: https://github.com/NRules/NRules
+    repere: ''
+  ORTOOLS:
+    titre: Google OR-Tools
+    nature: documentation_officielle
+    reference: https://developers.google.com/optimization/introduction
+    repere: Bibliothèque C++ avec API C# ; le wrapper n’en fait pas un moteur écrit en C#
+  REBUS:
+    titre: Rebus
+    nature: documentation_officielle
+    reference: https://github.com/rebus-org/Rebus
+    repere: ''
+  SILKHOM:
+    titre: Silkhom, baromètre des TJM freelance 2025
+    nature: barometre
+    reference: https://www.silkhom.com/wp-content/uploads/2025/05/Barometre_TJM_2025_SILKHOM_FREELANCE.pdf
+    repere: Pages PDF 25 Java, 31 .NET, 119 développeur ERP, 121 support applicatif ; grille Paris / senior
+  FORTEAM:
+    titre: ForTeam IT, grille des TJM freelance
+    nature: barometre
+    reference: https://www.forteam-it.com/ressources/grille-tjm
+    repere: 'Architecture SI et Tech Lead : 850–1 000 confirmé, 920–1 180 senior/expert ; fourchettes indicatives'

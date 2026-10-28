@@ -1,0 +1,282 @@
+# Modèle source éditable. Même schéma pour Make et Buy.
+version_schema: 1
+id: sap-buy
+nom: SAP S/4HANA Fashion
+strategie: buy
+date_documentation: '2026-10-22'
+description: Progiciel Fashion en édition privée et services complémentaires de la proposition Delaware, avec intégration
+  au SI.
+conventions:
+- Description d’une stack de travail, sans chiffrage global ni calendrier.
+- Les prix de produits sont à qualifier ; les TJM rémunèrent les interventions humaines.
+- Un composant inclus est financé par un autre élément, pas gratuit.
+- Les composants proposés ne valent pas décision d’achat ou validation d’architecture.
+elements:
+- id: s4-fashion
+  nom: SAP S/4HANA Cloud for fashion and vertical business
+  couche: progiciel
+  edition: Private edition, références 8012632 / 8012633
+  description: ERP Fashion de l’offre Delaware, avec son socle retail et fashion.
+  deploiement: service_editeur
+  fondement: etude_client
+  licence: Propriétaire
+  tarification:
+    regime: payant
+    assiette: Souscriptions, droits FUE et capacités selon contrat
+    inclus_dans: []
+    precision: Licences payantes ; les droits FUE sont une métrique de la solution, pas un outil additionnel à facturer
+      deux fois.
+  limites: 'Édition privée, pas édition publique. La BOM comprend de la finance : périmètre FLOW à qualifier sans
+    quote-part inventée.'
+  sources:
+  - SAP_RFI
+- id: infra-s4
+  nom: Infrastructure standard S/4HANA Cloud
+  couche: iaas
+  edition: null
+  description: Hébergement du standard SAP et des services techniques prévus dans l’offre.
+  deploiement: service_editeur
+  fondement: etude_client
+  licence: Service propriétaire
+  tarification:
+    regime: inclus
+    assiette: null
+    inclus_dans:
+    - s4-fashion
+    precision: Financée dans le contrat SAP applicable. Ne pas ajouter un IaaS standard indépendant pour les mêmes
+      environnements.
+  limites: Ne couvre pas toute extension de mémoire, stockage, reprise ou service BTP. Les capacités additionnelles
+    sont identifiées séparément.
+  sources:
+  - SAP_RFI
+  - SYNTHESE_RFI
+- id: capacites-s4
+  nom: Extensions de mémoire et stockage SAP Cloud
+  couche: paas
+  edition: Références 8011726 / 8011727 / 8008794
+  description: Capacités supplémentaires des environnements de production et de non-production.
+  deploiement: service_editeur
+  fondement: etude_client
+  licence: Propriétaire
+  tarification:
+    regime: payant
+    assiette: Capacités souscrites
+    inclus_dans: []
+    precision: Extensions payantes au-delà de la capacité standard ; pas de prix ni quantité repris à cette étape.
+  limites: La BOM comporte des extensions distinctes. Dimensionnement à reprendre ultérieurement, sans réutiliser
+    sa roadmap.
+  sources:
+  - SAP_RFI
+- id: abap-fiori
+  nom: Plateforme ABAP / SAP Fiori
+  couche: framework
+  edition: null
+  description: Outils d’extension, interfaces et mécanismes de workflow / règles du périmètre S/4.
+  deploiement: extension_progiciel
+  fondement: proposition
+  licence: Propriétaire
+  tarification:
+    regime: inclus
+    assiette: null
+    inclus_dans:
+    - s4-fashion
+    precision: Capacités intégrées sous les droits S/4 applicables ; services BTP distincts non compris par défaut.
+  limites: Ne pas supposer une couverture universelle de Case Management ou du low-code. Respecter les extensions
+    supportées et les droits développeurs.
+  sources:
+  - SAP_RFI
+- id: omsa
+  nom: SAP Order Management for sourcing and availability
+  couche: progiciel
+  edition: Référence 8012655
+  description: Sourcing et disponibilité des commandes, composant explicitement proposé dans la BOM.
+  deploiement: service_editeur
+  fondement: etude_client
+  licence: Propriétaire
+  tarification:
+    regime: payant
+    assiette: Métrique de souscription à confirmer
+    inclus_dans: []
+    precision: Souscription identifiable dans la BOM ; à compter une seule fois dans l’ensemble SAP.
+  limites: Ne prouve pas à lui seul la couverture des dossiers, aléas, tâches humaines et de toute l’orchestration
+    de fulfillment FLOW.
+  sources:
+  - SAP_RFI
+- id: osta
+  nom: SAP Omnichannel Sales Transfer and Audit
+  couche: progiciel
+  edition: Référence 8018957
+  description: Transfert et contrôle des ventes omnicanales dans le périmètre de l’offre SAP.
+  deploiement: service_editeur
+  fondement: etude_client
+  licence: Propriétaire
+  tarification:
+    regime: payant
+    assiette: Métrique contractuelle à confirmer
+    inclus_dans: []
+    precision: Service ou licence payant. Droits, capacités et services inclus à confirmer au contrat ; montant
+      non chiffré.
+  limites: Recouvrement avec les systèmes de canal et le périmètre FLOW à instruire.
+  sources:
+  - SAP_RFI
+- id: ibp
+  nom: SAP Integrated Business Planning for response and supply
+  couche: progiciel
+  edition: Référence 8015923
+  description: Planification de réponse et d’approvisionnement présente dans l’offre RFI.
+  deploiement: service_editeur
+  fondement: etude_client
+  licence: Propriétaire
+  tarification:
+    regime: payant
+    assiette: Souscription selon contrat
+    inclus_dans: []
+    precision: Service ou licence payant. Droits, capacités et services inclus à confirmer au contrat ; montant
+      non chiffré.
+  limites: La planification stratégique n’est pas présumée dans FLOW. Ne pas retirer ou ajouter automatiquement
+    ce module dans une comparaison ultérieure.
+  sources:
+  - SAP_RFI
+- id: btp
+  nom: SAP Business Technology Platform
+  couche: paas
+  edition: null
+  description: Plateforme de services d’extension et d’intégration ; l’offre mentionne un crédit BTP.
+  deploiement: service_cloud
+  fondement: etude_client
+  licence: Propriétaire
+  tarification:
+    regime: a_confirmer
+    assiette: Services consommés et crédits applicables
+    inclus_dans: []
+    precision: BTP est un ensemble de services, pas un abonnement unique à sommer avec tous ses services. Un crédit
+      imputé ne se déduit qu’une fois.
+  limites: Le crédit inclus n’est pas valorisé. Il ne prouve ni un usage BTP illimité, ni la gratuité de Cloud Integration.
+  sources:
+  - SAP_RFI
+- id: ipaas
+  nom: SAP Integration Suite / Cloud Integration
+  couche: ipaas
+  edition: Édition à préciser
+  description: Connecteurs, mappings et exécution des interfaces avec le SI ; anciennement désigné CPI dans l’étude.
+  deploiement: service_cloud
+  fondement: etude_client
+  licence: Propriétaire
+  tarification:
+    regime: payant
+    assiette: Édition, tenants, messages et capacités selon contrat
+    inclus_dans: []
+    precision: Service payant, potentiellement financé en partie par un crédit BTP. Ne pas additionner une facture
+      BTP abstraite à la facture du service.
+  limites: La BOM annuelle Delaware est explicitement hors CPI. Édition, quotas et crédit BTP imputable restent
+    à qualifier.
+  sources:
+  - SAP_IS
+  - SAP_RFI
+interventions:
+  unite: EUR_HT_par_JH
+  marche: France
+  mode_achat: freelance_direct
+  profil_comparable: Intervenant autonome expérimenté ; hors direction de projet, architecte transverse et astreinte.
+  base_geographique: France ; grilles Paris utilisées lorsqu’une ventilation existe. Pas de coefficient régional
+    automatique.
+  tarifs:
+    expert:
+      bas: 750
+      reference: 1000
+      haut: 1250
+      nature: hypothese_de_cadrage
+      niveau_preuve: intermediaire
+      justification: ForTeam publie 750–950 pour SAP confirmé et 950–1 250 pour senior/expert. Référence de cadrage
+        1 000 pour une expertise S/4 ; plage couvrant les deux segments. La spécialisation Fashion n’a pas de benchmark
+        isolé dans les sources consultées.
+      sources:
+      - FORTEAM
+    qa:
+      bas: 600
+      reference: 650
+      haut: 700
+      nature: hypothese_de_cadrage
+      niveau_preuve: faible
+      justification: QA senior Paris Silkhom 2025, 530–700 €/JH. Référence de cadrage haute pour spécialisation SAP, sans cotation QA SAP dédiée.
+      sources:
+      - SILKHOM
+    architecte:
+      bas: 950
+      reference: 1100
+      haut: 1250
+      nature: hypothese_de_cadrage
+      niveau_preuve: faible
+      justification: ForTeam spécialiste SAP senior/expert 950–1 250 €/JH et Architecture SI 920–1 180. Référence de cadrage à 1 100 pour architecture S/4, sans cotation Fashion isolée.
+      sources:
+      - FORTEAM
+    support_utilisateur:
+      bas: 400
+      reference: 425
+      haut: 450
+      nature: hypothese_de_cadrage
+      niveau_preuve: intermediaire
+      justification: Accueil et diagnostic de premier niveau. Grille support applicatif senior Paris, Silkhom 2025.
+        Hors expertise propre au progiciel ou au langage.
+      sources:
+      - SILKHOM
+  activites:
+    developpement:
+      tarif: expert
+      perimetre: Extensions client, plugins et tests ; jamais le développement du produit éditeur.
+    integration:
+      tarif: expert
+      perimetre: Configuration, adaptations fonctionnelles, intégration technique et flux par un spécialiste autonome.
+    support_n3:
+      tarif: expert
+      perimetre: Diagnostic expert et correction des composants ou extensions sous responsabilité client.
+    support_n1:
+      tarif: support_utilisateur
+      perimetre: Réception, qualification et résolution de premier niveau ; escalade des incidents complexes.
+  regle: Même tarif pour développement, intégration et support N3 à qualification équivalente. Aucun écart systématique
+    par activité n’est établi par les sources retenues.
+  limites: Les bornes sont une plage de cadrage, pas un intervalle statistique. La référence n’est pas une moyenne
+    observée. Hors marge ESN additionnelle, forfait de support éditeur, SLA, astreintes et remises de volume.
+  repere_esn:
+    tjm_eur_ht: null
+    precision: Les offres Delaware mélangent configuration, développement, conseil et pilotage. Ne pas transformer
+      leur TJM moyen de dispositif en tarif pur de chaque activité.
+    sources:
+    - SAP_RFI
+    - SYNTHESE_RFI
+points_ouverts:
+- Comparer la couverture fonctionnelle de l’ensemble S/4 + OMSA, puis identifier les manques.
+- Arbitrer le périmètre Finance, IBP et opérations de canal par rapport à FLOW.
+- Qualifier crédits BTP, offre Integration Suite, reprise et support inclus.
+- La BOM 2025 est indicative et n’est pas une offre SAP validée.
+sources:
+  CADRE:
+    titre: Choix de modélisation de cette première version
+    nature: hypothese
+    reference: AGENTS.md
+    repere: Reprise du modèle en YAML ; proposition à préciser, pas décision d’architecture validée
+  SAP_RFI:
+    titre: Proposition Delaware, septembre 2025
+    nature: etude_client
+    reference: sources/client/delaware-septembre.pdf
+    repere: Pages PDF 21–28 et 43–45 ; BOM indicative non validée par SAP
+  SYNTHESE_RFI:
+    titre: Analyse du périmètre Synvance et des suites du RFI
+    nature: analyse_interne
+    reference: archives/etude-avant-yaml-2026-10-24/07-analyse-synvance.md
+    repere: Périmètre et distinction entre offres de juillet et septembre 2025
+  SAP_IS:
+    titre: SAP Integration Suite
+    nature: documentation_officielle
+    reference: https://www.sap.com/products/technology-platform/integration-suite.html
+    repere: ''
+  SILKHOM:
+    titre: Silkhom, baromètre des TJM freelance 2025
+    nature: barometre
+    reference: https://www.silkhom.com/wp-content/uploads/2025/05/Barometre_TJM_2025_SILKHOM_FREELANCE.pdf
+    repere: Pages PDF 25 Java, 31 .NET, 119 développeur ERP, 121 support applicatif ; grille Paris / senior
+  FORTEAM:
+    titre: ForTeam IT, grille des TJM freelance
+    nature: barometre
+    reference: https://www.forteam-it.com/ressources/grille-tjm
+    repere: 'SAP : 750–950 confirmé, 950–1 250 senior/expert ; backend senior/expert : 680–880 ; fourchettes indicatives'

@@ -1,0 +1,1668 @@
+version: 1
+date: '2026-10-27'
+id: qualification-buy
+principe: Les capacités définissent le Core générique. En Buy, le produit fournit le standard ; la configuration
+  et les parcours Beaumanoir relèvent de l’intégration. Un développement additionnel exige un écart identifié
+  et un financement distinct.
+hypothese: Le budget central retient les offres et les travaux client déjà identifiés. Il ne finance pas de
+  reconstruction générique par capacité. Les modules et fonctions encore à qualifier ci-dessous ne sont pas
+  chiffrés en supplément ; cela ne prouve pas leur inclusion.
+absence_de_developpement: Aucun développement générique additionnel n’est démontré par la revue ; les points
+  ouverts portent sur l’adéquation, l’intégration ou le choix des modules.
+sources:
+  ms-dom:
+    titre: Microsoft Commerce DOM
+    reference: https://learn.microsoft.com/en-us/dynamics365/commerce/dom
+    portee: Optimisation du sourcing des commandes selon contraintes et coûts ; pas preuve de toute optimisation
+      FLOW.
+  ms-ctp:
+    titre: Microsoft Planning Optimization CTP
+    reference: https://learn.microsoft.com/en-us/dynamics365/supply-chain/master-planning/planning-optimization/calculate-delivery-dates-using-ctp
+    portee: Promesse selon stock, capacité et délais ; conditions de version et de moteur.
+  ms-stock:
+    titre: Microsoft Safety stock fulfillment
+    reference: https://learn.microsoft.com/en-us/dynamics365/supply-chain/master-planning/safety-stock-replenishment
+    portee: Réapprovisionnement et protection des stocks ; pas preuve de toute optimisation économique.
+  ms-mining:
+    titre: Microsoft Power Automate Process Mining
+    reference: https://learn.microsoft.com/en-us/power-automate/process-advisor-overview
+    portee: Produit de mining disponible ; licence et capacité propres, non inclusion automatique dans D365/K3.
+  sap-omf:
+    titre: SAP Order Management Foundation — fonctionnalités
+    reference: https://help.sap.com/doc/65309ba6056d4d6c8dc40195ec4b3074/Cloud/en-US/FSD_SAP_OMF.pdf
+    portee: Orchestration de commandes et retours ; module distinct d’OMSA, inclusion dans le panier non établie.
+  sap-mining:
+    titre: SAP Signavio Process Intelligence
+    reference: https://help.sap.com/docs/signavio-process-intelligence/user-guide/process-analysis?locale=en-US
+    portee: Analyse de processus comme produit commercial ; prix et inclusion non établis dans l’offre.
+  sap-tm:
+    titre: SAP Transportation Management
+    reference: https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/e3dc5400c1cc41d1bc0ae0e7fd9aa5a2/9c27c9535f267414e10000000a174cb4.html?locale=en-US
+    portee: Fonctions de transport dans un module commercial ; TM non inclus dans la BOM Delaware indexée.
+  offres:
+    titre: Périmètre des offres Avanade / Delaware
+    reference: source/ecarts-perimetre-flow-rfi.md
+    portee: Pièces et pages localisées ; ne pas transformer une fonction disponible au catalogue en prestation
+      achetée.
+  carte-scm:
+    titre: Capacités métier Supply Chain Management
+    reference: source/grille-complexite.yaml
+    portee: Fonctions et frontières proposées sous les capacités Beaumanoir ; rattachement métier des points
+      à qualifier, sans preuve de couverture produit ni de prix.
+exceptions:
+- id: optimisation-stocks
+  titre: Optimisation des protections et règles de réservation
+  stacks:
+  - microsoft
+  - sap
+  blocs:
+  - BC-040
+  - BC-041
+  - BC-042
+  nature: adequation_standard
+  decision: Utiliser les politiques, seuils et réservations standard. Définir les objectifs supplémentaires
+    attendus avant de retenir un optimiseur distinct.
+  sources:
+  - ms-stock
+  - offres
+  statut: a_qualifier
+  cout_initial_eur_ht: null
+  cout_annuel_eur_ht: null
+  financement: Aucun supplément autonome retenu ; vérifier le besoin résiduel et l’inclusion avant un achat
+    ou une extension.
+- id: ctp-sap
+  titre: Promesse fondée sur les capacités dans SAP
+  stacks:
+  - sap
+  blocs:
+  - BC-047
+  nature: module
+  decision: Comparer les scénarios CTP à aATP et Supply Creation-Based Confirmation ; vérifier le moteur et
+    les droits PP/DS. L’absence de PP/DS dans la BOM ne démontre pas un besoin de moteur maison.
+  sources:
+  - offres
+  statut: a_qualifier
+  cout_initial_eur_ht: null
+  cout_annuel_eur_ht: null
+  financement: Aucun supplément autonome retenu ; vérifier le besoin résiduel et l’inclusion avant un achat
+    ou une extension.
+- id: ptp
+  titre: Choix d’une promesse économiquement admissible
+  stacks:
+  - microsoft
+  - sap
+  blocs:
+  - BC-048
+  nature: adequation_standard
+  decision: Rapprocher les objectifs FLOW des règles de sourcing, coûts et contraintes du produit. Un choix
+    explicable ou un paramétrage ne signifie pas nécessairement un moteur PTP spécifique.
+  sources:
+  - ms-dom
+  - offres
+  statut: a_qualifier
+  cout_initial_eur_ht: null
+  cout_annuel_eur_ht: null
+  financement: Aucun supplément autonome retenu ; vérifier le besoin résiduel et l’inclusion avant un achat
+    ou une extension.
+- id: transport-sap
+  titre: Décision de plan de transport SAP
+  stacks:
+  - sap
+  blocs:
+  - BC-052
+  nature: module
+  decision: TM est exclu du panier indexé. Distinguer le raccordement au transporteur ou TMS existant d’un
+    moteur de planification à acheter ; ne pas budgéter son développement sans ce choix.
+  sources:
+  - sap-tm
+  - offres
+  statut: a_qualifier
+  cout_initial_eur_ht: null
+  cout_annuel_eur_ht: null
+  financement: Aucun supplément autonome retenu ; vérifier le besoin résiduel et l’inclusion avant un achat
+    ou une extension.
+- id: orchestration
+  titre: Coordination et reprises des parcours
+  stacks:
+  - microsoft
+  - sap
+  blocs:
+  - BC-053
+  - BC-076
+  - BC-077
+  - BC-079
+  nature: integration
+  decision: Configurer les workflows et raccorder les exécutants. Vérifier les reprises et interventions des
+    parcours Beaumanoir ; pour SAP, examiner S/4 avec OMSA puis le besoin éventuel d’Order Management Foundation.
+  sources:
+  - ms-dom
+  - sap-omf
+  - offres
+  statut: a_qualifier
+  cout_initial_eur_ht: null
+  cout_annuel_eur_ht: null
+  financement: Aucun supplément autonome retenu ; vérifier le besoin résiduel et l’inclusion avant un achat
+    ou une extension.
+- id: mining
+  titre: Analyse des processus
+  stacks:
+  - microsoft
+  - sap
+  blocs:
+  - BC-087
+  nature: module
+  decision: Examiner Power Automate Process Mining ou SAP Signavio, leurs licences et la collecte des événements.
+    Aucun développement de moteur de mining n’est retenu par défaut.
+  sources:
+  - ms-mining
+  - sap-mining
+  - offres
+  statut: a_qualifier
+  cout_initial_eur_ht: null
+  cout_annuel_eur_ht: null
+  financement: Aucun supplément autonome retenu ; vérifier le besoin résiduel et l’inclusion avant un achat
+    ou une extension.
+- id: reassort-sap
+  titre: Réassort magasin et allocation SAP
+  stacks:
+  - sap
+  blocs:
+  - BC-034
+  - BC-037
+  - BC-040
+  - BC-043
+  - BC-044
+  nature: module
+  decision: Le questionnaire conserve un moteur de réassort externe et la BOM exclut CAR Allocation Management.
+    Qualifier ses responsabilités avec Planning Scenario Reconciliation, Supply Assignment, Physical Stock
+    Target Optimization, Replenishment et Stock Redistribution. Ce rapprochement est proposé pour les besoins
+    de réapprovisionnement et de redistribution du réseau magasin ; il ne démontre ni un écart produit ni un
+    supplément. Les allocations standard S/4 restent créditées.
+  sources:
+  - offres
+  - carte-scm
+  statut: a_qualifier
+  cout_initial_eur_ht: null
+  cout_annuel_eur_ht: null
+  financement: Aucun supplément autonome retenu ; vérifier le besoin résiduel et l’inclusion avant un achat
+    ou une extension.
+developpements: []
+revues:
+- bloc: BC-001
+  capacite: cap-service-provider-eligibility-control
+  stack: microsoft
+  couverture_ref: ms_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-001
+  capacite: cap-service-provider-eligibility-control
+  stack: sap
+  couverture_ref: sap_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-002
+  capacite: master-data-ingestion
+  stack: microsoft
+  couverture_ref: ms_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-002
+  capacite: master-data-ingestion
+  stack: sap
+  couverture_ref: sap_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-003
+  capacite: cap-partner-agreement-reference-stewardship
+  stack: microsoft
+  couverture_ref: ms_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-003
+  capacite: cap-partner-agreement-reference-stewardship
+  stack: sap
+  couverture_ref: sap_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-004
+  capacite: cap-merchandise-reference-stewardship
+  stack: microsoft
+  couverture_ref: ms_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-004
+  capacite: cap-merchandise-reference-stewardship
+  stack: sap
+  couverture_ref: sap_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-005
+  capacite: cap-packaging-reference-stewardship
+  stack: microsoft
+  couverture_ref: ms_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-005
+  capacite: cap-packaging-reference-stewardship
+  stack: sap
+  couverture_ref: sap_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-006
+  capacite: cap-internal-supplies-reference-stewardship
+  stack: microsoft
+  couverture_ref: ms_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-006
+  capacite: cap-internal-supplies-reference-stewardship
+  stack: sap
+  couverture_ref: sap_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-007
+  capacite: cap-service-reference-stewardship
+  stack: microsoft
+  couverture_ref: ms_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-007
+  capacite: cap-service-reference-stewardship
+  stack: sap
+  couverture_ref: sap_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-008
+  capacite: demand-fulfilment-policy-management
+  stack: microsoft
+  couverture_ref: ms_reference
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-008
+  capacite: demand-fulfilment-policy-management
+  stack: sap
+  couverture_ref: sap_reference
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-009
+  capacite: D01.f
+  stack: microsoft
+  couverture_ref: ms_stock
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-009
+  capacite: D01.f
+  stack: sap
+  couverture_ref: sap_stock
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-010
+  capacite: D01.g
+  stack: microsoft
+  couverture_ref: ms_stock
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-010
+  capacite: D01.g
+  stack: sap
+  couverture_ref: sap_stock
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-011
+  capacite: D01.c
+  stack: microsoft
+  couverture_ref: ms_stock
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-011
+  capacite: D01.c
+  stack: sap
+  couverture_ref: sap_stock
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-012
+  capacite: planning-data-provision
+  stack: microsoft
+  couverture_ref: ms_stock
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-012
+  capacite: planning-data-provision
+  stack: sap
+  couverture_ref: sap_stock
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-013
+  capacite: D01.d
+  stack: microsoft
+  couverture_ref: ms_stock
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-013
+  capacite: D01.d
+  stack: sap
+  couverture_ref: sap_stock
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-014
+  capacite: D01.h
+  stack: microsoft
+  couverture_ref: ms_stock
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-014
+  capacite: D01.h
+  stack: sap
+  couverture_ref: sap_stock
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-015
+  capacite: inventory-ownership-ledger
+  stack: microsoft
+  couverture_ref: ms_stock
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-015
+  capacite: inventory-ownership-ledger
+  stack: sap
+  couverture_ref: sap_stock
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-016
+  capacite: accounting-data-provision
+  stack: microsoft
+  couverture_ref: ms_stock
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-016
+  capacite: accounting-data-provision
+  stack: sap
+  couverture_ref: sap_stock
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-017
+  capacite: product-feedback
+  stack: microsoft
+  couverture_ref: ms_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-017
+  capacite: product-feedback
+  stack: sap
+  couverture_ref: sap_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-018
+  capacite: D02.c
+  stack: microsoft
+  couverture_ref: ms_stock
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-018
+  capacite: D02.c
+  stack: sap
+  couverture_ref: sap_stock
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-019
+  capacite: D05.i
+  stack: microsoft
+  couverture_ref: ms_stock
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-019
+  capacite: D05.i
+  stack: sap
+  couverture_ref: sap_stock
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-020
+  capacite: D04.i
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-020
+  capacite: D04.i
+  stack: sap
+  couverture_ref: sap_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-021
+  capacite: D04.j
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-021
+  capacite: D04.j
+  stack: sap
+  couverture_ref: sap_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-022
+  capacite: D04.k
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-022
+  capacite: D04.k
+  stack: sap
+  couverture_ref: sap_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-023
+  capacite: D04.r
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-023
+  capacite: D04.r
+  stack: sap
+  couverture_ref: sap_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-024
+  capacite: D04.t
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-024
+  capacite: D04.t
+  stack: sap
+  couverture_ref: sap_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-025
+  capacite: D04.l
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-025
+  capacite: D04.l
+  stack: sap
+  couverture_ref: sap_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-026
+  capacite: D04.m
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-026
+  capacite: D04.m
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-027
+  capacite: D04.n
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-027
+  capacite: D04.n
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-028
+  capacite: plans-ingestion
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-028
+  capacite: plans-ingestion
+  stack: sap
+  couverture_ref: sap_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-029
+  capacite: demand-forecast-development
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-029
+  capacite: demand-forecast-development
+  stack: sap
+  couverture_ref: sap_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-030
+  capacite: demand-plan-development
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-030
+  capacite: demand-plan-development
+  stack: sap
+  couverture_ref: sap_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-031
+  capacite: demand-plan-visibility
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-031
+  capacite: demand-plan-visibility
+  stack: sap
+  couverture_ref: sap_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-032
+  capacite: supply-plan-development
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-032
+  capacite: supply-plan-development
+  stack: sap
+  couverture_ref: sap_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-033
+  capacite: plans-visibility
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-033
+  capacite: plans-visibility
+  stack: sap
+  couverture_ref: sap_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-034
+  capacite: planning-scenario-reconciliation
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-034
+  capacite: planning-scenario-reconciliation
+  stack: sap
+  couverture_ref: sap_plan
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - reassort-sap
+- bloc: BC-035
+  capacite: D05.f
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-035
+  capacite: D05.f
+  stack: sap
+  couverture_ref: sap_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-036
+  capacite: D03.m
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-036
+  capacite: D03.m
+  stack: sap
+  couverture_ref: sap_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-037
+  capacite: D03.o
+  stack: microsoft
+  couverture_ref: ms_dom
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-037
+  capacite: D03.o
+  stack: sap
+  couverture_ref: sap_plan
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - reassort-sap
+- bloc: BC-038
+  capacite: delivery-release-decision
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-038
+  capacite: delivery-release-decision
+  stack: sap
+  couverture_ref: sap_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-039
+  capacite: D02.e
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-039
+  capacite: D02.e
+  stack: sap
+  couverture_ref: sap_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-040
+  capacite: D05.a
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - optimisation-stocks
+- bloc: BC-040
+  capacite: D05.a
+  stack: sap
+  couverture_ref: sap_plan
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - optimisation-stocks
+  - reassort-sap
+- bloc: BC-041
+  capacite: D05.d
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - optimisation-stocks
+- bloc: BC-041
+  capacite: D05.d
+  stack: sap
+  couverture_ref: sap_plan
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - optimisation-stocks
+- bloc: BC-042
+  capacite: D05.h
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - optimisation-stocks
+- bloc: BC-042
+  capacite: D05.h
+  stack: sap
+  couverture_ref: sap_plan
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - optimisation-stocks
+- bloc: BC-043
+  capacite: D05.e
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-043
+  capacite: D05.e
+  stack: sap
+  couverture_ref: sap_plan
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - reassort-sap
+- bloc: BC-044
+  capacite: D05.c
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-044
+  capacite: D05.c
+  stack: sap
+  couverture_ref: sap_plan
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - reassort-sap
+- bloc: BC-045
+  capacite: BHV006
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-045
+  capacite: BHV006
+  stack: sap
+  couverture_ref: sap_plan
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-046
+  capacite: D03.i
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-046
+  capacite: D03.i
+  stack: sap
+  couverture_ref: sap_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-047
+  capacite: D03.j
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-047
+  capacite: D03.j
+  stack: sap
+  couverture_ref: sap_plan
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - ctp-sap
+- bloc: BC-048
+  capacite: D03.k
+  stack: microsoft
+  couverture_ref: ms_plan
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - ptp
+- bloc: BC-048
+  capacite: D03.k
+  stack: sap
+  couverture_ref: sap_plan
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - ptp
+- bloc: BC-049
+  capacite: D06.b
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-049
+  capacite: D06.b
+  stack: sap
+  couverture_ref: sap_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-050
+  capacite: D07.a
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-050
+  capacite: D07.a
+  stack: sap
+  couverture_ref: sap_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-051
+  capacite: D06.e
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-051
+  capacite: D06.e
+  stack: sap
+  couverture_ref: sap_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-052
+  capacite: transport-plan-decision
+  stack: microsoft
+  couverture_ref: ms_transport
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-052
+  capacite: transport-plan-decision
+  stack: sap
+  couverture_ref: sap_transport
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - transport-sap
+- bloc: BC-053
+  capacite: D06.d
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - orchestration
+- bloc: BC-053
+  capacite: D06.d
+  stack: sap
+  couverture_ref: sap_process
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - orchestration
+- bloc: BC-054
+  capacite: D06.f
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-054
+  capacite: D06.f
+  stack: sap
+  couverture_ref: sap_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-055
+  capacite: service-order-release-decision
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-055
+  capacite: service-order-release-decision
+  stack: sap
+  couverture_ref: sap_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-056
+  capacite: D07.d
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-056
+  capacite: D07.d
+  stack: sap
+  couverture_ref: sap_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-057
+  capacite: D07.c
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-057
+  capacite: D07.c
+  stack: sap
+  couverture_ref: sap_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-058
+  capacite: operations-visibility
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-058
+  capacite: operations-visibility
+  stack: sap
+  couverture_ref: sap_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-059
+  capacite: service-order-picking
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-059
+  capacite: service-order-picking
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-060
+  capacite: service-order-packing
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-060
+  capacite: service-order-packing
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-061
+  capacite: service-order-cross-docking
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-061
+  capacite: service-order-cross-docking
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-062
+  capacite: service-order-labeling
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-062
+  capacite: service-order-labeling
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-063
+  capacite: service-order-kitting
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-063
+  capacite: service-order-kitting
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-064
+  capacite: service-order-garment-finishing
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-064
+  capacite: service-order-garment-finishing
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-065
+  capacite: service-order-cleaning
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-065
+  capacite: service-order-cleaning
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-066
+  capacite: service-order-repair-alteration
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-066
+  capacite: service-order-repair-alteration
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-067
+  capacite: service-order-personalization
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-067
+  capacite: service-order-personalization
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-068
+  capacite: service-order-inspection
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-068
+  capacite: service-order-inspection
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-069
+  capacite: service-order-receiving
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-069
+  capacite: service-order-receiving
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-070
+  capacite: service-order-scrapping
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-070
+  capacite: service-order-scrapping
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-071
+  capacite: service-order-transport
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-071
+  capacite: service-order-transport
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-072
+  capacite: service-order-transport-booking
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-072
+  capacite: service-order-transport-booking
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-073
+  capacite: service-order-customs-clearance
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-073
+  capacite: service-order-customs-clearance
+  stack: sap
+  couverture_ref: sap_order
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-074
+  capacite: service-order-billing
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-074
+  capacite: service-order-billing
+  stack: sap
+  couverture_ref: sap_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-075
+  capacite: service-order-payment-collection
+  stack: microsoft
+  couverture_ref: ms_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-075
+  capacite: service-order-payment-collection
+  stack: sap
+  couverture_ref: sap_order
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-076
+  capacite: workflow-definition-management
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - orchestration
+- bloc: BC-076
+  capacite: workflow-definition-management
+  stack: sap
+  couverture_ref: sap_process
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - orchestration
+- bloc: BC-077
+  capacite: order-workflow-planning
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - orchestration
+- bloc: BC-077
+  capacite: order-workflow-planning
+  stack: sap
+  couverture_ref: sap_process
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - orchestration
+- bloc: BC-078
+  capacite: order-workflow-sentry
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-078
+  capacite: order-workflow-sentry
+  stack: sap
+  couverture_ref: sap_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-079
+  capacite: order-workflow-orchestration
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - orchestration
+- bloc: BC-079
+  capacite: order-workflow-orchestration
+  stack: sap
+  couverture_ref: sap_process
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - orchestration
+- bloc: BC-080
+  capacite: human-task-management
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-080
+  capacite: human-task-management
+  stack: sap
+  couverture_ref: sap_process
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-081
+  capacite: work-assignment
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-081
+  capacite: work-assignment
+  stack: sap
+  couverture_ref: sap_process
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-082
+  capacite: work-deadline-management
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-082
+  capacite: work-deadline-management
+  stack: sap
+  couverture_ref: sap_process
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-083
+  capacite: process-intervention
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-083
+  capacite: process-intervention
+  stack: sap
+  couverture_ref: sap_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-084
+  capacite: process-exception-management
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-084
+  capacite: process-exception-management
+  stack: sap
+  couverture_ref: sap_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-085
+  capacite: process-ledger
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-085
+  capacite: process-ledger
+  stack: sap
+  couverture_ref: sap_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-086
+  capacite: BHV082
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-086
+  capacite: BHV082
+  stack: sap
+  couverture_ref: sap_process
+  statut: integration_client
+  decision: Les contrats d’échange, variantes et qualifications propres à Beaumanoir sont portés par l’enveloppe
+    d’intégration. Aucun développement générique supplémentaire n’est chiffré pour cette capacité.
+  exceptions: []
+- bloc: BC-087
+  capacite: process-mining
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - mining
+- bloc: BC-087
+  capacite: process-mining
+  stack: sap
+  couverture_ref: sap_process
+  statut: point_cible
+  decision: Le traitement dépend du point ciblé ci-joint ; ni absence produit ni inclusion commerciale ne sont
+    déduites automatiquement.
+  exceptions:
+  - mining
+- bloc: BC-088
+  capacite: operational-analysis-reporting
+  stack: microsoft
+  couverture_ref: ms_process
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: BC-088
+  capacite: operational-analysis-reporting
+  stack: sap
+  couverture_ref: sap_process
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: TRANSVERSE
+  capacite: null
+  stack: microsoft
+  couverture_ref: ms_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+- bloc: TRANSVERSE
+  capacite: null
+  stack: sap
+  couverture_ref: sap_reference
+  statut: standard_retenu
+  decision: Le scénario retient le mécanisme générique dans le standard de l’option. L’étendue fonctionnelle
+    et l’inclusion commerciale se lisent dans les apports, limites et preuves.
+  exceptions: []
+presentation:
+  titre: Ce que les produits fournissent et les points à préciser
+  note: Le standard est acheté ; son adaptation au contexte Beaumanoir est intégrée. Les points ci-dessous
+    déterminent un éventuel achat ou travail supplémentaire.
+  point: Point à préciser
+  options: Options concernées
+  decision: Traitement retenu
+  cout: Supplément initial / annuel
+  non_chiffre: Non chiffré
+  details: Couverture des capacités et preuves
+  source: Ouvrir le registre complet
+  coverage_title: Couverture du Core générique
+  coverage_note: La revue distingue l’hypothèse de standard, les travaux client et les points ciblés. Elle
+    ne constitue pas un pourcentage de couverture certifié.
+  statuses:
+    standard_retenu: Hypothèse de standard
+    integration_client: Travaux client inclus
+    point_cible: Point à qualifier
+  budget_note: Les budgets Buy ne comprennent pas de supplément chiffré pour les modules et fonctions restant
+    à qualifier.
+  budget_link: Voir les points de couverture Buy
+  product_evidence_note: Les profils d’apport décrivent des fonctions documentées des produits. Ils sont mutualisés
+    entre les capacités concernées.
+  adequacy_note: L’adéquation au besoin FLOW se juge sur les fonctions et situations de la capacité ; les points
+    ciblés précisent ce qui reste à vérifier.
+  offer_note: La disponibilité d’une fonction au catalogue ne démontre pas son inclusion dans l’offre achetée.
+    Les pièces commerciales et leurs limites restent attachées aux points ciblés.
+  funding_note: Les travaux client retenus sont financés par les enveloppes d’intégration. Les modules et fonctions
+    encore à qualifier n’ajoutent aucun supplément automatiquement.

@@ -1,0 +1,684 @@
+version_schema: 1
+id: maintenance-sap
+nom: Maintenance - SAP
+produit: Flow Core System
+stack_id: sap-buy
+strategie: buy
+periode: annuelle
+date_evaluation: '2026-10-22'
+dependances:
+  schema: source/schema-valorisation-cycle.yaml
+  catalogue: source/maintenance.yaml
+  stack: source/stacks/sap.yaml
+  scenario: source/maintenance.yaml#scenario_annuel
+  inflation: source/inflation.yaml
+  preuves: sources/integration-maintenance-2026-10-22.yaml
+  catalogue_sha256: 0c652166b1cc68696848c248a8aa087a02534b07f55d9475e7f69a1255bbaf2d
+  stack_sha256: 81c866e7ddeb1c46ea402a83e519ca2c30bfac842435251b797b54696cb077a8
+  scenario_sha256: f1453e3dba54b1c8983cb458b2ab7d7070ce7c87a8fa0a42d27512d0aa92090f
+  integration: source/integration/integration-sap.yaml
+  integration_sha256: d958c65c0ec3a4d69aa4cccb412c137e05dd0dfa08d6fd6926e849d2e33f39cf
+tarifs_roles:
+  developpement:
+    reference: source/stacks/sap.yaml#interventions/activites/developpement
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+  integration:
+    reference: source/stacks/sap.yaml#interventions/activites/integration
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+  support_n3:
+    reference: source/stacks/sap.yaml#interventions/activites/support_n3
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+  support_n1:
+    reference: source/stacks/sap.yaml#interventions/activites/support_n1
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+activites:
+- id: MAI-001
+  nom: Assistance utilisateur et administration courante
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+    integration:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+    support_n3:
+      part_pct: 10
+      travaux: Enrichir les consignes et traiter les questions expertes ponctuelles.
+    support_n1:
+      part_pct: 90
+      travaux: Qualifier, aider à l’usage et résoudre les demandes simples.
+  justification: Même service N1 et mêmes volumes ; ne pas utiliser le TJM SAP expert pour l’assistance simple.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - abap-fiori
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - GOLIVE
+  valorisation_ref: MAI-001
+- id: MAI-002
+  nom: Diagnostic expert et remise en service
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 10
+      travaux: Diagnostiquer le comportement du code.
+    integration:
+      part_pct: 15
+      travaux: Diagnostiquer flux et configuration.
+    support_n3:
+      part_pct: 75
+      travaux: Conduire investigation, contournement et remise en service.
+    support_n1:
+      part_pct: 0
+      travaux: Déjà couvert en MAI-001.
+  justification: Investigation coordonnée entre S/4, OMSA, IBP, CPI et extensions client. Contrats et responsabilités
+    multiples expliquent la complexité de diagnostic.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - s4-fashion
+  - ibp
+  - omsa
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - SHARED
+  valorisation_ref: rfi-mco
+- id: MAI-003
+  nom: 'Maintenir la Plateforme Core System : correctifs et versions'
+  nature: travail
+  prise_en_charge: abonnement_editeur
+  roles: null
+  justification: Maintenance du standard SAP financée par les contrats applicables ; la production des versions
+    éditeur n’est pas une équipe de build client. Prestations techniques hors contrat restent à qualifier.
+  justification_roles: 'Pas de répartition de travail client : service financé par les contrats MAI-010.'
+  composants:
+  - s4-fashion
+  - ibp
+  - omsa
+  - osta
+  inclus_dans:
+  - MAI-010/licences
+  achats: null
+  adequation_tjm: sans_objet
+  sources:
+  - CADRE
+  - SOLUTION
+  - MS_UPDATES
+  valorisation_ref: MAI-003
+- id: MAI-004
+  nom: Maintenir les extensions et spécifiques sous responsabilité client
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 65
+      travaux: Corriger les extensions et leurs tests locaux.
+    integration:
+      part_pct: 20
+      travaux: Vérifier les contrats et paramètres concernés.
+    support_n3:
+      part_pct: 15
+      travaux: Reproduire et qualifier la correction locale.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Maintenir extensions ABAP/Fiori et compléments du Core sous responsabilité client, avec dépendances
+    croisées S/4/OMSA/IBP ; le standard éditeur reste exclu de cette prestation.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - abap-fiori
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - SOLUTION
+  valorisation_ref: rfi-mco
+- id: MAI-005
+  nom: Maintenir les flux et la compatibilité avec le SI
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 20
+      travaux: Adapter les composants de transformation.
+    integration:
+      part_pct: 65
+      travaux: Modifier contrats, mappings et tests de flux.
+    support_n3:
+      part_pct: 15
+      travaux: Vérifier exploitabilité et reprise.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Contrats et versions de plusieurs composants à préserver dans CPI. Une capacité iPaaS achetée ne
+    finance ni mapping ni test métier.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - ipaas
+  - s4-fashion
+  - ibp
+  - omsa
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - CADRE
+  - MS_DATA
+  valorisation_ref: rfi-monitoring
+- id: MAI-006
+  nom: Qualifier et déployer les nouvelles versions
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 20
+      travaux: Adapter les tests automatisés et traiter la compatibilité.
+    integration:
+      part_pct: 50
+      travaux: Conduire validation de configuration et processus.
+    support_n3:
+      part_pct: 30
+      travaux: Préparer déploiement, contrôle et repli.
+    support_n1:
+      part_pct: 0
+      travaux: Documentation d’usage mise à jour en MAI-001.
+  justification: Qualifier l’ensemble S/4 Fashion, OMSA, IBP et extensions, avec transports et tests de composition.
+    La cadence et les opérations incluses dépendent des contrats Private.
+  justification_roles: Qualification des paramètres et transports sur versions éditeur, avec adaptations de tests.
+  composants:
+  - abap-fiori
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - MS_UPDATES
+  - CICD
+  - MS_TEST
+  valorisation_ref: rfi-mco
+- id: MAI-007
+  nom: Exploiter la plateforme et les traitements
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 10
+      travaux: Maintenir diagnostics et automatisations.
+    integration:
+      part_pct: 20
+      travaux: Maintenir paramètres et chaîne applicative.
+    support_n3:
+      part_pct: 70
+      travaux: Surveiller, administrer et ajuster le service client.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Exclure les opérations techniques standard confiées à SAP. Conserver jobs, flux, paramètres et
+    coordination de capacité côté client ; vérifier le contrat avant toute déduction additionnelle.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - infra-s4
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - SHARED
+  - CICD
+  valorisation_ref: rfi-mco
+- id: MAI-008
+  nom: Maintenir la sécurité et la continuité
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 10
+      travaux: Vérifier les contrôles applicatifs.
+    integration:
+      part_pct: 35
+      travaux: Maintenir identités, règles de sécurité et rétention.
+    support_n3:
+      part_pct: 55
+      travaux: Tester restauration et continuité opérationnelle.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: 'La continuité métier traverse les services SAP et les SI externes : accès, rétention et restauration
+    cohérente restent à qualifier même si les sauvegardes techniques sont opérées par SAP.'
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - infra-s4
+  - abap-fiori
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - SHARED
+  - MS_RESTORE
+  - SAP_CONTRACT
+  valorisation_ref: rfi-mco
+- id: MAI-009
+  nom: Faire évoluer le Core et l’adaptation métier
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 45
+      travaux: Faire évoluer le Flow Core System ou les extensions client Buy.
+    integration:
+      part_pct: 45
+      travaux: Configurer les règles et parcours métier nouveaux.
+    support_n3:
+      part_pct: 10
+      travaux: Qualifier l’exploitabilité des changements.
+    support_n1:
+      part_pct: 0
+      travaux: Aides d’usage en MAI-001.
+  justification: Même portefeuille d’évolutions demandé. Ne pas supposer les six améliorations génériques livrées
+    par SAP ; leur extension doit rester supportée, avec cohérence entre composants et contraintes clean core.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - s4-fashion
+  - ibp
+  - omsa
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - SOLUTION
+  - MS_UPDATES
+  valorisation_ref: rfi-evolutions
+- id: MAI-010
+  nom: Licences, abonnements et droits aux versions
+  nature: achat
+  prise_en_charge: achat
+  roles: null
+  justification: Un contrat groupé reste un achat unique ; hébergement ou support inclus sont des renvois, pas une
+    nouvelle facture.
+  justification_roles: 'Achat de droits, capacité ou forfait : aucun rôle en pourcentage, aucun point de complexité
+    de prestation.'
+  composants: []
+  inclus_dans: []
+  achats:
+  - id: licences
+    composants:
+    - s4-fashion
+    - omsa
+    - osta
+    - ibp
+    regime: prix_documente
+    assiette: 950 utilisateurs selon profils du scénario ; FUE et autres métriques contractuelles à déterminer.
+    inclus_dans: []
+    montant_annuel_eur_ht: null
+    inflation_ref: source/inflation.yaml#categories/licences_logiciels
+    precision: Ne pas convertir mécaniquement 950 utilisateurs en 950 FUE. Confirmer la BOM et les droits IBP actuels
+      ; abonnement regroupé conservé sans ventilation inventée. Prix conservés dans valorisation_annuelle/postes,
+      sans montant annuel scalaire dupliqué ; périmètre RFI à rapprocher de FLOW.
+    valorisation_ref: MAI-010/licences
+  - id: extensions-incluses
+    composants:
+    - abap-fiori
+    regime: inclus
+    assiette: Droits intégrés S/4 applicables.
+    inclus_dans:
+    - MAI-010/licences
+    montant_annuel_eur_ht: null
+    inflation_ref: source/inflation.yaml#categories/licences_logiciels
+    precision: BTP n’est pas inclus par déduction ; le travail ABAP/Fiori reste une prestation.
+    valorisation_ref: MAI-010/extensions-incluses
+  adequation_tjm: sans_objet
+  sources:
+  - CADRE
+  - SAP_CONTRACT
+  - MS_UPDATES
+  - RFI_SAP_PRIX
+- id: MAI-011
+  nom: Cloud et capacité d’hébergement
+  nature: achat
+  prise_en_charge: achat
+  roles: null
+  justification: Hébergement standard inclus en Buy renvoyé à MAI-010. Capacité supplémentaire ou ressources externes
+    facturées seulement si réellement distinctes.
+  justification_roles: 'Achat de droits, capacité ou forfait : aucun rôle en pourcentage, aucun point de complexité
+    de prestation.'
+  composants: []
+  inclus_dans: []
+  achats:
+  - id: cloud-standard
+    composants:
+    - infra-s4
+    regime: inclus
+    assiette: Hébergement standard des environnements et capacités réellement souscrits.
+    inclus_dans:
+    - MAI-010/licences
+    montant_annuel_eur_ht: null
+    inflation_ref: source/inflation.yaml#categories/licences_logiciels
+    precision: Le même hébergement ne reçoit pas de facture IaaS supplémentaire. Limites d’environnements/capacité
+      à confronter au scénario.
+    valorisation_ref: MAI-011/cloud-standard
+  - id: capacite-complementaire
+    composants:
+    - capacites-s4
+    regime: a_confirmer
+    assiette: Écart de capacité FLOW au-delà des capacités déjà financées dans la BOM RFI, après vérification du
+      stockage et du DRP.
+    inclus_dans: []
+    montant_annuel_eur_ht: null
+    inflation_ref: null
+    precision: 'Seulement les dépassements au-delà de la BOM RFI : les extensions mémoire déjà dans le panier licences
+      ne doivent pas être recomptées. Stockage et DRP signalés dans les réserves ; ne pas les ajouter automatiquement.'
+    valorisation_ref: MAI-011/capacite-complementaire
+  adequation_tjm: sans_objet
+  sources:
+  - SHARED
+  - SAP_CONTRACT
+  - RFI_SAP_PRIX
+- id: MAI-012
+  nom: Exécution iPaaS et échanges
+  nature: achat
+  prise_en_charge: achat
+  roles: null
+  justification: Le développement des flux et leur MCO sont du travail séparé. Ne pas additionner crédit BTP et
+    service qu’il finance.
+  justification_roles: 'Achat de droits, capacité ou forfait : aucun rôle en pourcentage, aucun point de complexité
+    de prestation.'
+  composants: []
+  inclus_dans: []
+  achats:
+  - id: ipaas
+    composants:
+    - ipaas
+    - btp
+    regime: a_chiffrer
+    assiette: 24 millions d’échanges métier logiques/an ; traduire en métriques du fournisseur, connecteurs, tenants
+      et actions.
+    inclus_dans: []
+    montant_annuel_eur_ht: null
+    inflation_ref: source/inflation.yaml#categories/cloud
+    precision: Pour SAP, imputer les crédits BTP une seule fois sur les services concernés, sans ajouter une facture
+      BTP abstraite. Pour Logic Apps, actions et connecteurs ne sont pas égaux au nombre de messages métier.
+    valorisation_ref: MAI-012/ipaas
+  adequation_tjm: sans_objet
+  sources:
+  - CADRE
+- id: MAI-013
+  nom: Outillage et support complémentaire acheté
+  nature: achat
+  prise_en_charge: achat
+  roles: null
+  justification: Si un forfait finance les interventions MAI-001 à MAI-008, retirer la prestation remplacée de leur
+    assiette. Ni forfait éditeur ni licence commerciale OSS présumés.
+  justification_roles: 'Achat de droits, capacité ou forfait : aucun rôle en pourcentage, aucun point de complexité
+    de prestation.'
+  composants: []
+  inclus_dans: []
+  achats:
+  - id: outillage-support
+    composants: []
+    regime: a_confirmer
+    assiette: Licences d’outillage, contrats de support et audits complémentaires réellement sélectionnés.
+    inclus_dans: []
+    montant_annuel_eur_ht: null
+    inflation_ref: null
+    precision: Aucun forfait choisi. Distinguer ultérieurement licences (inflation logiciel) et prestations (inflation
+      TJM) avant calcul ; remplacer les JH couverts par un forfait au lieu de les additionner.
+    valorisation_ref: MAI-013/outillage-support
+  adequation_tjm: sans_objet
+  sources:
+  - CADRE
+  - SAP_CONTRACT
+limites:
+- Points et parts de rôles = hypothèses d’ingénierie à qualifier. Aucune conversion en JH, coût ou somme économique
+  de points.
+- Le catalogue décrit les apports nécessaires des métiers et profils non tarifés. Ils ne sont pas implicitement
+  inclus dans les quatre tarifs techniques.
+- 'Le TJM de la stack n’est pas automatiquement celui de tous les spécialistes : l’adéquation partielle bloque une
+  valorisation complète sans qualification du profil.'
+- Les empreintes lient cette estimation au catalogue, à la stack, à la solution et au scénario commun ; une évolution
+  exige une réévaluation.
+- La mise en place initiale du socle/CI-CD/run est affectée à INT-008/009/011. Ici, seules les opérations et évolutions
+  de l’année stabilisée sont évaluées ; aucun second chantier initial.
+valorisation_annuelle:
+  unite: EUR_HT
+  regle: Table de prix prioritaire par poste, commune Make/Buy. Une activité/achat appartient à un seul poste ;
+    les inclusions ne se somment pas. Les points ne financent pas une seconde fois un forfait. Prix inconnus = null
+    ; prix historiques non actualisés silencieusement.
+  postes:
+  - id: MAI-001
+    couvre:
+    - MAI-001
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Travail annuel du scénario ; points et rôles à traduire en JH puis TJM. Aucun montant inventé.
+  - id: MAI-003
+    couvre:
+    - MAI-003
+    methode: inclus
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: inclus
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: MAI-010/licences
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Maintenance et versions du standard éditeur financées par le panier logiciel. Les évolutions
+      client demandées restent en MAI-009.
+  - id: MAI-010/licences
+    couvre:
+    - MAI-010/licences
+    methode: prix_documentes
+    annee_prix: 2025
+    repere_annees: 'Années 1 à 5 de l’offre 2025 ; séquence tarifaire source, sans calendrier FLOW. SAP : montée
+      en charge du périmètre, non inflation.'
+    montants_documentes_eur_ht:
+    - annee: 1
+      montant: 790633
+    - annee: 2
+      montant: 765823
+    - annee: 3
+      montant: 973480
+    - annee: 4
+      montant: 1270879
+    - annee: 5
+      montant: 1270879
+    projection:
+      methode: indexation
+      a_partir_annee: 6
+      inflation_ref: source/inflation.yaml#categories/licences_logiciels
+    finance_par: null
+    sources:
+    - RFI_SAP_PRIX
+    adequation_perimetre: source_a_rapprocher
+    justification: Prix RFI repris tels quels. Usage, maintien du standard et infrastructure financés ensemble ;
+      aucune ventilation financière inventée. Hypothèse d’indexation à partir de la sixième année seulement, sur
+      le dernier montant documenté ; ni renouvellement garanti ni tarif actuel.
+  - id: MAI-010/extensions-incluses
+    couvre:
+    - MAI-010/extensions-incluses
+    methode: inclus
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: inclus
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: MAI-010/licences
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: BTP n’est pas inclus par déduction ; le travail ABAP/Fiori reste une prestation.
+  - id: MAI-011/cloud-standard
+    couvre:
+    - MAI-011/cloud-standard
+    methode: inclus
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: inclus
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: MAI-010/licences
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Le même hébergement ne reçoit pas de facture IaaS supplémentaire. Limites d’environnements/capacité
+      à confronter au scénario.
+  - id: MAI-011/capacite-complementaire
+    couvre:
+    - MAI-011/capacite-complementaire
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - RFI_SAP_PRIX
+    adequation_perimetre: hypothese_commune
+    justification: 'Seulement les dépassements au-delà de la BOM RFI : les extensions mémoire déjà dans le panier
+      licences ne doivent pas être recomptées. Stockage et DRP signalés dans les réserves ; ne pas les ajouter automatiquement.'
+  - id: MAI-012/ipaas
+    couvre:
+    - MAI-012/ipaas
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - RFI_SAP_PRIX
+    adequation_perimetre: hypothese_commune
+    justification: Integration Suite marqué non inclus p.28 ; BTP voucher annoncé inclus sans enveloppe exploitable.
+      iPaaS reste non chiffré, aucun zéro présumé. Déduire seulement des crédits effectivement utilisables et confirmés.
+  - id: MAI-013/outillage-support
+    couvre:
+    - MAI-013/outillage-support
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Aucun forfait choisi. Distinguer ultérieurement licences (inflation logiciel) et prestations
+      (inflation TJM) avant calcul ; remplacer les JH couverts par un forfait au lieu de les additionner.
+  - id: rfi-mco
+    couvre:
+    - MAI-002
+    - MAI-004
+    - MAI-006
+    - MAI-007
+    - MAI-008
+    methode: prix_reference_indexe
+    annee_prix: 2025
+    repere_annees: Prix annuel après stabilisation, référence économique du dossier 2025. Année 1 = année de prix
+      de référence, pas année 1 de la roadmap SAP.
+    montants_documentes_eur_ht:
+    - annee: 1
+      montant: 250000
+    projection:
+      methode: indexation
+      a_partir_annee: 2
+      inflation_ref: source/inflation.yaml#categories/tjm_ingenierie
+    finance_par: null
+    sources:
+    - RFI_SAP_SERVICES
+    adequation_perimetre: source_a_rapprocher
+    justification: 'Forfait MCO hors évolutions après stabilisation. Rapprochement de travail : diagnostic, correctifs
+      client, qualification, exploitation et sécurité technique ; détail contractuel non fourni. Ne pas prétendre
+      ces activités intégralement couvertes ni en rajouter le coût complet. Compléments éventuels à isoler après
+      rapprochement.'
+  - id: rfi-monitoring
+    couvre:
+    - MAI-005
+    methode: prix_reference_indexe
+    annee_prix: 2025
+    repere_annees: Prix annuel après stabilisation, référence économique du dossier 2025. Année 1 = année de prix
+      de référence, pas année 1 de la roadmap SAP.
+    montants_documentes_eur_ht:
+    - annee: 1
+      montant: 450000
+    projection:
+      methode: indexation
+      a_partir_annee: 2
+      inflation_ref: source/inflation.yaml#categories/tjm_ingenierie
+    finance_par: null
+    sources:
+    - RFI_SAP_SERVICES
+    adequation_perimetre: source_a_rapprocher
+    justification: Forfait monitoring des flux en horaires étendus. Ce niveau de service dépasse le support humain
+      en jours ouvrés du scénario commun ; le MCO des contrats de flux et leurs modifications ne sont pas tous démontrés
+      inclus. Prix conservé sans réduction arbitraire ; complément ou retraitement à qualifier.
+  - id: rfi-evolutions
+    couvre:
+    - MAI-009
+    methode: prix_reference_indexe
+    annee_prix: 2025
+    repere_annees: Prix annuel après stabilisation, référence économique du dossier 2025. Année 1 = année de prix
+      de référence, pas année 1 de la roadmap SAP.
+    montants_documentes_eur_ht:
+    - annee: 1
+      montant: 350000
+    projection:
+      methode: indexation
+      a_partir_annee: 2
+      inflation_ref: source/inflation.yaml#categories/tjm_ingenierie
+    finance_par: null
+    sources:
+    - RFI_SAP_SERVICES
+    adequation_perimetre: source_a_rapprocher
+    justification: Enveloppe annuelle TMA évolutive. Pas de preuve qu’elle finance exactement les 24 évolutions
+      du scénario ; remplace l’estimation de cette enveloppe, sans addition de JH pour les mêmes changements.
+  reserves:
+  - 'Aucun total annuel FLOW complet : JH résiduels, achats inconnus et écarts de périmètre restent à qualifier.
+    Les prix connus ne valent pas couverture complète.'
+  - Les années relatives ne relient pas automatiquement montée en charge des licences, service stabilisé et Build/Run.
+    Aucune durée de projet ni durée de TCO imposée.
+  - 'BOM p.43–44 : stockage 12 unités à 834 EUR/an soit 10 008 EUR/an, absent du tableau p.45. Non ajouté aux totaux
+    sources sans confirmation.'
+  - 'DRP affiché p.45 mais hors totaux imprimés (exemple année 4 : 214 927 EUR). Le total source de 1 270 879 EUR
+    est conservé avec anomalie ; ce n’est pas un coût complet validé.'
+  - Finance, IBP et autres capacités du RFI dépassent potentiellement FLOW. Aucun prorata de réduction ni conversion
+    des suppléments mémoire en coût cloud complet.
+  - Les forfaits 250/450/350 kEUR sont distincts. RISE arrondi à 1,27 MEUR n’est jamais ajouté à la BOM licences
+    déjà prise en compte.

@@ -1,0 +1,428 @@
+version_schema: 1
+id: integration-java-spring
+nom: Intégration - Java / Spring Boot
+produit: Flow Core System
+stack_id: java-spring-make
+strategie: make
+periode: jusqu_a_v1
+date_evaluation: '2026-10-22'
+dependances:
+  schema: source/schema-valorisation-cycle.yaml
+  catalogue: source/integration.yaml
+  stack: source/stacks/java-spring.yaml
+  scenario: source/maintenance.yaml#scenario_annuel
+  inflation: source/inflation.yaml
+  preuves: sources/integration-maintenance-2026-10-22.yaml
+  catalogue_sha256: 1ab1ced93592f639e23c63f1e50292556bc41183e62a2aa658a301d2794f5642
+  stack_sha256: 7bf6d1fdda764685cc3aeb669d4678db6f3b5af74f7901b2ac7ef3ad51848d4f
+  scenario_sha256: f1453e3dba54b1c8983cb458b2ab7d7070ce7c87a8fa0a42d27512d0aa92090f
+tarifs_roles:
+  developpement:
+    reference: source/stacks/java-spring.yaml#interventions/activites/developpement
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+  integration:
+    reference: source/stacks/java-spring.yaml#interventions/activites/integration
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+  support_n3:
+    reference: source/stacks/java-spring.yaml#interventions/activites/support_n3
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+  support_n1:
+    reference: source/stacks/java-spring.yaml#interventions/activites/support_n1
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+activites:
+- id: INT-001
+  nom: Préparer l’adaptation et les décisions de configuration
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 20
+      travaux: Examiner les points d’extension.
+    integration:
+      part_pct: 75
+      travaux: Traduire les besoins en configuration et contrats.
+    support_n3:
+      part_pct: 5
+      travaux: Vérifier l’exploitabilité des choix.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: 'Équipe de fabrication conservée : contrats et points de variation connus. Restent ateliers de
+    correspondance et décisions Beaumanoir, sans contrat intégrateur ni découverte du produit à répéter.'
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - spring
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - CARTO
+  - GOLIVE
+- id: INT-002
+  nom: Configurer les structures et paramètres de base
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 5
+      travaux: Petits scripts de configuration.
+    integration:
+      part_pct: 85
+      travaux: Définir et saisir les paramètres.
+    support_n3:
+      part_pct: 10
+      travaux: Vérifier et documenter l’administration.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Les API et écrans de paramètres du produit livré sont réutilisés. Saisie, contrôle et documentation
+    d’un jeu cohérent constituent l’étalon à 100 ; aucune nouvelle fonction Java à construire.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - spring
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - MS_DATA
+- id: INT-003
+  nom: Paramétrer les politiques et calibrer les décisions Supply
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 20
+      travaux: Configurer les extensions de règles autorisées.
+    integration:
+      part_pct: 70
+      travaux: Formaliser les choix métier et ajuster les paramètres.
+    support_n3:
+      part_pct: 10
+      travaux: Vérifier diagnostics et reproductibilité.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Drools/DMN et Timefold sont déjà encapsulés par le Core. L’essentiel est le choix des politiques
+    et la validation ATP/allocation avec les cas Beaumanoir, pas la construction de moteurs.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - drools
+  - timefold
+  - flowable
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - CARTO
+  - SOLUTION
+- id: INT-004
+  nom: Configurer les parcours, formulaires et écrans low-code
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 30
+      travaux: Adapter composants de formulaire et assemblages.
+    integration:
+      part_pct: 60
+      travaux: Configurer parcours, écrans et règles de tâche.
+    support_n3:
+      part_pct: 10
+      travaux: Vérifier la conduite des dossiers.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Parcours et formulaires configurables de la V1 réutilisés. Flowable fournit le runtime, mais les
+    variantes de parcours Beaumanoir doivent être configurées et validées.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - flowable
+  - react
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - SOLUTION
+- id: INT-005
+  nom: Réaliser les extensions et spécifiques nécessaires
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 70
+      travaux: Concevoir et coder les extensions et tests locaux.
+    integration:
+      part_pct: 20
+      travaux: Vérifier les contrats et l’adéquation métier.
+    support_n3:
+      part_pct: 10
+      travaux: Préparer le diagnostic des extensions.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Points d’extension Java/Spring et contrats connus de l’équipe. Restent plugin, tests locaux et
+    isolation du spécifique ; pas de crédit additionnel sur des fonctions du Core déjà construites.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - spring
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - SOLUTION
+- id: INT-006
+  nom: Intégrer les flux avec les applications et partenaires
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 25
+      travaux: Compléter les adaptateurs indispensables.
+    integration:
+      part_pct: 65
+      travaux: Réaliser flux, mappings et reprises.
+    support_n3:
+      part_pct: 10
+      travaux: Préparer alertes et procédures de traitement.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: 'Logic Apps proposé pour les échanges externes ; 30 contrats de flux à raccorder et qualifier.
+    Camel reste interne au Core : pas double développement du même mapping.'
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - ipaas
+  - camel
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - CADRE
+  - CARTO
+  - MS_DATA
+- id: INT-007
+  nom: Migrer, rapprocher et archiver les données
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 25
+      travaux: Construire transformations et contrôles automatisés.
+    integration:
+      part_pct: 65
+      travaux: Piloter techniquement les reprises et écarts.
+    support_n3:
+      part_pct: 10
+      travaux: Préparer traces et reprise sur erreur.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: API de reprise du produit maîtrisées par l’équipe, mais pas outil de migration Beaumanoir déjà
+    livré. Nettoyage, transformations, stocks/engagements et rapprochements dominent.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - spring
+  - postgresql
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - CARTO
+  - MS_DATA
+  - SAP_MIG
+- id: INT-008
+  nom: Préparer environnements, accès et intégration de sécurité
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 10
+      travaux: Adapter les paramètres applicatifs.
+    integration:
+      part_pct: 65
+      travaux: Raccorder réseau, identités et secrets.
+    support_n3:
+      part_pct: 25
+      travaux: Vérifier accès et procédures opérationnelles.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: 'Composants de socle sélectionnés, mais environnements client encore à provisionner : services,
+    réseau, accès, secrets et configuration. Même service cible pour les trois Make ; aucun environnement gratuit
+    déduit du code Core livré.'
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - kubernetes
+  - keycloak
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - SHARED
+  - CICD
+- id: INT-009
+  nom: Industrialiser la chaîne de fabrication et de livraison
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 45
+      travaux: Automatiser build, packaging et tests techniques.
+    integration:
+      part_pct: 40
+      travaux: Assembler les promotions et paramètres.
+    support_n3:
+      part_pct: 15
+      travaux: Préparer rollback et traçabilité opérationnelle.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Les scripts et artefacts de compilation du produit sont réutilisables ; la chaîne industrielle
+    complète n’est pas chiffrée dans Core System Features. Construire CI/CD, promotions, contrôles, jeux d’essai
+    techniques et rollback à cet endroit, une seule fois. Périmètre comparable entre Make.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - kubernetes
+  - spring
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - CICD
+  - MS_TEST
+- id: INT-010
+  nom: Qualifier la solution intégrée et accompagner la recette
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 25
+      travaux: Automatiser et analyser les défauts techniques.
+    integration:
+      part_pct: 55
+      travaux: Préparer scénarios et accompagner UAT.
+    support_n3:
+      part_pct: 15
+      travaux: Qualifier exploitation et non-fonctionnel.
+    support_n1:
+      part_pct: 5
+      travaux: Préparer l’assistance aux utilisateurs de recette.
+  justification: Les tests génériques du produit sont acquis ; les 30 échanges et règles Beaumanoir exigent des
+    preuves de bout en bout. La connaissance des diagnostics réduit l’investigation, pas le besoin de recette.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - spring
+  - flowable
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - GOLIVE
+  - MS_TEST
+  - SHARED
+- id: INT-011
+  nom: Préparer l’exploitation, la continuité et le support
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 15
+      travaux: Compléter instrumentation et diagnostics.
+    integration:
+      part_pct: 35
+      travaux: Assembler procédures et responsabilités.
+    support_n3:
+      part_pct: 45
+      travaux: Vérifier supervision, restauration et traitement d’incidents.
+    support_n1:
+      part_pct: 5
+      travaux: Préparer accueil, triage et base de connaissance.
+  justification: Compléter les diagnostics et l’instrumentation effectivement livrés, configurer alertes, procédures,
+    sauvegardes et essais de restauration. La sélection d’OpenTelemetry ou de PostgreSQL ne livre pas un run opérationnel.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - otel
+  - postgresql
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - SHARED
+  - MS_RESTORE
+  - GOLIVE
+- id: INT-012
+  nom: Préparer les utilisateurs et transmettre la solution
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+    integration:
+      part_pct: 35
+      travaux: Expliquer configuration et parcours métier.
+    support_n3:
+      part_pct: 15
+      travaux: Transmettre les diagnostics et procédures N3.
+    support_n1:
+      part_pct: 50
+      travaux: Préparer aides, accueil et exercices d’usage.
+  justification: Parcours produit ciblés et équipe de fabrication disponible. Supports et exercices d’usage demeurent
+    nécessaires ; aucune économie sur le temps des métiers supposée.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - react
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - GOLIVE
+  - CADRE
+- id: INT-013
+  nom: Basculer vers la V1 et stabiliser le démarrage
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 15
+      travaux: Corriger les défauts des adaptations.
+    integration:
+      part_pct: 45
+      travaux: Exécuter et rapprocher les étapes de bascule.
+    support_n3:
+      part_pct: 30
+      travaux: Conduire la stabilisation technique et le repli si nécessaire.
+    support_n1:
+      part_pct: 10
+      travaux: Assister les utilisateurs au démarrage.
+  justification: 'Bascule Make en une fois : exposition importante des stocks et engagements, d’où qualification
+    élevée. Scripts déjà construits en migration ; répétition, contrôle et stabilisation restent ici.'
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - spring
+  - postgresql
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CUTOVER
+  - GOLIVE
+limites:
+- Points et parts de rôles = hypothèses d’ingénierie à qualifier. Aucune conversion en JH, coût ou somme économique
+  de points.
+- Le catalogue décrit les apports nécessaires des métiers et profils non tarifés. Ils ne sont pas implicitement
+  inclus dans les quatre tarifs techniques.
+- 'Le TJM de la stack n’est pas automatiquement celui de tous les spécialistes : l’adéquation partielle bloque une
+  valorisation complète sans qualification du profil.'
+- Les empreintes lient cette estimation au catalogue, à la stack, à la solution et au scénario commun ; une évolution
+  exige une réévaluation.

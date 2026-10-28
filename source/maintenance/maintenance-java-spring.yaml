@@ -1,0 +1,667 @@
+version_schema: 1
+id: maintenance-java-spring
+nom: Maintenance - Java / Spring Boot
+produit: Flow Core System
+stack_id: java-spring-make
+strategie: make
+periode: annuelle
+date_evaluation: '2026-10-22'
+dependances:
+  schema: source/schema-valorisation-cycle.yaml
+  catalogue: source/maintenance.yaml
+  stack: source/stacks/java-spring.yaml
+  scenario: source/maintenance.yaml#scenario_annuel
+  inflation: source/inflation.yaml
+  preuves: sources/integration-maintenance-2026-10-22.yaml
+  catalogue_sha256: 0c652166b1cc68696848c248a8aa087a02534b07f55d9475e7f69a1255bbaf2d
+  stack_sha256: 7bf6d1fdda764685cc3aeb669d4678db6f3b5af74f7901b2ac7ef3ad51848d4f
+  scenario_sha256: f1453e3dba54b1c8983cb458b2ab7d7070ce7c87a8fa0a42d27512d0aa92090f
+  integration: source/integration/integration-java-spring.yaml
+  integration_sha256: e4fcbc6b8707afbf30058ef808cb1c9dcb659572e86eb68210092e81eea60656
+tarifs_roles:
+  developpement:
+    reference: source/stacks/java-spring.yaml#interventions/activites/developpement
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+  integration:
+    reference: source/stacks/java-spring.yaml#interventions/activites/integration
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+  support_n3:
+    reference: source/stacks/java-spring.yaml#interventions/activites/support_n3
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+  support_n1:
+    reference: source/stacks/java-spring.yaml#interventions/activites/support_n1
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+activites:
+- id: MAI-001
+  nom: Assistance utilisateur et administration courante
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+    integration:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+    support_n3:
+      part_pct: 10
+      travaux: Enrichir les consignes et traiter les questions expertes ponctuelles.
+    support_n1:
+      part_pct: 90
+      travaux: Qualifier, aider à l’usage et résoudre les demandes simples.
+  justification: Même service N1 et mêmes volumes que les autres stacks ; aucun tarif expert Java appliqué au support
+    simple.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - react
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - GOLIVE
+  valorisation_ref: MAI-001
+- id: MAI-002
+  nom: Diagnostic expert et remise en service
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 10
+      travaux: Diagnostiquer le comportement du code.
+    integration:
+      part_pct: 15
+      travaux: Diagnostiquer flux et configuration.
+    support_n3:
+      part_pct: 75
+      travaux: Conduire investigation, contournement et remise en service.
+    support_n1:
+      part_pct: 0
+      travaux: Déjà couvert en MAI-001.
+  justification: Équipe connaissant le produit et diagnostics communs ; investigation des flux, règles et données
+    reste nécessaire pour les escalades du scénario.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - spring
+  - flowable
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - SHARED
+  valorisation_ref: MAI-002
+- id: MAI-003
+  nom: 'Maintenir la Plateforme Core System : correctifs et versions'
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 80
+      travaux: Corriger le code produit et maintenir ses composants.
+    integration:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+    support_n3:
+      part_pct: 20
+      travaux: Reproduire les défauts et qualifier les correctifs locaux.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Flowable, Drools et Timefold réduisent le code moteur possédé. Maintenir néanmoins contrats, ledgers,
+    calculs métier, interfaces React et composition ; les dépendances OSS ne corrigent pas le code FLOW.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - flowable
+  - drools
+  - timefold
+  - spring
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - SOLUTION
+  - MS_UPDATES
+  valorisation_ref: MAI-003
+- id: MAI-004
+  nom: Maintenir les extensions et spécifiques sous responsabilité client
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 65
+      travaux: Corriger les extensions et leurs tests locaux.
+    integration:
+      part_pct: 20
+      travaux: Vérifier les contrats et paramètres concernés.
+    support_n3:
+      part_pct: 15
+      travaux: Reproduire et qualifier la correction locale.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Extensions isolées et contrats connus ; corriger les défauts localisés et qualifier les cas métier
+    concernés, hors campagne transverse.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - spring
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - SOLUTION
+  valorisation_ref: MAI-004
+- id: MAI-005
+  nom: Maintenir les flux et la compatibilité avec le SI
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 20
+      travaux: Adapter les composants de transformation.
+    integration:
+      part_pct: 65
+      travaux: Modifier contrats, mappings et tests de flux.
+    support_n3:
+      part_pct: 15
+      travaux: Vérifier exploitabilité et reprise.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Même portefeuille Logic Apps et mêmes changements de contrats que les autres Make ; aucune réduction
+    liée au seul langage Java.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - ipaas
+  - camel
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - CADRE
+  - MS_DATA
+  valorisation_ref: MAI-005
+- id: MAI-006
+  nom: Qualifier et déployer les nouvelles versions
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 25
+      travaux: Adapter les tests automatisés et traiter la compatibilité.
+    integration:
+      part_pct: 45
+      travaux: Conduire validation de configuration et processus.
+    support_n3:
+      part_pct: 30
+      travaux: Préparer déploiement, contrôle et repli.
+    support_n1:
+      part_pct: 0
+      travaux: Documentation d’usage mise à jour en MAI-001.
+  justification: Qualifier compatibilités Spring, moteurs, base et frontend ; tests génériques réutilisés mais la
+    composition de la solution cliente doit être vérifiée.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - kubernetes
+  - spring
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - MS_UPDATES
+  - CICD
+  - MS_TEST
+  valorisation_ref: MAI-006
+- id: MAI-007
+  nom: Exploiter la plateforme et les traitements
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 10
+      travaux: Maintenir diagnostics et automatisations.
+    integration:
+      part_pct: 20
+      travaux: Maintenir paramètres et chaîne applicative.
+    support_n3:
+      part_pct: 70
+      travaux: Surveiller, administrer et ajuster le service client.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Plateforme Make sous responsabilité client, avec supervision et automatisation déjà industrialisées.
+    Opérations hébergeur éventuellement managées à déduire seulement sur contrat.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - otel
+  - postgresql
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - SHARED
+  - CICD
+  valorisation_ref: MAI-007
+- id: MAI-008
+  nom: Maintenir la sécurité et la continuité
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 10
+      travaux: Vérifier les contrôles applicatifs.
+    integration:
+      part_pct: 35
+      travaux: Maintenir identités, règles de sécurité et rétention.
+    support_n3:
+      part_pct: 55
+      travaux: Tester restauration et continuité opérationnelle.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Contrôles d’identité, secrets, rétention et deux exercices de restauration sur le scénario commun
+    ; aucun SOC ou audit externe réputé compris.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - kubernetes
+  - keycloak
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - SHARED
+  - MS_RESTORE
+  - SAP_CONTRACT
+  valorisation_ref: MAI-008
+- id: MAI-009
+  nom: Faire évoluer le Core et l’adaptation métier
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 45
+      travaux: Faire évoluer le Flow Core System ou les extensions client Buy.
+    integration:
+      part_pct: 45
+      travaux: Configurer les règles et parcours métier nouveaux.
+    support_n3:
+      part_pct: 10
+      travaux: Qualifier l’exploitabilité des changements.
+    support_n1:
+      part_pct: 0
+      travaux: Aides d’usage en MAI-001.
+  justification: Six évolutions génériques, douze de configuration et six d’extension. Règles et cas exploitent
+    les moteurs déjà intégrés ; le développement et les tests métier restent nécessaires.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - drools
+  - timefold
+  - flowable
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - SOLUTION
+  - MS_UPDATES
+  valorisation_ref: MAI-009
+- id: MAI-010
+  nom: Licences, abonnements et droits aux versions
+  nature: achat
+  prise_en_charge: achat
+  roles: null
+  justification: Un contrat groupé reste un achat unique ; hébergement ou support inclus sont des renvois, pas une
+    nouvelle facture.
+  justification_roles: 'Achat de droits, capacité ou forfait : aucun rôle en pourcentage, aucun point de complexité
+    de prestation.'
+  composants: []
+  inclus_dans: []
+  achats:
+  - id: licences-oss
+    composants:
+    - camel
+    - drools
+    - flowable
+    - jdk
+    - keycloak
+    - kubernetes
+    - otel
+    - postgresql
+    - rabbitmq
+    - react
+    - spring
+    - timefold
+    regime: sans_redevance
+    assiette: Éditions OSS retenues ; droit d’usage logiciel seulement.
+    inclus_dans: []
+    montant_annuel_eur_ht: 0
+    inflation_ref: source/inflation.yaml#categories/licences_logiciels
+    precision: Zéro redevance pour les éditions indiquées, pas zéro maintenance, cloud ou support. Aucun plan commercial
+      additionnel présumé.
+    valorisation_ref: MAI-010/licences-oss
+  adequation_tjm: sans_objet
+  sources:
+  - CADRE
+  - SAP_CONTRACT
+  - MS_UPDATES
+- id: MAI-011
+  nom: Cloud et capacité d’hébergement
+  nature: achat
+  prise_en_charge: achat
+  roles: null
+  justification: Hébergement standard inclus en Buy renvoyé à MAI-010. Capacité supplémentaire ou ressources externes
+    facturées seulement si réellement distinctes.
+  justification_roles: 'Achat de droits, capacité ou forfait : aucun rôle en pourcentage, aucun point de complexité
+    de prestation.'
+  composants: []
+  inclus_dans: []
+  achats:
+  - id: cloud
+    composants:
+    - iaas
+    regime: a_chiffrer
+    assiette: Trois environnements logiques, 2 To actifs et 5 To archivés ; charge de pointe 100 utilisateurs et
+      2 millions de messages métier/mois.
+    inclus_dans: []
+    montant_annuel_eur_ht: null
+    inflation_ref: source/inflation.yaml#categories/cloud
+    precision: Dimensionner CPU, RAM, réplication, stockage physique, réseau et sauvegarde ; aucune économie matérielle
+      Rust ou équivalence de capacité déduite sans benchmark.
+    valorisation_ref: MAI-011/cloud
+  adequation_tjm: sans_objet
+  sources:
+  - SHARED
+  - SAP_CONTRACT
+- id: MAI-012
+  nom: Exécution iPaaS et échanges
+  nature: achat
+  prise_en_charge: achat
+  roles: null
+  justification: Le développement des flux et leur MCO sont du travail séparé. Ne pas additionner crédit BTP et
+    service qu’il finance.
+  justification_roles: 'Achat de droits, capacité ou forfait : aucun rôle en pourcentage, aucun point de complexité
+    de prestation.'
+  composants: []
+  inclus_dans: []
+  achats:
+  - id: ipaas
+    composants:
+    - ipaas
+    regime: a_chiffrer
+    assiette: 24 millions d’échanges métier logiques/an ; traduire en métriques du fournisseur, connecteurs, tenants
+      et actions.
+    inclus_dans: []
+    montant_annuel_eur_ht: null
+    inflation_ref: source/inflation.yaml#categories/cloud
+    precision: Pour SAP, imputer les crédits BTP une seule fois sur les services concernés, sans ajouter une facture
+      BTP abstraite. Pour Logic Apps, actions et connecteurs ne sont pas égaux au nombre de messages métier.
+    valorisation_ref: MAI-012/ipaas
+  adequation_tjm: sans_objet
+  sources:
+  - CADRE
+- id: MAI-013
+  nom: Outillage et support complémentaire acheté
+  nature: achat
+  prise_en_charge: achat
+  roles: null
+  justification: Si un forfait finance les interventions MAI-001 à MAI-008, retirer la prestation remplacée de leur
+    assiette. Ni forfait éditeur ni licence commerciale OSS présumés.
+  justification_roles: 'Achat de droits, capacité ou forfait : aucun rôle en pourcentage, aucun point de complexité
+    de prestation.'
+  composants: []
+  inclus_dans: []
+  achats:
+  - id: outillage-support
+    composants: []
+    regime: a_confirmer
+    assiette: Licences d’outillage, contrats de support et audits complémentaires réellement sélectionnés.
+    inclus_dans: []
+    montant_annuel_eur_ht: null
+    inflation_ref: null
+    precision: Aucun forfait choisi. Distinguer ultérieurement licences (inflation logiciel) et prestations (inflation
+      TJM) avant calcul ; remplacer les JH couverts par un forfait au lieu de les additionner.
+    valorisation_ref: MAI-013/outillage-support
+  adequation_tjm: sans_objet
+  sources:
+  - CADRE
+  - SAP_CONTRACT
+limites:
+- Points et parts de rôles = hypothèses d’ingénierie à qualifier. Aucune conversion en JH, coût ou somme économique
+  de points.
+- Le catalogue décrit les apports nécessaires des métiers et profils non tarifés. Ils ne sont pas implicitement
+  inclus dans les quatre tarifs techniques.
+- 'Le TJM de la stack n’est pas automatiquement celui de tous les spécialistes : l’adéquation partielle bloque une
+  valorisation complète sans qualification du profil.'
+- Les empreintes lient cette estimation au catalogue, à la stack, à la solution et au scénario commun ; une évolution
+  exige une réévaluation.
+- La mise en place initiale du socle/CI-CD/run est affectée à INT-008/009/011. Ici, seules les opérations et évolutions
+  de l’année stabilisée sont évaluées ; aucun second chantier initial.
+valorisation_annuelle:
+  unite: EUR_HT
+  regle: Table de prix prioritaire par poste, commune Make/Buy. Une activité/achat appartient à un seul poste ;
+    les inclusions ne se somment pas. Les points ne financent pas une seconde fois un forfait. Prix inconnus = null
+    ; prix historiques non actualisés silencieusement.
+  postes:
+  - id: MAI-001
+    couvre:
+    - MAI-001
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Travail annuel du scénario ; points et rôles à traduire en JH puis TJM. Aucun montant inventé.
+  - id: MAI-002
+    couvre:
+    - MAI-002
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Travail annuel du scénario ; points et rôles à traduire en JH puis TJM. Aucun montant inventé.
+  - id: MAI-003
+    couvre:
+    - MAI-003
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Travail annuel du scénario ; points et rôles à traduire en JH puis TJM. Aucun montant inventé.
+  - id: MAI-004
+    couvre:
+    - MAI-004
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Travail annuel du scénario ; points et rôles à traduire en JH puis TJM. Aucun montant inventé.
+  - id: MAI-005
+    couvre:
+    - MAI-005
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Travail annuel du scénario ; points et rôles à traduire en JH puis TJM. Aucun montant inventé.
+  - id: MAI-006
+    couvre:
+    - MAI-006
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Travail annuel du scénario ; points et rôles à traduire en JH puis TJM. Aucun montant inventé.
+  - id: MAI-007
+    couvre:
+    - MAI-007
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Travail annuel du scénario ; points et rôles à traduire en JH puis TJM. Aucun montant inventé.
+  - id: MAI-008
+    couvre:
+    - MAI-008
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Travail annuel du scénario ; points et rôles à traduire en JH puis TJM. Aucun montant inventé.
+  - id: MAI-009
+    couvre:
+    - MAI-009
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Travail annuel du scénario ; points et rôles à traduire en JH puis TJM. Aucun montant inventé.
+  - id: MAI-010/licences-oss
+    couvre:
+    - MAI-010/licences-oss
+    methode: sans_redevance
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: sans_redevance
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Zéro redevance pour les éditions indiquées, pas zéro maintenance, cloud ou support. Aucun plan
+      commercial additionnel présumé.
+  - id: MAI-011/cloud
+    couvre:
+    - MAI-011/cloud
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Dimensionner CPU, RAM, réplication, stockage physique, réseau et sauvegarde ; aucune économie
+      matérielle Rust ou équivalence de capacité déduite sans benchmark.
+  - id: MAI-012/ipaas
+    couvre:
+    - MAI-012/ipaas
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Pour SAP, imputer les crédits BTP une seule fois sur les services concernés, sans ajouter une
+      facture BTP abstraite. Pour Logic Apps, actions et connecteurs ne sont pas égaux au nombre de messages métier.
+  - id: MAI-013/outillage-support
+    couvre:
+    - MAI-013/outillage-support
+    methode: estimation
+    annee_prix: null
+    repere_annees: Année de service de référence, sans calendrier de projet.
+    montants_documentes_eur_ht: []
+    projection:
+      methode: a_estimer
+      a_partir_annee: null
+      inflation_ref: null
+    finance_par: null
+    sources:
+    - CADRE
+    adequation_perimetre: hypothese_commune
+    justification: Aucun forfait choisi. Distinguer ultérieurement licences (inflation logiciel) et prestations
+      (inflation TJM) avant calcul ; remplacer les JH couverts par un forfait au lieu de les additionner.
+  reserves:
+  - 'Aucun total annuel FLOW complet : JH résiduels, achats inconnus et écarts de périmètre restent à qualifier.
+    Les prix connus ne valent pas couverture complète.'
+  - Les années relatives ne relient pas automatiquement montée en charge des licences, service stabilisé et Build/Run.
+    Aucune durée de projet ni durée de TCO imposée.

@@ -1,0 +1,194 @@
+version: 1
+id: flow-architecture
+allocation: qualitative_only
+activity_types:
+- id: build
+  notion: build
+- id: run
+  notion: run_activities
+layers:
+- id: applications
+  label: Applications
+  parts:
+  - label: Frontend spécifique Beaumanoir
+    examples: Écrans et parcours utilisateurs Beaumanoir
+    id: frontend
+  - label: Backend spécifique Beaumanoir
+    examples: Services et règles propres au Groupe
+    id: beaumanoir_backend
+  definition: Interfaces et services applicatifs spécifiques au Groupe. Les moteurs génériques réutilisables appartiennent
+    à la couche core_system.
+- id: business_process
+  label: Business Process / Case Management
+  examples: Processus, dossiers métier, tâches et décisions propres à Beaumanoir
+  definition: Orchestration des processus et traitement des dossiers métier propres au Groupe, par configuration
+    ou spécialisation des moteurs génériques.
+- id: integration
+  label: Intégration
+  parts:
+  - label: Exposition de services
+    examples: API et contrats d’accès spécifiques
+    id: service_exposure
+  - label: Échanges interapplications
+    examples: Flux, événements et transformations Beaumanoir
+    id: interapplication_exchanges
+  definition: Interfaces, flux et transformations spécifiques qui raccordent les applications et les SI du Groupe.
+- id: core_system
+  label: '{{notion.core_system}}'
+  examples: Interface React et parcours UX génériques, services métier et moteurs réutilisables, dont workflow et gestion de dossiers
+  definition: Fonctions métier et mécanismes génériques de la {{notion.core_system}}, construits en Make ou acquis
+    en Buy, avec leur interface utilisateur générique. Les écrans et parcours propres au Groupe relèvent des Applications spécifiques Beaumanoir.
+- id: platform_services
+  label: Services de plateforme
+  parts:
+  - label: '{{notion.paas.court}}'
+    examples: Bases de données managées et services d’exécution applicative
+    id: paas
+  - label: '{{notion.ipaas.court}}'
+    examples: Plateforme, connecteurs et exécution des flux
+    id: ipaas
+  definition: Services techniques consommés pour développer et exécuter les applications et les flux. Le développement
+    des flux spécifiques appartient à la couche integration.
+- id: caas
+  label: CaaS
+  examples: Orchestration et exécution des conteneurs, Kubernetes managé
+  definition: Service d’orchestration et d’exécution des conteneurs, y compris Kubernetes managé.
+- id: iaas
+  label: IaaS
+  examples: Machines virtuelles, réseau et stockage
+  definition: Ressources de calcul, réseau et stockage qui hébergent les autres couches.
+cost_structures:
+- id: obtention
+  notion: obtention_initiale_core_system
+  activity_type_refs: [build]
+  activity_scope: La construction Make et la sélection-contractualisation Buy préparent la réalisation. Ce classement ne crée pas de construction du produit éditeur en Buy.
+  coverage:
+  - layer: core_system
+  description:
+    bullets:
+    - 'Make : **construire la {{notion.flow_core_system}} générique**.'
+    - 'Buy : **sélectionner la solution et contractualiser son acquisition**, sans développer le produit éditeur.'
+    examples:
+    - Développement du produit générique Make
+    - '{{notion.selection_solution_buy}}'
+  cost_nature_refs:
+  - obtention
+- id: integration
+  notion: integration_deploiement_initiaux
+  activity_type_refs: [build]
+  activity_scope: La réalisation initiale comprend les adaptations, la migration, les raccordements, la qualification, le déploiement et la stabilisation avant réception.
+  coverage:
+  - layer: applications
+  - layer: business_process
+  - layer: integration
+  description:
+    text: '**Spécialiser la {{notion.core_system}} générique** en processus et applications adaptés à Beaumanoir.
+      **Réunir les deux SI** des marques historiques et de Boardriders, migrer les données, raccorder les applications,
+      déployer et stabiliser.'
+    examples:
+    - Migration des données des deux SI
+    - Raccordement des applications Beaumanoir
+  cost_nature_refs:
+  - integration
+- id: core_care
+  notion: maintenance_core
+  activity_type_refs: [build]
+  activity_scope: Par convention de pilotage, tout le MCO de la {{notion.core_system}} relève du {{notion.build}}, correctifs et évolutions compris, même avec un financement annuel.
+  coverage:
+  - layer: core_system
+  description:
+    text: '**Corriger, qualifier et faire évoluer le produit générique** après sa construction. En Buy, les parts
+      correspondantes restent incluses dans les contrats sans ventilation connue.'
+    examples:
+    - Évolution d’une fonctionnalité cœur
+    - Qualification d’une nouvelle version
+  cost_nature_refs:
+  - core_care
+- id: client_care
+  notion: mco_plateforme_beaumanoir
+  activity_type_refs: [build, run]
+  activity_scope: Le MCO courant des adaptations et interfaces Beaumanoir relève du {{notion.run_activities}}. Les interventions importantes conduites en mode projet relèvent du {{notion.build}}.
+  activity_allocation:
+    build_pct: 50
+    basis: 'Clé de pilotage appliquée au poste MCO et évolutions Beaumanoir. La part Build, paramétrable, représente les interventions importantes conduites en projet. La part Run est calculée par complément : part Run (%) = 100 − part Build (%). Cette répartition ne modifie pas le budget du poste.'
+  coverage:
+  - layer: applications
+  - layer: business_process
+  - layer: integration
+  description:
+    text: Entretenir les configurations, extensions et interfaces Beaumanoir **après réception**. Réaliser les évolutions
+      demandées par le Groupe. Le {{notion.maintenance_core}} reste suivi séparément.
+    examples:
+    - Correction d’une interface Beaumanoir
+    - Évolution d’un processus propre au Groupe
+  cost_nature_refs:
+  - client_care
+- id: run_cloud
+  notion: socle_technique_cloud
+  activity_type_refs: [run]
+  activity_scope: Les moyens techniques consommés relèvent du {{notion.run_activities}}, y compris lorsqu’ils servent à la construction ou à l’intégration. Les travaux qui les mettent en place restent suivis dans leurs postes de réalisation.
+  coverage:
+  - layer: platform_services
+  - layer: caas
+  - layer: iaas
+  description:
+    text: Hébergement, bases de données, stockage et plateforme d’échanges entre applications. La rubrique regroupe
+      les **ressources et achats techniques** prévus pendant la construction, l’intégration et l’exploitation. En
+      Buy, un service déjà inclus dans l’offre n’est pas ajouté.
+    examples_label: Exemples possibles, sans coût ajouté automatiquement
+    examples:
+    - Base de données managée et S3
+    - API Gateway et Kafka
+    - Kubernetes managé et VM
+  cost_nature_refs:
+  - run_cloud
+  - technical_purchases
+- id: grouped_buy
+  notion: grouped_buy
+  activity_type_refs: [build, run]
+  activity_scope: Selon leur périmètre, les contrats réunissent maintien et évolutions du produit, droits d’usage et services d’exploitation. Ils peuvent couvrir les deux activités. Les parts non documentées restent non ventilées ; le prix global est compté une seule fois.
+  coverage:
+  - layer: core_system
+  - layer: platform_services
+    condition: contract_inclusion
+  - layer: caas
+    condition: contract_inclusion
+  - layer: iaas
+    condition: contract_inclusion
+  description:
+    text: Licences, droits d’usage et services des offres Buy sont conservés à leur **prix global**. Les parts logiciel,
+      cloud et maintenance ne sont pas connues séparément. Elles ne sont pas ajoutées aux autres rubriques.
+    examples:
+    - Licences ou abonnements Microsoft, K3 et SAP
+    - Support éditeur compris dans une offre
+  cost_nature_refs:
+  - grouped_buy
+- id: operations_support
+  notion: operations_support
+  activity_type_refs: [run]
+  activity_scope: L’assistance, la surveillance et les opérations courantes maintiennent le service Beaumanoir, avec leur outillage de support.
+  coverage:
+  - layer: applications
+  - layer: business_process
+  - layer: integration
+  - layer: core_system
+  - layer: platform_services
+  - layer: caas
+  - layer: iaas
+  description:
+    text: Assistance N1/N3, surveillance, opérations et sécurité, avec l’outillage de support. Ces **prestations
+      humaines** ne sont pas du cloud.
+    examples:
+    - Assistance aux utilisateurs
+    - Supervision et traitement des incidents
+  cost_nature_refs:
+  - operations_support
+conditions:
+  contract_inclusion: Les services de plateforme et d’infrastructure ne sont concernés que s’ils sont inclus dans
+    le contrat.
+rules:
+  financing: La position indique l’objet financé, sans répartition des montants. Un contrat Buy groupé reste compté
+    une seule fois. Le budget d’obtention conserve la sélection-contractualisation Buy, sans construction du produit
+    éditeur.
+  ownership: Développer un flux Beaumanoir relève de l’intégration. Acheter le service iPaaS qui l’exécute relève
+    du socle technique. Les mécanismes génériques, même réalisés en backend, restent dans la {{notion.core_system}}.

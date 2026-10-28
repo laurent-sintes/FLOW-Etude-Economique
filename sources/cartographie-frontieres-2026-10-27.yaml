@@ -1,0 +1,969 @@
+id: cartographie-frontieres-2026-10-27
+date_capture: '2026-10-27'
+provenance:
+  projet: Beaumanoir Cartographie
+  fichier: C:/Dev/Beaumanoir Cartographie/modeles/backlog/model.yaml
+  selection: Descendants contains/presents du domaine SCM ; nœuds et relations conservés avec leurs champs
+    complets.
+  limite: Capture du backlog, pas une release ni une validation métier. Comparaisons marché conservées avec
+    leur statut et leurs limites ; aucune couverture commerciale déduite.
+  sha256: bd0d1e91b8f2b4e0f126cb14d621e73cb571dc2c66e4f7ad713a6ad6cc4331b7
+  model_id: flow-urbanism
+  version: 2026-09-13.3
+  as_of: '2026-10-22'
+  espace: backlog
+selection: Nœuds de domaines voisins, repris sans modification de la même révision Beaumanoir. Les liens de
+  lecture de l’étude sont des rapprochements proposés, pas de nouvelles relations métier validées.
+nodes:
+- id: domain-sales
+  revision: 6
+  kind: domain
+  fields:
+    name: Commerce
+    definition: Préparer et commercialiser l’offre, exploiter les canaux de vente et le réseau de magasins,
+      et définir les conditions commerciales applicables.
+    finality: Préparer les offres, conduire les ventes et organiser l’exploitation des canaux et du réseau
+      de magasins.
+    scope: 'Préparer l’offre et les conditions commerciales, puis conduire les ventes aux particuliers et aux
+      revendeurs. Le domaine regroupe [Retail Commerce](model:subdomain-retail-commerce), [Wholesale Commerce](model:subdomain-sales-wholesale),
+      [Assortment & Catalog Management](model:subdomain-assortment-catalog-management), [Pricing & Promotions
+      Management](model:subdomain-pricing-promotions-management) et [Rebates & Incentives Management](model:subdomain-rebates-incentives-management).
+
+
+      [Retail Network Management](model:subdomain-retail-network-management) et [Store Operations](model:subdomain-store-backoffice-operations)
+      portent le réseau et les opérations magasin ; [Store Sales](model:subdomain-sales-b2c-store) porte la
+      vente et la caisse. Une vente encaissée et emportée est un fait réalisé, pas nécessairement une commande
+      restant à servir.
+
+
+      [Supply Chain Management](model:supply-chain-orchestration) conserve les commandes à satisfaire, promesses,
+      affectations, stocks de référence et coordination. [Sales Order](model:D04.i) tient l’identité et les
+      transitions autorisées ; les canaux ne créent pas un cycle concurrent. Commerce détermine les prix applicables
+      et les dispositifs commerciaux ; [Commercial Settlement Management](model:subdomain-commercial-settlement-management)
+      calcule et règle les avantages sous Finance. Les décisions de crédit et la comptabilité restent dans
+      [Finance](glossary:TER117).
+
+
+      Exemple fictif : un revendeur prépare sa sélection puis soumet une commande ; la sélection seule ne réserve
+      pas le stock. Les capacités décrivent la cible métier, sans preuve de transfert depuis les systèmes existants.
+
+
+      [Pourquoi conserver le cycle complet de la commande dans SCM](principle:PRINCIPLE-ORDER-DECISION-CONTEXT).'
+    modeling_depth: capabilities
+    examples:
+    - title: Illustration de responsabilité
+      situation: Illustration FLOW fictive. Un client [B2B](glossary:TER195) négocie les conditions d’une [commande](glossary:TER012)
+        de 100 vêtements. L’[orchestration](glossary:TER031) examine ensuite comment satisfaire la quantité
+        et la date demandées dans les conditions convenues.
+      lesson: Le récit explique la frontière métier ; il ne prouve aucun flux ou déploiement installé.
+      source_refs:
+      - U780
+      - U1131
+      id: illustration-domain-sales-U1131
+      outcome: La [Supply](glossary:TER083) peut examiner comment servir la [demande](glossary:TER011) dans
+        les conditions convenues, sans que la sélection commerciale ait réservé le [stock](glossary:TER005).
+    market_comparisons:
+    - vendor: Microsoft
+      product: Dynamics 365 Commerce
+      element_name: Channels overview
+      concept_name: Channels overview
+      element_type: Périmètre fonctionnel documenté
+      relationship: Recouvrement partiel
+      similarities: Canaux magasin et en ligne, organisation du réseau, assortiments et règles propres aux
+        canaux.
+      differences: Les produits regroupent ces fonctions et ne prescrivent ni cette hiérarchie ni les autorités
+        du Core FLOW.
+      flow_position: Préparer les offres, conduire les ventes et organiser l’exploitation des canaux et du
+        réseau de magasins. Commerce décrit désormais les Business Areas et leurs capacités ; les comportements
+        restent hors de ce lot. Les décisions commerciales ne transfèrent ni stock ni engagement à Commerce.
+      term_choice: Commerce nomme la responsabilité discutée et validée U987, sans consensus de taxonomie revendiqué.
+      definition_choice: Responsabilité présentée dans la discussion ; texte détaillé proposé.
+      scope_summary: Préparer les offres et conduire les ventes au consommateur ou au revendeur.
+      approach_summary: Rendre visibles la préparation commerciale et les canaux, au-delà du seul traitement
+        de commandes.
+      source_title: Channels overview
+      source_url: https://learn.microsoft.com/en-us/dynamics365/commerce/channels-overview
+      source_version: Documentation évolutive, édition globale inconnue
+      consulted_on: '2026-10-12'
+      source_locator: Types of channels; Channel setup basics
+      evidence_limits: Recouvrement partiel de périmètre, sans taxonomie FLOW prescrite, équivalence exacte
+        ni preuve de réalisation Beaumanoir. Édition globale non indiquée; synthèse et lien seulement, sans
+        redistribution intégrale.
+      source_refs:
+      - ELM887
+      - CMP316
+      - U982
+      - U987
+      - U1079
+      status: proposed
+      id: market-domain-sales-U1131-1
+    - vendor: SAP
+      product: SAP S/4HANA for fashion and vertical business
+      element_name: Getting a Business Process Overview
+      concept_name: Getting a Business Process Overview
+      element_type: Périmètre fonctionnel documenté
+      relationship: Recouvrement partiel
+      similarities: Commerce retail et wholesale dans une solution intégrée, avec visibilité du stock, planning
+        et achats partagés.
+      differences: Les produits regroupent ces fonctions et ne prescrivent ni cette hiérarchie ni les autorités
+        du Core FLOW.
+      flow_position: Préparer les offres, conduire les ventes et organiser l’exploitation des canaux et du
+        réseau de magasins. Commerce décrit désormais les Business Areas et leurs capacités ; les comportements
+        restent hors de ce lot. Les décisions commerciales ne transfèrent ni stock ni engagement à Commerce.
+      term_choice: Commerce nomme la responsabilité discutée et validée U987, sans consensus de taxonomie revendiqué.
+      definition_choice: Responsabilité présentée dans la discussion ; texte détaillé proposé.
+      scope_summary: Préparer les offres et conduire les ventes au consommateur ou au revendeur.
+      approach_summary: Rendre visibles la préparation commerciale et les canaux, au-delà du seul traitement
+        de commandes.
+      source_title: Getting a Business Process Overview
+      source_url: https://learning.sap.com/courses/exploring-fashion-functions-and-business-processes-in-sap-s-4hana-for-fashion-and-vertical-business/getting-a-business-process-overview_dc53cbb3-5b68-4bb1-a163-7b4437784888
+      source_version: Documentation évolutive, édition globale inconnue
+      consulted_on: '2026-10-12'
+      source_locator: Specifics of vertical fashion businesses; key benefits
+      evidence_limits: Recouvrement partiel de périmètre, sans taxonomie FLOW prescrite, équivalence exacte
+        ni preuve de réalisation Beaumanoir. Édition globale non indiquée; synthèse et lien seulement, sans
+        redistribution intégrale.
+      source_refs:
+      - ELM896
+      - CMP316
+      - U982
+      - U987
+      - U1079
+      status: proposed
+      id: market-domain-sales-U1131-2
+    pedagogical_description:
+      explanation: 'Ce [domaine](glossary:TER030) prépare ce qui est proposé aux clients et conduit les ventes
+        en magasin, en ligne ou aux revendeurs. Il organise l’offre, les prix, les dispositifs commerciaux
+        et le fonctionnement des canaux. La satisfaction des commandes, les décisions de crédit et les opérations
+        logistiques gardent leurs responsabilités propres.
+
+
+        [Pourquoi distinguer les responsabilités dans un système intégré](principle:PRINCIPLE-INTEGRATED-BUSINESS-OPERATIONS).'
+      example_refs:
+      - node_id: domain-sales
+        example_id: illustration-domain-sales-U1131
+        contribution: Préparer l’offre et les conditions commerciales puis recueillir la [demande](glossary:TER011)
+          à transmettre.
+      distinctions:
+      - node_id: supply-chain-orchestration
+        explanation: '[Commerce](glossary:TER108) définit l’offre et conduit la vente ; la [Supply](glossary:TER083)
+          évalue et organise la satisfaction des demandes et conserve les commandes à servir.'
+      source_refs:
+      - U1130
+      - U1131
+      - U1160
+      market_comparison_refs:
+      - node_id: domain-sales
+        comparison_id: market-domain-sales-U1131-1
+      - node_id: domain-sales
+        comparison_id: market-domain-sales-U1131-2
+  source_refs:
+  - U778
+  - U779
+  - U780
+  - CMP309
+  - U797
+  - U895
+  - U896
+  - U897
+  - U898
+  - U982
+  - U986
+  - U987
+  - CMP316
+  - U996
+  - U1025
+  - U1023
+  - U1024
+  - U1026
+  - U1027
+  - U1079
+  - U1091
+  - U1160
+  source_locator:
+    path: connaissance/01-contributions-utilisateur.md
+    anchor: u780
+  review:
+    state: partial
+    note: U996 adopte le lot complet de responsabilités, noms et rattachements CMP317/CMP318. Rédaction détaillée,
+      exemples et correspondances restent proposés ; aucune réalisation installée.
+  last_modified: '2026-10-07T00:00:00Z'
+- id: domain-finance
+  revision: 3
+  kind: domain
+  fields:
+    name: Finance
+    definition: Tenir les comptes, analyser les coûts, décider du crédit et gérer la trésorerie et les règlements,
+      pour rendre compte de l’activité et éclairer les décisions de l’entreprise.
+    finality: Disposer d’une information financière fiable et conduire les décisions de crédit, de trésorerie
+      et de règlement.
+    scope: 'Comptes, méthodes de coûts, crédit et trésorerie. Les domaines opérationnels restent responsables
+      des faits qu’ils transmettent. [Financial Accounting](glossary:TER118) conserve son rattachement et son
+      raccordement comptable existant ; [Cost & Profitability Management](glossary:TER229), [Credit & Collections
+      Management](glossary:TER230) et [Treasury & Cash Management](glossary:TER231) complètent le contexte
+      sans nouvelles capacités.
+
+
+      [Commercial Settlement Management](model:subdomain-commercial-settlement-management) complète ce contexte
+      pour calculer, régulariser et régler les avantages commerciaux autorisés. Ce périmètre n’est pas détaillé
+      en capacités et ne transfère ni les règles commerciales ni la rémunération du personnel à FLOW.'
+    market_comparisons:
+    - vendor: SAP
+      product: SAP S/4HANA 2025 FPS02
+      element_name: SAP S/4HANA 2025 — Feature Scope Description
+      element_type: Périmètre fonctionnel ou processus produit
+      relationship: Recouvrement partiel
+      similarities: 'Finance (§2.5) ; méthodes de coût, crédit et trésorerie : appuis partiels aux responsabilités
+        de contexte'
+      differences: Le document décrit des fonctions ou processus produit ; FLOW distingue les responsabilités
+        indépendamment des applications. Le regroupement et la maille ne sont pas des équivalents natifs démontrés.
+      flow_position: 'Comptes, méthodes de coûts, crédit et trésorerie. Les domaines opérationnels restent
+        responsables des faits qu’ils transmettent. [Financial Accounting](glossary:TER118) conserve son rattachement
+        et son raccordement comptable existant ; [Cost & Profitability Management](glossary:TER229), [Credit
+        & Collections Management](glossary:TER230) et [Treasury & Cash Management](glossary:TER231) complètent
+        le contexte sans nouvelles capacités.
+
+
+        [Commercial Settlement Management](model:subdomain-commercial-settlement-management) complète ce contexte
+        pour calculer, régulariser et régler les avantages commerciaux autorisés. Ce périmètre n’est pas détaillé
+        en capacités et ne transfère ni les règles commerciales ni la rémunération du personnel à FLOW.'
+      term_choice: Finance nomme le périmètre FLOW discuté ; aucun intitulé commun aux éditeurs ni consensus
+        de taxonomie revendiqué.
+      definition_choice: Décrire le service rendu et sa frontière ; les textes détaillés restent proposés.
+      concept_name: SAP S/4HANA 2025 — Feature Scope Description
+      scope_summary: Périmètres de finance, développement, structures et changements produit, entreposage et
+        transport.
+      approach_summary: Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.
+      source_title: SAP S/4HANA 2025 — Feature Scope Description
+      source_url: https://help.sap.com/doc/e2048712f0ab45e791e6d15ba5e20c68/2025/en-US/FSD_OP2025_latest.pdf
+      source_version: Document 3.0 du 2026-10-07
+      consulted_on: '2026-10-12'
+      source_locator: §2.5.1 Cost Management and Profitability Analysis
+      evidence_limits: Catalogue fonctionnel ; sections de base et extensions distinctes. Aucun découpage universel
+        de Business Systems ni couverture installée. Portfolio Management porte des projets, pas une équivalence
+        complète aux collections de mode.
+      source_refs:
+      - ELM860
+      - CMP312
+      - U974
+      status: proposed
+      id: market-domain-finance-U1131-2
+    - vendor: Microsoft
+      product: Dynamics 365 Finance
+      element_name: Cost accounting terminology
+      element_type: Périmètre fonctionnel ou processus produit
+      relationship: Recouvrement partiel
+      similarities: 'Finance (§2.5) ; méthodes de coût, crédit et trésorerie : appuis partiels aux responsabilités
+        de contexte'
+      differences: Le document décrit des fonctions ou processus produit ; FLOW distingue les responsabilités
+        indépendamment des applications. Le regroupement et la maille ne sont pas des équivalents natifs démontrés.
+      flow_position: 'Comptes, méthodes de coûts, crédit et trésorerie. Les domaines opérationnels restent
+        responsables des faits qu’ils transmettent. [Financial Accounting](glossary:TER118) conserve son rattachement
+        et son raccordement comptable existant ; [Cost & Profitability Management](glossary:TER229), [Credit
+        & Collections Management](glossary:TER230) et [Treasury & Cash Management](glossary:TER231) complètent
+        le contexte sans nouvelles capacités.
+
+
+        [Commercial Settlement Management](model:subdomain-commercial-settlement-management) complète ce contexte
+        pour calculer, régulariser et régler les avantages commerciaux autorisés. Ce périmètre n’est pas détaillé
+        en capacités et ne transfère ni les règles commerciales ni la rémunération du personnel à FLOW.'
+      term_choice: Finance nomme le périmètre FLOW discuté ; aucun intitulé commun aux éditeurs ni consensus
+        de taxonomie revendiqué.
+      definition_choice: Décrire le service rendu et sa frontière ; les textes détaillés restent proposés.
+      concept_name: Cost accounting terminology
+      scope_summary: Objets de coût, méthodes de répartition et contrôle des coûts.
+      approach_summary: Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.
+      source_title: Cost accounting terminology
+      source_url: https://learn.microsoft.com/en-us/dynamics365/finance/cost-accounting/terms-cost-accounting
+      source_version: Page évolutive ; édition globale non indiquée
+      consulted_on: '2026-10-12'
+      source_locator: Cost elements ; cost objects ; allocation policies
+      evidence_limits: Appui produit partiel ; ni taxonomie FLOW, ni preuve de réalisation Beaumanoir.
+      source_refs:
+      - ELM870
+      - CMP312
+      - U974
+      status: proposed
+      id: market-domain-finance-U1131-1
+    modeling_depth: domains
+    examples:
+    - title: Illustration FLOW
+      situation: Des réceptions, ventes et encaissements doivent être rapprochés sur une période.
+      source_refs:
+      - U1131
+      id: illustration-domain-finance-U1131
+      outcome: La situation financière peut être expliquée sans confondre un bien reçu, un produit vendu et
+        un montant encaissé.
+    pedagogical_description:
+      explanation: Ce [domaine](glossary:TER030) permet de comprendre les résultats financiers de l’activité
+        et de gérer les moyens de paiement et de financement qui en découlent. Il tient les comptes, analyse
+        les coûts et porte les décisions de crédit et de trésorerie. Les faits reçus des opérations restent
+        sous la responsabilité de leurs producteurs.
+      example_refs:
+      - node_id: domain-finance
+        example_id: illustration-domain-finance-U1131
+        contribution: Traiter les informations financières selon les responsabilités comptables, de crédit,
+          de coût et de trésorerie.
+      distinctions:
+      - node_id: domain-enterprise-planning-performance
+        explanation: '[Finance](glossary:TER117) porte les comptes, les méthodes financières et les décisions
+          de son mandat ; le pilotage consolidé compare les résultats aux objectifs et budgets d’entreprise.'
+      source_refs:
+      - U1130
+      - U1131
+      market_comparison_refs:
+      - node_id: domain-finance
+        comparison_id: market-domain-finance-U1131-1
+      - node_id: domain-finance
+        comparison_id: market-domain-finance-U1131-2
+  source_refs:
+  - U826
+  - ELM858
+  - ELM859
+  - U974
+  - U975
+  - U981
+  - U996
+  source_locator:
+    path: connaissance/01-contributions-utilisateur.md
+    anchor: u826
+  review:
+    state: partial
+    note: U996 adopte le lot complet de responsabilités, noms et rattachements CMP317/CMP318. Rédaction détaillée,
+      exemples et correspondances restent proposés ; aucune réalisation installée.
+- id: domain-product-portfolio-collection
+  revision: 4
+  kind: domain
+  fields:
+    name: Product Portfolio & Collection Management
+    definition: '[Product Portfolio & Collection Management](glossary:TER206) : choisir les orientations produit,
+      composer les collections et prévoir leur demande et leur supply possibles avant la planification opérationnelle.'
+    finality: Orienter les produits et collections à développer, avec des scénarios de demande et de ressources
+      à préparer.
+    scope: 'Choisir les orientations et les produits à développer. [Product Strategy & Requirements](model:subdomain-product-strategy-requirements)
+      examine tendances, usages et nouveaux canaux. [Collection Planning](model:subdomain-collection-planning)
+      compose les produits et jalons de collection ; [Demand & Supply Forecasting](model:subdomain-demand-supply-forecasting)
+      estime demande future, supply envisageable et écarts avant lancement. [Product Design & Specification](model:subdomain-product-design-specification)
+      définit les caractéristiques du produit dans un autre domaine. [Demand & Supply Plan Preparation](model:ba-demand-supply-plan-preparation)
+      qualifie une version prévisionnelle pour le [Master Plan](model:domain-plan), sans reprendre l’autorité
+      de la prévision amont. [Commerce](glossary:TER108) décide les assortiments par canal ; [Enterprise Planning
+      & Performance](glossary:TER221) conserve les objectifs et budgets financiers.
+
+
+      Mode possible pour une collection : préparer très tôt les volumes du socle [offshore](glossary:TER382)
+      et les lignes susceptibles d''un appoint [nearshore](glossary:TER383). Définition du produit, matières,
+      jalons et hypothèses de demande permettent d''examiner les options avec [Sourcing and Procurement](model:domain-sourcing-procurement).
+      Le [Supply Chain Management](model:supply-chain-orchestration) utilise ces contributions pour dimensionner
+      le socle et le recours possible ; son [CTP](glossary:TER045) vérifie ce que les ressources permettent
+      réellement d''obtenir à temps. Une hypothèse de collection ne constitue ni une capacité fournisseur réservée
+      ni une commande ferme. La décision d''achat peut être portée par différents domaines selon son objet
+      et la délégation applicable.
+
+
+      Cadrer les [contextes de planification](glossary:TER389) en amont : [saisons](glossary:TER386), campagnes,
+      [capsules](glossary:TER388), produits reconduits et jalons utiles. [Collection Planning](model:subdomain-collection-planning)
+      précise ces repères et leurs liens aux produits. Les rythmes peuvent varier par ligne de produits, canal
+      ou marché ; aucun nombre annuel, calendrier unique ou emboîtement saison–capsule n’est imposé. Chaque
+      domaine conserve ses plans et ses règles ; le cadrage amont ne décide pas à la place de Commerce, Finance
+      ou du [Master Plan](model:domain-plan).'
+    examples:
+    - title: De la collection aux prévisions
+      situation: 'Illustration fictive : une marque choisit deux modèles pour une collection d’été. [Demand
+        & Supply Forecasting](glossary:TER373) compare ensuite ventes possibles par canal et capacités fournisseur
+        envisageables avant lancement.'
+      lesson: La composition des produits et la prévision de la [demande](glossary:TER011) et des ressources
+        sont deux responsabilités distinctes ; aucune ne crée une [commande](glossary:TER012) ou un [besoin](glossary:TER010)
+        net.
+      source_refs:
+      - U1101
+      - U1131
+      id: illustration-domain-product-portfolio-collection-U1131
+      outcome: Les produits à préparer et les hypothèses à examiner sont identifiés avant tout [engagement](glossary:TER013)
+        d’achat ou de vente.
+    - id: offshore-nearshore-domain-product-portfolio-collection-U1134
+      title: Préparer le socle sans figer tout le volume
+      situation: 'Illustration fictive : la demande de saison pourrait être de 800 ou 1 200 pièces.'
+      outcome: Le portefeuille prépare les hypothèses de collection et les lignes éligibles à un appoint ;
+        le [Supply Chain Management](model:supply-chain-orchestration) compare les engagements possibles avec
+        le recours vérifié par le [CTP](glossary:TER045).
+      lesson: Une demande prévisionnelle et une possibilité fournisseur doivent garder leur version et leur
+        incertitude.
+      source_refs:
+      - U1132
+      - U1133
+      - U1134
+      - U1135
+    market_comparisons:
+    - vendor: SAP
+      product: SAP S/4HANA 2025 FPS02
+      element_name: SAP S/4HANA 2025 — Feature Scope Description
+      element_type: Périmètre fonctionnel ou processus produit
+      relationship: Recouvrement partiel
+      similarities: Portfolio Management (§3.6.1) ; Retail and Fashion (§4.1.3) ; stratégie produit
+      differences: Le document décrit des fonctions ou processus produit ; FLOW distingue les responsabilités
+        indépendamment des applications. Le regroupement et la maille ne sont pas des équivalents natifs démontrés.
+      flow_position: Choisir les orientations et les produits à développer. [Product Strategy & Requirements](model:subdomain-product-strategy-requirements)
+        examine tendances, usages et nouveaux canaux. [Collection Planning](model:subdomain-collection-planning)
+        compose les produits et jalons de collection ; [Demand & Supply Forecasting](model:subdomain-demand-supply-forecasting)
+        estime demande future, supply envisageable et écarts avant lancement. [Product Design & Specification](model:subdomain-product-design-specification)
+        définit les caractéristiques du produit dans un autre domaine. [Demand & Supply Plan Preparation](model:ba-demand-supply-plan-preparation)
+        qualifie une version prévisionnelle pour le [Master Plan](model:domain-plan), sans reprendre l’autorité
+        de la prévision amont. [Commerce](glossary:TER108) décide les assortiments par canal ; [Enterprise
+        Planning & Performance](glossary:TER221) conserve les objectifs et budgets financiers.
+      term_choice: Product Portfolio & Collection Management nomme le périmètre FLOW discuté ; aucun intitulé
+        commun aux éditeurs ni consensus de taxonomie revendiqué.
+      definition_choice: Décrire le service rendu et sa frontière ; les textes détaillés restent proposés.
+      concept_name: SAP S/4HANA 2025 — Feature Scope Description
+      scope_summary: Périmètres de finance, développement, structures et changements produit, entreposage et
+        transport.
+      approach_summary: Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.
+      source_title: SAP S/4HANA 2025 — Feature Scope Description
+      source_url: https://help.sap.com/doc/e2048712f0ab45e791e6d15ba5e20c68/2025/en-US/FSD_OP2025_latest.pdf
+      source_version: Document 3.0 du 2026-10-07
+      consulted_on: '2026-10-12'
+      source_locator: §2.8.1 et §3.6.1 Portfolio and Project Management ; §4.1.3 Retail and Fashion
+      evidence_limits: Catalogue fonctionnel ; sections de base et extensions distinctes. Aucun découpage universel
+        de Business Systems ni couverture installée. Portfolio Management porte des projets, pas une équivalence
+        complète aux collections de mode.
+      source_refs:
+      - ELM860
+      - CMP312
+      - U974
+      - U1093
+      status: proposed
+      id: market-domain-product-portfolio-collection-U1131-2
+    - vendor: Microsoft
+      product: Dynamics 365 Supply Chain Management et Commerce
+      element_name: Design to retire end-to-end overview
+      element_type: Périmètre fonctionnel ou processus produit
+      relationship: Recouvrement partiel
+      similarities: Portfolio Management (§3.6.1) ; Retail and Fashion (§4.1.3) ; stratégie produit
+      differences: Le document décrit des fonctions ou processus produit ; FLOW distingue les responsabilités
+        indépendamment des applications. Le regroupement et la maille ne sont pas des équivalents natifs démontrés.
+      flow_position: Choisir les orientations et les produits à développer. [Product Strategy & Requirements](model:subdomain-product-strategy-requirements)
+        examine tendances, usages et nouveaux canaux. [Collection Planning](model:subdomain-collection-planning)
+        compose les produits et jalons de collection ; [Demand & Supply Forecasting](model:subdomain-demand-supply-forecasting)
+        estime demande future, supply envisageable et écarts avant lancement. [Product Design & Specification](model:subdomain-product-design-specification)
+        définit les caractéristiques du produit dans un autre domaine. [Demand & Supply Plan Preparation](model:ba-demand-supply-plan-preparation)
+        qualifie une version prévisionnelle pour le [Master Plan](model:domain-plan), sans reprendre l’autorité
+        de la prévision amont. [Commerce](glossary:TER108) décide les assortiments par canal ; [Enterprise
+        Planning & Performance](glossary:TER221) conserve les objectifs et budgets financiers.
+      term_choice: Product Portfolio & Collection Management nomme le périmètre FLOW discuté ; aucun intitulé
+        commun aux éditeurs ni consensus de taxonomie revendiqué.
+      definition_choice: Décrire le service rendu et sa frontière ; les textes détaillés restent proposés.
+      concept_name: Design to retire end-to-end overview
+      scope_summary: Stratégie et introduction des produits, définitions et cycle de vie ; coûts et prix dépassent
+        Design & Development FLOW.
+      approach_summary: Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.
+      source_title: Design to retire end-to-end overview
+      source_url: https://learn.microsoft.com/en-us/dynamics365/guidance/business-processes/design-to-retire-overview
+      source_version: Page mise à jour 2025-05-27 ; avertissement de décalage avec le catalogue de juillet
+        2026
+      consulted_on: '2026-10-12'
+      source_locator: Business process areas ; process relationship
+      evidence_limits: Appui produit partiel ; ni taxonomie FLOW, ni preuve de réalisation Beaumanoir.
+      source_refs:
+      - ELM861
+      - CMP312
+      - U974
+      - U1093
+      status: proposed
+      id: market-domain-product-portfolio-collection-U1131-1
+    - id: market-domain-product-portfolio-collection-U1134-ms_design
+      vendor: Microsoft
+      product: Dynamics 365
+      element_name: Design to retire end-to-end overview
+      concept_name: Design to retire end-to-end overview
+      element_type: Fonction ou processus documenté dans un produit
+      relationship: Recouvrement fonctionnel partiel
+      similarities: La préparation produit alimente les achats ; des consultations fournisseur peuvent précéder
+        la définition finale du produit.
+      differences: Les documents décrivent des mécanismes de produit. Ils n'imposent pas la répartition des
+        décisions [offshore](glossary:TER382) / [nearshore](glossary:TER383) entre domaines retenue comme mode
+        possible dans FLOW.
+      flow_position: Préparer les hypothèses de collection et d'approvisionnement ; le recours réellement faisable
+        est vérifié avec le [SCM](glossary:TER035).
+      scope_summary: La préparation produit alimente les achats ; des consultations fournisseur peuvent précéder
+        la définition finale du produit.
+      approach_summary: Préparer les hypothèses de collection et d'approvisionnement ; le recours réellement
+        faisable est vérifié avec le [SCM](glossary:TER035).
+      term_choice: Les noms des capacités sont conservés. Les modes de sourcing sont des conditions de fonctionnement,
+        sans créer de nouvelles capacités.
+      definition_choice: Préparer les hypothèses de collection et d'approvisionnement ; le recours réellement
+        faisable est vérifié avec le [SCM](glossary:TER035).
+      source_title: Design to retire end-to-end overview
+      source_url: https://learn.microsoft.com/en-us/dynamics365/guidance/business-processes/design-to-retire-overview
+      source_version: Documentation en ligne consultée le 21 octobre 2026
+      source_locator: Design to retire process relationship
+      consulted_on: '2026-10-21'
+      evidence_limits: Appui primaire partiel ; aucune organisation universelle, gain chiffré ou réalisation
+        Beaumanoir démontrés. Le mode de décision partagé vient de U1134. Les pages SAP Help HTML ont été consultées
+        via leur texte primaire indexé lorsque l'ouverture directe ne rendait aucun texte.
+      status: proposed
+      source_refs:
+      - U1132
+      - U1133
+      - U1134
+      - U1135
+    - id: market-domain-product-portfolio-collection-U1134-sap_design
+      vendor: SAP
+      product: SAP S/4HANA 2025
+      element_name: Feature Scope Description
+      concept_name: Feature Scope Description
+      element_type: Fonction ou processus documenté dans un produit
+      relationship: Recouvrement fonctionnel partiel
+      similarities: La préparation et le développement des produits, les collections et la prévision contribuent
+        aux décisions amont. Le parcours mode relie conception, développement, achat et vente.
+      differences: Les documents décrivent des mécanismes de produit. Ils n'imposent pas la répartition des
+        décisions [offshore](glossary:TER382) / [nearshore](glossary:TER383) entre domaines retenue comme mode
+        possible dans FLOW.
+      flow_position: Préparer les hypothèses de collection et d'approvisionnement ; le recours réellement faisable
+        est vérifié avec le [SCM](glossary:TER035).
+      scope_summary: La préparation et le développement des produits, les collections et la prévision contribuent
+        aux décisions amont. Le parcours mode relie conception, développement, achat et vente.
+      approach_summary: Préparer les hypothèses de collection et d'approvisionnement ; le recours réellement
+        faisable est vérifié avec le [SCM](glossary:TER035).
+      term_choice: Les noms des capacités sont conservés. Les modes de sourcing sont des conditions de fonctionnement,
+        sans créer de nouvelles capacités.
+      definition_choice: Préparer les hypothèses de collection et d'approvisionnement ; le recours réellement
+        faisable est vérifié avec le [SCM](glossary:TER035).
+      source_title: Feature Scope Description
+      source_url: https://help.sap.com/doc/e2048712f0ab45e791e6d15ba5e20c68/2025/en-US/FSD_OP2025_latest.pdf
+      source_version: 3.0, 7 octobre 2026, FPS02
+      source_locator: 2.8 R&D/Engineering ; 4.1.3.3 (p.583) ; 4.1.3.1.6 (p.575)
+      consulted_on: '2026-10-21'
+      evidence_limits: Appui primaire partiel ; aucune organisation universelle, gain chiffré ou réalisation
+        Beaumanoir démontrés. Le mode de décision partagé vient de U1134. Les pages SAP Help HTML ont été consultées
+        via leur texte primaire indexé lorsque l'ouverture directe ne rendait aucun texte.
+      status: proposed
+      source_refs:
+      - U1132
+      - U1133
+      - U1134
+      - U1135
+    - id: market-domain-product-portfolio-collection-U1155-ms
+      vendor: Microsoft
+      product: Dynamics 365 — périmètre de la documentation citée
+      element_name: Design to retire end-to-end overview
+      element_type: Documentation de produit ou processus
+      relationship: Appui ciblé, recouvrement partiel
+      similarities: La préparation des produits et leur cycle de vie sont distingués des processus qui les
+        utilisent.
+      differences: La source ne définit pas une gouvernance universelle des saisons et ne prescrit pas les
+        responsabilités FLOW. Plans, règles et données de référence restent distingués.
+      flow_position: 'Cadrer les [contextes de planification](glossary:TER389) en amont : [saisons](glossary:TER386),
+        campagnes, [capsules](glossary:TER388), produits reconduits et jalons utiles. [Collection Planning](model:subdomain-collection-planning)
+        précise ces repères et leurs liens aux produits. Les rythmes peuvent varier par ligne de produits,
+        canal ou marché ; aucun nombre annuel, calendrier unique ou emboîtement saison–capsule n’est imposé.
+        Chaque domaine conserve ses plans et ses règles ; le cadrage amont ne décide pas à la place de Commerce,
+        Finance ou du [Master Plan](model:domain-plan).'
+      evidence_limits: Appui partiel au périmètre décrit ; aucune réalisation Beaumanoir ni équivalence complète
+        prouvée.
+      source_title: Design to retire end-to-end overview
+      source_url: https://learn.microsoft.com/en-us/dynamics365/guidance/business-processes/design-to-retire-overview
+      source_version: Documentation évolutive consultée le 2026-10-23
+      source_locator: Define product catalog and strategy / Manage product lifecycle
+      consulted_on: '2026-10-23'
+      source_refs:
+      - U1152
+      - U1153
+      - U1154
+      - U1155
+      status: proposed
+      concept_name: Design to retire end-to-end overview
+      scope_summary: La préparation des produits et leur cycle de vie sont distingués des processus qui les
+        utilisent.
+      approach_summary: 'Cadrer les [contextes de planification](glossary:TER389) en amont : [saisons](glossary:TER386),
+        campagnes, [capsules](glossary:TER388), produits reconduits et jalons utiles. [Collection Planning](model:subdomain-collection-planning)
+        précise ces repères et leurs liens aux produits. Les rythmes peuvent varier par ligne de produits,
+        canal ou marché ; aucun nombre annuel, calendrier unique ou emboîtement saison–capsule n’est imposé.
+        Chaque domaine conserve ses plans et ses règles ; le cadrage amont ne décide pas à la place de Commerce,
+        Finance ou du [Master Plan](model:domain-plan).'
+    - id: market-domain-product-portfolio-collection-U1155-sap
+      vendor: SAP
+      product: SAP S/4HANA for fashion and vertical business
+      element_name: Season Workbench et Seasonal Hierarchy
+      element_type: Données et mécanismes de produit
+      relationship: Appui ciblé, recouvrement partiel
+      similarities: Les produits peuvent relever de plusieurs saisons et le contexte saisonnier intervient
+        dans les documents. La maintenance de ces données est explicitement distinguée de leur utilisation.
+      differences: SAP présente année de saison, saison, collection et thème. FLOW conserve des associations
+        configurables et des plans distincts, sans imposer cette arborescence. La source ne démontre pas les
+        règles de versionnement ou d’autorisation proposées ici pour FLOW.
+      flow_position: 'Cadrer les [contextes de planification](glossary:TER389) en amont : [saisons](glossary:TER386),
+        campagnes, [capsules](glossary:TER388), produits reconduits et jalons utiles. [Collection Planning](model:subdomain-collection-planning)
+        précise ces repères et leurs liens aux produits. Les rythmes peuvent varier par ligne de produits,
+        canal ou marché ; aucun nombre annuel, calendrier unique ou emboîtement saison–capsule n’est imposé.
+        Chaque domaine conserve ses plans et ses règles ; le cadrage amont ne décide pas à la place de Commerce,
+        Finance ou du [Master Plan](model:domain-plan).'
+      evidence_limits: Cours primaire S/4HANA Fashion consulté ; appui au contexte de produit et de document,
+        pas preuve d’un métamodèle générique de plans ni d’une réalisation installée.
+      source_title: Comparing with Legacy SAP Apparel and Footwear Solution
+      source_url: https://learning.sap.com/courses/outlining-sap-s-4hana-for-fashion-and-vertical-business-and-implementing-best-practices/comparing-with-sap-fashion-management-solution-fms
+      source_version: Cours évolutif ; release précise non indiquée
+      source_locator: Comparison of Master Data Capabilities / Advanced Seasonality Management
+      consulted_on: '2026-10-23'
+      source_refs:
+      - U1152
+      - U1153
+      - U1154
+      - U1155
+      status: proposed
+      concept_name: Season Workbench et Seasonal Hierarchy
+      scope_summary: Les produits peuvent relever de plusieurs saisons et le contexte saisonnier intervient
+        dans les documents. La maintenance de ces données est explicitement distinguée de leur utilisation.
+      approach_summary: 'Cadrer les [contextes de planification](glossary:TER389) en amont : [saisons](glossary:TER386),
+        campagnes, [capsules](glossary:TER388), produits reconduits et jalons utiles. [Collection Planning](model:subdomain-collection-planning)
+        précise ces repères et leurs liens aux produits. Les rythmes peuvent varier par ligne de produits,
+        canal ou marché ; aucun nombre annuel, calendrier unique ou emboîtement saison–capsule n’est imposé.
+        Chaque domaine conserve ses plans et ses règles ; le cadrage amont ne décide pas à la place de Commerce,
+        Finance ou du [Master Plan](model:domain-plan).'
+    modeling_depth: context
+    pedagogical_description:
+      explanation: 'Ce [domaine](glossary:TER030) aide à choisir les produits à préparer pour une collection
+        et à apprécier les ventes et ressources envisageables. Il rapproche les orientations de l’offre, les
+        modèles retenus et leurs échéances. Ces choix préparent l’activité sans constituer une [commande](glossary:TER012)
+        ni un plan de couverture opérationnel. Une collection peut ainsi préparer un socle [offshore](glossary:TER382)
+        et des possibilités d''appoint [nearshore](glossary:TER383), dont la faisabilité sera vérifiée avant
+        engagement.
+
+
+        Les rythmes peuvent varier : deux [saisons](glossary:TER386), plusieurs [capsules](glossary:TER388)
+        ou des produits reconduits. Le service rendu reste de préparer les produits et leurs jalons ; le calendrier
+        est un [contexte configurable](glossary:TER389).
+
+
+        [Pourquoi les rythmes et calendriers restent configurables](principle:PRINCIPLE-CONFIGURABLE-CONTEXTS).'
+      example_refs:
+      - node_id: domain-product-portfolio-collection
+        example_id: illustration-domain-product-portfolio-collection-U1131
+        contribution: Relier le choix des produits aux jalons de collection et aux hypothèses de ventes et
+          d’approvisionnement.
+      - node_id: domain-product-portfolio-collection
+        example_id: offshore-nearshore-domain-product-portfolio-collection-U1134
+        contribution: Le portefeuille prépare les hypothèses de collection et les lignes éligibles à un appoint
+          ; le [Supply Chain Management](model:supply-chain-orchestration) compare les engagements possibles
+          avec le recours vérifié par le [CTP](glossary:TER045).
+      distinctions:
+      - node_id: domain-product-development
+        explanation: Composer une collection revient à choisir ce qui mérite d’être développé ; concevoir le
+          produit consiste à en définir et éprouver les caractéristiques.
+      source_refs:
+      - U1130
+      - U1131
+      - U1132
+      - U1133
+      - U1134
+      - U1135
+      - U1152
+      - U1153
+      - U1154
+      - U1155
+      - U1160
+      market_comparison_refs:
+      - node_id: domain-product-portfolio-collection
+        comparison_id: market-domain-product-portfolio-collection-U1131-1
+      - node_id: domain-product-portfolio-collection
+        comparison_id: market-domain-product-portfolio-collection-U1131-2
+      - node_id: domain-product-portfolio-collection
+        comparison_id: market-domain-product-portfolio-collection-U1134-ms_design
+      - node_id: domain-product-portfolio-collection
+        comparison_id: market-domain-product-portfolio-collection-U1134-sap_design
+      - node_id: domain-product-portfolio-collection
+        comparison_id: market-domain-product-portfolio-collection-U1155-ms
+      - node_id: domain-product-portfolio-collection
+        comparison_id: market-domain-product-portfolio-collection-U1155-sap
+  source_refs:
+  - CMP312
+  - U1093
+  - U1099
+  - U1101
+  - U974
+  - U975
+  - U1132
+  - U1133
+  - U1134
+  - U1135
+  - U1152
+  - U1153
+  - U1154
+  - U1155
+  - U1160
+  source_locator:
+    path: connaissance/01-contributions-utilisateur.md
+    anchor: u975
+  review:
+    state: partial
+    note: Nom, niveau et parent validés U975. U1093 propose de distinguer les hypothèses de collection avant
+      lancement des prévisions et besoins nets opérationnels ; texte et correspondances à revoir, sans réalisation
+      installée.
+  last_modified: '2026-10-23T00:00:00Z'
+- id: domain-product-development
+  revision: 1
+  kind: domain
+  fields:
+    name: Product Development
+    definition: '[Product Development](glossary:TER210) : concevoir, expérimenter et valider les produits avant
+      leur mise à disposition.'
+    finality: Concevoir, expérimenter et valider les produits avant leur mise à disposition.
+    scope: Concevoir, expérimenter et valider le produit. La sélection commerciale des fournisseurs et les
+      contrats restent dans [Sourcing and Procurement](glossary:TER109).
+    examples:
+    - title: Illustration de responsabilité
+      situation: 'Exemple fictif : Faire évoluer la coupe et tester un tissu avant de valider le modèle.'
+      lesson: Illustration de la frontière proposée ; aucune opération Beaumanoir constatée ni réalisation
+        installée déduite.
+      source_refs:
+      - U975
+      - U1131
+      id: illustration-domain-product-development-U1131
+      outcome: La décision de poursuivre ou corriger le modèle repose sur des caractéristiques et des constats
+        identifiés.
+    market_comparisons:
+    - vendor: SAP
+      product: SAP S/4HANA 2025 FPS02
+      element_name: SAP S/4HANA 2025 — Feature Scope Description
+      element_type: Périmètre fonctionnel ou processus produit
+      relationship: Recouvrement partiel
+      similarities: Product Development Foundation (§2.8.2) ; introduction des nouveaux produits
+      differences: Le document décrit des fonctions ou processus produit ; FLOW distingue les responsabilités
+        indépendamment des applications. Le regroupement et la maille ne sont pas des équivalents natifs démontrés.
+      flow_position: Concevoir, expérimenter et valider le produit. La sélection commerciale des fournisseurs
+        et les contrats restent dans [Sourcing and Procurement](glossary:TER109).
+      term_choice: Product Development nomme le périmètre FLOW discuté ; aucun intitulé commun aux éditeurs
+        ni consensus de taxonomie revendiqué.
+      definition_choice: Décrire le service rendu et sa frontière ; les textes détaillés restent proposés.
+      concept_name: SAP S/4HANA 2025 — Feature Scope Description
+      scope_summary: Périmètres de finance, développement, structures et changements produit, entreposage et
+        transport.
+      approach_summary: Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.
+      source_title: SAP S/4HANA 2025 — Feature Scope Description
+      source_url: https://help.sap.com/doc/e2048712f0ab45e791e6d15ba5e20c68/2025/en-US/FSD_OP2025_latest.pdf
+      source_version: Document 3.0 du 2026-10-07
+      consulted_on: '2026-10-12'
+      source_locator: §2.8.2 Product Development Foundation ; §3.6.2 Engineering Change Management
+      evidence_limits: Catalogue fonctionnel ; sections de base et extensions distinctes. Aucun découpage universel
+        de Business Systems ni couverture installée. Portfolio Management porte des projets, pas une équivalence
+        complète aux collections de mode.
+      source_refs:
+      - ELM860
+      - CMP312
+      - U974
+      status: proposed
+      id: market-domain-product-development-U1131-2
+    - vendor: Microsoft
+      product: Dynamics 365 Supply Chain Management
+      element_name: Engineering change management overview
+      element_type: Périmètre fonctionnel ou processus produit
+      relationship: Recouvrement partiel
+      similarities: Product Development Foundation (§2.8.2) ; introduction des nouveaux produits
+      differences: Le document décrit des fonctions ou processus produit ; FLOW distingue les responsabilités
+        indépendamment des applications. Le regroupement et la maille ne sont pas des équivalents natifs démontrés.
+      flow_position: Concevoir, expérimenter et valider le produit. La sélection commerciale des fournisseurs
+        et les contrats restent dans [Sourcing and Procurement](glossary:TER109).
+      term_choice: Product Development nomme le périmètre FLOW discuté ; aucun intitulé commun aux éditeurs
+        ni consensus de taxonomie revendiqué.
+      definition_choice: Décrire le service rendu et sa frontière ; les textes détaillés restent proposés.
+      concept_name: Engineering change management overview
+      scope_summary: Définition, versions, disponibilité à l’usage et changements contrôlés des produits.
+      approach_summary: Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.
+      source_title: Engineering change management overview
+      source_url: https://learn.microsoft.com/en-us/dynamics365/supply-chain/engineering-change-management/product-engineering-overview
+      source_version: Page mise à jour 2026-07-01
+      consulted_on: '2026-10-12'
+      source_locator: Product versions ; product readiness ; engineering changes
+      evidence_limits: Appui produit partiel ; ni taxonomie FLOW, ni preuve de réalisation Beaumanoir.
+      source_refs:
+      - ELM862
+      - CMP312
+      - U974
+      status: proposed
+      id: market-domain-product-development-U1131-1
+    modeling_depth: context
+    pedagogical_description:
+      explanation: Ce [domaine](glossary:TER030) transforme une intention de produit en une proposition conçue
+        et éprouvée. Il précise les caractéristiques, évalue les matières et fait examiner les échantillons.
+        Il permet de corriger le produit avant sa mise à disposition sans se substituer aux achats dans le
+        choix commercial des fournisseurs.
+      example_refs:
+      - node_id: domain-product-development
+        example_id: illustration-domain-product-development-U1131
+        contribution: Faire converger conception, évaluation des matières et validation du produit.
+      distinctions:
+      - node_id: domain-sourcing-procurement
+        explanation: L’évaluation technique vérifie le produit et ses composants ; les achats sélectionnent
+          les sources et négocient leurs conditions commerciales.
+      source_refs:
+      - U1130
+      - U1131
+      market_comparison_refs:
+      - node_id: domain-product-development
+        comparison_id: market-domain-product-development-U1131-1
+      - node_id: domain-product-development
+        comparison_id: market-domain-product-development-U1131-2
+  source_refs:
+  - U974
+  - U975
+  - CMP312
+  source_locator:
+    path: connaissance/01-contributions-utilisateur.md
+    anchor: u975
+  review:
+    state: partial
+    note: 'Validé : Nom, niveau, parent et frontière du lot validé U975. Proposé : Définition détaillée, illustration
+      et correspondances rédigées pour mise en œuvre ; aucune réalisation installée.'
+- id: domain-product-definition-lifecycle
+  revision: 1
+  kind: domain
+  fields:
+    name: Product Definition & Lifecycle Management
+    definition: '[Product Definition & Lifecycle Management](glossary:TER214) : tenir les définitions approuvées
+      des produits et maîtriser leurs évolutions.'
+    finality: '[Tenir](glossary:VER002) les définitions approuvées des produits et maîtriser leurs évolutions.'
+    scope: 'Maintenir les définitions approuvées, leurs variantes, versions et conditions d’utilisation. Cela
+      ne présume pas que toutes les données produit de l’entreprise ont leur maître dans ce domaine.
+
+
+      [Pourquoi préciser la source responsable par objet](principle:PRINCIPLE-REFERENCE-PROJECTIONS).'
+    examples:
+    - title: Illustration de responsabilité
+      situation: 'Exemple fictif : Publier une nouvelle version d’un modèle et préciser la date à laquelle
+        elle devient applicable.'
+      lesson: Illustration de la frontière proposée ; aucune opération Beaumanoir constatée ni réalisation
+        installée déduite.
+      source_refs:
+      - U975
+      - U1131
+      id: illustration-domain-product-definition-lifecycle-U1131
+      outcome: Les utilisateurs peuvent distinguer la version à utiliser d’une version encore en préparation.
+    market_comparisons:
+    - vendor: SAP
+      product: SAP S/4HANA 2025 FPS02
+      element_name: SAP S/4HANA 2025 — Feature Scope Description
+      element_type: Périmètre fonctionnel ou processus produit
+      relationship: Recouvrement partiel
+      similarities: Product Structure Management (§2.8.2) ; Engineering Change Management (§3.6.2) ; définitions
+        et versions
+      differences: Le document décrit des fonctions ou processus produit ; FLOW distingue les responsabilités
+        indépendamment des applications. Le regroupement et la maille ne sont pas des équivalents natifs démontrés.
+      flow_position: Maintenir les définitions approuvées, leurs variantes, versions et conditions d’utilisation.
+        Cela ne présume pas que toutes les données produit de l’entreprise ont leur maître dans ce domaine.
+      term_choice: Product Definition & Lifecycle Management nomme le périmètre FLOW discuté ; aucun intitulé
+        commun aux éditeurs ni consensus de taxonomie revendiqué.
+      definition_choice: Décrire le service rendu et sa frontière ; les textes détaillés restent proposés.
+      concept_name: SAP S/4HANA 2025 — Feature Scope Description
+      scope_summary: Périmètres de finance, développement, structures et changements produit, entreposage et
+        transport.
+      approach_summary: Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.
+      source_title: SAP S/4HANA 2025 — Feature Scope Description
+      source_url: https://help.sap.com/doc/e2048712f0ab45e791e6d15ba5e20c68/2025/en-US/FSD_OP2025_latest.pdf
+      source_version: Document 3.0 du 2026-10-07
+      consulted_on: '2026-10-12'
+      source_locator: §2.8.2 Product Development Foundation ; §3.6.2 Engineering Change Management ; §4.1.3
+        Retail and Fashion
+      evidence_limits: Catalogue fonctionnel ; sections de base et extensions distinctes. Aucun découpage universel
+        de Business Systems ni couverture installée. Portfolio Management porte des projets, pas une équivalence
+        complète aux collections de mode.
+      source_refs:
+      - ELM860
+      - CMP312
+      - U974
+      status: proposed
+      id: market-domain-product-definition-lifecycle-U1131-2
+    - vendor: Microsoft
+      product: Dynamics 365 Supply Chain Management
+      element_name: Product information overview
+      element_type: Périmètre fonctionnel ou processus produit
+      relationship: Recouvrement partiel
+      similarities: Product Structure Management (§2.8.2) ; Engineering Change Management (§3.6.2) ; définitions
+        et versions
+      differences: Le document décrit des fonctions ou processus produit ; FLOW distingue les responsabilités
+        indépendamment des applications. Le regroupement et la maille ne sont pas des équivalents natifs démontrés.
+      flow_position: Maintenir les définitions approuvées, leurs variantes, versions et conditions d’utilisation.
+        Cela ne présume pas que toutes les données produit de l’entreprise ont leur maître dans ce domaine.
+      term_choice: Product Definition & Lifecycle Management nomme le périmètre FLOW discuté ; aucun intitulé
+        commun aux éditeurs ni consensus de taxonomie revendiqué.
+      definition_choice: Décrire le service rendu et sa frontière ; les textes détaillés restent proposés.
+      concept_name: Product information overview
+      scope_summary: Identités, attributs, variantes et échanges de définitions produit.
+      approach_summary: Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.
+      source_title: Product information overview
+      source_url: https://learn.microsoft.com/en-us/dynamics365/supply-chain/pim/product-information
+      source_version: Page mise à jour 2026-07-01
+      consulted_on: '2026-10-12'
+      source_locator: Product definition ; product variants ; imports
+      evidence_limits: Appui produit partiel ; ni taxonomie FLOW, ni preuve de réalisation Beaumanoir.
+      source_refs:
+      - ELM863
+      - CMP312
+      - U974
+      status: proposed
+      id: market-domain-product-definition-lifecycle-U1131-1
+    - vendor: Microsoft
+      product: Dynamics 365 Supply Chain Management
+      element_name: Engineering change management overview
+      element_type: Périmètre fonctionnel ou processus produit
+      relationship: Recouvrement partiel
+      similarities: Product Structure Management (§2.8.2) ; Engineering Change Management (§3.6.2) ; définitions
+        et versions
+      differences: Le document décrit des fonctions ou processus produit ; FLOW distingue les responsabilités
+        indépendamment des applications. Le regroupement et la maille ne sont pas des équivalents natifs démontrés.
+      flow_position: Maintenir les définitions approuvées, leurs variantes, versions et conditions d’utilisation.
+        Cela ne présume pas que toutes les données produit de l’entreprise ont leur maître dans ce domaine.
+      term_choice: Product Definition & Lifecycle Management nomme le périmètre FLOW discuté ; aucun intitulé
+        commun aux éditeurs ni consensus de taxonomie revendiqué.
+      definition_choice: Décrire le service rendu et sa frontière ; les textes détaillés restent proposés.
+      concept_name: Engineering change management overview
+      scope_summary: Définition, versions, disponibilité à l’usage et changements contrôlés des produits.
+      approach_summary: Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.
+      source_title: Engineering change management overview
+      source_url: https://learn.microsoft.com/en-us/dynamics365/supply-chain/engineering-change-management/product-engineering-overview
+      source_version: Page mise à jour 2026-07-01
+      consulted_on: '2026-10-12'
+      source_locator: Product versions ; product readiness ; engineering changes
+      evidence_limits: Appui produit partiel ; ni taxonomie FLOW, ni preuve de réalisation Beaumanoir.
+      source_refs:
+      - ELM862
+      - CMP312
+      - U974
+      status: proposed
+    modeling_depth: context
+    pedagogical_description:
+      explanation: 'Ce [domaine](glossary:TER030) permet de savoir quelle définition d’un produit est approuvée
+        et dans quelles conditions elle peut être utilisée. Il conserve les variantes, les documents et les
+        évolutions autorisées. Il évite de confondre une proposition de modification avec une version déjà
+        applicable.
+
+
+        Les caractéristiques et combinaisons admissibles identifient les [variantes](glossary:TER058). La grille
+        peut aider à les représenter ou à les commander ; elle ne définit pas leur identité métier. [Pourquoi
+        distinguer variante et grille](principle:PRINCIPLE-PRODUCT-VARIANTS).'
+      example_refs:
+      - node_id: domain-product-definition-lifecycle
+        example_id: illustration-domain-product-definition-lifecycle-U1131
+        contribution: Relier la version approuvée, les variantes et les conditions de mise à disposition.
+      distinctions:
+      - node_id: domain-product-development
+        explanation: Le développement prépare et éprouve une définition ; ce [domaine](glossary:TER030) maîtrise
+          les définitions approuvées et leurs conditions d’utilisation.
+      source_refs:
+      - U1130
+      - U1131
+      - U1160
+      market_comparison_refs:
+      - node_id: domain-product-definition-lifecycle
+        comparison_id: market-domain-product-definition-lifecycle-U1131-1
+      - node_id: domain-product-definition-lifecycle
+        comparison_id: market-domain-product-definition-lifecycle-U1131-2
+  source_refs:
+  - U974
+  - U975
+  - CMP312
+  - U1160
+  source_locator:
+    path: connaissance/01-contributions-utilisateur.md
+    anchor: u975
+  review:
+    state: partial
+    note: 'Validé : Nom, niveau, parent et frontière du lot validé U975. Proposé : Définition détaillée, illustration
+      et correspondances rédigées pour mise en œuvre ; aucune réalisation installée.'

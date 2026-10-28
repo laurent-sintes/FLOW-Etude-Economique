@@ -1,0 +1,93 @@
+<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cahier des charges FLOW — plateforme opérationnelle Make</title><style>body{font:16px/1.55 Arial,sans-serif;color:#19344c;background:#f3f5f8;margin:0}main{max-width:1120px;margin:28px auto;padding:36px 48px;background:white}h1{font-size:30px;line-height:1.2;margin:24px 0}h2{font-size:22px;margin-top:36px;color:#19344c}h3{font-size:18px;margin-top:24px}a{color:#5041c9}nav{padding:14px 0;border-bottom:2px solid #6554ff}img{max-width:150px;height:auto}table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px;table-layout:auto}th{background:#19344c;color:white;text-align:left}td,th{padding:10px 12px;border-bottom:1px solid #dce3e9;vertical-align:top}tr:nth-child(even){background:#f2f0ff}code{word-break:break-word}blockquote{border-left:3px solid #6554ff;margin-left:0;padding-left:18px}footer{margin-top:36px;font-size:12px;color:#617488}.actions{display:flex;gap:18px;padding:18px;background:#efedff}.actions a{font-weight:bold}@media(max-width:700px){main{margin:0;padding:20px}table{font-size:12px}td,th{padding:6px}}@media print{body{background:white}main{margin:0;padding:0;max-width:none}nav,.actions{display:none}h2,h3{break-after:avoid}tr{break-inside:avoid}a{color:inherit}th{-webkit-print-color-adjust:exact}}</style><main><nav><a href="../index.html">Accueil du dossier</a> · <a href="20-registre-sources.html">Pièces et références</a> · <a href="../FLOW_Comparaison.xlsx">Excel</a></nav><p><img src="../exalt-logo.png" alt="Logo eXalt"></p>
+<p><strong>Laurent Sintès</strong> · 19 octobre 2026</p>
+<hr>
+<h1>Cahier des charges FLOW — plateforme opérationnelle Make</h1>
+<p><strong>Statut :</strong> périmètre de référence pour estimation, 21 octobre 2026. <strong>Destinataires :</strong> responsables métier, architecture, produit et estimation FLOW.</p>
+<p>FLOW doit permettre au groupe Beaumanoir de piloter les commandes et les flux de supply chain de Beaumanoir et Boardriders, avec une vision commune du stock physique et de la disponibilité promise. Le code métier et les règles opérationnelles doivent rester maîtrisés par Beaumanoir. La souplesse de configuration par marque, enseigne, ligne produit et autres axes pertinents est une exigence centrale : ajouter ou modifier une règle courante ne doit pas nécessiter systématiquement une évolution du code applicatif.</p>
+<h2>Contexte et hypothèses confirmées</h2>
+<ul>
+<li>Deux systèmes d&#39;information et deux ERP historiques sont à remplacer ou à rapprocher pour les fonctions concernées : SAP ECC AFS côté Boardriders et Storeland côté marques historiques Beaumanoir.</li>
+<li>Les fonctions concernées dans UR pour la prise de commandes B2C, Socloz et NewStore sont à remplacer dans le périmètre défini ci-dessous.</li>
+<li>La cible combine un cœur opérationnel commun et des systèmes de canal autonomes : Retail, EComm B2C et Wholesale.</li>
+<li>Environ 20 marques, des flux internationaux et intercompany, une centrale d&#39;achat, plusieurs fournisseurs logistiques et des partenariats à l&#39;étranger structurent la complexité métier.</li>
+<li>Volumes communiqués : environ 120 millions de pièces vendues par an et plusieurs centaines de milliers de commandes de vente. Le nombre de tickets Retail, de commandes B2C, de lignes de commandes, de mouvements de stock et les pics ne sont pas encore connus.</li>
+<li>Données économiques communiquées : Beaumanoir 2,2 Md€ de chiffre d&#39;affaires, dont 10 % en Wholesale ; Boardriders 500 M€, dont 60 % en Wholesale. Le chiffre d&#39;affaires indique l&#39;importance économique des domaines, mais ne sert pas de multiplicateur de charge de développement.</li>
+</ul>
+<h2>Périmètre fonctionnel de FLOW</h2>
+<p><strong>Référence de périmètre pour l&#39;ordre de grandeur :</strong> le domaine <em>Supply Chain Management</em> de la publication <code>2026-10-17.1</code> du projet <a href="../sources/client/cartographie-2026-10-17.1.yaml">Beaumanoir Cartographie</a>. Ses capacités sont un modèle métier, pas une liste de modules à coder un pour un. FLOW reprend les responsabilités opérationnelles pertinentes de ce domaine. Les fonctions complémentaires de <em>Sourcing and Procurement</em> et <em>Commerce</em> requises pour sortir de Storeland ne sont pas encore identifiées : elles figurent provisoirement en <strong>option de périmètre de 15 % de l&#39;effort identifié</strong>, hors nominal, sans prétendre qu&#39;elles sont définies.</p>
+<ol>
+<li><strong>Achats opérationnels :</strong> commandes d&#39;achat et leur suivi, engagements, modifications, annulations et événements de réception transmis par les partenaires concernés. La définition précise des achats couverts reste à faire.</li>
+<li><strong>Ventes et retours :</strong> enregistrement et suivi des commandes de vente des canaux concernés, modifications, annulations, retours et déstockage.</li>
+<li><strong>Stock unifié :</strong> consolidation du stock physique déclaré par les systèmes d&#39;exécution, gestion de la protection du stock, des réservations et de la disponibilité utilisable par canal.</li>
+<li><strong>Carnet de commandes :</strong> allocation du stock, traitements de type AllocationRun et Backorder Processing, arbitrage entre demandes concurrentes et traçabilité des décisions.</li>
+<li><strong>Promesse et optimisation :</strong> ATP, CTP, PTP selon les définitions métier qui seront validées ; plan de fulfillment et optimisation des flux, avec contraintes de stock, lieu, date, coût et priorité.</li>
+<li><strong>Documents opérationnels :</strong> production des documents nécessaires aux flux, dont factures et bons de livraison, avec transmission aux systèmes financiers et aux partenaires. Le calcul comptable, le contrôle de gestion et le pilotage financier sont exclus.</li>
+<li><strong>Exceptions et interventions humaines :</strong> dossiers opérationnels, tâches, décisions, escalades et historique nécessaires aux cas qui ne suivent pas un traitement entièrement automatique.</li>
+</ol>
+<h2>Hors périmètre et frontières</h2>
+<table>
+<thead>
+<tr>
+<th>Domaine hors FLOW</th>
+<th>Responsabilité de FLOW à l&#39;interface</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Finance, contrôle de gestion, performance d&#39;entreprise et conformité</td>
+<td>Produire et transmettre les données et documents opérationnels convenus ; recevoir les retours nécessaires au suivi des commandes. Les obligations applicables à l&#39;émission des documents restent à préciser.</td>
+</tr>
+<tr>
+<td>Design, développement produit et planification stratégique</td>
+<td>Consommer les références, variantes et plans approuvés nécessaires aux opérations.</td>
+</tr>
+<tr>
+<td>WMS, TMS et exécution logistique délégués à des entreprises tierces</td>
+<td>Envoyer les instructions et plans de fulfillment, recevoir les confirmations, mouvements et écarts ; réconcilier ces événements.</td>
+</tr>
+<tr>
+<td>Gestion commerciale des clients, assortiments, prix, primes, promotions et soldes dans des outils dédiés</td>
+<td>Recevoir les données ou décisions commerciales applicables et conserver la version effectivement utilisée pour chaque commande.</td>
+</tr>
+<tr>
+<td>Expériences propres aux canaux Retail, EComm B2C et Wholesale</td>
+<td>Exposer des contrats de commande, disponibilité, réservation et suivi communs, sans imposer une interface utilisateur unique à tous les canaux.</td>
+</tr>
+</tbody></table>
+<h2>Exigence centrale : configurabilité maîtrisée</h2>
+<p>Le mini cahier des charges fourni par Laurent est conservé comme <a href="../sources/Gestion%20de%20la%20configuration.pdf">source de configuration</a>. Il formalise les exigences métier retenues dans cette étude.</p>
+<p>La configuration doit être un <strong>composant transverse</strong> de FLOW, au-delà de tables de paramètres : découpage organisationnel non figé, héritage et dérogations, résolution explicite des priorités lorsque plusieurs périmètres se croisent, objets de gouvernance (notamment plan commercial et saison), gestion des dépendances, versions, brouillons, validations, releases cohérentes, publication, activation datée et retour à une version antérieure. Les demandes en cours doivent conserver un comportement défini lors d&#39;un changement de version. Les droits de consultation, modification, validation, publication et activation dépendent du périmètre et du rôle.</p>
+<p>La décision doit combiner le contexte d&#39;une <strong>demande longue</strong> (état, engagements, échéances et historique), l&#39;état présent et futur de la supply chain et les politiques applicables. La sélection d&#39;une règle ne peut donc pas se réduire à la lecture d&#39;une ligne de table selon la marque.</p>
+<p>Chaque décision importante doit garder sa <strong>provenance</strong> : faits et contexte pris en compte, version des politiques appliquées, origine organisationnelle, héritages, dérogations, arbitrages humains et motif. Une décision passée doit rester explicable après changement de configuration. L&#39;historique des changements est lié aux décisions produites. La structure explicite vise aussi à faciliter des usages futurs de l&#39;IA sous les mêmes habilitations ; elle ne présume pas la construction d&#39;un agent IA dans FLOW.</p>
+<p>Les règles courantes doivent pouvoir varier par <strong>marque, enseigne, pays, entité juridique, canal, ligne produit, saison, partenaire et période de validité</strong>, selon les besoins effectivement observés. L&#39;héritage et la priorité entre ces niveaux doivent être explicites : une règle commune peut être spécialisée pour une marque ou un pays sans duplication intégrale. Les conflits entre règles doivent être détectés avant publication.</p>
+<p>Une modification autorisée d&#39;une règle doit pouvoir suivre ce cycle : rédaction, simulation sur des cas représentatifs, comparaison avec la règle active, approbation, date d&#39;entrée en vigueur, publication, suivi et retour arrière. Toute décision opérationnelle doit conserver l&#39;identifiant et la version de la règle appliquée, ses données d&#39;entrée utiles et son résultat. Les habilitations doivent distinguer auteur, approbateur et opérateur.</p>
+<p><strong>Critère de réussite à éprouver :</strong> des utilisateurs habilités ajoutent une variante d&#39;allocation ou de protection de stock pour une marque et une ligne produit, la testent, la publient et la retirent sans recompilation ni déploiement du cœur applicatif. Le temps, le coût et les compétences nécessaires à cette opération doivent être mesurés. Une interface de paramétrage est nécessaire si la cible d&#39;autonomie des métiers l&#39;exige ; un simple fichier de configuration manipulé par les développeurs ne suffit pas à démontrer cette autonomie.</p>
+<p>Le paramétrage doit rester borné. Les invariants de stock, l&#39;intégrité des réservations, les transitions irréversibles et les contrôles de sécurité relèvent du code et de tests automatisés. Une règle déclarative ne doit pas pouvoir invalider ces invariants.</p>
+<h2>Architecture technique de référence à éprouver</h2>
+<ul>
+<li><strong>Socle :</strong> Java et Spring pour les services de gestion ; PostgreSQL comme hypothèse initiale pour les écritures transactionnelles. Découpage par domaines métier avec contrats d&#39;API et événements explicites, plutôt qu&#39;un découpage par marque.</li>
+<li><strong>Décisions et dossiers :</strong> règles simples et tables de décision dans un mécanisme versionné ; DMN pour les décisions adaptées à ce format ; Flowable BPMN/CMMN pour les dossiers et parcours humains qui le justifient. Comparer la charge complète de Flowable open source à celle d&#39;un développement ciblé avec ou sans moteur de workflow.</li>
+<li><strong>Optimisation :</strong> Timefold Solver ou Google OR-Tools à comparer sur des jeux de commandes réels. Le solveur propose une allocation ; FLOW valide et enregistre la décision au regard des règles et de l&#39;état du stock.</li>
+<li><strong>Availability :</strong> journal durable et contrôles transactionnels pour les mouvements et réservations ; projection de lecture éventuellement en mémoire pour les consultations rapides. Une base colonnaire peut servir l&#39;analyse, mais son rôle dans la promesse transactionnelle n&#39;est pas présumé.</li>
+<li><strong>Intégration :</strong> interfaces résilientes, événements horodatés, identifiants de corrélation, traitements idempotents et mécanismes de reprise avec les systèmes de canal, de commerce, de logistique et de finance.</li>
+</ul>
+<p><strong>Familles d&#39;interfaces cibles explicitées pour l&#39;estimation :</strong> (1) PLM et outils Commerce pour produit, article et prix ; (2) contrôle de gestion pour le <em>credit check</em> ; (3) SAP FI/CO pour les structures juridiques des entreprises et partenaires ; (4) prestataires logistiques via les API de commandes de fulfillment et leurs retours d&#39;exécution. Les contrats de commande, disponibilité et suivi avec les canaux Retail, EComm B2C et Wholesale sont également requis par l&#39;architecture omnicanale décrite plus haut. Le nombre réel de connecteurs et de flux par famille n&#39;est pas encore établi. FLOW consomme le résultat du contrôle de crédit et les références maîtres ; il ne prend pas la responsabilité de leur calcul ou de leur maintenance amont.</p>
+<p>Ces composants sont des hypothèses de conception, pas des produits déjà sélectionnés. Leur coût d&#39;intégration, d&#39;exploitation, de montée de version et de maintien en compétence entre dans l&#39;estimation Make.</p>
+<h2>Critères d&#39;acceptation structurants</h2>
+<ol>
+<li>Une même pièce ne peut pas être promise deux fois lorsque deux canaux réservent simultanément le même stock.</li>
+<li>Une disponibilité publiée est traçable jusqu&#39;aux mouvements physiques, engagements et protections qui l&#39;ont produite ; les retards de synchronisation sont visibles.</li>
+<li>Une décision d&#39;allocation peut être expliquée et rejouée avec les versions de règles et les données pertinentes.</li>
+<li>Les spécificités de marque, pays et partenaire sont configurables dans les limites définies, sans branche de code par marque.</li>
+<li>Les erreurs d&#39;un partenaire logistique ou d&#39;un système de canal peuvent être rejouées et réconciliées sans créer de doublon de commande ou de mouvement.</li>
+<li>Les documents opérationnels reprennent les données et règles en vigueur pour la transaction concernée et sont transmis aux destinataires définis.</li>
+<li>Les performances sont validées sur les pics observés, y compris les périodes de soldes et les vagues d&#39;allocation Wholesale.</li>
+</ol>
+<h2>Points à arbitrer pour figer le périmètre</h2>
+<ul>
+<li>Définitions métier exactes de CTP et PTP, puis objectifs de service associés.</li>
+<li>Fonctions précises de NewStore, Socloz, Storeland, SAP ECC AFS et UR à reprendre dans FLOW ou dans un système de canal.</li>
+<li>Système maître de chaque donnée : article, prix, client, stock physique, réservation, commande et facture.</li>
+<li>Nombre de marques réellement distinctes en règles et niveaux d&#39;héritage nécessaires.</li>
+<li>Frontière entre facture opérationnelle produite par FLOW et traitements financiers ou réglementaires réalisés ailleurs.</li>
+</ul>
+<footer>Laurent Sintès · eXalt · 21 octobre 2026 · Étude sous hypothèses</footer></main></html>

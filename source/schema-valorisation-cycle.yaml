@@ -1,0 +1,377 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Valorisation Intégration / Maintenance — même modèle pour toutes les stacks
+type: object
+additionalProperties: false
+properties:
+  version_schema:
+    const: 1
+  id: &id001
+    type: string
+    minLength: 1
+  nom: *id001
+  produit:
+    const: Flow Core System
+  stack_id: *id001
+  strategie:
+    enum:
+    - make
+    - buy
+  periode:
+    enum:
+    - jusqu_a_v1
+    - annuelle
+  date_evaluation:
+    type: string
+    pattern: ^\d{4}-\d{2}-\d{2}$
+  dependances:
+    type: object
+    additionalProperties: false
+    properties:
+      schema:
+        const: source/schema-valorisation-cycle.yaml
+      catalogue: *id001
+      stack: *id001
+      scenario:
+        const: source/maintenance.yaml#scenario_annuel
+      inflation:
+        const: source/inflation.yaml
+      preuves:
+        const: sources/integration-maintenance-2026-10-22.yaml
+      catalogue_sha256: &id002
+        type: string
+        pattern: ^[0-9a-f]{64}$
+      stack_sha256: *id002
+      scenario_sha256: *id002
+      integration: *id001
+      integration_sha256: *id002
+    required:
+    - schema
+    - catalogue
+    - stack
+    - scenario
+    - inflation
+    - preuves
+    - catalogue_sha256
+    - stack_sha256
+    - scenario_sha256
+  tarifs_roles:
+    type: object
+    additionalProperties: false
+    properties:
+      developpement:
+        type: object
+        additionalProperties: false
+        properties:
+          reference: *id001
+          regle: *id001
+          adequation: *id001
+        required:
+        - reference
+        - regle
+        - adequation
+      integration:
+        type: object
+        additionalProperties: false
+        properties:
+          reference: *id001
+          regle: *id001
+          adequation: *id001
+        required:
+        - reference
+        - regle
+        - adequation
+      support_n3:
+        type: object
+        additionalProperties: false
+        properties:
+          reference: *id001
+          regle: *id001
+          adequation: *id001
+        required:
+        - reference
+        - regle
+        - adequation
+      support_n1:
+        type: object
+        additionalProperties: false
+        properties:
+          reference: *id001
+          regle: *id001
+          adequation: *id001
+        required:
+        - reference
+        - regle
+        - adequation
+    required:
+    - developpement
+    - integration
+    - support_n3
+    - support_n1
+  activites:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        nom: *id001
+        nature:
+          enum:
+          - travail
+          - achat
+        prise_en_charge:
+          enum:
+          - travail_client
+          - abonnement_editeur
+          - achat
+        roles:
+          anyOf:
+          - type: object
+            additionalProperties: false
+            properties:
+              developpement:
+                type: object
+                additionalProperties: false
+                properties:
+                  part_pct: &id003
+                    type: number
+                    minimum: 0
+                    maximum: 100
+                  travaux: *id001
+                required:
+                - part_pct
+                - travaux
+              integration:
+                type: object
+                additionalProperties: false
+                properties:
+                  part_pct: *id003
+                  travaux: *id001
+                required:
+                - part_pct
+                - travaux
+              support_n3:
+                type: object
+                additionalProperties: false
+                properties:
+                  part_pct: *id003
+                  travaux: *id001
+                required:
+                - part_pct
+                - travaux
+              support_n1:
+                type: object
+                additionalProperties: false
+                properties:
+                  part_pct: *id003
+                  travaux: *id001
+                required:
+                - part_pct
+                - travaux
+            required:
+            - developpement
+            - integration
+            - support_n3
+            - support_n1
+          - type: 'null'
+        justification: *id001
+        justification_roles: *id001
+        composants: &id004
+          type: array
+          items: *id001
+          minItems: 0
+        inclus_dans: *id004
+        achats:
+          anyOf:
+          - type: array
+            items:
+              type: object
+              additionalProperties: false
+              properties:
+                id: *id001
+                composants: *id004
+                regime:
+                  enum:
+                  - a_chiffrer
+                  - a_confirmer
+                  - inclus
+                  - sans_redevance
+                  - prix_documente
+                assiette: *id001
+                inclus_dans: *id004
+                montant_annuel_eur_ht:
+                  anyOf:
+                  - type: number
+                    minimum: 0
+                  - type: 'null'
+                inflation_ref:
+                  anyOf:
+                  - *id001
+                  - type: 'null'
+                precision: *id001
+                valorisation_ref: &id005
+                  type: string
+                  minLength: 1
+              required:
+              - id
+              - composants
+              - regime
+              - assiette
+              - inclus_dans
+              - montant_annuel_eur_ht
+              - inflation_ref
+              - precision
+            minItems: 1
+          - type: 'null'
+        adequation_tjm:
+          enum:
+          - compatible
+          - partielle
+          - sans_objet
+        sources:
+          type: array
+          items: *id001
+          minItems: 1
+        valorisation_ref: *id005
+      required:
+      - id
+      - nom
+      - nature
+      - prise_en_charge
+      - roles
+      - justification
+      - justification_roles
+      - composants
+      - inclus_dans
+      - achats
+      - adequation_tjm
+      - sources
+    minItems: 1
+  limites:
+    type: array
+    items: *id001
+    minItems: 1
+  valorisation_annuelle:
+    type: object
+    additionalProperties: false
+    properties:
+      unite:
+        const: EUR_HT
+      regle: *id005
+      postes:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            id: *id005
+            couvre:
+              type: array
+              items: *id005
+              minItems: 1
+              uniqueItems: true
+            methode:
+              enum:
+              - estimation
+              - prix_documentes
+              - prix_reference_indexe
+              - inclus
+              - sans_redevance
+            annee_prix:
+              type:
+              - integer
+              - 'null'
+              minimum: 2000
+            repere_annees: *id005
+            montants_documentes_eur_ht:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  annee:
+                    type: integer
+                    minimum: 1
+                  montant:
+                    type: number
+                    minimum: 0
+                required:
+                - annee
+                - montant
+            projection:
+              type: object
+              additionalProperties: false
+              properties:
+                methode:
+                  enum:
+                  - indexation
+                  - non_etablie
+                  - a_estimer
+                  - inclus
+                  - sans_redevance
+                a_partir_annee:
+                  type:
+                  - integer
+                  - 'null'
+                  minimum: 1
+                inflation_ref: &id006
+                  anyOf:
+                  - *id005
+                  - type: 'null'
+              required:
+              - methode
+              - a_partir_annee
+              - inflation_ref
+            finance_par: *id006
+            sources:
+              type: array
+              items: *id005
+              minItems: 1
+            adequation_perimetre:
+              enum:
+              - hypothese_commune
+              - source_a_rapprocher
+            justification: *id005
+          required:
+          - id
+          - couvre
+          - methode
+          - annee_prix
+          - repere_annees
+          - montants_documentes_eur_ht
+          - projection
+          - finance_par
+          - sources
+          - adequation_perimetre
+          - justification
+        minItems: 1
+      reserves:
+        type: array
+        items: *id005
+        minItems: 1
+    required:
+    - unite
+    - regle
+    - postes
+    - reserves
+required:
+- version_schema
+- id
+- nom
+- produit
+- stack_id
+- strategie
+- periode
+- date_evaluation
+- dependances
+- tarifs_roles
+- activites
+- limites
+allOf:
+- if:
+    properties:
+      periode:
+        const: annuelle
+  then:
+    required:
+    - valorisation_annuelle

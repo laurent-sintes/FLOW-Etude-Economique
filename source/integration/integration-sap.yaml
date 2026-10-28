@@ -1,0 +1,431 @@
+version_schema: 1
+id: integration-sap
+nom: Intégration - SAP
+produit: Flow Core System
+stack_id: sap-buy
+strategie: buy
+periode: jusqu_a_v1
+date_evaluation: '2026-10-22'
+dependances:
+  schema: source/schema-valorisation-cycle.yaml
+  catalogue: source/integration.yaml
+  stack: source/stacks/sap.yaml
+  scenario: source/maintenance.yaml#scenario_annuel
+  inflation: source/inflation.yaml
+  preuves: sources/integration-maintenance-2026-10-22.yaml
+  catalogue_sha256: 1ab1ced93592f639e23c63f1e50292556bc41183e62a2aa658a301d2794f5642
+  stack_sha256: 81c866e7ddeb1c46ea402a83e519ca2c30bfac842435251b797b54696cb077a8
+  scenario_sha256: f1453e3dba54b1c8983cb458b2ab7d7070ce7c87a8fa0a42d27512d0aa92090f
+tarifs_roles:
+  developpement:
+    reference: source/stacks/sap.yaml#interventions/activites/developpement
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+  integration:
+    reference: source/stacks/sap.yaml#interventions/activites/integration
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+  support_n3:
+    reference: source/stacks/sap.yaml#interventions/activites/support_n3
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+  support_n1:
+    reference: source/stacks/sap.yaml#interventions/activites/support_n1
+    regle: Résoudre activite.tarif puis interventions.tarifs ; aucune copie des montants.
+    adequation: Repère du profil applicatif ; voir les réserves par activité pour cloud, sécurité et formation.
+activites:
+- id: INT-001
+  nom: Préparer l’adaptation et les décisions de configuration
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 20
+      travaux: Examiner les points d’extension.
+    integration:
+      part_pct: 75
+      travaux: Traduire les besoins en configuration et contrats.
+    support_n3:
+      part_pct: 5
+      travaux: Vérifier l’exploitabilité des choix.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Articuler S/4 Fashion, OMSA, IBP et les SI externes ; droits, responsabilités et correspondances
+    métier à instruire. La diversité des composants explique l’étendue, pas une prime arbitraire SAP.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - s4-fashion
+  - ibp
+  - omsa
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - CARTO
+  - GOLIVE
+- id: INT-002
+  nom: Configurer les structures et paramètres de base
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 5
+      travaux: Petits scripts de configuration.
+    integration:
+      part_pct: 85
+      travaux: Définir et saisir les paramètres.
+    support_n3:
+      part_pct: 10
+      travaux: Vérifier et documenter l’administration.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Customizing et référentiels standard disponibles ; aligner organisations, sites, unités et calendriers
+    entre les composants. Leur cohérence augmente la qualification.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - s4-fashion
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - MS_DATA
+- id: INT-003
+  nom: Paramétrer les politiques et calibrer les décisions Supply
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 20
+      travaux: Configurer les extensions de règles autorisées.
+    integration:
+      part_pct: 70
+      travaux: Formaliser les choix métier et ajuster les paramètres.
+    support_n3:
+      part_pct: 10
+      travaux: Vérifier diagnostics et reproductibilité.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Allocation Fashion, ATP/OMSA et plan IBP apportent leurs paramètres. Cohérence des politiques entre
+    moteurs, horizons et droits à valider ; aucun nouveau solveur à construire.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - s4-fashion
+  - ibp
+  - omsa
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - CARTO
+  - SOLUTION
+- id: INT-004
+  nom: Configurer les parcours, formulaires et écrans low-code
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 20
+      travaux: Adapter composants de formulaire et assemblages.
+    integration:
+      part_pct: 70
+      travaux: Configurer parcours, écrans et règles de tâche.
+    support_n3:
+      part_pct: 10
+      travaux: Vérifier la conduite des dossiers.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Workflows documentaires et Fiori fournissent des bases. Paramétrer les parcours transverses et
+    formulaires dans les extensions déjà prévues au Core ; BTP Build non implicitement ajouté.
+  justification_roles: Configurer les workflows standard et compléter les formulaires existants.
+  composants:
+  - abap-fiori
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - SOLUTION
+- id: INT-005
+  nom: Réaliser les extensions et spécifiques nécessaires
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 65
+      travaux: Concevoir et coder les extensions et tests locaux.
+    integration:
+      part_pct: 25
+      travaux: Vérifier les contrats et l’adéquation métier.
+    support_n3:
+      part_pct: 10
+      travaux: Préparer le diagnostic des extensions.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Extensions supportées ABAP/Fiori et interfaces publiées ; qualifier leur compatibilité S/4/OMSA/IBP.
+    L’écart vient des contrats et déploiements croisés, pas du seul TJM.
+  justification_roles: Développement ABAP/Fiori avec vérification des points d’extension supportés.
+  composants:
+  - abap-fiori
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - SOLUTION
+- id: INT-006
+  nom: Intégrer les flux avec les applications et partenaires
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 25
+      travaux: Compléter les adaptateurs indispensables.
+    integration:
+      part_pct: 65
+      travaux: Réaliser flux, mappings et reprises.
+    support_n3:
+      part_pct: 10
+      travaux: Préparer alertes et procédures de traitement.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: CPI/Integration Suite pour les flux externes ; aligner versions et sémantiques S/4, OMSA et IBP.
+    Mappings et reprises de bout en bout restent à réaliser.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - ipaas
+  - s4-fashion
+  - ibp
+  - omsa
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - CADRE
+  - CARTO
+  - MS_DATA
+- id: INT-007
+  nom: Migrer, rapprocher et archiver les données
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 20
+      travaux: Construire transformations et contrôles automatisés.
+    integration:
+      part_pct: 70
+      travaux: Piloter techniquement les reprises et écarts.
+    support_n3:
+      part_pct: 10
+      travaux: Préparer traces et reprise sur erreur.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Migration Cockpit fournit des objets et contrôles. Vérifier ordre de chargement, correspondances
+    des stocks/engagements et historiques entre composants ; les reprises non supportées restent à traiter.
+  justification_roles: Objets Migration Cockpit réutilisés ; correspondances et séquence pilotées par l’intégrateur.
+  composants:
+  - s4-fashion
+  - ibp
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CADRE
+  - CARTO
+  - MS_DATA
+  - SAP_MIG
+- id: INT-008
+  nom: Préparer environnements, accès et intégration de sécurité
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 10
+      travaux: Adapter les paramètres applicatifs.
+    integration:
+      part_pct: 65
+      travaux: Raccorder réseau, identités et secrets.
+    support_n3:
+      part_pct: 25
+      travaux: Vérifier accès et procédures opérationnelles.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: Infrastructure standard du contrat Private réutilisée. Configuration client, identités et coordination
+    des responsabilités SAP restent nécessaires ; pas confusion avec Public ou Tailored.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - infra-s4
+  - abap-fiori
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - SHARED
+  - CICD
+- id: INT-009
+  nom: Industrialiser la chaîne de fabrication et de livraison
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 45
+      travaux: Automatiser build, packaging et tests techniques.
+    integration:
+      part_pct: 40
+      travaux: Assembler les promotions et paramètres.
+    support_n3:
+      part_pct: 15
+      travaux: Préparer rollback et traçabilité opérationnelle.
+    support_n1:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+  justification: 'Transports et outils d’extension SAP réutilisés. Coordonner plusieurs cycles de composants, configurations
+    et jeux d’essai ; aucune facture d’outillage commercial présumée gratuite. L’outillage réutilisable ne finance
+    pas la chaîne client : construire ses automatisations et contrôles non couverts ici, sans report implicite au
+    build Core.'
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - abap-fiori
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - CICD
+  - MS_TEST
+- id: INT-010
+  nom: Qualifier la solution intégrée et accompagner la recette
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 25
+      travaux: Automatiser et analyser les défauts techniques.
+    integration:
+      part_pct: 55
+      travaux: Préparer scénarios et accompagner UAT.
+    support_n3:
+      part_pct: 15
+      travaux: Qualifier exploitation et non-fonctionnel.
+    support_n1:
+      part_pct: 5
+      travaux: Préparer l’assistance aux utilisateurs de recette.
+  justification: Les résultats de S/4 Fashion, OMSA, IBP et des SI raccordés doivent rester cohérents. Forte qualification
+    de composition et d’engagements ; tests éditeur non recomptés.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - s4-fashion
+  - ibp
+  - omsa
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - GOLIVE
+  - MS_TEST
+  - SHARED
+- id: INT-011
+  nom: Préparer l’exploitation, la continuité et le support
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 15
+      travaux: Compléter instrumentation et diagnostics.
+    integration:
+      part_pct: 35
+      travaux: Assembler procédures et responsabilités.
+    support_n3:
+      part_pct: 45
+      travaux: Vérifier supervision, restauration et traitement d’incidents.
+    support_n1:
+      part_pct: 5
+      travaux: Préparer accueil, triage et base de connaissance.
+  justification: Opérations techniques standard selon contrat ; organiser supervision applicative et flux, responsabilités
+    de restauration et continuité métier client.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - infra-s4
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - SHARED
+  - MS_RESTORE
+  - GOLIVE
+- id: INT-012
+  nom: Préparer les utilisateurs et transmettre la solution
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 0
+      travaux: Sans intervention prévue.
+    integration:
+      part_pct: 35
+      travaux: Expliquer configuration et parcours métier.
+    support_n3:
+      part_pct: 15
+      travaux: Transmettre les diagnostics et procédures N3.
+    support_n1:
+      part_pct: 50
+      travaux: Préparer aides, accueil et exercices d’usage.
+  justification: Parcours et vocabulaire de plusieurs composants à transmettre. Contenus SAP réutilisables mais
+    exercices Beaumanoir et transfert aux supports restent à faire.
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - abap-fiori
+  inclus_dans: []
+  achats: null
+  adequation_tjm: partielle
+  sources:
+  - GOLIVE
+  - CADRE
+- id: INT-013
+  nom: Basculer vers la V1 et stabiliser le démarrage
+  nature: travail
+  prise_en_charge: travail_client
+  roles:
+    developpement:
+      part_pct: 15
+      travaux: Corriger les défauts des adaptations.
+    integration:
+      part_pct: 45
+      travaux: Exécuter et rapprocher les étapes de bascule.
+    support_n3:
+      part_pct: 30
+      travaux: Conduire la stabilisation technique et le repli si nécessaire.
+    support_n1:
+      part_pct: 10
+      travaux: Assister les utilisateurs au démarrage.
+  justification: 'Coexistence par lots et données réparties entre composants : contrôles de cohérence et repli plus
+    riches. Aucun nombre de lots, durée ou surcharge forfaitaire inventé.'
+  justification_roles: 'Mix de référence commun : les responsabilités sont comparables pour cette activité.'
+  composants:
+  - s4-fashion
+  - ibp
+  - omsa
+  inclus_dans: []
+  achats: null
+  adequation_tjm: compatible
+  sources:
+  - CUTOVER
+  - GOLIVE
+limites:
+- Points et parts de rôles = hypothèses d’ingénierie à qualifier. Aucune conversion en JH, coût ou somme économique
+  de points.
+- Le catalogue décrit les apports nécessaires des métiers et profils non tarifés. Ils ne sont pas implicitement
+  inclus dans les quatre tarifs techniques.
+- 'Le TJM de la stack n’est pas automatiquement celui de tous les spécialistes : l’adéquation partielle bloque une
+  valorisation complète sans qualification du profil.'
+- Les empreintes lient cette estimation au catalogue, à la stack, à la solution et au scénario commun ; une évolution
+  exige une réévaluation.

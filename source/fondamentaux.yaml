@@ -1,0 +1,238 @@
+version: 1
+id: flow-fundamentals
+architecture_ref: source/architecture.yaml
+reading:
+  intro: Comprendre ce que le modèle compare, d’où viennent les estimations et comment lire les charges, les coûts et le calendrier.
+  toc_label: Les six repères du modèle
+  chapters:
+  - id: scope
+    title: Ce que nous évaluons
+    lead: '**Distinguer le programme, le produit et son adaptation délimite ce que l’on finance.** Le modèle compare cinq options pour obtenir une {{notion.core_system}}, l’intégrer au Groupe et la faire fonctionner.'
+  - id: strategies
+    title: Sur quoi reposent les évaluations Make et Buy
+    lead: '**Deux points de départ, un même besoin à examiner.** La cartographie métier structure les travaux Make et sert à challenger les propositions Buy.'
+  - id: activities
+    title: Quelles activités relèvent du Build et du Run
+    lead: '**Build et Run décrivent la nature des activités, pas leur période.** Cette convention distingue la réalisation du service courant, indépendamment du choix Make ou Buy.'
+  - id: workload
+    title: Que mesurent le brut, le net et le total projet
+    lead: '**Le brut et le net couvrent les mêmes travaux. Le total projet élargit le périmètre humain.** Ces distinctions évitent de confondre développement, effort complet et budget en euros.'
+  - id: costs
+    title: Quels postes sont financés
+    lead: '**Chaque dépense est financée une seule fois.** Les structures de coût indiquent l’objet financé ; elles permettent de rapprocher les options sans additionner des prestations déjà incluses.'
+  - id: calendar
+    title: Quand les dépenses interviennent
+    lead: '**Les dépenses suivent la consommation et les réceptions.** Les trois phases donnent des repères chronologiques ; une même nature de coût peut traverser plusieurs phases.'
+  composition: '**{{notion.plateforme_beaumanoir}} = {{notion.core_system}} retenue + spécificités du Groupe.** Cette composition décrit la cible métier, pas une formule de coût.'
+  strategy_note: '**Comparer exige d’expliciter les écarts de périmètre entre les offres et le besoin.** Une couverture déclarée ne prouve pas son inclusion dans le prix ; un point à qualifier ne crée aucun supplément automatique.'
+  strategy_links:
+  - href: source/offres-synvance.md
+    label: Comprendre les offres issues de Synvance
+  - href: source/ecarts-perimetre-flow-rfi.md
+    label: Examiner les écarts de périmètre des offres
+  costs_intro: Les sept postes ci-dessous décrivent ce qui est acheté ou réalisé. Leurs tags indiquent la nature Build ou Run des activités.
+  costs_note: '**Le poste « {{notion.grouped_buy}} » conserve les prix groupés et leurs inclusions.** Une part non documentée reste inconnue. Les tags ne créent aucun budget ; un total Build / Run exige une ventilation monétaire justifiée.'
+  coverage_label: Couches concernées
+  next_href: '#marche'
+  next_label: Examiner les références qui peuvent étayer les estimations
+activity_reading:
+  title: '{{notion.build}} et {{notion.run_activities}}, deux angles de lecture des activités'
+  intro: Un budget annuel peut financer du Build. Du Run peut être consommé pendant la réalisation.
+  type_refs: [build, run]
+  summaries:
+  - type_ref: build
+    text: Construire, adapter ou faire évoluer le système, y compris les travaux importants conduits en mode projet.
+  - type_ref: run
+    text: Maintenir le service courant, exploiter les moyens techniques et assister les utilisateurs, y compris pendant la réalisation.
+  note: '**Le MCO de la {{notion.core_system}} est classé en Build.** Le MCO des adaptations et interfaces Beaumanoir est Run, sauf interventions importantes en mode projet : leur structure de coût porte une répartition paramétrable. Un financement annuel ne détermine donc pas son classement.'
+entities:
+- id: programme_flow
+  notion: programme_flow
+  kind: program
+  text: Choisir la solution, organiser son intégration et son déploiement dans le Groupe.
+- id: core_system
+  notion: core_system
+  kind: platform
+  text: Le produit générique, construit ou acheté, avant les adaptations propres à Beaumanoir.
+  layer_refs:
+  - core_system
+- id: plateforme_beaumanoir
+  notion: plateforme_beaumanoir
+  kind: platform
+  text: La cible réunissant le produit retenu et les spécificités du Groupe pour unifier les SI des marques historiques et de Boardriders.
+- id: flow_core_system
+  notion: flow_core_system
+  kind: platform
+- id: adaptations_beaumanoir
+  label: Spécificités Beaumanoir
+  definition: Processus, configurations, extensions, interfaces et données propres au Groupe.
+  layer_refs:
+  - applications
+  - business_process
+  - integration
+  kind: adaptations
+- id: si_historique
+  label: SI des marques historiques
+  definition: Système d’information des marques historiques du Groupe.
+  kind: information_system
+- id: si_boardriders
+  label: SI de Boardriders
+  definition: Système d’information de Boardriders.
+  kind: information_system
+relations:
+- id: flow_implements_core
+  type: implements
+  source: flow_core_system
+  target: core_system
+- id: beaumanoir_contains_core
+  type: composed_of
+  source: plateforme_beaumanoir
+  target: core_system
+- id: beaumanoir_contains_specifics
+  type: composed_of
+  source: plateforme_beaumanoir
+  target: adaptations_beaumanoir
+- id: program_targets_platform
+  type: targets
+  source: programme_flow
+  target: plateforme_beaumanoir
+- id: platform_unifies_historical
+  type: unifies
+  source: plateforme_beaumanoir
+  target: si_historique
+- id: platform_unifies_boardriders
+  type: unifies
+  source: plateforme_beaumanoir
+  target: si_boardriders
+strategies:
+- id: make
+  notion: make
+  mode: Make
+  target_ref: core_system
+  option_refs:
+  - java-spring
+  - dotnet
+  - rust
+  open_selection: false
+  tags:
+  - Construire
+  - '{{notion.core_system}} générique'
+  text: '**Construire la {{notion.flow_core_system}}, version Make de la {{notion.core_system}}.** Les capacités métier et les fonctions produit orientent la réutilisation du patrimoine logiciel, puis l’estimation des travaux restants. Trois options sont comparées : Java / Spring, .NET et Rust.'
+  implementation_ref: flow_core_system
+- id: buy
+  notion: buy
+  mode: Buy
+  target_ref: core_system
+  option_refs:
+  - microsoft
+  - sap
+  open_selection: true
+  tags:
+  - Microsoft, SAP ou autre
+  - '{{notion.core_system}} existante'
+  text: '**Partir de l’étude Synvance.** Les offres Avanade / Microsoft et Delaware / SAP, les questionnaires et la projection COPIL documentent les prestations, prix et trajectoires. L’étude FLOW les confronte au besoin et explicite les compléments retenus. Le choix fournisseur reste ouvert.'
+phases:
+- id: obtain_core
+  notion: obtenir_core_system
+  bullets:
+  - '**Make :** construire le produit et financer ses moyens de fabrication.'
+  - '**Buy :** réutiliser le dossier Synvance pour sélectionner et contractualiser. Les dates de consommation suivent les engagements de l’offre retenue.'
+  costs:
+  - obtention
+  - run_cloud
+  target_ref: core_system
+- id: integrate_deploy
+  notion: integrer_deployer
+  text: Adapter le produit, migrer les données et raccorder les SI, puis déployer progressivement. La stabilisation précède la réception locale ; le {{notion.mco_client}} commence après cette réception.
+  costs:
+  - integration
+  - core_care
+  - client_care
+  - run_cloud
+  - operations_support
+  - grouped_buy
+  target_ref: plateforme_beaumanoir
+- id: operate_evolve
+  notion: exploiter_evoluer
+  text: Les services annuels complets prennent le relais des financements transitoires, sans chevauchement. Les moyens consommés pendant la réalisation sont déjà financés à leur période d’usage.
+  costs:
+  - core_care
+  - client_care
+  - run_cloud
+  - operations_support
+  - grouped_buy
+  target_ref: plateforme_beaumanoir
+phase_reading: '**Un départ commun permet de comparer les dépenses sans imposer les mêmes dates de service.** Construire le calendrier Make à partir de ses travaux et déploiements. Pour Buy, instruire les trajectoires reçues de Synvance et du COPIL, puis la sélection-contractualisation ; ces données ne déterminent pas le calendrier Make.'
+limitations: '**Chaque évaluation doit déclarer ses inclusions et exclusions.** Examiner notamment le temps interne, la transformation organisationnelle, les systèmes maintenus pendant la transition, le décommissionnement et la sélection fournisseur. Un poste exclu ne vaut pas zéro ; un travail déjà financé n’est pas ajouté une seconde fois.'
+business_map:
+  source: sources/client/cartographie-2026-10-17.1.yaml
+  systems:
+  - node_ref: system-design-development
+    domain_relation_refs:
+    - REL-U975-domain-product-portfolio-collection
+    - REL-U975-domain-product-development
+    - REL-U975-domain-product-definition-lifecycle
+  - node_ref: system-business-operations
+    domain_relation_refs:
+    - REL-U780-OPERATIONS-domain-sourcing-procurement
+    - REL-U780-OPERATIONS-domain-sales
+    - REL-U780-OPERATIONS-supply-chain-orchestration
+  - node_ref: system-enterprise-management-control
+    domain_relation_refs:
+    - REL-U826-domain-finance
+    - REL-U975-domain-enterprise-planning-performance
+    - REL-U975-domain-governance-risk-compliance
+  - node_ref: domain-logistics-execution
+    domain_relation_refs:
+    - REL-U975-domain-warehousing
+    - REL-U975-domain-transportation
+    - REL-U1027-PARENT-domain-customs-management
+  program_scope:
+    entity_ref: programme_flow
+    system_ref: system-business-operations
+  outside_scope:
+  - system-design-development
+  - system-enterprise-management-control
+  positioning:
+    entity_ref: flow_core_system
+    domain_ref: supply-chain-orchestration
+    status: indicative
+  note: 'La cartographie organise le métier en domaines, puis en capacités métier : ce que l’entreprise doit savoir
+    faire.'
+  estimation: Les capacités retenues définissent le besoin commun. Elles structurent l’estimation Make et permettent de confronter les offres Buy aux fonctions attendues, avec leurs preuves et leurs limites.
+  scope_summary: '**La cartographie reçue situe le programme dans Business Operations. Les capacités retenues de la chaîne logistique forment le périmètre d’entrée de l’évaluation.** Ce référentiel sert aussi à examiner les offres Buy ; le schéma situe la cible dans un ensemble plus large.'
+  scope: 'Design & Development et Enterprise Management & Control restent hors du périmètre du programme présenté. Le positionnement de la {{notion.flow_core_system}} est indicatif : cette vue de contexte ne remplace pas la sélection des capacités chiffrées et n’étend pas le budget de construction aux autres domaines.'
+estimation:
+  title: Les trois niveaux de charge
+  intro: Les efforts humains sont exprimés en JH ; leur valorisation en euros intervient séparément.
+  stages:
+  - id: gross
+    notion: charge_brute
+    producer: Estimée par le skill
+    text: '**Les JH développeur restant à réaliser après réutilisation**, tests développeur inclus et qualification indépendante exclue. Le skill estime ces travaux à partir des capacités métier et des fonctions observées, avant les gains de productivité explicites.'
+  - id: net
+    notion: charge_nette
+    producer: Calculée par le moteur
+    text: '**Les mêmes travaux après application des gains de productivité documentés.** Le moteur les applique aux activités éligibles, sans seconde remise pour la réutilisation déjà comptée dans le brut.'
+  - id: total_project
+    notion: charge_totale_projet
+    producer: À constituer sur tout le périmètre déclaré
+    text: '**Le développement net et les autres efforts humains retenus** : qualification indépendante, architecture, pilotage, intégration, déploiement et conduite du changement, selon le périmètre déclaré et sans double compte.'
+  relations:
+  - source_ref: gross
+    target_ref: net
+    operation: apply_productivity
+    text: 'Brut → net : appliquer les gains explicites sur le même périmètre de travaux.'
+  - source_ref: net
+    target_ref: total_project
+    operation: add_project_activities
+    text: 'Net → total projet : ajouter les autres efforts retenus, sans compter un travail deux fois.'
+  note: '**Une provision en euros ne dimensionne pas un effort humain.** Un total complet en JH exige des rôles, missions et charges explicites ; un effort inconnu ou exclu ne vaut pas zéro. Achats, licences et forfaits restent en euros. Les forfaits Buy priment sur les JH diagnostiques et ne reçoivent aucune remise automatique de productivité.'
+  links:
+  - href: '#complexite'
+    label: Comprendre l’estimation du brut par le skill
+  - href: '#calcul-net'
+    label: Consulter « {{vue.calcul_net}} »
+  - href: '#evaluation-core'
+    label: Consulter l’application et la provenance des évaluations
+program_ref: programme_flow

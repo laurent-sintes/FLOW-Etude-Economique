@@ -1,0 +1,335 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+additionalProperties: false
+required:
+- version
+- id
+- architecture_ref
+- entities
+- relations
+- strategies
+- phases
+- phase_reading
+- limitations
+- business_map
+- program_ref
+- estimation
+- activity_reading
+- reading
+properties:
+  version:
+    const: 1
+  id:
+    const: flow-fundamentals
+  architecture_ref:
+    const: source/architecture.yaml
+  reading:
+    type: object
+    additionalProperties: false
+    required: [intro, toc_label, chapters, composition, strategy_note, strategy_links, costs_intro, costs_note, coverage_label, next_href, next_label]
+    properties:
+      intro: &reading_text {type: string, minLength: 1}
+      toc_label: *reading_text
+      chapters:
+        type: array
+        minItems: 6
+        maxItems: 6
+        items:
+          type: object
+          additionalProperties: false
+          required: [id, title, lead]
+          properties:
+            id: {enum: [scope, strategies, activities, workload, costs, calendar]}
+            title: *reading_text
+            lead: *reading_text
+      composition: *reading_text
+      strategy_note: *reading_text
+      strategy_links:
+        type: array
+        minItems: 2
+        maxItems: 2
+        items:
+          type: object
+          additionalProperties: false
+          required: [href, label]
+          properties:
+            href: {enum: ['source/offres-synvance.md', 'source/ecarts-perimetre-flow-rfi.md']}
+            label: *reading_text
+      costs_intro: *reading_text
+      costs_note: *reading_text
+      coverage_label: *reading_text
+      next_href: {const: '#marche'}
+      next_label: *reading_text
+  activity_reading:
+    type: object
+    additionalProperties: false
+    required: [title, intro, type_refs, summaries, note]
+    properties:
+      title: {type: string, minLength: 1}
+      intro: {type: string, minLength: 1}
+      note: {type: string, minLength: 1}
+      type_refs:
+        type: array
+        minItems: 2
+        maxItems: 2
+        uniqueItems: true
+        items: {type: string, pattern: '^[a-z][a-z0-9_]*$'}
+      summaries:
+        type: array
+        minItems: 2
+        maxItems: 2
+        items:
+          type: object
+          additionalProperties: false
+          required: [type_ref, text]
+          properties:
+            type_ref: {type: string, pattern: '^[a-z][a-z0-9_]*$'}
+            text: *reading_text
+  entities:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - kind
+      properties:
+        id: &id001
+          type: string
+          pattern: ^[a-z][a-z0-9_-]*$
+        notion: *id001
+        label: &id002
+          type: string
+          minLength: 1
+        definition: *id002
+        text: *id002
+        layer_refs:
+          type: array
+          minItems: 1
+          items: *id001
+          uniqueItems: true
+        kind:
+          enum:
+          - program
+          - platform
+          - adaptations
+          - information_system
+      oneOf:
+      - required:
+        - notion
+        not:
+          anyOf:
+          - required:
+            - label
+          - required:
+            - definition
+      - required:
+        - label
+        - definition
+        not:
+          required:
+          - notion
+  relations:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - type
+      - source
+      - target
+      properties:
+        id: *id001
+        type:
+          enum:
+          - implements
+          - composed_of
+          - targets
+          - unifies
+        source: *id001
+        target: *id001
+  strategies:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - notion
+      - mode
+      - target_ref
+      - option_refs
+      - open_selection
+      - tags
+      - text
+      properties:
+        id: *id001
+        notion: *id001
+        mode:
+          enum:
+          - Make
+          - Buy
+        target_ref: *id001
+        implementation_ref: *id001
+        option_refs:
+          type: array
+          minItems: 1
+          items: *id001
+          uniqueItems: true
+        open_selection:
+          type: boolean
+        tags:
+          type: array
+          minItems: 1
+          items: *id002
+        text: *id002
+  phases:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - notion
+      - costs
+      - target_ref
+      properties:
+        id: *id001
+        notion: *id001
+        text: *id002
+        bullets:
+          type: array
+          minItems: 1
+          items: *id002
+        costs:
+          type: array
+          minItems: 1
+          items: *id001
+          uniqueItems: true
+        target_ref: &id003
+          type: string
+          minLength: 1
+      anyOf:
+      - required:
+        - text
+      - required:
+        - bullets
+  phase_reading: *id002
+  limitations: *id002
+  business_map:
+    type: object
+    additionalProperties: false
+    required:
+    - source
+    - systems
+    - program_scope
+    - outside_scope
+    - positioning
+    - note
+    - estimation
+    - scope
+    - scope_summary
+    properties:
+      source:
+        const: sources/client/cartographie-2026-10-17.1.yaml
+      systems:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          additionalProperties: false
+          required:
+          - node_ref
+          - domain_relation_refs
+          properties:
+            node_ref: *id001
+            domain_relation_refs:
+              type: array
+              minItems: 1
+              items:
+                type: string
+                minLength: 1
+              uniqueItems: true
+      program_scope:
+        type: object
+        additionalProperties: false
+        required:
+        - entity_ref
+        - system_ref
+        properties:
+          entity_ref: *id001
+          system_ref: *id001
+      outside_scope:
+        type: array
+        minItems: 1
+        items: *id001
+        uniqueItems: true
+      positioning:
+        type: object
+        additionalProperties: false
+        required:
+        - entity_ref
+        - domain_ref
+        - status
+        properties:
+          entity_ref: *id001
+          domain_ref: *id001
+          status:
+            const: indicative
+      note: *id002
+      estimation: *id002
+      scope: *id002
+      scope_summary: *id002
+  program_ref: *id003
+  estimation:
+    type: object
+    additionalProperties: false
+    required: [title, intro, stages, relations, note, links]
+    properties:
+      title: *id002
+      intro: *id002
+      stages:
+        type: array
+        minItems: 3
+        maxItems: 3
+        items:
+          type: object
+          additionalProperties: false
+          required: [id, notion, text, producer]
+          properties:
+            id: *id001
+            notion: *id001
+            producer: *id002
+            text: *id002
+      relations:
+        type: array
+        minItems: 2
+        maxItems: 2
+        items:
+          type: object
+          additionalProperties: false
+          required: [source_ref, target_ref, operation, text]
+          properties:
+            source_ref: *id001
+            target_ref: *id001
+            operation:
+              enum: [apply_productivity, add_project_activities]
+            text: *id002
+      note: *id002
+      links:
+        type: array
+        minItems: 2
+        maxItems: 3
+        items:
+          type: object
+          additionalProperties: false
+          required: [href, label]
+          properties:
+            href:
+              enum: ['#complexite', '#calcul-net', '#evaluation-core']
+            label: *id002

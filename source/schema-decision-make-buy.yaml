@@ -1,0 +1,142 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+additionalProperties: false
+required: [version, date, role, affichage, options, criteres, benefices, mandat, preuves, financement, alternatives, test_calendrier, methodes]
+properties:
+  version: {const: 1}
+  date: {type: string}
+  role: {$ref: '#/$defs/text'}
+  affichage:
+    type: object
+    additionalProperties:
+      anyOf:
+      - {$ref: '#/$defs/text'}
+      - type: array
+        items: {$ref: '#/$defs/navigation'}
+  options:
+    type: array
+    minItems: 3
+    maxItems: 3
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, nom_ref, favorable, engagement, renoncer]
+      properties:
+        id: {enum: [make, sap, microsoft]}
+        nom_ref: {$ref: '#/$defs/text'}
+        favorable: {$ref: '#/$defs/text'}
+        engagement: {$ref: '#/$defs/text'}
+        renoncer: {$ref: '#/$defs/text'}
+  criteres:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, titre, principal, options, preuve, responsable, impact, source]
+      properties:
+        id: {$ref: '#/$defs/text'}
+        titre: {$ref: '#/$defs/text'}
+        principal: {type: boolean}
+        options:
+          type: object
+          additionalProperties: false
+          required: [make, sap, microsoft]
+          properties:
+            make: {$ref: '#/$defs/tradeoff'}
+            sap: {$ref: '#/$defs/tradeoff'}
+            microsoft: {$ref: '#/$defs/tradeoff'}
+        preuve: {$ref: '#/$defs/text'}
+        responsable: {$ref: '#/$defs/text'}
+        impact: {$ref: '#/$defs/text'}
+        source: {$ref: '#/$defs/text'}
+  benefices:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, titre, indicateur, initial, cible, echeance, responsable]
+      properties:
+        id: {$ref: '#/$defs/text'}
+        titre: {$ref: '#/$defs/text'}
+        indicateur: {$ref: '#/$defs/text'}
+        initial: {$ref: '#/$defs/pending'}
+        cible: {$ref: '#/$defs/pending'}
+        echeance: {$ref: '#/$defs/pending'}
+        responsable: {$ref: '#/$defs/text'}
+  mandat:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, titre, valeur, aide]
+      properties:
+        id: {$ref: '#/$defs/text'}
+        titre: {$ref: '#/$defs/text'}
+        valeur: {$ref: '#/$defs/pending'}
+        aide: {$ref: '#/$defs/text'}
+  preuves:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, titre, livrable, responsable, poursuivre, arreter, risque, reponse, source]
+      properties:
+        id: {$ref: '#/$defs/text'}
+        titre: {$ref: '#/$defs/text'}
+        livrable: {$ref: '#/$defs/text'}
+        responsable: {$ref: '#/$defs/text'}
+        poursuivre: {$ref: '#/$defs/text'}
+        arreter: {$ref: '#/$defs/text'}
+        risque: {$ref: '#/$defs/text'}
+        reponse: {$ref: '#/$defs/text'}
+        source: {$ref: '#/$defs/text'}
+  financement: {$ref: '#/$defs/paragraphs'}
+  alternatives: {$ref: '#/$defs/paragraphs'}
+  test_calendrier:
+    type: object
+    additionalProperties: false
+    required: [option, prolongation_mois]
+    properties:
+      option: {enum: [java-spring, dotnet, rust]}
+      prolongation_mois: {type: integer, minimum: 1}
+  methodes:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [titre, apport, limite, source]
+      properties:
+        titre: {$ref: '#/$defs/text'}
+        apport: {$ref: '#/$defs/text'}
+        limite: {$ref: '#/$defs/text'}
+        source: {type: string, pattern: '^https://'}
+$defs:
+  text: {type: string, minLength: 1}
+  pending: {type: [string, 'null'], minLength: 1}
+  navigation:
+    type: object
+    additionalProperties: false
+    required: [id, titre]
+    properties:
+      id: {enum: [choix, economie, preuves, mandat]}
+      titre: {$ref: '#/$defs/text'}
+  tradeoff:
+    type: object
+    additionalProperties: false
+    required: [apport, contrepartie]
+    properties:
+      apport: {$ref: '#/$defs/text'}
+      contrepartie: {$ref: '#/$defs/text'}
+  paragraphs:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [titre, texte]
+      properties:
+        titre: {$ref: '#/$defs/text'}
+        texte: {$ref: '#/$defs/text'}

@@ -1,0 +1,2423 @@
+version_schema: 1
+id: references-couts-integration
+date: '2026-10-28'
+objet: Repères publics de coût de mise en œuvre, séparés du chiffrage FLOW. Les montants comparables dans l'étude portent
+  exclusivement sur des achats et prestations externes ; les équipes du client ne sont jamais valorisées ici. La cible
+  d'un retraitement est le périmètre FLOW chez Beaumanoir, commun aux références. Le bloc de build Core présente
+  séparément des abaques d'effort conditionnels et des programmes SCM non transposés en prix.
+dependances:
+  preuves: sources/benchmark-integration-2026-10-23.md
+  preuve_build_core: sources/benchmark-build-core-scm-2026-10-27.md
+  preuve_frappe_erpnext: sources/fiche-marche-frappe-erpnext-flow-2026-10-28.md
+  preuve_microsoft: sources/fiche-marche-microsoft-flow-2026-10-28.md
+  preuve_sap: sources/fiche-marche-sap-flow-2026-10-28.md
+  shortlist_erp_oss: sources/shortlist-erp-oss-flow-2026-10-28.md
+  revue_postes: sources/revue-projets-reference-2026-10-26.md
+  perimetre_flow: source/ecarts-perimetre-flow-rfi.md
+  budgets_etude: source/couts-15-ans.yaml
+  convention_plan: source/plan-investissement.yaml
+conventions:
+  assiette_cible: Services externes de réalisation et d'intégration, incluant si documentés configuration, extensions,
+    interfaces, données, tests, déploiement, pilotage et stabilisation. Licences, cloud, matériel, MCO récurrent, salaires
+    internes et transformation organisationnelle globale exclus.
+  montant_publie: Prix ou budget de la publication, dans sa devise et sur son périmètre exact. Un montant dont la séparation
+    des charges internes n'est pas démontrée est conservé comme information, mais n'est pas réputé coût externe.
+  normalisation: Montant publié × indice 2026 / indice de départ ÷ taux de change BCE du 22 octobre 2026, exprimé en
+    unités de devise d'origine par euro. Le résultat est un repère monétaire indicatif en EUR 2026, au périmètre publié
+    ; il ne transpose ni la taille, ni les fonctions, ni les responsabilités à FLOW. En EUR 2026, facteur et taux valent
+    1. Une fourchette reste une fourchette.
+  prix_2026: L'indice britannique vise les prix des services informatiques vendus aux entreprises. Pour les montants
+    américains, le CPI-U général sert de proxy faute de série PPI couvrant correctement ces prestations. L'IPC canadien
+    n'est utilisé que pour illustrer les montants publiés dont l'assiette externe n'est pas vérifiée. Ces indices ne
+    sont pas des tarifs français d'intégrateur.
+  transposition_au_perimetre_flow_beaumanoir: 'Contrefactuel : coût des prestations externes du projet publié, retraité
+    aux fonctions, volumes, pays, interfaces et responsabilités du périmètre FLOW chez Beaumanoir. Une estimation chiffrée
+    exige un pont documenté des livrables et des responsabilités depuis le projet de référence, y compris les ajouts
+    et retraits justifiés. Un champ null signifie que ce pont n''existe pas, et non un coût nul.'
+  independence: Les budgets Beaumanoir Microsoft et SAP et l'ancre Make dérivée de SAP figurent dans les YAML économiques.
+    Ils ne valident pas indépendamment cette ancre et sont exclus de l'échantillon de comparaison de marché.
+reperes_build_core:
+  titre: Abaques d'effort et références SCM · Build Core System
+  colonnes:
+    composant: Référence publique
+    taille: Mesure observée
+    portee: Portée de la comparaison
+  introduction: 'Une cohorte ISBSG de développements neufs Java donne un abaque en heures par point de fonction,
+    applicable à FLOW après comptage indépendant et réconciliation du périmètre d''effort. Les codes figés de
+    Frappe/ERPNext/Insights, Odoo Community, Tryton et Axelor permettent d''observer la taille et les points chauds
+    de sélections opérationnelles. Ces volumes ne sont ni des points de fonction, ni une calibration FLOW.'
+  lignes:
+  - composant: ISBSG 2023 · 72 builds neufs Java
+    mesure: 100–300 PF IFPUG/Nesma ; P25 6,2, médiane 9,4, P75 14,7 h/PF
+    portee: Abaque conditionnel par lot mesuré ; cohorte non limitée à la SCM et pilotage à réconcilier.
+  - composant: QSM · développement neuf
+    mesure: Médiane 9,16 PF/mois-personne, soit 17,47 h/PF à 160 h/mois
+    portee: Contrepoint historique IT métier ; ne se moyenne pas avec ISBSG.
+  - composant: OpenLMIS · tickets de stock
+    mesure: 22 à 153 h tracées sur six évolutions documentées
+    portee: Microfonctions sur socle existant ; temps présent pour 20 des 57 tickets achevés du composant.
+  - composant: OpenLMIS, RELEX et W-RESPONSE · programmes
+    mesure: Budgets publiés en devises et assiettes d'origine
+    portee: Programmes SCM réels dont le build logiciel n'est pas isolé ; aucun tarif €/JH déductible.
+  - composant: Frappe et ERPNext v16 · code source figé
+    mesure: 3 088 fichiers hors tests ; 14,49 Mo de code source sélectionné, dont 10,44 Mo Frappe
+    portee: Premier relevé en octets Git, sans Insights ; autre sélection que la mesure PNCLOC, sans conversion en JH.
+  - composant: Frappe, ERPNext et Insights · code opérationnel sélectionné
+    mesure: Étude OSS structurée ci-dessous ; un calcul nominal en mois-personne et JH, dérivé par composant.
+    portee: Diagnostic reproductible sur commits figés, non calibré ; sans résiduel FLOW ni intégration client.
+  - composant: Six fiches produit · quatre OSS, Microsoft et SAP
+    mesure: Six axes FLOW communs ; relevé PNCLOC sélectionné pour chaque OSS et effort nominal dérivé pour ERPNext.
+    portee: Comparer fonctions documentées, frontières d'édition, code ouvert et parité à éprouver ; aucun relevé public complet du code Buy.
+  - composant: Odoo Community, Tryton et Axelor · code sélectionné
+    mesure: Relevés PNCLOC sur commits figés, avec framework, opérations et interfaces distingués ; XML et dépendances hors FLOW à part.
+    portee: Proxys de taille et points chauds, non des tailles fonctionnelles homogènes ni des estimations de charge FLOW.
+  - composant: OCA et Camunda · composants complémentaires
+    mesure: Écosystème et moteur tiers documentés, hors relevés des quatre références OSS.
+    portee: Aident à contrôler les dépendances et réutilisations ; leur code ne s'ajoute pas implicitement aux assiettes observées.
+  conclusion: 'Premier test calculable : compter les points de fonction de lots FLOW bornés et comparer leurs heures
+    au PDR ISBSG à assiette égale. Six fiches produit comparables consignent quatre relevés de code OSS et des essais
+    pour mesurer le résiduel Availability, dossier et analytics. Le calcul COCOMO simplifié d''ERPNext reste un diagnostic
+    conditionnel. Aucune de ces méthodes ne valide directement le prix du Core complet ; le chiffrage courant reste
+    une hypothèse.'
+  source:
+    path: sources/fiche-marche-frappe-erpnext-flow-2026-10-28.md
+    label: Fiche ERPNext/Frappe · code, Availability, dossiers et analyses
+  etude_oss:
+    id: erpnext-flow-operations-2026-10-28
+    titre: ERPNext et Frappe · calcul sur le code opérationnel sélectionné
+    date_observation: '2026-10-28'
+    nature: diagnostic_reconstruction_oss
+    statut: non_calibre
+    niveau_comparaison: axes_selectifs
+    preuve_ref: sources/fiche-marche-frappe-erpnext-flow-2026-10-28.md
+    prix_observe_eur_ht: null
+    prix_retraite_flow_eur_2026: null
+    perimetre:
+      objet: >-
+        Calcul de reconstruction hypothétique sur une sélection de code du framework Frappe, des opérations
+        ERPNext et de Frappe Insights v3 rapprochée du périmètre opérationnel FLOW. Cette sélection n'est pas
+        une spécification complète de FLOW. Les axes comparatifs ciblent des risques majeurs sans qualifier
+        exhaustivement chaque capacité.
+      bc_total: 88
+      bc_exclus: [BC-016, BC-017, BC-074, BC-075]
+      exclus: >-
+        Comptabilité, facturation, encaissement, étude et développement produit ; intégration au SI Beaumanoir,
+        migration, déploiement Groupe, Run et MCO client. Les interfaces opérationnelles vers Finance restent à qualifier.
+      assiette_effort: >-
+        Développement logiciel du produit générique : analyse, conception, code, intégration technique et
+        qualification dans le sens du modèle COCOMO II. Les JH ne sont ni des dépenses observées ni un devis.
+    architecture:
+      technologies:
+      - id: frappe
+        titre: Frappe Framework
+        description: >-
+          Framework Python et JavaScript à DocTypes déclaratifs, persistance MariaDB, droits, API REST,
+          formulaires, événements, tâches de fond et services Redis/Valkey. Le périmètre retenu comprend
+          interface et temps réel ; tous les services du framework ne sont pas propres à FLOW.
+        preuve_ref: https://docs.frappe.io/framework/user/en/basics/architecture
+      - id: erpnext
+        titre: ERPNext
+        description: >-
+          Application métier Python et JavaScript sur Frappe. La sélection opérationnelle couvre stock,
+          achats, ventes, support et des services de planification/exécution ; des branches comptables
+          restent présentes dans le code malgré l'exclusion du contrat Finance FLOW.
+        preuve_ref: https://github.com/frappe/erpnext/tree/ade850bbd6a7412e9994a9637d2c5c713771632a
+      - id: insights
+        titre: Frappe Insights v3
+        description: >-
+          Application analytique distincte avec serveur Python, interface Vue/TypeScript, requêtes Ibis
+          et Data Store DuckDB/Parquet. Droits, cache, fraîcheur et correction des données doivent être
+          validés sur les volumes et indicateurs FLOW.
+        preuve_ref: https://github.com/frappe/insights/tree/c7dc954d8275756deb5ad24f7c35c3f3c2ca1a6c
+      points_chauds:
+      - id: automation_reprise
+        titre: Reprise et concurrence d'Automation Flow
+        description: >-
+          Instantanés de parcours, attentes, corrélation, vidage concurrent de file et marqueurs antirejeu.
+          Le moteur est bêta ; l'effet unique dans un SI externe et la conservation durable des preuves
+          restent à démontrer. Le sous-ensemble mesuré est déjà inclus dans Frappe.
+        preuve_ref: https://github.com/frappe/frappe/tree/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/automation_engine
+      - id: stock_chronologique
+        titre: Stock chronologique et réservation
+        description: >-
+          Les corrections rétroactives, lots/séries et réservations concurrentes concentrent les règles
+          d'état. La projection agrégée ne vaut pas promesse ATP/CTP/PTP transactionnelle.
+        preuve_ref: https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/stock_ledger.py
+      - id: planification_promesse
+        titre: Planification et promesse de date
+        description: >-
+          MRP/MPS et Work Order manipulent besoins, fournitures et capacité datés. Leur combinaison avec
+          les commandes ne démontre pas la promesse FLOW avant engagement sous concurrence.
+        preuve_ref: https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/manufacturing/report/material_requirements_planning_report/material_requirements_planning_report.py
+      - id: retours_sav
+        titre: Retours et identité du bien
+        description: >-
+          Les retours achat/vente interagissent avec mouvements, statuts et quantités. Le dossier FLOW
+          doit préserver le lien du bien sérialisé entre retour, réparation, remboursement et remplacement.
+        preuve_ref: https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/controllers/sales_and_purchase_return.py
+      - id: insights_requetes
+        titre: Requêtes, droits et fraîcheur d'Insights
+        description: >-
+          La construction des jointures, le cache et la synchronisation DuckDB/Parquet conditionnent
+          l'explicabilité des KPI FLOW. L'analyse des variantes de processus reste une fonction distincte.
+        preuve_ref: https://github.com/frappe/insights/blob/c7dc954d8275756deb5ad24f7c35c3f3c2ca1a6c/insights/insights/doctype/insights_data_source_v3/ibis_utils.py
+    mesure:
+      unite: PNCLOC
+      script_ref: tools/oss_flow_code_audit.py
+      limites: >-
+        Lignes physiques non vides et hors commentaires ; Python tokenize, scanner lexical simple JS/TS/Vue.
+        Docstrings, templates Vue et certains typages générés inclus ; tests, JSON déclaratifs et dépendances
+        externes exclus. Cette métrique n'est pas l'instruction logique requise par COCOMO II.
+      versions:
+      - id: frappe
+        version: v16.54.0
+        commit: 2fcb9397a1f1da353b21e53d2f97ec56653acd02
+        url: https://github.com/frappe/frappe/tree/2fcb9397a1f1da353b21e53d2f97ec56653acd02
+      - id: erpnext
+        version: v16.52.1
+        commit: ade850bbd6a7412e9994a9637d2c5c713771632a
+        url: https://github.com/frappe/erpnext/tree/ade850bbd6a7412e9994a9637d2c5c713771632a
+      - id: insights
+        version: v3.15.1
+        commit: c7dc954d8275756deb5ad24f7c35c3f3c2ca1a6c
+        url: https://github.com/frappe/insights/tree/c7dc954d8275756deb5ad24f7c35c3f3c2ca1a6c
+      composants:
+        frappe:
+          retenu: {fichiers: 1714, pncloc: 247402}
+          elargi: {fichiers: 2010, pncloc: 262197}
+        erpnext:
+          planification: {fichiers: 883, pncloc: 115201}
+          execution: {fichiers: 895, pncloc: 122900}
+          fabrication_entiere: {fichiers: 1066, pncloc: 130691}
+        insights:
+          v3: {fichiers: 424, pncloc: 45645}
+          serveur: {fichiers: 191, pncloc: 18150}
+          interface: {fichiers: 233, pncloc: 27495}
+      sous_ensembles:
+        automation_flow: {parent: frappe, fichiers: 34, pncloc: 3454}
+    methode:
+      nom: Calcul nominal simplifié inspiré de COCOMO II, sur proxy PNCLOC non calibré
+      source_ref: https://info.usherbrooke.ca/llavoie/enseignement/References/CocomoII_Model_Manual.pdf
+      coefficient_a: 2.94
+      exposant_nominal: 1.0997
+      heures_mois_personne: 152
+      heures_jh: 7
+      limites: >-
+        Application séparée aux trois composants puis addition. Les facteurs produit, équipe et environnement
+        ne sont pas évalués et aucune calibration locale n'a été faite. Aucun gain IA explicite n'est appliqué.
+        Ce calcul décrit la sélection de code observée ; il n'est pas un devis de la Plateforme Flow complète.
+    calcul_cocomo:
+      selections: {frappe: retenu, erpnext: execution, insights: v3}
+    lecture:
+      conclusion: >-
+        Le calcul nominal décrit la reconstruction hypothétique du code OSS sélectionné. Le résiduel nécessaire
+        pour satisfaire toutes les exigences FLOW n'est pas mesuré. ERPNext apporte des fonctions opérationnelles
+        documentées, dont la parité sur les parcours FLOW reste à établir. Ce diagnostic ne s'ajoute pas aux cinq
+        options publiées.
+      limites: >-
+        Les lignes de code ne sont pas des points de fonction ni un prix. COCOMO demande des instructions logiques
+        et une calibration locale. Le volume OSS observé ne spécifie pas la Plateforme Flow complète. Les axes
+        de la fiche sont sélectifs et ne calculent aucun taux de couverture.
+  cadre_comparaison:
+    introduction: >-
+      Comparaison de fonctions documentées et de présence dans les offres RFI, sur des axes FLOW sélectifs.
+      Les fiches distinguent fonctions, extensions, intégration, capacité à absorber les volumes et commerce par canal.
+      Une fonction du catalogue n'est pas une parité démontrée ; un point inconnu n'est pas une absence produit.
+    axes:
+    - id: transactions
+      titre: Stocks, achats et ventes
+      bc_refs: [BC-010, BC-011, BC-013, BC-020, BC-021]
+      cible_flow: >-
+        Registre de stock, position à date, inventaire et commandes achat/vente avec provenance et correction.
+      essai: Réception partielle puis correction antidatée ; reconstituer la position et la provenance par site.
+    - id: availability
+      titre: Réserver et promettre une quantité et une date
+      bc_refs: [BC-018, BC-046, BC-047, BC-048]
+      cible_flow: Promettre quantité et date sous concurrence, puis arbitrer des options faisables selon coût et service.
+      essai: Deux ventes simultanées, réception future partielle et capacité occupée ; comparer deux promesses faisables sans surpromesse.
+    - id: execution_sav
+      titre: Exécution, retours et service après-vente
+      bc_refs: [BC-025, BC-026, BC-053, BC-056, BC-059, BC-069, BC-073]
+      cible_flow: Relier commandes, préparation, livraison, retours, réparation et remplacement du même bien.
+      essai: Retour partiel, réparation fournisseur du même bien, remplacement et reprise après incident sans double mouvement.
+    - id: case_automation
+      titre: Gestion des dossiers et automatisation
+      bc_refs: [BC-076, BC-077, BC-078, BC-079, BC-080, BC-085]
+      cible_flow: Dossier achat → vente → SAV avec corrélation, interventions, reprise et historique métier à date.
+      essai: Dossier achat → vente → SAV avec doublon, événement tardif, panne/reprise et relecture « connu à date ».
+    - id: analytics
+      titre: Indicateurs opérationnels et tableaux de bord
+      bc_refs: [BC-086, BC-088]
+      cible_flow: Indicateurs de gestion de la chaîne logistique explicables par marque et période avec droits, source et correction.
+      essai: Taux de service, reliquats, retours et délais par marque/période ; corriger un événement antidaté et retracer chaque chiffre.
+    - id: mining
+      titre: Analyse des variantes de processus
+      bc_refs: [BC-087]
+      cible_flow: Reconstruire variantes, temps de passage et écarts du cycle achat → vente → SAV.
+      essai: Reconstituer variantes et temps de passage à partir d'événements horodatés corrigés, avec provenance.
+    singularites:
+      methode: >-
+        Les caractéristiques des versions à code ouvert mesurées et des produits proposés dans les offres Synvance
+        sont examinées sous cinq angles : fonctions, extensions de périmètre, intégration, tenue en charge et
+        commerce en magasin, en ligne ou en gros. Une documentation produit ne prouve ni activation, ni déploiement, ni parité FLOW.
+      prudence: >-
+        Un point non démontré dans une assiette n'est pas une absence du produit. Aucun benchmark public homogène
+        des six compositions ne mesure la promesse, la cohérence omnicanale et la reprise sous la charge FLOW.
+        Les cas clients ciblés ne certifient pas un Core System groupe.
+      preuve_ref: sources/etude-singularites-produits-flow-2026-10-28.md
+      produits:
+        erpnext:
+          atout:
+            titre: DocTypes, Automation Flow et Insights dans une sélection OSS inspectable
+            constat: >-
+              Frappe fournit modèle déclaratif, droits et API ; la sélection inclut le moteur Automation Flow bêta
+              et Insights v3 pour les analyses multi-sources.
+            comparaison: >-
+              Odoo, Tryton et Axelor sont aussi extensibles ; Axelor dispose d'un BPMN/DMN explicite. L'ouverture
+              du code et le low-code ne sont pas exclusifs à Frappe.
+            limite: Ni ATP/CTP/PTP inter-systèmes, ni process mining FLOW ne sont prouvés par cet assemblage.
+            preuves:
+            - https://docs.frappe.io/framework/user/en/basics/doctypes
+            - https://docs.frappe.io/framework/automations
+            - https://docs.frappe.io/insights/querying/overview
+          extension:
+            au_dela_flow: ERPNext contient aussi Comptabilité, RH, CRM et fabrication complète, hors du build opérationnel étudié.
+            complements_flow: Webshop et Helpdesk sont des applications distinctes ; disponibilité et dossier FLOW restent à qualifier.
+            limite: Ne pas ajouter ces applications au volume PNCLOC ERPNext/Frappe/Insights sans nouvelle mesure.
+            preuves:
+            - https://github.com/frappe/webshop
+            - https://docs.frappe.io/helpdesk/integration/erpnext
+          integration:
+            mecanismes: API REST des DocTypes, méthodes exposées, webhooks et jobs de fond sur Redis.
+            limite: Contrats WMS/POS, ordre, sécurité, antirejeu et identité des objets restent à concevoir et tester.
+            preuves:
+            - https://docs.frappe.io/framework/user/en/api/rest
+            - https://docs.frappe.io/framework/user/en/guides/integration/webhooks
+          charge:
+            mecanismes: Serveurs web et traitements d’arrière-plan séparés ; consolidation différée des ventes de caisse dans le journal des stocks, avec ventes ouvertes réservées dans le stock projeté ; recalcul des mouvements antidatés.
+            repere_observe: Livre blanc Frappe 2020, 70 centres (p. 5), plus de 500 entrepôts et environ 6–8 transactions/minute en moyenne dans un témoignage (p. 18).
+            limite: Cas historique non comparable à ERPNext v16 ni aux pics, corrections et promesses FLOW.
+            preuves:
+            - https://erpnext.com/files/Scaling%20ERPNext.pdf
+            - https://docs.frappe.io/erpnext/point-of-sale/pos-invoice-consolidation
+            - https://docs.frappe.io/erpnext/stock-reposting-settings
+          commerce:
+            retail:
+              statut: hors_perimetre
+              constat: POS ERPNext documenté, hors de la sélection de code mesurée ; consolidation de session différée.
+              limite: Le cas Andok's montre un usage en magasin, sans volume ni version comparables à FLOW.
+              preuves: [https://docs.frappe.io/erpnext/point-of-sale, https://frappe.io/stories/Andok%27s%20Litson%20Corporation]
+            ecommerce:
+              statut: hors_perimetre
+              constat: Webshop est une application séparée d'ERPNext v16 ; Vodafone UK atteste une boutique SIM ciblée.
+              limite: Aucun Core e-commerce groupe ni charge de canal FLOW démontrés.
+              preuves: [https://github.com/frappe/webshop, https://korecent.com/case-study/success-story-of-vodafone-global]
+            wholesale:
+              statut: dans_perimetre
+              constat: Devis, commandes, achats, livraisons, stocks et prix par groupe client sont dans ERPNext.
+              limite: Contrats saisonniers et allocation mode multi-marques FLOW à éprouver.
+              preuves: [https://docs.frappe.io/erpnext/selling, https://docs.frappe.io/erpnext/customer-group]
+        odoo-community:
+          atout:
+            titre: Largeur modulaire publique et routes de stock paramétrables
+            constat: >-
+              Community réunit achats, ventes, stock, réparation et automation ; le même dépôt public contient POS
+              et website_sale, et les routes logistiques permettent plusieurs modes de préparation et livraison.
+            comparaison: >-
+              Cette largeur réduit certains assemblages de départ mais n'est pas exclusive : ERPNext et Tryton ont
+              aussi POS et commerce web, tandis que les paniers Buy ont des fonctions de canal plus spécialisées.
+            limite: POS et website_sale sont hors des 430 879 PNCLOC retenues ; aucune parité omnicanale FLOW déduite.
+            preuves:
+            - https://github.com/odoo/odoo/tree/299075f17026b830a9755f3c43f3e83143995946/addons/point_of_sale
+            - https://github.com/odoo/odoo/tree/299075f17026b830a9755f3c43f3e83143995946/addons/website_sale
+            - https://www.odoo.com/documentation/20.0/applications/inventory_and_mrp/inventory/warehouses_storage/inventory_management/use_routes.html
+          extension:
+            au_dela_flow: Comptabilité, RH, CRM, site web et fabrication complète dépassent la reconstruction opérationnelle FLOW.
+            complements_flow: POS et website_sale publics sont hors assiette mesurée ; OCA et modules Enterprise exigent analyse séparée.
+            limite: Helpdesk Enterprise et EDI d'intégrateur ne doivent pas être crédités à Community mesuré.
+            preuves:
+            - https://github.com/odoo/odoo/tree/299075f17026b830a9755f3c43f3e83143995946/addons/point_of_sale
+            - https://github.com/OCA
+          integration:
+            mecanismes: API JSON-2, méthodes serveur atomiques et webhook entrant de Base Automation dans le commit Community.
+            limite: Un appel JSON-2 est une transaction ; séquences multi-appels, EDI SCM et droits des offres hébergées restent distincts.
+            preuves:
+            - https://www.odoo.com/documentation/20.0/developer/reference/external_api.html
+            - https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/base_automation/models/base_automation.py
+          charge:
+            mecanismes: Workers HTTP/cron séparés et verrous SQL de Stock Quant lors des réservations.
+            repere_observe: null
+            limite: Aucun débit ou p95 public comparable sur la sélection FLOW ; workers supplémentaires ne résolvent pas les verrous ou requêtes lentes.
+            preuves:
+            - https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/odoo/service/server.py
+            - https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_quant.py
+          commerce:
+            retail:
+              statut: hors_perimetre
+              constat: POS présent dans le dépôt Community 20, mais non retenu dans le comptage FLOW.
+              limite: Fonctionnalités et dépendances du POS à mesurer avant comparaison de build.
+              preuves: [https://github.com/odoo/odoo/tree/299075f17026b830a9755f3c43f3e83143995946/addons/point_of_sale]
+            ecommerce:
+              statut: hors_perimetre
+              constat: website_sale présent dans le dépôt Community 20, hors sélection de code mesurée.
+              limite: Parcours, droits et charge omnicanale FLOW non éprouvés.
+              preuves: [https://github.com/odoo/odoo/tree/299075f17026b830a9755f3c43f3e83143995946/addons/website_sale]
+            wholesale:
+              statut: dans_perimetre
+              constat: Commandes, achats, stock, tarification client/quantité et routes logistiques dans la sélection.
+              limite: Allocation Fashion et promesse multi-systèmes FLOW non démontrées.
+              preuves:
+              - https://www.odoo.com/documentation/20.0/applications/sales/sales/products_prices/prices/pricing.html
+              - https://www.odoo.com/documentation/20.0/applications/inventory_and_mrp/inventory/warehouses_storage/inventory_management/use_routes.html
+        tryton:
+          atout:
+            titre: Stock à date par périodes clôturées et cache des quantités
+            constat: Stock Period mémorise les positions antérieures et les mouvements utilisent des verrouillages concurrents explicites.
+            comparaison: Les autres ERP historisent aussi les stocks ; l'algorithme Tryton observé est transparent, sans exclusivité fonctionnelle prouvée.
+            limite: Clôtures et verrous peuvent contraindre les corrections antidatées et les références produit très demandées.
+            preuves:
+            - https://docs.tryton.org/8.2/modules-stock/design/index.html
+            - https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/move.py
+          extension:
+            au_dela_flow: Modules Finance et comptabilité existent mais restent hors du build opérationnel FLOW.
+            complements_flow: POS, web_shop, Shopify, accords-cadres et Peppol sont des modules distincts, hors des 25 mesurés.
+            limite: Le code et les dépendances de ces extensions doivent être comptés séparément avant estimation.
+            preuves:
+            - https://docs.tryton.org/8.2/modules-sale-point/design.html
+            - https://docs.tryton.org/8.2/modules-web-shop/design.html
+          integration:
+            mecanismes: JSON-RPC, XML-RPC et client REST ; module Shopify avec synchronisations et webhook ciblé.
+            limite: La notification Shopify ne démontre pas un service général d’événements métier ou d’échange de données de la chaîne logistique dans le périmètre étudié.
+            preuves:
+            - https://docs.tryton.org/8.2/server/topics/rpc.html
+            - https://docs.tryton.org/8.2/client-rest/index.html
+          charge:
+            mecanismes: Stock Period met en cache les périodes clôturées ; SQL et verrous NOWAIT protègent l'affectation.
+            repere_observe: null
+            limite: Aucune mesure comparable de débit ou de temps de réponse au 95e percentile ; tester les corrections après clôture et les accès simultanés à une référence très demandée.
+            preuves:
+            - https://docs.tryton.org/8.2/modules-stock/design/index.html
+            - https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/move.py
+          commerce:
+            retail:
+              statut: hors_perimetre
+              constat: Module POS OSS sale_point disponible, hors des 25 modules retenus.
+              limite: Vente, paiement et écriture comptable étendent le périmètre et les dépendances.
+              preuves: [https://docs.tryton.org/8.2/modules-sale-point/design.html]
+            ecommerce:
+              statut: hors_perimetre
+              constat: web_shop et connecteurs Shopify/Vue Storefront existent hors des modules mesurés.
+              limite: Aucun front e-commerce ou déploiement grand compte n'est attesté dans l'assiette FLOW.
+              preuves: [https://docs.tryton.org/8.2/modules-web-shop/design.html]
+            wholesale:
+              statut: dans_perimetre
+              constat: Sale, Purchase et Stock constituent le socle B2B ; accords-cadres en module additionnel.
+              limite: Taille de déploiement et parité allocations FLOW non démontrées.
+              preuves: [https://docs.tryton.org/8.2/modules-sale-blanket-agreement/design.html]
+        axelor-open-suite:
+          atout:
+            titre: Studio/BPM avec BPMN et DMN au voisinage de la Suite ERP OSS
+            constat: Studio/BPM 4.0.7 apporte processus graphiques, décisions, tâches et suivi d'instance.
+            comparaison: Frappe Automation Flow est bêta, Odoo et Tryton ont des règles locales ; l'assemblage BPMN/DMN d'Axelor est plus explicite dans les quatre assiettes OSS étudiées.
+            limite: Le moteur Camunda est tiers ; le dossier transversal FLOW avec reprise et effet externe unique reste à prouver.
+            preuves:
+            - https://docs.axelor.com/studio/4.0/bpm-docs/index.html
+            - https://github.com/axelor/axelor-studio/blob/4.0.7/build.gradle
+          extension:
+            au_dela_flow: La Suite possède CRM, contrats, RH et Finance comme modules ou dépendances non financées ici.
+            complements_flow: Connecteur Enterprise vers la caisse tierce Cashmag, BI avancée et Data Capture EDI sont hors OSS ; Axelor Connect est distinct.
+            limite: Ne pas ajouter ces capacités au code OSS ni au panier économique sans droits et preuves séparés.
+            preuves:
+            - https://docs.axelor.com/aos/en/enterprise/cashmag/
+            - https://docs.axelor.com/aos/en/9.0/enterprise/data-capture/EDI/
+            - https://docs.axelor.com/connect-help-center/docs/HTML/en/tools/webhooks.html
+          integration:
+            mecanismes: API REST paginée avec versions d'écriture et appels de web services depuis Studio/BPM.
+            limite: Webhooks d'Axelor Connect et EDI Enterprise restent hors du panier OSS ; la corrélation FLOW est à concevoir.
+            preuves:
+            - https://docs.axelor.com/adk/latest/dev-guide/web-services/rest.html
+            - https://docs.axelor.com/studio/4.0/web-service-docs/tutorial/step5.html
+          charge:
+            mecanismes: Cache Caffeine ou Redisson/Redis et Quartz JobStore en cluster sont configurables ; Camunda ajoute ses jobs.
+            repere_observe: null
+            limite: Aucune mesure comparative de débit ou de temps de réponse au 95e percentile sur les réservations et dossiers FLOW ; l’assemblage de serveurs doit être configuré et testé.
+            preuves:
+            - https://docs.axelor.com/adk/8.2/dev-guide/application/cache.html
+            - https://docs.axelor.com/adk/8.2/dev-guide/modules/scheduler.html
+          commerce:
+            retail:
+              statut: hors_perimetre
+              constat: Un connecteur Enterprise vers la caisse tierce Cashmag est documenté, hors du code AOS mesuré.
+              limite: Aucun POS OSS crédité à la sélection ; synchronisation de canal à éprouver.
+              preuves: [https://docs.axelor.com/aos/en/enterprise/cashmag/]
+            ecommerce:
+              statut: non_demontre
+              constat: Le discours Retail mentionne l'e-commerce, sans module storefront identifié dans la sélection AOS.
+              limite: Édition, code et droits du commerce web non établis pour le panier OSS.
+              preuves: [https://axelor.com/retail/]
+            wholesale:
+              statut: dans_perimetre
+              constat: Achats, ventes, stock et supply chain dans AOS ; TKMF illustre un usage filial B2B.
+              limite: Ni Core groupe ni promesse FLOW inter-systèmes démontrés.
+              preuves: [https://axelor.com/fr/cas-client-tkmf/]
+        microsoft:
+          atout:
+            titre: Commerce, CSU et DOM dans un panier de canaux développé
+            constat: Commerce couvre POS, e-commerce et B2B ; CSU réplique le canal et DOM optimise le choix du site.
+            comparaison: SAP OMSA source les commandes mais le panier SAP n'inclut ni caisse ni storefront ; les POS/web OSS sont hors des assiettes mesurées.
+            limite: DOM est un traitement batch et les canaux répliqués sont asynchrones ; remplacement des POS FLOW non établi.
+            preuves:
+            - https://learn.microsoft.com/en-us/dynamics365/commerce/channels-overview
+            - https://learn.microsoft.com/en-us/dynamics365/commerce/dom
+            - https://learn.microsoft.com/en-us/dynamics365/commerce/commerce-architecture
+          extension:
+            au_dela_flow: F&O, Customer Service et Power Platform couvrent d'autres fonctions d'entreprise selon licences.
+            complements_flow: Inventory Visibility est une option d'architecture discutée ; Customer Service et droits Power Platform autonomes ne sont pas établis dans le RFI.
+            limite: Les composants du catalogue ne sont pas réputés achetés ou activés sans preuve du panier.
+            preuves:
+            - source/ecarts-perimetre-flow-rfi.md
+            - https://learn.microsoft.com/en-us/dynamics365/supply-chain/inventory/inventory-visibility-overview
+          integration:
+            mecanismes: OData, Data Management asynchrone, intégrations récurrentes et Business/Data Events vers les services Azure.
+            limite: Business Events ne sert pas l'export massif ; les droits, quotas et reprises aval sont à tester.
+            preuves:
+            - https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/data-entities/data-management-integration-data-entity
+            - https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/business-events/home-page
+          charge:
+            mecanismes: Commerce Scale Unit distribue le canal ; DOM partitionne les lignes pour son solveur batch.
+            repere_observe: Data Events indique 5 000 événements/5 min et 50 000/h par environnement avant risque de dégradation.
+            limite: Sous-service exigeant l'activation Power Platform, non établie dans le RFI ; pas un débit ERP. Latence DOM, fraîcheur CSU et promesse FLOW non mesurées ensemble.
+            preuves:
+            - https://learn.microsoft.com/en-us/dynamics365/commerce/dom-processing
+            - https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/business-events/data-events
+          commerce:
+            retail:
+              statut: dans_perimetre
+              constat: Commerce et CSU sont dans le panier annoncé ; Store Commerce/POS est une capacité du catalogue.
+              limite: Le RFI conserve des interfaces POS externes ; leur remplacement par Commerce n'est pas prouvé.
+              preuves: [https://learn.microsoft.com/en-us/dynamics365/commerce/dev-itpro/store-commerce-capabilities, source/ecarts-perimetre-flow-rfi.md]
+            ecommerce:
+              statut: dans_perimetre
+              constat: Commerce et tier e-commerce annoncés ; storefront B2C/B2B au catalogue.
+              limite: Construction et mise en service d'un site FLOW non démontrées.
+              preuves: [https://learn.microsoft.com/en-us/dynamics365/commerce/channels-overview, https://learn.microsoft.com/en-us/dynamics365/commerce/b2b/set-up-b2b-site]
+            wholesale:
+              statut: dans_perimetre
+              constat: SCM/K3 et site B2B Commerce avec commandes de masse et variantes.
+              limite: Droits, paramétrage et flux Fashion précis de l'offre FLOW à confirmer.
+              preuves: [https://learn.microsoft.com/en-us/dynamics365/commerce/b2b/quick-bulk-orders, https://k3fashionsolutions.com/solutions/enterprise/k3-fashion/]
+        sap:
+          atout:
+            titre: Affecter les stocks rares aux commandes et aux contrats de gros
+            constat: S/4 Fashion alloue les approvisionnements, aATP confirme quantité/date et OMSA source/réserve selon stratégies.
+            comparaison: Microsoft DOM/CTP offre un autre assemblage ; les quatre OSS ne démontrent pas une promesse FLOW équivalente de bout en bout.
+            limite: Activation et droits aATP/OMSA à confirmer ; PP/DS nécessaire au CTP de création d'approvisionnement n'est pas établi dans la BOM.
+            preuves:
+            - https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/f132c385e0234fe68ae9ff35b2da178c/d335e3418f4348ffbae9f11888a62cc7.html
+            - https://help.sap.com/doc/08442b9d2cd744f7aecc1e08080c26f3/SHIP/en-US/FSD_SAP_OMSA.pdf
+            - https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/e296651f454c4284ade361292c633d69/40f313c8371047b1824c2565d63a8f79.html
+          extension:
+            au_dela_flow: S/4 comprend Finance et IBP planifie le réseau au-delà de la promesse transactionnelle FLOW.
+            complements_flow: POS de caisse, Commerce Cloud, Order Management Foundation, PP/DS, Integration Suite et Signavio ne sont pas établis dans la BOM.
+            limite: IBP proposé ne vaut pas CTP synchrone ; chaque produit additionnel exige droits et financement distincts.
+            preuves:
+            - source/ecarts-perimetre-flow-rfi.md
+            - https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/e1d9bfb257d54a5fbdd0f1545de13b22/0667341ef93045f8853245817e96bc82.html
+          integration:
+            mecanismes: OData V2/V4, SOAP A2A/B2B et Business Events/CloudEvents ; Event Mesh selon configuration/droits.
+            limite: Integration Suite est distincte et exclue du RFI ; mapping, ordre, quotas et reprise demeurent à contractualiser.
+            preuves:
+            - https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/19d48293097f4a2589433856b034dfa5/3bac8c01d7024ae1b15cf848ce12544e.html
+            - https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/8308e6d301d54584a33cd04a9861bc52/8cbf952e55364254be2da77aa1342aa5.html
+          charge:
+            mecanismes: HANA, aATP/ARun, sourcing OMSA et runs IBP ; SAP publie benchmarks applicatifs et Quick Sizer.
+            repere_observe: null
+            limite: Les aSAPS et dimensionnements matériels ne mesurent pas le panier FLOW, la latence de promesse ni la reprise inter-systèmes.
+            preuves:
+            - https://www.sap.com/about/benchmark.html
+            - https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/22bbe89ef68b4d0e98d05f0d56a7f6c8/067579ee1f7f4ffba00c4abd9bc6f832.html
+          commerce:
+            retail:
+              statut: partiel
+              constat: Back office magasin et OSTA collectent/auditent les transactions POS ; pas de caisse dans le panier.
+              limite: La continuité du stock et des ventes magasins sous panne/retard reste à prouver.
+              preuves: [https://help.sap.com/docs/SAP_OMNICHANNEL_SALES_TRANSFER_AND_AUDIT/8d062be4847040a48f4b9aa20eece24a/ddc9f86057a84ccdab1dbe69203c1cb4.html]
+            ecommerce:
+              statut: partiel
+              constat: OMSA traite sourcing et réservation des commandes, sans storefront dans la BOM.
+              limite: Commerce Cloud et OMS cycle complet ne sont pas inclus de façon démontrée.
+              preuves: [https://help.sap.com/doc/08442b9d2cd744f7aecc1e08080c26f3/SHIP/en-US/FSD_SAP_OMSA.pdf, source/ecarts-perimetre-flow-rfi.md]
+            wholesale:
+              statut: dans_perimetre
+              constat: S/4 Fashion gère variantes, saisons, contrats et Supply Assignment sous activation.
+              limite: Droits et paramétrage exacts du RFI 2025 à vérifier par scénario FLOW.
+              preuves: [https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/9905622a5c1f49ba84e9076fc83a9c2c/248a2e7a5f91489f8a18eb7e1372828a.html]
+  fiches_produit:
+    erpnext:
+      id: erpnext
+      nom: ERPNext + Frappe + Frappe Insights
+      famille: oss
+      statut: diagnostic_mesure
+      date_observation: '2026-10-28'
+      version_edition: Versions figées de Frappe, ERPNext et Insights, détaillées dans le relevé de code source.
+      preuve_ref: sources/fiche-marche-frappe-erpnext-flow-2026-10-28.md
+      composition:
+        produits: [Frappe Framework, ERPNext, Frappe Insights v3]
+        technologies: Python, JavaScript et Vue/TypeScript ; MariaDB, Redis/Valkey et DuckDB/Parquet pour les services étudiés.
+        preuve_ref: sources/fiche-marche-frappe-erpnext-flow-2026-10-28.md
+      code:
+        observabilite: mesure_oss
+        mesure_ref: etude_oss.mesure
+        calcul_ref: etude_oss.calcul_cocomo
+        pncloc: null
+        effort_jh: null
+        limite: La mesure et les JH couvrent ensemble ERPNext, Frappe et Insights v3 ; proxy COCOMO II nominal non calibré, sans résiduel FLOW ni gains IA.
+      references_deploiement:
+      - id: chewy-portail-fournisseurs
+        organisation: Chewy
+        taille_organisation: Environ 18 000 salariés au 1er février 2026 (Chewy Inc., groupe).
+        entite_equipee: Chewy ; portail de partenaires fournisseurs, sans périmètre ERP groupe établi.
+        usage_atteste: ERPNext personnalisé pour les contrats de remises fournisseurs, leurs validations, révisions, traces d'audit et analyses.
+        edition_deploiement: null
+        annee_preuve: 2026
+        actualite: recent
+        limite_flow: Cas de portail contractuel et d'automatisation ; ne démontre ni le système central de gestion de la chaîne logistique de Chewy, ni la promesse de disponibilité ou le SAV FLOW. Version et volumes d'usage inconnus.
+        preuves:
+        - https://www.sec.gov/Archives/edgar/data/1766502/000176650226000034/chwy-20260201.htm
+        - https://frappe.io/stories/Chewy
+        - https://korecent.com/case-study/success-story-of-chewy
+      - id: vodafone-uk-sim
+        organisation: Vodafone Group
+        taille_organisation: 87 205 salariés moyens du groupe en exercice 2025, hors opérations non contrôlées.
+        entite_equipee: Vodafone UK ; flux de commandes SIM et webshop spécifique.
+        usage_atteste: ERPNext adapté pour hiérarchies clients, validations, commandes de vente et d'achat, bons de livraison et entrepôt virtuel de contrôle des stocks.
+        edition_deploiement: null
+        annee_preuve: 2026
+        actualite: recent
+        limite_flow: Application UK circonscrite aux commandes SIM ; aucun déploiement Core groupe, volume transactionnel, nombre d'utilisateurs ou promesse FLOW démontrés.
+        preuves:
+        - https://reports.investors.vodafone.com/view/897876789/16
+        - https://korecent.com/case-study/success-story-of-vodafone-global
+      prix_observe_eur_ht: null
+      prix_retraite_flow_eur_2026: null
+      evaluations:
+        transactions:
+          fonctionnalite: Stock Ledger, Purchase Order et Sales Order forment un socle transactionnel substantiel.
+          statut_offre: sans_objet
+          offre: Référence de code OSS ; aucune offre d'acquisition ERPNext n'est étudiée.
+          limite: La position FLOW avec corrections, provenances et incertitudes doit être éprouvée.
+          preuves:
+          - https://docs.frappe.io/erpnext/stock-ledger
+          - https://docs.frappe.io/erpnext/purchase-order
+          parite_flow: non_demontree
+        availability:
+          fonctionnalite: Réservation, stock projeté, MRP/MPS et Work Order apportent des briques temporelles.
+          statut_offre: sans_objet
+          offre: Référence de code OSS ; aucun module ERPNext n'est acheté dans les cinq options.
+          limite: ATP/CTP/PTP transactionnels et choix explicable bout en bout non démontrés.
+          preuves:
+          - https://docs.frappe.io/erpnext/stock-reservation
+          - https://docs.frappe.io/erpnext/material-requirements-planning-mrp
+          parite_flow: non_demontree
+        execution_sav:
+          fonctionnalite: Delivery/Purchase Receipt, retours, Issue et Warranty Claim couvrent des étapes réelles.
+          statut_offre: sans_objet
+          offre: Référence de code OSS, sans offre RFI.
+          limite: Coordination transverse, identité de l'article sérialisé et exceptions à éprouver.
+          preuves:
+          - https://docs.frappe.io/erpnext/sales-return
+          - https://docs.frappe.io/erpnext/warranty-claim
+          parite_flow: non_demontree
+        case_automation:
+          fonctionnalite: Automation Flow bêta, Workflow, ToDo et Issue/SLA fournissent parcours, attente et tâches.
+          statut_offre: sans_objet
+          offre: Référence de code OSS, sans offre RFI.
+          limite: Rejeu d'effets externes et registre temporel transverse FLOW non démontrés.
+          preuves:
+          - https://docs.frappe.io/framework/automations
+          - https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/automation_engine/runner.py
+          parite_flow: non_demontree
+        analytics:
+          fonctionnalite: Rapports ERPNext/Frappe et Insights v3 fournissent requêtes, tableaux et droits par ligne.
+          statut_offre: sans_objet
+          offre: Insights est une application séparée comptée dans le diagnostic OSS, pas une offre RFI.
+          limite: Définition des KPI FLOW, fraîcheur et corrections tardives à éprouver.
+          preuves:
+          - https://docs.frappe.io/insights/querying/overview
+          - https://docs.frappe.io/insights/permissions-access-control/overview
+          parite_flow: non_demontree
+        mining:
+          fonctionnalite: Insights est une BI configurable ; un moteur de process mining FLOW n'est pas démontré.
+          statut_offre: sans_objet
+          offre: Référence de code OSS, sans offre RFI.
+          limite: Un tableau de bord ne prouve pas la découverte ni la conformité de processus.
+          preuves:
+          - https://docs.frappe.io/insights/querying/overview
+          parite_flow: non_demontree
+    odoo-community:
+      id: odoo-community
+      nom: Odoo Community 20 + o-spreadsheet
+      famille: oss
+      statut: diagnostic_mesure
+      date_observation: '2026-10-28'
+      version_edition: Odoo Community 20.0 au commit 299075f17026b830a9755f3c43f3e83143995946 et éditeur OSS o-spreadsheet 20.0.4 au commit a3fe2e1792d3159d11a14536c90d58a5affa2013 ; modules Enterprise exclus.
+      preuve_ref: sources/fiche-marche-odoo-community-flow-2026-10-28.md
+      composition:
+        produits: [Odoo Framework, Web, Mail, modules opérationnels, Base Automation, Spreadsheet et Dashboard, o-spreadsheet OSS]
+        technologies: Python, JavaScript/TypeScript, Owl et vues XML ; PostgreSQL et services tiers selon déploiement.
+        preuve_ref: sources/fiche-marche-odoo-community-flow-2026-10-28.md
+      code:
+        observabilite: mesure_oss
+        mesure_ref: tools/oss_candidates_code_audit.py
+        calcul_ref: null
+        pncloc: 430879
+        effort_jh: null
+        limite: 312 868 PNCLOC dans le dépôt Community sélectionné plus 118 011 PNCLOC du moteur o-spreadsheet OSS distinct ; tests, démonstrations, XML et dépendances Finance directes hors total. Helpdesk absent de ce dépôt Community et autres extensions non publiques non crédités.
+      references_deploiement:
+      - id: aurora-wfm
+        organisation: Aurora Multimarket
+        taille_organisation: Plus de 16 000 salariés au total et plus de 1 800 magasins selon le cas intégrateur de juillet 2026.
+        entite_equipee: Réseau de magasins Aurora en Ukraine ; plus de 10 000 salariés couverts par la planification, sans nombre d'utilisateurs actifs publié.
+        usage_atteste: Odoo Community pour les horaires, le temps de travail, les absences, les droits et les rapports de charge du personnel.
+        edition_deploiement: Odoo Community
+        annee_preuve: 2026
+        actualite: recent
+        limite_flow: Preuve d'un déploiement distribué de gestion du personnel (Workforce Management), sans preuve de système central d’achats, ventes, stocks ou SAV sur Odoo.
+        preuves:
+        - https://ubmsoft.com.ua/en/blog/our-blog-2/wfm-system-in-odoo-how-to-automate-personnel-management-23
+        - https://ubmsoft.com.ua/en/proekty
+      - id: ikea-vetements-professionnels
+        organisation: IKEA / Ingka Group
+        taille_organisation: Ingka Group comptait 166 460 collaborateurs et 41,5 Md€ de revenus en exercice 2025 ; ces chiffres ne mesurent pas le déploiement Odoo.
+        entite_equipee: Logistique interne des vêtements professionnels IKEA en Belgique, puis aux Pays-Bas et en Suisse ; entité juridique non nommée dans le cas.
+        usage_atteste: Odoo en backend du webshop Magento pour commandes, stock, préparation, livraison et réapprovisionnement des vêtements professionnels.
+        edition_deploiement: null
+        annee_preuve: null
+        actualite: source_non_datee
+        limite_flow: Flux interne spécialisé dans trois pays ; ni l'entité juridique équipée, ni le Core commercial ou logistique global d'IKEA, ni l'édition Community ne sont établis. Date de mise en service inconnue.
+        preuves:
+        - https://www.ingka.com/newsroom/faq/
+        - https://www.obycron.be/cases/ikea
+      - id: toyota-material-handling-france
+        organisation: Toyota Industries Corporation
+        taille_organisation: 79 454 salariés du groupe en exercice 2025 ; effectif de la filiale équipée non établi dans la source.
+        entite_equipee: Toyota Material Handling France ; interactions avec d'autres unités européennes.
+        usage_atteste: Odoo pour CRM, commandes de vente, achats, fabrication, stock et comptabilité selon un cas publié en 2017.
+        edition_deploiement: null
+        annee_preuve: 2017
+        actualite: historique_non_reconfirme
+        limite_flow: Déploiement filial historique ; extension projetée au reste du SI et maintien en service en 2026 non démontrés. Édition inconnue, donc aucune preuve Community.
+        preuves:
+        - https://www.toyota-industries.com/company/financial/indicators/index.html
+        - https://www.odoo.com/blog/customer-reviews-6/how-toyota-uses-odoo-after-just-6-months-of-integration-312
+      prix_observe_eur_ht: null
+      prix_retraite_flow_eur_2026: null
+      evaluations:
+        transactions:
+          fonctionnalite: Stock, Purchase, Sale et MRP publics traitent commandes, mouvements, emplacements et planification.
+          statut_offre: sans_objet
+          offre: Code Community audité ; aucune offre d'acquisition Odoo n'est étudiée dans les cinq options.
+          limite: Position FLOW avec corrections antidatées et provenance multi-systèmes à éprouver ; dépendances directes à Account séparées du volume retenu.
+          preuves:
+          - https://github.com/odoo/odoo/tree/299075f17026b830a9755f3c43f3e83143995946/addons/stock
+          - https://www.odoo.com/documentation/20.0/applications/inventory_and_mrp/inventory.html
+          parite_flow: non_demontree
+        availability:
+          fonctionnalite: Stock projeté, réservation et règles de réapprovisionnement croisent des quantités et dates ; MRP apporte la planification de fabrication.
+          statut_offre: sans_objet
+          offre: Modules Community publics, sans offre RFI.
+          limite: Promesse atomique ATP/CTP/PTP avant engagement, sous concurrence et arbitrée par coût et service non démontrée.
+          preuves:
+          - https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_quant.py
+          - https://www.odoo.com/documentation/20.0/applications/inventory_and_mrp/inventory/product_management/configure/type.html
+          parite_flow: non_demontree
+        execution_sav:
+          fonctionnalite: Livraisons, retours, réparations et ordres de réparation existent dans les modules Community.
+          statut_offre: sans_objet
+          offre: Modules Stock et Repair publics ; Helpdesk documenté par Odoo n'est pas dans le dépôt Community audité.
+          limite: Dossier unifié achat, vente, retour, réparation et remplacement du même bien à prouver, sans attribuer le Helpdesk Enterprise à Community.
+          preuves:
+          - https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/repair/models/repair.py
+          - https://www.odoo.com/documentation/20.0/applications/inventory_and_mrp/repairs/repair_orders.html
+          parite_flow: non_demontree
+        case_automation:
+          fonctionnalite: Base Automation, activités et fil Mail permettent des règles, notifications et suivi local des objets.
+          statut_offre: sans_objet
+          offre: Base Automation et Mail publics dans Community, sans offre RFI.
+          limite: Orchestration durable et corrélation d'un dossier transversal FLOW avec antirejeu et historique à date non démontrées.
+          preuves:
+          - https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/base_automation/models/base_automation.py
+          - https://github.com/odoo/odoo/tree/299075f17026b830a9755f3c43f3e83143995946/addons/mail
+          parite_flow: non_demontree
+        analytics:
+          fonctionnalite: Spreadsheet et Spreadsheet Dashboard publics apportent des tableaux reliés aux données Odoo ; rapports locaux dans les modules métier.
+          statut_offre: sans_objet
+          offre: Code Community sélectionné ; fonctions avancées sous licence distincte non comptées.
+          limite: KPI multi-source FLOW avec droits, fraîcheur, provenance et corrections antidatées à éprouver.
+          preuves:
+          - https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/spreadsheet_dashboard/__manifest__.py
+          - https://www.odoo.com/documentation/20.0/applications/productivity/spreadsheet/insert.html
+          parite_flow: non_demontree
+        mining:
+          fonctionnalite: Activités et traces des documents peuvent fournir des événements, selon leur configuration et leur conservation.
+          statut_offre: sans_objet
+          offre: Référence de code Community, sans offre RFI.
+          limite: Journal de cas multi-systèmes et découverte ou conformité des variantes non démontrés dans le code sélectionné.
+          preuves:
+          - https://github.com/odoo/odoo/tree/299075f17026b830a9755f3c43f3e83143995946/addons/mail
+          parite_flow: non_demontree
+    tryton:
+      id: tryton
+      nom: Tryton 8.2
+      famille: oss
+      statut: diagnostic_mesure
+      date_observation: '2026-10-28'
+      version_edition: Monorepo trytond-8.2.0 au commit e011222dc305c431677e586706fd241dffe02236.
+      preuve_ref: sources/fiche-marche-tryton-flow-2026-10-28.md
+      composition:
+        produits: [Tryton Server, Sao Web, 25 modules opérationnels sélectionnés]
+        technologies: Python et JavaScript ; modèles SQL, vues XML, PostgreSQL ou SQLite selon la configuration.
+        preuve_ref: sources/fiche-marche-tryton-flow-2026-10-28.md
+      code:
+        observabilite: mesure_oss
+        mesure_ref: tools/oss_candidates_code_audit.py
+        calcul_ref: null
+        pncloc: 97142
+        effort_jh: null
+        limite: >-
+          Sélection de 97 142 PNCLOC de serveur, client web et 25 modules, avec 23 921 lignes XML distinctes ;
+          dépendances Finance directes exclues. Ce volume n'est pas une taille fonctionnelle FLOW ni un effort calibré.
+          La pièce source contient aussi un calcul conditionnel en JH, non repris dans le registre actif.
+          Le motif de cette non-reprise n'est pas documenté ; elle ne constitue pas une décision de rejet.
+          Ce diagnostic documentaire ne modifie ni les charges ni les budgets.
+      references_deploiement: null
+      prix_observe_eur_ht: null
+      prix_retraite_flow_eur_2026: null
+      evaluations:
+        transactions:
+          fonctionnalite: Stock, Purchase et Sale traitent commandes, réceptions, expéditions, retours et positions passées ou futures.
+          statut_offre: sans_objet
+          offre: Code OSS observé ; aucune offre Tryton n'est évaluée dans les cinq options.
+          limite: Corrections antidatées et provenance multi-systèmes FLOW à éprouver ; Purchase et Sale dépendent de modules Finance.
+          preuves:
+          - https://docs.tryton.org/8.2/modules-stock/usage/index.html
+          - https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/purchase/tryton.cfg
+          parite_flow: non_demontree
+        availability:
+          fonctionnalite: Sale Stock Quantity contrôle la quantité au devis ; Stock protège l'affectation concurrente par verrouillage en base.
+          statut_offre: sans_objet
+          offre: Modules publics Tryton 8.2, sans offre RFI.
+          limite: Contrôle parfois acquittable, forçage possible avec stock négatif et date de réapprovisionnement production incomplète ; promesse ATP/CTP/PTP coût/service non démontrée.
+          preuves:
+          - https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/sale_stock_quantity/sale.py
+          - https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/move.py
+          parite_flow: non_demontree
+        execution_sav:
+          fonctionnalite: Stock gère les retours ; Sale Complaint traite une réclamation liée à une vente et peut déclencher retour ou avoir.
+          statut_offre: sans_objet
+          offre: Modules publics Tryton 8.2, sans offre RFI.
+          limite: Parcours continu achat, vente, réparation fournisseur et remplacement du même bien non établi.
+          preuves:
+          - https://docs.tryton.org/latest/modules-sale-complaint/design.html
+          - https://docs.tryton.org/8.2/modules-stock-lot/design.html
+          parite_flow: non_demontree
+        case_automation:
+          fonctionnalite: Workflow de réclamation, déclencheurs, cron, file avec reprise et journal de modèle apportent des mécanismes locaux.
+          statut_offre: sans_objet
+          offre: Serveur et modules publics Tryton 8.2, sans offre RFI.
+          limite: Corrélation transverse, effet externe unique et historique métier « connu à date » du dossier FLOW non démontrés.
+          preuves:
+          - https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/sale_complaint/complaint.py
+          - https://docs.tryton.org/8.2/server/modules/ir/design/index.html
+          parite_flow: non_demontree
+        analytics:
+          fonctionnalite: Rapports stock, achats et ventes, client web et Dashboard personnel fournissent des vues opérationnelles.
+          statut_offre: sans_objet
+          offre: Modules publics Tryton 8.2, sans offre RFI.
+          limite: KPI multi-source FLOW avec dénominateurs, droits et corrections tracées à concevoir et vérifier.
+          preuves:
+          - https://docs.tryton.org/latest/modules-dashboard/design.html
+          - https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/purchase/purchase_reporting.py
+          parite_flow: non_demontree
+        mining:
+          fonctionnalite: Model Log et dates des documents peuvent fournir des traces d'activité selon configuration.
+          statut_offre: sans_objet
+          offre: Serveur public Tryton 8.2, sans offre RFI.
+          limite: Journal de cas corrélé et moteur de découverte ou conformité de variantes non établis.
+          preuves:
+          - https://docs.tryton.org/8.2/server/modules/ir/design/index.html
+          parite_flow: non_demontree
+    axelor-open-suite:
+      id: axelor-open-suite
+      nom: Axelor Open Suite + Studio/BPM
+      famille: oss
+      statut: diagnostic_mesure
+      date_observation: '2026-10-28'
+      version_edition: Suite v9.1.10, Open Platform v8.2.5, Studio/BPM 4.0.7, Utils 4.0.2 et Message 4.0.3 aux commits figés dans la fiche.
+      preuve_ref: sources/fiche-marche-axelor-flow-2026-10-28.md
+      composition:
+        produits: [Axelor Open Suite, Axelor Open Platform, Axelor Studio/BPM, Axelor Utils, Axelor Message]
+        technologies: Java et Groovy côté serveur, React/TypeScript côté client, modèles et vues XML ; moteur Camunda tiers pour BPM.
+        preuve_ref: sources/fiche-marche-axelor-flow-2026-10-28.md
+      code:
+        observabilite: mesure_oss
+        mesure_ref: tools/oss_candidates_code_audit.py
+        calcul_ref: null
+        pncloc: 425789
+        effort_jh: null
+        limite: Sélection de 425 789 PNCLOC incluant neuf modules Suite, Platform, Studio/BPM, Utils et Message ; maintenance d'équipements exclue selon BC-006 et mesurée à part. Code Camunda tiers, BI Enterprise et six dépendances internes séparés ; XML/CSV et règles intégrées au XML non convertis.
+      references_deploiement:
+      - id: thyssenkrupp-materials-france
+        organisation: thyssenkrupp AG
+        taille_organisation: 93 375 salariés du groupe au 30 septembre 2025 ; la filiale Materials France annonce 260 salariés en France et Tunisie.
+        entite_equipee: thyssenkrupp Materials France (TKMF), 12 agences commerciales, 4 centres de transformation et 5 centres logistiques selon le cas Axelor.
+        usage_atteste: Axelor pour la production, les achats, les ventes, les stocks et l'étiquetage ; 50 000 références produits annoncées.
+        edition_deploiement: null
+        annee_preuve: null
+        actualite: source_non_datee
+        limite_flow: Référence opérationnelle d'une filiale d'environ 260 salariés, pas déploiement du Core thyssenkrupp. Édition, version, date et maintien en service non établis.
+        preuves:
+        - https://www.thyssenkrupp.com/en/investor-relations/facts-and-figures
+        - https://www.thyssenkrupp-materials.fr/fr
+        - https://axelor.com/fr/cas-client-tkmf/
+      - id: octopia-facturation-vendeurs
+        organisation: Groupe Casino / Cdiscount / Octopia
+        taille_organisation: Groupe Casino 24 147 salariés en 2025 ; le cas Axelor porte sur près de 200 vendeurs tiers du service, pas sur cet effectif.
+        entite_equipee: Octopia, filiale de Cdiscount ; service proposé aux vendeurs tiers de la marketplace.
+        usage_atteste: Plateforme Axelor adaptée à l'inscription des vendeurs et à la facturation automatisée, reliée aux API Cdiscount/Octopia.
+        edition_deploiement: null
+        annee_preuve: 2021
+        actualite: historique_non_reconfirme
+        limite_flow: Cas de service de facturation hors périmètre opérationnel FLOW ; aucun système central de gestion de la chaîne logistique du Groupe, usage actuel ou édition Community démontré.
+        preuves:
+        - https://www.groupe-casino.fr/en/team/diversity-and-inclusion/
+        - https://www.groupe-casino.fr/groupe/les-activites-du-groupe-en-france-et-international/e-commerce-nouvelles-activites/octopia/
+        - https://axelor.com/fr/cas-client-cdiscount/
+        - https://axelor.com/assets/it-for-business-octopia-etend-ses-services-avec-le-low-code.pdf
+      prix_observe_eur_ht: null
+      prix_retraite_flow_eur_2026: null
+      evaluations:
+        transactions:
+          fonctionnalite: Suite OSS couvre commandes achat et vente, mouvements de stock et supply chain.
+          statut_offre: sans_objet
+          offre: Référence de code OSS, sans offre Axelor étudiée pour les cinq options.
+          limite: Dossier et provenance multi-enseignes avec corrections à date à éprouver.
+          preuves:
+          - https://github.com/axelor/axelor-open-suite/tree/v9.1.10/axelor-supplychain
+          - https://docs.axelor.com/aos/en/9.0/aos/purchases/purchase_order/
+          parite_flow: non_demontree
+        availability:
+          fonctionnalite: Stock disponible, réservations liées aux mouvements et calcul MRP documentés dans la Suite.
+          statut_offre: sans_objet
+          offre: Modules OSS de stock et supply chain, sans offre RFI.
+          limite: Promesse ATP/CTP/PTP avant engagement, sous concurrence et arbitrée par coût/service non démontrée.
+          preuves:
+          - https://docs.axelor.com/aos/en/aos/stock/allocations/
+          - https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java
+          parite_flow: non_demontree
+        execution_sav:
+          fonctionnalite: Demandes client, équipements, interventions, commandes liées et tickets Helpdesk/SLA couvrent plusieurs étapes du SAV.
+          statut_offre: sans_objet
+          offre: Modules OSS Intervention et Helpdesk de la Suite, sans offre RFI.
+          limite: Chaîne unique achat, vente, retour, réparation et remplacement du même bien à démontrer.
+          preuves:
+          - https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-intervention/src/main/resources/domains/Intervention.xml
+          - https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-helpdesk/src/main/resources/domains/Ticket.xml
+          parite_flow: non_demontree
+        case_automation:
+          fonctionnalite: Studio/BPM public fournit BPMN, DMN, tâches humaines et suivi des instances sur moteur Camunda.
+          statut_offre: sans_objet
+          offre: Dépendance publique Studio/BPM 4.0.7, distincte du code Suite ; aucun achat n'est étudié.
+          limite: Dossier transverse FLOW, corrélation, reprises et effets externes uniques non démontrés.
+          preuves:
+          - https://docs.axelor.com/studio/4.0/bpm-docs/index.html
+          - https://github.com/axelor/axelor-studio/blob/4.0.7/build.gradle
+          parite_flow: non_demontree
+        analytics:
+          fonctionnalite: Dashboards et graphiques opérationnels XML dans la Suite OSS ; dashboard de tâches et durées dans Studio/BPM.
+          statut_offre: sans_objet
+          offre: Axelor BI avancé est Enterprise et hors inventaire OSS ; ses droits et prix ne sont pas étudiés.
+          limite: KPI FLOW multi-source, droits, fraîcheur et corrections antidatées à éprouver.
+          preuves:
+          - https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/resources/views/Dashboard.xml
+          - https://docs.axelor.com/bi/4.0/index.html
+          parite_flow: non_demontree
+        mining:
+          fonctionnalite: Studio/BPM mesure tâches, durées et tendances des instances à partir de l'historique Camunda.
+          statut_offre: sans_objet
+          offre: Monitoring BPM de l'addon public Studio/BPM, sans offre RFI.
+          limite: Découverte et conformité des variantes inter-systèmes FLOW non démontrées par ces graphiques.
+          preuves:
+          - https://docs.axelor.com/studio/4.0/bpm-docs/general-documentation/dashboard.html
+          - https://github.com/axelor/axelor-studio/tree/4.0.7/src/main/java/com/axelor/studio/bpm/service/dashboard
+          parite_flow: non_demontree
+    microsoft:
+      id: microsoft
+      nom: Microsoft Dynamics 365 / K3 Fashion
+      famille: proprietaire
+      statut: analyse_documentaire
+      date_observation: '2026-10-28'
+      version_edition: Version exacte et paramétrage de l'offre RFI non établis.
+      preuve_ref: sources/fiche-marche-microsoft-flow-2026-10-28.md
+      composition:
+        produits: [Dynamics 365 Supply Chain Management, Dynamics 365 Commerce, K3 Fashion]
+        technologies: Dynamics 365 F&O et Commerce, extensions X++ et services Power Platform selon droits et architecture retenus.
+        preuve_ref: source/stacks/microsoft.yaml
+      code:
+        observabilite: code_non_public
+        mesure_ref: null
+        calcul_ref: null
+        pncloc: null
+        effort_jh: null
+        limite: Le X++ applicatif peut être consultable sous licence, mais aucun relevé complet et reproductible du panier FLOW, incluant plateforme, services et K3 ISV, n'est disponible ; pas de PNCLOC ni de JH COCOMO déductibles.
+      references_deploiement: null
+      prix_observe_eur_ht: null
+      prix_retraite_flow_eur_2026: null
+      evaluations:
+        transactions:
+          fonctionnalite: Dynamics SCM traite achats et stock ; Commerce traite les stocks magasin.
+          statut_offre: inclus
+          offre: SCM, Commerce et K3 figurent dans le panier Avanade.
+          limite: Le scénario de stock consolidé magasin et WMS doit être démontré.
+          preuves:
+          - https://learn.microsoft.com/en-us/dynamics365/commerce/work-with-store-inventory
+          - source/ecarts-perimetre-flow-rfi.md
+          parite_flow: non_demontree
+        availability:
+          fonctionnalite: SCM documente ATP, CTP en lot et CTP quasi temps réel sous conditions ; Commerce DOM arbitre les sites selon contraintes et coûts.
+          statut_offre: mixte
+          offre: SCM et Commerce sont proposés ; Inventory Visibility est une option d'architecture à discuter.
+          limite: >-
+            Le CTP quasi temps réel exige l'activation de sa fonction avec Planning Optimization ; le CTP en lot
+            peut produire une date devenue obsolète après replanification. Assemblage, délais et concurrence à tester.
+          preuves:
+          - https://learn.microsoft.com/en-us/dynamics365/supply-chain/master-planning/planning-optimization/calculate-delivery-dates-using-ctp
+          - https://learn.microsoft.com/en-us/dynamics365/commerce/dom
+          - source/ecarts-perimetre-flow-rfi.md
+          parite_flow: non_demontree
+        execution_sav:
+          fonctionnalite: Commerce DOM et Service Management SCM couvrent exécution, retour et réparation.
+          statut_offre: inclus
+          offre: SCM et Commerce figurent dans le panier Avanade ; remplacement NewStore/SoCloz non démontré.
+          limite: Vérifier l'enchaînement précis des tâches et réorientations entre systèmes.
+          preuves:
+          - https://learn.microsoft.com/en-us/dynamics365/supply-chain/service-management/working-with-customer-service
+          - source/ecarts-perimetre-flow-rfi.md
+          parite_flow: non_demontree
+        case_automation:
+          fonctionnalite: Case Management F&O et CAPA SCM relient achats, ventes, service et objets multiples.
+          statut_offre: inclus
+          offre: Fonctions natives SCM/F&O ; Customer Service distinct non établi dans l'offre.
+          limite: La parité du dossier FLOW et l'idempotence des business events doivent être démontrées.
+          preuves:
+          - https://learn.microsoft.com/en-us/dynamics365/supply-chain/inventory/capa-manage-cases
+          - https://learn.microsoft.com/en-us/dynamics365/fin-ops-core/dev-itpro/organization-administration/plan-case-management
+          parite_flow: non_demontree
+        analytics:
+          fonctionnalite: SCM fournit des rapports et analyses Power BI de supply et de fournisseurs.
+          statut_offre: mixte
+          offre: SCM proposé ; droits et préparation des données Power BI à préciser.
+          limite: Les KPI transverses FLOW et leur fraîcheur ne sont pas démontrés.
+          preuves:
+          - https://learn.microsoft.com/en-us/dynamics365/supply-chain/procurement/supply-risk-assessment-reports
+          - source/ecarts-perimetre-flow-rfi.md
+          parite_flow: non_demontree
+        mining:
+          fonctionnalite: Power Automate Process Mining analyse des journaux avec case ID, activité et horodatage.
+          statut_offre: non_demontre
+          offre: Produit distinct, sans inclusion établie dans le panier Avanade.
+          limite: Licence, collecte de tous les événements et raccordement à FLOW à qualifier.
+          preuves:
+          - https://learn.microsoft.com/en-us/power-automate/process-advisor-overview
+          - https://learn.microsoft.com/en-us/power-automate/process-mining-processes-and-data
+          parite_flow: non_demontree
+    sap:
+      id: sap
+      nom: SAP S/4HANA Fashion
+      famille: proprietaire
+      statut: analyse_documentaire
+      date_observation: '2026-10-28'
+      version_edition: S/4HANA Private Edition ; release et paramétrage précis de l'offre RFI non établis.
+      preuve_ref: sources/fiche-marche-sap-flow-2026-10-28.md
+      composition:
+        produits: [SAP S/4HANA Cloud for fashion and vertical business, SAP Order Management for sourcing and availability, SAP Omnichannel Sales Transfer and Audit, SAP IBP]
+        technologies: S/4HANA Private Edition, ABAP/Fiori et services BTP selon droits et architecture retenus.
+        preuve_ref: source/stacks/sap.yaml
+      code:
+        observabilite: code_non_public
+        mesure_ref: null
+        calcul_ref: null
+        pncloc: null
+        effort_jh: null
+        limite: L'ABAP standard peut être consultable sous licence, mais aucun relevé complet et reproductible du panier FLOW, incluant kernel, services et modules, n'est disponible ; pas de PNCLOC ni de JH COCOMO déductibles.
+      references_deploiement: null
+      prix_observe_eur_ht: null
+      prix_retraite_flow_eur_2026: null
+      evaluations:
+        transactions:
+          fonctionnalite: S/4HANA Private Edition couvre achats, ventes et stocks.
+          statut_offre: inclus
+          offre: S/4 Fashion est dans la BOM Delaware ; les flux WMS et magasins ont des frontières à qualifier.
+          limite: L'exécution physique sur systèmes externes et sa fraîcheur restent à éprouver.
+          preuves:
+          - https://help.sap.com/doc/9f8b1e91e4a442499364d2b49c8d4bdb/2025/en-US/FSD_CLOUD_PE_2025_latest.pdf
+          - source/ecarts-perimetre-flow-rfi.md
+          parite_flow: non_demontree
+        availability:
+          fonctionnalite: S/4 aATP et OMSA apportent disponibilité, réservations et sourcing ; SBC avec PP/DS traite une confirmation fondée sur matières et capacités.
+          statut_offre: mixte
+          offre: OMSA et IBP sont proposés ; droits PP/DS non établis dans la BOM.
+          limite: IBP proposé ne démontre pas une réponse CTP synchrone ni tous les droits du moteur.
+          preuves:
+          - https://help.sap.com/doc/08442b9d2cd744f7aecc1e08080c26f3/SHIP/en-US/FSD_SAP_OMSA.pdf
+          - https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/f899ce30af9044299d573ea30b533f1c/4c56297de7c33a0de10000000a42189c.html
+          - source/ecarts-perimetre-flow-rfi.md
+          parite_flow: non_demontree
+        execution_sav:
+          fonctionnalite: S/4 traite retours et ordres de service ; OMSA source les commandes.
+          statut_offre: mixte
+          offre: S/4 et OMSA proposés ; Order Management Foundation non établi dans la BOM.
+          limite: Une orchestration plus large est documentée dans OMF, dont l'achat n'est pas démontré.
+          preuves:
+          - https://help.sap.com/doc/65309ba6056d4d6c8dc40195ec4b3074/Cloud/en-US/FSD_SAP_OMF.pdf
+          - source/ecarts-perimetre-flow-rfi.md
+          parite_flow: non_demontree
+        case_automation:
+          fonctionnalite: Case Management S/4 lie transactions, produits, acteurs et étapes ; workflow intégré.
+          statut_offre: mixte
+          offre: S/4 proposé ; SAP Build Process Automation est un service distinct aux droits non établis.
+          limite: Corrélation et reprise du dossier adaptatif FLOW à démontrer.
+          preuves:
+          - https://help.sap.com/doc/9f8b1e91e4a442499364d2b49c8d4bdb/2025/en-US/FSD_CLOUD_PE_2025_latest.pdf
+          - https://help.sap.com/docs/r/p/PROCESS_AUTOMATION
+          parite_flow: non_demontree
+        analytics:
+          fonctionnalite: Analytics S/4 et Process Observer documentent événements, instances, délais et KPI.
+          statut_offre: non_demontre
+          offre: S/4 Private Edition est proposé ; l'inclusion des fonctions analytiques reste à confirmer sur l'édition et les droits précis.
+          limite: Assiettes KPI et corrections FLOW à vérifier.
+          preuves:
+          - https://help.sap.com/doc/9f8b1e91e4a442499364d2b49c8d4bdb/2025/en-US/FSD_CLOUD_PE_2025_latest.pdf
+          parite_flow: non_demontree
+        mining:
+          fonctionnalite: Process Observer S/4 apporte une base de traces ; Signavio Process Intelligence analyse les processus.
+          statut_offre: mixte
+          offre: S/4 proposé ; inclusion de Signavio non démontrée dans la BOM.
+          limite: Découverte/conformité et alimentation complète des traces à éprouver.
+          preuves:
+          - https://help.sap.com/doc/dbe5b7e54b9e4bccade17c4c4fbac1d1/SHIP/en-US/FeatureScopeDescriptionSAPSignavioProcessIntelligence_EN.pdf
+          - source/ecarts-perimetre-flow-rfi.md
+          parite_flow: non_demontree
+  candidats_a_etudier:
+  - id: idempiere
+    nom: iDempiere
+    categorie: erp_oss
+    priorite: a_etudier
+    motif: Examiner le socle ERP communautaire et ses modules SCM documentés.
+    preuve_ref: sources/shortlist-erp-oss-flow-2026-10-28.md
+  - id: apache-ofbiz
+    nom: Apache OFBiz
+    categorie: erp_oss
+    priorite: a_etudier
+    motif: Examiner les services métier et le framework ERP public sur les mêmes axes.
+    preuve_ref: sources/shortlist-erp-oss-flow-2026-10-28.md
+  - id: metasfresh
+    nom: metasfresh
+    categorie: erp_oss
+    priorite: a_etudier
+    motif: Examiner les fonctions distribution et supply ainsi que les limites de l'édition ouverte.
+    preuve_ref: sources/shortlist-erp-oss-flow-2026-10-28.md
+  - id: dolibarr
+    nom: Dolibarr
+    categorie: erp_oss
+    priorite: secondaire
+    motif: Examiner sa pertinence pour les opérations FLOW avant tout relevé de code.
+    preuve_ref: sources/shortlist-erp-oss-flow-2026-10-28.md
+  - id: oca-extensions
+    nom: Odoo Community Association
+    categorie: ecosysteme_complementaire
+    priorite: a_etudier
+    motif: Évaluer les extensions communautaires séparément du produit Odoo et éviter leur double comptage.
+    preuve_ref: sources/shortlist-erp-oss-flow-2026-10-28.md
+echelle_qualite_prix_source:
+  0: Aucun prix publié.
+  1: Montant publié, séparation des prestations externes non démontrée.
+  2: Modèle composite ou estimation préliminaire ; externe isolé mais non observé.
+  3: Valeur estimée d'un achat identifié ; pas une dépense réalisée.
+  4: Montant contractuel attribué, sans preuve de dépense finale.
+  5: Dépense externe réalisée et auditée sur le périmètre décrit.
+echelle_truth_level_transposition:
+  0: Aucun coût du projet retraité au périmètre FLOW Beaumanoir chiffrable.
+  1: Retraitement intuitif sans allocation vérifiable ; ne sert pas à comparer.
+  2: Retraitement chiffré, mais des travaux majeurs restent alloués par hypothèse.
+  3: Pont vers FLOW Beaumanoir documenté avec quelques charges importantes incertaines.
+  4: Devis ou dépense externe détaillé, rapproché des principaux livrables FLOW Beaumanoir.
+  5: Dépense réalisée auditée et rapprochement quasi intégral des livrables FLOW Beaumanoir.
+analyse_dispersion:
+  valeur: projet_reference_retraite_flow_beaumanoir_eur_2026
+  statistique: Par cohorte de solutions et de modes de prestation comparables, moyenne, variance d'échantillon (diviseur
+    n-1), écart-type et coefficient de variation (écart-type/moyenne). Ne jamais calculer la variance des coûts publiés
+    bruts de projets différents. Tous les retraitements admis visent le même périmètre FLOW Beaumanoir ; un écart entre
+    plateformes relève aussi du choix de solution et ne doit pas être assimilé à du bruit statistique.
+  criteres:
+    truth_level_minimum: 4
+    references_independantes_minimum: 3
+    cout_externe_confirme: true
+    meme_cible_flow_et_solution_comparable: true
+    retraitement_central_et_fourchette_documentes: true
+  resultat_actuel:
+    references_eligibles: 0
+    variance_eur_2026_carre: null
+    coefficient_variation: null
+    conclusion: Échantillon indépendant et comparable insuffisant. Les prix publics questionnent les budgets, mais leurs
+      transpositions au périmètre FLOW Beaumanoir ne valident pas encore la comparaison de marché.
+  interpretation: Même une faible dispersion dans une cohorte de plusieurs sources indépendantes serait un argument de
+    plausibilité, pas une preuve de coût réalisable pour Beaumanoir. Fixer la tolérance de dispersion avant de regarder
+    les résultats et vérifier les biais communs entre sources.
+utilite_flow:
+  seuil_mise_en_avant: 2
+  nature: Appréciation éditoriale argumentée, sans calcul de coût ni mesure statistique.
+  echelle:
+    0: Aucun apport identifié à une question FLOW.
+    1: 'Analogie éloignée : méthode utile, fonctions ou travaux trop peu rapprochables.'
+    2: 'Repère partiel : travaux, répartition des responsabilités ou postes de coût identifiables.'
+    3: 'Repère métier proche : fonctions Supply Chain Management centrales et contexte de déploiement décrit.'
+presentation_references:
+  score_flow: Utilité pour FLOW
+  score_prix: Qualité du prix initial
+  seuil: Seuil de mise en avant
+  regle: Les références à 2 ou 3 apportent un repère de travaux ou de coûts. Les analogies plus éloignées restent
+    consultables en grisé.
+  statut_insuffisant: Analogie éloignée
+  statut_suffisant: Repère utile
+  detail_scores: Comment lire les notes ?
+  explication_scores: L’utilité apprécie ce que le cas apporte à l’étude ; la qualité décrit la preuve du prix initial.
+    Ce sont deux jugements distincts, sans note globale ni probabilité de réussite.
+  methode: Critères et sources dans la base de connaissance
+  postes_titre: Quels postes ce projet éclaire-t-il ?
+  postes:
+    build: '{{notion.build_core_system}}'
+    integration: '{{notion.integration_migration}}'
+    mco_run: '{{notion.mco_run}}'
+  statuts:
+    non_etudie: Non étudié
+    chiffre: Chiffrée
+    chiffre_separe: Chiffré à part
+    partiel: Évolutions incluses
+    non_publie: Non publié
+  build_explication: Ces références mettent en œuvre un progiciel existant. Leur conception, paramétrage et extensions
+    appartiennent à l’intégration ; elles ne chiffrent pas la réalisation d’une release générique Make.
+  prix_principal: Intégration initiale
+  observations_titre: Autres coûts publiés, en devise d’origine
+  observations_note: Ces postes sont distincts du prix initial affiché dans la liste. Chaque montant garde sa durée,
+    son périmètre et sa nature de preuve.
+  apport: Apport à l’estimation FLOW
+  preuves: Localiser les preuves
+  transposition: Peut-on en déduire un prix FLOW ?
+  transposition_note: Aucun prix FLOW complet n’a été reconstitué à partir de ces projets. Le niveau de transposition
+    reste donc à 0/5 ; cela n’annule pas leur utilité pour comparer les travaux et les postes de dépense.
+  qualite_observation: Preuve du montant
+  reperes_integration: Repères de prix d’intégration
+synthese_decision:
+  titre: Ce que les projets de référence apportent au budget FLOW
+  conclusion: Les projets ERP publiés éclairent surtout l’intégration et les services après livraison. Pour le
+    build générique, un abaque ISBSG en heures par point de fonction permet désormais un contrôle conditionnel
+    de lots Java mesurés. La reconstruction OSS Frappe/ERPNext/Insights fournit un diagnostic distinct en taille
+    de code et JH inspirés de COCOMO II, non calibrés. Aucun de ces repères ne fournit un prix de construction
+    directement transposable à FLOW.
+  sap:
+    titre: Grands programmes SAP publics
+    lecture: Estimations et contrats AP-HP, Southwark, Transport for London et EWEB, convertis en euros 2026 à leur
+      périmètre d’origine.
+    consequence: Un repère pour des programmes de convergence avec migrations et nombreuses interfaces.
+  dynamics:
+    titre: Contrepoints Dynamics
+    lecture: Contrat MTC et deux entreprises composites Forrester commandées par Microsoft. Les composites modélisent
+      des entreprises types.
+    consequence: Un prix externe bas peut laisser davantage de travail aux équipes du client.
+  dispersion:
+    titre: Pourquoi ces projets ne donnent-ils pas un prix moyen FLOW ?
+    texte: Les fonctions, volumes et responsabilités diffèrent trop pour former une cohorte comparable. Une moyenne
+      mélangerait des prestations différentes.
+  cadre:
+    titre: Ce qui explique les écarts entre projets
+    points:
+    - titre: Comparer le travail acheté
+      texte: Rapprocher fonctions livrées, interfaces, migrations et vagues de déploiement. Un prix externe plus
+        faible peut aussi correspondre à davantage de travail pris en charge par le client.
+  methode:
+    titre: Comment rapprocher ces projets de FLOW ?
+    formule: Prix externe en euros 2026 − travaux hors FLOW + travaux FLOW absents ± écarts de volumes et de responsabilités
+    texte: La conversion monétaire rend les prix lisibles dans une même unité. La transposition à FLOW demande ensuite
+      de rapprocher les travaux achetés.
+  references_titre: Projets de référence
+  preuves:
+  - path: source/references-couts-integration.yaml
+    titre: Prix, conversions et critères de comparaison
+  - path: sources/benchmark-integration-2026-10-23.md
+    titre: Sources publiques et périmètres des projets
+  - path: source/faq-sponsors.md
+    titre: Explication de l’ancre et des contrôles de coût
+  enseignements_postes:
+  - poste: build
+    texte: Le build Make reste estimé à partir des fonctions, charges et tarifs. Un « build SAP » public correspond
+      à son implémentation, pas à la création du produit.
+  - poste: integration
+    texte: Comparer interfaces, migration, qualification et déploiements, puis le travail conservé par le client.
+      Les prix publics éclairent l’enveloppe, sans former une moyenne FLOW.
+  - poste: mco_run
+    texte: Les sources séparent licences, exploitation, support et évolutions. Un abonnement ou un forfait de support
+      seul ne représente pas le coût annuel complet.
+reperes_exploratoires_marche:
+  objet: Test de sensibilité sur les prix externes publiés et convertis en EUR 2026, au périmètre de chaque projet d'origine.
+    Ces plages ne sont ni des devis, ni des bornes basses/hautes du projet FLOW Beaumanoir, ni des intervalles statistiques.
+    Les budgets Beaumanoir sont exclus de leur construction.
+  grands_programmes_sap_publics:
+    selection: 'Quatre programmes publics SAP multi-domaines avec coûts de prestations externes isolés : AP-HP, Southwark,
+      Transport for London et EWEB. Les secteurs, fonctions, tailles et maturités des prix restent hétérogènes ; cette
+      sélection sert uniquement à interroger l''ordre de grandeur SAP.'
+    ancres:
+    - reference_id: aph-p-s4-2026
+      montant_min_eur_2026: 7008885
+      montant_max_eur_2026: 7008885
+      traitement: Deux lots estimés, intégration et AMOA/recette ; migration hospitalière.
+    - reference_id: southwark-sap-2025
+      montant_min_eur_2026: 8646201
+      montant_max_eur_2026: 8646201
+      lot_exclu_devise_origine: 1506158.3
+      traitement: Trois lots informatiques attribués (mise en œuvre, données, reporting/interfaces) ; lot de changement
+        métier exclu. Les quatre lots publiés totalisent 10 497 672 EUR 2026.
+    - reference_id: tfl-s4-2023
+      montant_min_eur_2026: 12951934
+      montant_max_eur_2026: 19427901
+      traitement: Estimation préconsultation du design et du build, non prix attribué.
+    - reference_id: eweb-s4-2023
+      montant_min_eur_2026: 15940049
+      montant_max_eur_2026: 15940049
+      traitement: Plafond de contrat Deloitte attribué pour l'intégration initiale, hors direction de programme achetée
+        séparément ; non dépense finale.
+    minimum_ancres_eur_2026: 7008885
+    maximum_ancres_eur_2026: 19427901
+    plage_arrondie_m_eur_2026:
+      min: 7
+      max: 20
+    verite_transposition_flow_beaumanoir: 0
+    usage: Signal d'audit uniquement pour des budgets de grands programmes SAP. Se situer hors de 7 à 20 M EUR appelle
+      une explication de périmètre et de responsabilités ; rester dans la plage ne valide aucun budget. Cette sélection
+      SAP/public ne sert pas de plancher applicable à Microsoft ou à Make.
+  contrepoints_dynamics:
+    selection: 'Montants externes Dynamics de projets entiers plutôt que d''un module isolé : MTC contractuel et composites
+      Forrester 2026 et 2018. Les deux composites sont des modèles commandés par Microsoft, non des devis.'
+    references_ids:
+    - forrester-d365-erp-2026
+    - mtc-d365-2022
+    - forrester-d365-fo-2018
+    minimum_eur_2026: 1517180
+    maximum_eur_2026: 14294386
+    verite_transposition_flow_beaumanoir: 0
+    usage: 'La très large amplitude contredit l''emploi de la seule plage SAP/public comme fourchette générale du marché.
+      Le composite Forrester 2026 ne compte que 1,7 M USD externes mais 2,619 M USD internes de mise en œuvre : le partage
+      des travaux avec le client est décisif. Aucun coût interne n''est ajouté à la comparaison externe de l''étude.'
+  pont_requis_pour_une_fourchette_flow:
+  - Quantifier les livrables publiés absents du périmètre FLOW à retrancher.
+  - Quantifier les livrables FLOW absents des prix publiés à ajouter.
+  - Rapprocher volumes, interfaces, données, pays, déploiements et responsabilités.
+  - Distinguer prix attribué, estimation avant consultation et modèle composite.
+  - Confronter les scénarios ainsi obtenus aux JH et TJM externes du modèle.
+sources_monetaires:
+  change_bce_2026_10_22:
+    url: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html
+    usd_par_eur: 1.1205
+    gbp_par_eur: 0.8377
+    cad_par_eur: 1.5725
+    aud_par_eur: 1.598
+  cpi_us:
+    url_historique: https://www.bls.gov/regions/mid-atlantic/data/consumerpriceindexhistorical_us_table.htm
+    url_2026: https://www.bls.gov/news.release/archives/cpi_10142026.htm
+    septembre_2026: 336.94
+    limite: Prix à la consommation, pas prix de prestations informatiques.
+  sppi_uk_informatique:
+    url: https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/hr6l
+    url_revision: https://www.ons.gov.uk/economy/inflationandpriceindices/datasets/serviceproducerpriceindices
+    serie: HR6L, programmation et conseil informatiques J62
+    trimestre_2026_t3: 131.5
+    limite: Série révisée ; T3 2026 provisoire et accréditation statistique suspendue.
+  ipc_canada:
+    url_2020: https://www150.statcan.gc.ca/n1/daily-quotidien/210120/dq210120b-eng.htm
+    url_2026: https://www150.statcan.gc.ca/n1/daily-quotidien/261019/t001a-eng.htm
+    moyenne_2020: 137.0
+    septembre_2026: 170.0
+    limite: Prix à la consommation ; seulement illustration d'un coût publié non qualifié externe.
+references:
+- id: forrester-d365-fo-2018
+  nom: Composite Forrester Dynamics 365 Finance and Operations 2018
+  sources:
+  - https://info.microsoft.com/rs/157-GQE-382/images/EN-CNTNT-eBook-Forrester-TEI-Microsoft-Dynamics-365-For-Finance-Operations.pdf
+  contexte_business:
+    activite: Fabrication, vente en gros, distribution et magasins
+    pays: Multipays, entreprise composite
+    salaries: 10000
+    chiffre_affaires:
+      montant: 1000000000
+      devise: USD
+    magasins: '>100'
+  projet:
+    plateforme: Dynamics 365 Finance and Operations
+    perimetre: Finance, fabrication, supply chain puis retail ; remplacement de plusieurs ERP.
+    duree_mois: 24
+    inclus_dans_prix: Prestataires tiers sur deux phases de 12 mois, 8 puis 4 M$.
+    exclus_du_prix: 11,960 M$ de temps interne, 1 M$ de matériel, licences et exploitation.
+  cout_publie:
+    statut: modele_composite_commande_par_editeur
+    date_prix: 2018-09
+    devise: USD
+    min: 12000000
+    max: 12000000
+    externe_confirme: true
+    qualite_prix_source: 2
+    famille_source: forrester-microsoft
+  normalisation_2026:
+    indice: CPI-U États-Unis non désaisonnalisé
+    periode_depart: 2018-09
+    valeur_depart: 252.439
+    valeur_2026: 336.94
+    devise_par_eur: 1.1205
+    min_eur: 14294386
+    max_eur: 14294386
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Finance, fabrication, retail et travaux transverses ne sont pas ventilés par livrable. La phase retail contient
+      aussi des améliorations Finance et production ; aucun pourcentage soustractible n'est démontré.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 3
+    raison: Distribution, wholesale et magasins ; remplacement de plusieurs ERP. La fabrication et la Finance élargissent
+      le périmètre par rapport à FLOW.
+    enseignement: Repère pour une convergence Dynamics de grande ampleur ; l’intégration et les services après livraison
+      sont deux budgets distincts.
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: chiffre_separe
+    integration: Prestataires tiers sur deux phases de 12 mois, 8 puis 4 M$.
+    mco_run: Le modèle isole les mises à jour et le support partenaire. Les licences et les équipes internes sont
+      encore d’autres postes.
+    preuves:
+    - source: https://info.microsoft.com/rs/157-GQE-382/images/EN-CNTNT-eBook-Forrester-TEI-Microsoft-Dynamics-365-For-Finance-Operations.pdf
+      localisation: PDF p. 12, 32–36 ; Implementation, Licensing, Support And Management
+    observations:
+    - libelle: Mises à jour par le partenaire
+      min: 800000
+      max: 800000
+      devise: USD
+      periode: Année 1
+      assiette: Services externes ; 400 000 USD en année 2, puis zéro modélisé en année 3. Hors licences et personnel
+        interne.
+      source: https://info.microsoft.com/rs/157-GQE-382/images/EN-CNTNT-eBook-Forrester-TEI-Microsoft-Dynamics-365-For-Finance-Operations.pdf
+      localisation: PDF p. 36, H1
+      qualite_prix_source: 2
+    - libelle: Support partenaire
+      min: 363000
+      max: 363000
+      devise: USD
+      periode: Année 1
+      assiette: Support externe ; 367 488 USD en année 2 et 371 976 USD en année 3. H2 applique 10 % aux licences
+        déjà ajustées du risque ; pas de seconde majoration ici.
+      source: https://info.microsoft.com/rs/157-GQE-382/images/EN-CNTNT-eBook-Forrester-TEI-Microsoft-Dynamics-365-For-Finance-Operations.pdf
+      localisation: PDF p. 36, H2
+      qualite_prix_source: 2
+- id: forrester-d365-commerce-2020
+  nom: Composite Forrester Dynamics 365 Commerce 2020
+  sources:
+  - https://dynamics.folio3.com/wp-content/uploads/2025/05/the-total-economic-impact-of-microsoft-dynamics-365-commerce.pdf
+  contexte_business:
+    activite: Distribution omnicanale
+    pays: Multipays, entreprise composite
+    salaries: 2000
+    chiffre_affaires:
+      montant: 500000000
+      devise: USD
+    magasins: 100
+  projet:
+    plateforme: Dynamics 365 Commerce
+    perimetre: Commerce, caisses, e-commerce, stocks magasin et réassort.
+    duree_mois: 18
+    inclus_dans_prix: Prestataire de mise en œuvre modélisé.
+    exclus_du_prix: 1,920 M$ de temps interne, licences et exploitation.
+  cout_publie:
+    statut: modele_composite_commande_par_editeur
+    date_prix: 2020-06
+    devise: USD
+    min: 1000000
+    max: 1000000
+    externe_confirme: true
+    qualite_prix_source: 2
+    famille_source: forrester-microsoft
+  normalisation_2026:
+    indice: CPI-U États-Unis non désaisonnalisé
+    periode_depart: 2020-06
+    valeur_depart: 257.797
+    valeur_2026: 336.94
+    devise_par_eur: 1.1205
+    min_eur: 1166441
+    max_eur: 1166441
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Caisses et e-commerce dépassent FLOW ; le prix ne ventile pas les fonctions conservées.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 1
+    raison: Les caisses et le commerce en ligne dominent ; le stock magasin et le réassort ne représentent qu’une
+      partie du périmètre FLOW.
+    enseignement: Utile pour distinguer déploiement, licences et équipe d’entretien ; trop centré sur le commerce
+      pour calibrer l’intégration FLOW.
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: chiffre_separe
+    integration: Prestataire de mise en œuvre modélisé.
+    mco_run: Licences annuelles isolées ; maintenance et évolutions assurées par quatre équivalents temps plein internes,
+      hors budget externe comparé.
+    preuves:
+    - source: https://dynamics.folio3.com/wp-content/uploads/2025/05/the-total-economic-impact-of-microsoft-dynamics-365-commerce.pdf
+      localisation: PDF p. 10, 22–24 ; tableaux F et G
+    observations:
+    - libelle: Licences Commerce après remise du modèle
+      min: 420000
+      max: 420000
+      devise: USD
+      periode: Par an, années 1 à 3
+      assiette: Licences seules ; entretien interne exclu. Valeur publiée F8, avant majoration de risque de 5 %. La
+        formule imprimée F6 × F7 omet le complément à 100 % de la remise.
+      source: https://dynamics.folio3.com/wp-content/uploads/2025/05/the-total-economic-impact-of-microsoft-dynamics-365-commerce.pdf
+      localisation: PDF p. 23, F8
+      qualite_prix_source: 2
+- id: forrester-d365-scm-2021
+  nom: Composite Forrester Dynamics 365 Supply Chain Management 2021
+  sources:
+  - https://sunrise.co/wp-content/uploads/2023/08/Dynamics365SupplyChainManagementTEI_FINAL.pdf
+  contexte_business:
+    activite: Fabrication industrielle et supply chain
+    pays: Multipays, entreprise composite
+    salaries: 5000
+    chiffre_affaires:
+      montant: 1000000000
+      devise: USD
+    magasins: null
+  projet:
+    plateforme: Dynamics 365 Supply Chain Management
+    perimetre: Production, stocks et transport sur 50 usines.
+    duree_mois: 18
+    inclus_dans_prix: Prestataire de mise en œuvre modélisé.
+    exclus_du_prix: 9,450 M$ de temps interne, licences et exploitation.
+  cout_publie:
+    statut: modele_composite_commande_par_editeur
+    date_prix: 2021-08
+    devise: USD
+    min: 3000000
+    max: 3000000
+    externe_confirme: true
+    qualite_prix_source: 2
+    famille_source: forrester-microsoft
+  normalisation_2026:
+    indice: CPI-U États-Unis non désaisonnalisé
+    periode_depart: 2021-08
+    valeur_depart: 273.567
+    valeur_2026: 336.94
+    devise_par_eur: 1.1205
+    min_eur: 3297602
+    max_eur: 3297602
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Usines et production dominent un projet sans retail ; effort FLOW non isolable.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 3
+    raison: Stocks, entrepôts et transport au cœur du projet, avec une forte composante de production et cinquante
+      usines.
+    enseignement: 'Repère fonctionnel Supply Chain Management : le prix du partenaire ne couvre pas les importants
+      travaux conservés par le client.'
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: chiffre_separe
+    integration: Prestataire de mise en œuvre modélisé.
+    mco_run: 'Abonnement, support Premier et partenaire sont séparés. Le total « Support and Management » inclut aussi
+      personnel interne et ancien système : ce n’est pas le MCO externe du nouveau produit.'
+    preuves:
+    - source: https://sunrise.co/wp-content/uploads/2023/08/Dynamics365SupplyChainManagementTEI_FINAL.pdf
+      localisation: PDF p. 24–27 ; tableaux F, G et H
+    observations:
+    - libelle: Abonnement, environnement complémentaire et support Premier
+      min: 710000
+      max: 710000
+      devise: USD
+      periode: Année 1
+      assiette: 'Achats externes : 1 040 000 USD en année 2, 1 370 000 USD en année 3 ; utilisateurs de 500 à 1 000.
+        Avant majoration de risque.'
+      source: https://sunrise.co/wp-content/uploads/2023/08/Dynamics365SupplyChainManagementTEI_FINAL.pdf
+      localisation: PDF p. 26, Gt
+      qualite_prix_source: 2
+    - libelle: Support du partenaire
+      min: 400000
+      max: 400000
+      devise: USD
+      periode: Année 1
+      assiette: 200 000 USD en année 2, zéro modélisé en année 3. Distinct des licences, du support Premier, des équipes
+        internes et du maintien de l’ancien système.
+      source: https://sunrise.co/wp-content/uploads/2023/08/Dynamics365SupplyChainManagementTEI_FINAL.pdf
+      localisation: PDF p. 27, H9
+      qualite_prix_source: 2
+- id: forrester-d365-finance-2022
+  nom: Composite Forrester Dynamics 365 Finance 2022
+  sources:
+  - https://dynamics.folio3.com/wp-content/uploads/2025/04/tei-microsoft-dynamics-365-finance.pdf
+  contexte_business:
+    activite: Distribution et vente en gros
+    pays: Multipays, entreprise composite
+    salaries: 2000
+    chiffre_affaires:
+      montant: 750000000
+      devise: USD
+    magasins: 50
+  projet:
+    plateforme: Dynamics 365 Finance
+    perimetre: Finance seule, avec peu de personnalisations.
+    duree_mois: 6
+    inclus_dans_prix: Prestataire de mise en œuvre initiale modélisé.
+    exclus_du_prix: 0,480 M$ de temps interne, licences et exploitation.
+  cout_publie:
+    statut: modele_composite_commande_par_editeur
+    date_prix: 2022-07
+    devise: USD
+    min: 600000
+    max: 600000
+    externe_confirme: true
+    qualite_prix_source: 2
+    famille_source: forrester-microsoft
+  normalisation_2026:
+    indice: CPI-U États-Unis non désaisonnalisé
+    periode_depart: 2022-07
+    valeur_depart: 296.276
+    valeur_2026: 336.94
+    devise_par_eur: 1.1205
+    min_eur: 608969
+    max_eur: 608969
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Finance est hors du périmètre FLOW comparé ; pas de travaux SCM à transposer.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 1
+    raison: Le projet porte sur la Finance, hors du cœur métier FLOW ; son intérêt concerne la structure des dépenses.
+    enseignement: Un exemple de support partenaire dégressif après déploiement, pas un repère de prix du domaine Supply
+      Chain Management.
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: chiffre_separe
+    integration: Prestataire de mise en œuvre initiale modélisé.
+    mco_run: Support partenaire isolé après livraison ; les licences et deux équivalents temps plein internes sont
+      distincts.
+    preuves:
+    - source: https://dynamics.folio3.com/wp-content/uploads/2025/04/tei-microsoft-dynamics-365-finance.pdf
+      localisation: PDF p. 18–20 ; tableaux E et F
+    observations:
+    - libelle: Support partenaire après mise en service
+      min: 150000
+      max: 150000
+      devise: USD
+      periode: Année 1
+      assiette: 75 000 USD en année 2, zéro modélisé en année 3. Hors licences et entretien interne ; avant majoration
+        de risque.
+      source: https://dynamics.folio3.com/wp-content/uploads/2025/04/tei-microsoft-dynamics-365-finance.pdf
+      localisation: PDF p. 19, Et
+      qualite_prix_source: 2
+- id: forrester-d365-erp-2026
+  nom: Composite Forrester Dynamics 365 ERP grandes entreprises 2026
+  sources:
+  - https://tei.forrester.com/go/Microsoft/Dynamics365ERPforEnterprises/index.html
+  contexte_business:
+    activite: Fabrication et distribution
+    pays: Multipays, entreprise composite
+    salaries: 20000
+    chiffre_affaires:
+      montant: 5000000000
+      devise: USD
+    magasins: null
+  projet:
+    plateforme: Dynamics 365 Finance et Supply Chain Management
+    perimetre: Finance et SCM, déploiement progressif ; commerce non inclus.
+    duree_mois: 20
+    inclus_dans_prix: 1,700 M$ de prestataires de mise en œuvre modélisés.
+    exclus_du_prix: 2,619 M$ de temps interne, 0,770 M$ de formation, licences et run.
+  cout_publie:
+    statut: modele_composite_commande_par_editeur
+    date_prix: 2026-02
+    devise: USD
+    min: 1700000
+    max: 1700000
+    externe_confirme: true
+    qualite_prix_source: 2
+    famille_source: forrester-microsoft
+  normalisation_2026:
+    indice: aucune, montant déjà daté 2026
+    periode_depart: 2026-02
+    valeur_depart: 1
+    valeur_2026: 1
+    devise_par_eur: 1.1205
+    min_eur: 1517180
+    max_eur: 1517180
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Fabrication, Finance, SCM et mode de déploiement non ventilés en livrables FLOW.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 2
+    raison: Finance et Supply Chain Management d’une grande entreprise industrielle ; le partage des travaux internes
+      et externes est explicite.
+    enseignement: Un faible prix externe d’intégration peut refléter une équipe cliente très mobilisée, et non un
+      projet plus petit.
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: chiffre_separe
+    integration: 1,700 M$ de prestataires de mise en œuvre modélisés.
+    mco_run: Abonnements chiffrés séparément ; pas d’enveloppe autonome de MCO partenaire dans le modèle.
+    preuves:
+    - source: https://tei.forrester.com/go/Microsoft/Dynamics365ERPforEnterprises/index.html
+      localisation: Analysis Of Costs ; Subscription Fees et Implementation And Training Costs
+    observations:
+    - libelle: Abonnements Finance et Supply Chain Management
+      min: 2772000
+      max: 2772000
+      devise: USD
+      periode: Par an, années 1 à 3
+      assiette: 1 100 licences à 210 USD par mois. Avant majoration de risque de 5 % ; ce n’est pas un forfait complet
+        de MCO.
+      source: https://tei.forrester.com/go/Microsoft/Dynamics365ERPforEnterprises/index.html
+      localisation: Subscription Fees, Gt
+      qualite_prix_source: 2
+- id: aph-p-s4-2026
+  nom: AP-HP, conversion SAP ECC vers S/4HANA
+  sources:
+  - https://www.boamp.fr/telechargements/FILES/PDF/2026/01/26-8999.pdf
+  - https://www.aphp.fr/sites/default/files/2026-09/APHP_RA2025_Digital_17092026.pdf
+  contexte_business:
+    activite: Groupe hospitalier public
+    pays: France
+    salaries: null
+    chiffre_affaires: null
+    magasins: null
+    autres_dimensions: Environ 100 000 professionnels, 38 hôpitaux et budget annuel supérieur à 10,5 Md€ ; rapport annuel
+      2025.
+  projet:
+    plateforme: SAP S/4HANA
+    perimetre: Migration ECC, BW et GRC ; finances, budgets, patrimoine et logistique.
+    duree_mois: null
+    inclus_dans_prix: Lot intégration 5 061 585 € et lot AMOA/recette 1 947 300 € ; accords-cadres de 48 mois.
+    exclus_du_prix: Licences distinctes ; plafonds d'accords-cadres non consommés.
+  cout_publie:
+    statut: valeurs_estimees_accords_cadres_attribues
+    date_prix: 2026-01
+    devise: EUR
+    min: 7008885
+    max: 7008885
+    externe_confirme: true
+    qualite_prix_source: 3
+    famille_source: boamp-aphp
+    reserve: Valeur de procédure 8 772 000 € contradictoire avec les 7 008 885 € des deux lots estimés ; la somme des
+      lots est retenue.
+  normalisation_2026:
+    indice: aucune, montant déjà daté 2026
+    periode_depart: 2026-01
+    valeur_depart: 1
+    valeur_2026: 1
+    devise_par_eur: 1
+    min_eur: 7008885
+    max_eur: 7008885
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Migration hospitalière SAP existante ; volumes et livrables FLOW non définis.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 2
+    raison: Migration SAP multi-domaines avec logistique, habilitations et recette ; contexte hospitalier, sans déploiement
+      Fashion.
+    enseignement: Séparer intégration et assistance à la recette, puis identifier les évolutions déjà financées dans
+      les lots.
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: partiel
+    integration: Lot intégration 5 061 585 € et lot AMOA/recette 1 947 300 € ; accords-cadres de 48 mois.
+    mco_run: Évolutions et assistance incluses dans un accord-cadre de 48 mois ; aucune annuité autonome de Run &
+      MCO isolée.
+    preuves:
+    - source: https://www.boamp.fr/telechargements/FILES/PDF/2026/01/26-8999.pdf
+      localisation: Avis BOAMP 26-8999, PDF p. 1–4, lots 1 et 2
+    observations: []
+- id: southwark-sap-2025
+  nom: Southwark360, remplacement d'un ERP SAP
+  sources:
+  - https://moderngov.southwark.gov.uk/documents/s128412/Report%20Gateway%202%20Contract%20Award%20Approval%20Replacement%20of%20the%20Enterprise%20Resource%20Planning%20System.pdf
+  - https://moderngov.southwark.gov.uk/documents/s128424/Report%20Gateway%202%20-%20Contract%20Award%20Approval-%20Replacement%20of%20the%20Enterprise%20Resource%20Planning%20System.pdf
+  - https://www.southwark.gov.uk/sites/default/files/2025-12/Audited%20statement%20of%20accounts%202024%20to%202025.pdf
+  - https://moderngov.southwark.gov.uk/documents/s124063/Report%20Gateway%202%20Contract%20Award%20Approval%20Replacement%20of%20the%20Enterprise%20Resource%20Planning%20System.pdf
+  contexte_business:
+    activite: Collectivité locale
+    pays: Royaume-Uni
+    salaries: 5385
+    chiffre_affaires: null
+    magasins: null
+    autres_dimensions: Permanents et CDD au 31 mars 2025 ; budget net General Fund approuvé de 359,4 M£, hors compte
+      logement. La population desservie n'est pas assimilée à des utilisateurs ERP.
+  projet:
+    plateforme: SAP ERP
+    perimetre: RH, paie, finance et achats ; quatre contrats attribués pour deux ans.
+    duree_mois: null
+    inclus_dans_prix: 'Quatre lots externes attribués : mise en œuvre 5 550 887,07 £, changement 1 506 158,30 £, données
+      803 714 £, reporting et interfaces 679 020 £.'
+    exclus_du_prix: Licences SAP 5 368 323 £ sur dix ans, futurs lots de support et archivage.
+  cout_publie:
+    statut: quatre_contrats_attribues_non_depense_finale
+    date_prix: 2025-08
+    devise: GBP
+    min: 8539779.37
+    max: 8539779.37
+    externe_confirme: true
+    qualite_prix_source: 4
+    famille_source: southwark
+    reserve: Le registre des contrats affiche 9 123,93 £ de plus pour le lot 2 ; la somme suit les rapports d'attribution.
+  normalisation_2026:
+    indice: SPPI britannique J62, série HR6L
+    periode_depart: 2025-T3
+    valeur_depart: 127.7
+    valeur_2026: 131.5
+    devise_par_eur: 0.8377
+    min_eur: 10497672
+    max_eur: 10497672
+    reserve: L'indice informatique est aussi appliqué au lot de changement métier ; proxy imparfait.
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Le changement métier du lot 3 déborde potentiellement l'assiette FLOW ; RH/paie/finance n'éclairent pas SCM
+      et omnicanal. La ventilation ne permet pas de reconstruire un coût FLOW.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 2
+    raison: Lots distincts pour intégration, données et interfaces ; fonctions surtout Finance, achats et RH.
+    enseignement: 'Un repère de découpage contractuel : les licences et le support ne doivent pas être absorbés dans
+      le prix d’intégration.'
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: chiffre_separe
+    integration: 'Quatre lots externes attribués : mise en œuvre 5 550 887,07 £, changement 1 506 158,30 £, données
+      803 714 £, reporting et interfaces 679 020 £.'
+    mco_run: Licences sur dix ans publiées à part. Le support après démarrage et l’archivage relèvent d’autres lots
+      ; aucune annuité globale n’est déduite.
+    preuves:
+    - source: https://moderngov.southwark.gov.uk/documents/s128412/Report%20Gateway%202%20Contract%20Award%20Approval%20Replacement%20of%20the%20Enterprise%20Resource%20Planning%20System.pdf
+      localisation: Rapports Gateway 2, lots 2–5, p. 1 et description des sept lots
+    observations:
+    - libelle: Contrat éditeur SAP
+      min: 5368323
+      max: 5368323
+      devise: GBP
+      periode: Dix ans
+      assiette: Lot 1 distinct des services d’intégration. Montant de contrat ; pas de division arbitraire en annuités
+        et pas de MCO global.
+      source: https://moderngov.southwark.gov.uk/documents/s124063/Report%20Gateway%202%20Contract%20Award%20Approval%20Replacement%20of%20the%20Enterprise%20Resource%20Planning%20System.pdf
+      localisation: Gateway 2, lot 1, p. 1 et §76–78
+      qualite_prix_source: 4
+- id: tfl-s4-2023
+  nom: Transport for London, consultation SAP S/4HANA
+  sources:
+  - https://www.find-tender.service.gov.uk/Notice/005876-2023/PDF
+  - https://content.tfl.gov.uk/annual-report-and-statement-of-accounts-2022-23-acc.pdf
+  - https://content.tfl.gov.uk/tfl-quarterly-performance-report-q1-2023-24-acc.pdf
+  contexte_business:
+    activite: Transport public métropolitain
+    pays: Royaume-Uni
+    salaries: null
+    chiffre_affaires: null
+    magasins: null
+    autres_dimensions: 27 043 ETP TfL et Crossrail au 31 mars 2023, y compris main-d'œuvre non permanente ; revenus bruts
+      de services 2022/23 de 5 803,6 M£. Ces ETP ne sont pas un nombre de salariés permanents.
+  projet:
+    plateforme: SAP S/4HANA
+    perimetre: Design et build, migration ECC, finances, RH, paie, achats, logistique, données et plus de 60 interfaces.
+    duree_mois: null
+    inclus_dans_prix: Estimation des étapes Design et Build sur 24 à 36 mois.
+    exclus_du_prix: Run futur estimé 4 à 5 M£ par an, dont hébergement.
+  cout_publie:
+    statut: estimation_avant_mise_en_concurrence
+    date_prix: 2023-02
+    devise: GBP
+    min: 10000000
+    max: 15000000
+    externe_confirme: true
+    qualite_prix_source: 2
+    famille_source: tfl
+  normalisation_2026:
+    indice: SPPI britannique J62, série HR6L
+    periode_depart: 2023-T1
+    valeur_depart: 121.2
+    valeur_2026: 131.5
+    devise_par_eur: 0.8377
+    min_eur: 12951934
+    max_eur: 19427901
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Transports publics et migration existante ; devis final et charges par fonction inconnus.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 2
+    raison: Grand remplacement SAP avec migration et nombreuses interfaces ; Finance, RH et achats dépassent FLOW.
+    enseignement: 'Le « Design and Build » désigne l’implémentation de SAP : il ne chiffre pas la fabrication d’un
+      Core System réutilisable.'
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: chiffre_separe
+    integration: Estimation des étapes Design et Build sur 24 à 36 mois.
+    mco_run: Maintenance opérationnelle et hébergement estimés séparément de l’implémentation. Le périmètre comprend
+      l’ancien ECC puis les applications futures ; ce n’est pas le seul support de S/4HANA.
+    preuves:
+    - source: https://www.find-tender.service.gov.uk/Notice/005876-2023/PDF
+      localisation: Avis 2023/S 000-005876, description du besoin ; sources/benchmark-integration-2026-10-23.md
+    observations:
+    - libelle: Maintenance opérationnelle, hébergement compris
+      min: 4000000
+      max: 5000000
+      devise: GBP
+      periode: Par an
+      assiette: Estimation préconsultation de 2023 ; ancien et futur environnement SAP. Distincte des 10–15 MGBP de
+        Design and Build. Aucun coût de release générique Make.
+      source: https://www.find-tender.service.gov.uk/Notice/005876-2023/PDF
+      localisation: Avis 2023/S 000-005876, II.2.4 ; lecture conservée le 23 octobre 2026
+      qualite_prix_source: 2
+- id: eweb-s4-2023
+  nom: Eugene Water & Electric Board, déploiement SAP S/4HANA
+  sources:
+  - https://www.eweb.org/documents/board-meetings/2023/03-07-23/m7_eweb_enterprise_solutions_ees_implementation_contracts.pdf
+  - https://www.eweb.org/documents/board-meetings/2026/05-05-26/m5.pdf
+  - https://www.eweb.org/documents/board-meetings/2022/11-01-22/cc4_sap.pdf
+  - https://www.eweb.org/your-public-utility
+  contexte_business:
+    activite: Service public de l'eau et de l'électricité
+    pays: États-Unis
+    salaries: 600
+    chiffre_affaires: null
+    magasins: null
+    autres_dimensions: Environ 98 000 clients électricité et 63 000 clients eau selon EWEB ; secteur et fonctions éloignés
+      de Beaumanoir.
+  projet:
+    plateforme: SAP S/4HANA for Utilities
+    perimetre: Remplacement des systèmes clients et financiers ; conception, configuration, tests, formation et mise
+      en service.
+    duree_mois: 24
+    inclus_dans_prix: Contrat initial de l'intégrateur Deloitte, déploiement et assistance après mise en production.
+    exclus_du_prix: Contrat SAP cloud et licences séparé ; directeur de programme Avant séparé jusqu'à 5 M$ sur cinq
+      ans ; contributions internes EWEB.
+  cout_publie:
+    statut: plafond_contrat_attribue_non_depense_finale
+    date_prix: 2023-03
+    devise: USD
+    min: 16000000
+    max: 16000000
+    externe_confirme: true
+    qualite_prix_source: 4
+    famille_source: eweb
+  normalisation_2026:
+    indice: CPI-U États-Unis non désaisonnalisé
+    periode_depart: 2023-03
+    valeur_depart: 301.836
+    valeur_2026: 336.94
+    devise_par_eur: 1.1205
+    min_eur: 15940049
+    max_eur: 15940049
+    reserve: Prix américain transposé en pouvoir d'achat américain puis converti ; pas un TJM français. Six offres pour
+      le même appel d'offres entre 9 507 467 et 20 866 652 USD, pas six projets indépendants. L'avenant portant le plafond
+      à 22 M$ en 2026 finance aussi des travaux postérieurs.
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Finance et système clients d'une régie, non SCM Fashion ; directeur de programme acheté séparément et travaux
+      internes non chiffrés. Aucun pont de livrables et de prix au périmètre FLOW Beaumanoir.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 2
+    raison: Remplacement SAP avec migration, qualification et mise en service ; fonctions clients d’une régie et Finance,
+      éloignées du retail.
+    enseignement: Distinguer intégrateur, direction de programme et services cloud ; un seul contrat ne représente
+      pas tout l’investissement.
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: chiffre_separe
+    integration: Contrat initial de l'intégrateur Deloitte, déploiement et assistance après mise en production.
+    mco_run: Contrat SAP séparé comprenant cloud, licences et services d’exploitation. L’intégrateur couvre également
+      l’assistance au démarrage.
+    preuves:
+    - source: https://www.eweb.org/documents/board-meetings/2023/03-07-23/m7_eweb_enterprise_solutions_ees_implementation_contracts.pdf
+      localisation: Décision du 7 mars 2023, p. 2–3 ; contrat SAP du 1er novembre 2022, p. 1–2
+    observations:
+    - libelle: SAP Cloud Services Agreement
+      min: 7900000
+      max: 7900000
+      devise: USD
+      periode: 6,5 ans
+      assiette: Licences et cloud, supervision, exploitation, tests de régression et montées de version. Pas une annuité
+        uniforme ; périmètre distinct du contrat Deloitte.
+      source: https://www.eweb.org/documents/board-meetings/2022/11-01-22/cc4_sap.pdf
+      localisation: PDF p. 1–2, Contract Amount et Contracted Goods or Services
+      qualite_prix_source: 4
+- id: mtc-d365-2022
+  nom: Manufacturing Technology Centre, remplacement d'ERP
+  sources:
+  - https://www.find-tender.service.gov.uk/Notice/004129-2022/PDF
+  - https://find-and-update.company-information.service.gov.uk/company/06815480/filing-history?page=2
+  - https://uploads1.craft.co/uploads/craft/source/document/24496/8dbc8e2a5a5b3d69.pdf
+  contexte_business:
+    activite: Industrie et projets de recherche industrielle
+    pays: Royaume-Uni
+    salaries: 790
+    chiffre_affaires:
+      montant: 96645000
+      devise: GBP
+    magasins: null
+    autres_dimensions: Effectif moyen et chiffre d'affaires consolidé des comptes 2021/22 déposés en novembre 2022.
+  projet:
+    plateforme: Dynamics 365
+    perimetre: Implémentation et remplacement d'un ERP, modules détaillés non publiés.
+    duree_mois: null
+    inclus_dans_prix: Services HSO attribués à 1 957 756 £ HT.
+    exclus_du_prix: Licences et contributions internes non chiffrées.
+  cout_publie:
+    statut: contrat_attribue_non_depense_finale
+    date_prix: 2022-02
+    devise: GBP
+    min: 1957756
+    max: 1957756
+    externe_confirme: true
+    qualite_prix_source: 4
+    famille_source: mtc
+  normalisation_2026:
+    indice: SPPI britannique J62, série HR6L
+    periode_depart: 2022-T1
+    valeur_depart: 116.8
+    valeur_2026: 131.5
+    devise_par_eur: 0.8377
+    min_eur: 2631195
+    max_eur: 2631195
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Modules, interfaces, données et déploiements non publiés ; projet non Fashion.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 1
+    raison: Prix attribué Dynamics identifiable, mais détail des modules, interfaces et responsabilités insuffisant
+      pour rapprocher le travail de FLOW.
+    enseignement: Repère de prix contractuel d’un remplacement ERP plus étroit ; il ne fournit pas un plancher du
+      budget FLOW.
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: non_publie
+    integration: Services HSO attribués à 1 957 756 £ HT.
+    mco_run: Pas de coût annuel de support, licences ou exploitation isolé dans le registre de cette attribution.
+    preuves:
+    - source: https://www.find-tender.service.gov.uk/Notice/004129-2022/PDF
+      localisation: Avis d’attribution 2022/S 000-004129, p. 3–6 ; revue du 23 octobre 2026, accès direct bloqué le
+        26 octobre
+    observations: []
+- id: halifax-water-microsoft-2020
+  nom: Halifax Water, option Microsoft SaaS non retenue
+  sources:
+  - https://halifaxwater.ca/sites/default/files/2020-09/Board%20Meeting%20Package%20-%20September%2024%2C%202020_0.pdf
+  - https://halifaxwater.ca/sites/default/files/2020-08/Signed%20Halifax%20Water%20Financial%20Statements%20March%2031%202020.pdf
+  - https://halifaxwater.ca/2020-rate-application
+  contexte_business:
+    activite: Service public de l'eau
+    pays: Canada
+    salaries: 500
+    chiffre_affaires:
+      montant: 137750000
+      devise: CAD
+    magasins: null
+    autres_dimensions: Environ 105 000 comptes de service ; effectif arrondi et revenus de l'exercice 2019/20.
+  projet:
+    plateforme: Microsoft Dynamics 365 SaaS
+    perimetre: Finance, paie, facturation, achats et inventaire.
+    duree_mois: null
+    inclus_dans_prix: Ligne indicative de coût d'implémentation KPMG.
+    exclus_du_prix: Licences et services gérés présentés séparément.
+  cout_publie:
+    statut: option_estimee_avant_choix_non_realisee
+    date_prix: 2020-09
+    devise: CAD
+    min: 4000000
+    max: 5000000
+    externe_confirme: false
+    qualite_prix_source: 1
+    famille_source: halifax-kpmg
+  normalisation_2026:
+    indice: IPC canadien général, illustration du prix publié seulement
+    periode_depart: moyenne-2020
+    valeur_depart: 137.0
+    valeur_2026: 170.0
+    devise_par_eur: 1.5725
+    min_eur: 3156441
+    max_eur: 3945551
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Prestations externes non séparées de façon certaine ; projet eau et Finance.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 2
+    raison: Deux options chiffrées sur le même besoin, avec licences et services annuels séparés ; le contexte est
+      celui d’une régie d’eau.
+    enseignement: 'Un repère de comparaison des options Buy : licences et services gérés peuvent varier en sens contraire selon
+      la solution. Ce sont des options estimées, pas deux projets réalisés.'
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: chiffre_separe
+    integration: Ligne indicative de coût d'implémentation KPMG.
+    mco_run: 'Services gérés : support N1–N3, hébergement et sauvegarde. Les évolutions fonctionnelles sont facturées
+      en plus ; cinq ans de licences et quatre ans de services après déploiement.'
+    preuves:
+    - source: https://halifaxwater.ca/sites/default/files/2020-09/Board%20Meeting%20Package%20-%20September%2024%2C%202020_0.pdf
+      localisation: Dossier conseil, PDF p. 58–61 ; note KPMG p. 18–21
+    observations:
+    - libelle: Licences et produits complémentaires
+      min: 440000
+      max: 440000
+      devise: CAD
+      periode: Par an
+      assiette: Option KPMG ; cinq années comptées dans le TCO. Montants nominaux de la note publiée en 2020.
+      source: https://halifaxwater.ca/sites/default/files/2020-09/Board%20Meeting%20Package%20-%20September%2024%2C%202020_0.pdf
+      localisation: PDF p. 60, B.1
+      qualite_prix_source: 2
+    - libelle: Services gérés
+      min: 500000
+      max: 500000
+      devise: CAD
+      periode: Par an après mise en service
+      assiette: Quatre années comptées dans le TCO ; évolutions facturées en supplément. Hypothèse KPMG, pas contrat
+        signé.
+      source: https://halifaxwater.ca/sites/default/files/2020-09/Board%20Meeting%20Package%20-%20September%2024%2C%202020_0.pdf
+      localisation: PDF p. 60, B.2 ; p. 58, périmètre
+      qualite_prix_source: 2
+- id: halifax-water-sap-2020
+  nom: Halifax Water, option SAP SaaS non retenue
+  sources:
+  - https://halifaxwater.ca/sites/default/files/2020-09/Board%20Meeting%20Package%20-%20September%2024%2C%202020_0.pdf
+  - https://halifaxwater.ca/sites/default/files/2020-08/Signed%20Halifax%20Water%20Financial%20Statements%20March%2031%202020.pdf
+  - https://halifaxwater.ca/2020-rate-application
+  contexte_business:
+    activite: Service public de l'eau
+    pays: Canada
+    salaries: 500
+    chiffre_affaires:
+      montant: 137750000
+      devise: CAD
+    magasins: null
+    autres_dimensions: Environ 105 000 comptes de service ; effectif arrondi et revenus de l'exercice 2019/20.
+  projet:
+    plateforme: SAP SaaS
+    perimetre: Finance, paie, facturation, achats et inventaire.
+    duree_mois: null
+    inclus_dans_prix: Ligne indicative de coût d'implémentation KPMG.
+    exclus_du_prix: Licences et services gérés présentés séparément.
+  cout_publie:
+    statut: option_estimee_avant_choix_non_realisee
+    date_prix: 2020-09
+    devise: CAD
+    min: 7000000
+    max: 9000000
+    externe_confirme: false
+    qualite_prix_source: 1
+    famille_source: halifax-kpmg
+  normalisation_2026:
+    indice: IPC canadien général, illustration du prix publié seulement
+    periode_depart: moyenne-2020
+    valeur_depart: 137.0
+    valeur_2026: 170.0
+    devise_par_eur: 1.5725
+    min_eur: 5523772
+    max_eur: 7101992
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Même absence de frontière externe démontrée ; cette option ne fut pas achetée.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 2
+    raison: Deux options chiffrées sur le même besoin, avec licences et services annuels séparés ; le contexte est
+      celui d’une régie d’eau.
+    enseignement: 'Un repère de comparaison des options Buy : licences et services gérés peuvent varier en sens contraire selon
+      la solution. Ce sont des options estimées, pas deux projets réalisés.'
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: chiffre_separe
+    integration: Ligne indicative de coût d'implémentation KPMG.
+    mco_run: 'Services gérés : support N1–N3, hébergement et sauvegarde. Les évolutions fonctionnelles sont facturées
+      en plus ; cinq ans de licences et quatre ans de services après déploiement.'
+    preuves:
+    - source: https://halifaxwater.ca/sites/default/files/2020-09/Board%20Meeting%20Package%20-%20September%2024%2C%202020_0.pdf
+      localisation: Dossier conseil, PDF p. 58–61 ; note KPMG p. 18–21
+    observations:
+    - libelle: Licences et produits complémentaires
+      min: 820000
+      max: 820000
+      devise: CAD
+      periode: Par an
+      assiette: Option KPMG ; cinq années comptées dans le TCO. Montants nominaux de la note publiée en 2020.
+      source: https://halifaxwater.ca/sites/default/files/2020-09/Board%20Meeting%20Package%20-%20September%2024%2C%202020_0.pdf
+      localisation: PDF p. 61, B.1
+      qualite_prix_source: 2
+    - libelle: Services gérés
+      min: 400000
+      max: 400000
+      devise: CAD
+      periode: Par an après mise en service
+      assiette: Quatre années comptées dans le TCO ; évolutions facturées en supplément. Hypothèse KPMG, pas contrat
+        signé.
+      source: https://halifaxwater.ca/sites/default/files/2020-09/Board%20Meeting%20Package%20-%20September%2024%2C%202020_0.pdf
+      localisation: PDF p. 61, B.2 ; p. 58, périmètre
+      qualite_prix_source: 2
+- id: velrada-jt-johnson-2022
+  nom: Velrada, J.T. Johnson & Sons
+  sources:
+  - https://assets.applytosupply.digitalmarketplace.service.gov.uk/g-cloud-13/documents/715243/114078871087067-service-definition-document-2022-05-17-1420.pdf
+  - https://www.jtj.com.au/
+  contexte_business:
+    activite: Fabrication et export de fourrage et d'aliments pour animaux
+    pays: Australie
+    salaries: null
+    chiffre_affaires: null
+    magasins: null
+    autres_dimensions: Implantations en Australie du Sud, Victoria et Australie-Occidentale ; effectif daté non publié.
+  projet:
+    plateforme: Dynamics 365
+    perimetre: Finance 75 jours et SCM 550 jours sur 625 jours publiés.
+    duree_mois: 11
+    inclus_dans_prix: Coût d'implémentation publié sans ventilation suffisante de l'assiette.
+    exclus_du_prix: Contributions des équipes du client non chiffrées.
+  cout_publie:
+    statut: temoignage_integrateur_assiette_incertaine
+    date_prix: null
+    devise: AUD
+    min: 1300000
+    max: 1300000
+    externe_confirme: false
+    qualite_prix_source: 1
+    famille_source: velrada
+  normalisation_2026:
+    indice: null
+    periode_depart: null
+    valeur_depart: null
+    valeur_2026: null
+    devise_par_eur: null
+    min_eur: null
+    max_eur: null
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Date du prix et assiette externe inconnues ; 625 jours loin du programme FLOW.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 2
+    raison: Projet stocks, production et logistique ; jours par module et interfaces identifiés. Taille bien inférieure
+      à FLOW.
+    enseignement: Un même cas distingue intégration initiale et service applicatif annuel, avec une part Supply Chain
+      Management identifiable en jours.
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: chiffre_separe
+    integration: Coût d'implémentation publié sans ventilation suffisante de l'assiette.
+    mco_run: Service applicatif annuel publié à part ; licences, niveau de service et volume d’évolutions non détaillés.
+    preuves:
+    - source: https://assets.applytosupply.digitalmarketplace.service.gov.uk/g-cloud-13/documents/715243/114078871087067-service-definition-document-2022-05-17-1420.pdf
+      localisation: Dossier Velrada G-Cloud 13, PDF p. 6
+    observations:
+    - libelle: Service applicatif géré
+      min: 98000
+      max: 98000
+      devise: AUD
+      periode: Par an
+      assiette: Prix annoncé par l’intégrateur ; contenu précis et date de prix non détaillés. Publication 2022, sans
+        conversion en euros 2026.
+      source: https://assets.applytosupply.digitalmarketplace.service.gov.uk/g-cloud-13/documents/715243/114078871087067-service-definition-document-2022-05-17-1420.pdf
+      localisation: PDF p. 6, Timeline and Costs
+      qualite_prix_source: 1
+- id: velrada-club-assist-2022
+  nom: Velrada, Club Assist
+  sources:
+  - https://assets.applytosupply.digitalmarketplace.service.gov.uk/g-cloud-13/documents/715243/114078871087067-service-definition-document-2022-05-17-1420.pdf
+  - https://clubassist.com.au/-/media/Project/ClubAssist/Corporate/Files/Corporate-Responsibility/Club-Assist-Modern-Slavery-Statement-FY22.pdf
+  contexte_business:
+    activite: Services automobiles
+    pays: Australie
+    salaries: null
+    chiffre_affaires: null
+    magasins: null
+    autres_dimensions: Plus de 300 salariés et sous-traitants australiens selon la déclaration FY22 ; nombre exact de
+      salariés inconnu.
+  projet:
+    plateforme: Dynamics 365
+    perimetre: Finance 400 jours, SCM 600 jours, Customer Engagement et Field Service 435 jours.
+    duree_mois: 12
+    inclus_dans_prix: Coût d'implémentation publié sans ventilation suffisante de l'assiette.
+    exclus_du_prix: Contributions des équipes du client non chiffrées.
+  cout_publie:
+    statut: temoignage_integrateur_assiette_incertaine
+    date_prix: null
+    devise: AUD
+    min: 2300000
+    max: 2300000
+    externe_confirme: false
+    qualite_prix_source: 1
+    famille_source: velrada
+  normalisation_2026:
+    indice: null
+    periode_depart: null
+    valeur_depart: null
+    valeur_2026: null
+    devise_par_eur: null
+    min_eur: null
+    max_eur: null
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Date et assiette externe inconnues ; Field Service étranger au périmètre FLOW.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 2
+    raison: Stocks, entrepôts et planification, mais aussi relation client et interventions terrain.
+    enseignement: Les jours par module aident à repérer les travaux métier ; leur ventilation n’est pas une ventilation
+      du prix.
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: non_publie
+    integration: Coût d'implémentation publié sans ventilation suffisante de l'assiette.
+    mco_run: Aucun forfait annuel publié dans cette fiche ; le montant décrit la mise en œuvre.
+    preuves:
+    - source: https://assets.applytosupply.digitalmarketplace.service.gov.uk/g-cloud-13/documents/715243/114078871087067-service-definition-document-2022-05-17-1420.pdf
+      localisation: Dossier Velrada G-Cloud 13, PDF p. 7
+    observations: []
+- id: velrada-hinkler-books-2022
+  nom: Velrada, Hinkler Books
+  sources:
+  - https://assets.applytosupply.digitalmarketplace.service.gov.uk/g-cloud-13/documents/715243/114078871087067-service-definition-document-2022-05-17-1420.pdf
+  - https://www.hinkler.com.au/who-we-are
+  contexte_business:
+    activite: Édition et distribution de livres
+    pays: Australie
+    salaries: null
+    chiffre_affaires: null
+    magasins: null
+    autres_dimensions: Éditeur basé à Melbourne, diffusion internationale ; effectif daté non publié.
+  projet:
+    plateforme: Dynamics 365
+    perimetre: Finance 159 jours et SCM 300 jours sur 459 jours publiés.
+    duree_mois: 7
+    inclus_dans_prix: Coût d'implémentation publié sans ventilation suffisante de l'assiette.
+    exclus_du_prix: Contributions des équipes du client non chiffrées.
+  cout_publie:
+    statut: temoignage_integrateur_assiette_incertaine
+    date_prix: null
+    devise: AUD
+    min: 725000
+    max: 725000
+    externe_confirme: false
+    qualite_prix_source: 1
+    famille_source: velrada
+  normalisation_2026:
+    indice: null
+    periode_depart: null
+    valeur_depart: null
+    valeur_2026: null
+    devise_par_eur: null
+    min_eur: null
+    max_eur: null
+  transposition_au_perimetre_flow_beaumanoir:
+    cout_central_eur_2026: null
+    fourchette_min_eur_2026: null
+    fourchette_max_eur_2026: null
+    truth_level: 0
+    cohorte: null
+    limite: Date et assiette externe inconnues ; projet nettement plus petit que FLOW.
+  lecture_flow:
+    date_revue: '2026-10-26'
+    score_utilite: 2
+    raison: Distribution de livres, stocks, entrepôts et interfaces EDI ; migration d’un ERP existant.
+    enseignement: Un exemple concret de reprise Dynamics avec interfaces logistiques, sur une échelle plus petite
+      que FLOW.
+    postes:
+      build: non_etudie
+      integration: chiffre
+      mco_run: non_publie
+    integration: Coût d'implémentation publié sans ventilation suffisante de l'assiette.
+    mco_run: Aucun montant annuel publié dans cette fiche ; les équipes clientes sont listées sans prix.
+    preuves:
+    - source: https://assets.applytosupply.digitalmarketplace.service.gov.uk/g-cloud-13/documents/715243/114078871087067-service-definition-document-2022-05-17-1420.pdf
+      localisation: Dossier Velrada G-Cloud 13, PDF p. 9
+    observations: []

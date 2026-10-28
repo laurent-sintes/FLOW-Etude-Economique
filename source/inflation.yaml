@@ -1,0 +1,188 @@
+# Hypothèses de prix unitaires, communes aux cinq stacks. Aucun calendrier de projet.
+version_schema: 1
+id: inflation-france
+date_documentation: '2026-10-22'
+pays: FR
+devise: EUR
+unite_taux: pourcentage_annuel
+horizons_analyse_ans: [10, 15]
+nature: scenarios_de_cadrage
+description: >-
+  Évolution nominale des prix HT achetés en France, à périmètre, qualification et
+  consommation constants. Les taux sont des hypothèses prospectives de l'étude,
+  pas des prévisions sectorielles publiées sur 15 ans ni des clauses contractuelles.
+dependances:
+  schema: source/schema-inflation.yaml
+  stacks:
+    - source/stacks/microsoft.yaml
+    - source/stacks/sap.yaml
+    - source/stacks/java-spring.yaml
+    - source/stacks/rust.yaml
+    - source/stacks/dotnet.yaml
+  utilisation: >-
+    Les stacks fournissent les prix de départ, les régimes de tarification et les
+    inclusions. Ce fichier fournit seulement leur évolution. Les futurs calculs
+    de coûts combineront ces deux entrées, sans recopier les taux dans les stacks.
+conventions:
+  - France uniquement ; pays d'achat et marché de prestation, pas nationalité de l'éditeur.
+  - Les mêmes catégories et hypothèses s'appliquent à Make et Buy ; aucune prime d'inflation par langage.
+  - Bas et haut sont des sensibilités choisies, pas des percentiles ni un intervalle de confiance.
+  - Les trois taux sectoriels sont nominaux ; ne pas ajouter à nouveau l'inflation générale.
+  - Les taux annuels constants simplifient l'ordre de grandeur ; ils ne prédisent pas chaque année.
+  - Les horizons de 10 et 15 ans mesurent l'effet des prix ; ils ne fixent pas la durée de maintenance ni une roadmap.
+  - Aucun changement de volume, d'utilisateurs, de mix de profils, de licence ou de périmètre n'est de l'inflation.
+  - Les gains de productivité, dont l'IA, affectent les JH et ne sont pas retranchés une seconde fois des TJM.
+  - Les tarifs historiques doivent être datés et rebasés une seule fois ; la date de documentation n'est pas forcément la date du prix.
+  - Pas de projection de change ; les scénarios supposent une parité constante pour les achats indexés sur une devise étrangère.
+calcul:
+  formule_prix: P_n = P_0 * (1 + taux_annuel_pct / 100) ** n
+  definition_n: Nombre entier de révisions annuelles depuis le prix de référence ; n=0 donne P_0.
+  formule_facteur: (1 + taux_annuel_pct / 100) ** n
+  formule_variation_pct: 100 * ((1 + taux_annuel_pct / 100) ** n - 1)
+  application: >-
+    Appliquer un seul facteur au prix unitaire, puis multiplier par la quantité
+    ou les JH. Le facteur à 10 ou 15 ans représente le prix à cette échéance,
+    pas le cumul des dépenses sur la période. Aucun TCO n'est calculé ici.
+  priorite: >-
+    Pour une séquence RFI documentée, conserver les montants annuels tels quels,
+    sans indexation supplémentaire. Une clause contractuelle applicable prévaut
+    si elle remplace cette référence. Hors période documentée, utiliser une
+    évolution publiée applicable au prix de base, sinon le scénario de catégorie.
+    La valorisation_annuelle de Maintenance indique le début de l'indexation.
+    Un forfait de première année sans récurrence établie n'est pas projeté.
+    Ne pas cumuler ces règles ni convertir une montée en volume en inflation.
+categories:
+  licences_logiciels:
+    libelle: Licences, abonnements logiciels et maintenance éditeur
+    assiette: Prix d'un droit, abonnement ou forfait logiciel à couverture et volume constants.
+    taux_annuel_pct: {bas: 0.0, central: 3.0, haut: 6.0}
+    fondement: hypothese_analyste
+    niveau_etayage: faible
+    justification: >-
+      3 % est une convention d'étude : ancrage macro de 2 % et marge de 1 point
+      pour les révisions commerciales, non une prime mesurée. Dynamics a révisé
+      ses prix en 2024 après plus de cinq ans ; un ajustement de devise a ensuite
+      abaissé des prix cloud EUR en 2026. Le prix logiciel n'est donc pas un simple
+      IPC français. Aucun taux annuel à 15 ans propre à SAP, K3 ou Microsoft n'est établi.
+    sensibilite: >-
+      0 % représente un prix nominal stable ; 6 % des hausses commerciales
+      persistantes. Bornes de test non calibrées statistiquement ; des baisses
+      ou des sauts de prix peuvent se produire hors de cette représentation lissée.
+    limites: >-
+      Les annonces Microsoft documentent un mécanisme, pas une moyenne de tous
+      les logiciels. Ne pas appliquer leur baisse historique à un devis qui
+      l'intègre déjà. Le support inclus évolue avec l'abonnement, sans ligne additionnelle.
+    sources: [BCE_SPF, MS_DYNAMICS, MS_DEVISES]
+  tjm_ingenierie:
+    libelle: TJM des interventions humaines
+    assiette: Prix d'une journée à rôle, expérience, localisation et mode d'achat constants.
+    taux_annuel_pct: {bas: 1.0, central: 2.5, haut: 4.5}
+    fondement: hypothese_analyste
+    niveau_etayage: intermediaire
+    justification: >-
+      2,5 % arrondit l'évolution de l'indice Syntec révisé entre décembre 2024
+      et décembre 2025 : 322,6 / 314,8 - 1, soit environ 2,48 %. C'est un repère
+      de coût salarial, pas un indice de TJM. En août 2026, le glissement annuel
+      est légèrement négatif (320,4 / 321,1 - 1). Le SPF de la BCE situe la hausse
+      des salaires de la zone euro à 2,9 % en 2031 ; il fournit un contrepoint,
+      sans mesurer les ingénieurs français. Le choix de 2,5 % reste une extrapolation.
+    sensibilite: >-
+      1 % teste une faible transmission des salaires aux prix ; 4,5 % une tension
+      durable sur les compétences et les coûts. Même fourchette pour les cinq
+      stacks, faute de prévisions différentielles robustes à 10-15 ans.
+    limites: >-
+      Syntec mesure le coût du travail salarié, pas le prix freelance ou la marge
+      ESN. La qualification des profils et les primes de rareté sont dans les
+      TJM de départ. Le support N1 peut avoir un prix inférieur tout en suivant
+      la même hypothèse d'évolution, en l'absence de preuve d'une trajectoire distincte.
+    sources: [SYNTEC, BCE_SPF]
+  cloud:
+    libelle: Hébergement et services cloud techniques
+    assiette: Panier constant de calcul, stockage, réseau, sauvegarde, PaaS et iPaaS à l'usage.
+    taux_annuel_pct: {bas: -2.0, central: 1.0, haut: 4.0}
+    fondement: hypothese_analyste
+    niveau_etayage: faible
+    justification: >-
+      1 % est une convention prudente : ancrage macro de 2 % atténué de 1 point
+      par les baisses possibles de prix unitaires, sans supposer une baisse
+      générale. AWS a par exemple réduit en 2025 le prix de stockage S3 Express
+      One Zone de 31 %. Cet événement illustre la direction possible et ne
+      calibre ni un panier cloud français ni une baisse annuelle durable.
+    sensibilite: >-
+      -2 % teste des baisses modérées et persistantes de prix unitaires ; 4 % une
+      hausse durable des tarifs. Bornes choisies pour la sensibilité, non issues
+      d'une prévision de fournisseur. Maintenir les consommations constantes.
+    limites: >-
+      L'exemple AWS concerne un produit et des régions spécifiques, pas une offre
+      FLOW sélectionnée ni une région France. Les changements d'architecture,
+      de capacité ou de remise sont hors de ce taux. Pas de supplément énergie
+      si celle-ci est déjà dans le tarif cloud ; pas de cloud additionnel si inclus dans le SaaS.
+    sources: [BCE_SPF, AWS_S3]
+rattachement:
+  prestations:
+    developpement: tjm_ingenierie
+    integration: tjm_ingenierie
+    support_n3: tjm_ingenierie
+    support_n1: tjm_ingenierie
+  regles:
+    - Support et maintenance facturés en JH suivent tjm_ingenierie.
+    - Maintenance et évolutions réalisées par l'équipe Make suivent tjm_ingenierie à JH constants.
+    - Support éditeur et mises à jour inclus suivent le contrat qui les finance, une seule fois.
+    - Support séparé à prix forfaitaire suit sa clause ; à défaut, retenir sa nature réelle (logiciel ou prestation).
+    - Un abonnement PaaS/iPaaS à droit d'usage fixe suit licences_logiciels ; les ressources facturées à l'usage suivent cloud.
+    - Un contrat groupé sans ventilation suit une seule règle documentée ; ne pas inventer de ventilation.
+    - Une redevance OSS nulle reste nulle ; le support payant et l'hébergement restent rattachés à leurs catégories.
+    - Une dépense inconnue reste inconnue ; appliquer un facteur ne lui attribue pas un prix de départ.
+    - Le pilotage en JH suit tjm_ingenierie ; en pourcentage d'une assiette déjà réévaluée, ne pas ajouter une seconde inflation.
+  hors_taux_autonome:
+    - Énergie et réseau inclus dans le cloud ; pas de paramètres supplémentaires sans dépense distincte significative.
+    - Outillage, sécurité et observabilité rattachés au mode d'achat logiciel, cloud ou prestation.
+    - Change, taxes, croissance des volumes et productivité hors inflation des prix unitaires.
+sources:
+  BCE_SPF:
+    titre: BCE — Survey of Professional Forecasters, troisième trimestre 2026
+    url: https://www.ecb.europa.eu/stats/ecb_surveys/survey_of_professional_forecasters/html/ecb.spf2026q3.en.html
+    nature: enquete_previsions
+    portee: Zone euro ; ancrage macro, non prévision sectorielle française.
+    repere: Tableau 1 ; horizon long terme 2031.
+    observations:
+      - IPCH attendu à 2,0 % en 2031.
+      - Croissance des salaires attendue à 2,9 % en 2031.
+    limite: Aucune projection des licences, du cloud ou des TJM jusqu'à 2041.
+  SYNTEC:
+    titre: Fédération Syntec — indice révisé
+    url: https://www.syntec.fr/indice-syntec/
+    nature: indice_historique
+    portee: Coût de main-d'œuvre des prestations intellectuelles en France.
+    repere: Historique, uniquement colonne Indice révisé, sans mélange avec l'ancien indice raccordé.
+    observations:
+      - Décembre 2024 = 314,8 ; décembre 2025 = 322,6.
+      - Août 2025 = 321,1 ; août 2026 = 320,4, publié le 30 septembre 2026.
+    limite: Ni indice de prix de vente des prestations, ni prévision à long terme, ni mesure des freelances.
+  MS_DYNAMICS:
+    titre: Microsoft — nouvelle tarification Dynamics 365, effective octobre 2024
+    url: https://www.microsoft.com/en-us/dynamics-365/blog/business-leader/2024/04/12/new-pricing-for-microsoft-dynamics-365-Effective-october-2024-2/
+    nature: annonce_editeur
+    portee: Produits Dynamics concernés ; pas tous les logiciels du marché.
+    repere: Annonce du 12 avril 2024, effet au 1er octobre 2024.
+    observations:
+      - Première révision tarifaire annoncée après plus de cinq ans.
+    limite: Événement commercial passé, pas taux annuel prédictif à périmètre constant.
+  MS_DEVISES:
+    titre: Microsoft Partner Center — annonces décembre 2025
+    url: https://learn.microsoft.com/en-us/partner-center/announcements/2025-december
+    nature: annonce_editeur
+    portee: Commercial Cloud en devises locales ; pas logiciel on-premises.
+    repere: Local currency price adjustments ; annonce du 12 décembre 2025, effet au 1er février 2026.
+    observations:
+      - Ajustement EUR de -7,4 % annoncé, avec possibles arrondis selon le SKU.
+    limite: Correction de devise passée, pas baisse annuelle à répéter ni règle générale de tarification Azure.
+  AWS_S3:
+    titre: AWS — réductions tarifaires S3 Express One Zone
+    url: https://aws.amazon.com/blogs/aws/up-to-85-price-reductions-for-amazon-s3-express-one-zone/
+    nature: annonce_fournisseur
+    portee: S3 Express One Zone dans les régions alors disponibles, dont Irlande et Stockholm ; pas France.
+    repere: Annonce et effet au 10 avril 2025 ; tableau tarifaire illustratif US East.
+    observations:
+      - Baisse de 31 % du prix de stockage ; évolutions différentes selon les opérations.
+    limite: Exemple de prix unitaire ; aucune représentativité du cloud global et aucune extrapolation annuelle de cette baisse.

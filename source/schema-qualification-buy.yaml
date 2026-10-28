@@ -1,0 +1,213 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+additionalProperties: false
+required:
+- version
+- date
+- id
+- principe
+- hypothese
+- absence_de_developpement
+- sources
+- exceptions
+- developpements
+- revues
+- presentation
+properties:
+  version:
+    const: 1
+  date:
+    type: string
+  id:
+    const: qualification-buy
+  principe:
+    type: string
+    minLength: 1
+  hypothese:
+    type: string
+    minLength: 1
+  absence_de_developpement:
+    type: string
+    minLength: 1
+  presentation:
+    type: object
+  sources:
+    type: object
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      required:
+      - titre
+      - reference
+      - portee
+      properties:
+        titre:
+          type: string
+          minLength: 1
+        reference:
+          type: string
+          minLength: 1
+        portee:
+          type: string
+          minLength: 1
+  revues:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - bloc
+      - capacite
+      - stack
+      - couverture_ref
+      - statut
+      - decision
+      - exceptions
+      properties:
+        bloc:
+          type: string
+        capacite:
+          type:
+          - string
+          - 'null'
+        stack:
+          enum:
+          - microsoft
+          - sap
+        couverture_ref:
+          type: string
+        statut:
+          enum:
+          - standard_retenu
+          - integration_client
+          - point_cible
+        decision:
+          type: string
+          minLength: 1
+        exceptions:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+  exceptions:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - titre
+      - stacks
+      - blocs
+      - nature
+      - decision
+      - sources
+      - statut
+      - cout_initial_eur_ht
+      - cout_annuel_eur_ht
+      - financement
+      properties:
+        id:
+          type: string
+          minLength: 1
+        titre:
+          type: string
+          minLength: 1
+        stacks:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            enum:
+            - microsoft
+            - sap
+        blocs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+        nature:
+          enum:
+          - adequation_standard
+          - module
+          - integration
+          - developpement
+        decision:
+          type: string
+          minLength: 1
+        sources:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+        statut:
+          enum:
+          - a_qualifier
+          - ecart_demontre
+        cout_initial_eur_ht:
+          type:
+          - number
+          - 'null'
+          minimum: 0
+        cout_annuel_eur_ht:
+          type:
+          - number
+          - 'null'
+          minimum: 0
+        financement:
+          type: string
+          minLength: 1
+  developpements:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - exception
+      - stack
+      - preuve
+      - fonction_absente
+      - financement_distinct
+      - bas
+      - central
+      - haut
+      - entretien_jh_annuels
+      properties:
+        id:
+          type: string
+          pattern: ^BUY-
+        exception:
+          type: string
+        stack:
+          enum:
+          - microsoft
+          - sap
+        preuve:
+          type: string
+        fonction_absente:
+          type: string
+          minLength: 1
+        financement_distinct:
+          type: string
+          minLength: 1
+        bas:
+          $ref: '#/$defs/charges'
+        central:
+          $ref: '#/$defs/charges'
+        haut:
+          $ref: '#/$defs/charges'
+        entretien_jh_annuels:
+          type: number
+          minimum: 0
+$defs:
+  charges:
+    type: array
+    minItems: 6
+    maxItems: 6
+    items:
+      type: number
+      minimum: 0

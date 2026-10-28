@@ -1,0 +1,295 @@
+# Modèle source éditable. Même schéma pour Make et Buy.
+version_schema: 1
+id: microsoft-buy
+nom: Microsoft Dynamics 365 + K3 Fashion
+strategie: buy
+date_documentation: '2026-10-22'
+description: Progiciel Fashion acquis, configuré et étendu sur le socle Microsoft. Infrastructure standard portée
+  par les abonnements.
+conventions:
+- Description d’une stack de travail, sans chiffrage global ni calendrier.
+- Les prix de produits sont à qualifier ; les TJM rémunèrent les interventions humaines.
+- Un composant inclus est financé par un autre élément, pas gratuit.
+- Les composants proposés ne valent pas décision d’achat ou validation d’architecture.
+elements:
+- id: d365-scm
+  nom: Dynamics 365 Supply Chain Management
+  couche: progiciel
+  edition: null
+  description: Socle ERP de gestion des achats, stocks et opérations de supply chain.
+  deploiement: service_editeur
+  fondement: etude_client
+  licence: Propriétaire
+  tarification:
+    regime: payant
+    assiette: Utilisateurs, rôles et capacités selon contrat
+    inclus_dans: []
+    precision: Abonnement éditeur ; ne pas ajouter un coût de build du produit Microsoft.
+  limites: La couverture du RFI n’est pas un taux de couverture du futur Flow Core System. Capacités et limites
+    à comparer fonction par fonction.
+  sources:
+  - MS_RFI
+  - D365
+- id: d365-finance
+  nom: Dynamics 365 Finance
+  couche: progiciel
+  edition: null
+  description: Composant financier présent dans la proposition RFI Dynamics 365.
+  deploiement: service_editeur
+  fondement: etude_client
+  licence: Propriétaire
+  tarification:
+    regime: payant
+    assiette: Utilisateurs et droits selon contrat
+    inclus_dans: []
+    precision: Aucune quote-part financière ni remise déduite automatiquement.
+  limites: La finance est hors du cœur opérationnel FLOW. Présence dans l’offre historique à conserver ; besoin
+    et périmètre comparable à arbitrer.
+  sources:
+  - MS_RFI
+  - D365
+- id: d365-commerce
+  nom: Dynamics 365 Commerce
+  couche: progiciel
+  edition: null
+  description: Composant commerce et opérations omnicanales proposé avec Dynamics 365.
+  deploiement: service_editeur
+  fondement: etude_client
+  licence: Propriétaire
+  tarification:
+    regime: payant
+    assiette: Utilisateurs, appareils et capacités selon contrat
+    inclus_dans: []
+    precision: Service ou licence payant. Droits, capacités et services inclus à confirmer au contrat ; montant
+      non chiffré.
+  limites: Les systèmes de canal ne sont pas tous dans FLOW. Distinguer les fonctions communes des POS et du commerce
+    propres aux canaux.
+  sources:
+  - MS_RFI
+  - D365
+- id: k3-fashion
+  nom: K3 Fashion
+  couche: progiciel
+  edition: null
+  description: 'Extension Fashion intégrée à Dynamics 365 : collections, variantes et processus propres à la mode.'
+  deploiement: extension_progiciel
+  fondement: etude_client
+  licence: Propriétaire
+  tarification:
+    regime: payant
+    assiette: Souscription K3 à préciser
+    inclus_dans: []
+    precision: Souscription propre. Ne pas la supposer comprise dans la licence D365 de base.
+  limites: Éditeur et souscription distincts de Microsoft. Ne pas confondre K3 Fashion avec K3 Pebblestone pour
+    Business Central.
+  sources:
+  - K3
+  - MS_RFI
+  - SYNTHESE_RFI
+- id: infra-d365
+  nom: Infrastructure standard Dynamics 365
+  couche: iaas
+  edition: null
+  description: Infrastructure hébergée et administrée par Microsoft pour le service ERP standard.
+  deploiement: service_editeur
+  fondement: etude_client
+  licence: Service propriétaire
+  tarification:
+    regime: inclus
+    assiette: null
+    inclus_dans:
+    - d365-scm
+    - d365-finance
+    - d365-commerce
+    precision: Financée par les abonnements applicables ; aucune seconde facture IaaS pour les mêmes ressources.
+  limites: Périmètre et capacités contractuels. Ne couvre pas automatiquement les ressources Azure des extensions
+    client.
+  sources:
+  - D365
+  - SYNTHESE_RFI
+- id: extension-d365
+  nom: Plateforme d’extension Dynamics 365 F&O
+  couche: framework
+  edition: null
+  description: Modèle d’extension X++, événements, API et interfaces du progiciel.
+  deploiement: extension_progiciel
+  fondement: proposition
+  licence: Propriétaire
+  tarification:
+    regime: inclus
+    assiette: null
+    inclus_dans:
+    - d365-scm
+    - d365-finance
+    - d365-commerce
+    precision: Capacités du progiciel, sous réserve des droits et environnements souscrits. Le travail d’extension
+      est une prestation distincte.
+  limites: Droits développeurs et environnements à qualifier. .NET seul ne remplace pas la compétence Dynamics /
+    X++.
+  sources:
+  - MS_RFI
+  - D365
+- id: power-platform
+  nom: Power Apps / Power Automate / Dataverse
+  couche: paas
+  edition: null
+  description: Outils de configuration, applications low-code, automatisation et données pour les extensions.
+  deploiement: service_cloud
+  fondement: proposition
+  licence: Propriétaire
+  tarification:
+    regime: a_confirmer
+    assiette: Usages, utilisateurs, processus et capacité
+    inclus_dans: []
+    precision: Droits limités éventuellement inclus dans Dynamics ; droits autonomes et dépassements potentiellement
+      payants.
+  limites: Les licences Dynamics donnent des droits limités au contexte autorisé. Ne pas déclarer tous les usages,
+    connecteurs premium et capacités gratuits.
+  sources:
+  - POWER
+  - D365
+- id: ipaas
+  nom: Azure Logic Apps
+  couche: ipaas
+  edition: Plan à préciser
+  description: Connecteurs et orchestration des échanges entre Dynamics, les extensions et le SI.
+  deploiement: service_cloud
+  fondement: proposition
+  licence: Propriétaire
+  tarification:
+    regime: payant
+    assiette: Plan, exécutions, connecteurs et capacités
+    inclus_dans: []
+    precision: Abonnement ou consommation distincts du progiciel sauf inclusion contractuelle explicite.
+  limites: Proposition technique à confronter à l’iPaaS du SI ; les prestations d’intégration ne financent pas la
+    consommation cloud.
+  sources:
+  - LOGIC
+  - CADRE
+interventions:
+  unite: EUR_HT_par_JH
+  marche: France
+  mode_achat: freelance_direct
+  profil_comparable: Intervenant autonome expérimenté ; hors direction de projet, architecte transverse et astreinte.
+  base_geographique: France ; grilles Paris utilisées lorsqu’une ventilation existe. Pas de coefficient régional
+    automatique.
+  tarifs:
+    expert:
+      bas: 550
+      reference: 650
+      haut: 800
+      nature: hypothese_de_cadrage
+      niveau_preuve: faible
+      justification: 'Hypothèse pour un spécialiste D365 F&O autonome : développeur ERP senior Paris 550–650 chez
+        Silkhom, annonce F&O jusqu’à 680. Borne haute élargie à 800 par jugement pour la spécialisation ; aucun
+        benchmark K3 isolé. Ne pas utiliser les annonces CRM ou Business Central comme équivalents F&O.'
+      sources:
+      - SILKHOM
+      - D365_MISSION
+    qa:
+      bas: 550
+      reference: 600
+      haut: 700
+      nature: hypothese_de_cadrage
+      niveau_preuve: faible
+      justification: QA senior Paris Silkhom 2025, 530–700 €/JH. Référence majorée de 50 €/JH pour connaissance Dynamics/K3 ; écart non mesuré.
+      sources:
+      - SILKHOM
+    architecte:
+      bas: 900
+      reference: 1000
+      haut: 1150
+      nature: hypothese_de_cadrage
+      niveau_preuve: faible
+      justification: ForTeam Architecture SI et Tech Lead 920–1 180 €/JH senior/expert. Référence de cadrage à 1 000 pour Dynamics/K3 ; pas de cotation d'architecte produit.
+      sources:
+      - FORTEAM
+    support_utilisateur:
+      bas: 400
+      reference: 425
+      haut: 450
+      nature: hypothese_de_cadrage
+      niveau_preuve: intermediaire
+      justification: Accueil et diagnostic de premier niveau. Grille support applicatif senior Paris, Silkhom 2025.
+        Hors expertise propre au progiciel ou au langage.
+      sources:
+      - SILKHOM
+  activites:
+    developpement:
+      tarif: expert
+      perimetre: Extensions client, plugins et tests ; jamais le développement du produit éditeur.
+    integration:
+      tarif: expert
+      perimetre: Configuration, adaptations fonctionnelles, intégration technique et flux par un spécialiste autonome.
+    support_n3:
+      tarif: expert
+      perimetre: Diagnostic expert et correction des composants ou extensions sous responsabilité client.
+    support_n1:
+      tarif: support_utilisateur
+      perimetre: Réception, qualification et résolution de premier niveau ; escalade des incidents complexes.
+  regle: Même tarif pour développement, intégration et support N3 à qualification équivalente. Aucun écart systématique
+    par activité n’est établi par les sources retenues.
+  limites: Les bornes sont une plage de cadrage, pas un intervalle statistique. La référence n’est pas une moyenne
+    observée. Hors marge ESN additionnelle, forfait de support éditeur, SLA, astreintes et remises de volume.
+  repere_esn:
+    tjm_eur_ht: 1000
+    precision: 'Avanade 2025, pilote, page PDF 39 : lignes intégration et développement/customisation. Prix ESN
+      d’un périmètre déterminé, distinct de la base freelance ; support non déduit.'
+    sources:
+    - MS_RFI
+points_ouverts:
+- Qualifier les licences Finance / Commerce réellement nécessaires au périmètre FLOW.
+- Confirmer droits Power Platform, environnements, support, quotas et capacités incluses.
+- Qualifier la couverture Case Management, règles et contraintes sans la déduire du nom Dynamics.
+- Les TJM freelance ne remplacent pas une offre ESN Avanade ; pas de benchmark français K3 isolé.
+sources:
+  CADRE:
+    titre: Choix de modélisation de cette première version
+    nature: hypothese
+    reference: AGENTS.md
+    repere: Reprise du modèle en YAML ; proposition à préciser, pas décision d’architecture validée
+  MS_RFI:
+    titre: Réponse Avanade au RFI ERP 2025
+    nature: etude_client
+    reference: sources/client/microsoft-1.pdf
+    repere: Pages PDF 13, 22 et 38–40
+  SYNTHESE_RFI:
+    titre: Analyse du périmètre Synvance et des suites du RFI
+    nature: analyse_interne
+    reference: archives/etude-avant-yaml-2026-10-24/07-analyse-synvance.md
+    repere: Périmètre et distinction entre offres de juillet et septembre 2025
+  D365:
+    titre: Droits d’usage Dynamics 365
+    nature: documentation_officielle
+    reference: https://www.microsoft.com/licensing/guidance/Dynamics-365
+    repere: ''
+  K3:
+    titre: K3 Fashion
+    nature: documentation_officielle
+    reference: https://k3fashionsolutions.com/solutions/enterprise/k3-fashion/
+    repere: ''
+  POWER:
+    titre: Licences Power Platform
+    nature: documentation_officielle
+    reference: https://learn.microsoft.com/en-us/power-platform/admin/powerapps-flow-licensing-faq
+    repere: ''
+  LOGIC:
+    titre: Tarification Azure Logic Apps
+    nature: documentation_officielle
+    reference: https://azure.microsoft.com/en-us/pricing/details/logic-apps/
+    repere: Métriques selon plan et connecteurs ; aucun prix catalogue recopié
+  SILKHOM:
+    titre: Silkhom, baromètre des TJM freelance 2025
+    nature: barometre
+    reference: https://www.silkhom.com/wp-content/uploads/2025/05/Barometre_TJM_2025_SILKHOM_FREELANCE.pdf
+    repere: Pages PDF 25 Java, 31 .NET, 119 développeur ERP, 121 support applicatif ; grille Paris / senior
+  FORTEAM:
+    titre: ForTeam IT, grille des TJM freelance
+    nature: barometre
+    reference: https://www.forteam-it.com/ressources/grille-tjm
+    repere: 'Architecture SI et Tech Lead : 850–1 000 confirmé, 920–1 180 senior/expert ; fourchettes indicatives'
+  D365_MISSION:
+    titre: Annonces Dynamics sur Free-Work
+    nature: annonce
+    reference: https://www.free-work.com/fr/tech-it/jobs/microsoft-dynamics?page=0
+    repere: 'Tech Lead technique D365 F&O : 400–680 €/j affichés ; annonce, pas tarif négocié ni benchmark K3'

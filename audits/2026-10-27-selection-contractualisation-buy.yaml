@@ -1,0 +1,90 @@
+statut: proposition_non_appliquee
+objet: Travaux résiduels pour choisir et contractualiser le Buy à partir du dossier Synvance existant
+unite_budget: EUR HT
+frontiere:
+  depart: Go sur l'opportunité, dossier Synvance disponible et interlocuteurs désignés.
+  arrivee: Solution et intégrateur retenus, périmètre et prix actualisés, responsabilités et contrat approuvés ; autorisation de lancer l'intégration.
+  deja_realise: Expression des besoins, consultation Synvance, collecte des offres Avanade/Delaware et questionnaires ; aucune reconstruction de ces livrables dans cette proposition.
+  sequence: Consultation ciblée et actualisation des offres si nécessaire ; RFI/RFP/RFQ ne sont pas trois nouvelles campagnes successives.
+  achat: Assistance externe au Groupe. Réponses commerciales fournisseurs supposées non facturées ; condition à confirmer avant toute commande.
+  options: Même provision de départ pour Microsoft et SAP, faute de preuve d'un effort résiduel différent. Une seule décision Buy, pas deux programmes complets à additionner.
+  double_finaliste: La comparaison ciblée des deux options est incluse dans le tronc commun. La revue approfondie et la négociation portent sur un seul finaliste ; deux négociations finales parallèles demanderaient un chiffrage complémentaire explicite.
+  interne: Disponibilité des métiers, IT, achats et juridique interne requise ; charge interne non valorisée, conformément à la référence. Remplacer une prestation externe par l'interne peut réduire la dépense externe mais pas supprimer le travail.
+travaux:
+- id: perimetre
+  livrable: Reprise du dossier et confirmation des décisions ouvertes ; matrice de périmètre sur la cartographie métier.
+  jh: {resserre: 4, central: 8, prudent: 12}
+  tarif_eur_ht_jh: 850
+  fenetre_semaines: [0, 2]
+  partage: commun
+  source_contenu: source/parcours-synvance.yaml#points_cadrage
+- id: qualification_ciblee
+  livrable: Réponses et démonstrations ciblées sur les points Buy ouverts, modules inclus et écarts de périmètre ; décision préférentielle.
+  jh: {resserre: 10, central: 16, prudent: 24}
+  tarif_eur_ht_jh: 850
+  fenetre_semaines: [1, 5]
+  partage: commun
+  source_contenu: source/qualification-buy.yaml
+- id: architecture_exploitabilite
+  livrable: Revue du finaliste sur environnements, flux, données, sécurité, service et responsabilités ; liste d'engagements contractuels, sans conception détaillée ni réalisation d'intégration.
+  jh: {resserre: 8, central: 12, prudent: 18}
+  tarif_eur_ht_jh: 1000
+  fenetre_semaines: [4, 8]
+  partage: finaliste
+  source_contenu: source/parcours-integration.yaml
+- id: actualisation_commerciale
+  livrable: Panier, volumes, licences, calendrier, prix actualisés et conditions de commande rapprochés des offres initiales.
+  jh: {resserre: 6, central: 10, prudent: 14}
+  tarif_eur_ht_jh: 1000
+  fenetre_semaines: [4, 10]
+  partage: finaliste
+  source_contenu: source/parcours-synvance.yaml
+- id: contractualisation
+  livrable: Revue et négociation du périmètre, RACI, acceptation, engagements de service, responsabilités et sortie ; validation juridique par les conseils du Groupe.
+  jh: {resserre: 6, central: 10, prudent: 14}
+  tarif_eur_ht_jh: 1200
+  fenetre_semaines: [6, 12]
+  partage: finaliste
+  source_contenu: source/modele-composable.yaml#buy
+- id: coordination_decision
+  livrable: Coordination de la consultation résiduelle, décisions, consolidation et préparation de la signature ; hors pilotage de l'intégration.
+  jh: {resserre: 6, central: 8, prudent: 12}
+  tarif_eur_ht_jh: 850
+  fenetre_semaines: [0, 12]
+  partage: commun
+  source_contenu: source/parcours-synvance.yaml#points_cadrage
+tarifs:
+  nature: Provisions de travail, pas devis ni tarifs de marché vérifiés.
+  coordination_850_et_expertise_1000: Niveaux de provision cohérents avec les hypothèses de pilotage existantes ; leur application à ces prestations est une nouvelle hypothèse.
+  juridique_1200: Nouvelle provision explicite à confirmer par devis, sans référence tarifaire fournie par les pièces Synvance.
+  formule: Somme des JH par activité multipliés par leur tarif ; aucune majoration supplémentaire de pilotage, marge, outillage ou aléa.
+delais:
+  resserre_semaines: 8
+  central_semaines: 12
+  prudent_semaines: 16
+  nature: Durées écoulées proposées, avec travaux en parallèle ; ni somme des fenêtres ni conversion automatique des JH en délai.
+  condition_centrale: Dossier réutilisable, sponsors et conseils disponibles, réponses fournisseurs en deux à trois semaines, un finaliste à la fin de la qualification, pas de PoC construit.
+  prudent: Réponses ou arbitrages plus longs et plusieurs itérations de négociation ; ce n'est pas un plafond.
+  articulation: Par prudence, signature avant lancement de l'intégration. Préparatifs possibles en parallèle s'ils sont déjà inclus, sans les facturer à nouveau. Le délai net à ajouter reste à rapprocher des dates de départ des offres.
+  approximation_future: Douze semaines valent environ trois mois de planification ; ne pas les ajouter au modèle avant validation du calendrier et des recouvrements.
+anti_double_compte:
+- poste: Synvance et consultation passée
+  traitement: Exclus entièrement ; ne pas reconstituer ni refacturer besoins, RFI et analyse déjà disponibles.
+- poste: Préparation Buy existante
+  montant_reference_eur: 20000
+  traitement: Montant conservé dans la référence. Rapprocher les livrables avant tout ajout ; déduire uniquement une couverture effectivement établie, pas automatiquement la provision entière.
+  source: source/calibration-couts.yaml#couts_communs/preparation_buy
+- poste: Support initial Microsoft
+  montant_reference_eur: 90000
+  traitement: Unified et Project Quality advisory déjà financés une fois. Identifier les prestations de revue effectivement mobilisables ; aucune seconde commande ni déduction forfaitaire des 90 k€.
+  source: source/maintenance/maintenance-microsoft.yaml
+- poste: Forfaits, cadrage et compléments de qualification Buy
+  traitement: Conception détaillée, réalisation, recette et qualification technique d'intégration exclues de cette proposition. Toute revue déjà incluse remplace l'assistance correspondante, sans nouvel ajout.
+  source: source/parcours-synvance.yaml
+- poste: PoC payant ou nouvelle consultation complète
+  traitement: Hors proposition ; commande séparée seulement après démonstration du besoin et du coût.
+presentation_sponsor:
+  montant: Provision brute d'assistance externe à réserver ; pas supplément net démontré aux offres.
+  net: Inconnu tant que les couvertures existantes et les prestations restant réellement à acheter ne sont pas rapprochées.
+  make: La sélection des prestataires Make et les décisions contractuelles existent aussi ; elles ne sont pas chiffrées par cette proposition Buy et ne doivent pas être réputées gratuites.
+  reference: Aucun ajout de budget, aucun décalage des horizons et aucun démarrage d'abonnement modifié à ce stade.

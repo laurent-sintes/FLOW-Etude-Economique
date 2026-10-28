@@ -1,0 +1,63 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+additionalProperties: false
+required: [version, id, scope_ref, interpretation, status_labels, qualifications]
+properties:
+  version: {const: 1}
+  id: {const: instruction-marche-flow}
+  scope_ref: {const: source/references-couts-integration.yaml#reperes_build_core/etude_oss/perimetre}
+  interpretation: {$ref: '#/$defs/text'}
+  status_labels:
+    type: object
+    additionalProperties: false
+    required: [non_etudie, reperes_axes, qualification_detaillee]
+    properties:
+      non_etudie: {$ref: '#/$defs/text'}
+      reperes_axes: {$ref: '#/$defs/text'}
+      qualification_detaillee: {$ref: '#/$defs/text'}
+  qualifications:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, capability_ref, product_ref, need_refs, function_label, evaluation_function_ref, status, classification, evidence_refs, differences, unknowns, review]
+      properties:
+        id: {$ref: '#/$defs/text'}
+        capability_ref: {$ref: '#/$defs/text'}
+        product_ref: {$ref: '#/$defs/text'}
+        need_refs: {$ref: '#/$defs/refs'}
+        function_label: {$ref: '#/$defs/text'}
+        evaluation_function_ref: {type: [string, 'null'], minLength: 1}
+        status: {enum: [non_etudie, a_qualifier, qualifie]}
+        classification: {enum: [fait_observe, analogie, hypothese_ingenierie, inconnu]}
+        evidence_refs:
+          type: array
+          uniqueItems: true
+          items:
+            type: object
+            additionalProperties: false
+            required: [source_ref, location]
+            properties:
+              source_ref: {$ref: '#/$defs/text'}
+              location: {$ref: '#/$defs/text'}
+        differences: {$ref: '#/$defs/texts'}
+        unknowns: {$ref: '#/$defs/texts'}
+        review:
+          type: [object, 'null']
+          additionalProperties: false
+          required: [date, reviewer, decision]
+          properties:
+            date: {type: string, format: date}
+            reviewer: {$ref: '#/$defs/text'}
+            decision: {enum: [a_completer, retenu]}
+$defs:
+  text: {type: string, minLength: 1, pattern: '\S'}
+  texts:
+    type: array
+    uniqueItems: true
+    items: {$ref: '#/$defs/text'}
+  refs:
+    type: array
+    minItems: 1
+    uniqueItems: true
+    items: {$ref: '#/$defs/text'}

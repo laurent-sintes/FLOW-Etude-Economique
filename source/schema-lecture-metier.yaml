@@ -1,0 +1,28 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+additionalProperties: false
+required: [version, cartographie, empreinte, domaine, frontieres_source, frontieres_empreinte, sujets]
+properties:
+  version: {const: 1}
+  cartographie: {type: string}
+  empreinte: {type: string, pattern: '^[a-f0-9]{64}$'}
+  domaine: {type: string}
+  frontieres_source: {type: string}
+  frontieres_empreinte: {type: string, pattern: '^[a-f0-9]{64}$'}
+  sujets:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, nature, ancrages, capacites, voisins, justification, source, statut]
+      properties:
+        id: {type: string}
+        nature: {enum: [synthese, contexte, frontiere, technique]}
+        ancrages: {$ref: '#/$defs/ids'}
+        capacites: {$ref: '#/$defs/ids'}
+        voisins: {$ref: '#/$defs/ids'}
+        justification: {type: string, minLength: 1}
+        source: {type: string, minLength: 1}
+        statut: {const: rapprochement_propose}
+$defs:
+  ids: {type: array, uniqueItems: true, items: {type: string, minLength: 1}}

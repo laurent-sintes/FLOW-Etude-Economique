@@ -1,0 +1,184 @@
+version_schema: 1
+id: calibration-couts
+date: '2026-10-22'
+dependances:
+  preuves: sources/calibration-couts-2026-10-22.yaml
+  inflation: source/inflation.yaml
+  schema_chiffrages: source/schema-chiffrage.yaml
+convention:
+  definition: Valorisation des travaux initiaux, services annuels et séquences commerciales. Le plan d’investissement
+    fixe séparément les périodes et horizons.
+  prix: EUR HT ; prix RFI 2025 conservés et tarifs/provisions de cadrage des sources courantes. Base composite datée,
+    non euros constants normalisés. Aucun recalage monétaire caché.
+  perimetre: Dépenses IT fournisseur et capacité de réalisation équivalente au tarif de prestation ; pilotage technique
+    compris. Temps de décision des métiers, coût d’opportunité, transformation organisationnelle et décommissionnement
+    des SI historiques exclus pour toutes les options.
+  sap_licences_annees_sources:
+  - 4
+  - 5
+  microsoft_licences_annees_sources:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  lots: Produit FLOW générique puis unités de déploiement client proposées dans le modèle Groupe. Les forfaits Buy
+    conservent leur périmètre documenté sans multiplication par unité.
+  preparation: Les moyens consommés pendant build et intégration Make sont financés par le journal composable. Le
+    forfait de préparation Make subsiste uniquement dans le diagnostic par activités ; il ne s’ajoute pas à la référence
+    Groupe. Pour Buy, la préparation est transférée à source/selection-buy.yaml ; aucun forfait de préparation ne
+    reste en intégration.
+  precisions: Calcul au centime pour réconciliation ; restitution des budgets en k€ sans décimales et des tarifs
+    de prestation en euros entiers par jour, unités affichées. Les fourchettes sont des sensibilités, pas des probabilités.
+natures:
+- configuration
+- extension
+- developpement
+- assemblage
+- qualification
+calibration:
+  methode: Le build Make utilise les travaux par capacité et le socle transverse de source/recalibration-metier.yaml.
+    Les éventuelles exceptions Buy viennent de source/qualification-buy.yaml. Les plages de JH fonctionnels sont
+    valorisées directement, sans second facteur global ni remise de réutilisation supplémentaire.
+  definition_jh: Une journée de réalisation ; support converti sur 7 h utiles. Les JH avant IA sont déjà nets de la
+    réutilisation OSS ; les JH après IA incluent conception, code, assemblage et validation.
+  frontend: React et UX métier communs aux trois Make, financés dans les travaux par capacité et les mécanismes
+    transverses de la calibration métier. En Buy, écrans standards dans le RFI et écrans des extensions dans les
+    compléments.
+  diagnostic_historique_ref: source/diagnostics/calibration-historique.yaml
+ia:
+  nature: Hypothèses de réduction nette des JH, pas gain mesuré par plateforme. Revue humaine et tests conservés
+    ; pas de gain sur prix RFI.
+  taux_pct:
+    java-spring:
+      configuration: 5
+      extension: 10
+      developpement: 20
+      assemblage: 10
+      qualification: 8
+    dotnet:
+      configuration: 5
+      extension: 10
+      developpement: 20
+      assemblage: 10
+      qualification: 8
+    rust:
+      configuration: 3
+      extension: 5
+      developpement: 12
+      assemblage: 5
+      qualification: 3
+    microsoft:
+      configuration: 5
+      extension: 8
+      developpement: 12
+      assemblage: 5
+      qualification: 5
+    sap:
+      configuration: 3
+      extension: 5
+      developpement: 10
+      assemblage: 3
+      qualification: 5
+  frontend_pct: 15
+  integration_pct:
+    java-spring: 8
+    dotnet: 8
+    rust: 5
+    microsoft: 5
+    sap: 3
+  justification: 'Même gain central Java/.NET sur code courant : aucun résultat empirique ne démontre un écart.
+    Rust : part plus élevée de mise au point sémantique/concurrence/interop ; Buy : restrictions d’extension et
+    validation progiciel. Ces différences sont hypothèses ; le scénario haut inclut absence de gain.'
+  sources:
+  - IA_EXPERIMENT
+  - IA_METR
+  - INGENIERIE
+couts_communs:
+  outillage_realisation_eur_par_jh: 8
+  justification_outillage: Provision intégrée au coût complet de chaque JH technique estimé pour assistance de développement,
+    dépôts et outils ; aucune ligne IA en restitution. Pas de supplément sur les forfaits RFI.
+  cloud_make_annuel:
+    calcul_conteneurs: 18000
+    base_donnees_managée_ha: 24000
+    stockage_sauvegarde_archives: 12000
+    reseau_securite_logs: 18000
+  justification_cloud: '72 kEUR/an : enveloppe commune Make pour trois environnements, 2 To actifs et 5 To archivés,
+    sauvegarde et HA ; pas trois productions. Repère 6 kEUR/mois, à dimensionner. Pas de consommation plus faible
+    présumée en Rust sans benchmark.'
+  ipaas_make_microsoft_annuel: 36000
+  justification_ipaas: '36 kEUR/an : 18 kEUR runtime et environnements, 12 kEUR connecteurs/actions, 6 kEUR traces/EDI.
+    24 M messages logiques/an : métriques à qualifier, provision pas cotation.'
+  ipaas_sap_annuel: 100000
+  indexation_ipaas:
+    java-spring: cloud
+    dotnet: cloud
+    rust: cloud
+    microsoft: cloud
+    sap: licences_logiciels
+  justification_ipaas_sap: '100 kEUR/an : repère Standard, environnements complémentaires et volume de transactions
+    ; pas de crédit BTP non démontré. SAP Integration Suite exclu du RFI.'
+  outillage_support_annuel: 24000
+  justification_support: 'Audit externe, certificats et outillage transverse achetés : provision commune hors support
+    humain déjà en JH, hors cloud et hors abonnements. Aucun contrat OSS entreprise présumé.'
+  capacite_buy_supplementaire_annuel:
+    microsoft: 30000
+    sap: 30000
+  justification_capacite: Provision identique pour dépassements/ressources d’extensions hors socle SaaS ; les extensions
+    mémoire SAP connues sont déjà dans le panier RFI. Ce montant ne finance pas le DRP contesté.
+  power_platform_supplementaire_annuel: 24000
+  justification_power: Provision droits autonomes/connecteurs premium nécessaires aux compléments ; aucune licence
+    par 950 utilisateurs supposée. À confronter au panier contractuel.
+  preparation_make: 60000
+  preparation_buy: 0
+  accompagnement_applicatif_make_jh: 120
+  justification_accompagnement: Préparation de supports et transfert aux utilisateurs clés au-delà de la formation
+    technique INT-012. Transformation organisationnelle exclue, pas confondue avec gratuité.
+specialisation_maintenance_make:
+  statut: hypothese_heritee_non_observee
+  activites_refs:
+  - MAI-007
+  - MAI-008
+  profil_base: support_n3
+  profil_cible: architecte
+  plafond_jh_avant_sensibilite: 40
+  origine: Provision d’expertise cloud et sécurité préexistante, conservée sans recalibration. Le nombre de journées
+    n’est pas issu d’une observation de charge ou d’une cotation fournisseur.
+  assiette: Sous-ensemble des JH nets de support N3 déjà financés en exploitation applicative et cloud (MAI-007)
+    et en sécurité et continuité (MAI-008). La ventilation précise entre ces activités n’est pas établie.
+  calcul: Retenir le minimum entre le plafond après sensibilité JH et les JH nets du profil de base financés dans
+    les activités référencées. Revaloriser ces seules journées de support N3 au tarif architecte ; ne pas ajouter
+    de JH ni une seconde fois l’outillage. Le complément est nul si son assiette est nulle ou si le tarif cible
+    ne dépasse pas le tarif de base.
+pilotage:
+  build_pct: 8
+  integration_make_pct: 10
+  maintenance_pct: 8
+  complements_buy_pct: 10
+  assiette: Prestations techniques estimées uniquement, hors achats et prix RFI contenant leur propre gouvernance.
+    Pas de surcharge sur licences, cloud ou forfaits.
+  justification: Provision de coordination des travaux des développeurs et intégrateurs, pendant la fabrication
+    Make puis les évolutions annuelles. Elle vise le suivi des dépendances, blocages et livraisons par les responsables
+    techniques. Les missions détaillées, le profil et les JH restent à dimensionner. Cette provision ne finance pas
+    une seconde réalisation, architecture ou QA déjà comptée ; elle est distincte de la direction du programme.
+sensibilite:
+  jh_bas: 0.75
+  jh_haut: 1.4
+  achats_bas: 0.7
+  achats_haut: 1.5
+  justification: Fourchette d’ingénierie uniforme sur seuls JH/achats estimés ; prix RFI inchangés. Taux d’inflation
+    bas/haut issus du YAML Inflation. Ni remise commerciale inventée ni intervalle statistique.
+  sap_ecart_total_integration_haut: 2000000
+  sap_drp_annuel_haut: 214927
+exclusions:
+- Temps interne de décision/acceptation métier non acheté ; coût d’opportunité des équipes.
+- Transformation organisationnelle globale, systèmes de canal conservés et décommissionnement ; hors Core/Intégration
+  IT/Run modélisés.
+- 'Refonte complète du produit pendant les 15 ans : maintenance des versions et évolutions limitées incluses, nouvelle
+  génération fonctionnelle non imposée.'
+sources:
+- INGENIERIE
+- SOLUTIONS
+- AZURE_DB
+- AZURE_IPAAS
+- SAP_IPAAS

@@ -1,0 +1,35 @@
+import {createRequire} from 'node:module';
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+const require=createRequire('C:/Users/laure/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/package.json');
+const {FileBlob,SpreadsheetFile}=require('@oai/artifact-tool');
+const path='outputs/01a1530f-f378-7fd1-9654-468c9b2141b6/FLOW_Make_abaques_et_prix_France_v4.xlsx';
+const hash=()=>crypto.createHash('sha256').update(fs.readFileSync(path)).digest('hex');
+const before=hash(), wb=await SpreadsheetFile.importXlsx(await FileBlob.load(path));
+const rg=(s,a)=>wb.worksheets.getItem(s).getRange(a), v=(s,a)=>rg(s,a).values[0][0];
+const near=(a,b)=>{if(typeof a!=='number'||Math.abs(a-b)>.02)throw Error(`${a} != ${b}`);};
+const passed=[];function test(label,fn){fn();passed.push(label);}
+const headlines=()=>[9,10,11].map(r=>v('Comparaison','I'+r));
+wb.recalculate();const base=headlines();
+function change(s,a,x,check){const r=rg(s,a),old=r.values,form=r.formulas?.[0]?.[0];try{r.values=[[x]];wb.recalculate();check();}finally{if(typeof form==='string'&&form.startsWith('='))r.formulas=[[form]];else r.values=old;wb.recalculate();}}
+test('Exactly three requested sheets',()=>{if(wb.worksheets.items.map(s=>s.name).join('|')!=='Comparaison|Hypothèses|Sources')throw Error('Sheets');});
+test('Initial budgets preserved',()=>[24461000,17132678.87295082,5736150].forEach((x,i)=>near(v('Comparaison','D'+(9+i)),x)));
+test('FLOW extra service capacity: +150 k€/year for ten years',()=>change('Hypothèses','C9',8,()=>headlines().forEach((x,i)=>near(x,base[i]+(i===0?1500000:0)))));
+test('Microsoft extra service capacity: +170 k€/year for 13.5 years',()=>change('Hypothèses','E9',7,()=>headlines().forEach((x,i)=>near(x,base[i]+(i===2?2295000:0)))));
+test('SAP theoretical capacity has no effect on totals',()=>change('Sources','C181',7,()=>headlines().forEach((x,i)=>near(x,base[i]))));
+test('SAP sourced forfait increase counted exactly once',()=>change('Sources','C8',300000,()=>headlines().forEach((x,i)=>near(x,base[i]+(i===1?675000:0)))));
+test('FLOW extra evolution capacity counted once',()=>change('Hypothèses','C10',3,()=>near(headlines()[0],base[0]+1500000)));
+test('Client provision excluded from supplier totals',()=>change('Hypothèses','C57',.1,()=>{headlines().forEach((x,i)=>near(x,base[i]));near(v('Comparaison','D75'),2407500);}));
+test('Annual on-call option counted only in Run',()=>change('Hypothèses','C58',100000,()=>near(headlines()[0],base[0]+1000000)));
+test('First live use shifts FLOW cost without changing initial budget',()=>change('Hypothèses','C23',72,()=>{near(v('Comparaison','D9'),24461000);near(v('Comparaison','F40'),9);near(headlines()[0],base[0]-1750000);}));
+test('Missing service capacity fails visibly, preserving other solutions',()=>change('Hypothèses','C9',null,()=>{if(typeof headlines()[0]==='number')throw Error('Missing accepted');near(headlines()[1],base[1]);near(headlines()[2],base[2]);}));
+test('Missing SAP forfait cannot silently become zero',()=>change('Sources','C8',null,()=>{if(typeof headlines()[1]==='number')throw Error('Missing accepted');}));
+test('Prestations inflation starts from project launch',()=>change('Hypothèses','C42',.02,()=>{let total=0;for(let y=1;y<=15;y++){if(y<=5)total+=4815000*1.02**(y-1)+[24000,36000,76000,94000,156000][y-1];else total+=1350000*1.02**(y-1)+400000;}near(headlines()[0],total);}));
+test('Licence inflation: five-year Microsoft price freeze',()=>change('Hypothèses','C44',.07,()=>{near(v('Hypothèses','G143'),979001.51*.9);near(v('Hypothèses','G144'),979001.51*.9*1.07);}));
+test('SAP CPI annual trajectory unchanged',()=>{const old=JSON.parse(fs.readFileSync('tmp/three_tabs_source.json','utf8'));for(let y=1;y<=15;y++)near(v('Hypothèses','H'+(115+y)),old['Calculs 15 ans']['W'+(29+y)].v*1e6);} );
+test('Independent annual cashflow reconciliation',()=>{const old=JSON.parse(fs.readFileSync('tmp/three_tabs_source.json','utf8'));for(const [id,start,b,maint,evo,first]of [['flow',8,92,1050000,300000,60],['sap',29,115,700000,350000,18],['ms',50,138,1020000,340000,18]]){let cumulative=0;for(let y=1;y<=15;y++){const o=old['Calculs 15 ans'],r=start+y,initial=o['C'+r].v*1e6,lic=o['D'+r].v*1e6;const platform=id==='flow'?(y>5?400000:0):o['W'+r].v*1e6;const support=id==='ms'?o['H'+r].v*1e6:0;const run=Math.max(0,Math.min(12,y*12-first))/12;const annual=initial+lic+platform+support+(maint+evo)*run;cumulative+=annual;near(v('Hypothèses','K'+(b+y)),annual);near(v('Hypothèses','L'+(b+y)),cumulative);}}});
+test('Original file is unmodified by audit',()=>{if(hash()!==before)throw Error('File changed');});
+test('RFI-to-budget explanations reconcile without adding cost',()=>{for(const c of ['C','D','E']){near(v('Sources',c+'141'),v('Sources',c+'40'));near(v('Sources',c+'142'),0);}});
+test('Decision commentary reacts to the actual price inputs',()=>change('Hypothèses','C11',900,()=>{const text=v('Comparaison','B19');if(!text.includes('900 €/JH'))throw Error('Stale supplier price');if(v('Comparaison','B15').includes('Microsoft +1 M€'))throw Error('Stale cost gap');}));
+fs.writeFileSync('tmp/three_tabs_audit.json',JSON.stringify({status:'PASS',sha256:before,headlines:base,passed},null,2));
+console.log(JSON.stringify({status:'PASS',checks:passed.length,headlines:base}));

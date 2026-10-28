@@ -1,0 +1,43 @@
+date: '2026-10-28'
+objet: Introduire Build et Run dans le modèle métier et les structures de coûts.
+convention_utilisateur:
+  core_system: Le MCO de la Plateforme Core System relève entièrement du Build.
+  integration: Le MCO des adaptations et interfaces Beaumanoir relève du Run, sauf interventions importantes conduites en mode projet.
+  part_build_mco_integration_pct: 50
+  validation: Pourcentage confirmé explicitement par l’utilisateur dans ce chat.
+autorites:
+  definitions: source/glossaire.yaml#notions/build et #notions/run_activities
+  taxonomy: source/architecture.yaml#activity_types
+  structures: source/architecture.yaml#cost_structures
+  parametre: source/architecture.yaml#cost_structures/client_care/activity_allocation/build_pct
+  lecture: source/fondamentaux.yaml#activity_reading
+classement:
+  obtention: [build]
+  integration: [build]
+  core_care: [build]
+  client_care: [build, run]
+  run_cloud: [run]
+  operations_support: [run]
+  grouped_buy: [build, run]
+regles:
+- La part Run est dérivée en Python par complément à 100 de la part Build, sans seconde valeur modifiable.
+- Le paramètre est une référence du modèle ; aucun nouveau paramètre personnel de simulation ni total comparatif n’est introduit.
+- Les contrats Buy mixtes conservent leurs parts inconnues, sans ventilation inventée.
+- Les tags sont indépendants de Make/Buy, des phases et de la récurrence. Un budget annuel peut relever du Build ; des moyens Run sont consommés pendant la réalisation.
+- La notion historique run du glossaire continue de désigner le Run cloud ; les identifiants de simulation ne changent pas de sens.
+presentation:
+- Les Fondamentaux présentent Make/Buy, puis Build/Run, les charges, les structures et les phases.
+- Chaque structure affiche ses tags et leur portée. La clé Beaumanoir est visible sur la structure et dans Paramètres du modèle.
+- Le chapitre Des charges au budget annonce son périmètre Build, détaillé pour la réalisation initiale.
+- Le glossaire généré contient 87 notions.
+validation:
+  suite_complete: 169 tests Python réussis ; tests JavaScript, types, contenu et compilation réussis.
+  valeurs: Bornes, types et valeurs non finies contrôlés ; part Run complémentaire et copies isolées vérifiés.
+  parite: Témoin de simulation préservé, résultats des cinq options et horizons 3/5/7/10 inchangés.
+  relecture: Convention utilisateur et contrats mixtes relus indépendamment, sans défaut constaté.
+  visuel: Définitions, sept structures, clé 50/50 et périmètre Build vérifiés. Aucun débordement de page ou des tags à 390 px et au format courant 800 px.
+  serveur: Application locale actualisée avec les sources et le build validés.
+  captures:
+  - output/build-run-fondamentaux.jpg
+  - output/build-run-repartition.jpg
+economic_change: false

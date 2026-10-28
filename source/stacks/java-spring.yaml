@@ -1,0 +1,418 @@
+# Modèle source éditable. Même schéma pour Make et Buy.
+version_schema: 1
+id: java-spring-make
+nom: Java / Spring Boot
+strategie: make
+date_documentation: '2026-10-22'
+description: Backend Java, moteurs métier JVM et frontend React. Services techniques externes explicitement distingués
+  du backend.
+conventions:
+- Description d’une stack de travail, sans chiffrage global ni calendrier.
+- Les prix de produits sont à qualifier ; les TJM rémunèrent les interventions humaines.
+- Un composant inclus est financé par un autre élément, pas gratuit.
+- Les composants proposés ne valent pas décision d’achat ou validation d’architecture.
+elements:
+- id: iaas
+  nom: IaaS cloud — fournisseur à sélectionner
+  couche: iaas
+  edition: null
+  description: Calcul, réseau, stockage, sauvegardes et ressources de reprise nécessaires à la plateforme.
+  deploiement: service_cloud
+  fondement: a_preciser
+  licence: null
+  tarification:
+    regime: payant
+    assiette: Ressources et consommation
+    inclus_dans: []
+    precision: Aucun montant ni fournisseur retenu à cette étape.
+  limites: Fournisseur, région, capacités et engagements de service ouverts. Ne pas ajouter une seconde fois les
+    ressources incluses dans un PaaS managé.
+  sources:
+  - CADRE
+- id: kubernetes
+  nom: Kubernetes
+  couche: paas
+  edition: null
+  description: Orchestration des conteneurs, déploiement et redémarrage des services.
+  deploiement: service_autogere
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Socle d’exécution proposé, pas un PaaS clé en main. Administration, sécurité et CI/CD restent à assembler.
+  sources:
+  - K8S
+- id: postgresql
+  nom: PostgreSQL
+  couche: donnees
+  edition: null
+  description: Base relationnelle transactionnelle pour le Core et ses moteurs.
+  deploiement: service_autogere
+  fondement: proposition
+  licence: PostgreSQL
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Le schéma métier, les politiques de concurrence, la haute disponibilité et les sauvegardes restent à
+    concevoir.
+  sources:
+  - PG
+- id: rabbitmq
+  nom: RabbitMQ
+  couche: messagerie
+  edition: Community
+  description: Files de messages et routage asynchrone entre services.
+  deploiement: service_autogere
+  fondement: proposition
+  licence: MPL-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Ne garantit pas à lui seul une opération métier exactement une fois. Contrats, idempotence et reprise
+    restent à réaliser.
+  sources:
+  - RABBIT
+- id: keycloak
+  nom: Keycloak
+  couche: securite
+  edition: null
+  description: Authentification, fédération d’identité et protocoles OIDC / SAML.
+  deploiement: service_autogere
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Service externe écrit en Java. Les autorisations métier et l’intégration à l’identité Beaumanoir restent
+    à traiter.
+  sources:
+  - KEYCLOAK
+- id: otel
+  nom: OpenTelemetry Collector
+  couche: observabilite
+  edition: null
+  description: Collecte et export des traces, métriques et journaux.
+  deploiement: service_autogere
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Le stockage, la consultation, les alertes et l’exploitation des données de supervision ne sont pas fournis
+    par le collecteur seul.
+  sources:
+  - OTEL
+- id: react
+  nom: React
+  couche: interface
+  edition: null
+  description: Bibliothèque commune de réalisation des interfaces web des trois options Make.
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: MIT
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Les écrans métier, formulaires, droits et parcours ne sont pas fournis. Les consoles techniques des OSS
+    ne remplacent pas ce frontend.
+  sources:
+  - REACT
+- id: ipaas
+  nom: Azure Logic Apps
+  couche: ipaas
+  edition: Plan à préciser
+  description: Plateforme externe de connecteurs et de flux pour les échanges avec le SI.
+  deploiement: service_cloud
+  fondement: proposition
+  licence: Propriétaire
+  tarification:
+    regime: payant
+    assiette: Plan, exécutions, connecteurs et capacités
+    inclus_dans: []
+    precision: Service payant distinct du Core. Les quotas et connecteurs inclus dépendent du plan ; aucun montant
+      retenu.
+  limites: Proposition commune, à confronter à l’iPaaS existant. Les mappings, contrats et contrôles métier restent
+    à développer. Ne remplace pas les moteurs du Core.
+  sources:
+  - LOGIC
+  - CADRE
+- id: jdk
+  nom: Eclipse Temurin / OpenJDK
+  couche: runtime
+  edition: Temurin, version LTS à sélectionner
+  description: JDK et JVM pour compiler et exécuter le backend Java.
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: GPL-2.0-only WITH Classpath-exception-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Distribution libre proposée. Choisir une version maintenue et distinguer support communautaire et contrat
+    de support.
+  sources:
+  - JDK
+- id: spring
+  nom: Spring Boot
+  couche: framework
+  edition: OSS
+  description: 'Socle d’application Java : configuration, API, injection et intégration des modules Spring.'
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Les domaines métier et leur validation restent à réaliser. Les modules de persistance et de sécurité
+    doivent être configurés ; support commercial distinct.
+  sources:
+  - SPRING
+- id: flowable
+  nom: Flowable
+  couche: moteur_metier
+  edition: Open Source engines
+  description: Moteurs BPMN, CMMN et DMN, persistance des processus et des dossiers, tâches humaines.
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Le produit métier de Case Management reste à assembler. Ne pas inclure gratuitement les écrans riches,
+    la plateforme low-code et les fonctions de l’édition commerciale.
+  sources:
+  - FLOWABLE
+  - FLOWABLE_ED
+- id: drools
+  nom: Drools
+  couche: moteur_metier
+  edition: Apache KIE OSS
+  description: Moteur de règles d’inférence et de décisions ; gestion des faits et activation des règles.
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Les règles Fashion, leur gouvernance, publication, simulation et expérience métier restent à construire.
+    Délimiter son rôle par rapport au DMN Flowable.
+  sources:
+  - DROOLS
+- id: timefold
+  nom: Timefold Solver
+  couche: moteur_metier
+  edition: Community
+  description: Optimisation sous contraintes et recherche de solutions à partir d’un modèle métier.
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Contraintes, fonction de score, données et validation des allocations restent à développer. Ne pas assimiler
+    le solveur libre aux services commerciaux Timefold.
+  sources:
+  - TIMEFOLD
+- id: camel
+  nom: Apache Camel
+  couche: framework
+  edition: null
+  description: Connecteurs et patrons d’intégration pour routage et transformation au sein des services Java.
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Framework embarqué, pas iPaaS managé. Délimiter les flux internes Camel et les flux SI gérés dans l’iPaaS
+    afin de ne pas les réaliser deux fois.
+  sources:
+  - CAMEL
+interventions:
+  unite: EUR_HT_par_JH
+  marche: France
+  mode_achat: freelance_direct
+  profil_comparable: Intervenant autonome expérimenté ; hors direction de projet, architecte transverse et astreinte.
+  base_geographique: France ; grilles Paris utilisées lorsqu’une ventilation existe. Pas de coefficient régional
+    automatique.
+  tarifs:
+    expert:
+      bas: 450
+      reference: 550
+      haut: 600
+      nature: hypothese_de_cadrage
+      niveau_preuve: intermediaire
+      justification: 'Référence arrondie dans la grille Java senior Paris 450–600 de Silkhom 2025. ForTeam affiche
+        680–880 pour des seniors/experts : ce segment supérieur doit être traité comme un autre profil, pas mélangé
+        à la grille choisie.'
+      sources:
+      - SILKHOM
+      - FORTEAM
+    qa:
+      bas: 500
+      reference: 550
+      haut: 650
+      nature: hypothese_de_cadrage
+      niveau_preuve: faible
+      justification: QA senior Paris Silkhom 2025, 530–700 €/JH. Référence basse dans cette plage ; pas de preuve d'une prime Java spécifique.
+      sources:
+      - SILKHOM
+    architecte:
+      bas: 850
+      reference: 900
+      haut: 1000
+      nature: hypothese_de_cadrage
+      niveau_preuve: faible
+      justification: ForTeam Architecture SI et Tech Lead 850–1 000 €/JH confirmé et 920–1 180 senior/expert. Référence de cadrage à 900 pour l'architecture transverse Java/cloud ; pas de cotation FLOW.
+      sources:
+      - FORTEAM
+    support_utilisateur:
+      bas: 400
+      reference: 425
+      haut: 450
+      nature: hypothese_de_cadrage
+      niveau_preuve: intermediaire
+      justification: Accueil et diagnostic de premier niveau. Grille support applicatif senior Paris, Silkhom 2025.
+        Hors expertise propre au progiciel ou au langage.
+      sources:
+      - SILKHOM
+  activites:
+    developpement:
+      tarif: expert
+      perimetre: Architecture applicative, conception, code et tests du Core.
+    integration:
+      tarif: expert
+      perimetre: Configuration, adaptations fonctionnelles, intégration technique et flux par un spécialiste autonome.
+    support_n3:
+      tarif: expert
+      perimetre: Diagnostic expert et correction des composants ou extensions sous responsabilité client.
+    support_n1:
+      tarif: support_utilisateur
+      perimetre: Réception, qualification et résolution de premier niveau ; escalade des incidents complexes.
+  regle: Même tarif pour développement, intégration et support N3 à qualification équivalente. Aucun écart systématique
+    par activité n’est établi par les sources retenues.
+  limites: Les bornes sont une plage de cadrage, pas un intervalle statistique. La référence n’est pas une moyenne
+    observée. Hors marge ESN additionnelle, forfait de support éditeur, SLA, astreintes et remises de volume.
+  repere_esn:
+    tjm_eur_ht: null
+    precision: Aucun tarif ESN comparable suffisamment documenté retenu. Ne pas appliquer une marge forfaitaire
+      au tarif freelance.
+    sources:
+    - CADRE
+points_ouverts:
+- Versions et compatibilité des composants à sélectionner avant tout engagement.
+- Fournisseur IaaS, option Kubernetes managée ou autogérée, sauvegardes et reprise à qualifier.
+- Choix iPaaS à confronter au SI existant ; Logic Apps est une proposition, pas une décision utilisateur.
+- Chaîne CI/CD, gestion des secrets, stockage de supervision et contrats de support à préciser.
+- Les coûts logiciels et cloud ne sont pas chiffrés ; aucune gratuité globale n’est déduite des licences OSS.
+- Délimiter le DMN Flowable et Drools ; vérifier les fonctions réservées aux éditions commerciales.
+sources:
+  CADRE:
+    titre: Choix de modélisation de cette première version
+    nature: hypothese
+    reference: AGENTS.md
+    repere: Reprise du modèle en YAML ; proposition à préciser, pas décision d’architecture validée
+  LOGIC:
+    titre: Tarification Azure Logic Apps
+    nature: documentation_officielle
+    reference: https://azure.microsoft.com/en-us/pricing/details/logic-apps/
+    repere: Métriques selon plan et connecteurs ; aucun prix catalogue recopié
+  K8S:
+    titre: Kubernetes
+    nature: documentation_officielle
+    reference: https://github.com/kubernetes/kubernetes
+    repere: ''
+  PG:
+    titre: Licence PostgreSQL
+    nature: documentation_officielle
+    reference: https://www.postgresql.org/about/licence/
+    repere: ''
+  RABBIT:
+    titre: RabbitMQ Server
+    nature: documentation_officielle
+    reference: https://github.com/rabbitmq/rabbitmq-server
+    repere: ''
+  KEYCLOAK:
+    titre: Keycloak
+    nature: documentation_officielle
+    reference: https://github.com/keycloak/keycloak
+    repere: ''
+  OTEL:
+    titre: OpenTelemetry Collector
+    nature: documentation_officielle
+    reference: https://github.com/open-telemetry/opentelemetry-collector
+    repere: ''
+  REACT:
+    titre: React
+    nature: documentation_officielle
+    reference: https://github.com/react/react
+    repere: ''
+  JDK:
+    titre: Eclipse Temurin / Adoptium
+    nature: documentation_officielle
+    reference: https://adoptium.net/docs/faq
+    repere: ''
+  SPRING:
+    titre: Spring Boot
+    nature: documentation_officielle
+    reference: https://github.com/spring-projects/spring-boot
+    repere: ''
+  FLOWABLE:
+    titre: Moteurs Flowable OSS
+    nature: documentation_officielle
+    reference: https://www.flowable.com/open-source/docs/oss-introduction/
+    repere: ''
+  FLOWABLE_ED:
+    titre: Comparaison des éditions Flowable
+    nature: documentation_officielle
+    reference: https://www.flowable.com/pricing
+    repere: Distinguer moteurs OSS et interfaces / fonctions low-code commerciales
+  DROOLS:
+    titre: Apache KIE / Drools
+    nature: documentation_officielle
+    reference: https://github.com/apache/incubator-kie
+    repere: ''
+  TIMEFOLD:
+    titre: Timefold Solver
+    nature: documentation_officielle
+    reference: https://github.com/TimefoldAI/timefold-solver
+    repere: ''
+  CAMEL:
+    titre: Apache Camel
+    nature: documentation_officielle
+    reference: https://github.com/apache/camel
+    repere: ''
+  SILKHOM:
+    titre: Silkhom, baromètre des TJM freelance 2025
+    nature: barometre
+    reference: https://www.silkhom.com/wp-content/uploads/2025/05/Barometre_TJM_2025_SILKHOM_FREELANCE.pdf
+    repere: Pages PDF 25 Java, 31 .NET, 119 développeur ERP, 121 support applicatif ; grille Paris / senior
+  FORTEAM:
+    titre: ForTeam IT, grille des TJM freelance
+    nature: barometre
+    reference: https://www.forteam-it.com/ressources/grille-tjm
+    repere: 'SAP : 750–950 confirmé, 950–1 250 senior/expert ; backend senior/expert : 680–880 ; fourchettes indicatives'

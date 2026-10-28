@@ -1,0 +1,150 @@
+version: 1
+date: '2026-10-27'
+statut: proposition_isolee_non_appliquee
+dependances:
+  enveloppe: audits/2026-10-27-enveloppe-groupe-make-preuves.json
+  cartographie: source/grille-complexite.yaml
+  calendrier: source/plan-investissement.yaml
+  resultats_actifs: source/investissements-10-ans.yaml
+  couts_communs: source/calibration-couts.yaml
+contrat:
+  objets: [core_system, adaptations_client, plateforme, programme]
+  prestations: [construction, integration, exploitation, maintien, evolution, pilotage, abonnement_groupe]
+  responsabilites: [cycle_vie_core_system, integration_client, run, mco_client, evolutions_client]
+  modes_financement: [estimation, prix_documente, forfait_groupe, inclus, non_chiffre]
+  structure: Le registre conserve les financements et leurs prix. Le journal Make contient seulement leurs allocations monétaires, jamais le parent en plus. Un forfait Buy non ventilable reste au registre avec plusieurs services décrits et des parts null ; il ne reçoit pas une responsabilité monétaire unique fictive.
+  champs_ligne: [id, option, financement_id, objet, prestation, responsabilite, debut_mois, fin_mois, montant_eur_ht, source_refs]
+  prix: Montants en euros HT, conservés au centime. Restitution k€ HT sans décimales. Les sous-totaux sont des vues, pas de nouveaux financements.
+  temps: Mois relatifs depuis le début du build Make, ou du projet Buy ; intervalles début inclus, fin exclue. La cadence commerciale Buy conserve séparément ses années sources.
+  invariants:
+    - Une allocation monétaire a un propriétaire de financement unique et une responsabilité unique ; un forfait non ventilable reste dans le registre des financements.
+    - Une décomposition conserve exactement le montant du financement parent ; parent et enfants ne s'additionnent jamais.
+    - Un forfait groupé garde un prix unique et plusieurs services inclus ; les parts financières inconnues restent null.
+    - Une inclusion renvoie au financement parent et n'est jamais une seconde dépense ni un faux prix nul.
+    - Le cycle du Core et le MCO client sont distincts ; une release produit et sa qualification client sont des livrables distincts.
+    - Les corrections de conformité encore dues au titre de la réalisation restent dans leur financement initial.
+    - Les prestations initiales avant acceptation ne deviennent pas du MCO par simple récurrence.
+    - Le Run suit la consommation des moyens ; le MCO client suit la réception des livrables concernés.
+    - Aucun total de ventilation Buy n'est calculé si le prix groupé ne fournit pas ses parts.
+    - La carte métier rattache les livrables, jamais un coefficient automatique de charge ou de prix.
+definitions:
+  cycle_vie_core_system: Construction, corrections génériques, releases et évolutions du produit. En Make responsabilité de producteur ; en Buy responsabilité éditeur financée par l'achat du produit.
+  run: Moyens techniques, droits d'usage exploitables et opérations courantes nécessaires à faire fonctionner les environnements ; peut commencer pendant le build.
+  mco_client: Maintien correctif, préventif et de compatibilité des configurations, extensions et interfaces réceptionnées ; exclut la production du Core et les nouveaux besoins fonctionnels.
+  evolutions_client: Évolutions fonctionnelles commandées sur les adaptations client ; portefeuille séparé du maintien en état. Aucun supplément dans la proposition centrale.
+  integration_client: Première réalisation, réception, migration, formation, bascule et stabilisation du contexte client.
+cartographie:
+  domaine: supply-chain-orchestration
+  core: [D03.i, D05.e, D01.g, workflow-definition-management]
+  adaptations: [master-data-ingestion, accounting-data-provision, D04.i, D04.k, D06.d]
+  usage_run: [BHV082, human-task-management]
+  limite: Rattachements proposés, sans ventilation de prix par capacité. Hébergement et contrats groupés restent transverses.
+classification_make:
+  MAI-001: {objet: adaptations_client, responsabilite: run, prestation: exploitation, preuve: Assistance et administration courantes ; pas de correction de code.}
+  MAI-002: {objet: adaptations_client, responsabilite: run, prestation: exploitation, preuve: Diagnostic N3 ; la correction durable est financée séparément.}
+  MAI-003: {objet: core_system, responsabilite: cycle_vie_core_system, prestation: maintien, preuve: Corrections génériques et releases produit ; hors garantie initiale selon la convention de la proposition.}
+  MAI-004: {objet: adaptations_client, responsabilite: mco_client, prestation: maintien, preuve: Corrections des extensions réceptionnées après stabilisation.}
+  MAI-005:
+    objet: adaptations_client
+    prestation: maintien
+    decomposition: fixe_et_charges
+    fixe_responsabilite: run
+    charges_responsabilite: mco_client
+    preuve: Le chiffrage distingue 40 JH de surveillance courante et des modifications de contrats. Les parts viennent des travaux déjà chiffrés, pas d'un pourcentage choisi.
+    condition: Les modifications affectées au MCO doivent maintenir les contrats existants et leur compatibilité. Une nouvelle fonction ou interface appartient aux évolutions client. Le catalogue ne documente pas ce mix ; cette affectation est une hypothèse à qualifier, sans ajout ni retrait financier.
+  MAI-006: {objet: adaptations_client, responsabilite: mco_client, prestation: maintien, preuve: Qualification et promotion client des mises à jour ; hors première réception INT-010.}
+  MAI-007: {objet: plateforme, responsabilite: run, prestation: exploitation, preuve: Exploitation des traitements et de la chaîne de livraison. Une nouvelle fonctionnalité d'outillage exigerait un travail distinct.}
+  MAI-008: {objet: plateforme, responsabilite: run, prestation: exploitation, preuve: Contrôles opérationnels sécurité, sauvegardes et restauration ; correctifs de code en MAI-003/004.}
+  MAI-009:
+    decomposition: objet_du_changement
+    core_generique: cycle_vie_core_system
+    parametrage_metier: evolutions_client
+    extensions_metier: evolutions_client
+    montant_dans_proposition: 0
+    preuve: Option non commandée dans la proposition, sans changement des portefeuilles de la référence active.
+reception:
+  regle_partagee: Première unité stabilisée pour le MCO des interfaces communes et la qualification des mises à jour client.
+  regle_locale: Fin de stabilisation de chaque unité pour ses corrections d'extensions.
+  traitement_avant_reception: Les charges déjà prévues avant ce jalon sont classées en intégration client. Reclassement à montant constant, sans ajout au paquet de déploiement et sans économie présumée.
+  limite: Convention proposée de responsabilité ; n'affirme pas que tous les contrats partagés sont déjà acceptés à ce jalon. Un autre lotissement demande de déplacer les dates, pas de multiplier le financement.
+relais_service_complet:
+  regle: Au terme de la stabilisation Groupe, fermer les allocations transitoires et ouvrir le régime annuel complet une seule fois, par financement et objet. Core, Run et MCO poursuivent leurs propres calendriers ; aucune deuxième annuité ne se superpose à la période précédente.
+  portee: Le journal de cette proposition s'arrête à cette frontière. Une application future devra recalculer les horizons 3/5/7/10 ans et les simulations ; aucun TCO actuel n'est remplacé ici.
+hebergement_build:
+  nature: run
+  objet: plateforme
+  options: [java-spring, dotnet, rust]
+  duree_ref: source/plan-investissement.yaml#build_make_mois
+  cas_central: central
+  statut_prix: Provisions d'ingénierie proposées, pas cotations cloud ni prix de catalogue vérifiés. Prix constants en euros HT.
+  inclus: Calcul applicatif et runners de tests hébergés, bases de développement/qualification, stockage et sauvegardes, réseau et traces des environnements de fabrication.
+  exclus: Licences et dépôts/outils déjà financés par les 8 euros par JH ; postes de travail ; main-d'œuvre CI/CD et socle déjà dans le build ; iPaaS de production et flux métier réels ; production HA et secours multisite.
+  limites: Pas d'environnement persistant dédié par développeur. Données de test synthétiques ou anonymisées ; pas une copie automatique de tout le patrimoine de production. Tests de performance intermittents, arrêt des ressources inutilisées. Les tests payants de systèmes tiers restent à qualifier si nécessaires.
+  phases:
+    - id: developpement_initial
+      part_duree: 0.25
+      contenu: Un environnement partagé de développement/intégration et des runners éphémères ; base simple, sans HA de production.
+      couts_mensuels_eur_ht:
+        sobre: {calcul_runners: 300, bases: 150, stockage_sauvegardes: 50, reseau_traces: 150}
+        central: {calcul_runners: 450, bases: 250, stockage_sauvegardes: 100, reseau_traces: 200}
+        soutenu: {calcul_runners: 700, bases: 400, stockage_sauvegardes: 150, reseau_traces: 250}
+    - id: developpement_qualification
+      part_duree: 0.50
+      contenu: Deux environnements partagés persistants, développement et qualification ; exécution régulière des tests et sauvegardes.
+      couts_mensuels_eur_ht:
+        sobre: {calcul_runners: 600, bases: 300, stockage_sauvegardes: 100, reseau_traces: 300}
+        central: {calcul_runners: 900, bases: 500, stockage_sauvegardes: 200, reseau_traces: 400}
+        soutenu: {calcul_runners: 1400, bases: 800, stockage_sauvegardes: 300, reseau_traces: 500}
+    - id: qualification_performance
+      part_duree: 0.25
+      contenu: Deux environnements persistants et capacité temporaire de charge/performance, jeux d'essai plus volumineux et traces renforcées.
+      couts_mensuels_eur_ht:
+        sobre: {calcul_runners: 1100, bases: 500, stockage_sauvegardes: 150, reseau_traces: 550}
+        central: {calcul_runners: 1700, bases: 800, stockage_sauvegardes: 300, reseau_traces: 700}
+        soutenu: {calcul_runners: 2500, bases: 1200, stockage_sauvegardes: 500, reseau_traces: 800}
+  justification: Les budgets suivent les environnements et l'intensité des essais, pas un prorata des 72 k€ annuels de production. La même hypothèse s'applique aux trois stacks faute de mesure justifiant un avantage de consommation.
+  frontiere: Fin des consommations de build à la réception du Core. Les 374 k€ de moyens pendant intégration commencent ensuite ; une plateforme réutilisée n'est pas facturée deux fois au changement de phase.
+buy:
+  microsoft:
+    source: source/maintenance/maintenance-microsoft.yaml
+    groupes:
+      MAI-010/licences:
+        services: [cycle_vie_core_system, run]
+        statut_inclusions: documente
+        periode: Séquence commerciale de cinq années sources, conservée. Le modèle actif démarre les souscriptions avec l'intégration.
+        preuve: sources/client/microsoft-1.pdf#page=38
+        limite: Maintenance standard, Azure, sandbox et services managés groupés ; aucune preuve de couverture de toutes les adaptations client.
+      MAI-013/outillage-support:
+        services: [integration_client, run]
+        statut_inclusions: a_rapprocher
+        periode: Année 1 de l'offre, prix initial unique ; récurrence non établie. Affectation initiale courante conservée.
+        preuve: sources/client/microsoft-questionnaire.xlsx#8. Estimations budgétaires!C13:D13
+        limite: Advisory Unified et Project Quality ; pas une maintenance annuelle ni un deuxième abonnement produit.
+  sap:
+    source: source/maintenance/maintenance-sap.yaml
+    groupes:
+      MAI-010/licences:
+        services: [cycle_vie_core_system, run]
+        statut_inclusions: documente_avec_reserves
+        periode: Séquence BOM source conservée ; années sources 4/5 utilisées dans le modèle courant. Le RISE arrondi est un rappel, pas un nouvel achat.
+        preuve: sources/client/delaware-septembre.pdf#page=37,43-45
+        limite: Pas de ventilation inventée de Finance, droits, infrastructure ou entretien du standard. Réserves DRP/stockage préservées.
+      rfi-mco:
+        services: [mco_client, run]
+        statut_inclusions: rapprochement_propose
+        periode: Après stabilisation selon la pièce ; pas année 1 du projet par défaut.
+        preuve: sources/client/delaware-septembre.pdf#page=37
+        limite: Libellé MCO hors évolutions, contenu détaillé non contractuel. La liste couvre du modèle est un rapprochement de travail, pas une preuve de ventilation Run/MCO.
+      rfi-monitoring:
+        services: [run]
+        statut_inclusions: documente_pour_monitoring
+        periode: Après stabilisation, horaires étendus.
+        preuve: sources/client/delaware-septembre.pdf#page=37
+        limite: Le rattachement historique à tout MAI-005 ne démontre pas la prise en charge des modifications de contrats. Aucun supplément n'est ajouté ici.
+      rfi-evolutions:
+        services: [evolutions_client]
+        statut_inclusions: portefeuille_a_qualifier
+        periode: Enveloppe annuelle après stabilisation.
+        preuve: sources/client/delaware-septembre.pdf#page=37
+        limite: Ne prouve pas la livraison de la roadmap générique SAP ni l'identité avec les 24 évolutions du scénario.
+  regle_financiere: Les prix, séquences, projections, inclusions et forfaits sont lus tels quels des sources. Les couvertures commerciales ne deviennent pas des prix additionnels. Pas de nouveau calendrier Buy ni de total Make/Buy à assiettes inégales.

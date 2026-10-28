@@ -1,0 +1,181 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+additionalProperties: false
+properties:
+  version_schema:
+    const: 2
+  id: &id001
+    type: string
+    minLength: 1
+  stack:
+    enum:
+    - java-spring
+    - dotnet
+    - rust
+    - microsoft
+    - sap
+  strategie:
+    enum:
+    - make
+    - buy
+  dependances:
+    type: object
+    minProperties: 5
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      properties:
+        fichier: *id001
+        sha256:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+      required:
+      - fichier
+      - sha256
+  integration:
+    type: object
+    additionalProperties: false
+    properties:
+      activites:
+        type: array
+        minItems: 13
+        maxItems: 13
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            activite: *id001
+            jh_avant_ia: &id002
+              type: number
+              minimum: 0
+            jh_expertise_transverse: *id002
+            traitement:
+              enum:
+              - estimation
+              - inclus_rfi
+            justification: *id001
+            usage_reference:
+              enum:
+              - travaux_communs_et_diagnostic
+              - diagnostic_seul
+              - diagnostic_buy_remplace_par_forfait
+            remplacement_ref:
+              type: string
+              minLength: 1
+          required:
+          - activite
+          - jh_avant_ia
+          - jh_expertise_transverse
+          - traitement
+          - justification
+      prix_rfi:
+        type: object
+        additionalProperties: false
+        properties:
+          methode:
+            enum:
+            - sans_objet
+            - somme_postes_sources
+          postes_eur:
+            type: array
+            items: *id002
+          total_imprime_eur:
+            type:
+            - number
+            - 'null'
+          sources:
+            type: array
+            items: *id001
+          justification: *id001
+        required:
+        - methode
+        - postes_eur
+        - total_imprime_eur
+        - sources
+        - justification
+      complement_qualification_automation_jh: *id002
+      justification_complement: *id001
+    required:
+    - activites
+    - prix_rfi
+    - complement_qualification_automation_jh
+    - justification_complement
+  maintenance:
+    type: object
+    additionalProperties: false
+    properties:
+      activites:
+        type: array
+        minItems: 9
+        maxItems: 9
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            activite: *id001
+            traitement:
+              enum:
+              - estimation
+              - inclus_abonnement
+              - inclus_forfait_rfi
+            charges:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  volume_ref: *id001
+                  jh_unitaire: *id002
+                  travail: *id001
+                  jh_unitaire_ref:
+                    enum:
+                    - correction_core
+                    - qualification_release
+                    - correction_extension
+                    - qualification_client
+                    - evolution_core
+                required:
+                - volume_ref
+                oneOf:
+                - required:
+                  - jh_unitaire
+                  - travail
+                  not:
+                    required:
+                    - jh_unitaire_ref
+                - required:
+                  - jh_unitaire_ref
+                  not:
+                    anyOf:
+                    - required:
+                      - jh_unitaire
+                    - required:
+                      - travail
+            jh_fixes_avant_ia: *id002
+            gain_ia_pct:
+              type: number
+              minimum: 0
+              maximum: 30
+            justification: *id001
+          required:
+          - activite
+          - traitement
+          - charges
+          - jh_fixes_avant_ia
+          - gain_ia_pct
+          - justification
+    required:
+    - activites
+  limites:
+    type: array
+    items: *id001
+    minItems: 1
+required:
+- version_schema
+- id
+- stack
+- strategie
+- dependances
+- integration
+- maintenance
+- limites
