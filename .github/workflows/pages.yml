@@ -35,7 +35,10 @@ jobs:
           npm install --global pnpm@11.25.0 --ignore-scripts
           pnpm --dir app install --frozen-lockfile --ignore-scripts
       - name: Validate model and local application
-        run: python -m tools.check_model --full
+        run: |
+          mkdir -p tmp
+          pnpm --dir app exec vite build
+          python -m tools.check_model --full
       - name: Build static application and original evidence
         run: |
           pnpm --dir app exec vite build --outDir dist-pages --base /FLOW-Etude-Economique/

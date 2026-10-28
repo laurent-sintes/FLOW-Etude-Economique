@@ -142,6 +142,7 @@ Le workflow `.github/workflows/pages.yml` contrôle les sources courantes, const
 
 ```powershell
 pnpm --dir app install --frozen-lockfile --ignore-scripts
+pnpm --dir app exec vite build
 python -m tools.check_model --full
 pnpm --dir app exec vite build --outDir dist-pages --base /FLOW-Etude-Economique/
 python -m tools.build_pages --output app/dist-pages --base /FLOW-Etude-Economique/
