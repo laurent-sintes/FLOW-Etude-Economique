@@ -63,6 +63,36 @@ async function route(id){
  await page.locator('main .essential-page:visible').first().waitFor();
  if(id==='evaluation-core')await page.locator('[data-evaluation="annual"]').waitFor();
 }
+async function checkFrameworkNavigation(){
+ await page.setViewportSize({width:390,height:844});await route('modele');
+ const navigation=page.locator('#study-navigation');
+ const opener=page.locator('.topbar button[aria-controls="study-navigation"]');
+ const open=async()=>{
+  await opener.focus();await page.keyboard.press('Enter');
+  await page.waitForFunction(()=>document.querySelector('.topbar button[aria-controls="study-navigation"]')?.getAttribute('aria-expanded')==='true'&&document.querySelector('#study-navigation')?.contains(document.activeElement));
+ };
+ await open();await page.keyboard.press('Tab');
+ assert.equal(await navigation.evaluate(element=>element.contains(document.activeElement)),true,'Tab should enter the open mobile navigation.');
+ await page.keyboard.press('Escape');
+ await page.waitForFunction(()=>document.querySelector('.topbar button[aria-controls="study-navigation"]')?.getAttribute('aria-expanded')==='false');
+ assert.equal(await opener.evaluate(element=>element===document.activeElement),true,'Escape must return focus to the navigation button.');
+ await open();await navigation.locator('nav a').last().focus();await page.keyboard.press('Tab');
+ await page.waitForFunction(()=>document.querySelector('.topbar button[aria-controls="study-navigation"]')?.getAttribute('aria-expanded')==='false');
+ assert.equal(await navigation.evaluate(element=>element.contains(document.activeElement)),false,'Leaving the nonmodal menu should keep focus outside.');
+ await open();await navigation.locator('a[href="#marche"]').click();await route('marche');
+ await page.waitForFunction(()=>document.querySelector('main h1')===document.activeElement);
+ assert.equal(await opener.getAttribute('aria-expanded'),'false','Choosing a page must close the mobile navigation.');
+ await open();await page.setViewportSize({width:1440,height:1000});
+ await page.waitForFunction(()=>{
+  const element=document.activeElement;if(!element||element===document.body)return false;
+  const style=getComputedStyle(element),box=element.getBoundingClientRect();
+  return style.visibility!=='hidden'&&style.display!=='none'&&box.width>0&&box.height>0;
+ });
+ await navigation.locator('a[aria-current="page"]').focus();await page.setViewportSize({width:390,height:844});
+ await page.waitForFunction(()=>document.activeElement===document.querySelector('.topbar button[aria-controls="study-navigation"]'));
+ await page.setViewportSize({width:1440,height:1000});
+ report.accessibility={mobileMenuFocus:true,escapeRestoresFocus:true,leavingClosesMenu:true,pageHeadingFocus:true,resizeKeepsFocusVisible:true,reverseResizeRestoresFocus:true};
+}
 async function workerRequest(manifest,manifestUrl,requestPath,body){
  const id=++sequence;
  return page.evaluate(({id,manifest,manifestUrl,requestPath,body})=>new Promise((resolve,reject)=>{
@@ -99,6 +129,7 @@ try{
    report.routes[width].push(id);
   }
  }
+ await checkFrameworkNavigation();
  await page.setViewportSize({width:1440,height:1000});
  const assets=await page.locator('img').evaluateAll(images=>images.map(image=>({src:image.src,loaded:image.complete&&image.naturalWidth>0})));
  assert.ok(assets.length>0);
@@ -135,6 +166,8 @@ try{
  const offers=data.ui.essential.market_study.offers.sources.find(source=>source.path==='source/offres-synvance.md');assert.ok(offers);
  await page.getByRole('button',{name:offers.label,exact:true}).click();
  await page.locator('dialog[open] .markdown').waitFor({timeout:180000});
+ const documentTitle=data.ui.documents.find(document=>document.path==='source/offres-synvance.md')?.title;assert.ok(documentTitle);
+ await page.getByRole('dialog',{name:documentTitle,exact:true}).waitFor();report.accessibility.documentDialogNamed=true;
  const pdf=page.locator('dialog[open] a').filter({hasText:/PDF/i}).first();
  let pdfLink=pdf;
  if(!await pdf.count())pdfLink=page.locator('dialog[open] a[href*=".pdf"]').first();

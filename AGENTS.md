@@ -3,6 +3,7 @@
 ## Communication
 
 - Tutoyer l’utilisateur dans les échanges.
+- Conserver « QA » dans les textes : ce jargon est partagé avec le client.
 
 ## Autorités et finalité
 

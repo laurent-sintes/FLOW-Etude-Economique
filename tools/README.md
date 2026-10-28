@@ -89,7 +89,7 @@ python tools/oss_candidates_code_audit.py tryton tmp/tryton-code-audit-2026-10-2
 python tools/oss_candidates_code_audit.py axelor tmp/oss-audit-axelor --platform tmp/oss-audit-axelor-platform --webapp tmp/oss-audit-axelor-webapp --studio tmp/oss-audit-axelor-studio --utils tmp/oss-audit-axelor-utils --message tmp/oss-audit-axelor-message
 ```
 
-Le compteur refuse les commits différents et sépare code, XML, CSV et manifestes. Les totaux sont des **sélections physiques de code source**, avec certains modules encore plus larges que FLOW et des dépendances Finance hors total. Ils ne sont ni des points de fonction ni des JH de reconstruction. Aucun COCOMO comparatif n'est dérivé pour ces trois produits.
+Le compteur refuse les commits différents et sépare code, XML, CSV et manifestes. Les totaux sont des **sélections physiques de code source**, avec certains modules encore plus larges que FLOW et des dépendances Finance hors total. Ils ne sont ni des points de fonction ni des JH de reconstruction. Le compteur et le registre actif ne dérivent aucun COCOMO pour ces trois produits. La pièce Tryton conserve un diagnostic nominal conditionnel distinct, sans reprise dans les cinq options économiques.
 
 ## Vérifier une refactorisation sans changement économique
 

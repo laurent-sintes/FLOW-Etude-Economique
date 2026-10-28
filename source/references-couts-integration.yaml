@@ -6,6 +6,7 @@ objet: Repères publics de coût de mise en œuvre, séparés du chiffrage FLOW.
   d'un retraitement est le périmètre FLOW chez Beaumanoir, commun aux références. Le bloc de build Core présente
   séparément des abaques d'effort conditionnels et des programmes SCM non transposés en prix.
 dependances:
+  revue_referentiel: sources/rafraichissement-referentiel-marche-2026-10-28.md
   preuves: sources/benchmark-integration-2026-10-23.md
   preuve_build_core: sources/benchmark-build-core-scm-2026-10-27.md
   preuve_frappe_erpnext: sources/fiche-marche-frappe-erpnext-flow-2026-10-28.md
@@ -42,14 +43,15 @@ reperes_build_core:
     composant: Référence publique
     taille: Mesure observée
     portee: Portée de la comparaison
-  introduction: 'Une cohorte ISBSG de développements neufs Java donne un abaque en heures par point de fonction,
-    applicable à FLOW après comptage indépendant et réconciliation du périmètre d''effort. Les codes figés de
-    Frappe/ERPNext/Insights, Odoo Community, Tryton et Axelor permettent d''observer la taille et les points chauds
-    de sélections opérationnelles. Ces volumes ne sont ni des points de fonction, ni une calibration FLOW.'
+  introduction: "La cohorte ISBSG 2023 de développements neufs Java apporte un abaque conditionnel après comptage indépendant et réconciliation de l’effort. Une publication ISBSG 2025 ajoute un contrepoint Java agile de périmètre différent, sans remplacer cette cohorte. Les codes figés de Frappe/ERPNext/Insights, Odoo Community, Tryton et Axelor décrivent des sélections opérationnelles ; leurs volumes ne sont ni des points de fonction ni une calibration FLOW."
   lignes:
   - composant: ISBSG 2023 · 72 builds neufs Java
     mesure: 100–300 PF IFPUG/Nesma ; P25 6,2, médiane 9,4, P75 14,7 h/PF
     portee: Abaque conditionnel par lot mesuré ; cohorte non limitée à la SCM et pilotage à réconcilier.
+  - composant: ISBSG 2025 · Java agile après 2020
+    mesure: 183 observations ; médiane environ 6 h/PF, P90 10 h/PF ; base 2024 IFPUG/Nesma
+    portee: 'Contrepoint récent de sélection différente : tranche de taille et développement neuf non isolés ; ne remplace pas
+      les 72 builds de 2023. Source et limites dans la revue du référentiel.'
   - composant: QSM · développement neuf
     mesure: Médiane 9,16 PF/mois-personne, soit 17,47 h/PF à 160 h/mois
     portee: Contrepoint historique IT métier ; ne se moyenne pas avec ISBSG.
@@ -67,9 +69,11 @@ reperes_build_core:
     portee: Diagnostic reproductible sur commits figés, non calibré ; sans résiduel FLOW ni intégration client.
   - composant: Six fiches produit · quatre OSS, Microsoft et SAP
     mesure: Six axes FLOW communs ; relevé PNCLOC sélectionné pour chaque OSS et effort nominal dérivé pour ERPNext.
-    portee: Comparer fonctions documentées, frontières d'édition, code ouvert et parité à éprouver ; aucun relevé public complet du code Buy.
+    portee: Comparer fonctions documentées, frontières d'édition, code ouvert et parité à éprouver ; aucun relevé public complet
+      du code Buy.
   - composant: Odoo Community, Tryton et Axelor · code sélectionné
-    mesure: Relevés PNCLOC sur commits figés, avec framework, opérations et interfaces distingués ; XML et dépendances hors FLOW à part.
+    mesure: Relevés PNCLOC sur commits figés, avec framework, opérations et interfaces distingués ; XML et dépendances hors
+      FLOW à part.
     portee: Proxys de taille et points chauds, non des tailles fonctionnelles homogènes ni des estimations de charge FLOW.
   - composant: OCA et Camunda · composants complémentaires
     mesure: Écosystème et moteur tiers documentés, hors relevés des quatre références OSS.
@@ -632,7 +636,7 @@ reperes_build_core:
           fonctionnalite: Automation Flow bêta, Workflow, ToDo et Issue/SLA fournissent parcours, attente et tâches.
           statut_offre: sans_objet
           offre: Référence de code OSS, sans offre RFI.
-          limite: Rejeu d'effets externes et registre temporel transverse FLOW non démontrés.
+          limite: "Automation Flow reste bêta. La documentation courante décrit une purge standard des journaux de lancement après 30 jours ; ces traces ne démontrent pas un registre métier durable. Rejeu d’effets externes, historique temporel transverse FLOW et concordance de ces règles avec le commit figé restent à vérifier."
           preuves:
           - https://docs.frappe.io/framework/automations
           - https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/automation_engine/runner.py
@@ -784,12 +788,7 @@ reperes_build_core:
         calcul_ref: null
         pncloc: 97142
         effort_jh: null
-        limite: >-
-          Sélection de 97 142 PNCLOC de serveur, client web et 25 modules, avec 23 921 lignes XML distinctes ;
-          dépendances Finance directes exclues. Ce volume n'est pas une taille fonctionnelle FLOW ni un effort calibré.
-          La pièce source contient aussi un calcul conditionnel en JH, non repris dans le registre actif.
-          Le motif de cette non-reprise n'est pas documenté ; elle ne constitue pas une décision de rejet.
-          Ce diagnostic documentaire ne modifie ni les charges ni les budgets.
+        limite: "Sélection de 97 142 PNCLOC de serveur, client web et 25 modules, avec 23 921 lignes XML distinctes ; dépendances Finance directes exclues. Ce volume n’est pas une taille fonctionnelle FLOW ni un effort calibré. La pièce source conserve aussi un diagnostic nominal conditionnel en JH. Celui-ci n’est pas repris dans les calculs du registre ni dans les budgets FLOW ; cette séparation documentaire ne vaut pas décision de rejet."
       references_deploiement: null
       prix_observe_eur_ht: null
       prix_retraite_flow_eur_2026: null
@@ -798,10 +797,11 @@ reperes_build_core:
           fonctionnalite: Stock, Purchase et Sale traitent commandes, réceptions, expéditions, retours et positions passées ou futures.
           statut_offre: sans_objet
           offre: Code OSS observé ; aucune offre Tryton n'est évaluée dans les cinq options.
-          limite: Corrections antidatées et provenance multi-systèmes FLOW à éprouver ; Purchase et Sale dépendent de modules Finance.
+          limite: "La documentation 8.2 décrit les positions passées à partir des mouvements réalisés et de leur date effective. Elle ne démontre pas la reconstruction de ce qui était connu avant une correction tardive ni la provenance multi-systèmes FLOW. Purchase et Sale dépendent de modules Finance."
           preuves:
           - https://docs.tryton.org/8.2/modules-stock/usage/index.html
           - https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/purchase/tryton.cfg
+          - https://docs.tryton.org/8.2/modules-stock/design/index.html
           parite_flow: non_demontree
         availability:
           fonctionnalite: Sale Stock Quantity contrôle la quantité au devis ; Stock protège l'affectation concurrente par verrouillage en base.
@@ -928,10 +928,11 @@ reperes_build_core:
           fonctionnalite: Studio/BPM public fournit BPMN, DMN, tâches humaines et suivi des instances sur moteur Camunda.
           statut_offre: sans_objet
           offre: Dépendance publique Studio/BPM 4.0.7, distincte du code Suite ; aucun achat n'est étudié.
-          limite: Dossier transverse FLOW, corrélation, reprises et effets externes uniques non démontrés.
+          limite: "Dossier transverse FLOW, corrélation et effets externes uniques non démontrés. La documentation Studio 4.0 demande d’activer les logs BPM et prévoit l’effacement de ces logs techniques à la fin de l’instance ; cela ne qualifie pas la conservation des événements métier. La concordance avec le patch 4.0.7 reste à confirmer."
           preuves:
           - https://docs.axelor.com/studio/4.0/bpm-docs/index.html
           - https://github.com/axelor/axelor-studio/blob/4.0.7/build.gradle
+          - https://docs.axelor.com/studio/4.0/bpm-docs/general-documentation/process-instance/display-logs.html
           parite_flow: non_demontree
         analytics:
           fonctionnalite: Dashboards et graphiques opérationnels XML dans la Suite OSS ; dashboard de tâches et durées dans Studio/BPM.
@@ -984,7 +985,7 @@ reperes_build_core:
           - source/ecarts-perimetre-flow-rfi.md
           parite_flow: non_demontree
         availability:
-          fonctionnalite: SCM documente ATP, CTP en lot et CTP quasi temps réel sous conditions ; Commerce DOM arbitre les sites selon contraintes et coûts.
+          fonctionnalite: "SCM documente ATP, CTP en lot et CTP quasi temps réel sous conditions ; Commerce DOM arbitre les sites selon contraintes et coûts. Le CTP quasi temps réel requiert SCM 10.0.41 et les fonctions activées ; Commerce DOM tient compte du statut de stock à partir de 10.0.46."
           statut_offre: mixte
           offre: SCM et Commerce sont proposés ; Inventory Visibility est une option d'architecture à discuter.
           limite: >-
@@ -994,6 +995,7 @@ reperes_build_core:
           - https://learn.microsoft.com/en-us/dynamics365/supply-chain/master-planning/planning-optimization/calculate-delivery-dates-using-ctp
           - https://learn.microsoft.com/en-us/dynamics365/commerce/dom
           - source/ecarts-perimetre-flow-rfi.md
+          - https://learn.microsoft.com/en-us/dynamics365/commerce/dom-limitations
           parite_flow: non_demontree
         execution_sav:
           fonctionnalite: Commerce DOM et Service Management SCM couvrent exécution, retour et réparation.
@@ -1025,11 +1027,12 @@ reperes_build_core:
         mining:
           fonctionnalite: Power Automate Process Mining analyse des journaux avec case ID, activité et horodatage.
           statut_offre: non_demontre
-          offre: Produit distinct, sans inclusion établie dans le panier Avanade.
+          offre: "Le mining fait partie des droits Power Automate Premium, avec une capacité supplémentaire disponible par add-on. Son inclusion et sa capacité dans le panier historique Avanade ne sont pas établies."
           limite: Licence, collecte de tous les événements et raccordement à FLOW à qualifier.
           preuves:
           - https://learn.microsoft.com/en-us/power-automate/process-advisor-overview
           - https://learn.microsoft.com/en-us/power-automate/process-mining-processes-and-data
+          - https://learn.microsoft.com/en-us/power-platform/admin/power-automate-licensing/types
           parite_flow: non_demontree
     sap:
       id: sap
@@ -1067,7 +1070,7 @@ reperes_build_core:
           fonctionnalite: S/4 aATP et OMSA apportent disponibilité, réservations et sourcing ; SBC avec PP/DS traite une confirmation fondée sur matières et capacités.
           statut_offre: mixte
           offre: OMSA et IBP sont proposés ; droits PP/DS non établis dans la BOM.
-          limite: IBP proposé ne démontre pas une réponse CTP synchrone ni tous les droits du moteur.
+          limite: "IBP proposé ne démontre pas une réponse CTP synchrone ni les droits PP/DS. Pour SBC avec PP/DS, la documentation 2025 FPS01 signale que les résultats simulés restent invisibles aux transactions parallèles jusqu’au transfert, avec un risque de sollicitation des mêmes composants et capacités. Version, configuration et concurrence sont à vérifier sur les scénarios FLOW."
           preuves:
           - https://help.sap.com/doc/08442b9d2cd744f7aecc1e08080c26f3/SHIP/en-US/FSD_SAP_OMSA.pdf
           - https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/f899ce30af9044299d573ea30b533f1c/4c56297de7c33a0de10000000a42189c.html
@@ -1083,13 +1086,14 @@ reperes_build_core:
           - source/ecarts-perimetre-flow-rfi.md
           parite_flow: non_demontree
         case_automation:
-          fonctionnalite: Case Management S/4 lie transactions, produits, acteurs et étapes ; workflow intégré.
+          fonctionnalite: "Case Management S/4 lie transactions, produits, acteurs et étapes ; workflow intégré. Le FSD OMF du 22 octobre 2026 documente aussi les statuts personnalisés et la révocation/remplacement d’activités incorrectes ; OMF est distinct d’OMSA et son inclusion dans l’offre n’est pas établie."
           statut_offre: mixte
           offre: S/4 proposé ; SAP Build Process Automation est un service distinct aux droits non établis.
           limite: Corrélation et reprise du dossier adaptatif FLOW à démontrer.
           preuves:
           - https://help.sap.com/doc/9f8b1e91e4a442499364d2b49c8d4bdb/2025/en-US/FSD_CLOUD_PE_2025_latest.pdf
           - https://help.sap.com/docs/r/p/PROCESS_AUTOMATION
+          - https://help.sap.com/doc/65309ba6056d4d6c8dc40195ec4b3074/Cloud/en-US/FSD_SAP_OMF.pdf
           parite_flow: non_demontree
         analytics:
           fonctionnalite: Analytics S/4 et Process Observer documentent événements, instances, délais et KPI.
@@ -1326,7 +1330,7 @@ reperes_exploratoires_marche:
   - Confronter les scénarios ainsi obtenus aux JH et TJM externes du modèle.
 sources_monetaires:
   change_bce_2026_10_22:
-    url: https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html
+    url: "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist-90d.xml"
     usd_par_eur: 1.1205
     gbp_par_eur: 0.8377
     cad_par_eur: 1.5725
@@ -1337,7 +1341,7 @@ sources_monetaires:
     septembre_2026: 336.94
     limite: Prix à la consommation, pas prix de prestations informatiques.
   sppi_uk_informatique:
-    url: https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/hr6l
+    url: "https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/hr6l/sppi"
     url_revision: https://www.ons.gov.uk/economy/inflationandpriceindices/datasets/serviceproducerpriceindices
     serie: HR6L, programmation et conseil informatiques J62
     trimestre_2026_t3: 131.5
@@ -1736,7 +1740,7 @@ references:
     perimetre: Migration ECC, BW et GRC ; finances, budgets, patrimoine et logistique.
     duree_mois: null
     inclus_dans_prix: Lot intégration 5 061 585 € et lot AMOA/recette 1 947 300 € ; accords-cadres de 48 mois.
-    exclus_du_prix: Licences distinctes ; plafonds d'accords-cadres non consommés.
+    exclus_du_prix: "Licences distinctes ; plafonds contractuels non assimilés aux valeurs réestimées ni à une dépense effective."
   cout_publie:
     statut: valeurs_estimees_accords_cadres_attribues
     date_prix: 2026-01
@@ -1746,8 +1750,7 @@ references:
     externe_confirme: true
     qualite_prix_source: 3
     famille_source: boamp-aphp
-    reserve: Valeur de procédure 8 772 000 € contradictoire avec les 7 008 885 € des deux lots estimés ; la somme des
-      lots est retenue.
+    reserve: "L'avis distingue la valeur estimée de procédure de 8 772 000 € et la valeur approximative des accords-cadres de 7 008 885 €, explicitement publiée dans la section Résultats. Cette dernière correspond aux valeurs réestimées des deux lots ; elle reste distincte du plafond contractuel de 13 080 209,62 € et de la dépense effective."
   normalisation_2026:
     indice: aucune, montant déjà daté 2026
     periode_depart: 2026-01
@@ -1764,7 +1767,7 @@ references:
     cohorte: null
     limite: Migration hospitalière SAP existante ; volumes et livrables FLOW non définis.
   lecture_flow:
-    date_revue: '2026-10-26'
+    date_revue: "2026-10-28"
     score_utilite: 2
     raison: Migration SAP multi-domaines avec logistique, habilitations et recette ; contexte hospitalier, sans déploiement
       Fashion.
@@ -1981,7 +1984,7 @@ references:
     limite: Finance et système clients d'une régie, non SCM Fashion ; directeur de programme acheté séparément et travaux
       internes non chiffrés. Aucun pont de livrables et de prix au périmètre FLOW Beaumanoir.
   lecture_flow:
-    date_revue: '2026-10-26'
+    date_revue: "2026-10-28"
     score_utilite: 2
     raison: Remplacement SAP avec migration, qualification et mise en service ; fonctions clients d’une régie et Finance,
       éloignées du retail.
@@ -2003,11 +2006,22 @@ references:
       max: 7900000
       devise: USD
       periode: 6,5 ans
-      assiette: Licences et cloud, supervision, exploitation, tests de régression et montées de version. Pas une annuité
-        uniforme ; périmètre distinct du contrat Deloitte.
+      assiette: Licences et cloud, supervision, exploitation, tests de régression et montées de version. Pas une annuité uniforme
+        ; périmètre distinct du contrat Deloitte.
       source: https://www.eweb.org/documents/board-meetings/2022/11-01-22/cc4_sap.pdf
       localisation: PDF p. 1–2, Contract Amount et Contracted Goods or Services
       qualite_prix_source: 4
+    - libelle: Demande d’augmentation du contrat Deloitte
+      min: 6000000
+      max: 6000000
+      devise: USD
+      periode: Demande présentée le 5 mai 2026 ; enveloppe cumulée, non annuelle
+      assiette: Augmentation demandée du plafond de 16 à 22 M USD, notamment portail client, transfert McKenzie, données et améliorations.
+        Le plafond cumulé ne s’ajoute pas au contrat initial. La demande ne prouve ni son approbation ni la dépense finale.
+      source: https://www.eweb.org/documents/board-meetings/2026/05-05-26/m5.pdf
+      localisation: 'PDF p. 11–12, demande Deloitte : augmentation et nouveau plafond ; détail consommé/anticipé non repris en
+        raison d’un écart arithmétique de la source.'
+      qualite_prix_source: 3
 - id: mtc-d365-2022
   nom: Manufacturing Technology Centre, remplacement d'ERP
   sources:
@@ -2190,7 +2204,7 @@ references:
     valeur_2026: 170.0
     devise_par_eur: 1.5725
     min_eur: 5523772
-    max_eur: 7101992
+    max_eur: 7101993
   transposition_au_perimetre_flow_beaumanoir:
     cout_central_eur_2026: null
     fourchette_min_eur_2026: null

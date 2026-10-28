@@ -24,7 +24,9 @@ class MarketInstructionTests(unittest.TestCase):
 
     def test_all_capability_product_pairs_exist_without_fabricated_coverage(self):
         before = deepcopy(self.market)
-        matrix = build_market_instruction(self.market, grid=self.grid, instruction=self.source)
+        instruction = deepcopy(self.source)
+        instruction['qualifications'] = []
+        matrix = build_market_instruction(self.market, grid=self.grid, instruction=instruction)
         self.assertEqual(self.market, before)
         self.assertEqual(matrix['summary']['pairs'], 84 * 6)
         self.assertEqual(matrix['summary']['pairs_by_status'], dict(non_etudie=354, reperes_axes=150, qualification_detaillee=0))

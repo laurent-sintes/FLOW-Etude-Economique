@@ -40,7 +40,7 @@ def compile_fundamentals(document, glossary, architecture, options, native):
     if tuple(chapters) != READING_CHAPTERS:
         fail('reading/chapters', 'expected the six concepts in their reading order')
     links = index(document['reading']['strategy_links'], 'href', 'reading/strategy_links')
-    if set(links) != {'source/offres-synvance.md', 'source/ecarts-perimetre-flow-rfi.md'}:
+    if set(links) != {'source/offres-synvance.md', '#etude-marche'}:
         fail('reading/strategy_links', 'missing strategy evidence route')
     for href in links:
         if href.startswith('source/') and not (ROOT / href).is_file():
