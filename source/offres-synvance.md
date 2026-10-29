@@ -1,15 +1,19 @@
-# Lire les offres issues de la consultation Synvance
+# Repères Synvance — données reçues et pièces originales
 
-La comparaison rassemble un périmètre de consultation, des réponses fournisseur, une projection de comité et des compléments estimés par l’étude FLOW. La lecture distingue ce que chaque pièce apporte au budget comparé.
+**Une entrée de menu, trois pages de lecture.** Dans les Données d’entrée, avant le Framework, Repères Synvance présente une synthèse courte. Elle conduit aux détails Microsoft et SAP, qui exposent lots, annuités documentées et réserves, avec retour vers la synthèse. Les sept pièces originales sont consultables et téléchargeables depuis cette synthèse.
 
-| Pièces | Ce qu’elles établissent | Données de référence |
-|---|---|---|
-| [Présentation RFI](../sources/client/rfi-presentation.pdf), [besoins](../sources/client/rfi-besoins.pdf), questionnaires | Besoins, frontières et déclarations de couverture. Une demande ne prouve pas la livraison dans le prix. | [Note de périmètre](ecarts-perimetre-flow-rfi.md), [Grille métier](grille-complexite.yaml) et [charges des cinq stacks](recalibration-metier.yaml). |
-| [Avanade / Microsoft](../sources/client/microsoft-1.pdf), [questionnaire Microsoft](../sources/client/microsoft-questionnaire.xlsx) | Pilote, projection des déploiements et panier Dynamics 365 / K3. | [Chiffrage Microsoft](chiffrage/chiffrage-microsoft.yaml), [Maintenance Microsoft](maintenance/maintenance-microsoft.yaml). |
-| [Delaware](../sources/client/delaware-septembre.pdf), [questionnaire SAP](../sources/client/sap-questionnaire.xlsx) | Lots, jours, composants, prix et réserves SAP. | [Chiffrage SAP](chiffrage/chiffrage-sap.yaml), [Maintenance SAP](maintenance/maintenance-sap.yaml). |
-| [COPIL 5](../sources/client/copil-5.pdf), p. 7–8 | Projection globale Microsoft, durées et réserves de comparaison. | [Plan d’investissement](plan-investissement.yaml). |
-| Hypothèses FLOW | Compléments fonctionnels, préparation, pilotage, achats séparés et scénario annuel. | [Calibration](calibration-couts.yaml), chiffrages et catalogues communs. |
+La lecture distingue la demande du Groupe, les réponses fournisseur et la projection du comité de pilotage. **Ces données reçues ne constituent pas les budgets FLOW.** Les analyses de périmètre, les hypothèses retenues et leur traduction budgétaire restent dans le Dossier économique.
 
-Les [preuves de calibration](../sources/calibration-couts-2026-10-22.yaml) et les [preuves de valorisation annuelle](../sources/integration-maintenance-2026-10-22.yaml) conservent les repères et empreintes des pièces originales. Les montants sont dans les YAML liés ci-dessus, sans copie autonome sur cette page.
+| Pièce originale | Ce qu’elle établit |
+|---|---|
+| [Présentation de la consultation](../sources/client/rfi-presentation.pdf) | Contexte et frontières de la demande adressée aux fournisseurs. |
+| [Expression des besoins](../sources/client/rfi-besoins.pdf) | Besoins fonctionnels de la consultation. Une demande ne prouve pas sa livraison dans le prix. |
+| [Proposition Avanade / Microsoft](../sources/client/microsoft-1.pdf) | Pilote, repères de déploiement et panier Dynamics 365 / K3. |
+| [Questionnaire Microsoft](../sources/client/microsoft-questionnaire.xlsx) | Déclarations de couverture, modalités de déploiement et responsabilités. |
+| [Proposition Delaware / SAP](../sources/client/delaware-septembre.pdf) | Lots, jours, composants, prix et réserves SAP. |
+| [Questionnaire SAP](../sources/client/sap-questionnaire.xlsx) | Couverture déclarée, outils conservés et exclusions. |
+| [COPIL 5](../sources/client/copil-5.pdf), pages 7–8 | Projection Groupe Microsoft, durées et réserves de comparaison. |
 
-Le parcours de lecture actif est défini dans [Comprendre les offres Synvance](parcours-synvance.yaml) et affiché dans l’application. Cet index donne accès aux pièces ; il ne maintient pas une seconde explication des budgets.
+**Conserver le sens de chaque chiffre.** Le pilote Avanade et la projection Groupe du COPIL restent distincts. Pour SAP, le total imprimé et la somme des lots sont présentés séparément lorsqu’ils divergent ; l’écart ne constitue pas une prestation supplémentaire. Les annuités gardent les années et conditions de l’offre, sans actualisation, prolongation ou ventilation Build/Run inventée.
+
+Les montants de la synthèse et des détails sont dérivés de leurs propriétaires documentaires existants. Cette page conserve l’index des originaux, sans recopier les chiffres ni proposer les données YAML du modèle au téléchargement.

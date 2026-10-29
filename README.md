@@ -1,8 +1,8 @@
 # Étude économique FLOW
 
-L’étude compare trois Make — Java / Spring, .NET, Rust — et deux Buy — Microsoft Dynamics 365 + K3 et SAP. Elle aide à décider de poursuivre le Programme Flow, en distinguant périmètres, hypothèses et prix documentés. La Plateforme Flow désigne le produit métier construit en Make. Le calendrier part d’un départ commun, avec comparaisons à 3, 5, 7 et 10 ans.
+L’étude compare trois Make — Java / Spring, .NET, Rust — et deux Buy — Microsoft Dynamics 365 + K3 et SAP. Elle aide à décider des voies et conditions de réalisation du Core System, première étape d’une plateforme de marques, en distinguant périmètres, hypothèses et prix documentés. La Plateforme Flow désigne le produit métier construit en Make. Le calendrier part d’un départ commun, avec comparaisons à 3, 5, 7 et 10 ans.
 
-Le parcours sépare le **Framework d’évaluation** (entrants, concepts, méthodes et formules) du **Dossier économique** (étude de marché, hypothèses, évaluations, Comparer, Se projeter et Simuler). Justifications et pièces restent accessibles près des chiffres. Les simulations personnelles ne changent pas la référence.
+L’application s’ouvre sur la **Vue d’ensemble** du Framework. Le parcours sponsor relie ambition, entrants, conditions de réalisation et jalons de décision sur dix ans. Le menu distingue **Données d’entrée** (Repères Synvance et pièces originales), **Framework d’évaluation** (concepts, critères, méthodes et formules), **Capacité de réalisation** (organisation, points chauds et preuves à réunir) et **Dossier économique** (analyses, hypothèses, résultats et simulations). Les références eXalt encore absentes sont signalées comme telles. Les simulations personnelles ne changent pas la référence.
 
 | Besoin | Référence |
 |---|---|

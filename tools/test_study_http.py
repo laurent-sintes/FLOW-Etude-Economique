@@ -73,9 +73,13 @@ class ApiTests(unittest.TestCase):
         self.assertIsNone(h.get('Content-Encoding'));self.assertEqual(refused,light)
         self.assertLess(len(packed),len(light)/2)
         small=json.loads(light);full=json.loads(get('/api/bootstrap')[0])
-        self.assertEqual(set(small['content']),{'complexity','framework','market_method','core_evaluation'})
+        self.assertEqual(set(small['content']),{'complexity','framework','market_method','core_evaluation','synvance_reference','delivery_method','delivery_readiness'})
         self.assertEqual(len(small['content']['complexity']['rows']),88)
         self.assertEqual(len(small['content']['core_evaluation']),5)
+        for key in ('delivery_method','delivery_readiness'):
+            self.assertEqual(small['content'][key],full['content'][key])
+        self.assertEqual([row['capability_id'] for row in small['content']['delivery_readiness']['scope']['rows']],
+                         [row['capacite_id'] for row in small['content']['complexity']['rows']])
         for key in small:
             if key!='content':self.assertEqual(small[key],full[key])
         self.assertLess(len(light),len(get('/api/bootstrap')[0])/10)

@@ -3,6 +3,7 @@ import {useStudy,useFormat,request,type Data} from './context';
 import {Drawer,SourceLink} from './components';
 import {MethodText} from './MethodDocument';
 import {MarketSourceLink,MarketSourceList} from './MarketSources';
+import {isModelDataReference} from './documentVisibility';
 
 export function MarketReferenceDrawer({view,onClose}:{view:'projects'|'services';onClose:()=>void}){
  const {data}=useStudy(),{money,n}=useFormat(),T=data.ui.essential.market_study.references;
@@ -21,8 +22,11 @@ export function MarketReferenceDrawer({view,onClose}:{view:'projects'|'services'
   return `${number(low)}${typeof high==='number'&&high!==low?' – '+number(high):''} ${unit}`;
  };
  const evidence=(row:Data)=>{
-  const localized=new Set(row.proofs.map((proof:Data)=>proof.source));
-  return <div className="market-reference-sources">{row.proofs.map((proof:Data,index:number)=><p key={`${proof.source}-${index}`}><MarketSourceLink path={proof.source} label={T.source}>{proof.localisation}</MarketSourceLink></p>)}<MarketSourceList paths={row.sources.filter((source:string)=>!localized.has(source))} label={T.source}/><SourceLink path={row.source_ref}>{T.registry}</SourceLink></div>;
+  const proofs=row.proofs.filter((proof:Data)=>!isModelDataReference(proof.source));
+  const localized=new Set(proofs.map((proof:Data)=>proof.source));
+  const sources=row.sources.filter((source:string)=>!localized.has(source)&&!isModelDataReference(source));
+  if(!proofs.length&&!sources.length&&isModelDataReference(row.source_ref))return null;
+  return <div className="market-reference-sources">{proofs.map((proof:Data,index:number)=><p key={`${proof.source}-${index}`}><MarketSourceLink path={proof.source} label={T.source}>{proof.localisation}</MarketSourceLink></p>)}<MarketSourceList paths={sources} label={T.source}/><SourceLink path={row.source_ref}>{T.registry}</SourceLink></div>;
  };
  return <Drawer title={view==='projects'?T.project_drawer_title:T.services_drawer_title} onClose={onClose} wide>
   <div className="market-reference-reading">

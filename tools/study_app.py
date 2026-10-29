@@ -29,6 +29,8 @@ from framework_vision import hydrate_framework_vision
 from framework_parameters import hydrate_framework_parameters
 from application_framework import hydrate_application_framework
 from economic_reading import build_economic_evaluations
+from synvance_reference import build_synvance_reference
+from delivery_readiness import build_delivery_readiness
 
 
 class ScenarioError(ValueError):
@@ -229,6 +231,9 @@ class Study:
         content['framework'] = self._framework_content(stacks,content['calibration'])
         content['core_qualification'] = dict(document=validate_core_qualification(), summary=summarize_core_qualification())
         content['economic_evaluations'] = build_economic_evaluations(self.baseline, content, self.glossary, self.document_path)
+        content['synvance_reference'] = build_synvance_reference(content['guide'], self.glossary, self.document_path)
+        content['delivery_method'], content['delivery_readiness'] = build_delivery_readiness(
+            content['complexity'], self.glossary, self.document_path)
         return content
 
     def _framework_content(self, stacks, calibration):
@@ -545,6 +550,9 @@ class Study:
     def bootstrap(self, compact=False, essential=False):
         content={'complexity':self._essential_complexity(),'framework':self.content['framework'],
                  'market_method':self._essential_market_method(),
+                 'synvance_reference':self.content['synvance_reference'],
+                 'delivery_method':self.content['delivery_method'],
+                 'delivery_readiness':self.content['delivery_readiness'],
                  'core_evaluation':self._essential_core_evaluation()} if essential else pack_content(self.content) if compact else self.content
         return dict(ui=self.ui,glossary=self.glossary,baseline=self.baseline,content=content,
                     edition=self.edition,

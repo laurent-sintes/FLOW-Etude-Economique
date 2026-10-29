@@ -2,6 +2,7 @@ import type {ReactNode} from 'react';
 import {Bot} from 'lucide-react';
 import Markdown from 'react-markdown';
 import {useStudy,type Data} from './context';
+import {isModelDataReference} from './documentVisibility';
 import './coreEvaluation.css';
 
 export function MethodText({children}:{children:string}){
@@ -45,7 +46,10 @@ function MethodContent({block,examples,format,prefix}:{block:MethodBlock;example
   case 'table':return <div className="core-method-table-scroll" tabIndex={0} role="region" aria-label={block.caption}><table className="core-method-table"><caption>{block.caption}</caption><thead><tr>{block.columns.map(column=><th key={column} scope="col">{column}</th>)}</tr></thead><tbody>{block.rows.map((row,index)=><tr key={index}>{row.map((cell,column)=>column===0?<th key={column} scope="row"><MethodText>{cell}</MethodText></th>:<td key={column}><MethodText>{cell}</MethodText></td>)}</tr>)}</tbody></table></div>;
   case 'callout':return <aside className="core-method-callout"><h3>{block.title}</h3><p><MethodText>{block.text}</MethodText></p></aside>;
   case 'formula':return <p className="core-method-formula">{block.text}</p>;
-  case 'links':return <ul className="core-method-bullets">{block.items.map(link=><li key={link.href}><a className="text-button" href={link.href}>{link.label} <span aria-hidden="true">→</span></a></li>)}</ul>;
+  case 'links':{
+   const links=block.items.filter(link=>!isModelDataReference(link.href));
+   return links.length?<ul className="core-method-bullets">{links.map(link=><li key={link.href}><a className="text-button" href={link.href}>{link.label} <span aria-hidden="true">→</span></a></li>)}</ul>:null;
+  }
   case 'example':{
    const example=examples.find(item=>item.id===block.ref);
    if(!example)throw new Error('ERR_METHOD_EXAMPLE');

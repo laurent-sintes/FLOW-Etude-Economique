@@ -19,16 +19,24 @@ def _object(properties):
 TEXT = dict(type='string', minLength=1, pattern=r'\S')
 IDENTIFIER = dict(type='string', pattern='^[a-z][a-z0-9-]*$')
 TITLE_TEXT = _object(dict(title=TEXT, text=TEXT))
+PARAGRAPHS = dict(type='array', minItems=1, items=TEXT)
+MATRIX_ROW = _object(dict(id=IDENTIFIER, title=TEXT, make=PARAGRAPHS, buy=PARAGRAPHS))
+READING_LINK = _object(dict(href=TEXT, label=TEXT))
+PROOF_LEVEL = _object(dict(id=IDENTIFIER, title=TEXT, text=TEXT, href=TEXT, label=TEXT))
 SCHEMA = _object(dict(
     version=dict(const=1), id=dict(const='framework-vision'),
     opening=TITLE_TEXT,
     adaptation=_object(dict(title=TEXT, text=TEXT, href=dict(const='#leviers'), label=TEXT)),
     approach=_object(dict(title=TEXT, steps=dict(type='array', minItems=1,
-        items=_object(dict(id=IDENTIFIER, title=TEXT, text=TEXT))))),
+        items=_object(dict(id=IDENTIFIER, title=TEXT, text=TEXT))),
+        matrix=_object(dict(caption=TEXT, activity_label=TEXT, make_label=TEXT, buy_label=TEXT,
+            rows=dict(type='array', minItems=2, maxItems=2, items=MATRIX_ROW), notes=PARAGRAPHS)))),
     evidence=_object(dict(title=TEXT, items=dict(type='array', minItems=1,
         items=_object(dict(id=IDENTIFIER, title=TEXT, text=TEXT, href=TEXT, label=TEXT))))),
     dimensions=_object(dict(title=TEXT, items=dict(type='array', minItems=1, items=TITLE_TEXT))),
-    confidence=_object(dict(title=TEXT, text=TEXT, limits_title=TEXT,
+    confidence=_object(dict(title=TEXT, text=TEXT,
+        levels=dict(type='array', minItems=4, maxItems=4, items=PROOF_LEVEL),
+        links=dict(type='array', minItems=1, items=READING_LINK), limits_title=TEXT,
         limits=dict(type='array', minItems=1, items=TEXT))),
     next=_object(dict(href=dict(const='#modele'), label=TEXT)),
 ))
@@ -41,20 +49,28 @@ def compile_vision(document, glossary, routes, documents):
         error = errors[0]
         raise ValueError(f'{ERROR}:{SOURCE}:{list(error.path)}:{error.message}')
 
-    if [step['id'] for step in document['approach']['steps']] != ['besoin', 'make', 'buy', 'investissement']:
-        raise ValueError(f'{ERROR}:{SOURCE}:approach.steps:expected need, Make/Buy and investment reading order')
+    if [step['id'] for step in document['approach']['steps']] != ['besoin', 'investissement']:
+        raise ValueError(f'{ERROR}:{SOURCE}:approach.steps:expected need and investment reading order')
+
+    if [row['id'] for row in document['approach']['matrix']['rows']] != ['build', 'run']:
+        raise ValueError(f'{ERROR}:{SOURCE}:approach.matrix:expected Build and Run reading order')
+
+    if [level['id'] for level in document['confidence']['levels']] != ['method', 'application', 'review', 'delivery']:
+        raise ValueError(f'{ERROR}:{SOURCE}:confidence.levels:expected method, application, review and delivery order')
 
     for rows, key, location in ((document['approach']['steps'], 'id', 'approach.steps'),
                                 (document['evidence']['items'], 'id', 'evidence.items'),
                                 (document['evidence']['items'], 'href', 'evidence.items'),
-                                (document['dimensions']['items'], 'title', 'dimensions.items')):
+                                (document['dimensions']['items'], 'title', 'dimensions.items'),
+                                (document['confidence']['links'], 'href', 'confidence.links')):
         values = [row[key] for row in rows]
         if len(values) != len(set(values)):
             raise ValueError(f'{ERROR}:{SOURCE}:{location}:duplicate {key}')
 
     allowed = {'#' + route for route in routes} | {
         path for path in documents if path.startswith(('source/', 'sources/'))}
-    for link in [document['adaptation'], *document['evidence']['items'], document['next']]:
+    for link in [document['adaptation'], *document['evidence']['items'],
+                 *document['confidence']['levels'], *document['confidence']['links'], document['next']]:
         if link['href'] not in allowed:
             raise ValueError(f'{ERROR}:{SOURCE}:unknown reading link:{link["href"]}')
 

@@ -1,5 +1,6 @@
 import type {ReactNode} from 'react';
 import {SourceLink} from './components';
+import {isModelDataReference} from './documentVisibility';
 
 // A URL or filename identifies the source; it does not establish its evidence type.
 export function marketSourceName(path:string):string{
@@ -17,5 +18,6 @@ export function MarketSourceLink({path,label,children}:{path:string;label:string
 }
 
 export function MarketSourceList({paths,label}:{paths:string[];label:string}){
- return <div className="essential-market-proofs">{paths.map(path=><MarketSourceLink key={path} path={path} label={label}/>)}</div>;
+ const visible=paths.filter(path=>!isModelDataReference(path));
+ return visible.length?<div className="essential-market-proofs">{visible.map(path=><MarketSourceLink key={path} path={path} label={label}/>)}</div>:null;
 }

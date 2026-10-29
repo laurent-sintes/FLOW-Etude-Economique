@@ -3,6 +3,7 @@ import {createContext,useContext,useEffect,useState,type ReactNode} from 'react'
 import {Info,Hammer,ShoppingCart,type LucideIcon} from 'lucide-react';
 import {useStudy,useFormat,request,type Data,type Option,type Projection} from './context';
 import {fileHref} from './transport';
+import {isModelDataReference} from './documentVisibility';
 import {Drawer,SourceLink} from './components';
 import {MethodText} from './MethodDocument';
 import {MarketSourceLink,MarketSourceList} from './MarketSources';
@@ -17,7 +18,7 @@ export function EvidenceProvider({open,children}:{open:(proof:Proof)=>void;child
 export function ProofDialog({proof,onClose}:{proof:Proof;onClose:()=>void}){
  const {data}=useStudy();const E=data.ui.essential;const [expanded,setExpanded]=useState(false),[excerpt,setExcerpt]=useState<Data|null>(null),[error,setError]=useState(false);
  useEffect(()=>{setExpanded(false);setExcerpt(null);setError(false);},[proof]);
- const source=proof.source,local=Boolean(source&&/\.(yaml|md|py)#/.test(source));
+ const source=proof.source&&!isModelDataReference(proof.source)?proof.source:undefined,local=Boolean(source&&/\.(yaml|md|py)#/.test(source));
  const show=()=>{setExpanded(true);if(!local||!source)return;request<Data>('/api/document?path='+encodeURIComponent(source)).then(setExcerpt).catch(()=>setError(true));};
  const full=source?fileHref(source):'';
  return <Drawer title={proof.title} onClose={onClose}>

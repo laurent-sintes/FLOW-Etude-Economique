@@ -3,6 +3,7 @@ import {MarketProductDrawer} from './EssentialViews';
 import {useStudy,type Data} from './context';
 import {MethodText} from './MethodDocument';
 import {SourceLink} from './components';
+import {isModelDataReference} from './documentVisibility';
 import {MarketReferenceDrawer} from './MarketReferenceDrawer';
 import './marketMethod.css';
 
@@ -16,9 +17,10 @@ function StudySection({id,title,children}:{id:string;title:string;children:React
 
 function ApplicationNote({section}:{section:Data|undefined}){
  if(!section)return null;
+ const links=(section.links||[]).filter((link:Data)=>!isModelDataReference(link.href));
  return <aside className="core-method-notice market-study-application-note">
   <h3>{section.title}</h3>{section.paragraphs.map((text:string,index:number)=><p key={index}><MethodText>{text}</MethodText></p>)}
-  {section.links?.length>0&&<ul>{section.links.map((link:Data)=><li key={link.href}>{link.href.startsWith('#')?<a className="text-button" href={link.href}>{link.label}</a>:<SourceLink path={link.href}>{link.label}</SourceLink>}</li>)}</ul>}
+  {links.length>0&&<ul>{links.map((link:Data)=><li key={link.href}>{link.href.startsWith('#')?<a className="text-button" href={link.href}>{link.label}</a>:<SourceLink path={link.href}>{link.label}</SourceLink>}</li>)}</ul>}
  </aside>;
 }
 

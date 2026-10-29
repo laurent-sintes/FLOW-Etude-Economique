@@ -6,10 +6,13 @@ import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {request,useStudy,type Data} from './context';
 import {fileHref} from './transport';
+import {isModelDataReference} from './documentVisibility';
 
 export function SourceLink({path,children}:{path:string;children?:ReactNode}){
  const {data,openDoc}=useStudy(),route=data.ui.document_routes?.[path.split('#')[0]];
- if(route)return <a className="source-link" href={route}>{children||data.ui.labels.source}<ArrowUpRight size={13}/></a>;
+ if(isModelDataReference(path))return null;
+ const destination=path.startsWith('#')?path:route;
+ if(destination)return <a className="source-link" href={destination}>{children||data.ui.labels.source}<ArrowUpRight size={13}/></a>;
  const outside=/^https?:\/\//.test(path),isDoc=/\.(md|yaml|py)(#.*)?$/.test(path);
  if(outside||!isDoc){const href=outside?path:fileHref(path);if(href)return <a className="source-link" href={href} target="_blank" rel="noreferrer">{children||data.ui.labels.source}<ArrowUpRight size={13}/></a>;}
  return <button className="source-link" onClick={()=>openDoc(path)}>{children||data.ui.labels.source}<ArrowUpRight size={13}/></button>;
@@ -23,13 +26,16 @@ export function Drawer({title,onClose,children,wide=false}:{title:string;onClose
 export function DocumentViewer({path,onClose}:{path:string;onClose:()=>void}){
  const {data}=useStudy(),F=data.ui.document_focus;
  const [doc,setDoc]=useState<Data|null>(null),[error,setError]=useState(''),[fullPath,setFullPath]=useState('');
- const sourcePath=path.split('#')[0],isFull=fullPath===path,requestedPath=isFull?sourcePath:path,download=fileHref(sourcePath);
+ const hidden=isModelDataReference(path),sourcePath=path.split('#')[0],isFull=fullPath===path,requestedPath=isFull?sourcePath:path,download=hidden?null:fileHref(sourcePath);
  const hasFragment=Boolean(path.split('#').slice(1).join('#'));
+ useEffect(()=>{if(hidden)onClose();},[hidden,onClose]);
  useEffect(()=>{
+  if(hidden)return;
   let current=true;setDoc(null);setError('');
   request<Data>('/api/document?path='+encodeURIComponent(requestedPath)).then(d=>{if(current)setDoc(d);}).catch(e=>{if(current)setError(data.ui.errors[e.code]||data.ui.errors.missing_document);});
   return()=>{current=false;};
- },[requestedPath,data.ui.errors]);
+ },[requestedPath,data.ui.errors,hidden]);
+ if(hidden)return null;
  const title=data.ui.documents.find((d:Data)=>d.path===sourcePath)?.title||sourcePath.split('/').pop();
  return <Drawer title={title} onClose={onClose} wide>
   <div className="document-meta"><FileText size={16}/><span>{sourcePath}</span>{download&&<a className="source-link" href={download} download>{data.ui.labels.download}<ArrowUpRight size={13}/></a>}</div>
@@ -42,7 +48,7 @@ export function DocumentViewer({path,onClose}:{path:string;onClose:()=>void}){
    if(!href)return <span>{children}</span>;
    const relative=new URL(href,'http://reference/'+doc.path);
    const target=/^https?:/.test(href)?href:decodeURIComponent(relative.pathname.slice(1))+relative.hash;
-   return <SourceLink path={target}>{children}</SourceLink>;
+   return isModelDataReference(target)?<span>{children}</span>:<SourceLink path={target}>{children}</SourceLink>;
   }}}>{doc.content}</Markdown></article>:<pre className="document-code">{doc.content}</pre>)}
  </Drawer>;
 }

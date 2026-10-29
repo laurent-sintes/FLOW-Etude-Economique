@@ -3,6 +3,7 @@ import {useStudy,useFormat,type Data} from './context';
 import {CostActivityTags} from './ArchitectureLayers';
 import {MethodText} from './MethodDocument';
 import {SourceLink} from './components';
+import {isModelDataReference} from './documentVisibility';
 import './framework.css';
 
 const sectionId=(id:string)=>'framework-section-'+id;
@@ -42,7 +43,8 @@ function ParameterUsage({personal,status}:{personal?:Data;status?:string}){
 }
 
 function ProofLinks({items}:{items:Data[]}){
- const unique=[...new Map<string,Data>(items.map(item=>[item.path,item])).values()];
+ const unique=[...new Map<string,Data>(items.filter(item=>!isModelDataReference(item.path)).map(item=>[item.path,item])).values()];
+ if(!unique.length)return null;
  return <ul className="framework-proof-links">{unique.map(item=><li key={item.path}><SourceLink path={item.path}>{item.title}</SourceLink></li>)}</ul>;
 }
 
@@ -137,7 +139,7 @@ export function FrameworkPage(){
        })}
       </tr>)}
      </tbody></ParameterTable>
-     <div className="framework-reading-sources"><h3>{T.annual_gains_sources}</h3><ProofLinks items={F.sources.annual_gains.map((row:Data)=>({path:row.path,title:F.tariffs.find((option:Data)=>option.key===row.key).name}))}/></div>
+     {F.sources.annual_gains.some((row:Data)=>!isModelDataReference(row.path))&&<div className="framework-reading-sources"><h3>{T.annual_gains_sources}</h3><ProofLinks items={F.sources.annual_gains.map((row:Data)=>({path:row.path,title:F.tariffs.find((option:Data)=>option.key===row.key).name}))}/></div>}
     </div>
    </ParameterSection>
 
@@ -183,7 +185,7 @@ export function FrameworkPage(){
      <div className="framework-factors"><h4>{T.specialist_factors_title}</h4><dl>{Object.entries(specialist.factors_jh).map(([key,value])=><div key={key}><dt>{T.specialist_scenarios[key]}</dt><dd>× {n(value as number,2)}</dd></div>)}</dl></div>
      <Formulas items={[T.specialist_formula]}/>
      <p><MethodText>{T.specialist_factor_note}</MethodText></p>
-     <div className="framework-reading-sources"><SourceLink path={specialist.source}>{T.specialist_method}</SourceLink><SourceLink path={specialist.sensitivity_source}>{T.specialist_sensitivity}</SourceLink></div>
+     {[specialist.source,specialist.sensitivity_source].some(path=>!isModelDataReference(path))&&<div className="framework-reading-sources"><SourceLink path={specialist.source}>{T.specialist_method}</SourceLink><SourceLink path={specialist.sensitivity_source}>{T.specialist_sensitivity}</SourceLink></div>}
     </div>
    </ParameterSection>
 
@@ -195,7 +197,7 @@ export function FrameworkPage(){
      <th scope="row">{row.label}</th><td className="framework-price">{percent(row.key==='deployment_pct'?F.pilotage.deployment_pct:F.pilotage.rates[row.key])}</td><td><MethodText>{row.base}</MethodText></td>
     </tr>)}</tbody></ParameterTable>
     <ApplicationHypothesis id="coordination"/>
-    <div className="framework-reading-sources"><SourceLink path={F.sources.coordination}>{T.coordination_source}</SourceLink><SourceLink path={F.sources.deployment}>{T.deployment_source}</SourceLink></div>
+    {[F.sources.coordination,F.sources.deployment].some(path=>!isModelDataReference(path))&&<div className="framework-reading-sources"><SourceLink path={F.sources.coordination}>{T.coordination_source}</SourceLink><SourceLink path={F.sources.deployment}>{T.deployment_source}</SourceLink></div>}
     <div className="framework-programme">
      <h3>{T.pilotage_programme_title}</h3>
      <Formulas items={T.programme_formulas}/>

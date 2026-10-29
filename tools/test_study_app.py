@@ -313,10 +313,10 @@ class StudyTests(unittest.TestCase):
     def test_essential_reader_groups_framework_before_economic_pages(self):
         from document_excerpt import document_excerpt
         essential=self.study.ui['essential']
-        self.assertEqual([item['id'] for item in essential['nav']],['vision','modele','marche','complexite','calcul-net','calcul-run','leviers','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler'])
-        self.assertEqual(set(essential['pages']),{'vision','modele','complexite','calcul-net','calcul-run','marche','leviers','etude-marche','parametres','comparer','evaluation-core','se-projeter','simuler'})
+        self.assertEqual([item['id'] for item in essential['nav']],['synvance','perimetre-retenu','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler'])
+        self.assertEqual(set(essential['pages']),{'synvance','synvance-microsoft','synvance-sap','perimetre-retenu','vision','modele','conditions-realisation','complexite','calcul-net','calcul-run','marche','leviers','capacite-realisation','etude-marche','parametres','comparer','evaluation-core','se-projeter','simuler'})
         self.assertEqual([group['items'] for group in essential['nav_groups']],
-                         [['vision','modele','marche','complexite','calcul-net','calcul-run','leviers'],['etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler']])
+                         [['synvance','perimetre-retenu'],['vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers'],['capacite-realisation'],['etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler']])
         self.assertEqual([phase['key'] for phase in essential['structure']['phases']],['obtention','integration','services'])
         for concept in essential['concepts']:
             self.assertIn(concept['notion'],self.study.glossary['notions'])

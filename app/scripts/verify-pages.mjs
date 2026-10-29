@@ -1,6 +1,7 @@
 /** Browser validation against a current Python oracle; no historical amounts in CI. */
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {performance} from 'node:perf_hooks';
 import {chromium} from 'playwright';
@@ -20,7 +21,9 @@ const output=path.resolve(flags.get('--output')||'tmp/pages-validation-report.js
 await fs.mkdir(path.dirname(output),{recursive:true});
 const oracle=JSON.parse((await fs.readFile(casesPath,'utf8')).replace(/^\uFEFF/,''));
 assert.equal(Object.keys(oracle.cases).length,6,'Six current model scenarios are required.');
-const routes=['vision','modele','marche','complexite','calcul-net','calcul-run','leviers','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler'];
+const navRoutes=['synvance','perimetre-retenu','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler'];
+const synvanceProviders=['microsoft','sap'];
+const routes=[navRoutes[0],...synvanceProviders.map(provider=>'synvance-'+provider),...navRoutes.slice(1)];
 const report={url:site.href,status:'running',routes:{},worker:{},proofs:{},storage:{},errors:[],warnings:[]};
 const started=performance.now();
 const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE}:{})});
@@ -59,8 +62,10 @@ function watch(target){
 }
 async function route(id){
  await page.evaluate(value=>{location.hash='#'+value;},id);
- await page.locator(`.essential-nav-group a[href="#${id}"][aria-current="page"]`).waitFor({state:'attached'});
+ const navigationId=id.startsWith('synvance-')?'synvance':id;
+ await page.locator(`.essential-nav-group a[href="#${navigationId}"][aria-current="page"]`).waitFor({state:'attached'});
  await page.locator('main .essential-page:visible').first().waitFor();
+ if(navigationId==='synvance')await page.locator(`[data-synvance-page="${id==='synvance'?'overview':id.slice('synvance-'.length)}"]`).waitFor();
  if(id==='evaluation-core')await page.locator('[data-evaluation="annual"]').waitFor();
 }
 async function checkFrameworkNavigation(){
@@ -106,7 +111,7 @@ async function workerRequest(manifest,manifestUrl,requestPath,body){
 }
 try{
  page=await context.newPage();watch(page);page.setDefaultTimeout(30000);
- await page.goto(site.href+'#vision');
+ await page.goto(site.href);
  await page.locator('.app-shell').waitFor();
  const manifestUrl=await page.evaluate(()=>new URL(JSON.parse(document.getElementById('app-config').textContent).static_site.manifest,document.baseURI).href);
  const manifestResponse=await page.request.get(manifestUrl);assert.ok(manifestResponse.ok());
@@ -116,7 +121,12 @@ try{
  const bootstrapResponse=await page.request.get(bootstrapUrl);assert.ok(bootstrapResponse.ok());
  const data=await bootstrapResponse.json();
  equalProjection(data.baseline,oracle.cases.reference.result,'The static reference differs from the Python reference.');
- assert.deepEqual(data.ui.essential.nav.map(item=>item.id),routes);
+ assert.deepEqual(data.ui.essential.nav.map(item=>item.id),navRoutes);
+ assert.equal(navRoutes.length,17);assert.equal(routes.length,19);
+ await page.waitForFunction(()=>location.hash==='#vision');
+ assert.equal(await page.locator('.brand-home').getAttribute('href'),'#vision','The home link must open the Vision.');
+ await route('modele');await page.locator('.brand-home').click();await route('vision');
+ assert.equal(await page.locator('.framework-vision').count(),1,'The logo must return to the Vision.');
  for(const width of [1440,390]){
   await page.setViewportSize({width,height:width===390?844:1000});
   report.routes[width]=[];
@@ -126,6 +136,8 @@ try{
    assert.ok(state.text.length>40,`Empty route: ${id}`);
    assert.doesNotMatch(state.text,/\{\{(?:notion|vue)\.|\bundefined\b|\bNaN\b/,`Unresolved content: ${id}`);
    assert.ok(state.overflow<=1,`Viewport overflow on ${width}/${id}: ${state.overflow}`);
+   assert.equal(await page.locator('main a[href]').evaluateAll(links=>links.filter(link=>/\.ya?ml(?:[?#]|$)/i.test(decodeURIComponent(link.getAttribute('href')||''))).length),0,`Model data link on ${id}`);
+   assert.equal(await page.locator('main details:visible').count(),0,`Disclosure on ${id}`);
    report.routes[width].push(id);
   }
  }
@@ -136,17 +148,25 @@ try{
  for(const asset of assets){assert.ok(asset.loaded,`Image did not load: ${asset.src}`);assert.ok(new URL(asset.src).pathname.startsWith(site.pathname),'Asset escaped the project base.');}
  report.assets=assets.length;
 
- // Open an actual source link: it initializes the application's real Python worker.
+ // Model YAML is hidden; a readable market note still initializes the real Python worker.
  await route('evaluation-core');
- const sourceButton=page.getByRole('button',{name:data.ui.essential.core_results.source,exact:true});
+ assert.equal(await page.getByRole('button',{name:data.ui.essential.core_results.source,exact:true}).count(),0);
+ assert.equal(await page.locator('.document-code:visible').count(),0);
+ report.proofs.yamlHidden=true;
+ await route('etude-marche');
+ const marketNote=data.ui.essential.application_framework.market.sections.find(section=>section.id==='evidence_status').links[0];
+ const sourceButton=page.getByRole('button',{name:marketNote.label,exact:true});
  await sourceButton.click();
- await page.locator('dialog[open] .document-code').waitFor({timeout:180000});
- const sourceText=await page.locator('dialog[open] .document-code').innerText();assert.ok(sourceText.length>100);
+ await page.locator('dialog[open] .markdown').waitFor({timeout:180000});
+ assert.ok((await page.locator('dialog[open] .markdown').innerText()).length>100);
+ assert.equal(await page.locator('dialog[open] a[href]').evaluateAll(links=>links.filter(link=>/\.ya?ml(?:[?#]|$)/i.test(decodeURIComponent(link.getAttribute('href')||''))).length),0);
+ const documentTitle=data.ui.documents.find(document=>document.path===marketNote.href)?.title;assert.ok(documentTitle);
+ await page.getByRole('dialog',{name:documentTitle,exact:true}).waitFor();report.accessibility.documentDialogNamed=true;
  const sourceDownload=await page.locator('dialog[open] .document-meta a').getAttribute('href');
  assert.ok(new URL(sourceDownload,page.url()).pathname.startsWith(site.pathname));
- report.proofs.yaml=true;
  await page.locator('dialog[open] header > button.icon-button').focus();await page.keyboard.press('Escape');await page.locator('dialog[open]').waitFor({state:'detached'});
  assert.equal(await sourceButton.evaluate(element=>element===document.activeElement),true,'Document close lost focus.');
+ report.proofs.markdown=true;report.proofs.focus=true;
 
  // Exercise the full engine, not a mock or a projection reconstructed in JavaScript.
  const workerStarted=performance.now();
@@ -162,24 +182,60 @@ try{
  assert.equal(stale.reply.status,422);assert.equal(stale.reply.data.error,'version');
  report.worker={scenarios:Object.keys(oracle.cases),referenceIsolation:true,versionRejection:true,seconds:Math.round(performance.now()-workerStarted)/1000};
 
- await route('etude-marche');
- const offers=data.ui.essential.market_study.offers.sources.find(source=>source.path==='source/offres-synvance.md');assert.ok(offers);
- await page.getByRole('button',{name:offers.label,exact:true}).click();
- await page.locator('dialog[open] .markdown').waitFor({timeout:180000});
- const documentTitle=data.ui.documents.find(document=>document.path==='source/offres-synvance.md')?.title;assert.ok(documentTitle);
- await page.getByRole('dialog',{name:documentTitle,exact:true}).waitFor();report.accessibility.documentDialogNamed=true;
- const pdf=page.locator('dialog[open] a').filter({hasText:/PDF/i}).first();
- let pdfLink=pdf;
- if(!await pdf.count())pdfLink=page.locator('dialog[open] a[href*=".pdf"]').first();
- await pdfLink.waitFor();
- const pdfUrl=new URL(await pdfLink.getAttribute('href'),page.url()).href;
- assert.ok(new URL(pdfUrl).pathname.startsWith(site.pathname),'PDF escaped project path.');
- const pdfResponse=await page.request.get(pdfUrl);assert.ok(pdfResponse.ok());
- assert.equal((await pdfResponse.body()).subarray(0,5).toString(),'%PDF-');
- const popupPromise=context.waitForEvent('page');await pdfLink.click();const popup=await popupPromise;
- await popup.waitForLoadState('domcontentloaded',{timeout:10000}).catch(()=>{});await popup.close();
- await page.locator('dialog[open] header > button.icon-button').focus();await page.keyboard.press('Escape');await page.locator('dialog[open]').waitFor({state:'detached'});
- report.proofs.markdown=true;report.proofs.pdf=true;report.proofs.focus=true;
+ await route('vision');
+ assert.equal(await page.locator('.vision-matrix tbody tr').count(),2);
+ assert.equal(await page.locator('.vision-matrix tbody td').count(),4);
+ assert.equal(await page.locator('.vision-proof-levels>li').count(),4,'The Vision should distinguish four levels of evidence.');
+ await page.locator('.vision-confidence-links a[href="#conditions-realisation"]').click();await route('conditions-realisation');
+ assert.equal(await page.locator('.delivery-conditions-page').count(),1);
+ await route('capacite-realisation');assert.equal(await page.locator('.delivery-readiness-page').count(),1);
+ await page.locator('main a[href="#perimetre-retenu"]').first().click();await route('perimetre-retenu');
+ const scope=data.content.delivery_readiness.scope;
+ assert.equal(await page.locator('.delivery-scope-capability').count(),scope.rows.length,'The full retained scope must be accessible.');
+ assert.equal(await page.locator('.delivery-scope-source a').getAttribute('href'),scope.link.href);
+ assert.ok((await page.locator('.delivery-scope-provenance').innerText()).includes(scope.source.version),'The retained cartography must identify its captured version.');
+ const sample=scope.rows[0];await page.locator('#delivery-scope-search').fill(sample.capability_id);
+ assert.equal(await page.locator('.delivery-scope-capability').count(),1,'The scope search must find the exact native capability.');
+ assert.equal(await page.locator('.delivery-scope-axes>div').count(),scope.axes.length);
+ assert.equal(await page.locator('.delivery-scope-capability>.source-link').getAttribute('href'),sample.href);
+ await page.locator('#delivery-scope-search').fill('');
+ await route('modele');assert.equal(await page.locator('.model-map a[href="#perimetre-retenu"]').count(),1);
+ assert.equal(await page.locator('.model-map a').filter({hasText:scope.link.label}).getAttribute('href'),scope.link.href);
+ report.proofs.sponsorJourney={visionLanding:true,evidenceLevels:true,realizationCriteria:true,readinessDossier:true,retainedScope:true,nativeCartography:true};
+ await route('vision');await page.locator('.vision-evidence a[href="#synvance"]').click();await route('synvance');
+ assert.equal(data.ui.essential.nav_groups[0].items[0],'synvance');
+ assert.equal(await page.locator('.synvance-provider').count(),0,'The Synvance overview should remain a short synthesis.');
+ for(const provider of synvanceProviders){
+  const detailRoute='synvance-'+provider;
+  const detailLink=page.locator(`main a[href="#${detailRoute}"]`).first();
+  await detailLink.click();
+  await page.waitForFunction(id=>location.hash==='#'+id,detailRoute);
+  await route(detailRoute);
+  assert.equal(await page.locator('.synvance-provider').count(),1,'Each supplier page must show only its own detail.');
+  assert.equal(await page.locator(`.synvance-provider[data-provider="${provider}"]`).count(),1);
+  assert.equal(await page.locator('.synvance-document').count(),0,'Original document cards belong to the overview.');
+  const back=page.locator('main a[href="#synvance"]').first();await back.click();
+  await page.waitForFunction(()=>location.hash==='#synvance');await route('synvance');
+  assert.equal(await page.locator('.synvance-provider').count(),0);
+ }
+ report.proofs.synvanceSupplierPages=synvanceProviders;
+ const documents=data.content.synvance_reference.documents.items;
+ assert.equal(documents.filter(doc=>doc.format==='pdf').length,5);
+ assert.equal(documents.filter(doc=>doc.format==='xlsx').length,2);
+ assert.equal(await page.locator('.synvance-document').count(),documents.length);
+ for(let index=0;index<documents.length;index++){
+  const doc=documents[index],card=page.locator('.synvance-document').nth(index);
+  const link=card.locator('a[download]');await link.waitFor();
+  const url=new URL(await link.getAttribute('href'),page.url()).href;
+  assert.ok(new URL(url).pathname.startsWith(site.pathname),'Original document escaped project path.');
+  const response=await page.request.get(url);assert.ok(response.ok());const bytes=await response.body();
+  assert.equal(createHash('sha256').update(bytes).digest('hex'),manifest.documents[doc.path.split('#')[0]].sha256,'Original source bytes differ.');
+  if(doc.format==='pdf')assert.equal(bytes.subarray(0,5).toString(),'%PDF-');
+ }
+ const downloadPromise=page.waitForEvent('download');await page.locator('.synvance-document a[download]').first().click();const download=await downloadPromise;
+ assert.ok(download.suggestedFilename().endsWith('.pdf'));assert.equal(await download.failure(),null);
+ report.proofs.pdf=true;report.proofs.originalDocuments=documents.length;report.proofs.pdfDownload=true;
+ report.proofs.synvanceEntry=true;report.proofs.visionMatrix=true;
 
  // Apply an oracle scenario through the visible controls, then save and restore it.
  const caseName=oracle.ui_case||Object.keys(oracle.cases).find(name=>name!=='reference');
@@ -232,7 +288,7 @@ try{
  const reader=await context.newPage();watch(reader);reader.setDefaultTimeout(30000);
  const readerData=structuredClone(data);
  const guideHasMissingLink=!manifest.documents['AGENTS.md'];
- readerData.ui.essential.market_study.offers.sources[0]={...readerData.ui.essential.market_study.offers.sources[0],path:guideHasMissingLink?'source/README.md':'source/__pages_missing_proof__.yaml',label:'Ouvrir le guide de validation'};
+ readerData.ui.essential.market_study.offers.sources[0]={...readerData.ui.essential.market_study.offers.sources[0],path:guideHasMissingLink?'source/README.md':'source/__pages_missing_proof__.md',label:'Ouvrir le guide de validation'};
  await reader.route(bootstrapUrl,request=>request.fulfill({json:readerData}));
  await reader.goto(site.href+'#etude-marche');
  await reader.getByRole('button',{name:'Ouvrir le guide de validation',exact:true}).click();

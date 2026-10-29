@@ -1,10 +1,10 @@
-import {ArrowDown,ArrowRight,ChartNoAxesCombined,FileCheck2,Hammer,ListTree,ShoppingCart} from 'lucide-react';
+import {ArrowDown,ArrowRight,ChartNoAxesCombined,FileCheck2,ListTree} from 'lucide-react';
 import {useStudy,type Data} from './context';
 import {SourceLink} from './components';
 import {MethodText} from './MethodDocument';
 import './frameworkVision.css';
 
-const stepIcons={besoin:ListTree,make:Hammer,buy:ShoppingCart,investissement:ChartNoAxesCombined};
+const stepIcons={besoin:ListTree,investissement:ChartNoAxesCombined};
 function VisionStep({step}:{step:Data}){
  const Icon=stepIcons[step.id as keyof typeof stepIcons];
  return <article className={`vision-step vision-step-${step.id}`}>
@@ -15,7 +15,7 @@ function VisionStep({step}:{step:Data}){
 
 export function FrameworkVisionPage(){
  const {data}=useStudy(),V=data.ui.essential.framework_vision;
- const [need,make,buy,investment]=V.approach.steps;
+ const [need,investment]=V.approach.steps,M=V.approach.matrix;
  return <div className="essential-page framework-vision">
   <section className="vision-opening" aria-labelledby="vision-opening-title">
    <h2 id="vision-opening-title">{V.opening.title}</h2>
@@ -31,7 +31,16 @@ export function FrameworkVisionPage(){
    <div className="vision-path">
     <VisionStep step={need}/>
     <div className="vision-path-connector" aria-hidden="true"><ArrowDown size={21}/></div>
-    <div className="vision-choices"><VisionStep step={make}/><VisionStep step={buy}/></div>
+    <div className="vision-matrix-scroll" tabIndex={0} role="region" aria-labelledby="vision-matrix-caption">
+     <table className="vision-matrix"><caption id="vision-matrix-caption">{M.caption}</caption>
+      <thead><tr><th scope="col">{M.activity_label}</th><th scope="col">{M.make_label}</th><th scope="col">{M.buy_label}</th></tr></thead>
+      <tbody>{M.rows.map((row:Data)=><tr key={row.id}>
+       <th scope="row">{row.title}</th>
+       {[row.make,row.buy].map((paragraphs:string[],index:number)=><td key={index}>{paragraphs.map((text:string,paragraph:number)=><p key={paragraph}><MethodText>{text}</MethodText></p>)}</td>)}
+      </tr>)}</tbody>
+     </table>
+    </div>
+    <div className="vision-matrix-notes">{M.notes.map((text:string,index:number)=><p key={index}><MethodText>{text}</MethodText></p>)}</div>
     <div className="vision-path-connector" aria-hidden="true"><ArrowDown size={21}/></div>
     <VisionStep step={investment}/>
    </div>
@@ -55,6 +64,11 @@ export function FrameworkVisionPage(){
   <section className="vision-section vision-confidence" aria-labelledby="vision-confidence-title">
    <h2 id="vision-confidence-title">{V.confidence.title}</h2>
    <p><MethodText>{V.confidence.text}</MethodText></p>
+   <ol className="vision-proof-levels">{V.confidence.levels.map((level:Data)=><li key={level.id} data-proof-level={level.id}>
+    <h3>{level.title}</h3><p><MethodText>{level.text}</MethodText></p>
+    <a className="text-button" href={level.href}>{level.label}<ArrowRight size={15} aria-hidden="true"/></a>
+   </li>)}</ol>
+   <div className="vision-confidence-links">{V.confidence.links.map((link:Data)=><a className="text-button" href={link.href} key={link.href}>{link.label}<ArrowRight size={17} aria-hidden="true"/></a>)}</div>
    <div className="vision-limits"><h3>{V.confidence.limits_title}</h3>
     <ul>{V.confidence.limits.map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ul>
    </div>

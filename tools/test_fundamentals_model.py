@@ -159,7 +159,7 @@ class FundamentalsTests(unittest.TestCase):
         self.assertEqual(view['model_workload']['stages'], model['estimation']['stages'])
         self.assertIn('#evaluation-core', {item['href'] for item in view['model_workload']['links']})
         self.assertEqual(view['pages']['modele']['intro'], reading['intro'])
-        self.assertNotIn('source/offres-synvance.md', self.ui.get('document_routes', {}))
+        self.assertEqual(self.ui['document_routes']['source/offres-synvance.md'], '#synvance')
         concepts = {item['notion']: item for item in view['concepts']}
         for entity in model['entities']:
             if entity.get('notion') in concepts:
