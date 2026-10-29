@@ -1,0 +1,435 @@
+{
+  "id": "iteration-10-preuves",
+  "date": "2026-10-29",
+  "repositories": {
+    "odoo": {
+      "cache": "tmp/odoo20-audit",
+      "url": "https://github.com/odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946"
+    },
+    "tryton": {
+      "cache": "tmp/tryton-code-audit-2026-10-28",
+      "url": "https://github.com/tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236"
+    },
+    "axelor": {
+      "cache": "tmp/oss-audit-axelor",
+      "url": "https://github.com/axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e"
+    }
+  },
+  "evidence": [
+    {
+      "id": "S10-OD-COUNT",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_quant.py",
+      "ranges": [
+        [
+          1031,
+          1071
+        ]
+      ],
+      "observed": "L’écart d’inventaire génère un mouvement puis l’exécute ; dates et prochaine vérification sont mises à jour.",
+      "delta": "FLOW doit rapprocher un constat avec les mouvements concomitants puis proposer ou appliquer une correction autorisée, sans assimiler toute différence à un fait physique.",
+      "caps": [
+        "BC-013"
+      ],
+      "read_mode": "Lecture statique ciblée, aucun produit exécuté, aucune charge humaine observée",
+      "cache_path": "tmp/odoo20-audit/addons/stock/models/stock_quant.py",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_quant.py#L1031",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+      "read_excerpt": [
+        {
+          "line": 1031,
+          "text": "    def _apply_inventory(self, date=None):"
+        }
+      ]
+    },
+    {
+      "id": "S10-OD-QUANT",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_quant.py",
+      "ranges": [
+        [
+          1073,
+          1140
+        ]
+      ],
+      "observed": "Mise à jour des quantités et réserves par produit, emplacement, lot, colis et propriétaire, avec verrou du quant disponible.",
+      "delta": "Un quant courant et son propriétaire ne démontrent ni registre autonome de propriété ni historique à double date. Conservation, états incomplets et transactions FLOW restent à composer.",
+      "caps": [
+        "BC-009",
+        "BC-010",
+        "BC-011",
+        "BC-015",
+        "BC-018"
+      ],
+      "read_mode": "Lecture statique ciblée, aucun produit exécuté, aucune charge humaine observée",
+      "cache_path": "tmp/odoo20-audit/addons/stock/models/stock_quant.py",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_quant.py#L1073",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+      "read_excerpt": [
+        {
+          "line": 1073,
+          "text": "    def _update_available_quantity(self, product_id, location_id, quantity=False, reserved_quantity=False, lot_id=None, package_id=None, owner_id=None, in_date=None):"
+        }
+      ]
+    },
+    {
+      "id": "S10-TR-COUNT",
+      "product": "tryton",
+      "path": "modules/stock/inventory.py",
+      "ranges": [
+        [
+          129,
+          151
+        ],
+        [
+          183,
+          208
+        ],
+        [
+          536,
+          579
+        ]
+      ],
+      "observed": "Tolérance d’inventaire, unicité des lignes, traitement explicite d’une quantité non renseignée, mouvement d’écart daté et relié au constat.",
+      "delta": "Conserve un comparable solide pour les états et corrections ; le rapprochement de comptages externes tardifs avec événements concurrents reste un contrat FLOW.",
+      "caps": [
+        "BC-013"
+      ],
+      "read_mode": "Lecture statique ciblée, aucun produit exécuté, aucune charge humaine observée",
+      "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/stock/inventory.py",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/inventory.py#L129",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "305d949d7165962450c6915c06692ca9322080d0778fe86be57c0452652f31bb",
+      "read_excerpt": [
+        {
+          "line": 129,
+          "text": "    def check_tolerance(self):"
+        },
+        {
+          "line": 183,
+          "text": "    def confirm(cls, inventories):"
+        },
+        {
+          "line": 536,
+          "text": "    def get_move(self):"
+        }
+      ]
+    },
+    {
+      "id": "S10-TR-CONSIGN",
+      "product": "tryton",
+      "path": "modules/stock_consignment/stock.py",
+      "ranges": [
+        [
+          195,
+          251
+        ],
+        [
+          283,
+          306
+        ]
+      ],
+      "observed": "Consignation fournisseur/client reconnue selon emplacement et partie ; construction de lignes de facture liées au mouvement, transitions de stock spécialisées.",
+      "delta": "Comparable partiel des parties, quantités et déclencheurs. FLOW évalue des conditions d’accord reçues et conserve une preuve de transfert indépendante de la position physique. Aucun moteur générique de clauses ni registre complet de propriété établi par ces tranches.",
+      "caps": [
+        "BC-014",
+        "BC-015",
+        "BC-016"
+      ],
+      "read_mode": "Lecture statique ciblée, aucun produit exécuté, aucune charge humaine observée",
+      "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/stock_consignment/stock.py",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock_consignment/stock.py#L195",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "d185cace6b5dd9fd9d9d80a6e411873a899c45ffbef355ec1f7c96c8c4ef0d9a",
+      "read_excerpt": [
+        {
+          "line": 195,
+          "text": "    def is_supplier_consignment(self):"
+        },
+        {
+          "line": 283,
+          "text": "    def draft(cls, moves):"
+        }
+      ]
+    },
+    {
+      "id": "S10-OD-ACCOUNT",
+      "product": "odoo",
+      "path": "addons/stock_account/models/stock_move.py",
+      "ranges": [
+        [
+          248,
+          294
+        ],
+        [
+          766,
+          783
+        ]
+      ],
+      "observed": "Mouvement terminé, valorisation, sélection des mouvements comptabilisables, écritures liées par société/partenaire ; exclusion de valorisation selon propriétaire.",
+      "delta": "FLOW fournit des faits et leurs corrections à Finance, avec acceptation/rejet, sans produire valorisation ou écritures. Le protocole externe d’accusé et correction reste à construire.",
+      "caps": [
+        "BC-014",
+        "BC-015",
+        "BC-016"
+      ],
+      "read_mode": "Lecture statique ciblée, aucun produit exécuté, aucune charge humaine observée",
+      "cache_path": "tmp/odoo20-audit/addons/stock_account/models/stock_move.py",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock_account/models/stock_move.py#L248",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "d23fa93b8d6b19cf492a4bacdb020a55904c36c5e16d22f1654e5d654cc7f359",
+      "read_excerpt": [
+        {
+          "line": 248,
+          "text": "    def _action_done(self, cancel_backorder=False):"
+        },
+        {
+          "line": 766,
+          "text": "    def _should_create_account_move(self):"
+        }
+      ]
+    },
+    {
+      "id": "S10-AX-COUNT",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java",
+      "ranges": [
+        [
+          113,
+          175
+        ]
+      ],
+      "observed": "Validation transactionnelle de statut, auteur/date, puis génération de mouvements d’entrée/sortie à partir des écarts, traitement paginé des lignes.",
+      "delta": "Comparable Java de contrôles et séparation de services ; dépendances Axelor non transplantables telles quelles dans Spring, fin du traitement non auditée ici.",
+      "caps": [
+        "BC-013"
+      ],
+      "read_mode": "Lecture statique ciblée, aucun produit exécuté, aucune charge humaine observée",
+      "cache_path": "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java#L113",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "2e7a5404cc4a641c89e30cd488bea400a5f136a8b4a193b9efa98f9169d62238",
+      "read_excerpt": [
+        {
+          "line": 113,
+          "text": "  @Override"
+        }
+      ]
+    },
+    {
+      "id": "S10-AX-FEEDBACK",
+      "product": "axelor",
+      "path": "axelor-quality/src/main/java/com/axelor/apps/quality/service/QualityImprovementCreateServiceImpl.java",
+      "ranges": [
+        [
+          56,
+          103
+        ]
+      ],
+      "observed": "Création d’un dossier qualité depuis un contrôle, vérification de valeurs, liens identification/résolution, rattachement de fichiers et société/statut par défaut.",
+      "delta": "FLOW conserve un constat et le transmet au responsable produit ; il ne reprend pas toute la résolution qualité. Routage externe, correction et statut de transmission sont des travaux cibles.",
+      "caps": [
+        "BC-017"
+      ],
+      "read_mode": "Lecture statique ciblée, aucun produit exécuté, aucune charge humaine observée",
+      "cache_path": "tmp/oss-audit-axelor/axelor-quality/src/main/java/com/axelor/apps/quality/service/QualityImprovementCreateServiceImpl.java",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-quality/src/main/java/com/axelor/apps/quality/service/QualityImprovementCreateServiceImpl.java#L56",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "2cfbef3cfe4b2fc83f56ae16b66b395b4a3ece6898cf7418d9005cbd6881cc68",
+      "read_excerpt": [
+        {
+          "line": 56,
+          "text": "  @Transactional(rollbackOn = Exception.class)"
+        }
+      ]
+    },
+    {
+      "id": "S10-AX-CONTEXT",
+      "product": "axelor",
+      "path": "axelor-quality/src/main/resources/domains/QIIdentification.xml",
+      "ranges": [
+        [
+          8,
+          42
+        ]
+      ],
+      "observed": "Liens explicites produit, quantités, mouvements/lignes, commandes, partenaires, auteur, date et contrôle.",
+      "delta": "Établit une analogie de contexte et preuve ; pas une intégration PLM disponible dans FLOW.",
+      "caps": [
+        "BC-017"
+      ],
+      "read_mode": "Lecture statique ciblée, aucun produit exécuté, aucune charge humaine observée",
+      "cache_path": "tmp/oss-audit-axelor/axelor-quality/src/main/resources/domains/QIIdentification.xml",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-quality/src/main/resources/domains/QIIdentification.xml#L8",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "8b55af281f6ddf20408e09bbc75717ff919e9570152b9dc5515a5a8f1ec858f0",
+      "read_excerpt": [
+        {
+          "line": 8,
+          "text": "  <entity name=\"QIIdentification\">"
+        }
+      ]
+    },
+    {
+      "id": "S10-OD-TRACE",
+      "product": "odoo",
+      "path": "addons/stock/report/stock_traceability.py",
+      "ranges": [
+        [
+          27,
+          75
+        ]
+      ],
+      "observed": "Recherche des lignes amont/aval par produit, lot, mouvements liés ou dates/emplacements ; évite les lignes déjà vues.",
+      "delta": "FLOW conserve uniquement une filiation annoncée/reconnue, incluant incomplet, fractionnement et assemblage. Une proximité de dates ou d’emplacements n’est pas une preuve de filiation.",
+      "caps": [
+        "BC-009",
+        "BC-011"
+      ],
+      "read_mode": "Lecture statique ciblée, aucun produit exécuté, aucune charge humaine observée",
+      "cache_path": "tmp/odoo20-audit/addons/stock/report/stock_traceability.py",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/report/stock_traceability.py#L27",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "3ba19f559b1e83120c7eeb01cea6ed8dd38862515577efe411d4bb14e6683ba0",
+      "read_excerpt": [
+        {
+          "line": 27,
+          "text": "    def _get_related_move_lines(self, move_lines, line_type=None):"
+        }
+      ]
+    },
+    {
+      "id": "S10-OD-PROJECT",
+      "product": "odoo",
+      "path": "addons/stock/report/report_stock_quantity.py",
+      "ranges": [
+        [
+          20,
+          130
+        ]
+      ],
+      "observed": "Vue SQL de stock prévisionnel, entrées/sorties, sociétés et entrepôts ; traitement séparé des transferts inter-entrepôts et unités.",
+      "delta": "FLOW distingue physique/propriété/risque/douane, attentes et engagements ; correction et publication versionnée pour un calcul ne sont pas prouvées par cette vue SQL.",
+      "caps": [
+        "BC-011",
+        "BC-012"
+      ],
+      "read_mode": "Lecture statique ciblée, aucun produit exécuté, aucune charge humaine observée",
+      "cache_path": "tmp/odoo20-audit/addons/stock/report/report_stock_quantity.py",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/report/report_stock_quantity.py#L20",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "9509bfd30ab5d13d45b8c7c3bb27b1bd06033e1fbd031f67a9be9f2b7504def1",
+      "read_excerpt": [
+        {
+          "line": 20,
+          "text": ""
+        }
+      ]
+    },
+    {
+      "id": "S10-TR-RESERVE",
+      "product": "tryton",
+      "path": "modules/stock/move.py",
+      "ranges": [
+        [
+          1169,
+          1218
+        ],
+        [
+          1290,
+          1388
+        ]
+      ],
+      "observed": "Affectation partielle, reliquat, unités et sélection de quantités ; verrou SQL NOWAIT des mouvements pertinents ou verrou de repli.",
+      "delta": "FLOW tient une réservation autonome identifiée, avec révision/consommation/libération/expiration et conflit après correction. Pas de garantie de charge déduite du verrou.",
+      "caps": [
+        "BC-018"
+      ],
+      "read_mode": "Lecture statique ciblée, aucun produit exécuté, aucune charge humaine observée",
+      "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/stock/move.py",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/move.py#L1169",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+      "read_excerpt": [
+        {
+          "line": 1169,
+          "text": "    def assign_try("
+        },
+        {
+          "line": 1290,
+          "text": "                if match(key, move_key):"
+        }
+      ]
+    },
+    {
+      "id": "S10-TR-TIME",
+      "product": "tryton",
+      "path": "modules/stock/move.py",
+      "ranges": [
+        [
+          1391,
+          1439
+        ],
+        [
+          1510,
+          1570
+        ]
+      ],
+      "observed": "Construction de requêtes selon date, affectations, prévisions, regroupements et emplacements ; articulation avec cache de périodes.",
+      "delta": "Comparable pour vues calculées et datées. L’axe connu-à-date, les corrections conservées et l’explication des trous d’historique restent une ingénierie FLOW.",
+      "caps": [
+        "BC-010",
+        "BC-011",
+        "BC-012"
+      ],
+      "read_mode": "Lecture statique ciblée, aucun produit exécuté, aucune charge humaine observée",
+      "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/stock/move.py",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/move.py#L1391",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+      "read_excerpt": [
+        {
+          "line": 1391,
+          "text": "    def compute_quantities_query(cls, location_ids, with_childs=False,"
+        },
+        {
+          "line": 1510,
+          "text": "            columns += [c for c in grouping if c not in columns]"
+        }
+      ]
+    },
+    {
+      "id": "S10-TR-ALERT",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "ranges": [
+        [
+          636,
+          707
+        ]
+      ],
+      "observed": "Alerte liée à une inspection d’origine, société, description, intervenants et transitions ouverte/en cours/différée/résolue.",
+      "delta": "Le dossier d’investigation qualité complet reste hors FLOW ; seuls constat, contexte, pièces et transmission sont retenus.",
+      "caps": [
+        "BC-017"
+      ],
+      "read_mode": "Lecture statique ciblée, aucun produit exécuté, aucune charge humaine observée",
+      "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/quality/quality.py",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/quality/quality.py#L636",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "read_excerpt": [
+        {
+          "line": 636,
+          "text": "class Alert(Workflow, ModelSQL, ModelView, ChatMixin):"
+        }
+      ]
+    }
+  ],
+  "limits": "Comparaisons ciblées partielles : aucun audit exhaustif ni charge observée ; aucun code ERP déclaré directement réutilisable dans Spring."
+}

@@ -1,0 +1,574 @@
+{
+  "schema_version": 1,
+  "id": "iteration-05-orch-preuves",
+  "date": "2026-10-29",
+  "status": "lecture_initiale_bornee_terminee_avant_chiffrage",
+  "method_ref": "iteration-04-methode-candidate.json",
+  "baseline_ref": "iteration-03-contrat.json",
+  "producer": "Instruction documentaire assistée par IA ; aucune revue humaine ni réalisation observée revendiquée.",
+  "prior_exposure": {
+    "declared": true,
+    "details": [
+      "Méthode, rôles et garanties transactionnelles/reprise/idempotence déjà étudiés sur REF/STOCK ; ce savoir est transféré.",
+      "Famille Orchestration connue au niveau de la cartographie et du plan ; aucune lecture ciblée antérieure de ces fichiers ORCH dans ce sous-agent.",
+      "Code workflow/jobs/tasks cité ci-dessous lu pour la première fois pendant cette instruction. Les trois OSS ont déjà été étudiés pour REF/STOCK.",
+      "La planification/optimisation réservée n'a pas été instruite ici ; certains noms de fichiers ont été vus dans les inventaires sans lecture de leurs corps."
+    ],
+    "claim": "Cas réservé pour éprouver la méthode, pas indépendance cognitive absolue."
+  },
+  "repositories": {
+    "odoo": {
+      "repository": "https://github.com/odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "cache": "tmp/odoo20-audit"
+    },
+    "tryton": {
+      "repository": "https://github.com/tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "cache": "tmp/tryton-code-audit-2026-10-28"
+    },
+    "axelor": {
+      "repository": "https://github.com/axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "cache": "tmp/oss-audit-axelor"
+    },
+    "axelor_platform": {
+      "repository": "https://github.com/axelor/axelor-open-platform",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "cache": "tmp/oss-audit-axelor-platform"
+    }
+  },
+  "integrity": {
+    "head_pins_read": true,
+    "selected_files_match_head": true,
+    "verification": "git diff --exit-code HEAD -- fichiers ciblés : code 0 sur les quatre caches ; consultation en lecture seule avec élévation après refus sandbox. SHA-256 calculés sur les fichiers locaux lus.",
+    "tests_executed": false,
+    "source_changes": false
+  },
+  "native_family": {
+    "domain": "supply-chain-orchestration",
+    "subdomain": "subdomain-process-management",
+    "name": "Process Management",
+    "capability_count": 13,
+    "bc_range": [
+      "BC-076",
+      "BC-088"
+    ],
+    "business_areas": [
+      "ba-reactive-workflow-management",
+      "ba-human-work-management",
+      "ba-process-supervision",
+      "ba-process-intelligence"
+    ],
+    "input_sources": [
+      "source/grille-complexite.yaml",
+      "sources/cartographie-scm-2026-10-24.yaml"
+    ],
+    "historical_scores_or_efforts_used": false
+  },
+  "evidence": [
+    {
+      "id": "OD-CRON",
+      "repository_ref": "odoo",
+      "path": "odoo/addons/base/models/ir_cron.py",
+      "local_path": "tmp/odoo20-audit/odoo/addons/base/models/ir_cron.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "1d5c4c625bf0cef2e269a8e7d4726bb33f8361691482897329d9f9bcc60063ee",
+      "line_ranges": [
+        [
+          311,
+          389
+        ],
+        [
+          402,
+          560
+        ],
+        [
+          872,
+          916
+        ]
+      ],
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/odoo/addons/base/models/ir_cron.py#L311",
+      "observed": "Acquisition exclusive du job par FOR NO KEY UPDATE SKIP LOCKED ; progression persistée et commit explicite ; distinction terminé/partiel/échec et reprogrammation.",
+      "limit": "Ordonnanceur de traitements, pas preuve d'une instance de parcours versionnée avec attente humaine. Le traitement métier doit annoncer sa progression et gérer ses propres effets.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "OD-CRON-TEST",
+      "repository_ref": "odoo",
+      "path": "odoo/addons/base/tests/test_ir_cron.py",
+      "local_path": "tmp/odoo20-audit/odoo/addons/base/tests/test_ir_cron.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "5bcdfb8e1f2c5afa6c792463b3335468be8abe2f8e23179c34eed2dedc1b272f",
+      "line_ranges": [
+        [
+          227,
+          350
+        ]
+      ],
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/odoo/addons/base/tests/test_ir_cron.py#L227",
+      "observed": "Tests lus de progression, succès, échec, progrès partiel puis exception, compteurs et désactivation. Le callback est remplacé dans le test.",
+      "limit": "Tests non exécutés ; ne démontrent ni la durée humaine, ni l'effet unique d'un appel distant, ni une reprise après arrêt réel du processus.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "OD-ACTIVITY",
+      "repository_ref": "odoo",
+      "path": "addons/mail/models/mail_activity.py",
+      "local_path": "tmp/odoo20-audit/addons/mail/models/mail_activity.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "e0b0303a72f0e0597bfd395aa1d00eb9d025ad8e719ac8b93f5b48a68d82544a",
+      "line_ranges": [
+        [
+          689,
+          765
+        ]
+      ],
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/mail/models/mail_activity.py#L689",
+      "observed": "Clôture d'activité avec auteur, retour utilisateur, pièces liées et message sur le document ; archivage de l'activité achevée pour conserver l'historique.",
+      "limit": "Une tâche documentaire et son historique ne prouvent pas la composition complète du parcours, une compensation ou un registre bitemporel.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "OD-AUTOMATION",
+      "repository_ref": "odoo",
+      "path": "addons/base_automation/models/base_automation.py",
+      "local_path": "tmp/odoo20-audit/addons/base_automation/models/base_automation.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "eb3d50cf1e2658467b7d030a60c50c04540617562dc1ad77d3dd6460cd415359",
+      "line_ranges": [
+        [
+          759,
+          823
+        ]
+      ],
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/base_automation/models/base_automation.py#L759",
+      "observed": "Filtrage des enregistrements déjà traités dans le contexte __action_done, déclenchement d'actions serveur, diagnostic en cas d'échec.",
+      "limit": "La protection contre la récursion est dans le contexte d'exécution : ce passage ne démontre pas une déduplication durable des messages métier reçus à plusieurs reprises.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "TY-WORKFLOW",
+      "repository_ref": "tryton",
+      "path": "trytond/trytond/model/workflow.py",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/trytond/trytond/model/workflow.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "d25258838d578f46a09356783f8483fc6151a4f6a25efdfe542388b7e22fc528",
+      "line_ranges": [
+        [
+          20,
+          50
+        ]
+      ],
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/model/workflow.py#L20",
+      "observed": "Le décorateur filtre les transitions permises, appelle la fonction métier, met à jour l'état si elle ne l'a pas déjà modifié, puis journalise la transition.",
+      "limit": "Mixin de transitions d'un objet, distinct de la queue durable ; ni définition graphique, ni reprise universelle, ni compensation automatique démontrée.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "TY-QUEUE",
+      "repository_ref": "tryton",
+      "path": "trytond/trytond/ir/queue_.py",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/trytond/trytond/ir/queue_.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "fc5fe0ead0ffbcaa45110503d09c291c76803ce319aaaea51b32a83598d1eb35",
+      "line_ranges": [
+        [
+          18,
+          44
+        ],
+        [
+          62,
+          211
+        ]
+      ],
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/ir/queue_.py#L18",
+      "observed": "Enregistrement persistant des tâches et dates ; sélection avec verrou compatible SKIP LOCKED selon base ; exécution sous utilisateur/contexte ; relance des tâches prises mais non finies sans erreur enregistrée.",
+      "limit": "Le mécanisme rappelle une méthode de modèle. Les effets hors de sa transaction ne deviennent pas exactement une fois. La classe ne définit pas le dossier FLOW ni ses décisions.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "TY-WORKER",
+      "repository_ref": "tryton",
+      "path": "trytond/trytond/worker.py",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/trytond/trytond/worker.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "2966a3b178bc822540967f9b20e0ba4efbb94c933f0e693fa505e1837176c9e6",
+      "line_ranges": [
+        [
+          161,
+          176
+        ],
+        [
+          200,
+          216
+        ],
+        [
+          233,
+          239
+        ]
+      ],
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/worker.py#L161",
+      "observed": "Exécution task.run dans une transaction ; adaptation puis nouvelle tentative sur TransactionError ; reprogrammation d'une tâche après certains échecs et distinction des erreurs inattendues.",
+      "limit": "La reprise dépend du type d'échec. Aucun test de ce worker n'a été exécuté dans l'instruction.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "TY-TRIGGER",
+      "repository_ref": "tryton",
+      "path": "trytond/trytond/ir/trigger.py",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/trytond/trytond/ir/trigger.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "e91dc5d652178c2240e31858a1590b1f16911ac4327be346a8af10b7aaf33110",
+      "line_ranges": [
+        [
+          183,
+          257
+        ]
+      ],
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/ir/trigger.py#L183",
+      "observed": "Conditions avant mise en queue et avant action ; exclusion des identifiants déjà déclenchés dans la transaction ; limite de nombre et délai minimal fondés sur un journal de déclenchement.",
+      "limit": "Ce journal conditionnel ne constitue pas une preuve de transmission unique générale d'événements externes ni un registre complet de dossier.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "TY-WORKFLOW-TEST",
+      "repository_ref": "tryton",
+      "path": "trytond/trytond/tests/test_workflow.py",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/trytond/trytond/tests/test_workflow.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "305649e8a30e87b2cabd343750c2b0691522bfa267c4f11f96ef9b849477604b",
+      "line_ranges": [
+        [
+          13,
+          26
+        ]
+      ],
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/tests/test_workflow.py#L13",
+      "observed": "Test lu : transition vers running autorisée ; un objet déjà à end ne repasse pas à running.",
+      "limit": "Test étroit, non exécuté ; ne couvre pas les garanties de queue, de corrélation, de compensation ou de reprise FLOW.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "AX-TASK",
+      "repository_ref": "axelor",
+      "path": "axelor-project/src/main/java/com/axelor/apps/project/service/ProjectTaskServiceImpl.java",
+      "local_path": "tmp/oss-audit-axelor/axelor-project/src/main/java/com/axelor/apps/project/service/ProjectTaskServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "2822f521151119714d5709dfeaf753c1fc2cd27bc4f2fe2c5eabe487fd2d916f",
+      "line_ranges": [
+        [
+          182,
+          223
+        ],
+        [
+          288,
+          328
+        ]
+      ],
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-project/src/main/java/com/axelor/apps/project/service/ProjectTaskServiceImpl.java#L182",
+      "observed": "Création transactionnelle d'une tâche affectée, statut initial issu de la configuration du projet ; héritage de propriétés des sous-tâches et progression selon statut/catégorie.",
+      "limit": "Gestion de tâches projet ; ce code ne démontre pas une tâche humaine reliée à une instance BPM versionnée.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "AX-TASK-MODEL",
+      "repository_ref": "axelor",
+      "path": "axelor-project/src/main/resources/domains/ProjectTask.xml",
+      "local_path": "tmp/oss-audit-axelor/axelor-project/src/main/resources/domains/ProjectTask.xml",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "d8e3f14ade31bd1bdf585ee860b1b0ff81a6590d955ec23d93077e426805522a",
+      "line_ranges": [
+        [
+          10,
+          20
+        ],
+        [
+          120,
+          133
+        ]
+      ],
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-project/src/main/resources/domains/ProjectTask.xml#L10",
+      "observed": "Déclaration de responsable, statut, échéance ; suivi des changements de statut, progression, responsable et autres champs.",
+      "limit": "Déclaration de suivi de champs, pas démonstration d'un historique immuable de tous les événements, ni d'une reconstitution connu-à-date.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "AX-WORKFLOW",
+      "repository_ref": "axelor",
+      "path": "axelor-purchase/src/main/java/com/axelor/apps/purchase/service/PurchaseRequestWorkflowServiceImpl.java",
+      "local_path": "tmp/oss-audit-axelor/axelor-purchase/src/main/java/com/axelor/apps/purchase/service/PurchaseRequestWorkflowServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "c45c91f6abd2beb2a98c2667f0985915b75d4057d971d81826db6ca1e6656b1f",
+      "line_ranges": [
+        [
+          42,
+          118
+        ]
+      ],
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-purchase/src/main/java/com/axelor/apps/purchase/service/PurchaseRequestWorkflowServiceImpl.java#L42",
+      "observed": "Transitions métier codées avec contrôle du statut et rollback sur exception ; auteur demandeur/validateur ; création de commande si absente ; annulation par changement de statut.",
+      "limit": "Fonctions d'achat examinées seulement comme exemple de mécanisme de transition. L'annulation lue ne prouve pas l'inversion de tous les effets antérieurs ni une compensation universelle.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "AX-SCHEDULER",
+      "repository_ref": "axelor_platform",
+      "path": "axelor-core/src/main/java/com/axelor/quartz/SchedulerProvider.java",
+      "local_path": "tmp/oss-audit-axelor-platform/axelor-core/src/main/java/com/axelor/quartz/SchedulerProvider.java",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "sha256": "eb011241f61890cd0ab81d22b202590648e0bfd860f8661697546995766004b5",
+      "line_ranges": [
+        [
+          60,
+          110
+        ],
+        [
+          114,
+          188
+        ]
+      ],
+      "url": "https://github.com/axelor/axelor-open-platform/blob/96caf51eb97fbab7750b7dadf10a371a55a490a3/axelor-core/src/main/java/com/axelor/quartz/SchedulerProvider.java#L60",
+      "observed": "Raccordement Quartz via Guice ; configuration d'un JobStore JDBC lorsque le store configuré le supporte ; activation conditionnelle du mode cluster et connexion au datasource.",
+      "limit": "La persistance JDBC est conditionnelle : le fichier ne prouve pas la configuration effective d'une installation. Axelor est ici Guice/Quartz, pas Spring.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "AX-JOB-RUNNER",
+      "repository_ref": "axelor_platform",
+      "path": "axelor-core/src/main/java/com/axelor/quartz/JobRunner.java",
+      "local_path": "tmp/oss-audit-axelor-platform/axelor-core/src/main/java/com/axelor/quartz/JobRunner.java",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "sha256": "0eb14aabd18982854bb22ca4601d898200642563616e3426d4c616945e69f01d",
+      "line_ranges": [
+        [
+          112,
+          176
+        ]
+      ],
+      "url": "https://github.com/axelor/axelor-open-platform/blob/96caf51eb97fbab7750b7dadf10a371a55a490a3/axelor-core/src/main/java/com/axelor/quartz/JobRunner.java#L112",
+      "observed": "Construction du job et du trigger Quartz depuis MetaSchedule ; validation classe/cron ; paramètres ; prise en charge d'un job déjà persistant via ObjectAlreadyExistsException.",
+      "limit": "Planification technique de jobs, pas composition des activités d'un dossier ni garantie de l'effet métier unique.",
+      "code_read": true,
+      "tests_executed": false
+    },
+    {
+      "id": "AX-JOB-SHELL",
+      "repository_ref": "axelor_platform",
+      "path": "axelor-core/src/main/java/com/axelor/quartz/GuiceJobRunShell.java",
+      "local_path": "tmp/oss-audit-axelor-platform/axelor-core/src/main/java/com/axelor/quartz/GuiceJobRunShell.java",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "sha256": "b2d2803da018ac17dcff6341fbde7beac868ed681c8c7a74b0d437db010bdcae",
+      "line_ranges": [
+        [
+          52,
+          100
+        ]
+      ],
+      "url": "https://github.com/axelor/axelor-open-platform/blob/96caf51eb97fbab7750b7dadf10a371a55a490a3/axelor-core/src/main/java/com/axelor/quartz/GuiceJobRunShell.java#L52",
+      "observed": "Exécution avec contexte Guice et tenant, puis gestion des erreurs d'initialisation/interruption par marquage des triggers en erreur.",
+      "limit": "Le wrapper de tenant utilise withTransaction(false) : ne pas supposer une transaction métier globale fournie par ce wrapper.",
+      "code_read": true,
+      "tests_executed": false
+    }
+  ],
+  "synthesis": [
+    "Les trois produits distinguent transitions métier, exécution technique et tâches ; un ordonnanceur seul ne prouve pas un moteur de dossier.",
+    "Odoo et Tryton montrent explicitement progression/queue persistantes et reprises. Axelor qualifie le raccordement Quartz/JDBC conditionnel et les limites de transaction du wrapper.",
+    "Odoo et Axelor montrent tâches et traces ; Tryton journalise les transitions. Ces traces ne démontrent pas un registre FLOW complet connu-à-date.",
+    "Aucune compensation universelle n'est démontrée par ce corpus ciblé. Une recherche limitée sans résultat positif ne prouve pas l'absence de capacité dans un produit ou une extension.",
+    "Les fonctions comparables ne constituent pas du code transplantable en Spring ; aucun effort humain, coût, ratio de productivité ou équivalence LOC/JH n'est déduit."
+  ],
+  "candidate": {
+    "id": "ORCH",
+    "label": "Conduire un dossier versionné avec attente, décision humaine et reprise explicable",
+    "status": "proposition_a_figer_dans_contrat05",
+    "reporting_owner": "subdomain-process-management",
+    "native_scope": [
+      {
+        "capability_ref": "workflow-definition-management",
+        "bc_ref": "BC-076",
+        "path": [
+          "supply-chain-orchestration",
+          "subdomain-process-management",
+          "ba-reactive-workflow-management",
+          "workflow-definition-management"
+        ],
+        "functions": [
+          "BC-076.01",
+          "BC-076.02",
+          "BC-076.03"
+        ],
+        "coverage": "Catalogue fermé d'activités et une composition autorisée, deux versions publiées du même modèle ; aucune migration d'instance en cours.",
+        "status": "partiel_propose"
+      },
+      {
+        "capability_ref": "order-workflow-sentry",
+        "bc_ref": "BC-078",
+        "path": [
+          "supply-chain-orchestration",
+          "subdomain-process-management",
+          "ba-reactive-workflow-management",
+          "order-workflow-sentry"
+        ],
+        "functions": [
+          "BC-078.01",
+          "BC-078.02",
+          "BC-078.03"
+        ],
+        "coverage": "Un type de signal explicitement corrélé ; validation d'état et déduplication à composer avec COMMON. Pas d'observation universelle de tous les faits Supply.",
+        "status": "partiel_propose"
+      },
+      {
+        "capability_ref": "order-workflow-orchestration",
+        "bc_ref": "BC-079",
+        "path": [
+          "supply-chain-orchestration",
+          "subdomain-process-management",
+          "ba-reactive-workflow-management",
+          "order-workflow-orchestration"
+        ],
+        "functions": [
+          "BC-079.01",
+          "BC-079.02",
+          "BC-079.03"
+        ],
+        "coverage": "Parcours borné, attente persistante, reprise et progression du dossier.",
+        "status": "partiel_propose"
+      },
+      {
+        "capability_ref": "human-task-management",
+        "bc_ref": "BC-080",
+        "path": [
+          "supply-chain-orchestration",
+          "subdomain-process-management",
+          "ba-human-work-management",
+          "human-task-management"
+        ],
+        "functions": [
+          "BC-080.01",
+          "BC-080.02",
+          "BC-080.03"
+        ],
+        "coverage": "Une tâche de décision approuver/refuser avec commentaire et résultat. Pas de pièces binaires ni studio de formulaires.",
+        "status": "partiel_propose"
+      },
+      {
+        "capability_ref": "process-intervention",
+        "bc_ref": "BC-083",
+        "path": [
+          "supply-chain-orchestration",
+          "subdomain-process-management",
+          "ba-process-supervision",
+          "process-intervention"
+        ],
+        "functions": [
+          "BC-083.01",
+          "BC-083.02",
+          "BC-083.03"
+        ],
+        "coverage": "Consultation de l'incident et action autorisée de reprise ou annulation ; pas de retour arrière universel.",
+        "status": "partiel_propose"
+      },
+      {
+        "capability_ref": "process-ledger",
+        "bc_ref": "BC-085",
+        "path": [
+          "supply-chain-orchestration",
+          "subdomain-process-management",
+          "ba-process-supervision",
+          "process-ledger"
+        ],
+        "functions": [
+          "BC-085.01"
+        ],
+        "coverage": "Journal borné des événements du dossier avec auteur/origine et version de définition ; pas de registre métier complet ni bitemporalité.",
+        "status": "partiel_propose"
+      }
+    ],
+    "result": "Un dossier identifié parcourt une composition autorisée, conserve la version de sa définition, attend une décision puis un signal corrélé, et rend ses résultats/incidents consultables après reprise.",
+    "bounded_contract": [
+      "Un modèle de parcours et deux versions publiables. Une instance garde sa version initiale ; un changement s'applique aux nouvelles instances seulement.",
+      "Catalogue fermé de trois types d'activité : activité technique enregistrée, décision humaine, attente d'un signal. Aucune exécution libre de code ou de scripts saisis par l'utilisateur.",
+      "Une décision approuver/refuser avec commentaire ; affectation explicite à un utilisateur fourni, sans calcul des personnes admissibles.",
+      "Un signal typé comporte identifiant de dossier, identifiant de message et contenu borné. Définir au contrat le refus ou la conservation d'un signal arrivé avant l'attente ; ne pas supposer la garantie.",
+      "Incidents techniques visibles ; reprise explicite par opérateur autorisé ; annulation limitée aux états déclarés. Aucune compensation automatique des effets externes.",
+      "Lecture de l'état, tâches, résultats et chronologie du dossier ; deux vues candidates : dossier/chronologie/intervention et tâche/décision. Interfaces métier à construire, pas supposées fournies par une UI propriétaire.",
+      "Mêmes garanties de base que le contrat03 pour accès, erreurs, tests développeur et QA ; périmètre précis des courses signal/décision/reprise à figer avant estimation."
+    ],
+    "exclusions": [
+      "Tout Process Management au-delà de ces parts ; aucune capacité déclarée complète.",
+      "BC-077 Process Planning : composition dynamique/adaptation libre hors témoin.",
+      "BC-081 affectation par admissibilité/équilibrage et BC-082 calendriers/relances/escalades.",
+      "BC-084 gestion complète des exceptions, BC-086 rapprochement avec commandes, BC-087 mining, BC-088 BI.",
+      "BPMN/CMMN universel, studio graphique libre, migrations des instances en cours, multi-tenant distribué, haute disponibilité et SLA.",
+      "Connecteurs Beaumanoir, règles Supply/Fashion, affectations organisationnelles réelles, pièces binaires et formulaires universels.",
+      "Retour arrière d'actes irréversibles, transactions distribuées, garantie exactement une fois des effets externes.",
+      "Reconstruction des moteurs de transitions, timers, tâches ou historique que le moteur choisi peut fournir."
+    ]
+  },
+  "spring_candidate": {
+    "engine": {
+      "name": "Flowable OSS",
+      "version": "7.2.0",
+      "status": "candidat_indique_par_parent_preuves_techniques_a_relier",
+      "financing_owner": "EXEC",
+      "statement": "Moteur partagé à financer une seule fois dans EXEC ; aucune reconstruction par défaut d'un moteur BPM maison. La présente fiche ne prétend pas avoir lu le code Flowable.",
+      "open": [
+        "Compatibilité exacte avec le témoin Boot 3.5.7/Java21 et gestion de versions",
+        "Transactions avec PostgreSQL et SpringTx ; partage de datasource/transaction manager",
+        "Portée des jobs asynchrones, reprises, incidents, historique et corrélation",
+        "Licence et dépendances retenues ; aucune UI propriétaire supposée incluse"
+      ]
+    },
+    "available_baseline": [
+      "Spring JDBC/transactions et PostgreSQL du témoin04 : garanties locales effectivement éprouvées sur REF/STOCK uniquement.",
+      "Conventions d'API, sécurité commune, identité de test, UI commune et CI déjà financées COMMON ; raccordements propres ORCH restent à décrire."
+    ],
+    "new_or_adapted": [
+      "EXEC : installation/configuration/raccordement du moteur et de son exécuteur durable, tests techniques, diagnostic technique et compatibilité ; propriétaire commun unique.",
+      "ORCH : traduction du contrat du dossier en définition/version, identités/corrélation, décisions, interventions autorisées, vues et projection de l'historique utile.",
+      "Composition avec la clé/résultat COMMON : le fait que le moteur reprenne un job ne prouve pas l'effet unique d'une commande métier.",
+      "Contrats et QA de refus/reprise/annulation, droits propres, absence de migration implicite."
+    ],
+    "no_equivalence": [
+      "Axelor Java/Guice/Quartz n'est pas Spring.",
+      "Odoo/Tryton Python restent des comparables de mécanismes.",
+      "Le témoin JDBC04 n'a pas validé Spring Batch ni un moteur BPM.",
+      "Boot 3.5.7 est la référence historique de l'expérience, pas une recommandation de production 2026."
+    ]
+  },
+  "next_contract_decisions": [
+    "Réception d'un signal avant/après l'attente et politique de doublon/conflit.",
+    "Portée transactionnelle des activités techniques : locales uniquement ou contrat explicite d'effet distant.",
+    "Politique d'annulation après un effet acquis ; la compensation reste hors base tant qu'elle n'est pas définie.",
+    "Propriétaire de chaque adaptation EXEC/ORCH/COMMON, pour éviter de financer deux fois reprises, identité et journalisation."
+  ],
+  "effort_status": {
+    "orch_jh": null,
+    "exec_jh": null,
+    "full_core_jh": null,
+    "previous_pilot_gross_all_roles_central_jh": 409,
+    "previous_scope": "COMMON + REF + STOCK du panier03/04 seulement",
+    "new_estimate_produced": false,
+    "rule": "Ne pas additionner null comme zéro ; pas de total Core ni de classement probabiliste inventé."
+  },
+  "inspection_window": {
+    "started_utc": "2026-10-29 12:23:34 UTC",
+    "hash_collection_utc": "2026-10-29 12:27:45 UTC",
+    "meaning": "Temps d'instruction assistée par IA, pas mesure d'effort humain de réalisation."
+  }
+}

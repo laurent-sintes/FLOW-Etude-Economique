@@ -1,0 +1,352 @@
+{
+  "schema_version": 1,
+  "id": "iteration-02-code-oss",
+  "date": "2026-10-29",
+  "scope_note": "ERPNext/Frappe reste l’ancre initiale. Ce complément examine Odoo Community, Tryton et Axelor sur les références et le stock/réservation. Corps de méthodes, dépendances et tests ciblés ont été lus aux commits figés ; ce n’est pas une revue exhaustive des produits.",
+  "user_instruction": "Utiliser le code source des trois OSS étudiés comme référence, en complément de leur documentation.",
+  "method": "Lecture statique assistée par IA, caches locaux vérifiés et recours au connecteur GitHub pour les fichiers absents. Pas de modification des sources, pas d’exécution des produits, pas de revue humaine.",
+  "products": [
+    {
+      "id": "odoo",
+      "name": "Odoo Community 20",
+      "commits": [
+        "299075f17026b830a9755f3c43f3e83143995946"
+      ],
+      "code_read": true,
+      "tests_executed": false,
+      "cache": "tmp/odoo20-audit ; base_import récupéré au même commit via GitHub",
+      "finding": "L’import générique délègue à l’ORM et aux spécialisations des modèles. La réservation relie mouvements, lignes, positions, unités et dimensions de stock ; la libération suit cette même chaîne.",
+      "spring_implication": "Comparable Python de comportement. Spring peut fournir transactions, persistance et validation ; les règles de variante, l’identité externe, les invariants de quantité, arrondis et transitions restent des travaux produit à qualifier.",
+      "limits": "L’import Odoo peut alimenter son référentiel maître. FLOW maintient une référence locale. Un quant courant ne démontre pas un registre avec date du fait et date de connaissance. Tests lus, non exécutés.",
+      "evidence": [
+        {
+          "path": "addons/base_import/models/base_import.py",
+          "line": 1534,
+          "label": "Import : execute_import, L1534–1641",
+          "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/base_import/models/base_import.py#L1534",
+          "finding": "Conversion, correspondances, appel model.load, test avec rollback et mémorisation des correspondances."
+        },
+        {
+          "path": "odoo/orm/models.py",
+          "line": 943,
+          "label": "ORM : load, L943–1098 ; _load_records L4602–4722",
+          "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/odoo/orm/models.py#L943",
+          "finding": "Lots, erreurs, reprise unitaire, identifiants externes, création et mise à jour."
+        },
+        {
+          "path": "addons/product/models/product_product.py",
+          "line": 665,
+          "label": "Références produit : L665–836",
+          "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/product/models/product_product.py#L665",
+          "finding": "Cohérence des attributs, recherche/création des valeurs et association des variantes."
+        },
+        {
+          "path": "addons/product/tests/test_import_files.py",
+          "line": 57,
+          "label": "Tests d’import : L57–187",
+          "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/product/tests/test_import_files.py#L57",
+          "finding": "Création/mise à jour de variantes, erreurs, réimport et réemploi d’attributs."
+        },
+        {
+          "path": "addons/stock/models/stock_move.py",
+          "line": 2138,
+          "label": "Affectation : _action_assign, L2138–2275",
+          "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_move.py#L2138",
+          "finding": "Besoin restant, conversion des unités, mouvements chaînés, affectation partielle ou complète."
+        },
+        {
+          "path": "addons/stock/models/stock_quant.py",
+          "line": 869,
+          "label": "Quantités réservables : L869–949 ; écriture L1073–1155",
+          "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_quant.py#L869",
+          "finding": "Disponibilité, conditionnements, séries, arrondis et verrou avant mise à jour."
+        },
+        {
+          "path": "addons/stock/models/stock_move.py",
+          "line": 1082,
+          "label": "Libération : L1082–1108",
+          "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_move.py#L1082",
+          "finding": "Contrôle de l’état et suppression des lignes admissibles."
+        },
+        {
+          "path": "addons/stock/models/stock_move_line.py",
+          "line": 563,
+          "label": "Restitution de la quantité : L563–572",
+          "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_move_line.py#L563",
+          "finding": "La suppression restitue la quantité réservée à la position."
+        },
+        {
+          "path": "addons/stock/tests/test_move.py",
+          "line": 2221,
+          "label": "Tests de libération : L2221–2291 et L2411–2449",
+          "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/tests/test_move.py#L2221",
+          "finding": "Conversion douzaines/unités, colis, positions positives et négatives."
+        },
+        {
+          "path": "odoo/orm/models.py",
+          "line": 5090,
+          "label": "Verrou partagé : try_lock_for_update, L5090–5120",
+          "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/odoo/orm/models.py#L5090",
+          "finding": "Verrou SQL avec SKIP LOCKED ; garantie complète du parcours à vérifier."
+        }
+      ]
+    },
+    {
+      "id": "tryton",
+      "name": "Tryton 8.2",
+      "commits": [
+        "e011222dc305c431677e586706fd241dffe02236"
+      ],
+      "code_read": true,
+      "tests_executed": false,
+      "cache": "tmp/tryton-code-audit-2026-10-28 ; HEAD vérifié, aucun fichier suivi modifié",
+      "finding": "L’import des modèles est un mécanisme commun. L’affectation de stock utilise les quantités et l’état assigned d’un mouvement ; elle peut partager une demande en partie affectée et reliquat.",
+      "spring_implication": "Comparable Python de conception. Modèles, sémantique des relations, calcul d’affectation, portée des verrous et erreurs restent à construire ou à sélectionner. Les mécanismes Spring ne fournissent pas ces comportements métier complets.",
+      "limits": "Assigned ne prouve pas une réservation autonome avec expiration, quotas, priorité ou promesse future. Les verrous lus ne démontrent pas une tenue en charge. Aucun test produit exécuté.",
+      "evidence": [
+        {
+          "path": "trytond/trytond/model/modelstorage.py",
+          "line": 1141,
+          "label": "Import générique : L1141–1472",
+          "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/model/modelstorage.py#L1141",
+          "finding": "Conversions typées, relations, erreurs, création et mise à jour ; remplacement possible de collections."
+        },
+        {
+          "path": "modules/product/product.py",
+          "line": 128,
+          "label": "Article et variantes : L128–186 et L480–550",
+          "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/product/product.py#L128",
+          "finding": "Identifiants, unités, variantes, consommables et société distincts du moteur d’import."
+        },
+        {
+          "path": "trytond/trytond/protocols/dispatcher.py",
+          "line": 263,
+          "label": "Enveloppe transactionnelle : L263–325",
+          "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/protocols/dispatcher.py#L263",
+          "finding": "Transaction autour de l’appel, reprise de certaines erreurs et validation."
+        },
+        {
+          "path": "modules/stock/move.py",
+          "line": 1169,
+          "label": "Affectation : assign_try, L1169–1346",
+          "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/move.py#L1169",
+          "finding": "Disponibilité du jour, sélection d’emplacements, unités, découpage et reliquat."
+        },
+        {
+          "path": "modules/stock/move.py",
+          "line": 1349,
+          "label": "Verrouillage : L1349–1388",
+          "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/move.py#L1349",
+          "finding": "FOR UPDATE NOWAIT sur les mouvements ; repli de verrouillage selon backend."
+        },
+        {
+          "path": "modules/stock/move.py",
+          "line": 1391,
+          "label": "Quantités : L1391–1645",
+          "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/move.py#L1391",
+          "finding": "Calculs partagés par dates, états et emplacements."
+        },
+        {
+          "path": "modules/stock/period.py",
+          "line": 99,
+          "label": "Clôture de période : L99–171",
+          "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/period.py#L99",
+          "finding": "Contrôles et quantités mémorisées ; dépendance du registre."
+        },
+        {
+          "path": "trytond/trytond/tests/test_importdata.py",
+          "line": 331,
+          "label": "Tests d’import : L331–366 et L575–640",
+          "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/tests/test_importdata.py#L331",
+          "finding": "Relations, erreurs, mise à jour et remplacement de collections."
+        },
+        {
+          "path": "modules/stock/tests/test_module.py",
+          "line": 999,
+          "label": "Tests d’affectation : L999–1124",
+          "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/tests/test_module.py#L999",
+          "finding": "Affectation totale/partielle, manque de stock, décimales et mouvements chaînés."
+        }
+      ]
+    },
+    {
+      "id": "axelor",
+      "name": "Axelor Open Suite et Open Platform",
+      "commits": [
+        "Suite e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+        "Platform 96caf51eb97fbab7750b7dadf10a371a55a490a3"
+      ],
+      "code_read": true,
+      "tests_executed": false,
+      "cache": "tmp/oss-audit-axelor et tmp/oss-audit-axelor-platform ; révisions vérifiées, fichiers examinés non modifiés",
+      "finding": "L’import configurable traverse métamodèle, mapping, moteur CSV et historique. Le cycle de réservation propage les quantités entre ligne de vente, mouvement et position, avec conversions d’unités.",
+      "spring_implication": "Comparable Java, mais code fondé sur Guice, Hibernate et abstractions Axelor, pas Spring. Injection et transactions ont des équivalents ; comportements, modèles et dépendances ne se transplantent pas automatiquement.",
+      "limits": "Pas de garantie concurrente de bout en bout établie. Aucun verrou explicite trouvé dans les corps ciblés ne signifie pas son absence générale. Les dossiers de tests ciblés ne démontrent pas toute la QA. Les dépendances Finance observées ne deviennent pas un besoin FLOW.",
+      "evidence": [
+        {
+          "path": "axelor-base/src/main/java/com/axelor/apps/base/service/advanced/imports/DataImportServiceImpl.java",
+          "line": 131,
+          "label": "Import configurable : L131–228, L437–523, L657–731, L886–946",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-base/src/main/java/com/axelor/apps/base/service/advanced/imports/DataImportServiceImpl.java#L131",
+          "finding": "Lecteur, onglets, métamodèle, mappings, recherche/mise à jour, relations, conditions, import et historique."
+        },
+        {
+          "path": "axelor-base/src/main/resources/domains/AdvancedImport.xml",
+          "line": 8,
+          "label": "Données déclaratives d’import",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-base/src/main/resources/domains/AdvancedImport.xml#L8",
+          "finding": "Fichier, onglets, champs, options, historique et journal : les fichiers Java seuls ne décrivent pas tout le produit."
+        },
+        {
+          "path": "axelor-core/src/main/java/com/axelor/data/csv/CSVImporter.java",
+          "line": 232,
+          "label": "Moteur d’import : L232–445",
+          "url": "https://github.com/axelor/axelor-open-platform/blob/96caf51eb97fbab7750b7dadf10a371a55a490a3/axelor-core/src/main/java/com/axelor/data/csv/CSVImporter.java#L232",
+          "finding": "Liaison des données, transaction, traitement par ligne, commits par lots, rollback et reprise."
+        },
+        {
+          "path": "axelor-base/src/main/java/com/axelor/apps/base/service/DataSharingReferentialLineServiceImpl.java",
+          "line": 57,
+          "label": "Sélection de références : L57–111",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-base/src/main/java/com/axelor/apps/base/service/DataSharingReferentialLineServiceImpl.java#L57",
+          "finding": "Composition de conditions et requête JPA ; mécanisme configurable observé."
+        },
+        {
+          "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java",
+          "line": 83,
+          "label": "Réservation : L83–188, L275–369, L664–865, L1064–1168",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java#L83",
+          "finding": "Demandé/réservé/livré, disponibilité, conversions, libération, propagation entre trois objets et annulation."
+        },
+        {
+          "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/StockLocationLineFetchServiceSupplychainImpl.java",
+          "line": 43,
+          "label": "Surcharge du calcul de disponible : L43–79",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/StockLocationLineFetchServiceSupplychainImpl.java#L43",
+          "finding": "Le module supplychain retire le réservé du courant ; lire uniquement le module stock serait incomplet."
+        },
+        {
+          "path": "axelor-base/src/main/java/com/axelor/apps/base/service/UnitConversionServiceImpl.java",
+          "line": 89,
+          "label": "Conversion d’unités : L89–145",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-base/src/main/java/com/axelor/apps/base/service/UnitConversionServiceImpl.java#L89",
+          "finding": "Coefficient, unités absentes, zéro et arrondi ; mécanisme partagé."
+        },
+        {
+          "path": "axelor-base/src/test/java/com/axelor/apps/base/service/TestDataSharingReferentialLineService.java",
+          "line": 43,
+          "label": "Test de sélection du référentiel",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-base/src/test/java/com/axelor/apps/base/service/TestDataSharingReferentialLineService.java#L43",
+          "finding": "Vérifie la composition OR de deux conditions ; pas le cycle métier complet."
+        },
+        {
+          "path": "axelor-supplychain/src/test/java/com/axelor/apps/supplychain/service/saleorder/TestSaleOrderStockService.java",
+          "line": 39,
+          "label": "Test de statut de livraison",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/test/java/com/axelor/apps/supplychain/service/saleorder/TestSaleOrderStockService.java#L39",
+          "finding": "Calcul à partir des lignes, avec mock partiel ; pas un test de réservation concurrente."
+        },
+        {
+          "path": "axelor-core/build.gradle",
+          "line": 19,
+          "label": "Dépendances Platform : L19–39",
+          "url": "https://github.com/axelor/axelor-open-platform/blob/96caf51eb97fbab7750b7dadf10a371a55a490a3/axelor-core/build.gradle#L19",
+          "finding": "Guice, Groovy, Hibernate et RESTEasy : réutilisation vers Spring à qualifier."
+        }
+      ]
+    }
+  ],
+  "complexity_model_candidate": {
+    "status": "profil_documentaire_a_eprouver_sans_score",
+    "principle": "La complexité décrit des mécanismes observés et les écarts vers FLOW. Elle n’est pas une note ajoutée à la cartographie d’entrée.",
+    "dimensions": [
+      {
+        "dimension": "Données et relations",
+        "evidence": "Identités, versions, variantes, unités et relations entre objets.",
+        "effect_on_work": "Modèles, contrôles, transformations et reprise.",
+        "roles": [
+          "analyse_produit",
+          "architecture",
+          "dev_java",
+          "qa"
+        ]
+      },
+      {
+        "dimension": "Cohérence des opérations",
+        "evidence": "États, réservations partielles, annulations et modifications liées.",
+        "effect_on_work": "Transactions, invariants et tests de bout en bout.",
+        "roles": [
+          "architecture",
+          "dev_java",
+          "qa"
+        ]
+      },
+      {
+        "dimension": "Concurrence et reprise",
+        "evidence": "Portée des verrous, conflits, doublons et reprise après échec.",
+        "effect_on_work": "Conception des garanties, implémentation et qualification.",
+        "roles": [
+          "architecture",
+          "dev_java",
+          "qa",
+          "plateforme"
+        ]
+      },
+      {
+        "dimension": "Réutilisation et dépendances",
+        "evidence": "Services communs, spécialisations métier et composants effectivement disponibles.",
+        "effect_on_work": "Sélection, assemblage, adaptation et travaux résiduels.",
+        "roles": [
+          "architecture",
+          "dev_java",
+          "plateforme"
+        ]
+      },
+      {
+        "dimension": "Interfaces et contrôle du produit",
+        "evidence": "Commandes, diagnostics, correction et suivi nécessaires.",
+        "effect_on_work": "UX, interfaces, permissions et QA.",
+        "roles": [
+          "analyse_produit",
+          "ux",
+          "dev_frontend",
+          "securite",
+          "qa"
+        ]
+      }
+    ],
+    "conversion_rule": "Aucune dimension ne multiplie des JH. Elle justifie l’inclusion d’un travail, une variante ou une inconnue. L’effort exige ensuite une observation ou une hypothèse d’ingénierie explicite."
+  },
+  "maille_decision": "Ensemble fonctionnel cohérent + mécanismes communs financés une fois, candidat à éprouver. La lecture du code justifie les dépendances ; elle ne démontre pas l’optimum économique.",
+  "additional_effort_observation_ref": "iteration-02-openlmis.json",
+  "comparison": [
+    {
+      "aspect": "Import partagé",
+      "odoo": "Import + ORM + spécialisation de modèle",
+      "tryton": "ModelStorage + RPC transactionnel",
+      "axelor": "Configuration déclarative + moteur CSV",
+      "implication": "Moteur commun financé une fois ; spécialisation par famille de références."
+    },
+    {
+      "aspect": "Réservation",
+      "odoo": "Mouvements, lignes et quantités réservées",
+      "tryton": "État assigned des mouvements et reliquats",
+      "axelor": "Quantités propagées entre vente, mouvement et emplacement",
+      "implication": "Comparer les garanties demandées, pas seulement les noms d’objets."
+    },
+    {
+      "aspect": "Concurrence",
+      "odoo": "Verrou de ligne avec SKIP LOCKED dans le chemin lu",
+      "tryton": "FOR UPDATE NOWAIT ou verrou de table",
+      "axelor": "Transactions visibles ; protection complète à vérifier",
+      "implication": "Exigence commune à qualifier ; aucun débit ou niveau de sûreté déduit."
+    },
+    {
+      "aspect": "Cible Spring",
+      "odoo": "Référence de comportement Python",
+      "tryton": "Référence de comportement Python",
+      "axelor": "Java couplé aux abstractions Axelor",
+      "implication": "Compatibilité de langage et réutilisation effective sont deux questions distinctes."
+    }
+  ]
+}

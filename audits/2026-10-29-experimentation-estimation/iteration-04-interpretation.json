@@ -1,0 +1,96 @@
+{
+  "id": "iteration-04-interpretation",
+  "provenance": "Revue statique par un agent distinct puis essais exécutés par le pilote ; aucune revue humaine ni réalisation humaine mesurée.",
+  "execution_reference": "Les résultats d’exécution seront lus dans les journaux et rapports XML, jamais déduits de cette analyse.",
+  "prototypes": [
+    {
+      "id": "REF",
+      "code": [
+        "iteration-04-prototype/src/test/java/flow/audit4/RefProbe.java",
+        "iteration-04-prototype/src/test/java/flow/audit4/RefProbeTest.java",
+        "iteration-04-prototype/src/test/java/flow/audit4/RefProbeWorker.java"
+      ],
+      "packages": [
+        "R02",
+        "R03",
+        "R04",
+        "R07"
+      ],
+      "mechanism": "Staging durable, produits avant variantes, transaction atomique objet/effet/étatligne/progressionlot, reprise depuis les lignes restantes ; contribution corrigée distincte.",
+      "work_impact": "Précise le contenu de travaux déjà présents dans M1. Ne démontre ni un travail supprimé ni une durée révisée.",
+      "limitations": [
+        "Spring JDBC et TransactionTemplate exécutés ; Spring Batch non éprouvé.",
+        "Un seul worker ; parent et variante de même source, identité globale par type. Ce sont des restrictions du témoin, pas des décisions générales FLOW.",
+        "CSV canonique avec une ligne physique par enregistrement ; pas de retours à la ligne dans les champs. Champs scalaires bornés, nom obligatoire.",
+        "Arrêt après 211 commits pendant la phase produits du lot de 10 000 lignes valides ; rejets et correction testés séparément.",
+        "Rollback d’une création après mutation objet, avant effet/étatligne ; pas de crash à tous les points, ni de modification existante interrompue.",
+        "PostgreSQL reste actif pendant les arrêts JVM ; aucun crash serveur, multiworker ou incident de stockage testé.",
+        "API, permissions, interfaces, débit et volumétrie de production non testés."
+      ],
+      "roles_affected_by_knowledge": [
+        "analyse_produit",
+        "architecture",
+        "dev_java",
+        "qa",
+        "plateforme"
+      ]
+    },
+    {
+      "id": "STOCK",
+      "code": [
+        "iteration-04-prototype/src/test/java/flow/audit4/StockProbe.java",
+        "iteration-04-prototype/src/test/java/flow/audit4/StockProbeTest.java"
+      ],
+      "packages": [
+        "C04",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S07"
+      ],
+      "mechanism": "Clé de requête et résultat immuables, création atomique de la clé de stock, sérialisation des accès, position/journal/engagement/résultat dans une même transaction.",
+      "work_impact": "C04 finance la primitive commune ; S05 compose cette primitive avec les invariants du stock. Le code autonome du témoin ne crée pas un second financement.",
+      "limitations": [
+        "Concurrence observée via deux PID et attente Lock PostgreSQL ; le bloqueur exact n’est pas asserté. Unicité ou verrou de ligne peuvent sérialiser selon le chemin.",
+        "La perte de réponse est simulée après commit ; aucun incident réseau réel ni redémarrage de JVM/serveur stock.",
+        "Cycle de consommation/libération/correction séquentiel ; courses entre ces actions non testées.",
+        "Une clé, quantités entières, une unité ; pas de décimales, conversion, plusieurs clés ou contrôle d’accès par propriétaire.",
+        "Révision et expiration sont hors témoin ; les cinq commandes testées ne couvrent pas le cycle complet estimé.",
+        "Transactions Spring avec dépendances Boot 3.5.7 ; pas de validation du démarrage/auto-configuration Boot.",
+        "API/UI, sécurité complète, migrations et débit de production non testés."
+      ],
+      "roles_affected_by_knowledge": [
+        "analyse_produit",
+        "architecture",
+        "dev_java",
+        "qa"
+      ]
+    }
+  ],
+  "effort_decision": {
+    "change": false,
+    "reason": "Les décisions précisent les travaux déjà prévus. Ni une durée humaine observée ni un travail retiré/nouveau chiffrable n’est apporté. Conserver les JH et leurs plages ; la variante de revue sécurité STOCK reste ouverte.",
+    "m1_reference": "iteration-03-resultats.json#/estimates/M1",
+    "m2_reference": "iteration-03-resultats.json#/estimates/M2",
+    "class_change": false,
+    "percentile_added": false
+  },
+  "local_stop": "Clore la boucle de prototype de ces deux familles après le passage borné ; conserver les limites et passer à l’épreuve de généralisation.",
+  "next_iteration": {
+    "worthwhile": true,
+    "decision": "Continuer sur les familles réservées ; ne pas prolonger les prototypes actuels.",
+    "value": "Éprouver le transfert de la règle de maille et du contrat d’incertitude à l’orchestration et à la planification/optimisation. Cette étape teste la méthode, sans prétendre mesurer son erreur réelle.",
+    "reopen_current_only_if": "Nouvelle exigence ou preuve susceptible de changer les travaux, leur financement ou la décision d’investissement."
+  },
+  "execution_status": {
+    "initial": {
+      "STOCK": "6/6 passed",
+      "REF": "4/5 passed; 10000 witness interrupted at180 second harness limit"
+    },
+    "ref_final": "5/5 passed after harness correction; 10000 rows completed and reconciled",
+    "distinct_tests_passed": 11,
+    "business_implementation_changed": false,
+    "limits": "No production performance or human productivity conclusion. Initial failure retained."
+  }
+}

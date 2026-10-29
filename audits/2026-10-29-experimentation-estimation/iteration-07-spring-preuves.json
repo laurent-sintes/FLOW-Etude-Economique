@@ -1,0 +1,79 @@
+{
+  "id": "iteration-07-spring-preuves",
+  "date": "2026-10-29",
+  "kind": "Documentation officielle consultée ; aucune exécution nouvelle ni mesure de productivité",
+  "baseline_proposal": {
+    "java": "21",
+    "spring_boot": "4.1.2",
+    "spring_framework_min": "7.0.10",
+    "spring_batch_documentation": "6.0.6",
+    "database": "PostgreSQL 17 ou 18, version maintenue à choisir dans la préparation ; modèle relationnel unique",
+    "ui": "React, bibliothèque et composants usuels ; pas de composant métier FLOW livré supposé"
+  },
+  "evidence": [
+    {
+      "id": "SP07-BOOT",
+      "url": "https://docs.spring.io/spring-boot/system-requirements.html",
+      "observed": "Documentation 4.1.2 : Java 17 minimum, jusqu'à 27 ; Framework 7.0.10 minimum.",
+      "use": "Java 21 est dans la plage annoncée. Alignement des dépendances et qualification du projet restent à réaliser."
+    },
+    {
+      "id": "SP07-BATCH",
+      "url": "https://docs.spring.io/spring-batch/reference/job/configuring-repository.html",
+      "observed": "Documentation 6.0.6 : le repository sans ressources ne conserve pas les métadonnées, n'est pas destiné aux redémarrages et n'est pas thread-safe ; repository JDBC disponible.",
+      "use": "Retenir explicitement JDBC avec gestionnaire de transaction, métadonnées persistées et essais de reprise. Spring Batch n'apporte pas les décisions d'identité, version ou validité des références."
+    },
+    {
+      "id": "SP07-PARALLEL",
+      "url": "https://docs.spring.io/spring-batch/reference/scalability.html",
+      "observed": "Plusieurs modes de parallélisme sont disponibles ; des composants avec état demandent une analyse de sûreté.",
+      "use": "Dimensionner d'abord le traitement simple, qualifier la concurrence réelle ; pas de débit promis à partir de la présence de Batch."
+    },
+    {
+      "id": "SP07-SECURITY",
+      "url": "https://docs.spring.io/spring-security/reference/servlet/authorization/method-security.html",
+      "observed": "L'autorisation au niveau méthode est configurable et doit être activée ; les méthodes non annotées ne sont pas protégées par ce seul mécanisme.",
+      "use": "Définir droits et périmètres de données, protection par défaut, tests d'accès et revue indépendante. L'annotation ne remplace pas le modèle d'autorité."
+    },
+    {
+      "id": "SP07-LOCK",
+      "url": "https://docs.spring.io/spring-data/jpa/reference/jpa/locking.html",
+      "observed": "Les méthodes de requête ou CRUD peuvent déclarer un mode de verrou.",
+      "use": "Composer transactions et contraintes avec les invariants du catalogue ; aucun conflit métier ni idempotence automatique déduit."
+    },
+    {
+      "id": "SP07-RECOVERY",
+      "url": "https://www.postgresql.org/docs/18/continuous-archiving.html",
+      "observed": "Sauvegarde de base et archivage WAL permettent une restauration à un point choisi ; une réplication continue peut alimenter un serveur de secours.",
+      "use": "Prévoir configuration, contrôle d'archivage, restauration et rapprochement des contributions. La fonction du SGBD ne prouve pas l'objectif de reprise de l'application."
+    }
+  ],
+  "reuse": [
+    {
+      "mechanism": "Conteneur, injection, API web, validation et persistance",
+      "state": "bibliothèques utilisables ; assemblage et tests à réaliser",
+      "owner": "COMMON07"
+    },
+    {
+      "mechanism": "Import relançable, métadonnées de jobs et transactions",
+      "state": "Spring Batch JDBC utilisable ; modèle métier d'import, reprise et publication à développer",
+      "owner": "REF07-IN"
+    },
+    {
+      "mechanism": "Droits et identité externe",
+      "state": "Spring Security utilisable ; droits par périmètre, configuration OIDC et qualification à réaliser",
+      "owner": "COMMON07 puis composition métier dans REF07"
+    },
+    {
+      "mechanism": "Modèle de références, contributions multiples, versions, tarifs et cohérence des liens",
+      "state": "nouveau pour FLOW ; analogies OSS non transplantées en bloc",
+      "owner": "REF07"
+    },
+    {
+      "mechanism": "Projet du prototype04",
+      "state": "preuve expérimentale seulement, pas un produit de production à réutiliser gratuitement",
+      "owner": "aucune remise"
+    }
+  ],
+  "compatibility_limit": "Le contrat des petits témoins03/05 utilisait une autre version et n'incluait pas le service proposé ici. Aucune compatibilité totale ni économie de migration n'est présumée ; les coûts antérieurs ne sont pas additionnés au nouveau socle."
+}

@@ -1,0 +1,1159 @@
+{
+  "contract": {
+    "id": "iteration-13-contrat",
+    "date": "2026-10-29",
+    "scope": "Order Management D04 : BC-020 \u00e0 BC-027, huit capacit\u00e9s et vingt-quatre fonctions natives.",
+    "status": "Proposition conditionnelle d\u2019opportunit\u00e9, classe C ; sources actives inchang\u00e9es",
+    "origin": "Ing\u00e9nierie assist\u00e9e par IA ; pas de calibration empirique ni revue humaine revendiqu\u00e9e.",
+    "stack": "Spring/Java, PostgreSQL, React ; patrimoine g\u00e9n\u00e9rique09\u201312 suppos\u00e9 construit. Odoo, Tryton et Axelor sont des r\u00e9f\u00e9rences de m\u00e9canismes, pas du code incorpor\u00e9 \u00e0 Spring.",
+    "assumptions": [
+      [
+        "Granularit\u00e9",
+        "Estimation au niveau de la famille et des m\u00e9canismes partag\u00e9s, compl\u00e9t\u00e9e par les travaux propres \u00e0 chaque capacit\u00e9. Une ligne BC seule n\u2019est pas le prix autonome de cette capacit\u00e9."
+      ],
+      [
+        "Cycle commun",
+        "Identit\u00e9s stables de commande, ligne et portion ; quantit\u00e9/unit\u00e9, dates, parties, prix engag\u00e9s re\u00e7us, versions et contr\u00f4les applicables. \u00c9tats de demande, confirmation, r\u00e9alisation, annulation et cl\u00f4ture distincts. Suspension et changement autoris\u00e9 ne r\u00e9\u00e9crivent pas les faits r\u00e9alis\u00e9s."
+      ],
+      [
+        "Autorisations",
+        "Preuve d\u2019autorit\u00e9 par action/version/portion, validit\u00e9 dat\u00e9e ; absence, refus ou p\u00e9remption bloque les effets concern\u00e9s. Le Core interpr\u00e8te le r\u00e9sultat re\u00e7u ; r\u00e8gles cr\u00e9dit, achat et imputation Groupe en int\u00e9gration. API d\u00e9claratives, pas scripts arbitraires."
+      ],
+      [
+        "Faits et corrections",
+        "Publication durable10 et contrats11 r\u00e9utilis\u00e9s ; d\u00e9doublonnage technique par source/identifiant et \u00e9conomique par provenance/portion. Fait tardif ou correctif conserve son historique ; impossible \u00e0 imputer reste un \u00e9cart, pas un r\u00e9sultat invent\u00e9."
+      ],
+      [
+        "Vente et achat",
+        "Pr\u00e9commandes conserv\u00e9es, confirmation partielle et reliquat motiv\u00e9. Biens/services ont unit\u00e9s et preuves distinctes. Prix re\u00e7u fig\u00e9 par engagement ; sourcing, n\u00e9gociation, fiscalit\u00e9 et calcul de prix exclus. Branches intercompany autonomes reli\u00e9es, sans commande suppl\u00e9mentaire impos\u00e9e."
+      ],
+      [
+        "Transfert",
+        "\u00c9tapes connues et d\u00e9parts/arriv\u00e9es suivis s\u00e9par\u00e9ment. R\u00e9vision en transit ne modifie que ce qui reste autoris\u00e9 ; perte ou surplus trait\u00e9 par un \u00e9cart et une d\u00e9cision explicite. D\u00e9placement, propri\u00e9t\u00e9 et finance ne se d\u00e9duisent pas mutuellement."
+      ],
+      [
+        "Consignation",
+        "Fournisseur chez nous et nos biens chez tiers. Accord/mandat et conditions re\u00e7us ; propri\u00e9taire et d\u00e9tenteur distincts. V\u00e9rification dat\u00e9e puis nouvelle v\u00e9rification \u00e0 l\u2019engagement, utilisation de la r\u00e9servation10 quand applicable ; pas garantie d\u2019actif physique sans preuve externe. Fin de l\u2019apport/reprise ne cl\u00f4t pas l\u2019accord."
+      ],
+      [
+        "Retours",
+        "Parcours combinables par portions : r\u00e9ception ou absence de retour physique, acceptation/refus, avoir, remboursement, remplacement ou r\u00e9paration du m\u00eame bien identifi\u00e9. Les identit\u00e9s et preuves permettent de ne pas compter deux fois le remplacement. Chaque branche se termine selon sa preuve propre, sans r\u00e9ception/paiement implicite."
+      ],
+      [
+        "Structuration",
+        "Matrice explicite d\u2019op\u00e9rations permises par famille/\u00e9tat, unit\u00e9s/parties/prix/dates/autorit\u00e9 compatibles. Scission conserve origine/quantit\u00e9s ; regroupement conserve les objets ; fusion cr\u00e9e un r\u00e9sultat et rend les origines non ex\u00e9cutables pour les portions transf\u00e9r\u00e9es. Engagements d\u00e9j\u00e0 r\u00e9alis\u00e9s conserv\u00e9s ; modifications commerciales n\u00e9cessitent acceptation. Pas fusion universelle entre familles."
+      ],
+      [
+        "Intermodules",
+        "E131 remplace les doubles Orders utilis\u00e9s en11/12 par les endpoints r\u00e9els de cette famille. Les destinataires Finance, promesse, transport et prestations hors p\u00e9rim\u00e8tre conservent des contrats et doubles. Qualification en laboratoire des raccords10\u201312 financ\u00e9e ; aucune int\u00e9gration fournisseur/Groupe r\u00e9alis\u00e9e."
+      ],
+      [
+        "Volume propos\u00e9 S5",
+        "1 million de commandes actives, 10 millions de lignes, 30 millions de faits, 100 changements/s soutenus et pointe300/s pendant15min ; 200 utilisateurs simultan\u00e9s. Vues pagin\u00e9es cible p95\u22642s hors imports/recalculs. Restructuration jusqu\u2019\u00e01000lignes dans une transaction et graphe consultable par pages ; gros ensembles trait\u00e9s en lots avec \u00e9tat partiel explicite. Hypoth\u00e8ses de dimensionnement, pas mesures."
+      ],
+      [
+        "Calendrier et qualit\u00e9",
+        "\u00c9quipe exp\u00e9riment\u00e9e, 7h/JH, 18JH planifiables/personne/mois. Tests d\u00e9veloppeur inclus dans le brut d\u00e9veloppeur ; QA, architecture et coordination s\u00e9par\u00e9es. Infrastructure et restauration09 r\u00e9utilis\u00e9es, interruptions et reconstruction des vues Orders qualifi\u00e9es ici. Pas gain IA ajout\u00e9."
+      ],
+      [
+        "Incertitude",
+        "Bas/central/haut conservent ce contenu. Les bornes varient les reprises de conception et de qualification, par jugement non calibr\u00e9. Somme des bornes = sc\u00e9narios simultan\u00e9s de sensibilit\u00e9, pas intervalle probabiliste. \u00c9largissement du p\u00e9rim\u00e8tre oblige \u00e0 r\u00e9estimer."
+      ]
+    ],
+    "reuse": [
+      {
+        "owner": "09 C701\u2013707 / I701\u2013706",
+        "asset": "Infrastructure, r\u00e9f\u00e9rences, imports, identit\u00e9, composants UI",
+        "delta": "E131 raccorde le module ; S131 ajoute seulement le mod\u00e8le et les \u00e9crans de commandes."
+      },
+      {
+        "owner": "10 S101\u2013104 / BC-014,015,018",
+        "asset": "Publication durable, quantit\u00e9s/unit\u00e9s, registres de propri\u00e9t\u00e9 et r\u00e9servation",
+        "delta": "S132 porte les imputations et restes propres aux commandes. Les registres stocks ne sont pas refactur\u00e9s."
+      },
+      {
+        "owner": "11 E111 / S111\u2013112 / BC-079,083,086",
+        "asset": "Orchestration, interventions et vues des processus",
+        "delta": "E131 ajoute le raccord c\u00f4t\u00e9 Orders ; les cycles de commande gardent leur propre autorit\u00e9, sans nouveau moteur de processus."
+      },
+      {
+        "owner": "12 BC-038,039 / S121",
+        "asset": "D\u00e9cisions de lib\u00e9ration, application de plan et instantan\u00e9s",
+        "delta": "E131 raccorde le destinataire Orders et S132 la substitution proposition/commande ; pas nouveau planificateur ni solveur."
+      },
+      {
+        "owner": "13 S131\u2013132",
+        "asset": "Mod\u00e8le, droits, faits et reliquats communs",
+        "delta": "BC020\u2013027 ne financent que leurs particularit\u00e9s ; BC027 poss\u00e8de les transformations de filiation."
+      }
+    ],
+    "exclusions": [
+      "Promesse ATP/CTP/PTP et activation de protections : \u00e0 estimer s\u00e9par\u00e9ment, jamais d\u00e9duites de l\u2019existence d\u2019une commande.",
+      "Connecteurs Beaumanoir, donn\u00e9es/r\u00e8gles m\u00e9tier client, nettoyage/migration, d\u00e9ploiements des marques, Run et pilotage programme.",
+      "Calcul prix/taxes, cr\u00e9dit, facturation/paiement, ex\u00e9cution WMS/transport/r\u00e9paration ; seuls contrats, demandes et preuves re\u00e7ues sont dans cette famille.",
+      "Aucune reprise du code des ERP ; pas de remboursement automatique, de transaction distribu\u00e9e universelle ni d\u2019effet distant exactement une fois."
+    ],
+    "risks": [
+      {
+        "label": "R\u00e9solutions partielles des retours",
+        "caps": [
+          "BC-025",
+          "BC-026"
+        ],
+        "effect": "Combinaisons des suites, identit\u00e9 du bien r\u00e9par\u00e9 et preuve de r\u00e9solution restent \u00e0 qualifier ; analogies ERP partielles."
+      },
+      {
+        "label": "Restructuration apr\u00e8s engagement",
+        "caps": [
+          "BC-027"
+        ],
+        "effect": "Conservation des quantit\u00e9s ne suffit pas \u00e0 conserver les engagements commerciaux ; autorisations et provenance sont d\u00e9cisives."
+      },
+      {
+        "label": "Consignation et faits concurrents",
+        "caps": [
+          "BC-023",
+          "BC-024"
+        ],
+        "effect": "Les analogies portent surtout sur mouvements/propri\u00e9t\u00e9 ; l\u2019autorit\u00e9 d\u2019accord et l\u2019actualit\u00e9 des quantit\u00e9s sont des \u00e9carts FLOW."
+      },
+      {
+        "label": "Fronti\u00e8res externes",
+        "caps": [
+          "BC-020",
+          "BC-021",
+          "BC-022"
+        ],
+        "effect": "Retards, corrections et refus des autres autorit\u00e9s peuvent allonger les reprises de conception et de qualification."
+      }
+    ]
+  },
+  "lots": {
+    "id": "iteration-13-lots",
+    "date": "2026-10-29",
+    "roles": [
+      "analyse_produit",
+      "architecture",
+      "dev_java",
+      "dev_frontend",
+      "ux",
+      "qa",
+      "plateforme",
+      "securite",
+      "coordination",
+      "expert_optimisation"
+    ],
+    "packages": [
+      {
+        "id": "E131",
+        "group": "COMMUN",
+        "label": "Raccordement du module Commandes",
+        "central": {
+          "analyse_produit": 12,
+          "architecture": 18,
+          "dev_java": 36,
+          "dev_frontend": 8,
+          "plateforme": 12,
+          "securite": 6
+        },
+        "factors": [
+          0.7,
+          1.7
+        ],
+        "work": "Contrats Spring, d\u00e9ploiement et raccords r\u00e9els c\u00f4t\u00e9 Orders \u00e0 Plan Application12 et vues/processus11. Adaptateurs g\u00e9n\u00e9riques d\u2019effets stocks10 ; pas les connecteurs Beaumanoir.",
+        "java_actions": [
+          {
+            "action": "Contrats API, versions et erreurs",
+            "jh": 12
+          },
+          {
+            "action": "Raccords plan/processus/stock",
+            "jh": 14
+          },
+          {
+            "action": "Tests d\u00e9veloppeur de compatibilit\u00e9",
+            "jh": 10
+          }
+        ],
+        "frontend_actions": [
+          {
+            "action": "Navigation et affichage des erreurs",
+            "jh": 5
+          },
+          {
+            "action": "Tests interface",
+            "jh": 3
+          }
+        ],
+        "evidence": [
+          "O1",
+          "T1",
+          "A1"
+        ],
+        "range_reason": "Variations de conception, adaptation et qualification du contenu d\u00e9crit ; aucun facteur tir\u00e9 de LOC ou d\u2019un score m\u00e9tier.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      },
+      {
+        "id": "S131",
+        "group": "COMMUN",
+        "label": "Mod\u00e8le commun des commandes et autorisations",
+        "central": {
+          "analyse_produit": 20,
+          "architecture": 20,
+          "dev_java": 64,
+          "dev_frontend": 32,
+          "ux": 10,
+          "plateforme": 2,
+          "securite": 8
+        },
+        "factors": [
+          0.7,
+          1.8
+        ],
+        "work": "Identit\u00e9s, lignes/portions, unit\u00e9s, dates, prix engag\u00e9s re\u00e7us, versions, permissions. Transitions et suspensions g\u00e9n\u00e9riques, preuves d\u2019autorit\u00e9 p\u00e9rimables ; formulaire et historique communs.",
+        "java_actions": [
+          {
+            "action": "Mod\u00e8le, persistance et API",
+            "jh": 24
+          },
+          {
+            "action": "Transitions, autorisations et conflits de version",
+            "jh": 22
+          },
+          {
+            "action": "Tests d\u00e9veloppeur",
+            "jh": 18
+          }
+        ],
+        "frontend_actions": [
+          {
+            "action": "\u00c9dition et comparaison de versions",
+            "jh": 22
+          },
+          {
+            "action": "Tests interface",
+            "jh": 10
+          }
+        ],
+        "evidence": [
+          "O1",
+          "O2",
+          "A1",
+          "A2",
+          "T2"
+        ],
+        "range_reason": "Variations de conception, adaptation et qualification du contenu d\u00e9crit ; aucun facteur tir\u00e9 de LOC ou d\u2019un score m\u00e9tier.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      },
+      {
+        "id": "S132",
+        "group": "COMMUN",
+        "label": "Rapprochement des r\u00e9alisations et reliquats",
+        "central": {
+          "analyse_produit": 18,
+          "architecture": 18,
+          "dev_java": 80,
+          "dev_frontend": 20,
+          "ux": 4,
+          "plateforme": 4,
+          "securite": 4
+        },
+        "factors": [
+          0.65,
+          1.9
+        ],
+        "work": "Provenance des faits, corrections, imputation \u00e0 des portions et cl\u00f4ture motiv\u00e9e. Identit\u00e9 \u00e9conomique des demandes/apports, passage proposition\u2192commande, effets inconnus et rapprochement tardif. R\u00e9emploie la publication durable10, sans reconstruire son transport.",
+        "java_actions": [
+          {
+            "action": "Faits, corrections et imputation",
+            "jh": 28
+          },
+          {
+            "action": "Quantit\u00e9s, reliquats et d\u00e9doublonnage \u00e9conomique",
+            "jh": 28
+          },
+          {
+            "action": "Tests de concurrence, rejeu et corrections",
+            "jh": 24
+          }
+        ],
+        "frontend_actions": [
+          {
+            "action": "Restes \u00e0 traiter et \u00e9carts",
+            "jh": 14
+          },
+          {
+            "action": "Tests interface",
+            "jh": 6
+          }
+        ],
+        "evidence": [
+          "T1",
+          "T2",
+          "O3",
+          "A3"
+        ],
+        "range_reason": "Variations de conception, adaptation et qualification du contenu d\u00e9crit ; aucun facteur tir\u00e9 de LOC ou d\u2019un score m\u00e9tier.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      },
+      {
+        "id": "B020",
+        "group": "BC-020",
+        "label": "Commande client",
+        "central": {
+          "analyse_produit": 18,
+          "architecture": 6,
+          "dev_java": 42,
+          "dev_frontend": 20,
+          "ux": 3
+        },
+        "factors": [
+          0.7,
+          1.7
+        ],
+        "work": "Pr\u00e9commande, confirmation et r\u00e9vision partielle ; prix/cr\u00e9dit re\u00e7us et valides, livraison/enl\u00e8vement/direct ; branches intercompany autonomes. Aucun tunnel commercial ni moteur de prix.",
+        "java_actions": [
+          {
+            "action": "Variantes et confirmation sous contr\u00f4le",
+            "jh": 16
+          },
+          {
+            "action": "R\u00e9visions et r\u00e9sultats partiels",
+            "jh": 14
+          },
+          {
+            "action": "Tests d\u00e9veloppeur",
+            "jh": 12
+          }
+        ],
+        "frontend_actions": [
+          {
+            "action": "Parcours client et engagement",
+            "jh": 14
+          },
+          {
+            "action": "Tests interface",
+            "jh": 6
+          }
+        ],
+        "evidence": [
+          "O1",
+          "T1",
+          "T2",
+          "A1"
+        ],
+        "range_reason": "Variations de conception, adaptation et qualification du contenu d\u00e9crit ; aucun facteur tir\u00e9 de LOC ou d\u2019un score m\u00e9tier.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      },
+      {
+        "id": "B021",
+        "group": "BC-021",
+        "label": "Commande fournisseur",
+        "central": {
+          "analyse_produit": 20,
+          "architecture": 6,
+          "dev_java": 48,
+          "dev_frontend": 22,
+          "ux": 3
+        },
+        "factors": [
+          0.7,
+          1.8
+        ],
+        "work": "\u00c9mission autoris\u00e9e, r\u00e9ponses partielles et refus, dates, prix re\u00e7us, biens/services avec preuves diff\u00e9rentes ; affermissement sans double apport. Pas de sourcing ni n\u00e9gociation.",
+        "java_actions": [
+          {
+            "action": "\u00c9mission et confirmations fournisseur",
+            "jh": 18
+          },
+          {
+            "action": "R\u00e9visions et filiation propositions",
+            "jh": 16
+          },
+          {
+            "action": "Tests d\u00e9veloppeur",
+            "jh": 14
+          }
+        ],
+        "frontend_actions": [
+          {
+            "action": "R\u00e9ponses, reliquats et versions",
+            "jh": 16
+          },
+          {
+            "action": "Tests interface",
+            "jh": 6
+          }
+        ],
+        "evidence": [
+          "O2",
+          "A2",
+          "T2"
+        ],
+        "range_reason": "Variations de conception, adaptation et qualification du contenu d\u00e9crit ; aucun facteur tir\u00e9 de LOC ou d\u2019un score m\u00e9tier.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      },
+      {
+        "id": "B022",
+        "group": "BC-022",
+        "label": "Commande de transfert",
+        "central": {
+          "analyse_produit": 14,
+          "architecture": 4,
+          "dev_java": 36,
+          "dev_frontend": 16,
+          "ux": 2
+        },
+        "factors": [
+          0.7,
+          1.7
+        ],
+        "work": "Origine/destination, \u00e9tapes identifi\u00e9es, d\u00e9parts et arriv\u00e9es partiels, changements en transit soumis \u00e0 autorit\u00e9, \u00e9carts et liens intercompany. Ex\u00e9cution WMS/transport hors Core.",
+        "java_actions": [
+          {
+            "action": "\u00c9tapes et r\u00e9visions de transfert",
+            "jh": 14
+          },
+          {
+            "action": "Rapprochement d\u00e9part/arriv\u00e9e",
+            "jh": 12
+          },
+          {
+            "action": "Tests d\u00e9veloppeur",
+            "jh": 10
+          }
+        ],
+        "frontend_actions": [
+          {
+            "action": "Transit et \u00e9carts",
+            "jh": 11
+          },
+          {
+            "action": "Tests interface",
+            "jh": 5
+          }
+        ],
+        "evidence": [
+          "T4",
+          "A3",
+          "O3"
+        ],
+        "range_reason": "Variations de conception, adaptation et qualification du contenu d\u00e9crit ; aucun facteur tir\u00e9 de LOC ou d\u2019un score m\u00e9tier.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      },
+      {
+        "id": "B023",
+        "group": "BC-023",
+        "label": "Mise en consignation",
+        "central": {
+          "analyse_produit": 14,
+          "architecture": 4,
+          "dev_java": 30,
+          "dev_frontend": 16,
+          "ux": 2
+        },
+        "factors": [
+          0.65,
+          1.9
+        ],
+        "work": "Deux perspectives propri\u00e9taire/d\u00e9tenteur, mandat/accord versionn\u00e9 re\u00e7u, apports partiels et reste ; aucune vente ou acquisition implicite. R\u00e9emploie le registre de propri\u00e9t\u00e910.",
+        "java_actions": [
+          {
+            "action": "Accord, parties et portions",
+            "jh": 10
+          },
+          {
+            "action": "Apports et rapprochement",
+            "jh": 10
+          },
+          {
+            "action": "Tests d\u00e9veloppeur",
+            "jh": 10
+          }
+        ],
+        "frontend_actions": [
+          {
+            "action": "Accords et apports",
+            "jh": 11
+          },
+          {
+            "action": "Tests interface",
+            "jh": 5
+          }
+        ],
+        "evidence": [
+          "T3",
+          "T4"
+        ],
+        "range_reason": "Variations de conception, adaptation et qualification du contenu d\u00e9crit ; aucun facteur tir\u00e9 de LOC ou d\u2019un score m\u00e9tier.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      },
+      {
+        "id": "B024",
+        "group": "BC-024",
+        "label": "Reprise de biens consign\u00e9s",
+        "central": {
+          "analyse_produit": 14,
+          "architecture": 4,
+          "dev_java": 34,
+          "dev_frontend": 16,
+          "ux": 2
+        },
+        "factors": [
+          0.65,
+          2
+        ],
+        "work": "V\u00e9rification des biens encore d\u00e9tenus pour le propri\u00e9taire, quantit\u00e9 admissible dat\u00e9e, r\u00e9servation10 si n\u00e9cessaire, collecte/restitution et refus. Mandat durable non cl\u00f4tur\u00e9 avec la commande.",
+        "java_actions": [
+          {
+            "action": "\u00c9ligibilit\u00e9 et autorisation de reprise",
+            "jh": 12
+          },
+          {
+            "action": "Restitution et \u00e9carts",
+            "jh": 12
+          },
+          {
+            "action": "Tests d\u00e9veloppeur",
+            "jh": 10
+          }
+        ],
+        "frontend_actions": [
+          {
+            "action": "Reprise partielle et refus",
+            "jh": 11
+          },
+          {
+            "action": "Tests interface",
+            "jh": 5
+          }
+        ],
+        "evidence": [
+          "T3",
+          "T4",
+          "O3"
+        ],
+        "range_reason": "Variations de conception, adaptation et qualification du contenu d\u00e9crit ; aucun facteur tir\u00e9 de LOC ou d\u2019un score m\u00e9tier.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      },
+      {
+        "id": "B025",
+        "group": "BC-025",
+        "label": "Retour client",
+        "central": {
+          "analyse_produit": 22,
+          "architecture": 6,
+          "dev_java": 54,
+          "dev_frontend": 26,
+          "ux": 4
+        },
+        "factors": [
+          0.6,
+          2.1
+        ],
+        "work": "Admission avec/sans r\u00e9ception, suites combinables par portion : avoir, remboursement, remplacement, r\u00e9paration. Suivi des d\u00e9cisions/preuves re\u00e7ues, sans ex\u00e9cuter Finance ni la r\u00e9paration. Liens intercompany conserv\u00e9s.",
+        "java_actions": [
+          {
+            "action": "Parcours et quantit\u00e9s de r\u00e9solution",
+            "jh": 20
+          },
+          {
+            "action": "Liens aux ventes et suites externes",
+            "jh": 18
+          },
+          {
+            "action": "Tests d\u00e9veloppeur",
+            "jh": 16
+          }
+        ],
+        "frontend_actions": [
+          {
+            "action": "Suites physiques et financi\u00e8res distinctes",
+            "jh": 18
+          },
+          {
+            "action": "Tests interface",
+            "jh": 8
+          }
+        ],
+        "evidence": [
+          "O3",
+          "T5",
+          "T1"
+        ],
+        "range_reason": "Reprises des r\u00e9solutions combin\u00e9es, imputation et liens de remplacement/r\u00e9paration.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      },
+      {
+        "id": "B026",
+        "group": "BC-026",
+        "label": "Retour fournisseur",
+        "central": {
+          "analyse_produit": 22,
+          "architecture": 6,
+          "dev_java": 56,
+          "dev_frontend": 26,
+          "ux": 4
+        },
+        "factors": [
+          0.6,
+          2.1
+        ],
+        "work": "Accord et RMA facultatif, refus et r\u00e9solution partielle, remplacement unique reli\u00e9 \u00e0 l\u2019achat, r\u00e9paration du m\u00eame bien identifi\u00e9, restitution et r\u00e9sultat financier ind\u00e9pendants.",
+        "java_actions": [
+          {
+            "action": "Parcours fournisseur et identit\u00e9 du bien",
+            "jh": 20
+          },
+          {
+            "action": "Remplacement, r\u00e9paration et rapprochement",
+            "jh": 20
+          },
+          {
+            "action": "Tests d\u00e9veloppeur",
+            "jh": 16
+          }
+        ],
+        "frontend_actions": [
+          {
+            "action": "Renvoi et r\u00e9solution par portion",
+            "jh": 18
+          },
+          {
+            "action": "Tests interface",
+            "jh": 8
+          }
+        ],
+        "evidence": [
+          "O3",
+          "T5",
+          "A2"
+        ],
+        "range_reason": "Reprises des r\u00e9solutions combin\u00e9es, imputation et liens de remplacement/r\u00e9paration.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      },
+      {
+        "id": "B027",
+        "group": "BC-027",
+        "label": "Structuration des commandes",
+        "central": {
+          "analyse_produit": 26,
+          "architecture": 12,
+          "dev_java": 72,
+          "dev_frontend": 28,
+          "ux": 6
+        },
+        "factors": [
+          0.6,
+          2.2
+        ],
+        "work": "Scission, regroupement sans perte d\u2019identit\u00e9, fusion autoris\u00e9e avec nouvel objet ; graphe de filiation sans double besoin/apport, liens plusieurs-\u00e0-plusieurs. Pr\u00e9servation des parties, prix, dates et engagements accept\u00e9s.",
+        "java_actions": [
+          {
+            "action": "Graphe et op\u00e9rations de restructuration",
+            "jh": 26
+          },
+          {
+            "action": "Conservation, autorisations et conflits",
+            "jh": 24
+          },
+          {
+            "action": "Tests d\u00e9veloppeur et concurrence",
+            "jh": 22
+          }
+        ],
+        "frontend_actions": [
+          {
+            "action": "Pr\u00e9visualisation et lecture des filiations",
+            "jh": 20
+          },
+          {
+            "action": "Tests interface",
+            "jh": 8
+          }
+        ],
+        "evidence": [
+          "A3",
+          "T2",
+          "O3"
+        ],
+        "range_reason": "Reprises possibles du graphe, de la matrice d\u2019op\u00e9rations et des engagements concurrents.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      },
+      {
+        "id": "Q131",
+        "group": "QUAL",
+        "label": "QA des parcours crois\u00e9s et corrections",
+        "central": {
+          "analyse_produit": 8,
+          "architecture": 6,
+          "dev_java": 30,
+          "dev_frontend": 14,
+          "qa": 100
+        },
+        "factors": [
+          0.7,
+          1.9
+        ],
+        "work": "QA ind\u00e9pendante du mod\u00e8le : parcours huit familles, matrices d\u2019autorisation, ruptures plan/commande/stock/processus, correction des anomalies d\u2019assemblage. Tests d\u00e9veloppeur des lots d\u00e9j\u00e0 inclus, non refactur\u00e9s.",
+        "java_actions": [
+          {
+            "action": "Corrections issues des parcours crois\u00e9s",
+            "jh": 30
+          }
+        ],
+        "frontend_actions": [
+          {
+            "action": "Corrections interface issues de QA",
+            "jh": 14
+          }
+        ],
+        "evidence": [
+          "O1",
+          "T1",
+          "T2",
+          "A3"
+        ],
+        "range_reason": "Variations de conception, adaptation et qualification du contenu d\u00e9crit ; aucun facteur tir\u00e9 de LOC ou d\u2019un score m\u00e9tier.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      },
+      {
+        "id": "Q132",
+        "group": "QUAL",
+        "label": "Qualification des volumes et de la s\u00e9curit\u00e9",
+        "central": {
+          "architecture": 8,
+          "dev_java": 20,
+          "dev_frontend": 4,
+          "qa": 18,
+          "plateforme": 14,
+          "securite": 16
+        },
+        "factors": [
+          0.65,
+          2
+        ],
+        "work": "Profil de charge propos\u00e9, reconstruction des vues, isolation des soci\u00e9t\u00e9s, droits sur prix et d\u00e9cisions, interruptions et restauration. Pas reconstruction infrastructure09.",
+        "java_actions": [
+          {
+            "action": "Profilage et corrections de charge",
+            "jh": 12
+          },
+          {
+            "action": "Corrections s\u00e9curit\u00e9 et reprise",
+            "jh": 8
+          }
+        ],
+        "frontend_actions": [
+          {
+            "action": "Corrections volum\u00e9trie et droits",
+            "jh": 4
+          }
+        ],
+        "evidence": [
+          "O1",
+          "T1",
+          "A3"
+        ],
+        "range_reason": "Variations de conception, adaptation et qualification du contenu d\u00e9crit ; aucun facteur tir\u00e9 de LOC ou d\u2019un score m\u00e9tier.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      },
+      {
+        "id": "Q133",
+        "group": "QUAL",
+        "label": "Coordination technique de la famille",
+        "central": {
+          "coordination": 64
+        },
+        "factors": [
+          0.75,
+          1.6
+        ],
+        "work": "Coordination du mod\u00e8le, contrats intermodules, d\u00e9pendances et arbitrages techniques ; revue de passage de chaque phase. Aucun pilotage du programme Groupe.",
+        "java_actions": [],
+        "frontend_actions": [],
+        "evidence": [
+          "O1",
+          "T2",
+          "A3"
+        ],
+        "range_reason": "Variations de conception, adaptation et qualification du contenu d\u00e9crit ; aucun facteur tir\u00e9 de LOC ou d\u2019un score m\u00e9tier.",
+        "origin": "Jugement d\u2019ing\u00e9nierie assist\u00e9 par IA, non observ\u00e9, sans revue humaine."
+      }
+    ],
+    "bounds": "Classe C : hypoth\u00e8ses de r\u00e9alisation non calibr\u00e9es. Facteurs bas/haut par lot, arrondis au demi-JH ext\u00e9rieur. M\u00eame contenu, aucune interpr\u00e9tation percentile.",
+    "role_basis": {
+      "analyse_produit": "Contrats, \u00e9tats et autorisations ; exemples de portions, d\u00e9cisions et cl\u00f4tures propres \u00e0 chaque famille.",
+      "architecture": "Versions, transactions, provenance, fronti\u00e8res et revues des contrats entre modules.",
+      "dev_java": "Actions d\u00e9taill\u00e9es par lot, incluant tests d\u00e9veloppeur ; corrections crois\u00e9es s\u00e9par\u00e9es.",
+      "dev_frontend": "\u00c9crans communs et parcours sp\u00e9cifiques, tests interface et corrections identifi\u00e9s.",
+      "ux": "Conception/validation des parcours et repr\u00e9sentations des \u00e9tats, portions et filiations.",
+      "qa": "100JH de qualification des parcours et18JH de charge/reprise/s\u00e9curit\u00e9 ; les sc\u00e9narios sont ind\u00e9pendants des tests d\u00e9veloppeur.",
+      "plateforme": "12JH raccord module,6JH communs et14JH qualification ; socle09 d\u00e9j\u00e0 financ\u00e9.",
+      "securite": "Droits sur prix/commandes/branches intercompany et revue des preuves ; pas reconstruire IAM.",
+      "coordination": "64JH : cadrage intermodules16, revues des familles20, arbitrages d\u2019assemblage16, passage de qualification12.",
+      "expert_optimisation": "0JH additionnel : pas de nouvel algorithme d\u2019optimisation ; les d\u00e9cisions appartiennent \u00e012. Le cumul conserve350JH centraux."
+    },
+    "schedule": {
+      "days_per_person_month": 18,
+      "phases": [
+        {
+          "id": "P1",
+          "label": "Mod\u00e8le commun et contrats",
+          "packages": [
+            "E131",
+            "S131",
+            "S132"
+          ],
+          "floor_months": [
+            2,
+            3,
+            4
+          ],
+          "staff": [
+            0.8,
+            0.6,
+            2,
+            1,
+            0.3,
+            0.6,
+            0.4,
+            0.3,
+            0.3,
+            0
+          ]
+        },
+        {
+          "id": "P2",
+          "label": "Vente, achat, transfert et structuration",
+          "packages": [
+            "B020",
+            "B021",
+            "B022",
+            "B027"
+          ],
+          "floor_months": [
+            2,
+            3,
+            4
+          ],
+          "staff": [
+            1,
+            0.5,
+            2,
+            1,
+            0.3,
+            0.6,
+            0.2,
+            0.2,
+            0.3,
+            0
+          ]
+        },
+        {
+          "id": "P3",
+          "label": "Consignation et retours",
+          "packages": [
+            "B023",
+            "B024",
+            "B025",
+            "B026"
+          ],
+          "floor_months": [
+            2,
+            3,
+            4
+          ],
+          "staff": [
+            1,
+            0.5,
+            2,
+            1,
+            0.3,
+            0.6,
+            0.2,
+            0.2,
+            0.3,
+            0
+          ]
+        },
+        {
+          "id": "P4",
+          "label": "Qualification crois\u00e9e et stabilisation",
+          "packages": [
+            "Q131",
+            "Q132",
+            "Q133"
+          ],
+          "floor_months": [
+            2,
+            3,
+            4
+          ],
+          "staff": [
+            0.5,
+            0.5,
+            2,
+            1,
+            0.2,
+            2,
+            0.5,
+            0.5,
+            0.3,
+            0
+          ]
+        }
+      ],
+      "coordination_split": {
+        "package": "Q133",
+        "role": "coordination",
+        "shares": {
+          "P1": 0.25,
+          "P2": 0.3125,
+          "P3": 0.25,
+          "P4": 0.1875
+        }
+      },
+      "meaning": "Phases s\u00e9quentielles par prudence ; capacit\u00e9 par r\u00f4le = effectif mobilisable \u00d718JH/mois. Dur\u00e9e = max(plancher, charges/capacit\u00e9s). Effectifs non r\u00e9serv\u00e9s, mobilisation variable, pas une dur\u00e9e COCOMO.",
+      "dependencies": "Socles09\u201312 suppos\u00e9s disponibles. Cumul strictement s\u00e9quentiel de familles ; aucun plan programme optimis\u00e9 ni date de d\u00e9marrage promise."
+    }
+  },
+  "evidence": [
+    {
+      "id": "O1",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "local_path": "tmp/odoo20-audit/addons/sale/models/sale_order.py",
+      "path": "addons/sale/models/sale_order.py",
+      "line_ranges": [
+        [
+          1619,
+          1675
+        ],
+        [
+          1791,
+          1800
+        ]
+      ],
+      "observed": "La confirmation v\u00e9rifie l\u2019\u00e9tat, \u00e9crit la confirmation et appelle un point d\u2019extension ; annulation limit\u00e9e aux factures brouillon dans cet extrait.",
+      "flow_delta": "FLOW doit suivre autorisation, version, quantit\u00e9 et effets partiels externes ; cet extrait ne d\u00e9montre pas leur couverture compl\u00e8te.",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/sale/models/sale_order.py#L1619",
+      "basis": "Lecture du code fig\u00e9 ; ni ex\u00e9cution du produit ni temps de r\u00e9alisation observ\u00e9."
+    },
+    {
+      "id": "O2",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "local_path": "tmp/odoo20-audit/addons/purchase/models/purchase_order.py",
+      "path": "addons/purchase/models/purchase_order.py",
+      "line_ranges": [
+        [
+          708,
+          731
+        ]
+      ],
+      "observed": "Confirmation soumise \u00e0 validation ; annulation bloqu\u00e9e pour commande verrouill\u00e9e ou facture non annul\u00e9e/brouillon.",
+      "flow_delta": "L\u2019approbation interne ne vaut pas confirmation partielle du fournisseur. FLOW re\u00e7oit prix, contr\u00f4les et r\u00e9sultats financiers.",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/purchase/models/purchase_order.py#L708",
+      "basis": "Lecture du code fig\u00e9 ; ni ex\u00e9cution du produit ni temps de r\u00e9alisation observ\u00e9."
+    },
+    {
+      "id": "O3",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "local_path": "tmp/odoo20-audit/addons/stock/models/stock_picking.py",
+      "path": "addons/stock/models/stock_picking.py",
+      "line_ranges": [
+        [
+          936,
+          1012
+        ],
+        [
+          1014,
+          1048
+        ]
+      ],
+      "observed": "Retours li\u00e9s aux mouvements d\u2019origine et voisins, copie avec lieux invers\u00e9s ; r\u00e9alisation et absence de reliquat explicites.",
+      "flow_delta": "Analogie de filiation physique ; ne prouve ni l\u2019ensemble d\u2019un retour commercial, ni paiement/r\u00e9paration, ni restructuration d\u2019engagements.",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_picking.py#L936",
+      "basis": "Lecture du code fig\u00e9 ; ni ex\u00e9cution du produit ni temps de r\u00e9alisation observ\u00e9."
+    },
+    {
+      "id": "T1",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/sale/sale.py",
+      "path": "modules/sale/sale.py",
+      "line_ranges": [
+        [
+          1082,
+          1124
+        ],
+        [
+          1182,
+          1192
+        ],
+        [
+          1216,
+          1255
+        ]
+      ],
+      "observed": "Groupement des exp\u00e9ditions, progression factures/mouvements et cl\u00f4ture ; confirmation enfile le traitement, traitement verrouille les ventes.",
+      "flow_delta": "Distinguer acceptation et traitement effectif. FLOW re\u00e7oit les faits externes au lieu de recr\u00e9er facturation/exp\u00e9dition.",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/sale/sale.py#L1082",
+      "basis": "Lecture du code fig\u00e9 ; ni ex\u00e9cution du produit ni temps de r\u00e9alisation observ\u00e9."
+    },
+    {
+      "id": "T2",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/sale_amendment/sale.py",
+      "path": "modules/sale_amendment/sale.py",
+      "line_ranges": [
+        [
+          104,
+          171
+        ],
+        [
+          474,
+          479
+        ]
+      ],
+      "observed": "Avenant incr\u00e9mente r\u00e9vision, applique les lignes puis relance traitement ; nettoyage vise documents encore modifiables.",
+      "flow_delta": "Transposition aux r\u00e9visions autoris\u00e9es ; absence de preuve d\u2019un graphe universel plusieurs-\u00e0-plusieurs ou de fusion apr\u00e8s engagement.",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/sale_amendment/sale.py#L104",
+      "basis": "Lecture du code fig\u00e9 ; ni ex\u00e9cution du produit ni temps de r\u00e9alisation observ\u00e9."
+    },
+    {
+      "id": "T3",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/stock_consignment/stock.py",
+      "path": "modules/stock_consignment/stock.py",
+      "line_ranges": [
+        [
+          195,
+          251
+        ],
+        [
+          283,
+          305
+        ]
+      ],
+      "observed": "Consignation distingu\u00e9e via parties/lieux ; cr\u00e9ation de lignes de facture depuis certains mouvements et transitions d\u00e9di\u00e9es.",
+      "flow_delta": "Propri\u00e9t\u00e9/d\u00e9tention et effets financiers demandent une s\u00e9paration FLOW ; pas preuve d\u2019une commande d\u2019apport/reprise autonome ni d\u2019un moteur de clauses.",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock_consignment/stock.py#L195",
+      "basis": "Lecture du code fig\u00e9 ; ni ex\u00e9cution du produit ni temps de r\u00e9alisation observ\u00e9."
+    },
+    {
+      "id": "T4",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/stock/shipment.py",
+      "path": "modules/stock/shipment.py",
+      "line_ranges": [
+        [
+          2920,
+          2954
+        ],
+        [
+          2964,
+          2969
+        ]
+      ],
+      "observed": "D\u00e9part ex\u00e9cute mouvements sortants ; arriv\u00e9e ex\u00e9cute entrants et contr\u00f4le quantit\u00e9s en transit, dates distinctes.",
+      "flow_delta": "Analogie forte de s\u00e9paration d\u00e9part/arriv\u00e9e, mais commande et autorit\u00e9 de r\u00e9vision FLOW restent \u00e0 construire.",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/shipment.py#L2920",
+      "basis": "Lecture du code fig\u00e9 ; ni ex\u00e9cution du produit ni temps de r\u00e9alisation observ\u00e9."
+    },
+    {
+      "id": "T5",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/sale/sale.py",
+      "path": "modules/sale/sale.py",
+      "line_ranges": [
+        [
+          2580,
+          2602
+        ]
+      ],
+      "observed": "Assistant de retour copie la vente avec origine et quantit\u00e9s invers\u00e9es.",
+      "flow_delta": "Ne d\u00e9montre pas les suites simultan\u00e9es avoir/remboursement/remplacement/r\u00e9paration attendues par FLOW.",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/sale/sale.py#L2580",
+      "basis": "Lecture du code fig\u00e9 ; ni ex\u00e9cution du produit ni temps de r\u00e9alisation observ\u00e9."
+    },
+    {
+      "id": "A1",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "local_path": "tmp/oss-audit-axelor/axelor-sale/src/main/java/com/axelor/apps/sale/service/saleorder/status/SaleOrderWorkflowServiceImpl.java",
+      "path": "axelor-sale/src/main/java/com/axelor/apps/sale/service/saleorder/status/SaleOrderWorkflowServiceImpl.java",
+      "line_ranges": [
+        [
+          66,
+          116
+        ]
+      ],
+      "observed": "Annulation limit\u00e9e \u00e0 des statuts de devis ; cl\u00f4ture contr\u00f4l\u00e9e depuis confirm\u00e9, persistance transactionnelle.",
+      "flow_delta": "Le contr\u00f4le d\u2019\u00e9tat est comparable ; une cl\u00f4ture de FLOW n\u00e9cessite preuves et quantit\u00e9s propres, pas seulement le statut.",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-sale/src/main/java/com/axelor/apps/sale/service/saleorder/status/SaleOrderWorkflowServiceImpl.java#L66",
+      "basis": "Lecture du code fig\u00e9 ; ni ex\u00e9cution du produit ni temps de r\u00e9alisation observ\u00e9."
+    },
+    {
+      "id": "A2",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "local_path": "tmp/oss-audit-axelor/axelor-purchase/src/main/java/com/axelor/apps/purchase/service/PurchaseOrderWorkflowServiceImpl.java",
+      "path": "axelor-purchase/src/main/java/com/axelor/apps/purchase/service/PurchaseOrderWorkflowServiceImpl.java",
+      "line_ranges": [
+        [
+          68,
+          122
+        ]
+      ],
+      "observed": "Validation depuis demand\u00e9, utilisateur/date, v\u00e9rification fournisseur ; fin et annulation soumises \u00e0 statuts.",
+      "flow_delta": "Analogie d\u2019autorisation et tra\u00e7abilit\u00e9 ; engagement fournisseur externe partiel et prix re\u00e7u requi\u00e8rent un contrat propre.",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-purchase/src/main/java/com/axelor/apps/purchase/service/PurchaseOrderWorkflowServiceImpl.java#L68",
+      "basis": "Lecture du code fig\u00e9 ; ni ex\u00e9cution du produit ni temps de r\u00e9alisation observ\u00e9."
+    },
+    {
+      "id": "A3",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "local_path": "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "line_ranges": [
+        [
+          837,
+          918
+        ],
+        [
+          1231,
+          1292
+        ]
+      ],
+      "observed": "Reliquat copi\u00e9 li\u00e9 \u00e0 l\u2019origine, quantit\u00e9 demand\u00e9e moins r\u00e9alis\u00e9e ; scission v\u00e9rifie quantit\u00e9, copie et replanifie.",
+      "flow_delta": "Scission physique comparable ; ne d\u00e9montre pas conservation des autorisations/prix et liens intercompany d\u2019Order Structuring.",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java#L837",
+      "basis": "Lecture du code fig\u00e9 ; ni ex\u00e9cution du produit ni temps de r\u00e9alisation observ\u00e9."
+    }
+  ],
+  "repositories": {
+    "O": [
+      "tmp/odoo20-audit",
+      "odoo/odoo",
+      "299075f17026b830a9755f3c43f3e83143995946"
+    ],
+    "T": [
+      "tmp/tryton-code-audit-2026-10-28",
+      "tryton/tryton",
+      "e011222dc305c431677e586706fd241dffe02236"
+    ],
+    "A": [
+      "tmp/oss-audit-axelor",
+      "axelor/axelor-open-suite",
+      "e7cbea53bae88d2540f59a70b09bf0f326f1022e"
+    ]
+  }
+}

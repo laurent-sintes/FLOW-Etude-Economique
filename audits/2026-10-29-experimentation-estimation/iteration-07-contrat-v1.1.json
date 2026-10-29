@@ -1,0 +1,294 @@
+{
+  "id": "iteration-07-contrat",
+  "version": "1.1",
+  "date": "2026-10-29",
+  "status": "Contrat v1.1 fige avant le gel de M1/M2 ; scenario propose pour etude, non exigences approuvees.",
+  "unit": "Operational References : six capacités, deux ensembles fonctionnels (réception et vues de référence) et un socle commun identifiable.",
+  "scope_ids": [
+    "master-data-ingestion",
+    "cap-partner-agreement-reference-stewardship",
+    "cap-merchandise-reference-stewardship",
+    "cap-packaging-reference-stewardship",
+    "cap-internal-supplies-reference-stewardship",
+    "cap-service-reference-stewardship"
+  ],
+  "baseline": {
+    "stack": "Java 21, Spring Boot 4.1.2 ; Spring Batch avec repository JDBC explicite, Spring Data JPA, Spring Security, PostgreSQL relationnel, React.",
+    "architecture": "Application modulaire avec base transactionnelle unique ; déploiement de deux instances applicatives pour disponibilité et redémarrage, métadonnées de jobs partagées. Pas de microservices ni de moteur de recherche distribué imposés.",
+    "team": "Intervenants autonomes maîtrisant la stack et les pratiques de livraison. Hypothèse de dimensionnement, pas description de l'équipe Beaumanoir ou engagement d'un prestataire.",
+    "jh_hours": 7,
+    "quality": "Tests développeur et revue de code inclus dans les JH développeur ; QA indépendante, sécurité, architecture et travaux de plateforme séparés ; aucune remise IA.",
+    "starting_point": "Construction du produit et de ses moyens initiaux nécessaires, à partir des frameworks et composants usuels. Aucun produit FLOW livré ni équipe de production disponible n'est supposé.",
+    "ownership": "Les adaptateurs, identités concrètes, mappings et règles propres à Beaumanoir restent en intégration. Le Core fournit les contrats et mécanismes génériques permettant ces raccordements.",
+    "version_policy": "Deux versions canoniques simultanées (courante et précédente), schémas et conversions annoncés, migrations de données du produit incluses. Les formes d'autorité/condition restent typées ; combinaisons ET/OU bornées de prédicats, pas de script libre. Tout champ arbitraire non qualifié est conservé comme complément, sans prétendre permettre une décision automatique."
+  },
+  "functional_contract": [
+    {
+      "id": "F01",
+      "label": "Réception des contributions et contrats de source",
+      "capacities": [
+        "master-data-ingestion"
+      ],
+      "scope": "API JSON et lots CSV canoniques versionnés, complets ou différentiels ; réception authentifiée, empreinte et origine, états persistés et résultats par ligne. Un instantané complet doit porter périmètre, version et manifeste de complétude.",
+      "acceptance": "Une erreur de format ne rend pas un jeu partiellement chargé invisible ou faussement complet ; un lot répété renvoie un résultat identifiable."
+    },
+    {
+      "id": "F02",
+      "label": "Identités, sources multiples et autorité",
+      "capacities": [
+        "master-data-ingestion"
+      ],
+      "scope": "Identifiant interne stable, identifiants externes par source, correspondances explicites et groupes de champs d'autorité. Plusieurs sources peuvent contribuer au même sujet dans leurs domaines autorisés. Conflit de clé, version ou autorité rendu explicite et mis en quarantaine ; aucun rapprochement probabiliste.",
+      "acceptance": "Deux sources ne peuvent écraser silencieusement la même donnée sous une même version. Un rapprochement déclaré reste traçable ; l'arbitrage métier du maître demeure externe."
+    },
+    {
+      "id": "F03",
+      "label": "Validité, cohérence des liens et publication",
+      "capacities": [
+        "master-data-ingestion",
+        "cap-partner-agreement-reference-stewardship",
+        "cap-merchandise-reference-stewardship",
+        "cap-packaging-reference-stewardship",
+        "cap-internal-supplies-reference-stewardship",
+        "cap-service-reference-stewardship"
+      ],
+      "scope": "Dates d'effet et fin de validité, date de réception, versions immuables et liens vers versions connues. Mise en attente des dépendances absentes, rejet des cycles interdits, publication d'un ensemble cohérent par pointeur de version. Le lot complet peut retirer explicitement les absents après contrôle de complétude et autorisation ; conservation des versions référencées.",
+      "acceptance": "Une consultation à date/contexte retourne un jeu cohérent ou une indisponibilité/ambiguïté expliquée. Un retrait ne détruit pas la référence historique utilisée par une commande ; le consommateur décide de ses suites."
+    },
+    {
+      "id": "F04",
+      "label": "Quarantaine, correction et reprise",
+      "capacities": [
+        "master-data-ingestion"
+      ],
+      "scope": "Rejets persistés, motifs par champ/lien, regroupement par cause, correction par contribution sourcée et relance contrôlée. Reprise de lot après arrêt, protection contre lancement concurrent et nouvelle tentative sans second effet. Corrections tardives admissibles avec filiation et publication contrôlée.",
+      "acceptance": "Une relance ne réapplique pas les éléments déjà acceptés. Une correction de source reste distinguée d'une édition locale non autorisée."
+    },
+    {
+      "id": "F05",
+      "label": "Parties, rôles, accords et crédit reçus",
+      "capacities": [
+        "cap-partner-agreement-reference-stewardship"
+      ],
+      "scope": "Parties et liens organisationnels, rôles acheteur/vendeur/payeur/prestataire, accords et portées, périodes, liens intercompany reçus, engagements de quantité/valeur et conditions de l'accord reçus, liens vers une version figée d'assortiment, profils et limites de crédit sourcés. Contrôles de cohérence et restitution des références applicables. Les engagements de référence d'un accord ne sont pas les engagements opérationnels d'une commande.",
+      "acceptance": "Le jeu retourné identifie l'accord, la version, les parties, la portée et le profil reçu ; absence/conflit sont visibles. Ni exposition de crédit ni décision d'autoriser une commande n'est recalculée."
+    },
+    {
+      "id": "F06",
+      "label": "Marchandise et contextes reçus",
+      "capacities": [
+        "cap-merchandise-reference-stewardship"
+      ],
+      "scope": "Produits et variantes, unités et conversions reçues, offres/catalogues et assortiments distincts avec membres/périodes, livres de tarifs produits requis et prix contextualisés reçus lorsqu'ils sont fournis, plusieurs contextes et fenêtres de planification reçus par produit. Relations et versions explicitement contrôlées ; pas de hiérarchie saisonnière obligatoire.",
+      "acceptance": "Une offre, un assortiment et un produit ne sont pas fusionnés. Un consommateur connaît origine, validité, unité, devise et contexte de la référence fournie."
+    },
+    {
+      "id": "F07",
+      "label": "Conditionnement",
+      "capacities": [
+        "cap-packaging-reference-stewardship"
+      ],
+      "scope": "Matériaux, types de contenants et spécifications réutilisables ; niveaux et quantités, unités/conversions, dimensions et compatibilités déclarées. Structure acyclique à profondeur paramétrée ; vérification de cohérence et restitution des références valides.",
+      "acceptance": "Une spécification n'est pas une unité logistique déjà préparée. Boucle, unité incompatible ou référence retirée rendent l'usage incohérent explicite."
+    },
+    {
+      "id": "F08",
+      "label": "Fournitures et équipements opérationnels",
+      "capacities": [
+        "cap-internal-supplies-reference-stewardship"
+      ],
+      "scope": "Fournitures et équipements décrits par type, unité, conversion, usage et restrictions reçues, avec provenance/validité et liens utiles aux achats et transferts. Produit stockable, consommable et équipement ne sont pas confondus par défaut.",
+      "acceptance": "Les restrictions sont restituées et contrôlées selon leur forme typée ; aucune gestion d'immobilisation ni maintenance d'actif n'est ajoutée."
+    },
+    {
+      "id": "F09",
+      "label": "Réseau, offres de service et conditions tarifaires",
+      "capacities": [
+        "cap-service-reference-stewardship"
+      ],
+      "scope": "Réseau de sites/relations et exécutants, catalogue de prestations et offres, prestataires, description du résultat attendu de la prestation, conditions et niveaux de service de référence, métadonnées des accès de sollicitation/feedback (contrat, adresse, protocole, référence d'authentification sans secret exposé), unités, zones, périodes et conditions tarifaires reçues. Conditions typées de contexte (égalité, ensemble, intervalle, date), devise, base et paliers conservés. Restitution des candidats applicables et ambiguïtés sans calculer le prix engagé ni exécuter le raccordement.",
+      "acceptance": "Le résultat donne les données nécessaires à une sélection ou évaluation ultérieure ; il ne prouve ni disponibilité opérationnelle ni faisabilité ni prix d'un ordre."
+    },
+    {
+      "id": "F10",
+      "label": "Consultation, alimentation des consommateurs et droits",
+      "capacities": [
+        "cap-partner-agreement-reference-stewardship",
+        "cap-merchandise-reference-stewardship",
+        "cap-packaging-reference-stewardship",
+        "cap-internal-supplies-reference-stewardship",
+        "cap-service-reference-stewardship"
+      ],
+      "scope": "API paginées de recherche/détail/validité à date et contexte, export canonique et lecture des changements par curseur durable. Droits lecteur/gestionnaire de réception/administrateur, séparation logique par organisation et portées autorisées ; pas d'isolement physique par marque. Les consommateurs peuvent enregistrer/libérer une utilisation d'une version via un contrat générique de référence conservée. Le Core détecte ses liens internes et ces utilisations déclarées, pas les références externes non déclarées. Une purge requiert délai expiré, absence de lien protégé et export confirmé ; une non-déclaration du consommateur est une limite explicite du contrat.",
+      "acceptance": "Les données non autorisées ne sont pas divulguées par requête, recherche, export ou diagnostic. Les consommateurs peuvent retrouver la version exacte qu'ils ont utilisée."
+    },
+    {
+      "id": "F11",
+      "label": "Interfaces et administration fonctionnelle",
+      "capacities": [
+        "master-data-ingestion",
+        "cap-partner-agreement-reference-stewardship",
+        "cap-merchandise-reference-stewardship",
+        "cap-packaging-reference-stewardship",
+        "cap-internal-supplies-reference-stewardship",
+        "cap-service-reference-stewardship"
+      ],
+      "scope": "Sept parcours web : sources/autorités/contrats ; import/rejets/publication ; partenaires/accords/crédit ; marchandise/catalogues/assortiments/contextes ; conditionnement ; fournitures ; services/tarifs. Composants réutilisés, clavier/erreurs/états, recherche et détails. Pas de générateur universel de formulaires ou mappings.",
+      "acceptance": "Un utilisateur habilité comprend origine, version, validité, rejet et action possible. Les données maîtres se corrigent par contribution autorisée."
+    }
+  ],
+  "service_scenario": {
+    "id": "S1",
+    "status": "Hypothèses proposées pour dimensionner une option ; non exigences Beaumanoir approuvées, non mesures.",
+    "inherited_context": {
+      "nominal_users": 950,
+      "simultaneous_users": 100,
+      "availability_target_pct": 99.9,
+      "rpo_hours": 4,
+      "rto_hours": 8,
+      "environments": [
+        "développement",
+        "recette",
+        "production"
+      ],
+      "source": "iteration-06-garanties.json ; valeurs de comparaison existantes"
+    },
+    "qualification_load": {
+      "active_objects": 1000000,
+      "active_links": 5000000,
+      "retained_versions": 10000000,
+      "reads_per_second": 50,
+      "contribution_peak_per_second": 100,
+      "peak_minutes": 10,
+      "full_batch_records": 100000,
+      "full_batch_target_minutes": 30,
+      "p95_read_ms": 1000,
+      "accepted_change_publication_target_minutes": 5,
+      "provenance": "Jeu et objectifs proposés par l'analyste pour qualifier cette famille, pas volumétrie observée ni répartition des 2 millions de messages du modèle.",
+      "interpretation": "Charge mixte lectures/imports. Requêtes paginées et filtres typés ; pas de recherche floue ni analyse arbitraire."
+    },
+    "retention": {
+      "versions_years": 3,
+      "rejected_payload_days": 90,
+      "technical_logs_days": 30,
+      "rule": "Durées de scénario configurables pour l'essai ; aucune obligation légale déduite. Export avant purge, conservation des versions encore référencées, contrôle de capacité. Allongement substantiel à traiter comme variante."
+    },
+    "availability": "Deux instances applicatives, une base relationnelle avec service de secours et sauvegarde disponibles dans l'environnement cible. Installer/configurer/vérifier les moyens nécessaires fait partie des JH initiaux ; services cloud et exploitation récurrente ne sont pas des JH de construction.",
+    "recovery": "Restaurer base et métadonnées, puis reprendre les contributions depuis un point explicite. Hypothèse : les sources peuvent retransmettre au moins 24 h ; leur raccordement réel reste en intégration. Exercice initial de restauration et vérification de cohérence inclus.",
+    "availability_limit": "99,9 % est une cible mensuelle de service proposé, pas une garantie démontrée. La borne de rétablissement de 8 h après sinistre ne garantit pas à elle seule cette disponibilité : les scénarios d'incident et le contrat d'exploitation restent à arbitrer.",
+    "security": "OIDC avec fournisseur d'identité conforme, gestion des secrets, contrôle de périmètre dans toutes les requêtes, fichiers contrôlés, audit des actions sensibles, revue indépendante et correction. Pas d'engagement de certification ni d'hébergement réglementaire spécifique.",
+    "delivery": "Trois environnements logiques, provisionnement initial portable sur un fournisseur, automatisation de livraison, migrations réversibles ou reprise documentée, supervision/alertes et guide d'exploitation. Le choix commercial du fournisseur et les achats sont hors des JH.",
+    "performance_rule": "Les travaux de qualification de charge et de reprise sont chiffrés ; les objectifs ne sont pas déclarés atteints avant leur exécution. Un dépassement majeur de volumes ou une exigence différente crée un scénario distinct."
+  },
+  "responsibilities": {
+    "COMMON07": [
+      "Architecture de l'application et contrats communs",
+      "Configuration de projet, dépendances, persistance et chaîne de tests",
+      "Identité/droits/portées communs et revue sécurité",
+      "Navigation/composants UI communs",
+      "Moyens de trois environnements, déploiement, sauvegarde, restauration et supervision",
+      "Outillage de tests de charge et de livraison, documentation et transmission du socle"
+    ],
+    "REF07_IN": [
+      "Contrats de source et import",
+      "Identité/version/autorité métier",
+      "Cohérence de liens et publication",
+      "Quarantaine/rejeu et qualification des garanties métier"
+    ],
+    "REF07_VIEWS": [
+      "Modèles et vues des cinq familles",
+      "API de consommation et export/changements",
+      "Parcours UI métier et droits spécifiques",
+      "Qualification fonctionnelle de la famille, documentation et transmission"
+    ],
+    "integration_external": [
+      "Adaptateurs et mappings aux sources réelles",
+      "Nettoyage et rapprochements des données Beaumanoir",
+      "Règles, contenus des accords, catalogues et tarifs propres au Groupe",
+      "Fédération d'identité et habilitations réelles",
+      "Raccordement des consommateurs et recette des parcours Beaumanoir"
+    ],
+    "run_external": [
+      "Consommation cloud, licences éventuelles et support récurrent",
+      "Maintien annuel du service et exercices récurrents",
+      "Organisation et personnel d'exploitation"
+    ],
+    "counting_rule": "Un travail partagé n'est financé qu'une fois ; COMMON07 et les mécanismes communs REF07 ne sont pas répétés par capacité. L'intégration et le Run restent hors du total initial de construction affiché."
+  },
+  "native_boundaries": [
+    "Pas de maître PLM/MDM ni nettoyage automatique des données Groupe",
+    "Pas de négociation ni rédaction des contrats",
+    "Pas de moteur de prix contextualisé, de prix engagé ou d'exposition crédit calculée",
+    "Pas de constitution physique des colis, gestion des immobilisations ou entretien",
+    "Pas de disponibilité opérationnelle d'un exécutant ni de sélection finale de prestation"
+  ],
+  "scenario_restrictions": [
+    "Correspondances explicites et autorité typée ; rapprochement probabiliste, fusion automatique et langage de transformation libre ne sont pas inclus.",
+    "Restitution à date avec connaissance courante et accès à une version historique identifiée ; reconstruction universelle de tout ce qui était connu à une date n'est pas incluse.",
+    "Conditions de référence typées, sans exécution de formules arbitraires ni règle financière propre au Groupe.",
+    "Un fournisseur d'identité et un environnement d'hébergement ; multi-région actif/actif, isolement physique par marque et certification spécifique non inclus."
+  ],
+  "uncertainty_rule": "Chaque borne couvre exactement ce contrat. Ajouter une fonction ou renforcer une garantie ne doit pas être dissimulé dans la borne haute.",
+  "comparison_rule": "M1 par paquets ; M2 macro par rôle, sans consultation de M1. Écart >15 % total ou >25 % rôle expliqué. Pas de moyenne. Aucun des deux ne constitue un effort observé.",
+  "completion_rule": "Relier les 14 fonctions natives ET les attentes du scope aux travaux. La couverture du scénario ne démontre ni sa validation métier ni toutes les variantes possibles de la capacité.",
+  "prior_estimates_rule": "Ce contrat est complet et sa base technique/son service diffèrent des essais. Ne pas additionner ses JH aux anciens REF/COMMON. Ne pas calculer de nouveau cumul brut des contrats hétérogènes ; le Core complet reste inconnu.",
+  "review_before_freeze": "Revue fonctionnelle distincte : accords/engagements reçus et lien d'assortiment précisés, livres de tarifs produits conservés, contextes/fenêtres multiples nommés, références de service et d'accès explicitées. Revue M2 avant chiffrage : politique de versions et références externes conservées clarifiées.",
+  "native_function_ids": [
+    "BC-002.01",
+    "BC-002.02",
+    "BC-002.03",
+    "BC-003.01",
+    "BC-003.02",
+    "BC-004.01",
+    "BC-004.02",
+    "BC-004.03",
+    "BC-005.01",
+    "BC-005.02",
+    "BC-006.01",
+    "BC-006.02",
+    "BC-007.01",
+    "BC-007.02"
+  ],
+  "reference_subject_ids": [
+    "S-PARTY",
+    "S-AGREEMENT",
+    "S-CREDIT",
+    "S-PRODUCT",
+    "S-CATALOG",
+    "S-ASSORTMENT",
+    "S-PRODUCT-PRICE",
+    "S-PACK-MATERIAL",
+    "S-PACK-SPEC",
+    "S-INTERNAL",
+    "S-NETWORK",
+    "S-SERVICE",
+    "S-SERVICE-PRICE"
+  ],
+  "native_scope_ref": "iteration-07-perimetre.json",
+  "input_sha256": {
+    "iteration-07-perimetre.json": "0a6f8f0792d95c2dd6df00434bc10b75bb1dff9c171cf88e1be7b7e0052cc826",
+    "iteration-07-marche-preuves.json": "e2c58bde6822e17bcd4faac7de5ece4b6aaf401d198d926049acee9b2df83ad7",
+    "iteration-07-spring-preuves.json": "8734e25548950ff5e500b50ca5a68117fab4427ebf661091be597369ad8f21f0",
+    "iteration-07-protocole.json": "ddb2e4ea9708cb2b8e020db7c319ce92e652e27abe138734eed7e90d274114d5",
+    "iteration-07-clarification-reprise.json": "9994c1f09d9d06d00d74b8684feca8791a3023c2b694abdbc199c0f7fd2e1cf6"
+  },
+  "amendment": {
+    "id": "iteration-07-clarification-reprise",
+    "from_contract": "iteration-07-contrat.json",
+    "from_sha256": "69f463194f9fdab2127f87bcd1d41d4807210d8b46a26e58f2b8b5dd92cceec9",
+    "reason": "La restauration de la base à un point antérieur peut perdre des versions déjà exposées, des déclarations d'utilisation et des positions de lecture des consommateurs. La seule retransmission des sources ne rétablit pas ces contrats.",
+    "retained_guarantee": "F10 : retrouver une version utilisée et ne pas purger un objet encore référencé ; scénario S1 de reprise.",
+    "work": [
+      "Construire les identifiants stables de contributions et versions composées à partir de leurs identités/version/contenu normalisé et dépendances, sans dépendre du seul ordre d'arrivée après rejeu.",
+      "À la restauration, ouvrir une nouvelle époque de lecture des changements. Refuser explicitement les anciens curseurs avec consigne de resynchronisation ; ne pas reprendre une séquence qui ferait ignorer des modifications.",
+      "Fournir un protocole générique de déclaration/réconciliation des usages conservés et son statut ; les consommateurs redéclarent les versions utilisées, avec identifiants d'usage stables.",
+      "Suspendre toute purge après restauration jusqu'à clôture autorisée du rapprochement des consommateurs. Les usages non déclarés restent indétectables ; aucune purge sûre automatique ne sera promise pour eux.",
+      "Qualifier disparition d'un pin et d'une version après restauration, réordre de contributions et ancien curseur ; distinguer état rétabli, incomplet et non rapproché."
+    ],
+    "external_assumptions": "Les sources retransmettent les changements complets, pas seulement leur dernier état, sur au moins 24 h. Les consommateurs conservent leurs usages et participent au protocole de redéclaration. Les raccordements Beaumanoir restent en intégration.",
+    "service_limit": "La borne de 8 h concerne le rétablissement et la reprise dans ce scénario de sources disponibles. Une purge peut rester suspendue si un consommateur n'a pas été rapproché ; l'incomplétude reste visible. Aucune garantie d'effets externes exactement une fois.",
+    "funding": "COMMON07 finance les moyens de sauvegarde/restauration et leur outillage ; REF07 finance l'identité sémantique, les époques/cursors, la réconciliation des usages et leur QA spécifique. Un seul financement de chaque travail.",
+    "pre_estimate_status": "Amendement figé avant le gel des chiffrages M1 et M2 ; v1 conservée. Aucune charge antérieure ajustée pour obtenir un accord."
+  },
+  "amendment_ref": "iteration-07-clarification-reprise.json"
+}

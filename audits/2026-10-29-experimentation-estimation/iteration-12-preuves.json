@@ -1,0 +1,257 @@
+{
+  "id": "iteration-12-preuves",
+  "date": "2026-10-29",
+  "evidence": [
+    {
+      "id": "PLAN-OD-01",
+      "local_path": "tmp/odoo20-audit/addons/stock/models/stock_orderpoint.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "bfa46946e1596dc41cccdef4ac4c533517878ca57529ca98127e8079992128d4",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_orderpoint.py#L411",
+      "line_ranges": [
+        [
+          411,
+          428
+        ],
+        [
+          454,
+          472
+        ],
+        [
+          499,
+          527
+        ]
+      ],
+      "observed": "Positions disponibles/projetées et approvisionnements en cours ; sous le minimum, cible moins projection, arrondi au multiple et horizon de lieu/date.",
+      "delta": "Pas de comparaison globale des affectations sous capacités communes dans ces méthodes ; projection de stock ne signifie pas prévision statistique.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans12 ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-OD-02",
+      "local_path": "tmp/odoo20-audit/addons/product/models/product_product.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "831b6ee60470392ff4057399463d30fd7f89da69c59ec527194878cb413069c8",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/product/models/product_product.py#L1269",
+      "line_ranges": [
+        [
+          1269,
+          1324
+        ]
+      ],
+      "observed": "Filtrage dates, unité, quantité et variante ; préclassement fournisseurs puis choix dans les lignes du premier partenaire admissible.",
+      "delta": "Ne pas présenter cette sélection comme un optimum global entre tous fournisseurs et toutes demandes.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans12 ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-TR-01",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/stock_supply/purchase_request.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "104c40b981afba21b6e16e2d5e06b6b8e14abe03d51fc700ec062a28c4d60940",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock_supply/purchase_request.py#L39",
+      "line_ranges": [
+        [
+          302,
+          364
+        ]
+      ],
+      "observed": "Parcours daté des positions projetées : première rupture sous minimum et quantité minimale dans l’intervalle.",
+      "delta": "Pas d'objectif global ni recherche de plans concurrents dans ces corps ; forecast=True désigne ici le contexte de quantité projetée.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans12 ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-TR-02",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/stock_supply/purchase_request.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "104c40b981afba21b6e16e2d5e06b6b8e14abe03d51fc700ec062a28c4d60940",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock_supply/purchase_request.py#L163",
+      "line_ranges": [
+        [
+          163,
+          221
+        ],
+        [
+          274,
+          299
+        ]
+      ],
+      "observed": "Rapprochement des nouvelles demandes avec les demandes déjà liées à des achats ; cible moins position, conversion/arrondi et origine conservée. Ce code est une analogie, pas un algorithme validé pour FLOW.",
+      "delta": "Dépend de commandes/achats/unités/fournisseurs non fournis par REF03 et STOCK03 ; ne prouve pas une règle générique de non-double-compte applicable sans adaptation.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans12 ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-AX-01",
+      "local_path": "tmp/oss-audit-axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/MrpServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "ecfa954c1873aa0430e0c45c62099294c30c52be46e7ea3c70912e38f799822f",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/MrpServiceImpl.java#L194",
+      "line_ranges": [
+        [
+          368,
+          418
+        ],
+        [
+          457,
+          507
+        ]
+      ],
+      "observed": "Tri par date/type/séquence et nouvelle passe après proposition, garde-fou1000 itérations ; traitement spécifique des lignes déjà éditées. Rien dans l’extrait ne démontre un optimum.",
+      "delta": "Nombre de passes n'est pas une recherche d'optimum démontrée ; état de service et repositories Axelor couplés ; scénario figé/versionné de FLOW à construire.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans12 ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-AX-02",
+      "local_path": "tmp/oss-audit-axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/MrpServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "ecfa954c1873aa0430e0c45c62099294c30c52be46e7ea3c70912e38f799822f",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/MrpServiceImpl.java#L541",
+      "line_ranges": [
+        [
+          560,
+          636
+        ]
+      ],
+      "observed": "Minimum/multiple fournisseur, rapprochement avec proposition précédente, distinction proposition/arrivée estimée, dates et origines conservées.",
+      "delta": "Réutilisation de logique conceptuelle possible ; Java seul ne rend pas le service transplantable dans Spring.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans12 ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-AX-03",
+      "local_path": "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockRulesServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "7ac27992a23eca49251f460baffe7a9600b461cb66694a1c8d8c02c58c967ed8",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockRulesServiceImpl.java#L61",
+      "line_ranges": [
+        [
+          61,
+          95
+        ]
+      ],
+      "observed": "Cible moins quantité courante/future avec minimum de réapprovisionnement et plafond éventuel.",
+      "delta": "Aucun choix de répartition globale ni adaptation optimale des cibles démontré dans ces méthodes.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans12 ; aucun test OSS exécuté."
+    },
+    {
+      "id": "TR-FORECAST",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/stock_forecast/forecast.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "39116b1bee0527dc100edd34ce15154ec7ceb420d47fa1ecb21ce1023c792395",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock_forecast/forecast.py#L339",
+      "line_ranges": [
+        [
+          339,
+          383
+        ],
+        [
+          394,
+          435
+        ]
+      ],
+      "observed": "Le calcul nommé quantity_executed agrège des mouvements non annulés selon dates effectives ou prévues et exclut ceux issus de prévision. Les mouvements de prévision sont ensuite générés sur la quantité résiduelle répartie par dates.",
+      "delta": "Le nom ne signifie pas uniquement des réalisations physiques constatées. Les règles FLOW de consommation des commandes, granularités, versions et limites nécessitent un modèle propre ; aucune statistique de prévision démontrée.",
+      "kind": "implementation_read",
+      "review": "Extraits relus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "AX-FORECAST",
+      "local_path": "tmp/oss-audit-axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/MrpForecastServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "b15d49f8f416549d2907f99350bea5b36d3f9bd51efd3b191d786c5a7fed8ab7",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/MrpForecastServiceImpl.java#L33",
+      "line_ranges": [
+        [
+          33,
+          59
+        ]
+      ],
+      "observed": "Confirmation seulement depuis brouillon ; annulation seulement depuis états autorisés, dans une transaction avec retour arrière sur exception.",
+      "delta": "Une validation d’état ne prouve pas qualification des unités, versions/horizons, qualité de prévision, cohérence interplans ou estimation de service.",
+      "kind": "implementation_read",
+      "review": "Extraits relus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "T-MANAGER",
+      "local_path": "audits/2026-10-29-experimentation-estimation/iteration-12-code-timefold/DefaultSolverManager.java",
+      "commit": "e32850de3dad19a195b6f07fda0357024714d689",
+      "sha256": "8e0ba669f49b2c25c8ce877fd74f45a20cdc9b9d897ac48d084a1f88d6d38568",
+      "url": "https://raw.githubusercontent.com/TimefoldAI/timefold-solver/e32850de3dad19a195b6f07fda0357024714d689/core/src/main/java/ai/timefold/solver/core/impl/solver/DefaultSolverManager.java",
+      "line_ranges": [
+        [
+          40,
+          72
+        ],
+        [
+          110,
+          166
+        ]
+      ],
+      "observed": "Pool de threads, registre des jobs en ConcurrentHashMap, refus d’un identifiant déjà en résolution, arrêt anticipé et retrait du job à la fin.",
+      "delta": "Ce gestionnaire ne fournit pas de journal durable des problèmes/résultats. FLOW doit persister, reconnaître l’interruption et relancer depuis un instantané ; aucune reprise de l’état de recherche en mémoire présumée.",
+      "kind": "implementation_read",
+      "review": "Code figé lu ; combinaison Spring et solveur non exécutée."
+    },
+    {
+      "id": "T-API",
+      "local_path": "audits/2026-10-29-experimentation-estimation/iteration-12-code-timefold/SolverManager.java",
+      "commit": "e32850de3dad19a195b6f07fda0357024714d689",
+      "sha256": "980f441e67f2f99f0583fc7f992ecb17898856adaf06a3a25265ff7ceac74239",
+      "url": "https://raw.githubusercontent.com/TimefoldAI/timefold-solver/e32850de3dad19a195b6f07fda0357024714d689/core/src/main/java/ai/timefold/solver/core/api/solver/SolverManager.java",
+      "line_ranges": [
+        [
+          22,
+          74
+        ]
+      ],
+      "observed": "Contrat de résolution asynchrone de plusieurs problèmes du même domaine, avec threads de calcul et de consommation des meilleures solutions.",
+      "delta": "L’API ne définit ni les contraintes FLOW, ni leur validité, ni un optimum. Validation métier et modèle à financer séparément.",
+      "kind": "api_contract_read",
+      "review": "Code figé lu ; combinaison Spring et solveur non exécutée."
+    },
+    {
+      "id": "T-POM",
+      "local_path": "audits/2026-10-29-experimentation-estimation/iteration-12-code-timefold/pom.xml",
+      "commit": "e32850de3dad19a195b6f07fda0357024714d689",
+      "sha256": "be8f47af361484d83b70daedaa325cbdd4891082cbfc165f1ff00e852b64f6aa",
+      "url": "https://raw.githubusercontent.com/TimefoldAI/timefold-solver/e32850de3dad19a195b6f07fda0357024714d689/build/build-parent/pom.xml",
+      "line_ranges": [
+        [
+          20,
+          58
+        ]
+      ],
+      "observed": "Le build du commit figé référence Spring Boot3.5.5.",
+      "delta": "Référence de comparaison de l’itération05 ; version de production supportée à qualifier dansE121. Aucune recommandation de conserver cette génération.",
+      "kind": "build_configuration_read",
+      "review": "Code figé lu ; combinaison Spring et solveur non exécutée."
+    }
+  ],
+  "license": {
+    "product": "Timefold OSS",
+    "commit": "e32850de3dad19a195b6f07fda0357024714d689",
+    "url": "https://raw.githubusercontent.com/TimefoldAI/timefold-solver/e32850de3dad19a195b6f07fda0357024714d689/LICENSE.txt",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "observation": "Fichier de licence Apache2.0 lu. Produits hébergés et fonctions commerciales non supposés inclus. Dépendances/notices à qualifier dansE121."
+  },
+  "docs": [
+    {
+      "url": "https://docs.timefold.ai/timefold-solver/1.x/quickstart/spring-boot/spring-boot-quickstart",
+      "observed": "Intégration Spring et définition d’un modèle/contraintes propres à l’application ; documentation1.x vivante distincte du code figé."
+    },
+    {
+      "url": "https://docs.timefold.ai/timefold-solver/1.x/optimization-algorithms/overview",
+      "observed": "Recherche de la meilleure solution dans le temps disponible ; aucune garantie générale d’optimum, taille du problème déterminante."
+    }
+  ],
+  "limitations": [
+    "12 observations de code dont une API et une configuration ; aucun essai OSS ou benchmark de performance exécuté.",
+    "Odoo/Tryton/Axelor sont des comparables fonctionnels ; aucun transplant de leur code dans Spring retenu.",
+    "BC040/041/042/044 ont des correspondances indirectes : appliquer un seuil ne démontre pas son optimisation.",
+    "Aucun temps humain observé ni équivalence lignes de code/JH."
+  ]
+}

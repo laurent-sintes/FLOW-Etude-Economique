@@ -1,0 +1,167 @@
+{
+  "id": "iteration-04-parcours-qa",
+  "status": "Catalogue minimal de conception ; aucun écran réalisé ou testé.",
+  "views": [
+    {
+      "id": "REF-V1",
+      "name": "Dépôt, suivi et rejets d’import",
+      "owner": "REF",
+      "packages": [
+        "R03",
+        "R04",
+        "R06",
+        "R07"
+      ],
+      "states": [
+        "Fichier non conforme",
+        "Lot reçu",
+        "Traitement en cours",
+        "Traitement interrompu, reprise possible",
+        "Terminé avec acceptations et rejets"
+      ],
+      "actions": [
+        "Déposer le CSV canonique",
+        "Consulter les résultats par ligne",
+        "Fournir une contribution corrigée",
+        "Relancer le traitement interrompu"
+      ],
+      "open": "Forme des diagnostics, sélection des rejets et ergonomie restent à concevoir."
+    },
+    {
+      "id": "REF-V2",
+      "name": "Consultation produits et variantes",
+      "owner": "REF",
+      "packages": [
+        "R02",
+        "R05",
+        "R06",
+        "R07"
+      ],
+      "states": [
+        "Aucune référence trouvée",
+        "Référence avec source et version",
+        "Lien produit-variante",
+        "Accès refusé"
+      ],
+      "actions": [
+        "Rechercher et paginer",
+        "Lire les données et leur origine"
+      ],
+      "open": "Les parcours d’accès et de recherche ne sont pas exercés par le témoin JDBC."
+    },
+    {
+      "id": "STOCK-V1",
+      "name": "Positions de stock",
+      "owner": "STOCK",
+      "packages": [
+        "S02",
+        "S06",
+        "S07"
+      ],
+      "states": [
+        "Clé absente",
+        "Quantités physique/réservée/disponible présentes",
+        "Résultat de consultation indisponible"
+      ],
+      "actions": [
+        "Filtrer et consulter",
+        "Accéder aux mouvements explicatifs"
+      ],
+      "open": "La fraîcheur d’affichage et la pagination ne sont pas éprouvées."
+    },
+    {
+      "id": "STOCK-V2",
+      "name": "Engagements et actions",
+      "owner": "STOCK",
+      "packages": [
+        "S04",
+        "S05",
+        "S06",
+        "S07"
+      ],
+      "states": [
+        "Réservation admise totalement ou partiellement",
+        "Réservation consommée ou libérée",
+        "Action refusée avec motif",
+        "Réponse perdue ou répétée",
+        "Clé en conflit"
+      ],
+      "actions": [
+        "Réserver",
+        "Réviser",
+        "Libérer",
+        "Consommer",
+        "Expirer explicitement"
+      ],
+      "open": "Révision et expiration restent hors du témoin exécuté. La même clé rejoue un refus ; une nouvelle intention utilise une nouvelle clé."
+    },
+    {
+      "id": "STOCK-V3",
+      "name": "Journal et anomalies",
+      "owner": "STOCK",
+      "packages": [
+        "S02",
+        "S03",
+        "S06",
+        "S07"
+      ],
+      "states": [
+        "Fait reçu",
+        "Compensation enregistrée",
+        "Compensation refusée",
+        "Historique explicatif consultable"
+      ],
+      "actions": [
+        "Consulter",
+        "Soumettre une correction compensatrice",
+        "Comprendre un refus"
+      ],
+      "open": "Aucune restitution bitemporelle complète ni interface de résolution générale n’est démontrée."
+    }
+  ],
+  "qa_ownership": [
+    {
+      "work": "Invariants et stratégie de qualification",
+      "owner": "R01 / S01",
+      "role": "qa",
+      "rule": "Définir résultats attendus, pas implémenter deux fois les tests."
+    },
+    {
+      "work": "Tests développeur et reprise transactionnelle locale",
+      "owner": "R02–R05 / S02–S05",
+      "role": "dev_java",
+      "rule": "Compris dans développement ; ne pas en déduire une QA indépendante livrée."
+    },
+    {
+      "work": "Préparation des cas métier locaux",
+      "owner": "S02–S06",
+      "role": "qa",
+      "rule": "Les témoins locaux alimentent la campagne transverse."
+    },
+    {
+      "work": "Données et assemblage des parcours transverses",
+      "owner": "R07 / S07",
+      "role": "qa",
+      "rule": "Assembler et compléter les cas, sans reconcevoir les mêmes cas locaux."
+    },
+    {
+      "work": "Automatisation et exécution indépendante",
+      "owner": "R07 / S07",
+      "role": "qa",
+      "rule": "Travail produit futur ; les tests de ce prototype ne prouvent pas sa couverture complète."
+    },
+    {
+      "work": "Correction des défauts révélés par la QA",
+      "owner": "R07 / S07",
+      "role": "dev_java / dev_frontend",
+      "rule": "Contributions développeur spécifiques déjà présentes dans M1."
+    },
+    {
+      "work": "Dossier et transfert",
+      "owner": "R08 / S08",
+      "role": "analyse_produit / architecture / qa / coordination",
+      "rule": "Consolidation, pas duplication de conception ou des campagnes."
+    }
+  ],
+  "interpretation": "Le nombre de vues ou de tests n’est pas un multiplicateur de JH. Ce catalogue précise le contenu des travaux existants ; aucune diminution d’effort n’en est déduite."
+}

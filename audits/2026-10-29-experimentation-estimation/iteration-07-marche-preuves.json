@@ -1,0 +1,1978 @@
+{
+  "id": "iteration-07-marche-preuves",
+  "date": "2026-10-29",
+  "status": "comparaison_fonctionnelle_code_sous_contrat_cible_en_preparation",
+  "purpose": "Compléter la comparaison de la famille Operational References par lecture réelle de code OSS figé ; préparer l'évaluation d'opportunité sans calcul de JH.",
+  "target": {
+    "subdomain_id": "business-references",
+    "native_capacity_count": 6,
+    "native_function_count": 14,
+    "scope_ref": "iteration-06-perimetre-a.json#/capabilities",
+    "contract_07_status": "Candidat en cours de préparation par pilot_scope au moment de l'assemblage ; aucune estimation ni admission complète avant revue du contrat figé.",
+    "source_authority": "Fonctions natives BC-002 à BC-007 et frontières Core/intégration ; les scores et anciens JH actifs ne servent pas à la comparaison."
+  },
+  "method": {
+    "body_read": true,
+    "readers": [
+      "agent_spring_reuse : Odoo/Tryton et consolidation",
+      "agent_effort_admission : Axelor Suite/Platform"
+    ],
+    "tests": "Quatre fichiers de tests ciblés lus ; aucun test exécuté en07. Présence et assertions ne sont pas des résultats de qualification FLOW.",
+    "comparison": "Admettre des mécanismes et des différences explicites, sans inférer la fonction du nom de module. Un comparable partiel ne prouve pas la couverture complète d'une capacité.",
+    "negative_evidence": "Non observé dans les fichiers/ranges ciblés n'est pas absence dans le produit entier.",
+    "spring_rule": "Un mécanisme Python ou Java couplé au framework OSS n'est pas un composant Spring admis tel quel. La réutilisation d'inspiration/modèle ne donne aucun abattement automatique.",
+    "effort_rule": "Aucune mesure LOC, conversion LOC/CFP en JH, productivité, durée humaine ni nouveau JH.",
+    "prior_exposure": "Les pilotes REF/STOCK des itérations02–04 et PLAN/ORCH05 étaient connus des lecteurs ; cette lecture07 n'est pas une estimation indépendante ni un essai aveugle."
+  },
+  "repositories": [
+    {
+      "id": "odoo",
+      "product": "Odoo",
+      "upstream": "https://github.com/odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "cache": "tmp/odoo20-audit",
+      "head_verified": true,
+      "tracked_files_changed_from_HEAD": false,
+      "integrity_check": "git rev-parse HEAD et git diff --name-only HEAD vérifiés en lecture seule par le lecteur du dépôt."
+    },
+    {
+      "id": "tryton",
+      "product": "Tryton",
+      "upstream": "https://github.com/tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "cache": "tmp/tryton-code-audit-2026-10-28",
+      "head_verified": true,
+      "tracked_files_changed_from_HEAD": false,
+      "integrity_check": "git rev-parse HEAD et git diff --name-only HEAD vérifiés en lecture seule par le lecteur du dépôt."
+    },
+    {
+      "id": "axelor-suite",
+      "product": "Axelor Open Suite",
+      "upstream": "https://github.com/axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "cache": "tmp/oss-audit-axelor",
+      "head_verified": true,
+      "tracked_files_changed_from_HEAD": false,
+      "integrity_check": "git rev-parse HEAD et git diff --name-only HEAD vérifiés en lecture seule par le lecteur du dépôt."
+    },
+    {
+      "id": "axelor-platform",
+      "product": "Axelor Open Platform",
+      "upstream": "https://github.com/axelor/axelor-open-platform",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "cache": "tmp/oss-audit-axelor-platform",
+      "head_verified": true,
+      "tracked_files_changed_from_HEAD": false,
+      "integrity_check": "git rev-parse HEAD et git diff --name-only HEAD vérifiés en lecture seule par le lecteur du dépôt."
+    }
+  ],
+  "proofs": [
+    {
+      "id": "R07-OD01",
+      "product": "odoo",
+      "path": "odoo/addons/base/models/res_partner.py",
+      "ranges": [
+        [
+          330,
+          350
+        ],
+        [
+          598,
+          609
+        ],
+        [
+          807,
+          849
+        ]
+      ],
+      "symbols": [
+        "ResPartner._check_parent_id",
+        "ResPartner._commercial_sync_from_company",
+        "ResPartner._commercial_sync_to_descendants"
+      ],
+      "functions": [
+        "BC-003.01",
+        "BC-002.02"
+      ],
+      "observed": "Adresses typées, parent commercial, refus de cycle et propagation de champs depuis l'entité commerciale vers ses descendants.",
+      "delta": "FLOW conserve parties/rôles/liens et autorités de contribution. La propagation du maître commercial Odoo n'est pas une preuve de fusion multisource, de provenance par valeur ou de correction historisée.",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "odoo",
+      "reader": "agent_spring_reuse",
+      "sha256": "1c27cef22c66fa0763f8265afa6c3d8190bb81ec49e0236677edf6b89d9c70a8",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "cache_path": "tmp/odoo20-audit/odoo/addons/base/models/res_partner.py",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/odoo/addons/base/models/res_partner.py#L330",
+      "excerpts": [
+        {
+          "line": 607,
+          "text": "def _check_parent_id(self):"
+        },
+        {
+          "line": 608,
+          "text": "if self._has_cycle():"
+        },
+        {
+          "line": 609,
+          "text": "raise ValidationError(_('You cannot create recursive Partner hierarchies.'))"
+        }
+      ]
+    },
+    {
+      "id": "R07-OD02",
+      "product": "odoo",
+      "path": "addons/product/models/product_supplierinfo.py",
+      "ranges": [
+        [
+          14,
+          54
+        ],
+        [
+          95,
+          117
+        ],
+        [
+          126,
+          145
+        ]
+      ],
+      "symbols": [
+        "ProductSupplierinfo._check_dates",
+        "ProductSupplierinfo._get_seller_info",
+        "ProductSupplierinfo._sanitize_vals"
+      ],
+      "functions": [
+        "BC-003.02",
+        "BC-004.02",
+        "BC-007.02"
+      ],
+      "observed": "Lien fournisseur-produit/variante, code fournisseur, unité, devise, minimum, prix, délai et intervalle de dates ; refus d'un intervalle inversé et synchronisation variante/template.",
+      "delta": "Comparable partiel de conditions applicables reçues. Ne démontre ni accord métier complet, ni profil crédit reçu, ni choix explicite entre autorités concurrentes.",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "odoo",
+      "reader": "agent_spring_reuse",
+      "sha256": "513350f7af2283310737f8d59b99a080e66d7e7e71e840acc1986122b8ee382e",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "cache_path": "tmp/odoo20-audit/addons/product/models/product_supplierinfo.py",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/product/models/product_supplierinfo.py#L14",
+      "excerpts": [
+        {
+          "line": 41,
+          "text": "date_start = fields.Date('Start Date', help=\"Start date for this vendor price\")"
+        },
+        {
+          "line": 42,
+          "text": "date_end = fields.Date('End Date', help=\"End date for this vendor price\")"
+        },
+        {
+          "line": 97,
+          "text": "invalid_suppliers = self.filtered(lambda r: r.date_end and r.date_start and r.date_end < r.date_start)"
+        }
+      ]
+    },
+    {
+      "id": "R07-OD03",
+      "product": "odoo",
+      "path": "addons/product/models/product_template.py",
+      "ranges": [
+        [
+          67,
+          90
+        ],
+        [
+          158,
+          171
+        ],
+        [
+          820,
+          863
+        ]
+      ],
+      "symbols": [
+        "ProductTemplate.create",
+        "ProductTemplate.write"
+      ],
+      "functions": [
+        "BC-004.01",
+        "BC-006.01",
+        "BC-006.02",
+        "BC-007.01"
+      ],
+      "observed": "Modèle partagé biens/services, achat/vente, unité et conditionnements ; création des variantes appelée à la création et mise à jour, désactivation propagée aux variantes.",
+      "delta": "Le type 'consu' signifie Goods dans ce commit ; aucune sémantique dédiée de fourniture interne, restrictions d'usage ou réseau de services n'est établie par ce chemin. Le modèle maître modifiable ne fournit pas la vue sourcée FLOW.",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "odoo",
+      "reader": "agent_spring_reuse",
+      "sha256": "65714f423d18f5d5e231163fcf6fb78c6143ae1096d92815aaa44f7a295eafbf",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "cache_path": "tmp/odoo20-audit/addons/product/models/product_template.py",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/product/models/product_template.py#L67",
+      "excerpts": [
+        {
+          "line": 72,
+          "text": "('consu', \"Goods\"),"
+        },
+        {
+          "line": 73,
+          "text": "('service', \"Service\"),"
+        },
+        {
+          "line": 158,
+          "text": "sale_ok = fields.Boolean('Sales', default=True)"
+        }
+      ]
+    },
+    {
+      "id": "R07-OD04",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_package_type.py",
+      "ranges": [
+        [
+          18,
+          59
+        ],
+        [
+          74,
+          99
+        ],
+        [
+          101,
+          127
+        ]
+      ],
+      "symbols": [
+        "StockPackageType",
+        "StockPackageType._compute_has_quants",
+        "StockPackageType.create",
+        "StockPackageType.write"
+      ],
+      "functions": [
+        "BC-005.01",
+        "BC-005.02"
+      ],
+      "observed": "Type d'emballage réutilisable/jetable, dimensions, masse, poids maximal, barcode unique et contrôles positifs ; contenu physique recherché dans stock.package, séquence créée ou mise à jour.",
+      "delta": "Type de contenant distinct de l'instance et du contenu observé. Les matériaux, niveaux de spécification réutilisable, validités, provenance et conflits FLOW restent à traiter ; ce fichier ne démontre pas une spécification de packing versionnée.",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "odoo",
+      "reader": "agent_spring_reuse",
+      "sha256": "951184139c273eae02122d6166b8cf89c15f09f4ab0d1efcbc2bd024c4af701e",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "cache_path": "tmp/odoo20-audit/addons/stock/models/stock_package_type.py",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_package_type.py#L18",
+      "excerpts": [
+        {
+          "line": 22,
+          "text": "height = fields.Float('Height', help=\"Packaging Height\")"
+        },
+        {
+          "line": 26,
+          "text": "max_weight = fields.Float('Max Weight', help='Maximum weight shippable in this packaging')"
+        },
+        {
+          "line": 31,
+          "text": "package_use = fields.Selection(["
+        }
+      ]
+    },
+    {
+      "id": "R07-OD05",
+      "product": "odoo",
+      "path": "addons/product/models/product_pricelist_item.py",
+      "ranges": [
+        [
+          35,
+          50
+        ],
+        [
+          382,
+          407
+        ],
+        [
+          488,
+          544
+        ]
+      ],
+      "symbols": [
+        "ProductPricelistItem._check_date_range",
+        "ProductPricelistItem._check_product_consistency",
+        "ProductPricelistItem._is_applicable_for"
+      ],
+      "functions": [
+        "BC-004.02",
+        "BC-007.02"
+      ],
+      "observed": "Contrôles des dates et de la portée catégorie/produit/variante ; applicabilité selon unité, quantité et portée produit avant calcul du prix.",
+      "delta": "FLOW doit qualifier les conditions reçues sans importer implicitement le moteur de calcul de prix, ses priorités ou sa substitution de prix. Offre, assortiment et contexte restent des objets distincts.",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "odoo",
+      "reader": "agent_spring_reuse",
+      "sha256": "33ad344c9e4b4c3169091a67b6e55597ed2a72e71fa93d5bd5511b1401b51a3d",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "cache_path": "tmp/odoo20-audit/addons/product/models/product_pricelist_item.py",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/product/models/product_pricelist_item.py#L35",
+      "excerpts": [
+        {
+          "line": 385,
+          "text": "if item.date_start and item.date_end and item.date_start >= item.date_end:"
+        },
+        {
+          "line": 509,
+          "text": "if self.uom_id and uom != self.uom_id:"
+        },
+        {
+          "line": 510,
+          "text": "return False"
+        }
+      ]
+    },
+    {
+      "id": "R07-OD06",
+      "product": "odoo",
+      "path": "addons/product/models/product_pricelist.py",
+      "ranges": [
+        [
+          284,
+          344
+        ]
+      ],
+      "symbols": [
+        "ProductPricelist._get_applicable_rules",
+        "ProductPricelist._get_applicable_rules_domain"
+      ],
+      "functions": [
+        "BC-004.02",
+        "BC-007.02"
+      ],
+      "observed": "Recherche des règles candidates sur liste, catégorie, template/variante et validité temporelle ; les contrôles finaux sont délégués à l'item.",
+      "delta": "Preuve d'une séparation candidats/applicabilité, pas d'un tarif contextualisé externe conservé avec sa décision et son autorité. Aucun résultat de tarification FLOW déduit.",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "odoo",
+      "reader": "agent_spring_reuse",
+      "sha256": "8a759a4d685abf391b74071e754c2e33c87104f6c9820d00d91fd78de4b8733e",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "cache_path": "tmp/odoo20-audit/addons/product/models/product_pricelist.py",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/product/models/product_pricelist.py#L284",
+      "excerpts": [
+        {
+          "line": 289,
+          "text": "return self.env['product.pricelist.item'].search("
+        },
+        {
+          "line": 290,
+          "text": "self._get_applicable_rules_domain("
+        },
+        {
+          "line": 332,
+          "text": "Domain(\"pricelist_id\", \"=\", self.id),"
+        }
+      ]
+    },
+    {
+      "id": "R07-TR01",
+      "product": "tryton",
+      "path": "modules/party/party.py",
+      "ranges": [
+        [
+          35,
+          81
+        ],
+        [
+          103,
+          118
+        ],
+        [
+          296,
+          303
+        ],
+        [
+          1192,
+          1289
+        ]
+      ],
+      "symbols": [
+        "Party.__setup__",
+        "Party.preprocess_values",
+        "Replace.check_similarity",
+        "Replace.transition_replace"
+      ],
+      "functions": [
+        "BC-003.01",
+        "BC-002.02"
+      ],
+      "observed": "Identifiant de partie unique, identifiants supplémentaires et remplacement explicite ; contrôle de similarité, désactivation de la source, remplacement de liens et appel d'insertion d'historique.",
+      "delta": "Un remplacement maître avec réécriture de liens n'est pas l'alias multisource non destructif ni le rattachement de correction FLOW. Aucune historisation systématique de toutes contributions n'est déduite de l'appel _insert_history.",
+      "tests": [
+        {
+          "path": "modules/party/tests/test_module.py",
+          "ranges": [
+            [
+              117,
+              135
+            ]
+          ],
+          "symbols": [
+            "test_party_code"
+          ],
+          "observed": "Refus de réutilisation d'un code de partie dans le test source ; non exécuté.",
+          "sha256": "636f365d75c9e69a5c009839a47eeb3b721d6ded0c950aeacdce8e3f060c5fc2",
+          "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+          "commit": "e011222dc305c431677e586706fd241dffe02236",
+          "repository_id": "tryton",
+          "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/party/tests/test_module.py",
+          "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/party/tests/test_module.py#L117",
+          "excerpts": [
+            {
+              "line": 117,
+              "text": "def test_party_code(self):"
+            },
+            {
+              "line": 118,
+              "text": "'Test party code constraint'"
+            }
+          ]
+        }
+      ],
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "tryton",
+      "reader": "agent_spring_reuse",
+      "sha256": "5bb6c2fc04df1ec0b624a71cf5bfd6bbb1af3190d87ee0cdd1377a1a9a69ace0",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/party/party.py",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/party/party.py#L35",
+      "excerpts": [
+        {
+          "line": 108,
+          "text": "('code_uniq', Unique(t, t.code), 'party.msg_party_code_unique')"
+        },
+        {
+          "line": 1226,
+          "text": "self.check_similarity()"
+        },
+        {
+          "line": 1239,
+          "text": "source.replaced_by = destination"
+        }
+      ]
+    },
+    {
+      "id": "R07-TR02",
+      "product": "tryton",
+      "path": "modules/product/product.py",
+      "ranges": [
+        [
+          128,
+          186
+        ],
+        [
+          1060,
+          1077
+        ]
+      ],
+      "symbols": [
+        "Template",
+        "ProductReplace.transition_replace"
+      ],
+      "functions": [
+        "BC-004.01",
+        "BC-006.01",
+        "BC-006.02"
+      ],
+      "observed": "Article/variante avec unité, catégories et marqueur consommable ; remplacement produit déclaré et désactivation des remplacés.",
+      "delta": "Consommable autorise l'affectation indépendamment du stock : ce n'est pas la catégorie métier fourniture interne. Réutiliser l'analogie de référence/unité, pas importer ce comportement ni le cycle d'actif.",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "tryton",
+      "reader": "agent_spring_reuse",
+      "sha256": "8bea944d8465e2c668ae87944014a83970db98cfb14822752759ef4bcddeba60",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/product/product.py",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/product/product.py#L128",
+      "excerpts": [
+        {
+          "line": 141,
+          "text": "type = fields.Selection(TYPES, \"Type\", required=True)"
+        },
+        {
+          "line": 142,
+          "text": "consumable = fields.Boolean('Consumable',"
+        },
+        {
+          "line": 151,
+          "text": "help=\"Check to allow stock moves to be assigned \""
+        }
+      ]
+    },
+    {
+      "id": "R07-TR03",
+      "product": "tryton",
+      "path": "modules/product/uom.py",
+      "ranges": [
+        [
+          185,
+          285
+        ]
+      ],
+      "symbols": [
+        "Uom.compute_qty",
+        "Uom.compute_price"
+      ],
+      "functions": [
+        "BC-005.02",
+        "BC-006.02"
+      ],
+      "observed": "Conversion d'unités, ratio explicite requis entre catégories, rejet d'un ratio superflu dans une même catégorie et arrondi de quantité cible ; conversion de prix distincte.",
+      "delta": "Les dimensions, relations d'unités et restrictions FLOW doivent être bornées et sourcées. Cette bibliothèque Python du framework Tryton n'est pas un composant Spring ; aucune conversion contextuelle universelle n'est acquise.",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "tryton",
+      "reader": "agent_spring_reuse",
+      "sha256": "1e5b94034a83b02af9b44b3139c4f08ada2a12a9f7bc34587a55137831e77905",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/product/uom.py",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/product/uom.py#L185",
+      "excerpts": [
+        {
+          "line": 201,
+          "text": "if from_uom.category.id != to_uom.category.id:"
+        },
+        {
+          "line": 202,
+          "text": "if not factor and not rate:"
+        },
+        {
+          "line": 203,
+          "text": "raise ValueError("
+        }
+      ]
+    },
+    {
+      "id": "R07-TR04",
+      "product": "tryton",
+      "path": "modules/stock_package/stock.py",
+      "ranges": [
+        [
+          61,
+          181
+        ],
+        [
+          295,
+          333
+        ],
+        [
+          359,
+          361
+        ]
+      ],
+      "symbols": [
+        "MeasurementsMixin.on_change_with_packaging_volume",
+        "Package.on_change_type",
+        "Package.check_volume",
+        "Type"
+      ],
+      "functions": [
+        "BC-005.01",
+        "BC-005.02"
+      ],
+      "observed": "Type réutilisable et colis concret séparés ; copie des mesures depuis le type, conversion des dimensions pour calcul de volume et contrôle du volume des colis enfants.",
+      "delta": "La hiérarchie contrôlée appartient aux colis physiques. Ne pas l'assimiler à la spécification hiérarchique de conditionnement, aux matériaux ou à leurs versions métier FLOW.",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "tryton",
+      "reader": "agent_spring_reuse",
+      "sha256": "645753c6ce76f4e01ed3d56b827fd4b3ba919c1639d3cf6a2e03440dbb67c39c",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/stock_package/stock.py",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock_package/stock.py#L61",
+      "excerpts": [
+        {
+          "line": 128,
+          "text": "def on_change_with_packaging_volume(self):"
+        },
+        {
+          "line": 147,
+          "text": "length = Uom.compute_qty("
+        },
+        {
+          "line": 154,
+          "text": "return Uom.compute_qty("
+        }
+      ]
+    },
+    {
+      "id": "R07-TR05",
+      "product": "tryton",
+      "path": "modules/carrier/carrier.py",
+      "ranges": [
+        [
+          11,
+          120
+        ]
+      ],
+      "symbols": [
+        "Carrier.get_sale_price",
+        "Carrier.get_purchase_price",
+        "Selection.get_carriers"
+      ],
+      "functions": [
+        "BC-007.01",
+        "BC-007.02"
+      ],
+      "observed": "Prestataire lié à un produit service, prix/devise via contexte société, sélection par pays départ/arrivée et cache invalidé lors de modifications.",
+      "delta": "Comparable ciblé réseau/service/prix. La sélection n'est ni disponibilité réelle, ni réservation, ni graphe métier générique versionné. Le retour de tous les transporteurs en absence de sélection n'est pas repris comme politique FLOW.",
+      "tests": [
+        {
+          "path": "modules/carrier/tests/test_module.py",
+          "ranges": [
+            [
+              66,
+              87
+            ],
+            [
+              114,
+              151
+            ]
+          ],
+          "symbols": [
+            "test_carrier_sale_price",
+            "test_carrier_sale_price_without_list_price",
+            "test_carrier_sale_price_without_company",
+            "test_carrier_selection",
+            "test_carrier_selection_wihout_selection"
+          ],
+          "observed": "Cas prix/devise absent, routage pays et absence de sélection présents dans les tests source ; non exécutés.",
+          "sha256": "8acca2e7570002fe1dfeffb7555e703aa452f4fbaff0dde215da36a1a01b845a",
+          "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+          "commit": "e011222dc305c431677e586706fd241dffe02236",
+          "repository_id": "tryton",
+          "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/carrier/tests/test_module.py",
+          "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/carrier/tests/test_module.py#L66",
+          "excerpts": [
+            {
+              "line": 66,
+              "text": "def test_carrier_sale_price(self):"
+            },
+            {
+              "line": 67,
+              "text": "\"Test carrier sale price\""
+            }
+          ]
+        }
+      ],
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "tryton",
+      "reader": "agent_spring_reuse",
+      "sha256": "18c8cbcd01e6221fc4bde4116413e5145c84f273232d76d217b6f533bb5f9631",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/carrier/carrier.py",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/carrier/carrier.py#L11",
+      "excerpts": [
+        {
+          "line": 13,
+          "text": "party = fields.Many2One('party.party', 'Party', required=True,"
+        },
+        {
+          "line": 15,
+          "text": "carrier_product = fields.Many2One('product.product', 'Carrier Product',"
+        },
+        {
+          "line": 17,
+          "text": "('type', '=', 'service'),"
+        }
+      ]
+    },
+    {
+      "id": "R07-TR06",
+      "product": "tryton",
+      "path": "modules/carrier_weight/carrier.py",
+      "ranges": [
+        [
+          14,
+          115
+        ]
+      ],
+      "symbols": [
+        "Carrier.compute_weight_price",
+        "Carrier._get_weight_price"
+      ],
+      "functions": [
+        "BC-007.02"
+      ],
+      "observed": "Table de prix par poids avec unité/devise, seuils ordonnés et addition par colis ; défaut de calcul codé à zéro si aucune tranche reconnue.",
+      "delta": "Exemple de tarification calculée spécifique, pas convention FLOW. Pour prix reçu ou condition manquante, FLOW doit conserver inconnu/inapplicable, sans reprendre implicitement le zéro ni ce calcul.",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "tryton",
+      "reader": "agent_spring_reuse",
+      "sha256": "7572bdf97fe2b6b13dcfc65ea3b2ed765e7320b892a9785488d61ec4cec348ac",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/carrier_weight/carrier.py",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/carrier_weight/carrier.py#L14",
+      "excerpts": [
+        {
+          "line": 47,
+          "text": "def compute_weight_price(self, weight):"
+        },
+        {
+          "line": 50,
+          "text": "for line in reversed(self.weight_price_list):"
+        },
+        {
+          "line": 51,
+          "text": "if line.weight < weight:"
+        }
+      ]
+    },
+    {
+      "id": "R07-TR07",
+      "product": "tryton",
+      "path": "modules/product_price_list_dates/product.py",
+      "ranges": [
+        [
+          79,
+          107
+        ]
+      ],
+      "symbols": [
+        "PriceListLine.match"
+      ],
+      "functions": [
+        "BC-003.02",
+        "BC-004.02",
+        "BC-007.02"
+      ],
+      "observed": "Validité de ligne tarifaire contrôlée à la date demandée, ou à aujourd'hui si la date manque ; bornes inclusives.",
+      "delta": "Comparabilité de contrôle temporel uniquement : version connue à la date, provenance multisource, conflits, accords et contextes de planification ne sont pas établis.",
+      "tests": [
+        {
+          "path": "modules/product_price_list_dates/tests/test_module.py",
+          "ranges": [
+            [
+              51,
+              96
+            ]
+          ],
+          "symbols": [
+            "test_price_list_start_date",
+            "test_price_list_end_date"
+          ],
+          "observed": "Avant/début et après/fin de validité sont comparés dans le test source ; non exécuté.",
+          "sha256": "bbb25a8af1f1d77a1ef44fa551599a7dbbbb3ce88dd28fb7602c50b2e3ac2de1",
+          "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+          "commit": "e011222dc305c431677e586706fd241dffe02236",
+          "repository_id": "tryton",
+          "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/product_price_list_dates/tests/test_module.py",
+          "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/product_price_list_dates/tests/test_module.py#L51",
+          "excerpts": [
+            {
+              "line": 51,
+              "text": "def test_price_list_start_date(self):"
+            },
+            {
+              "line": 52,
+              "text": "\"Test price list with start date\""
+            }
+          ]
+        }
+      ],
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "tryton",
+      "reader": "agent_spring_reuse",
+      "sha256": "c2740243d2c000c4bf4ee544f8852177b1cd805042307626d4ef4b907a701704",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "cache_path": "tmp/tryton-code-audit-2026-10-28/modules/product_price_list_dates/product.py",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/product_price_list_dates/product.py#L79",
+      "excerpts": [
+        {
+          "line": 82,
+          "text": "start_date = fields.Date("
+        },
+        {
+          "line": 89,
+          "text": "end_date = fields.Date("
+        },
+        {
+          "line": 97,
+          "text": "def match(self, pattern):"
+        }
+      ]
+    },
+    {
+      "id": "R07-TR08",
+      "product": "tryton",
+      "path": "trytond/trytond/model/modelstorage.py",
+      "ranges": [
+        [
+          1141,
+          1196
+        ],
+        [
+          1327,
+          1388
+        ],
+        [
+          1401,
+          1472
+        ]
+      ],
+      "symbols": [
+        "ModelStorage.import_data"
+      ],
+      "functions": [
+        "BC-002.01",
+        "BC-002.02",
+        "BC-002.03"
+      ],
+      "observed": "Import générique avec conversions, recherche de relations et erreurs localisées ; distinction création/mise à jour, et suppression possible de membres absents d'une collection réimportée.",
+      "delta": "Comparable de parsing/liens/rejets, relu en extension de preuve02. Pas de preuve dans cette méthode d'une quarantaine durable, clé de contribution+version, correction liée, arbitrage multisource ou publication de vue cohérente. Les suppressions automatiques ne sont pas transposées.",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "repository_id": "tryton",
+      "reader": "agent_spring_reuse",
+      "sha256": "b03e95142a10b520d669dacc2c29f0959cde90d6785ec9bceb84640095dcd80d",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "cache_path": "tmp/tryton-code-audit-2026-10-28/trytond/trytond/model/modelstorage.py",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/model/modelstorage.py#L1141",
+      "excerpts": [
+        {
+          "line": 1160,
+          "text": "raise ImportDataError(gettext("
+        },
+        {
+          "line": 1162,
+          "text": "row=row_index(line) + 1,"
+        },
+        {
+          "line": 1163,
+          "text": "column=index + 1)) from e"
+        }
+      ]
+    },
+    {
+      "id": "R07-AX01",
+      "path": "axelor-base/src/main/java/com/axelor/apps/base/service/PartnerServiceImpl.java",
+      "ranges": [
+        [
+          155,
+          201
+        ],
+        [
+          633,
+          660
+        ]
+      ],
+      "symbols": [
+        "PartnerServiceImpl"
+      ],
+      "functions": [
+        "BC-003.01",
+        "BC-002.02"
+      ],
+      "observed": "Séquence conditionnelle, contrôle d'email déjà utilisé, liens contact/partenaire et recherche de doublon par nom/type, avec branche actifs/archivés.",
+      "delta": "Identité interne et recherche heuristique ; ne prouve pas l'identité source/version, la fusion multisource ni la validité temporelle d'un accord.",
+      "product": "axelor",
+      "repository_id": "axelor-suite",
+      "reader": "agent_effort_admission",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "test_search_scope": "Recherche bornée par noms des classes dans *Test*.java : aucun test direct identifié, sans conclure à l'absence de tests produit.",
+      "sha256": "ee8d2d6a8a7249824163dd7ed22e0b5f2323f373baf93f67ea77b61a32206a11",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "cache_path": "tmp/oss-audit-axelor/axelor-base/src/main/java/com/axelor/apps/base/service/PartnerServiceImpl.java",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-base/src/main/java/com/axelor/apps/base/service/PartnerServiceImpl.java#L155",
+      "excerpts": [
+        {
+          "line": 167,
+          "text": "partner.setPartnerSeq(seq);"
+        }
+      ]
+    },
+    {
+      "id": "R07-AX02",
+      "path": "axelor-contract/src/main/java/com/axelor/apps/contract/service/ContractServiceImpl.java",
+      "ranges": [
+        [
+          127,
+          131
+        ],
+        [
+          225,
+          240
+        ]
+      ],
+      "symbols": [
+        "ContractServiceImpl",
+        "ContractVersionServiceImpl"
+      ],
+      "functions": [
+        "BC-003.02"
+      ],
+      "observed": "Historique de versions de contrat, numéro métier, changements d'états autorisés, date/auteur d'activation, terminaison et copie pour le prochain brouillon.",
+      "delta": "Cycle de contrat lié aux engagements et à la facturation. Ne transpose pas une vue d'accord reçu ni ne prouve la correction bitemporelle ou la concurrence bout en bout.",
+      "supporting_sources": [
+        {
+          "path": "axelor-contract/src/main/java/com/axelor/apps/contract/service/ContractVersionServiceImpl.java",
+          "ranges": [
+            [
+              85,
+              112
+            ],
+            [
+              132,
+              165
+            ],
+            [
+              185,
+              202
+            ]
+          ],
+          "sha256": "3fb823f6a7b86c5304a156d76b989d23726d4321f296cc314567ac2c05636bc7",
+          "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+          "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+          "repository_id": "axelor-suite",
+          "cache_path": "tmp/oss-audit-axelor/axelor-contract/src/main/java/com/axelor/apps/contract/service/ContractVersionServiceImpl.java",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-contract/src/main/java/com/axelor/apps/contract/service/ContractVersionServiceImpl.java#L85",
+          "excerpts": [
+            {
+              "line": 85,
+              "text": "@Transactional(rollbackOn = {Exception.class})"
+            },
+            {
+              "line": 86,
+              "text": "public void waiting(ContractVersion version, LocalDate date) throws AxelorException {"
+            }
+          ]
+        }
+      ],
+      "product": "axelor",
+      "repository_id": "axelor-suite",
+      "reader": "agent_effort_admission",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "test_search_scope": "Recherche bornée par noms des classes dans *Test*.java : aucun test direct identifié, sans conclure à l'absence de tests produit.",
+      "sha256": "83d95b164847a7bb39525ca2f89cb3cf3439229874dc52214b85e793f25e253e",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "cache_path": "tmp/oss-audit-axelor/axelor-contract/src/main/java/com/axelor/apps/contract/service/ContractServiceImpl.java",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-contract/src/main/java/com/axelor/apps/contract/service/ContractServiceImpl.java#L127",
+      "excerpts": [
+        {
+          "line": 231,
+          "text": "contract.addVersionHistory(currentVersion);"
+        }
+      ]
+    },
+    {
+      "id": "R07-AX03",
+      "path": "axelor-purchase/src/main/java/com/axelor/apps/purchase/service/SupplierCatalogServiceImpl.java",
+      "ranges": [
+        [
+          84,
+          164
+        ],
+        [
+          327,
+          342
+        ]
+      ],
+      "symbols": [
+        "SupplierCatalogServiceImpl"
+      ],
+      "functions": [
+        "BC-003.02",
+        "BC-004.02",
+        "BC-007.02"
+      ],
+      "observed": "Sélection par produit/fournisseur/seuil ou par updateDate puis minimum ; noms/codes fournisseur, conversion monétaire datée et unité fournisseur avec repli.",
+      "delta": "updateDate n'est pas une période d'applicabilité ; la date de conversion de prix ne filtre pas ici les versions du catalogue. Priorités multi-accords et provenance restent non démontrées.",
+      "supporting_sources": [
+        {
+          "path": "axelor-purchase/src/main/resources/domains/SupplierCatalog.xml",
+          "ranges": [
+            [
+              10,
+              30
+            ]
+          ],
+          "sha256": "de0ccdc26f8e6970e4dd419624b3d1100d43fcfe0565b53119890a88d625bdd9",
+          "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+          "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+          "repository_id": "axelor-suite",
+          "cache_path": "tmp/oss-audit-axelor/axelor-purchase/src/main/resources/domains/SupplierCatalog.xml",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-purchase/src/main/resources/domains/SupplierCatalog.xml#L10",
+          "excerpts": [
+            {
+              "line": 10,
+              "text": "<many-to-one name=\"product\" ref=\"com.axelor.apps.base.db.Product\" title=\"Product\""
+            },
+            {
+              "line": 11,
+              "text": "required=\"true\"/>"
+            }
+          ]
+        }
+      ],
+      "product": "axelor",
+      "repository_id": "axelor-suite",
+      "reader": "agent_effort_admission",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "test_search_scope": "Recherche bornée par noms des classes dans *Test*.java : aucun test direct identifié, sans conclure à l'absence de tests produit.",
+      "sha256": "6cac695033ae82500ae160b0972048a4f0f61a1a4bd405b8bb9d827346934b97",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "cache_path": "tmp/oss-audit-axelor/axelor-purchase/src/main/java/com/axelor/apps/purchase/service/SupplierCatalogServiceImpl.java",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-purchase/src/main/java/com/axelor/apps/purchase/service/SupplierCatalogServiceImpl.java#L84",
+      "excerpts": [
+        {
+          "line": 106,
+          "text": "\"self.product = ?1 AND self.minQty <= ?2 AND self.supplierPartner = ?3 ORDER BY self.minQty DESC\","
+        }
+      ]
+    },
+    {
+      "id": "R07-AX04",
+      "path": "axelor-base/src/main/java/com/axelor/apps/base/service/ProductServiceImpl.java",
+      "ranges": [
+        [
+          306,
+          377
+        ]
+      ],
+      "symbols": [
+        "ProductServiceImpl"
+      ],
+      "functions": [
+        "BC-004.01"
+      ],
+      "observed": "Recherche de variantes existantes, suffixe de code, copie de modèle, liens parent/variante et calculs de prix.",
+      "delta": "Génération maître ; pas import idempotent d'une vue depuis source autoritaire. Ce corps ne démontre pas correction/retrait source ni absence de double génération concurrente.",
+      "product": "axelor",
+      "repository_id": "axelor-suite",
+      "reader": "agent_effort_admission",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "test_search_scope": "Recherche bornée par noms des classes dans *Test*.java : aucun test direct identifié, sans conclure à l'absence de tests produit.",
+      "sha256": "aa90509c26cbb9c70d4b0444fd66df12158e713402b141981c8dfe6ec69347bc",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "cache_path": "tmp/oss-audit-axelor/axelor-base/src/main/java/com/axelor/apps/base/service/ProductServiceImpl.java",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-base/src/main/java/com/axelor/apps/base/service/ProductServiceImpl.java#L306",
+      "excerpts": [
+        {
+          "line": 364,
+          "text": "generatedProduct.setParentProduct(productModel);"
+        }
+      ]
+    },
+    {
+      "id": "R07-AX05",
+      "path": "axelor-base/src/main/java/com/axelor/apps/base/service/ProductPackagingServiceImpl.java",
+      "ranges": [
+        [
+          45,
+          87
+        ]
+      ],
+      "symbols": [
+        "ProductPackagingServiceImpl",
+        "ProductPackaging",
+        "Product"
+      ],
+      "functions": [
+        "BC-005.01",
+        "BC-005.02"
+      ],
+      "observed": "Produit utilisé comme emballage avec dimensions/poids admissible ; lien produit/emballage/quantité, conversion de masse et contrôle du poids du contenu.",
+      "delta": "Relation de spécification partielle, sans preuve de version métier, validité ou provenance. Distinct de l'instance physique Packaging de Supplychain.",
+      "supporting_sources": [
+        {
+          "path": "axelor-base/src/main/resources/domains/ProductPackaging.xml",
+          "ranges": [
+            [
+              10,
+              16
+            ]
+          ],
+          "sha256": "46e6d84a659874d6f5cae24969070d334c9b5262afa4e7f722f938a35d1243c0",
+          "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+          "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+          "repository_id": "axelor-suite",
+          "cache_path": "tmp/oss-audit-axelor/axelor-base/src/main/resources/domains/ProductPackaging.xml",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-base/src/main/resources/domains/ProductPackaging.xml#L10",
+          "excerpts": [
+            {
+              "line": 10,
+              "text": "<many-to-one name=\"productToPackage\" ref=\"com.axelor.apps.base.db.Product\""
+            },
+            {
+              "line": 11,
+              "text": "title=\"Product to package\"/>"
+            }
+          ]
+        },
+        {
+          "path": "axelor-base/src/main/resources/domains/Product.xml",
+          "ranges": [
+            [
+              142,
+              158
+            ]
+          ],
+          "sha256": "18f70d5941d3cde8bf72cba94b4756fc709d3f0e22e110081282027c291c56d3",
+          "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+          "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+          "repository_id": "axelor-suite",
+          "cache_path": "tmp/oss-audit-axelor/axelor-base/src/main/resources/domains/Product.xml",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-base/src/main/resources/domains/Product.xml#L142",
+          "excerpts": [
+            {
+              "line": 142,
+              "text": "<boolean name=\"isPackaging\" title=\"This product is a packaging ?\" default=\"false\"/>"
+            },
+            {
+              "line": 143,
+              "text": "<decimal name=\"innerLength\" title=\"Inner length (mm)\" default=\"0\" scale=\"3\""
+            }
+          ]
+        }
+      ],
+      "product": "axelor",
+      "repository_id": "axelor-suite",
+      "reader": "agent_effort_admission",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "test_search_scope": "Recherche bornée par noms des classes dans *Test*.java : aucun test direct identifié, sans conclure à l'absence de tests produit.",
+      "sha256": "f88d8c8672c22a1827b3d338513bcafc6e7d4340abb0e635426032161d49c0a6",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "cache_path": "tmp/oss-audit-axelor/axelor-base/src/main/java/com/axelor/apps/base/service/ProductPackagingServiceImpl.java",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-base/src/main/java/com/axelor/apps/base/service/ProductPackagingServiceImpl.java#L45",
+      "excerpts": [
+        {
+          "line": 49,
+          "text": "return packagingWeight.add(productTotalWeight);"
+        }
+      ]
+    },
+    {
+      "id": "R07-AX06",
+      "path": "axelor-base/src/main/resources/domains/Product.xml",
+      "ranges": [
+        [
+          8,
+          37
+        ],
+        [
+          163,
+          163
+        ],
+        [
+          182,
+          183
+        ]
+      ],
+      "symbols": [
+        "Product",
+        "StockMoveServiceImpl"
+      ],
+      "functions": [
+        "BC-006.01",
+        "BC-006.02",
+        "BC-007.01"
+      ],
+      "observed": "Article générique à code unique, unité/famille/type ; un chemin de calcul de disponibilité exclut effectivement le type service.",
+      "delta": "Analogie d'article pour fourniture interne ; aucune gouvernance spécifique des fournitures ni catalogue FLOW de services/prestataires n'est établie. Ne conclut pas à une absence produit.",
+      "supporting_sources": [
+        {
+          "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+          "ranges": [
+            [
+              1617,
+              1626
+            ]
+          ],
+          "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+          "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+          "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+          "repository_id": "axelor-suite",
+          "cache_path": "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java#L1617",
+          "excerpts": [
+            {
+              "line": 1623,
+              "text": ".equals(ProductRepository.PRODUCT_TYPE_SERVICE)"
+            }
+          ]
+        }
+      ],
+      "product": "axelor",
+      "repository_id": "axelor-suite",
+      "reader": "agent_effort_admission",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "test_search_scope": "Recherche bornée par noms des classes dans *Test*.java : aucun test direct identifié, sans conclure à l'absence de tests produit.",
+      "sha256": "18f70d5941d3cde8bf72cba94b4756fc709d3f0e22e110081282027c291c56d3",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "cache_path": "tmp/oss-audit-axelor/axelor-base/src/main/resources/domains/Product.xml",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-base/src/main/resources/domains/Product.xml#L8",
+      "excerpts": [
+        {
+          "line": 8,
+          "text": "<entity name=\"Product\">"
+        },
+        {
+          "line": 10,
+          "text": "<string name=\"name\" title=\"Name\" initParam=\"true\" translatable=\"true\"/>"
+        }
+      ]
+    },
+    {
+      "id": "R07-AX07",
+      "repository_id": "axelor-platform",
+      "path": "axelor-core/src/main/java/com/axelor/db/Model.java",
+      "ranges": [
+        [
+          22,
+          55
+        ]
+      ],
+      "symbols": [
+        "Model",
+        "AuditableModel"
+      ],
+      "functions": [
+        "BC-002.02"
+      ],
+      "observed": "Annotation de version JPA, archive et métadonnées de création/dernière mise à jour (dates et auteurs).",
+      "delta": "Version technique distincte de version métier source, historique de corrections ou temps fait/connaissance. Annotations lues, aucune garantie concurrente testée.",
+      "supporting_sources": [
+        {
+          "path": "axelor-core/src/main/java/com/axelor/auth/db/AuditableModel.java",
+          "ranges": [
+            [
+              23,
+              77
+            ]
+          ],
+          "sha256": "50b42f02eda26e569b3dbc0b54ca4389c367b2d3fa6524554e35eca1e7d2a08f",
+          "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+          "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+          "repository_id": "axelor-platform",
+          "cache_path": "tmp/oss-audit-axelor-platform/axelor-core/src/main/java/com/axelor/auth/db/AuditableModel.java",
+          "url": "https://github.com/axelor/axelor-open-platform/blob/96caf51eb97fbab7750b7dadf10a371a55a490a3/axelor-core/src/main/java/com/axelor/auth/db/AuditableModel.java#L23",
+          "excerpts": [
+            {
+              "line": 23,
+              "text": "@MappedSuperclass"
+            },
+            {
+              "line": 24,
+              "text": "public abstract class AuditableModel extends Model {"
+            }
+          ]
+        }
+      ],
+      "product": "axelor",
+      "reader": "agent_effort_admission",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "test_search_scope": "Recherche bornée par noms des classes dans *Test*.java : aucun test direct identifié, sans conclure à l'absence de tests produit.",
+      "sha256": "d00256743e19e855f82e1ca85d0f9a2c14734f2ea2717ad39bac98e852b80305",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "cache_path": "tmp/oss-audit-axelor-platform/axelor-core/src/main/java/com/axelor/db/Model.java",
+      "url": "https://github.com/axelor/axelor-open-platform/blob/96caf51eb97fbab7750b7dadf10a371a55a490a3/axelor-core/src/main/java/com/axelor/db/Model.java#L22",
+      "excerpts": [
+        {
+          "line": 25,
+          "text": "@Version private Integer version;"
+        }
+      ]
+    },
+    {
+      "id": "R07-AX08",
+      "repository_id": "axelor-platform",
+      "path": "axelor-core/src/main/java/com/axelor/data/csv/CSVImporter.java",
+      "ranges": [
+        [
+          263,
+          351
+        ],
+        [
+          380,
+          440
+        ]
+      ],
+      "symbols": [
+        "CSVImporter",
+        "CSVBinder"
+      ],
+      "functions": [
+        "BC-002.01",
+        "BC-002.02",
+        "BC-002.03"
+      ],
+      "observed": "Recherche configurable avant création, binding/callback, persistance JPA, commits par lots, rollback et relecture des lignes du tampon.",
+      "delta": "Tampon mémoire et clé configurable : pas preuve de reprise durable après crash, journal source/version, atomicité du fichier entier ou effets de callbacks exactement une fois.",
+      "supporting_sources": [
+        {
+          "path": "axelor-core/src/main/java/com/axelor/data/csv/CSVBinder.java",
+          "ranges": [
+            [
+              171,
+              203
+            ]
+          ],
+          "sha256": "308b9456a8117f76d08703829a5afee035f0cd1fa8af23a6bc8db0cb804d3837",
+          "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+          "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+          "repository_id": "axelor-platform",
+          "cache_path": "tmp/oss-audit-axelor-platform/axelor-core/src/main/java/com/axelor/data/csv/CSVBinder.java",
+          "url": "https://github.com/axelor/axelor-open-platform/blob/96caf51eb97fbab7750b7dadf10a371a55a490a3/axelor-core/src/main/java/com/axelor/data/csv/CSVBinder.java#L171",
+          "excerpts": [
+            {
+              "line": 171,
+              "text": "@SuppressWarnings(\"unchecked\")"
+            },
+            {
+              "line": 172,
+              "text": "private Object find(Map<String, Object> params) {"
+            }
+          ]
+        }
+      ],
+      "product": "axelor",
+      "reader": "agent_effort_admission",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "test_search_scope": "Recherche bornée par noms des classes dans *Test*.java : aucun test direct identifié, sans conclure à l'absence de tests produit.",
+      "sha256": "385c2563d3f8e54b18f3c32d8ead5660417ae3ac3e40cbf1d6340f7c25a9d9b6",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "cache_path": "tmp/oss-audit-axelor-platform/axelor-core/src/main/java/com/axelor/data/csv/CSVImporter.java",
+      "url": "https://github.com/axelor/axelor-open-platform/blob/96caf51eb97fbab7750b7dadf10a371a55a490a3/axelor-core/src/main/java/com/axelor/data/csv/CSVImporter.java#L263",
+      "excerpts": [
+        {
+          "line": 328,
+          "text": "this.onRollback(values, binder, csvInput, context);"
+        }
+      ]
+    },
+    {
+      "id": "R07-AX09",
+      "path": "axelor-base/src/main/java/com/axelor/apps/base/service/DataSharingReferentialLineServiceImpl.java",
+      "ranges": [
+        [
+          72,
+          111
+        ]
+      ],
+      "symbols": [
+        "DataSharingReferentialLineServiceImpl"
+      ],
+      "functions": [
+        "BC-002.01",
+        "BC-004.02",
+        "BC-007.01"
+      ],
+      "observed": "Conditions non vides liées au métamodèle, union OR puis requête JPA ; sans filtre retourne null.",
+      "delta": "Sélection paramétrée de références, pas preuve de politique de partage correcte, d'isolation des droits ou de fraîcheur des vues.",
+      "tests": [
+        {
+          "path": "axelor-base/src/test/java/com/axelor/apps/base/service/TestDataSharingReferentialLineService.java",
+          "ranges": [
+            [
+              43,
+              70
+            ]
+          ],
+          "symbols": [
+            "TestDataSharingReferentialLineService"
+          ],
+          "observed": "Construit deux conditions et vérifie le texte OR de la requête ; non exécuté.",
+          "sha256": "ffcceb4d4f04f702e30a12b2fe61bc0ed1c00a1d9f27b4940489af02419cdc03",
+          "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+          "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+          "repository_id": "axelor-suite",
+          "cache_path": "tmp/oss-audit-axelor/axelor-base/src/test/java/com/axelor/apps/base/service/TestDataSharingReferentialLineService.java",
+          "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-base/src/test/java/com/axelor/apps/base/service/TestDataSharingReferentialLineService.java#L43",
+          "excerpts": [
+            {
+              "line": 43,
+              "text": "@Test"
+            },
+            {
+              "line": 44,
+              "text": "@Transactional"
+            }
+          ]
+        }
+      ],
+      "product": "axelor",
+      "repository_id": "axelor-suite",
+      "reader": "agent_effort_admission",
+      "kind": "code_source_lu",
+      "assessment": "comparable_fonctionnel_partiel",
+      "spring_component_admitted": false,
+      "execution": "lecture_seule_aucun_test_execute",
+      "test_search_scope": "Test ciblé lu, non exécuté.",
+      "sha256": "784c11299572acfd6d6bf90ebde561337e0f3532610adad66bccde223aaba714",
+      "hash_basis": "Octets du fichier local au commit verifie, fins de ligne du checkout.",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "cache_path": "tmp/oss-audit-axelor/axelor-base/src/main/java/com/axelor/apps/base/service/DataSharingReferentialLineServiceImpl.java",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-base/src/main/java/com/axelor/apps/base/service/DataSharingReferentialLineServiceImpl.java#L72",
+      "excerpts": [
+        {
+          "line": 88,
+          "text": "String condition = String.join(\" OR \", conditionList);"
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "id": "BC-002.01",
+      "status": "partiel",
+      "proof_ids": [
+        "R07-TR08",
+        "R07-AX08",
+        "R07-AX09"
+      ],
+      "conclusion": "Imports typés et relations observés ; orchestration de contributions, provenance, vues locales et publication cohérente restent à composer.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Recevoir les référentiels complets et leurs changements",
+      "capability_id": "master-data-ingestion",
+      "source_ref": "iteration-06-perimetre-a.json#master-data-ingestion"
+    },
+    {
+      "id": "BC-002.02",
+      "status": "partiel",
+      "proof_ids": [
+        "R07-OD01",
+        "R07-TR01",
+        "R07-TR08",
+        "R07-AX01",
+        "R07-AX07",
+        "R07-AX08"
+      ],
+      "conclusion": "Identifiants, correspondances et versions techniques observés. Autorités multiples, validité métier, conflits et corrections sourcées restent distincts et non acquis.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Rapprocher les identités et versions",
+      "capability_id": "master-data-ingestion",
+      "source_ref": "iteration-06-perimetre-a.json#master-data-ingestion"
+    },
+    {
+      "id": "BC-002.03",
+      "status": "partiel",
+      "proof_ids": [
+        "R07-TR08",
+        "R07-AX08"
+      ],
+      "conclusion": "Erreurs localisées et reprise de tampon observées. Quarantaine durable, rejouabilité après crash et idempotence métier du résultat ne sont pas prouvées.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Mettre en quarantaine puis rejouer les rejets",
+      "capability_id": "master-data-ingestion",
+      "source_ref": "iteration-06-perimetre-a.json#master-data-ingestion"
+    },
+    {
+      "id": "BC-003.01",
+      "status": "partiel",
+      "proof_ids": [
+        "R07-OD01",
+        "R07-TR01",
+        "R07-AX01"
+      ],
+      "conclusion": "Identités, adresses/rôles et liens de parties comparables. Autorité des profils crédit et composition multisource non acquises.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Contrôler parties et rôles utiles",
+      "capability_id": "cap-partner-agreement-reference-stewardship",
+      "source_ref": "iteration-06-perimetre-a.json#cap-partner-agreement-reference-stewardship"
+    },
+    {
+      "id": "BC-003.02",
+      "status": "partiel",
+      "proof_ids": [
+        "R07-OD02",
+        "R07-TR07",
+        "R07-AX02",
+        "R07-AX03"
+      ],
+      "conclusion": "Conditions fournisseur datées et version de contrat existent dans des contextes différents. Vue locale d'accord applicable et profil reçu à composer sans importer facturation ni calcul d'exposition.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Restituer les accords applicables et leurs dates",
+      "capability_id": "cap-partner-agreement-reference-stewardship",
+      "source_ref": "iteration-06-perimetre-a.json#cap-partner-agreement-reference-stewardship"
+    },
+    {
+      "id": "BC-004.01",
+      "status": "partiel",
+      "proof_ids": [
+        "R07-OD03",
+        "R07-TR02",
+        "R07-AX04"
+      ],
+      "conclusion": "Produits et variantes disposent de mécanismes concrets déjà partiellement examinés en02, complétés ici ; reste la réception de versions/corrections plutôt que génération maître.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Rapprocher produits et variantes",
+      "capability_id": "cap-merchandise-reference-stewardship",
+      "source_ref": "iteration-06-perimetre-a.json#cap-merchandise-reference-stewardship"
+    },
+    {
+      "id": "BC-004.02",
+      "status": "partiel",
+      "proof_ids": [
+        "R07-OD02",
+        "R07-OD05",
+        "R07-OD06",
+        "R07-TR07",
+        "R07-AX03",
+        "R07-AX09"
+      ],
+      "conclusion": "Listes/conditions tarifaires, catégories et filtres observés. Offres, catalogues et assortiments FLOW doivent rester des objets distincts, avec autorité, validité et limites explicites.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Qualifier les catalogues et assortiments utilisables",
+      "capability_id": "cap-merchandise-reference-stewardship",
+      "source_ref": "iteration-06-perimetre-a.json#cap-merchandise-reference-stewardship"
+    },
+    {
+      "id": "BC-004.03",
+      "status": "non_directement_etaye_dans_lecture_bornee",
+      "proof_ids": [],
+      "conclusion": "Aucun mécanisme directement équivalent aux contextes de planification reçus n'est établi par ces chemins. Dates de tarif ou catégories produit ne suffisent pas ; objet contextuel et liens génériques restent un travail cible. Ce constat ne prouve pas une absence dans les produits.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Exposer les contextes de planification reçus",
+      "capability_id": "cap-merchandise-reference-stewardship",
+      "source_ref": "iteration-06-perimetre-a.json#cap-merchandise-reference-stewardship"
+    },
+    {
+      "id": "BC-005.01",
+      "status": "partiel",
+      "proof_ids": [
+        "R07-OD04",
+        "R07-TR04",
+        "R07-AX05"
+      ],
+      "conclusion": "Types d'emballage séparés des instances et lien produit/emballage/quantité observés. Matériaux et spécification hiérarchique versionnée ne sont pas confondus avec colis physiques.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Distinguer matériaux et spécifications de conditionnement",
+      "capability_id": "cap-packaging-reference-stewardship",
+      "source_ref": "iteration-06-perimetre-a.json#cap-packaging-reference-stewardship"
+    },
+    {
+      "id": "BC-005.02",
+      "status": "partiel",
+      "proof_ids": [
+        "R07-OD04",
+        "R07-TR03",
+        "R07-TR04",
+        "R07-AX05"
+      ],
+      "conclusion": "Contrôles dimensionnels, unités, masses et volumes observés ; validité, origine, corrections et conflits des spécifications restent à réaliser pour FLOW.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Contrôler la validité des références locales",
+      "capability_id": "cap-packaging-reference-stewardship",
+      "source_ref": "iteration-06-perimetre-a.json#cap-packaging-reference-stewardship"
+    },
+    {
+      "id": "BC-006.01",
+      "status": "partiel_par_analogie_explicite",
+      "proof_ids": [
+        "R07-OD03",
+        "R07-TR02",
+        "R07-AX06"
+      ],
+      "conclusion": "Articles typés/actifs, achat/vente et familles offrent un comparable de référence réutilisable. Aucun mécanisme spécifique de gouvernance des fournitures internes n'est établi ; leur usage ne doit pas déclencher les comportements stock ou actifs des OSS.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Qualifier fournitures et équipements utilisables",
+      "capability_id": "cap-internal-supplies-reference-stewardship",
+      "source_ref": "iteration-06-perimetre-a.json#cap-internal-supplies-reference-stewardship"
+    },
+    {
+      "id": "BC-006.02",
+      "status": "partiel",
+      "proof_ids": [
+        "R07-OD03",
+        "R07-TR02",
+        "R07-TR03",
+        "R07-AX06"
+      ],
+      "conclusion": "Unités et conversions sont concrètes, restrictions de type et d'usage seulement partielles. Règles reçues et correspondances entre usages restent à représenter sans ajouter maintenance ni comptabilité d'actifs.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Restituer leurs unités et restrictions",
+      "capability_id": "cap-internal-supplies-reference-stewardship",
+      "source_ref": "iteration-06-perimetre-a.json#cap-internal-supplies-reference-stewardship"
+    },
+    {
+      "id": "BC-007.01",
+      "status": "partiel",
+      "proof_ids": [
+        "R07-OD03",
+        "R07-TR05",
+        "R07-AX06",
+        "R07-AX09"
+      ],
+      "conclusion": "Transporteur/service lié à des zones départ/arrivée et sélection de références comparables. Graphe réseau générique versionné, catalogue complet et autorités ne sont pas acquis ; aucune disponibilité réelle déduite.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Restituer le réseau et le catalogue des prestations",
+      "capability_id": "cap-service-reference-stewardship",
+      "source_ref": "iteration-06-perimetre-a.json#cap-service-reference-stewardship"
+    },
+    {
+      "id": "BC-007.02",
+      "status": "partiel",
+      "proof_ids": [
+        "R07-OD02",
+        "R07-OD05",
+        "R07-OD06",
+        "R07-TR05",
+        "R07-TR06",
+        "R07-TR07",
+        "R07-AX03"
+      ],
+      "conclusion": "Contrôles d'applicabilité datés, unités, quantités, devises et exemple de barème transport observés. Distinguer conservation/qualification des conditions reçues et calcul spécialisé de prix ; zéro implicite et priorité OSS ne sont pas repris.",
+      "full_target_coverage_demonstrated": false,
+      "native_result": "Qualifier les conditions de prix applicables",
+      "capability_id": "cap-service-reference-stewardship",
+      "source_ref": "iteration-06-perimetre-a.json#cap-service-reference-stewardship"
+    }
+  ],
+  "prior_evidence_reused": [
+    {
+      "ref": "iteration-02-code-oss.json#/products/0/evidence/0",
+      "mechanism": "Odoo base_import : conversion, mapping, model.load, dryrun avec rollback.",
+      "reuse_limit": "Lecture antérieure conservée. Le fichier base_import n'est pas dans le checkout sparse actuel ; aucune nouvelle lecture ni nouvelle empreinte de ce fichier revendiquée en07."
+    },
+    {
+      "ref": "iteration-02-code-oss.json#/products/0/evidence/1",
+      "mechanism": "Odoo ORM load : lots, erreurs, identifiants externes, création/mise à jour.",
+      "reuse_limit": "Appui antérieur à BC-002 ; aucun journal métier de contribution source/version ni couverture complète de reprise déduit."
+    },
+    {
+      "ref": "iteration-02-code-oss.json#/products/0/evidence/2",
+      "mechanism": "Odoo correspondance attributs/variantes.",
+      "reuse_limit": "Appui antérieur à la seule partie produit/variante."
+    },
+    {
+      "ref": "iteration-02-code-oss.json#/products/0/evidence/3",
+      "mechanism": "Tests d'import produit et réimport lus auparavant.",
+      "reuse_limit": "Non relus/exécutés en07 ; ne prouvent pas l'intégralité des six références."
+    },
+    {
+      "ref": "iteration-02-code-oss.json#/products/1/evidence/0",
+      "mechanism": "Tryton import générique.",
+      "reuse_limit": "Relu de façon ciblée en R07-TR08, avec limites de suppression/reprise explicitées."
+    },
+    {
+      "ref": "iteration-02-code-oss.json#/products/2",
+      "mechanism": "Axelor modèles, import et cadres techniques.",
+      "reuse_limit": "Relectures ciblées en R07-AX07/08/09 ; Java ne signifie pas Spring."
+    }
+  ],
+  "residual_work_for_spring": [
+    {
+      "id": "R07-W01",
+      "work": "Contrat de contribution par source/sujet, identité stable, version, validité et provenance ; autorité et conflit explicités.",
+      "proof_ids": [
+        "R07-OD01",
+        "R07-TR01",
+        "R07-TR08",
+        "R07-AX07",
+        "R07-AX08"
+      ],
+      "reason": "Les maîtres ERP et versions ORM observés ont une autre responsabilité."
+    },
+    {
+      "id": "R07-W02",
+      "work": "Réception/quarantaine durables, correction liée, relance et résultat idempotent ; règle de retrait et publication de vue cohérente.",
+      "proof_ids": [
+        "R07-TR08",
+        "R07-AX08"
+      ],
+      "reason": "Erreur d'import ou reprise d'un tampon n'établit pas ces garanties après crash."
+    },
+    {
+      "id": "R07-W03",
+      "work": "Schémas et vues locales distincts des six sujets, relations typées et validité ; contrôles de liens, unités et applicabilité.",
+      "proof_ids": [
+        "R07-OD02",
+        "R07-OD04",
+        "R07-TR03",
+        "R07-TR04",
+        "R07-TR05",
+        "R07-AX02",
+        "R07-AX05"
+      ],
+      "reason": "Éviter de prendre comme contrat générique les données et effets propres d'un ERP."
+    },
+    {
+      "id": "R07-W04",
+      "work": "Conserver et qualifier prix/conditions reçus, avec cas ambigu/inconnu ; contrat séparé pour tout calcul de prix spécialisé.",
+      "proof_ids": [
+        "R07-OD05",
+        "R07-OD06",
+        "R07-TR06",
+        "R07-TR07",
+        "R07-AX03"
+      ],
+      "reason": "Dates de mise à jour, barèmes de poids et priorités de recherche ne sont pas interchangeables avec l'autorité d'une condition externe."
+    },
+    {
+      "id": "R07-W05",
+      "work": "Contrôles, consultations, sécurité, documentation et qualification des garanties du contrat07 ; rapprochement des communs financés en03 avant tout chiffrage.",
+      "proof_ids": [
+        "R07-AX09",
+        "R07-TR05"
+      ],
+      "reason": "Un modèle et des tests OSS partiels ne fournissent pas les garanties de service ou le fonctionnement opérationnel FLOW."
+    }
+  ],
+  "spring_reuse": {
+    "oss_components_admitted_as_is": 0,
+    "assessment": "Aucun composant applicatif OSS examiné n'est admis tel quel dans la stack Spring. Modèles et algorithmes restent des comparables fonctionnels.",
+    "framework_baseline": "Les primitives Spring/PostgreSQL déjà retenues par les contrats02–04 restent à rapprocher de chaque travail ; leur composition métier n'est pas acquise par ces preuves.",
+    "forbidden_inference": "Aucun abattement de charge, calibrage Spring ni performance FLOW n'est déduit de la lecture."
+  },
+  "progress": {
+    "native_capacity_ids_examined": [
+      "master-data-ingestion",
+      "cap-partner-agreement-reference-stewardship",
+      "cap-merchandise-reference-stewardship",
+      "cap-packaging-reference-stewardship",
+      "cap-internal-supplies-reference-stewardship",
+      "cap-service-reference-stewardship"
+    ],
+    "new_code_compared_capacity_ids": [
+      "cap-partner-agreement-reference-stewardship",
+      "cap-packaging-reference-stewardship",
+      "cap-internal-supplies-reference-stewardship",
+      "cap-service-reference-stewardship"
+    ],
+    "meaning": "Comparaisons fonctionnelles nouvelles et partielles, traçables par fonction. L'ajout au cumul avec hypothèses de JH attend le chiffrage et la consolidation07.",
+    "historical_comparative_with_effort_baseline": 16,
+    "counter_delta_from_this_proof_file_alone": 0,
+    "full_capacity_admissions": 0,
+    "new_jh": null
+  },
+  "limits": [
+    "Lecture bornée des versions figées, aucun audit exhaustif de produit ou benchmark exécuté.",
+    "Les différences cibles doivent être réconciliées avec le contrat07 figé ; aucune lecture n'impose les choix métier Beaumanoir.",
+    "Aucune étude de compatibilité complète, de licence de réemploi du code, de portage ou d'exploitation en Spring n'est assimilée à une admission de composant.",
+    "BC-004.03 reste sans comparable direct établi dans les chemins lus ; conserver ce manque au lieu de présenter les 14 fonctions comme couvertes."
+  ],
+  "capabilities": [
+    {
+      "id": "master-data-ingestion",
+      "name": "Reference Ingestion",
+      "function_ids": [
+        "BC-002.01",
+        "BC-002.02",
+        "BC-002.03"
+      ],
+      "comparison_status": "comparaison_code_effective_partielle",
+      "new_code_comparison_in_07": false,
+      "proof_ids": [
+        "R07-AX01",
+        "R07-AX07",
+        "R07-AX08",
+        "R07-AX09",
+        "R07-OD01",
+        "R07-TR01",
+        "R07-TR08"
+      ],
+      "full_native_coverage_demonstrated": false,
+      "new_jh": null
+    },
+    {
+      "id": "cap-partner-agreement-reference-stewardship",
+      "name": "Partner & Agreement Reference Stewardship",
+      "function_ids": [
+        "BC-003.01",
+        "BC-003.02"
+      ],
+      "comparison_status": "comparaison_code_effective_partielle",
+      "new_code_comparison_in_07": true,
+      "proof_ids": [
+        "R07-AX01",
+        "R07-AX02",
+        "R07-AX03",
+        "R07-OD01",
+        "R07-OD02",
+        "R07-TR01",
+        "R07-TR07"
+      ],
+      "full_native_coverage_demonstrated": false,
+      "new_jh": null
+    },
+    {
+      "id": "cap-merchandise-reference-stewardship",
+      "name": "Merchandise Reference Stewardship",
+      "function_ids": [
+        "BC-004.01",
+        "BC-004.02",
+        "BC-004.03"
+      ],
+      "comparison_status": "comparaison_code_effective_partielle",
+      "new_code_comparison_in_07": false,
+      "proof_ids": [
+        "R07-AX03",
+        "R07-AX04",
+        "R07-AX09",
+        "R07-OD02",
+        "R07-OD03",
+        "R07-OD05",
+        "R07-OD06",
+        "R07-TR02",
+        "R07-TR07"
+      ],
+      "full_native_coverage_demonstrated": false,
+      "new_jh": null
+    },
+    {
+      "id": "cap-packaging-reference-stewardship",
+      "name": "Packaging Reference Stewardship",
+      "function_ids": [
+        "BC-005.01",
+        "BC-005.02"
+      ],
+      "comparison_status": "comparaison_code_effective_partielle",
+      "new_code_comparison_in_07": true,
+      "proof_ids": [
+        "R07-AX05",
+        "R07-OD04",
+        "R07-TR03",
+        "R07-TR04"
+      ],
+      "full_native_coverage_demonstrated": false,
+      "new_jh": null
+    },
+    {
+      "id": "cap-internal-supplies-reference-stewardship",
+      "name": "Internal Supplies Reference Stewardship",
+      "function_ids": [
+        "BC-006.01",
+        "BC-006.02"
+      ],
+      "comparison_status": "comparaison_code_effective_partielle",
+      "new_code_comparison_in_07": true,
+      "proof_ids": [
+        "R07-AX06",
+        "R07-OD03",
+        "R07-TR02",
+        "R07-TR03"
+      ],
+      "full_native_coverage_demonstrated": false,
+      "new_jh": null
+    },
+    {
+      "id": "cap-service-reference-stewardship",
+      "name": "Service Reference Stewardship",
+      "function_ids": [
+        "BC-007.01",
+        "BC-007.02"
+      ],
+      "comparison_status": "comparaison_code_effective_partielle",
+      "new_code_comparison_in_07": true,
+      "proof_ids": [
+        "R07-AX03",
+        "R07-AX06",
+        "R07-AX09",
+        "R07-OD02",
+        "R07-OD03",
+        "R07-OD05",
+        "R07-OD06",
+        "R07-TR05",
+        "R07-TR06",
+        "R07-TR07"
+      ],
+      "full_native_coverage_demonstrated": false,
+      "new_jh": null
+    }
+  ],
+  "input_sha256": {
+    "iteration-02-code-oss.json": "78113e817a13c49df5115c2e66ba13cc724207d611d03c5309e1b65b63dc51d3",
+    "iteration-06-perimetre-a.json": "7d1c51d14b62af6b1eb4699613f5951ef4b20534ddafa88b0cc072726470a77f"
+  },
+  "validation": {
+    "proof_count": 23,
+    "distinct_source_and_test_files": 33,
+    "test_files_read": 4,
+    "tests_executed": 0,
+    "native_capacities": 6,
+    "native_functions": 14,
+    "functions_with_partial_code_comparable": 13,
+    "functions_without_direct_comparable": [
+      "BC-004.03"
+    ],
+    "sha_and_ranges_verified": true,
+    "new_jh": false
+  }
+}

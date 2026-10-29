@@ -1,0 +1,68 @@
+{
+  "kind": "Sept contre-exemples analytiques et énumérations inventés ; aucun runtime ERP, Timefold ou OR-Tools exécuté.",
+  "cases": [
+    {
+      "id": "X1",
+      "question": "Stock100, engagement30 dont20 déjà réservés sur la même portion.",
+      "naive_available": 50,
+      "retained_available": 70,
+      "explanation": "L’engagement et sa réservation désignent une même obligation. La provenance évite de retirer deux fois20 ; S142 ne reconstruit pas le registre Reservation10."
+    },
+    {
+      "id": "X2",
+      "question": "Deux lignes de6 consomment le même stock de10.",
+      "each_line_alone": true,
+      "whole_request_feasible": false,
+      "uncovered_quantity": 2,
+      "explanation": "Deux réponses positives indépendantes ne forment pas une promesse d’ensemble. ATP doit signaler2 manquants ou proposer des dates/ressources différentes, selon autorité de fractionnement."
+    },
+    {
+      "id": "X3",
+      "question": "Besoin10, matière12, capacité4h et0,5h par unité avant échéance.",
+      "material_only_possible": 12,
+      "finite_capacity_possible": 8,
+      "explanation": "La matière permet10 mais la capacité seulement8. Le délai standard ne justifie pas la promesse ; les2 restantes nécessitent un autre créneau réellement admissible. Sans capacité fournie, réponse indéterminée."
+    },
+    {
+      "id": "X4",
+      "question": "OptionA : coût80, transport inconnu ; optionB : coût95 + transport10.",
+      "costs": {
+        "A": null,
+        "B": 105
+      },
+      "automatic_cheapest": null,
+      "explanation": "A ne peut pas être déclarée moins chère sur une somme incomplète. PTP expose le poste absent ; une décision explicite reste possible. Une option violant le service obligatoire serait rejetée même moins chère."
+    },
+    {
+      "id": "X5",
+      "question": "Proposition8 sur disponible10 ; avant confirmation, disponible6 et version changée.",
+      "confirmable": false,
+      "explanation": "La durée de validité ne garantit pas l’immobilisation du stock. Orders doit obtenir une revalidation et le résultat de l’acte de réservation/engagement ; pas d’effet exactement une fois présumé à distance."
+    },
+    {
+      "id": "X6",
+      "question": "Deux lignes : la première accepte A ou B, la seconde seulement A ; A est moins cher.",
+      "full_solutions": [
+        [
+          "B",
+          "A"
+        ]
+      ],
+      "truncated_solutions": [],
+      "explanation": "Trier puis garder seulement le premier candidat élimine la seule solution faisable. Une recherche sur le domaine tronqué ne peut pas conclure à l’impossibilité initiale ; le validateur rejette A utilisé deux fois."
+    },
+    {
+      "id": "X7",
+      "question": "Trois lignes : A coûte6 par ligne ; B coûte2 par ligne plus10 fixes partagés.",
+      "line_by_line_cost": 18,
+      "whole_request_optimum": 16,
+      "whole_request_choice": [
+        "B",
+        "B",
+        "B"
+      ],
+      "explanation": "Le choix isolé préfère A ; la demande entière préfère B à16 contre18. PTP doit préserver l’assiette des coûts fixes ; le résultat exact ici provient de l’énumération des8 combinaisons, pas d’un benchmark de solveurs."
+    }
+  ],
+  "passed": 7
+}

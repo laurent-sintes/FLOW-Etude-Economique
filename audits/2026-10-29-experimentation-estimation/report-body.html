@@ -1,0 +1,82 @@
+<p class="small">Étude économique FLOW · 29 octobre 2026 · Expérimentation 01 · Lecture et calculs assistés par IA</p>
+<h1>Choisir une maille d’évaluation défendable</h1>
+<p><strong>Le premier cycle élimine plusieurs façons trompeuses de comparer les méthodes. Il établit des contrôles reproductibles, un témoin de mesure sur du code produit et un dispositif candidat. Il ne calibre pas encore les JH du Core System.</strong></p>
+<div class="note">L’objectif reste une enveloppe d’investissement d’opportunité et des JH par rôle lisibles par unité métier. Les chiffres artificiels de contrôle ne sont jamais des estimations FLOW. Aucun budget actif n’a été modifié. L’accord entre deux modèles ne constitue pas une mesure de justesse.</div>
+<h2>Question de départ et protocole</h2>
+<p>La cartographie délimite les capacités financées. Les produits du marché précisent les fonctions et mécanismes génériques comparables. Le logiciel à réaliser est évalué selon une frontière déclarée, puis rattaché aux unités métier. Les règles propres aux marques et les adaptations Beaumanoir relèvent principalement de l’intégration.</p>
+<p>Le niveau de mesure logicielle, le niveau de calibration de l’effort et le niveau de restitution métier sont trois choix différents. Une Business Area n’est pas automatiquement un module logiciel ni un projet indépendant.</p>
+<ol><li>Garder le même périmètre et la même convention d’effort entre les variantes.</li><li>Rendre visibles les mesures, les hypothèses et les inconnues.</li><li>Faire varier une hypothèse à la fois ; conserver les candidats rejetés.</li><li>Tester l’invariance des totaux lorsque seul le niveau de restitution change.</li><li>Mesurer la stabilité entre les versions d’estimation. Mesurer la justesse uniquement lorsqu’un effort réel indépendant existe.</li></ol>
+<h2>Itération 0 — les trois appuis ne sont pas trois estimateurs interchangeables</h2>
+<table><tr><th>Appui</th><th>Entrée et résultat</th><th>Condition d’emploi</th></tr>
+<tr><td>COSMIC</td><td>Fonctions du logiciel → taille en CFP (mouvements de groupes de données).</td><td>Frontière, utilisateurs fonctionnels et granularité fixés. Le compte ne mesure pas séparément la sophistication algorithmique.</td></tr>
+<tr><td>ISBSG</td><td>Observations de projets → taux ou distribution d’effort pour une cohorte compatible.</td><td>Même méthode de taille, travaux et contexte comparables. Un taux IFPUG/Nesma ne s’applique pas à un CFP COSMIC.</td></tr>
+<tr><td>COCOMO II</td><td>Taille logique et facteurs déclarés → estimation paramétrique de l’effort.</td><td>Choix de frontière de projet et calibration explicités. Aucune conversion CFP → SLOC arbitraire ; les lignes physiques OSS existantes restent un diagnostic.</td></tr></table>
+<p><strong>Décision :</strong> comparer des voies complètes, par exemple COSMIC + cohorte h/CFP et COCOMO sur une taille admissible. Aucune moyenne des résultats n’est retenue. Les hypothèses communes sont conservées pour repérer les biais partagés.</p>
+<h2>Itération 1 — ce que permet la hiérarchie actuelle</h2>
+<p>La capture comporte 88 capacités, 9 sous-domaines et 28 Business Areas. Le tableau utilise uniquement les rattachements et les six hypothèses de mécanismes partagés déjà documentées ; les anciennes notes sur 5 ne participent à aucun calcul.</p>
+{{HIERARCHY}}
+<p>Les six mécanismes traversent plusieurs Business Areas et quatre traversent plusieurs sous-domaines. Ces liens restent des propositions de l’étude à vérifier sur le marché : ils ne prouvent pas une architecture installée. Leur présence suffit cependant à imposer un suivi des travaux communs.</p>
+<p>La qualification détaillée actuelle contient 11 observations concernant 8 capacités, toutes au statut « à qualifier ». Ces nombres ne mesurent pas la couverture de l’ensemble des preuves disponibles. Ils ne permettent pas de considérer un niveau métier comme entièrement calibré.</p>
+<p><strong>Décision :</strong> aucune maille uniforme n’est retenue à ce stade. Tester des ensembles logiciels cohérents, conserver les bénéficiaires métier et financer chaque travail commun une fois.</p>
+<h2>Itération 2 — COCOMO : isoler le biais de découpage</h2>
+<p>Contrôle entièrement artificiel : même ensemble de 100 milliers d’instructions logiques, A = 2,94, exposant E = 1,0997, 152 h/mois-personne et 7 h/JH. Ces conventions sont reprises du diagnostic local pour rendre le calcul reproductible ; aucun volume FLOW n’est mesuré.</p>
+<p class="formula">Mois-personnes nominaux = A × taille<sup>E</sup><br>JH nominaux = mois-personnes × 152 h/mois-personne ÷ 7 h/JH<br>Ratio « somme indépendante / ensemble » = nombre de groupes<sup>1 − E</sup></p>
+{{PARTITIONS}}
+<p>Ce contrôle porte sur des parts égales et des facteurs nominaux identiques. Il ne valide pas un estimateur multi-modules général avec facteurs différents. Le manuel COCOMO II §3.3 calcule l’effet d’ensemble d’un même projet, puis répartit et applique les facteurs des modules. Une somme de projets séparés répond à une autre hypothèse physique.</p>
+<p><strong>Décision :</strong> rejeter les écarts créés par une réapplication de la formule non linéaire à chaque BC ou Business Area. Un simple regroupement d’affichage doit conserver le total. L’exercice ne démontre pas que le Core entier devra être un projet unique.</p>
+<h2>Itération 3 — COSMIC sur une fonction réelle ERPNext</h2>
+<p>Référence figée : ERPNext <code>ade850bbd6a7412e9994a9637d2c5c713771632a</code>, fonction <code>get_stock_reservation_entries_for_voucher</code>. Objet limité : consulter les réservations d’une commande, dans une frontière applicative et un stockage interne.</p>
+<table><tr><th>Mouvement</th><th>Groupe observé / hypothèse de lecture</th><th>CFP</th></tr>
+<tr><td>Entrée</td><td>Critères de consultation d’une commande</td><td>1</td></tr>
+<tr><td>Lecture</td><td>Réservations enregistrées</td><td>1</td></tr>
+<tr><td>Sortie</td><td>Liste des réservations</td><td>1</td></tr></table>
+<p><strong>Résultat conditionnel : 3 CFP pour cette consultation uniquement.</strong> Le regroupement des attributs en groupes de données est une interprétation assistée par IA, non revue par un compteur COSMIC. Les erreurs et les autres comportements sont exclus de manière identique dans les variantes.</p>
+<p>En décomposant conceptuellement ce même comportement en contrôleur et service, on obtient 4 + 3 = 7 CFP bruts. Les quatre mouvements internes supplémentaires sont retranchés pour retrouver la frontière de l’application : 7 − 4 = 3. Il s’agit d’un contrôle analytique, non de deux architectures ERPNext observées. Le manuel COSMIC v5 illustre cette règle d’agrégation.</p>
+<p>Un premier assemblage hypothétique « créer 6 + libérer 4 + consulter 3 = 13 CFP » a été rejeté comme taille de toute la réservation : le code révèle d’autres lectures, mises à jour et dépendances (paramètres, articles, entrepôts, unités, commande et position de stock). Les valeurs 6 et 4 ne sont pas des mesures validées.</p>
+<p><strong>Décision :</strong> conserver le témoin de 3 CFP pour vérifier la méthode, sans le multiplier par un taux d’effort ni le présenter comme taille de la capacité Réservation. Une mesure reproductible peut rester incomplète.</p>
+<h2>Itération 4 — contrat de sortie par rôle</h2>
+<p>La sortie visée conserve pour chaque ensemble : capacités couvertes, frontières, taille et unité, facteurs de difficulté documentés, composants réutilisés, activités comprises, méthode d’effort, JH par rôle, incertitude et provenance.</p>
+<p class="formula">JH du rôle r = somme des heures d’activité affectées au rôle r ÷ heures par JH<br>Coût humain = somme sur les rôles (JH du rôle × tarif journalier du rôle)</p>
+<p>Si seule une charge totale est disponible, toute répartition par activité puis rôle est une hypothèse explicite dont les parts doivent conserver le total. Les hypothèses de QA, architecture et pilotage ne peuvent s’ajouter à un benchmark qui les comprend déjà. La formule ne déduit pas le nombre de personnes simultanées ni la durée calendaire.</p>
+<p>La décomposition des JH par rôle FLOW reste inconnue tant que l’effort comparable et la répartition ne sont pas justifiés. Le banc rejette une allocation supérieure à 100 % et conserve une allocation inconnue comme inconnue.</p>
+<h2>Itération 5 — éprouver une source d’effort avant de l’utiliser</h2>
+<p>L’extrait public COSMIC attribué à ISBSG sur Zenodo contient 42 projets. Le dictionnaire définit le taux N_PDR1 comme l’effort normalisé de l’équipe divisé par la taille fonctionnelle. Sur 41 lignes calculables, une seule satisfait cette relation à l’arrondi affiché.</p>
+<p>Deux exemples : projet 25081, 600 h / 237 CFP = 2,53 h/CFP, contre 4,4 dans la colonne du taux ; projet 29310, 47 493 h / 441 CFP = 107,69 h/CFP, contre 23,7. Le fichier original est conservé avec son empreinte, les colonnes sont lues selon l’en-tête et les 42 lignes ont le nombre attendu d’attributs.</p>
+<p><strong>Décision :</strong> suspendre l’utilisation de cet extrait pour la calibration tant que les champs ne sont pas réconciliés. Aucune correction des valeurs n’est inventée. Ce constat porte sur l’extrait public et ne démontre pas un défaut de la base ISBSG complète.</p>
+<p><a href="https://zenodo.org/records/268482">Source et dictionnaire</a> · <a href="cosmic.arff">extrait examiné</a>. Ce contrôle devient une condition d’admission de toute référence numérique.</p>
+<h2>Itération 6 — sensibilité de la répartition par rôle</h2>
+<p>Le guide ISBSG de 2006 publie des proportions générales et pour client externe. Il indique une interprétation et une normalisation des données, sans effectif de cohorte communiqué. Le test retire la catégorie « autres » et renormalise les 85 % restants, selon sa convention.</p>
+<table><tr><th>Rôle</th><th>Guide général</th><th>Client externe</th></tr>
+<tr><td>Pilotage logiciel</td><td>90 JH</td><td>110 JH</td></tr>
+<tr><td>Analyse</td><td>70 JH</td><td>100 JH</td></tr>
+<tr><td>Architecture</td><td>50 JH</td><td>40 JH</td></tr>
+<tr><td>Développement</td><td>440 JH</td><td>400 JH</td></tr>
+<tr><td>Interface / graphisme</td><td>30 JH</td><td>30 JH</td></tr>
+<tr><td>QA</td><td>170 JH</td><td>170 JH</td></tr>
+<tr><td><strong>Total fictif de contrôle</strong></td><td>850 JH</td><td>850 JH</td></tr></table>
+<p>Les 850 JH sont une assiette arbitraire de démonstration. Ces répartitions historiques ne sont ni un effectif, ni une estimation FLOW, ni une recommandation de staffing. Elles montrent qu’un même effort total peut produire des profils de rôles différents. Le pilotage est déjà compris dans cet exemple.</p>
+<p><strong>Décision :</strong> conserver les ratios comme contrepoint historique de sensibilité. La répartition FLOW devra expliquer ses activités et ses écarts ; elle ne sera pas déterminée automatiquement par le poids de complexité.</p>
+<p><a href="https://isbsg.org/wp-content/uploads/2017/03/Planning-Projects-Role-Effort-Ratios-2006.pdf">ISBSG, Planning Projects: Role Effort Ratios, 2006</a>, graphiques généraux et client externe.</p>
+<h2>Dispositif candidat à poursuivre</h2>
+<ol>
+<li><strong>Unités d’évaluation variables :</strong> un ensemble comparable peut couvrir une BC, plusieurs BC ou plusieurs Business Areas. Les frontières doivent être expliquées par les fonctions et composants, pas par le nombre de lignes de la carte.</li>
+<li><strong>Mesures séparées :</strong> taille fonctionnelle ; difficulté des traitements ; garanties et coordination ; réutilisation. Aucun score global n’est encore introduit.</li>
+<li><strong>Deux lectures métier :</strong> périmètre reçu, puis résultats de l’évaluation reliés aux mêmes identifiants. Les lots communs ont un propriétaire de financement unique et des bénéficiaires.</li>
+<li><strong>Maille de restitution :</strong> remonter les lots sans double compte. Une ventilation plus fine non étayée reste affichée comme effort commun non ventilé, au niveau collectif approprié.</li>
+<li><strong>Écarts interprétés :</strong> incompatibilité de mesure → candidat rejeté ; différence expliquée de périmètre → normalisation ; différence de méthode à périmètre constant → sensibilité ; écart à un effort réel indépendant → erreur d’estimation.</li>
+</ol>
+<p>Le choix du meilleur compromis demande de tester les mêmes fonctions sur plusieurs produits et plusieurs ensembles, puis de confronter les estimations à des références d’effort indépendantes. La mesure fine d’une consultation est un témoin méthodologique ; elle ne signifie pas qu’il faut décrire chaque cas d’usage FLOW.</p>
+<h2>Critères de convergence et prochains essais</h2>
+<ul><li>Une décomposition supplémentaire doit apporter une information utile à la décision d’investissement, en proportion de son coût d’analyse.</li><li>La couverture doit être expliquée ; les fonctions sans estimation restent visibles.</li><li>Les totaux sont stables à restitution équivalente, les travaux communs sont financés une seule fois.</li><li>Les écarts entre voies sont documentés. Aucun seuil universel d’écart n’est fixé avant d’observer la variabilité des références.</li><li>Un jeu de références sert à construire le modèle et un autre à l’éprouver lorsque le nombre de références le permet ; faute de cela, la validation demeure limitée.</li></ul>
+<p>Prochain cycle utile : compléter la mesure applicative du groupe réservation/stock, comparer les fonctions équivalentes ERPNext et Tryton ; tester un ensemble d’orchestration ; obtenir une référence h/CFP dont les activités et le contexte sont connus ; éprouver les répartitions de rôles et leurs sensibilités. Une cohorte comparable absente ne doit pas être remplacée par un taux d’une autre unité.</p>
+<h2>Reproduction et limites</h2>
+<p><strong>{{CHECKS}} contrôles réussis</strong> et empreintes de {{HASHES}} fichiers d’entrée. Le script ne charge pas le moteur économique et écrit uniquement dans ce dossier expérimental. <code>--check</code> recalcule sans écrire et compare aux résultats enregistrés.</p>
+<p>Fichiers : <a href="results.json">résultats détaillés</a>, <a href="pilot-inputs.json">hypothèses du pilote</a>, <a href="run_experiments.py">script reproductible</a>. Les contrôles assurent cohérence et conservation ; ils ne valent ni revue métier ni calibration des efforts.</p>
+<h2>Sources</h2>
+<ul>
+<li><a href="https://cosmic-sizing.org/wp-content/uploads/2022/11/Combination-of-Parts-v5.0-Sep-2024.pdf">COSMIC v5, septembre 2024</a> : Part 2, agrégation ; Part 3c, exemple client/serveur.</li>
+<li><a href="https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf">USC, COCOMO II v2.1</a> : taille, multi-modules (§3.3), assiette et calibration.</li>
+<li><a href="https://www.isbsg.org/wp-content/uploads/2023/10/Short-Paper-2023-09-Analysis-of-PPE3.pdf">ISBSG 2023</a> : cohorte Java IFPUG/Nesma, non utilisable directement avec CFP.</li>
+<li><a href="https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py">ERPNext, code de réservation figé</a> ; <a href="https://docs.frappe.io/erpnext/stock-reservation">documentation de réservation</a>.</li>
+<li>Sources locales lues : capture de cartographie du 24 octobre ; grille (rattachements uniquement) ; mécanismes partagés proposés ; qualification marché ; paramètres du diagnostic COCOMO. Les empreintes exactes figurent dans results.json.</li>
+</ul>

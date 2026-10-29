@@ -1,0 +1,98 @@
+{
+  "id": "iteration-03-revue",
+  "date": "2026-10-29",
+  "numeric_estimates_changed": false,
+  "comparability": "Contrat commun identique, mais quelques hypothèses d’organisation et de détail ont été interprétées différemment. Les écarts mesurent cette instabilité ; ils ne sont pas des erreurs de prévision observées.",
+  "findings": [
+    {
+      "id": "REV-01",
+      "status": "ecart_material",
+      "subject": "Compensation entre ensembles",
+      "finding": "M2 est inférieur à M1 sur COMMON et REF, supérieur sur STOCK. La proximité du total ne suffit pas à conclure.",
+      "action": "Conserver les estimations initiales et lire les écarts par ensemble et rôle."
+    },
+    {
+      "id": "REV-02",
+      "status": "clarification_metadata",
+      "subject": "Sécurité STOCK",
+      "finding": "M1 finance les contrôles d’accès dans développement/QA et la sécurité commune dans COMMON ; aucune revue spécialisée distincte de STOCK n’est prévue. M2 prévoit cette revue.",
+      "action": "Remplacer dans la lecture l’étiquette ambiguë « inclus COMMON » par « aucune revue spécialisée distincte prévue dans M1 ». Ne pas changer les JH pour rapprocher M1 et M2."
+    },
+    {
+      "id": "REV-03",
+      "status": "affectation_role_a_stabiliser",
+      "subject": "Plateforme REF",
+      "finding": "M1 distingue 5 JH centraux pour réglages de job, instrumentation/données et livraison ; M2 les rattache aux développeurs, à la QA ou au commun.",
+      "action": "Fixer une règle de responsabilité des travaux avant de valoriser les profils ; ne pas comparer les rôles comme s’ils avaient une assiette identique."
+    },
+    {
+      "id": "REV-04",
+      "status": "frontiere_QA_a_tracer",
+      "subject": "QA STOCK",
+      "finding": "M1 sépare conception locale, témoins concurrents, campagne transverse et dossier. Pas de duplication démontrée. Les 24 parcours proposés ne sont pas une mesure de couverture.",
+      "action": "Tracer un catalogue minimal cas / préparation / automatisation / exécution / rôle / lot. La préparation S07 monte les données et assemble les parcours, sans reconcevoir les cas locaux."
+    },
+    {
+      "id": "REV-05",
+      "status": "hypothese_detail_a_figer",
+      "subject": "Références",
+      "finding": "M1 explicite 12 champs produit et 8 champs variante, liens en deux phases, CSV fixe et aucune suppression implicite des absents. Ces hypothèses ne sont pas une observation de FLOW.",
+      "action": "Les conserver comme conventions du témoin ; une autre volumétrie de modèle ou sémantique de remplacement impose une variante distincte."
+    },
+    {
+      "id": "REV-06",
+      "status": "frontiere_commune_clarifiee",
+      "subject": "Construction du socle et réception finale",
+      "finding": "C02/C06 se recouvrent dans leur formulation sur livraison et documentation ; C04/C06 sur diagnostic. La revue ne démontre pas le double compte de jours, mais impose une frontière explicite.",
+      "action": "C02 construit et documente le fonctionnement de la chaîne d’essai. C04 construit les mécanismes de répétition et observabilité. C06 utilise la chaîne et les diagnostics pour réceptionner l’assemblage des deux pilotes, consolider le dossier commun et transférer. Aucun second développement de pipeline ni de collecte dans C06 ; conserver les montants initiaux comme hypothèses, à revoir si les travaux se révèlent identiques."
+    },
+    {
+      "id": "REV-07",
+      "status": "frontiere_interface_clarifiee",
+      "subject": "Interfaces REF",
+      "finding": "R06 utilise les API financées dans R03–R05. La correction se fait par nouvelle contribution fournie, pas par un éditeur de données universel.",
+      "action": "Lire « API comprises » comme raccordement frontend aux API ; aucun endpoint recompté dans R06."
+    },
+    {
+      "id": "REV-08",
+      "status": "garantie_reprise_a_preciser",
+      "subject": "Interruption de l’import",
+      "finding": "M1 prévoit une reprise après interruption ; M2 évoque un traitement partiel sans détailler le redémarrage du processus.",
+      "action": "Le prochain contrat doit expliciter écritures déjà validées, lignes restantes et résultat de la relance ; aucune égalité d’assiette démontrée sur cette garantie."
+    },
+    {
+      "id": "REV-09",
+      "status": "inclusion_confirmee_sans_ventilation",
+      "subject": "Documentation, passation et corrections M2",
+      "finding": "M2 inclut documentation des contrats dans analyse/architecture, documentation technique et corrections révélées par QA dans développement, retest dans QA et passation courte dans coordination. Aucune formation structurée supplémentaire.",
+      "action": "Conserver ces inclusions explicites pour la comparaison. Leur ventilation n’a pas été faite avant gel : ne pas inventer des jours par activité après coup."
+    },
+    {
+      "id": "REV-10",
+      "status": "provenance_rectifiee",
+      "subject": "Sources du socle et des garanties cibles",
+      "finding": "Les références COMMON C03/C05 décrivent une capacité proposée et un contrat cible ; aucune preuve OSS ciblée d’interface ou de sécurité n’a été lue ici. C04 clé/résultat est un choix cible. Les versions monotones, le rejeu FLOW, les cinq vues et le témoin de 10 000 lignes relèvent du contrat. Les tests OSS sont lus, non exécutés. Aucune référence ne mesure les durées proposées.",
+      "action": "Normaliser les pointeurs dans iteration-03-references.json ; remplacer les citations Odoo non ciblées de C03/C05 par le contrat et la capacité de bibliothèque proposée. Conserver les fichiers initiaux et les JH figés."
+    }
+  ],
+  "effective_role_states": {
+    "STOCK": {
+      "securite": {
+        "state": "non_mobilise_separement",
+        "jh": [
+          0,
+          0,
+          0
+        ],
+        "explanation": "Les contrôles sont réalisés par développement/QA. COMMON finance sa propre revue initiale ; aucune revue spécialisée STOCK n’est comprise dans M1."
+      }
+    }
+  },
+  "open_contract_questions": [
+    "Pour une commande refusée puis retentée après changement d’état, faut-il un nouvel identifiant de requête ? À fixer explicitement avant prototype.",
+    "Qui finance et réalise instrumentation du job, données de qualification et passage sur la chaîne commune ?",
+    "Quel niveau de revue sécurité spécialisée est nécessaire pour les deux ensembles ?"
+  ],
+  "revision_rule": "Aucun défaut démontré ne justifie de modifier les temps initiaux. Les clarifications sont enregistrées, sans moyenne ni rapprochement forcé.",
+  "review_producer": "Revue contradictoire par les agents ayant produit les deux approches ; pas de revue humaine ni de réalisation mesurée."
+}

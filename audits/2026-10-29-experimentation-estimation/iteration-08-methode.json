@@ -1,0 +1,211 @@
+{
+  "id": "iteration-08-methode",
+  "date": "2026-10-29",
+  "model": "COCOMO II.2000 Early Design",
+  "purpose": "Calcul conditionnel et sensibilité avant décision sur le dispositif ; aucun paramètre local calibré ni budget retenu.",
+  "source": {
+    "url": "https://www.rose-hulman.edu/class/cs/csse372/201310/Homework/CII_modelman2000.pdf",
+    "author": "USC Center for Software Engineering",
+    "version": "2.1, 2000",
+    "locations": [
+      "§1.2 et §2.1 : effort, délai et estimation de taille",
+      "Table10 p.18 : facteurs d’échelle",
+      "Tables21/34/36-40 : multiplicateurs",
+      "§4 p.41 : délai",
+      "§6.6 p.66-67 : activités et unités",
+      "§7 p.68 : calibration locale"
+    ]
+  },
+  "constants": {
+    "A": 2.94,
+    "B": 0.91,
+    "C": 3.67,
+    "D": 0.28,
+    "person_month_hours": 152,
+    "jh_hours": 7
+  },
+  "formulas": {
+    "E": "0.91 + 0.01 * somme(SF)",
+    "PM_NS": "2.94 * KSLOC**E * produit(EM hors SCED)",
+    "PM": "PM_NS * EM_SCED",
+    "JH": "PM * 152 / 7",
+    "F": "0.28 + 0.2 * (E - 0.91)",
+    "TDEV": "3.67 * PM_NS**F * SCED_pct/100",
+    "staffing_average": "PM / TDEV"
+  },
+  "scale_factors": {
+    "PREC": {
+      "label": "Expérience d’un produit comparable",
+      "L": 4.96,
+      "N": 3.72,
+      "H": 2.48
+    },
+    "FLEX": {
+      "label": "Souplesse des exigences",
+      "L": 4.05,
+      "N": 3.04,
+      "H": 2.03
+    },
+    "RESL": {
+      "label": "Résolution des risques et architecture",
+      "L": 5.65,
+      "N": 4.24,
+      "H": 2.83
+    },
+    "TEAM": {
+      "label": "Coopération de l’équipe",
+      "L": 4.38,
+      "N": 3.29,
+      "H": 2.19
+    },
+    "PMAT": {
+      "label": "Maturité des pratiques",
+      "L": 6.24,
+      "N": 4.68,
+      "H": 3.12
+    }
+  },
+  "effort_multipliers": {
+    "PERS": {
+      "label": "Compétence et stabilité de l’équipe",
+      "L": 1.26,
+      "N": 1,
+      "H": 0.83
+    },
+    "RCPX": {
+      "label": "Fiabilité, complexité, données et documentation",
+      "L": 0.83,
+      "N": 1,
+      "H": 1.33,
+      "VH": 1.91
+    },
+    "RUSE": {
+      "label": "Conception pour une réutilisation future",
+      "L": 0.95,
+      "N": 1,
+      "H": 1.07,
+      "VH": 1.15
+    },
+    "PDIF": {
+      "label": "Contraintes de la plateforme",
+      "L": 0.87,
+      "N": 1,
+      "H": 1.29
+    },
+    "PREX": {
+      "label": "Expérience métier, langage et plateforme",
+      "L": 1.22,
+      "N": 1,
+      "H": 0.87
+    },
+    "FCIL": {
+      "label": "Outillage et collaboration",
+      "L": 1.1,
+      "N": 1,
+      "H": 0.87
+    },
+    "SCED": {
+      "label": "Contrainte de délai",
+      "VL": 1.43,
+      "L": 1.14,
+      "N": 1,
+      "H": 1,
+      "VH": 1
+    }
+  },
+  "schedule_percent": {
+    "VL": 75,
+    "L": 85,
+    "N": 100,
+    "H": 130,
+    "VH": 160
+  },
+  "scenarios": [
+    {
+      "id": "nominal",
+      "label": "Référence nominale publiée",
+      "sf": {
+        "PREC": "N",
+        "FLEX": "N",
+        "RESL": "N",
+        "TEAM": "N",
+        "PMAT": "N"
+      },
+      "em": {
+        "PERS": "N",
+        "RCPX": "N",
+        "RUSE": "N",
+        "PDIF": "N",
+        "PREX": "N",
+        "FCIL": "N",
+        "SCED": "N"
+      },
+      "meaning": "Point de comparaison mathématique ; les notes nominales ne sont pas des observations de l’équipe FLOW."
+    },
+    {
+      "id": "experienced",
+      "label": "Équipe expérimentée, produit exigeant",
+      "sf": {
+        "PREC": "N",
+        "FLEX": "N",
+        "RESL": "N",
+        "TEAM": "H",
+        "PMAT": "N"
+      },
+      "em": {
+        "PERS": "H",
+        "RCPX": "H",
+        "RUSE": "H",
+        "PDIF": "N",
+        "PREX": "H",
+        "FCIL": "H",
+        "SCED": "N"
+      },
+      "meaning": "Hypothèse favorable d’équipe stable et expérimentée, outils et coopération efficaces ; exigence de fiabilité et réutilisation entre projets. À démontrer, pas une capacité partenaire acquise."
+    },
+    {
+      "id": "difficult",
+      "label": "Risques et contraintes plus élevés",
+      "sf": {
+        "PREC": "L",
+        "FLEX": "N",
+        "RESL": "L",
+        "TEAM": "N",
+        "PMAT": "N"
+      },
+      "em": {
+        "PERS": "N",
+        "RCPX": "VH",
+        "RUSE": "H",
+        "PDIF": "H",
+        "PREX": "N",
+        "FCIL": "N",
+        "SCED": "N"
+      },
+      "meaning": "Hypothèse de faible précédent et risques encore ouverts, avec contraintes plus élevées sur le produit et la plateforme. Ce n’est pas une borne de confiance."
+    }
+  ],
+  "selection": null,
+  "mapping_limits": [
+    "Le contrat décrit les fonctions et garanties ; il ne mesure pas les percentiles de compétence, la maturité, l’expérience de l’équipe ou les marges mémoire/CPU.",
+    "Le délai publié porte sur les jalons LCO→IOC (élaboration/construction) ou SRR→SAR. Il ne couvre pas automatiquement l’étude préalable, la transition, l’intégration Beaumanoir et les déploiements.",
+    "Les activités logicielles de conception, réalisation, tests, documentation et coordination sont déjà dans l’effort COCOMO. Ne pas additionner la QA ou l’architecture M1 à ce total.",
+    "Les neuf rôles FLOW ne correspondent pas directement aux anciennes catégories d’activités COCOMO ; aucune ventilation automatique n’est retenue.",
+    "Une estimation de taille par analogie est permise sans réalisé local. Elle demeure hypothétique, tout comme l’applicabilité du modèle publié à Spring/React en 2026.",
+    "152 heures par personne-mois restent la convention interne du modèle ; les JH de 7 heures sont une conversion d’unité, sans changement artificiel du calendrier.",
+    "Les scénarios ne sont pas des limites statistiques et n’épuisent pas toutes les conditions possibles."
+  ],
+  "reuse": {
+    "rule": "Compter le nouveau code cible et la part adaptée justifiée ; ne pas compter l’intégralité des bibliothèques appelées. Rendre visibles configuration, raccordements et tests. Pas de seconde remise Spring.",
+    "ruse_warning": "RUSE augmente l’effort pour produire un composant réutilisable ; ce n’est pas un rabais parce que le projet utilise Spring.",
+    "integration_of_unchanged_components": "Un composant inchangé n’exige pas de réécrire sa totalité ; son intégration et sa qualification restent à couvrir. Tout travail non réconcilié avec le cycle de vie du modèle est déclaré, pas supposé gratuit.",
+    "esloc_if_applicable": "Une formule de réutilisation ne sera appliquée que si taille adaptée et paramètres AA/DM/CM/IM/SU/UNFM sont justifiés ; sinon pas de réduction numérique inventée."
+  },
+  "tests_required": [
+    "Reproduire l’exemple officiel 100KSLOC,E1.15,EM1 : environ586.61personne-mois et29.7mois.",
+    "SCED85% donne délai85% du nominal et effort×1.14, calcul TDEV à partir PM_NS sansmultiplicateurSCED.",
+    "Vérifier JH*7=PM*152.",
+    "Sommer taille de la famille avant puissance ; pas somme autonome par BC.",
+    "Vérifier sources et estimations anciennes inchangées."
+  ]
+}

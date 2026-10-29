@@ -1,0 +1,301 @@
+{
+  "method": "M1",
+  "ensemble": "COMMON",
+  "provenance": "Estimation d’ingénierie assistée par IA, sans observation d’effort comparable ni revue humaine.",
+  "contract_ref": "iteration-03-contrat.json",
+  "packages": [
+    {
+      "id": "C01",
+      "label": "Architecture et contrats techniques communs",
+      "proof_refs": [
+        "iteration-02-cadre-spring.json#boundaries",
+        "iteration-02-code-oss.json#products"
+      ],
+      "work": "Découpage modulaire, contrats communs, conventions de données/erreurs, décisions de transaction et interfaces entre les deux pilotes.",
+      "rationale": "Hypothèse centrale : deux ateliers préparés et leur synthèse, puis revue des contrats et de la frontière transactionnelle. La plage varie avec les reprises de décision, à contenu identique.",
+      "effort": {
+        "analyse_produit": [
+          2,
+          3,
+          5
+        ],
+        "architecture": [
+          5,
+          8,
+          12
+        ],
+        "dev_java": [
+          2,
+          3,
+          5
+        ],
+        "coordination": [
+          1,
+          2,
+          3
+        ]
+      },
+      "central_basis": {
+        "analyse_produit": "Deux ateliers et préparation/synthèse : 3 JH.",
+        "architecture": "Préparation 2, conception 3, revue/décisions 3 : 8 JH.",
+        "dev_java": "Analyse de faisabilité et revue des contrats : 3 JH.",
+        "coordination": "Organisation des interfaces et arbitrages : 2 JH."
+      }
+    },
+    {
+      "id": "C02",
+      "label": "Projet, persistance et chaîne d’essai",
+      "proof_refs": [
+        "iteration-02-cadre-spring.json#technical_baseline"
+      ],
+      "work": "Projet Spring modulaire, base et migrations, configuration d’essai, CI et infrastructure des tests d’intégration.",
+      "rationale": "Un seul projet et un seul environnement d’essai ; pas de cluster de production. Variations dues aux raccordements, à l’isolation des tests et à la stabilisation de la chaîne.",
+      "effort": {
+        "architecture": [
+          1,
+          2,
+          3
+        ],
+        "dev_java": [
+          5,
+          8,
+          13
+        ],
+        "plateforme": [
+          5,
+          8,
+          13
+        ]
+      },
+      "central_basis": {
+        "architecture": "Revue des choix de persistance et de livraison : 2 JH.",
+        "dev_java": "Structure et configuration 3, migrations 2, infrastructure des tests 3 : 8 JH.",
+        "plateforme": "Environnement 3, CI et artefacts 3, vérification/documentation 2 : 8 JH."
+      }
+    },
+    {
+      "id": "C03",
+      "label": "Accès commun et identité de test",
+      "proof_refs": [
+        "iteration-02-cadre-spring.json#technical_baseline.reuse",
+        "iteration-02-code-oss.json#products.odoo"
+      ],
+      "work": "Raccordement à une identité de test, trois profils d’accès, primitive commune d’autorisation, erreurs d’accès et vérifications.",
+      "rationale": "Spring Security est réutilisé inchangé ; configuration, contrats d’accès et tests restent à réaliser. Les contraintes propres aux opérations REF/STOCK restent dans ces lots.",
+      "effort": {
+        "architecture": [
+          1,
+          2,
+          3
+        ],
+        "dev_java": [
+          5,
+          8,
+          13
+        ],
+        "securite": [
+          2,
+          4,
+          7
+        ],
+        "qa": [
+          2,
+          3,
+          5
+        ]
+      },
+      "central_basis": {
+        "architecture": "Contrat commun d’autorisation et revue : 2 JH.",
+        "dev_java": "Raccordement 3, autorisation et erreurs 3, tests développeur 2 : 8 JH.",
+        "securite": "Analyse des accès 2 et revue de la réalisation 2 : 4 JH.",
+        "qa": "Parcours d’accès communs, échecs et non-régression : 3 JH."
+      }
+    },
+    {
+      "id": "C04",
+      "label": "Répétition de requêtes, erreurs et journal technique",
+      "proof_refs": [
+        "iteration-02-code-oss.json#complexity_model_candidate",
+        "iteration-03-contrat.json#COMMON"
+      ],
+      "work": "Primitive commune clé/résultat de requête dans une transaction, contrat d’erreur et instrumentation ; les invariants et effets métier restent propres aux pilotes.",
+      "rationale": "Le mécanisme commun évite de refaire le même raccordement. Les reprises après échec et les conflits de clé expliquent l’écart de charge ; aucune garantie distribuée exactement une fois.",
+      "effort": {
+        "architecture": [
+          2,
+          3,
+          5
+        ],
+        "dev_java": [
+          6,
+          10,
+          16
+        ],
+        "qa": [
+          2,
+          4,
+          7
+        ],
+        "plateforme": [
+          1,
+          2,
+          4
+        ]
+      },
+      "central_basis": {
+        "architecture": "Décisions de transaction, durée de conservation et conflits : 3 JH.",
+        "dev_java": "Mécanisme clé/résultat 4, erreurs/journaux 3, tests développeur 3 : 10 JH.",
+        "qa": "Répétition, clé en conflit et reprise du mécanisme commun : 4 JH.",
+        "plateforme": "Exposition des métriques et consultation des journaux : 2 JH."
+      }
+    },
+    {
+      "id": "C05",
+      "label": "Structure commune des interfaces",
+      "proof_refs": [
+        "iteration-02-cadre-spring.json#technical_baseline.reuse",
+        "iteration-02-code-oss.json#products.odoo"
+      ],
+      "work": "Navigation, accès, composants de liste/formulaire et présentation commune des erreurs ; pas les cinq vues métier.",
+      "rationale": "React fournit la bibliothèque, pas la structure de produit. Les bornes dépendent de la stabilisation des composants et de l’accessibilité, sans changement de parcours.",
+      "effort": {
+        "architecture": [
+          1,
+          1,
+          2
+        ],
+        "dev_frontend": [
+          6,
+          10,
+          16
+        ],
+        "ux": [
+          2,
+          4,
+          6
+        ],
+        "qa": [
+          1,
+          2,
+          4
+        ]
+      },
+      "central_basis": {
+        "architecture": "Contrat interface/API commun : 1 JH.",
+        "dev_frontend": "Structure/navigation 3, composants 4, tests développeur 3 : 10 JH.",
+        "ux": "Règles d’interaction 2, conception/revue du socle 2 : 4 JH.",
+        "qa": "Navigation, accès et erreurs communs : 2 JH."
+      }
+    },
+    {
+      "id": "C06",
+      "label": "Livraison du socle, documentation et revue commune",
+      "proof_refs": [
+        "iteration-03-contrat.json#COMMON"
+      ],
+      "work": "Configuration reproductible de la livraison d’essai, documentation, contrôles communs et coordination finale du socle.",
+      "rationale": "Une livraison commune des deux pilotes ; les campagnes métier et leur documentation spécifique restent financées dans REF/STOCK. La plage couvre la stabilisation des raccordements communs.",
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "dev_java": [
+          2,
+          4,
+          6
+        ],
+        "plateforme": [
+          4,
+          7,
+          11
+        ],
+        "qa": [
+          2,
+          4,
+          7
+        ],
+        "securite": [
+          1,
+          2,
+          3
+        ],
+        "coordination": [
+          2,
+          3,
+          5
+        ]
+      },
+      "central_basis": {
+        "analyse_produit": "Guide des conventions et revue : 2 JH.",
+        "dev_java": "Raccordements et documentation technique commune : 4 JH.",
+        "plateforme": "Livraison reproductible 3, diagnostic 2, documentation/revue 2 : 7 JH.",
+        "qa": "Vérification de la livraison commune et documentation des contrôles : 4 JH.",
+        "securite": "Revue finale du socle et corrections à qualifier : 2 JH.",
+        "coordination": "Synchronisation des livrables communs et décision de réception : 3 JH."
+      }
+    }
+  ],
+  "zero_rule": "Un rôle absent d’un paquet n’y réalise pas de contribution distincte ; ses contributions sont explicites dans les autres paquets. Aucun rôle du total COMMON n’est réputé gratuit.",
+  "range_rule": "Bornes de sensibilité d’ingénierie à périmètre identique ; pas percentiles ni intervalle de confiance.",
+  "scope_exclusions": [
+    "Contrats et règles des références et du stock",
+    "Moteur générique d’import par lot (REF)",
+    "Écrans métier propres aux pilotes",
+    "Connecteurs SI Beaumanoir",
+    "Plateforme cloud de production, haute disponibilité, exploitation récurrente"
+  ],
+  "totals_by_role": {
+    "analyse_produit": [
+      3,
+      5,
+      8
+    ],
+    "architecture": [
+      10,
+      16,
+      25
+    ],
+    "dev_java": [
+      20,
+      33,
+      53
+    ],
+    "coordination": [
+      3,
+      5,
+      8
+    ],
+    "plateforme": [
+      10,
+      17,
+      28
+    ],
+    "securite": [
+      3,
+      6,
+      10
+    ],
+    "qa": [
+      7,
+      13,
+      23
+    ],
+    "dev_frontend": [
+      6,
+      10,
+      16
+    ],
+    "ux": [
+      2,
+      4,
+      6
+    ]
+  },
+  "total_jh": [
+    64,
+    109,
+    177
+  ]
+}

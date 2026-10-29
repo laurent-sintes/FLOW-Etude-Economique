@@ -1,0 +1,304 @@
+{
+  "id": "iteration-05-m1-exec",
+  "date": "2026-10-29",
+  "contract_ref": "iteration-05-contrat.json",
+  "contract_sha256": "73648b45efa673924009600f811744e5902ae5244f11ff293becca8fcc6fd429",
+  "method": "M1 par paquets",
+  "ensemble": "EXEC",
+  "producer": "Assistant principal, estimation d’ingénierie assistée par IA, sans revue humaine ni charge de réalisation observée",
+  "unit": "JH de 7h ; développeur comprend ses tests ; tous rôles avant gains de productivité, réutilisation déjà intégrée",
+  "packages": [
+    {
+      "id": "X01",
+      "name": "Configurer le moteur et son schéma dans l’application existante",
+      "roles": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "architecture": [
+          2,
+          4,
+          6
+        ],
+        "dev_java": [
+          3,
+          5,
+          8
+        ],
+        "plateforme": [
+          1,
+          2,
+          3
+        ]
+      },
+      "basis": "Deux raccordements Java : moteur/DataSource et schéma/configuration (~2,5 JH chacun au centre). Architecture : contrat technique et revue des dépendances (2 travaux ×2 JH). Analyse : cadrage de frontière (2 JH). Plateforme : extension de l’environnement existant (2 JH), sans recréer la CI.",
+      "uncertainty": "Compatibilité réelle des dépendances Boot/Flowable et migrations ; bornes couvrent reprise de configuration au même périmètre.",
+      "proofs": [
+        "SPR-F01",
+        "SPR-F02"
+      ]
+    },
+    {
+      "id": "X02",
+      "name": "Composer transaction, démarrage et signal idempotents",
+      "roles": {
+        "architecture": [
+          1,
+          2,
+          3
+        ],
+        "dev_java": [
+          4,
+          7,
+          11
+        ],
+        "qa": [
+          2,
+          3,
+          5
+        ]
+      },
+      "basis": "Deux chemins d’adaptateur start/signal et leurs tests développeur (~3,5 JH chacun). Architecture : portée de transaction et résultat (2 JH). QA : scénario crash avant/après commit et course doublon (3 JH). La primitive de déduplication COMMON est consommée, pas reconstruite.",
+      "uncertainty": "Interaction contexte moteur/transaction et exceptions ; la preuve de la primitive STOCK ne démontre pas cette composition.",
+      "proofs": [
+        "SPR-F02"
+      ],
+      "acceptance_refs": [
+        "EXEC.transactions",
+        "EXEC.repetitions"
+      ]
+    },
+    {
+      "id": "X03",
+      "name": "Encadrer l’exécution asynchrone et son diagnostic technique",
+      "roles": {
+        "architecture": [
+          1,
+          2,
+          4
+        ],
+        "dev_java": [
+          4,
+          7,
+          12
+        ],
+        "qa": [
+          2,
+          4,
+          7
+        ],
+        "plateforme": [
+          1,
+          2,
+          4
+        ]
+      },
+      "basis": "Trois circuits Java : exécution différée, délai et échec terminal (~2 JH chacun), plus configuration (1 JH). QA : arrêt/redémarrage, échéance, retry et état terminal (4 scénarios ×1 JH). Paramètres techniques et logs spécifiques (2 JH plateforme), sans surveillance d’exploitation récurrente.",
+      "uncertainty": "Acquisition de jobs, propagation des erreurs et fenêtres d’arrêt nécessitent des essais ; pas de HA ou de débit garanti.",
+      "proofs": [
+        "SPR-F03",
+        "SPR-F04"
+      ]
+    },
+    {
+      "id": "X04",
+      "name": "Limiter les modèles et délégués autorisés",
+      "roles": {
+        "analyse_produit": [
+          0.5,
+          1,
+          2
+        ],
+        "architecture": [
+          0.5,
+          1,
+          2
+        ],
+        "dev_java": [
+          2,
+          4,
+          7
+        ],
+        "qa": [
+          1,
+          2,
+          4
+        ],
+        "securite": [
+          1.5,
+          3,
+          5
+        ]
+      },
+      "basis": "Deux contrôles Java : liste blanche des éléments exécutables et validation/fermeture de l’exposition moteur (2 JH chacun). Revue spécialiste : chemins d’exécution, configuration puis contre-vérification (3 JH). QA négative (2 JH). Les modèles métier concrets et droits d’intervention sont ORCH/PLAN.",
+      "uncertainty": "Failles d’exposition par défaut, expressions et classes accessibles ; correction dans la même politique fermée.",
+      "proofs": [
+        "SPR-F01",
+        "SPR-F02"
+      ]
+    },
+    {
+      "id": "X05",
+      "name": "Qualifier l’extension commune et la livrer",
+      "roles": {
+        "architecture": [
+          0.5,
+          1,
+          2
+        ],
+        "dev_java": [
+          2,
+          3,
+          5
+        ],
+        "qa": [
+          3,
+          5,
+          8
+        ],
+        "plateforme": [
+          1,
+          2,
+          3
+        ],
+        "coordination": [
+          1.5,
+          3,
+          5
+        ]
+      },
+      "basis": "Trois montages d’essai Java : appel moteur, arrêt/redémarrage et erreur contrôlée (1 JH chacun). QA : réception des garanties communes, régression et diagnostic (5 JH). Extension de la chaîne existante et consignes (2 JH plateforme). Coordination technique des raccordements ORCH/PLAN (3 JH), sans programme.",
+      "uncertainty": "Reproductibilité des essais et défauts de configuration croisée ; pas de requalification métier comptée à nouveau.",
+      "proofs": [
+        "SPR-F01",
+        "SPR-F02",
+        "SPR-F03",
+        "SPR-F04"
+      ]
+    }
+  ],
+  "role_totals": {
+    "analyse_produit": [
+      1.5,
+      3,
+      5
+    ],
+    "architecture": [
+      5,
+      10,
+      17
+    ],
+    "dev_java": [
+      15,
+      26,
+      43
+    ],
+    "dev_frontend": [
+      0,
+      0,
+      0
+    ],
+    "ux": [
+      0,
+      0,
+      0
+    ],
+    "qa": [
+      8,
+      14,
+      24
+    ],
+    "plateforme": [
+      3,
+      6,
+      10
+    ],
+    "securite": [
+      1.5,
+      3,
+      5
+    ],
+    "coordination": [
+      1.5,
+      3,
+      5
+    ],
+    "expert_optimisation": [
+      0,
+      0,
+      0
+    ]
+  },
+  "total": [
+    35.5,
+    65,
+    109
+  ],
+  "role_states": {
+    "analyse_produit": {
+      "status": "estimated",
+      "class": "C",
+      "reason": "Décomposition et durées proposées documentées, aucune calibration empirique.",
+      "next_evidence": "Essai d’intégration et relevé de réalisation comparable par rôle."
+    },
+    "architecture": {
+      "status": "estimated",
+      "class": "C",
+      "reason": "Décomposition et durées proposées documentées, aucune calibration empirique.",
+      "next_evidence": "Essai d’intégration et relevé de réalisation comparable par rôle."
+    },
+    "dev_java": {
+      "status": "estimated",
+      "class": "C",
+      "reason": "Décomposition et durées proposées documentées, aucune calibration empirique.",
+      "next_evidence": "Essai d’intégration et relevé de réalisation comparable par rôle."
+    },
+    "dev_frontend": {
+      "status": "not_mobilized",
+      "class": null,
+      "reason": "Aucune interface métier à concevoir dans l’adaptateur technique EXEC."
+    },
+    "ux": {
+      "status": "not_mobilized",
+      "class": null,
+      "reason": "Aucune interface métier à concevoir dans l’adaptateur technique EXEC."
+    },
+    "qa": {
+      "status": "estimated",
+      "class": "C",
+      "reason": "Décomposition et durées proposées documentées, aucune calibration empirique.",
+      "next_evidence": "Essai d’intégration et relevé de réalisation comparable par rôle."
+    },
+    "plateforme": {
+      "status": "estimated",
+      "class": "C",
+      "reason": "Décomposition et durées proposées documentées, aucune calibration empirique.",
+      "next_evidence": "Essai d’intégration et relevé de réalisation comparable par rôle."
+    },
+    "securite": {
+      "status": "estimated",
+      "class": "C",
+      "reason": "Décomposition et durées proposées documentées, aucune calibration empirique.",
+      "next_evidence": "Essai d’intégration et relevé de réalisation comparable par rôle."
+    },
+    "coordination": {
+      "status": "estimated",
+      "class": "C",
+      "reason": "Décomposition et durées proposées documentées, aucune calibration empirique.",
+      "next_evidence": "Essai d’intégration et relevé de réalisation comparable par rôle."
+    },
+    "expert_optimisation": {
+      "status": "not_mobilized",
+      "class": null,
+      "reason": "Pas de modèle d’optimisation dans EXEC."
+    }
+  },
+  "unknowns": [
+    "Performance production, HA, montée de version cible et exploitation hors contrat",
+    "Conformité runtime exacte à confirmer ; présence du composant n’est pas une garantie d’intégration"
+  ],
+  "reuse_discounts_applied": 0,
+  "scope_extensions_outside_range": true
+}

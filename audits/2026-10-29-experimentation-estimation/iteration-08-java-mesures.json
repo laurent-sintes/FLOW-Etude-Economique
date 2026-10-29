@@ -1,0 +1,611 @@
+{
+  "id": "iteration-08-java-mesures",
+  "date": "2026-10-29",
+  "status": "Mesure du code uniquement, aucun effort humain",
+  "counter_convention": "Lignes logiques normalisées, proxy explicite : une instruction/déclaration terminée par point-virgule hors parenthèses ; une entête de bloc ouvrant ; vide/commentaire/chaînes/accolades seules exclus. Les continuations sont réunies. Un if sans accolade et son return restent une unité. Annotations isolées séparées. Cette convention ne constitue pas un comptage AST standardisé.",
+  "limitations": [
+    "Les tranches sélectionnées ont été lues et ne comportent pas de corps d initialisation de tableau/collection avec accolades ; le compteur rejette les initialisations = {, mais ne prétend pas analyser tout Java.",
+    "Les signatures, déclarations locales, appels, branches et traitements erreur sont comptés ; package/imports exclus par sélection de plage.",
+    "Pas de code généré ou de tests dans les tranches Java. Les tests et le support devront être traités séparément pour une taille cible.",
+    "Aucun code Axelor admis comme composant réutilisable en Spring. Aucun ratio automatique de conversion Java vers Spring."
+  ],
+  "samples": [
+    {
+      "id": "AXCSV_PROCESS",
+      "path": "tmp/oss-audit-axelor-platform/axelor-core/src/main/java/com/axelor/data/csv/CSVImporter.java",
+      "ranges": [
+        [
+          232,
+          367
+        ]
+      ],
+      "sha256": "385c2563d3f8e54b18f3c32d8ead5660417ae3ac3e40cbf1d6340f7c25a9d9b6",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "logical_units_proxy": 74,
+      "annotations_separate": 0,
+      "detail": [
+        {
+          "semicolon_units": 49,
+          "compound_headers": 25,
+          "logical_units_proxy": 74,
+          "annotations_separate": 0,
+          "normalized_units": [
+            "private void process(CSVInput csvInput, Reader reader) throws IOException, ClassNotFoundException",
+            "String beanName = csvInput.getTypeName()",
+            "LOG.info(STR, beanName, csvInput.getFileName())",
+            "int count = 0",
+            "int total = 0",
+            "int batchSize = DBHelper.getJdbcBatchSize()",
+            "CSVFile csv = CSVFile.DEFAULT.withDelimiter(csvInput.getSeparator())",
+            "if (StringUtils.isBlank(csvInput.getHeader()))",
+            "csv = csv.withFirstRecordAsHeader()",
+            "else",
+            "csv = csv.withHeader(csvInput.getHeader().trim().split(STR))",
+            "try (CSVParser csvParser = csv.parse(reader))",
+            "String[] fields = CSVFile.header(csvParser)",
+            "Class<?> beanClass = Class.forName(beanName)",
+            "if (loggerManager != null)",
+            "loggerManager.prepareInput(csvInput, fields)",
+            "LOG.debug(STR, Arrays.asList(fields))",
+            "CSVBinder binder = new CSVBinder(beanClass, fields, csvInput)",
+            "JPA.em().getTransaction().begin()",
+            "final Map<String, Object> context = new HashMap<>()",
+            "if (this.context != null)",
+            "context.putAll(this.context)",
+            "csvInput.callPrepareContext(context)",
+            "if (dataDir != null)",
+            "context.put(STR, dataDir.toPath())",
+            "for (DataAdapter adapter : defaultAdapters)",
+            "binder.registerAdapter(adapter)",
+            "for (DataAdapter adapter : this.config.getAdapters())",
+            "binder.registerAdapter(adapter)",
+            "for (DataAdapter adapter : csvInput.getAdapters())",
+            "binder.registerAdapter(adapter)",
+            "for (CSVRecord record : csvParser)",
+            "if (CSVFile.isEmpty(record))",
+            "continue",
+            "String[] values = CSVFile.values(record)",
+            "LOG.trace(STR, Arrays.asList(values))",
+            "Object bean = null",
+            "try",
+            "bean = this.importRow(values, binder, csvInput, context, false)",
+            "count++",
+            "catch (Exception e)",
+            "int line = count + 1",
+            "LOG.error(STR, csvInput.getFileName())",
+            "LOG.error( STR, line, Arrays.asList(values), ImportException.from(e))",
+            "if (JPA.em().getTransaction().isActive())",
+            "JPA.em().getTransaction().rollback()",
+            "if (!JPA.em().getTransaction().isActive())",
+            "JPA.em().getTransaction().begin()",
+            "for (Listener listener : listeners)",
+            "listener.handle((Model) bean, e)",
+            "this.onRollback(values, binder, csvInput, context)",
+            "++total",
+            "if (valuesStack.size() % batchSize == 0)",
+            "LOG.trace(STR, valuesStack.size())",
+            "if (JPA.em().getTransaction().isActive())",
+            "JPA.em().getTransaction().commit()",
+            "JPA.em().clear()",
+            "valuesStack.clear()",
+            "if (!JPA.em().getTransaction().isActive())",
+            "JPA.em().getTransaction().begin()",
+            "if (JPA.em().getTransaction().isActive())",
+            "LOG.trace(STR, valuesStack.size())",
+            "JPA.em().getTransaction().commit()",
+            "JPA.em().clear()",
+            "catch (Exception e)",
+            "if (JPA.em().getTransaction().isActive())",
+            "JPA.em().getTransaction().rollback()",
+            "LOG.error(STR, csvInput.getFileName())",
+            "LOG.error(STR)",
+            "LOG.error(STR, e)",
+            "finally",
+            "for (Listener listener : listeners)",
+            "listener.imported(total, count)",
+            "valuesStack.clear()"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AXCSV_ROW_REPLAY",
+      "path": "tmp/oss-audit-axelor-platform/axelor-core/src/main/java/com/axelor/data/csv/CSVImporter.java",
+      "ranges": [
+        [
+          380,
+          447
+        ]
+      ],
+      "sha256": "385c2563d3f8e54b18f3c32d8ead5660417ae3ac3e40cbf1d6340f7c25a9d9b6",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "logical_units_proxy": 30,
+      "annotations_separate": 0,
+      "detail": [
+        {
+          "semicolon_units": 17,
+          "compound_headers": 13,
+          "logical_units_proxy": 30,
+          "annotations_separate": 0,
+          "normalized_units": [
+            "private Object importRow( String[] values, CSVBinder binder, CSVInput csvInput, Map<String, Object> context, Boolean onRollback) throws Exception",
+            "Object bean = null",
+            "Map<String, Object> ctx = new HashMap<>(context)",
+            "bean = binder.bind(values, ctx)",
+            "bean = csvInput.call(bean, ctx)",
+            "LOG.trace(STR, bean)",
+            "if (bean != null)",
+            "JPA.manage((Model) bean)",
+            "LOG.trace(STR, bean)",
+            "if (!onRollback)",
+            "valuesStack.add(values)",
+            "for (Listener listener : listeners)",
+            "listener.imported((Model) bean)",
+            "return bean",
+            "private void onRollback( String[] values, CSVBinder binder, CSVInput csvInput, Map<String, Object> context)",
+            "if (loggerManager != null)",
+            "loggerManager.log(values)",
+            "for (String[] row : valuesStack)",
+            "LOG.debug(STR, Arrays.asList(row))",
+            "try",
+            "this.importRow(row, binder, csvInput, context, true)",
+            "if (JPA.em().getTransaction().isActive())",
+            "JPA.em().getTransaction().commit()",
+            "catch (Exception e)",
+            "if (JPA.em().getTransaction().isActive())",
+            "JPA.em().getTransaction().rollback()",
+            "finally",
+            "if (!JPA.em().getTransaction().isActive())",
+            "JPA.em().getTransaction().begin()",
+            "valuesStack.clear()"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AXPACK_SERVICE",
+      "path": "tmp/oss-audit-axelor/axelor-base/src/main/java/com/axelor/apps/base/service/ProductPackagingServiceImpl.java",
+      "ranges": [
+        [
+          30,
+          89
+        ]
+      ],
+      "sha256": "f88d8c8672c22a1827b3d338513bcafc6e7d4340abb0e635426032161d49c0a6",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "logical_units_proxy": 30,
+      "annotations_separate": 3,
+      "detail": [
+        {
+          "semicolon_units": 20,
+          "compound_headers": 10,
+          "logical_units_proxy": 30,
+          "annotations_separate": 3,
+          "normalized_units": [
+            "public class ProductPackagingServiceImpl implements ProductPackagingService",
+            "protected static final String UNIT_KG = STR",
+            "protected final UnitConversionService unitConversionService",
+            "protected final UnitRepository unitRepository",
+            "public ProductPackagingServiceImpl( UnitConversionService unitConversionService, UnitRepository unitRepository)",
+            "this.unitConversionService = unitConversionService",
+            "this.unitRepository = unitRepository",
+            "public BigDecimal computePackagingMaxTotalWeight(ProductPackaging productPackaging) throws AxelorException",
+            "BigDecimal packagingWeight = getConvertedGrossMass(productPackaging.getPackaging())",
+            "BigDecimal productTotalWeight = getProductTotalWeight(productPackaging)",
+            "return packagingWeight.add(productTotalWeight)",
+            "public boolean isTotalWeightNotValid(ProductPackaging productPackaging) throws AxelorException",
+            "Product packaging = productPackaging.getPackaging()",
+            "if (packaging == null)",
+            "return false",
+            "BigDecimal productTotalWeight = getProductTotalWeight(productPackaging)",
+            "return productTotalWeight.compareTo(packaging.getMaxWeight()) > 0",
+            "protected BigDecimal getConvertedGrossMass(Product product) throws AxelorException",
+            "if (product == null)",
+            "return BigDecimal.ZERO",
+            "BigDecimal grossMass = product.getGrossMass()",
+            "Unit unit = product.getMassUnit()",
+            "Unit targetUnit = getKilogramUnit()",
+            "if (unit != null && targetUnit != null && !unit.equals(targetUnit))",
+            "return unitConversionService.convert( unit, targetUnit, grossMass, AppBaseService.DEFAULT_NB_DECIMAL_DIGITS, product)",
+            "return grossMass",
+            "protected Unit getKilogramUnit()",
+            "return unitRepository .all() .filter(STR) .bind(STR, UNIT_KG) .fetchOne()",
+            "protected BigDecimal getProductTotalWeight(ProductPackaging productPackaging) throws AxelorException",
+            "return getConvertedGrossMass(productPackaging.getProductToPackage()) .multiply(BigDecimal.valueOf(productPackaging.getQty()))"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AXPACK_CONTROL",
+      "path": "tmp/oss-audit-axelor/axelor-base/src/main/java/com/axelor/apps/base/web/ProductPackagingController.java",
+      "ranges": [
+        [
+          30,
+          47
+        ]
+      ],
+      "sha256": "c2d8ef115d5d353e4a257e559908e664d3b3bebe0372b5f5e020f2c42113c889",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "logical_units_proxy": 8,
+      "annotations_separate": 0,
+      "detail": [
+        {
+          "semicolon_units": 4,
+          "compound_headers": 4,
+          "logical_units_proxy": 8,
+          "annotations_separate": 0,
+          "normalized_units": [
+            "public class ProductPackagingController",
+            "public void computePackagingMaxTotalWeight(ActionRequest request, ActionResponse response) throws AxelorException",
+            "ProductPackaging packaging = request.getContext().asType(ProductPackaging.class)",
+            "response.setValue( STR, Beans.get(ProductPackagingService.class).computePackagingMaxTotalWeight(packaging))",
+            "public void validateTotalWeight(ActionRequest request, ActionResponse response) throws AxelorException",
+            "ProductPackaging packaging = request.getContext().asType(ProductPackaging.class)",
+            "if (Beans.get(ProductPackagingService.class).isTotalWeightNotValid(packaging))",
+            "response.setError(I18n.get(BaseExceptionMessage.PACKAGING_MAX_WEIGHT_EXCEEDED))"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AXUNIT_CONVERSION",
+      "path": "tmp/oss-audit-axelor/axelor-base/src/main/java/com/axelor/apps/base/service/UnitConversionServiceImpl.java",
+      "ranges": [
+        [
+          88,
+          145
+        ],
+        [
+          264,
+          303
+        ]
+      ],
+      "sha256": "2878116fba86536f35ce2c17a1f0f3d8fd71099be42845f388ea5f137c21899b",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "logical_units_proxy": 37,
+      "annotations_separate": 2,
+      "detail": [
+        {
+          "semicolon_units": 12,
+          "compound_headers": 10,
+          "logical_units_proxy": 22,
+          "annotations_separate": 1,
+          "normalized_units": [
+            "public BigDecimal convert( Unit startUnit, Unit endUnit, BigDecimal value, int scale, Product product) throws AxelorException",
+            "List<UnitConversion> unitConversionList = new ArrayList<>()",
+            "if (startUnit != null && endUnit != null && startUnit != endUnit)",
+            "unitConversionList = fetchUnitConversionList(startUnit, endUnit, true)",
+            "return convert(unitConversionList, startUnit, endUnit, value, scale, product, STR)",
+            "protected BigDecimal convert( List<UnitConversion> unitConversionList, Unit startUnit, Unit endUnit, BigDecimal value, int scale, Model model, String nameInContext) throws AxelorException",
+            "if ((startUnit == null && endUnit == null))",
+            "throw new AxelorException( TraceBackRepository.CATEGORY_CONFIGURATION_ERROR, I18n.get(BaseExceptionMessage.UNIT_CONVERSION_3))",
+            "if (startUnit == null)",
+            "throw new AxelorException( TraceBackRepository.CATEGORY_CONFIGURATION_ERROR, I18n.get(BaseExceptionMessage.UNIT_CONVERSION_2))",
+            "if (endUnit == null)",
+            "throw new AxelorException( TraceBackRepository.CATEGORY_CONFIGURATION_ERROR, I18n.get(BaseExceptionMessage.UNIT_CONVERSION_4))",
+            "if (startUnit.equals(endUnit)) return value",
+            "else",
+            "try",
+            "BigDecimal coefficient = this.getCoefficient(unitConversionList, startUnit, endUnit, model, nameInContext)",
+            "if (coefficient.signum() == 0)",
+            "throw new AxelorException( TraceBackRepository.CATEGORY_CONFIGURATION_ERROR, I18n.get(BaseExceptionMessage.COEFFICIENT_SHOULD_NOT_BE_ZERO), startUnit.getName(), endUnit.getName())",
+            "return value.multiply(coefficient).setScale(scale, RoundingMode.HALF_UP)",
+            "catch (IOException | ClassNotFoundException e)",
+            "TraceBackService.trace(e)",
+            "return value"
+          ]
+        },
+        {
+          "semicolon_units": 10,
+          "compound_headers": 5,
+          "logical_units_proxy": 15,
+          "annotations_separate": 1,
+          "normalized_units": [
+            "protected List<UnitConversion> fetchUnitConversionList( Unit startUnit, Unit endUnit, boolean autoFlush)",
+            "String key = getKey(startUnit, endUnit)",
+            "List<UnitConversion> unitConversionList = unitConversionCache.get(key)",
+            "if (unitConversionList != null)",
+            "return unitConversionList",
+            "unitConversionList = unitConversionRepo .all() .autoFlush(autoFlush) .filter( STR) .bind(STR, UnitConversionRepository.ENTITY_ALL) .bind(STR, startUnit) .bind(STR, endUnit) .fetch()",
+            "unitConversionCache.put(key, unitConversionList)",
+            "return unitConversionList",
+            "protected String getKey(Unit startUnit, Unit endUnit)",
+            "return Stream.of(startUnit.getId(), endUnit.getId()) .sorted() .map(String::valueOf) .collect(Collectors.joining(STR))",
+            "public BigDecimal convertWithAutoFlushFalse( Unit startUnit, Unit endUnit, BigDecimal value, int scale, Product product) throws AxelorException",
+            "List<UnitConversion> unitConversionList = new ArrayList<>()",
+            "if (startUnit != null && endUnit != null && startUnit != endUnit)",
+            "unitConversionList = fetchUnitConversionList(startUnit, endUnit, false)",
+            "return convert(unitConversionList, startUnit, endUnit, value, scale, product, STR)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AXSHARING_QUERY",
+      "path": "tmp/oss-audit-axelor/axelor-base/src/main/java/com/axelor/apps/base/service/DataSharingReferentialLineServiceImpl.java",
+      "ranges": [
+        [
+          43,
+          165
+        ]
+      ],
+      "sha256": "784c11299572acfd6d6bf90ebde561337e0f3532610adad66bccde223aaba714",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "logical_units_proxy": 48,
+      "annotations_separate": 9,
+      "detail": [
+        {
+          "semicolon_units": 30,
+          "compound_headers": 18,
+          "logical_units_proxy": 48,
+          "annotations_separate": 9,
+          "normalized_units": [
+            "public class DataSharingReferentialLineServiceImpl implements DataSharingReferentialLineService",
+            "protected DataSharingReferentialLineRepository dataSharingReferentialLineRepository",
+            "protected MetaModelRepository metaModelRepository",
+            "public DataSharingReferentialLineServiceImpl( DataSharingReferentialLineRepository dataSharingReferentialLineRepository, MetaModelRepository metaModelRepository)",
+            "this.dataSharingReferentialLineRepository = dataSharingReferentialLineRepository",
+            "this.metaModelRepository = metaModelRepository",
+            "public <T extends Model> Query<T> getQuery( DataSharingReferential dataSharingReferential, Class<T> modelClass)",
+            "List<DataSharingReferentialLine> dataSharingReferentialLineList = dataSharingReferential.getDataSharingReferentialLineList().stream() .filter( dataSharingReferentialLine -> Objects.equals( dataSharingReferentialLine.getMetaModel().getName(), modelClass.getSimpleName())) .collect(Collectors.toList())",
+            "return this.getQuery(dataSharingReferentialLineList, modelClass)",
+            "public <T extends Model> Query<T> getQuery(Class<T> modelClass)",
+            "return this.getQuery(this.getDataSharingReferentialLineList(modelClass), modelClass)",
+            "protected <T extends Model> Query<T> getQuery( List<DataSharingReferentialLine> dataSharingReferentialLineList, Class<T> modelClass)",
+            "if (CollectionUtils.isEmpty(dataSharingReferentialLineList))",
+            "return null",
+            "List<String> conditionList = getConditionList(dataSharingReferentialLineList)",
+            "if (CollectionUtils.isEmpty(conditionList))",
+            "return null",
+            "String condition = String.join(STR, conditionList)",
+            "return JPA.all(modelClass).filter(condition)",
+            "protected List<DataSharingReferentialLine> getDataSharingReferentialLineList( Class<? extends Model> modelClass)",
+            "return dataSharingReferentialLineRepository .all() .filter(STR) .bind(STR, modelClass.getSimpleName()) .fetch()",
+            "protected List<String> getConditionList( List<DataSharingReferentialLine> dataSharingReferentialLineList)",
+            "List<String> conditionList = new ArrayList<>()",
+            "for (DataSharingReferentialLine dataSharingReferentialLine : dataSharingReferentialLineList)",
+            "String condition = dataSharingReferentialLine.getQueryCondition()",
+            "if (condition != null && !condition.trim().isEmpty())",
+            "conditionList.add(condition.trim())",
+            "return conditionList",
+            "public DataSharingReferentialLine createDataSharingReferentialLine( DataSharingReferential dataSharingReferential, String metaModelName, String condition, String wizardModelName, Long wizardRefId)",
+            "DataSharingReferentialLine dataSharingReferentialLine = new DataSharingReferentialLine()",
+            "dataSharingReferentialLine.setDataSharingReferential(dataSharingReferential)",
+            "dataSharingReferentialLine.setMetaModel(metaModelRepository.findByName(metaModelName))",
+            "dataSharingReferentialLine.setQueryCondition(condition)",
+            "dataSharingReferentialLine.setWizardMetaModel(metaModelRepository.findByName(wizardModelName))",
+            "dataSharingReferentialLine.setWizardRefId(wizardRefId)",
+            "return dataSharingReferentialLineRepository.save(dataSharingReferentialLine)",
+            "public void removeDataSharingReferentialLines(DataSharingProductWizard dataSharingProductWizard)",
+            "List<DataSharingReferentialLine> dataSharingReferentialLineList = dataSharingReferentialLineRepository .all() .filter(STR) .bind(STR, dataSharingProductWizard.getId()) .fetch()",
+            "if (!CollectionUtils.isEmpty(dataSharingReferentialLineList))",
+            "dataSharingReferentialLineList.forEach(dataSharingReferentialLineRepository::remove)",
+            "public void testQueryCondition(DataSharingReferentialLine dataSharingReferentialLine) throws AxelorException",
+            "MetaModel model = dataSharingReferentialLine.getMetaModel()",
+            "if (model == null)",
+            "return",
+            "try",
+            "getQuery( Collections.singletonList(dataSharingReferentialLine), (Class<? extends Model>) Class.forName(model.getFullName())) .fetchOne()",
+            "catch (Exception e)",
+            "throw new AxelorException( TraceBackRepository.CATEGORY_CONFIGURATION_ERROR, I18n.get(BaseExceptionMessage.DATA_SHARING_REFERENTIAL_LINE_JPQL_SYNTAX_IS_WRONG), e.getMessage())"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AXTOKEN_LOAD",
+      "path": "tmp/oss-audit-axelor-platform/axelor-core/src/main/java/com/axelor/auth/web/UserTokenController.java",
+      "ranges": [
+        [
+          47,
+          60
+        ]
+      ],
+      "sha256": "6d14db6d50ebd7c08f2e8c0ded2e91b0609d736e109851bb941f3787b9c256b8",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "logical_units_proxy": 8,
+      "annotations_separate": 0,
+      "detail": [
+        {
+          "semicolon_units": 5,
+          "compound_headers": 3,
+          "logical_units_proxy": 8,
+          "annotations_separate": 0,
+          "normalized_units": [
+            "public void loadUserTokens(ActionRequest request, ActionResponse response)",
+            "if (requiresIdentityCheck(request, response)) return",
+            "Long userId = (Long) request.getContext().get(STR)",
+            "if (userId == null || userId <= 0)",
+            "return",
+            "User user = JPA.find(User.class, userId)",
+            "if (!isNotAuthorized(user))",
+            "response.setValue(STR, userTokenService.getTokenData(user))"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AXTOKEN_CREATE",
+      "path": "tmp/oss-audit-axelor-platform/axelor-core/src/main/java/com/axelor/auth/web/UserTokenController.java",
+      "ranges": [
+        [
+          62,
+          98
+        ]
+      ],
+      "sha256": "6d14db6d50ebd7c08f2e8c0ded2e91b0609d736e109851bb941f3787b9c256b8",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "logical_units_proxy": 19,
+      "annotations_separate": 0,
+      "detail": [
+        {
+          "semicolon_units": 13,
+          "compound_headers": 6,
+          "logical_units_proxy": 19,
+          "annotations_separate": 0,
+          "normalized_units": [
+            "public void createToken(ActionRequest request, ActionResponse response)",
+            "if (requiresIdentityCheck(request, response)) return",
+            "try",
+            "UserToken userToken = request.getContext().asType(UserToken.class)",
+            "User owner = JPA.find(User.class, Long.valueOf(request.getContext().get(STR).toString()))",
+            "if (owner == null)",
+            "response.setError(I18n.get(STR))",
+            "return",
+            "if (isInvalidExpirationDate(userToken))",
+            "response.setError(I18n.get(STR))",
+            "return",
+            "if (isNotAuthorized(owner))",
+            "response.setError(I18n.get(STR))",
+            "return",
+            "userToken = userTokenService.createUserToken(userToken.getName(), userToken.getExpiresAt(), owner)",
+            "response.setCanClose(true)",
+            "response.setView( ActionView.define(STR) .model(UserToken.class.getName()) .add(STR, STR) .param(STR, STR) .param(STR, STR) .param(STR, STR) .param(STR, STR) .context(STR, userToken.getApiKey()) .map())",
+            "catch (Exception e)",
+            "response.setError(I18n.get(STR))"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AXTOKEN_REVOKE",
+      "path": "tmp/oss-audit-axelor-platform/axelor-core/src/main/java/com/axelor/auth/web/UserTokenController.java",
+      "ranges": [
+        [
+          100,
+          120
+        ]
+      ],
+      "sha256": "6d14db6d50ebd7c08f2e8c0ded2e91b0609d736e109851bb941f3787b9c256b8",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "logical_units_proxy": 15,
+      "annotations_separate": 0,
+      "detail": [
+        {
+          "semicolon_units": 10,
+          "compound_headers": 5,
+          "logical_units_proxy": 15,
+          "annotations_separate": 0,
+          "normalized_units": [
+            "public void revokeToken(ActionRequest request, ActionResponse response)",
+            "if (requiresIdentityCheck(request, response)) return",
+            "try",
+            "Long userTokenId = Long.valueOf(request.getContext().get(STR).toString())",
+            "UserToken userToken = userTokenRepository.find(userTokenId)",
+            "if (userToken == null)",
+            "response.setError(I18n.get(STR))",
+            "return",
+            "if (isNotAuthorized(userToken.getOwner()))",
+            "response.setError(I18n.get(STR))",
+            "return",
+            "userTokenService.revokeUserToken(userToken)",
+            "response.setReload(true)",
+            "catch (Exception e)",
+            "response.setError(I18n.get(STR))"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AXSHARING_CONTROL",
+      "path": "tmp/oss-audit-axelor/axelor-base/src/main/java/com/axelor/apps/base/web/DataSharingReferentialLineController.java",
+      "ranges": [
+        [
+          32,
+          43
+        ]
+      ],
+      "sha256": "19ec3aaf9dd2df87c4a08c4f9d36eb2a3082d267fda858e31dfee2188ddbfcc8",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "logical_units_proxy": 7,
+      "annotations_separate": 0,
+      "detail": [
+        {
+          "semicolon_units": 4,
+          "compound_headers": 3,
+          "logical_units_proxy": 7,
+          "annotations_separate": 0,
+          "normalized_units": [
+            "public void testQueryCondition(ActionRequest request, ActionResponse response)",
+            "try",
+            "DataSharingReferentialLine dataSharingReferentialLine = request.getContext().asType(DataSharingReferentialLine.class)",
+            "Beans.get(DataSharingReferentialLineService.class) .testQueryCondition(dataSharingReferentialLine)",
+            "response.setInfo( I18n.get(BaseExceptionMessage.DATA_SHARING_REFERENTIAL_LINE_JPQL_SYNTAX_IS_CORRECT))",
+            "catch (Exception e)",
+            "TraceBackService.trace(response, e)"
+          ]
+        }
+      ]
+    }
+  ],
+  "declarative": [
+    {
+      "id": "AXPACK_DOMAIN",
+      "path": "tmp/oss-audit-axelor/axelor-base/src/main/resources/domains/ProductPackaging.xml",
+      "range": [
+        10,
+        16
+      ],
+      "sha256": "46e6d84a659874d6f5cae24969070d334c9b5262afa4e7f722f938a35d1243c0",
+      "declarative_open_elements": 4,
+      "element_names": [
+        "many-to-one",
+        "many-to-one",
+        "integer",
+        "decimal"
+      ],
+      "cdata_code_excluded": true
+    },
+    {
+      "id": "AXUNIT_DOMAIN",
+      "path": "tmp/oss-audit-axelor/axelor-base/src/main/resources/domains/UnitConversion.xml",
+      "range": [
+        10,
+        22
+      ],
+      "sha256": "56a3fd93ec928dd214a973c4415f364396f5303a2bd6dd799112aa907e8e5a77",
+      "declarative_open_elements": 7,
+      "element_names": [
+        "many-to-one",
+        "many-to-one",
+        "decimal",
+        "integer",
+        "string",
+        "integer",
+        "string"
+      ],
+      "cdata_code_excluded": true
+    },
+    {
+      "id": "AXPACK_VIEW",
+      "path": "tmp/oss-audit-axelor/axelor-base/src/main/resources/views/ProductPackaging.xml",
+      "range": [
+        6,
+        44
+      ],
+      "sha256": "74338797f66ace4a3efd7d9a852a133a80aa9feae629eddb181b7d53b78eafcc",
+      "declarative_open_elements": 17,
+      "element_names": [
+        "grid",
+        "field",
+        "field",
+        "field",
+        "field",
+        "form",
+        "panel",
+        "field",
+        "field",
+        "field",
+        "field",
+        "action-record",
+        "field",
+        "action-method",
+        "call",
+        "action-method",
+        "call"
+      ],
+      "cdata_code_excluded": true
+    }
+  ]
+}

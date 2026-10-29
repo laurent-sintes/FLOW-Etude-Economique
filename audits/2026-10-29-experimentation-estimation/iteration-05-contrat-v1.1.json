@@ -1,0 +1,208 @@
+{
+  "id": "iteration-05-contract-v1.1",
+  "date": "2026-10-29",
+  "status": "Contrat expérimental figé avant chiffrage ; ne définit pas le Core complet",
+  "method_ref": "iteration-04-methode-candidate.json",
+  "baseline_ref": "iteration-03-contrat.json",
+  "baseline_extensions": {
+    "database": "PostgreSQL 17.11, même base transactionnelle de l’application",
+    "stack": "Java 21 / Spring Boot 3.5.7 / Spring 6.2.12 conservés comme référence d’expérience. Pas une recommandation de versions de production en 2026.",
+    "team": "Intervenants autonomes ; développeur Java familier de l’intégration de bibliothèques. Modélisation de l’optimisation et oracle indépendant attribués à un spécialiste distinct.",
+    "jh_hours": 7,
+    "quality": "Même revue, tests développeur et QA indépendante que03. Contrats d’accès lecteur/opérateur/administrateur et contrôles métier. Pas de SLA, haute disponibilité ou validation grandeur production."
+  },
+  "roles": [
+    "analyse_produit",
+    "architecture",
+    "dev_java",
+    "dev_frontend",
+    "ux",
+    "qa",
+    "plateforme",
+    "securite",
+    "coordination",
+    "expert_optimisation"
+  ],
+  "role_extension": "expert_optimisation : modélisation et validation mathématique, séparées de la conception métier, du code Java et de la QA. Application de la règle par rôle nécessaire, sans changement de formule ou coefficient. 0 sur périmètres précédents signifie absence de contribution distincte à ces pilotes, pas expertise gratuite.",
+  "previous": {
+    "reference": "iteration-03-resultats.json",
+    "jh": [
+      246,
+      409,
+      642
+    ],
+    "full_core_jh": null,
+    "reuse": [
+      "COMMON : projet, API, migration, sécurité primitive, idempotence transactionnelle, logs, CI et environnement d’essai, coque UI",
+      "REF : références locales produits/variantes seulement",
+      "STOCK : journal, positions et réservations du contrat03 seulement"
+    ],
+    "not_assumed": [
+      "Moteur d’exécution durable",
+      "Catalogue complet des nœuds et partenaires",
+      "Prévisions, demandes, ressources futures et coûts",
+      "Publication datée des positions pour planification"
+    ]
+  },
+  "EXEC": {
+    "id": "EXEC",
+    "name": "Intégrer une exécution durable commune",
+    "owner": "supply-chain-orchestration",
+    "beneficiaries": [
+      "ORCH",
+      "PLAN"
+    ],
+    "reuse": "Flowable OSS 7.2.0, commit 11a1cf83a8c03e343040b4d8edc751f9534d7323 ; composant retenu sous hypothèse d’intégration à qualifier. Son moteur n’est pas à reconstruire.",
+    "includes": [
+      "Installer moteur embarqué, schéma et configuration sur même DataSource/Spring TransactionManager",
+      "Encadrer les modèles et délégués autorisés, sans scripts libres fournis par utilisateur",
+      "Configurer traitements asynchrones, délais, reprises techniques bornées, erreurs terminales et métadonnées techniques",
+      "Exposer l’adaptateur commun de démarrage, signal, statut et diagnostic ; réutiliser la clé de requête COMMON",
+      "Qualifier les transactions communes, l’arrêt/redémarrage et les courses de répétition sur témoins ; intégrer CI/livraison et documentation de cette extension"
+    ],
+    "excludes": [
+      "Nouvelle CI ou nouveau service d’identité",
+      "Modèles et états métier ORCH/PLAN",
+      "Moteur universel de notifications/connecteurs externes",
+      "Portail Flowable commercial, designer visuel et moteur développé sur mesure",
+      "Exactly-once distribué, multi-instance HA, service d’exploitation en production"
+    ],
+    "funding_rule": "Financé une fois, jamais à nouveau dans ORCH ou PLAN. ORCH/PLAN paient leurs compositions et essais propres."
+  },
+  "ORCH": {
+    "id": "ORCH",
+    "name": "Conduire un dossier avec attente et décision humaine",
+    "owner": "subdomain-process-management",
+    "capabilities": [
+      "workflow-definition-management",
+      "order-workflow-sentry",
+      "order-workflow-orchestration",
+      "human-task-management",
+      "process-intervention",
+      "process-ledger"
+    ],
+    "native_functions": [
+      "BC-076.01",
+      "BC-076.02",
+      "BC-076.03",
+      "BC-078.01",
+      "BC-078.02",
+      "BC-078.03",
+      "BC-079.01",
+      "BC-079.02",
+      "BC-079.03",
+      "BC-080.01",
+      "BC-080.02",
+      "BC-080.03",
+      "BC-083.01",
+      "BC-083.02",
+      "BC-083.03",
+      "BC-085.01",
+      "BC-085.02"
+    ],
+    "coverage": "Parties des fonctions, jamais capacités entières ; pièces jointes et reconstitution historique complète exclues.",
+    "dependencies": [
+      "COMMON",
+      "EXEC"
+    ],
+    "includes": [
+      "Catalogue fermé de types : action locale sans effet externe, attente de signal corrélé, décision humaine accepter/refuser, délai et fin ; séquences et branche exclusive seulement",
+      "Déposer par API un modèle déclaratif JSON validé, le versionner et l’activer ; compiler vers le moteur. Deux versions d’un même parcours témoin de 6 activités maximum ; instances engagées gardent leur version",
+      "Ouvrir dossier avec référence externe et clé idempotente, recevoir signal identifié ; doublon identique sans second effet, contenu conflictuel refusé, signal sans attente refusé explicitement",
+      "Une tâche humaine à la fois, attribution à groupe opérateur, prise en charge nominative et décision protégées contre deux requêtes concurrentes ; texte court, pas de fichier joint",
+      "Après échec technique : reprise bornée puis incident ; opérateur autorisé peut relancer ou abandonner. Abandon sans compensation externe. Délais et événements tardifs ont un résultat explicite sans double transition",
+      "Journal append-only des événements reçus/acceptés/refusés, dates de fait/réception, version et décisions ; corrections par événement lié, pas réécriture ; reconstitution de la progression locale",
+      "Trois vues : versions et activation ; tâches à traiter ; dossier, progression, incident et journal"
+    ],
+    "excludes": [
+      "Process Planning dynamique, génération d’un parcours optimal ou arbitrage métier Beaumanoir",
+      "Parallélisme/jointure, sous-processus, transactions distribuées, compensation de prestations externes",
+      "Migration des instances actives vers une nouvelle définition",
+      "Calendriers ouvrés, escalades organisationnelles riches, délégation, notifications omnicanal",
+      "Process mining, suivi intégral des commandes et gestion globale des exceptions",
+      "Éditeur graphique universel et langage de règles libre"
+    ],
+    "acceptance": [
+      "V1 continue quand V2 activée ; une nouvelle instance utilise V2",
+      "Crash puis redémarrage avant/après commit ne perd pas une transition acquise et ne double pas l’action locale",
+      "Deux décisions concurrentes, doublon signal et signal tardif donnent des états cohérents et explicables",
+      "Incident, relance, abandon et autorisation contrôlés avec journal consultable"
+    ]
+  },
+  "PLAN": {
+    "id": "PLAN",
+    "name": "Comparer des affectations de ressources à une demande datée",
+    "owner": "domain-plan",
+    "capabilities": [
+      "planning-data-provision",
+      "D05.f",
+      "D03.o",
+      "BHV006"
+    ],
+    "native_functions": [
+      "BC-012.01",
+      "BC-012.02",
+      "BC-035.01",
+      "BC-035.02",
+      "BC-035.03",
+      "BC-037.01",
+      "BC-037.02",
+      "BC-037.03",
+      "BC-045.01",
+      "BC-045.02",
+      "BC-045.03"
+    ],
+    "coverage": "Parties bornées ; publication BC012 financée par PLAN pour ce témoin, non déjà financée par STOCK. Rattachement transversal visible sans dupliquer son coût.",
+    "dependencies": [
+      "COMMON",
+      "EXEC",
+      "REF pour identités produits",
+      "STOCK pour capture des positions courantes"
+    ],
+    "reuse": "Timefold Solver 1.26.0, commit e32850de3dad19a195b6f07fda0357024714d689. Recherche de solutions réutilisée ; données, contraintes, objectif, persistance et évaluation restent des travaux FLOW.",
+    "bounds": "Un propriétaire, un produit/variante par scénario, cinq nœuds au maximum, quatorze périodes journalières, cinquante demandes de 1 à 10 unités entières (500 unités maximum). Bornes de qualification choisies, pas volumétrie de production FLOW. Au maximum 70 lignes de ressources identifiées, chacune avec quantité entière, date de disponibilité, nœud, coût et admissibilités propres. Aucune agrégation à coût homogène imposée.",
+    "includes": [
+      "Contrat JSON canonique d’entrées datées/versionnées : demandes, apports futurs, nœuds, admissibilités, coûts unitaires non négatifs et délais ; contrôles et rejets explicites ; pas de nouveau moteur d’import universel",
+      "Capturer une version figée des positions STOCK utiles avec date et limites ; conserver ensemble entrées, versions des paramètres et provenance. REF ne fournit pas les autres données",
+      "Calculer le besoin net par produit/nœud/date et affecter les unités de demande aux apports admissibles disponibles à temps, sans dépasser ressources ; une demande peut rester partiellement non couverte",
+      "Objectif à deux priorités : maximiser unités servies, puis minimiser coût total des affectations. Coûts et admissibilités sont des paramètres de scénario, pas des règles Beaumanoir codées",
+      "Construire modèle Timefold, contraintes, score, vérificateur indépendant de faisabilité et total des coûts ; conserver résultat, limites de calcul et déficit explicite. Pas de garantie d’optimum global au cas général",
+      "Démarrer, suivre, arrêter et relancer explicitement calcul depuis mêmes entrées figées ; nouvelle tentative identifiée. EXEC fournit le moteur durable ; PLAN finance état métier, branchement solveur en mémoire, gestion résultat tardif et reprise par recalcul après interruption",
+      "Comparer deux scénarios compatibles par entrées communes et différences déclarées de paramètres : couverture, dates et coût. Signaler données devenues anciennes ; aucun résultat n’engage le stock",
+      "Trois vues : entrées et scénarios ; calcul/résultat/déficits ; comparaison"
+    ],
+    "excludes": [
+      "Prévision statistique, reconstitution complète de la demande, contrats fournisseur et connecteurs Groupe",
+      "Optimisation multi-échelons, transport, tailles de lots, séries, unit conversions avancées, risques probabilistes, stocks de sécurité",
+      "Calcul multi-produit concurrent à volume de production et garantie de temps/optimalité",
+      "Application du plan, création de commandes, réservation des propositions et optimisation dynamique en temps réel"
+    ],
+    "acceptance": [
+      "Ressources A=10/B=10 ; demandes D1=10/D2=10 ; toutes affectations admissibles ; coûts A-D1=1 B-D1=2 A-D2=1 B-D2=10. L’oracle est coût30 pour20unités servies, contre110 pour l’autre affectation complète. Ce sont des données de test, pas une politique client",
+      "Jeux minuscules vérifiés par énumération indépendante ; scénarios faisables, déficit, date incompatible et absence de solution complète",
+      "Aucune proposition ne dépasse ressources ; coûts et couverture recalculés indépendamment",
+      "Arrêt/redémarrage, recalcul, résultat tardif, version des entrées et publication-stock sont qualifiés"
+    ],
+    "solver_risk": "La qualité obtenue sur le témoin est à vérifier ; si le solveur retenu ne satisfait pas l’oracle et les bornes, requalifier le composant et conserver l’échec, pas supprimer la garantie."
+  },
+  "estimation": {
+    "M1": "Paquets par ensemble et rôle, unités d’action et hypothèses de durée explicites",
+    "M2": "Macro par ensemble/rôle sur ce même contrat sans lecture M1, puis gel",
+    "range": "Même périmètre aux trois bornes ; sensibilité et non percentiles",
+    "class": "Par ensemble et rôle. C si ingénierie étayée sans calibration ; D si justification insuffisante. A/B exigent réalisations mesurées.",
+    "unknown_rule": "Toute fonction obligatoire non dimensionnée interdit un total complet de l’ensemble. Les variantes sont séparées.",
+    "full_core": "Toujours null tant que les capacités et exigences hors contrats restent non évaluées."
+  },
+  "reserved_next_case": "Service Lifecycle : non utilisé pour ajuster la méthode à cette itération.",
+  "previous_contract": "iteration-05-contrat.json",
+  "clarification": {
+    "kind": "Bornage des données, avant gel des estimations PLAN/M2",
+    "cause": "Cinq nœuds et quatorze périodes ne bornent pas le nombre d’apports distincts.",
+    "effect": "Ajout du maximum de 70 lignes de ressources sans agrégation implicite ; fonctions, garanties et méthode inchangées.",
+    "unchanged_sections": [
+      "EXEC",
+      "ORCH"
+    ],
+    "method_structural_revision": false
+  }
+}

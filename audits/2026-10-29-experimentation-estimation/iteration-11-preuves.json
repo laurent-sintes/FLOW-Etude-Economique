@@ -1,0 +1,341 @@
+{
+  "id": "iteration-11-preuves",
+  "date": "2026-10-29",
+  "evidence": [
+    {
+      "id": "OD-ACTIVITY",
+      "local_path": "tmp/odoo20-audit/addons/mail/models/mail_activity.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "e0b0303a72f0e0597bfd395aa1d00eb9d025ad8e719ac8b93f5b48a68d82544a",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/mail/models/mail_activity.py#L689",
+      "observed": "Clôture d'activité avec auteur, retour utilisateur, pièces liées et message sur le document ; archivage de l'activité achevée pour conserver l'historique.",
+      "line_ranges": [
+        [
+          689,
+          765
+        ]
+      ],
+      "delta": "Une tâche documentaire et son historique ne prouvent pas la composition complète du parcours, une compensation ou un registre bitemporel.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans cette itération ; aucun test produit exécuté."
+    },
+    {
+      "id": "OD-AUTOMATION",
+      "local_path": "tmp/odoo20-audit/addons/base_automation/models/base_automation.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "eb3d50cf1e2658467b7d030a60c50c04540617562dc1ad77d3dd6460cd415359",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/base_automation/models/base_automation.py#L759",
+      "observed": "Filtrage des enregistrements déjà traités dans le contexte __action_done, déclenchement d'actions serveur, diagnostic en cas d'échec.",
+      "line_ranges": [
+        [
+          759,
+          823
+        ]
+      ],
+      "delta": "La protection contre la récursion est dans le contexte d'exécution : ce passage ne démontre pas une déduplication durable des messages métier reçus à plusieurs reprises.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans cette itération ; aucun test produit exécuté."
+    },
+    {
+      "id": "TY-WORKFLOW",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/trytond/trytond/model/workflow.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "d25258838d578f46a09356783f8483fc6151a4f6a25efdfe542388b7e22fc528",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/model/workflow.py#L20",
+      "observed": "Le décorateur filtre les transitions permises, appelle la fonction métier, met à jour l'état si elle ne l'a pas déjà modifié, puis journalise la transition.",
+      "line_ranges": [
+        [
+          20,
+          50
+        ]
+      ],
+      "delta": "Mixin de transitions d'un objet, distinct de la queue durable ; ni définition graphique, ni reprise universelle, ni compensation automatique démontrée.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans cette itération ; aucun test produit exécuté."
+    },
+    {
+      "id": "TY-QUEUE",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/trytond/trytond/ir/queue_.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "fc5fe0ead0ffbcaa45110503d09c291c76803ce319aaaea51b32a83598d1eb35",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/ir/queue_.py#L18",
+      "observed": "Exécution sous utilisateur/contexte, verrouillage de la tâche, fin enregistrée ; remise en attente des tâches prises mais non terminées et sans erreur liée.",
+      "line_ranges": [
+        [
+          140,
+          211
+        ]
+      ],
+      "delta": "Le mécanisme rappelle une méthode de modèle. Les effets hors de sa transaction ne deviennent pas exactement une fois. La classe ne définit pas le dossier FLOW ni ses décisions.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans cette itération ; aucun test produit exécuté."
+    },
+    {
+      "id": "TY-TRIGGER",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/trytond/trytond/ir/trigger.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "e91dc5d652178c2240e31858a1590b1f16911ac4327be346a8af10b7aaf33110",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/ir/trigger.py#L183",
+      "observed": "Conditions avant mise en queue et avant action ; exclusion des identifiants déjà déclenchés dans la transaction ; limite de nombre et délai minimal fondés sur un journal de déclenchement.",
+      "line_ranges": [
+        [
+          183,
+          257
+        ]
+      ],
+      "delta": "Ce journal conditionnel ne constitue pas une preuve de transmission unique générale d'événements externes ni un registre complet de dossier.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans cette itération ; aucun test produit exécuté."
+    },
+    {
+      "id": "AX-TASK",
+      "local_path": "tmp/oss-audit-axelor/axelor-project/src/main/java/com/axelor/apps/project/service/ProjectTaskServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "2822f521151119714d5709dfeaf753c1fc2cd27bc4f2fe2c5eabe487fd2d916f",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-project/src/main/java/com/axelor/apps/project/service/ProjectTaskServiceImpl.java#L182",
+      "observed": "Création transactionnelle d'une tâche affectée, statut initial issu de la configuration du projet ; héritage de propriétés des sous-tâches et progression selon statut/catégorie.",
+      "line_ranges": [
+        [
+          182,
+          223
+        ],
+        [
+          288,
+          328
+        ]
+      ],
+      "delta": "Gestion de tâches projet ; ce code ne démontre pas une tâche humaine reliée à une instance BPM versionnée.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans cette itération ; aucun test produit exécuté."
+    },
+    {
+      "id": "AX-WORKFLOW",
+      "local_path": "tmp/oss-audit-axelor/axelor-purchase/src/main/java/com/axelor/apps/purchase/service/PurchaseRequestWorkflowServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "c45c91f6abd2beb2a98c2667f0985915b75d4057d971d81826db6ca1e6656b1f",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-purchase/src/main/java/com/axelor/apps/purchase/service/PurchaseRequestWorkflowServiceImpl.java#L42",
+      "observed": "Transitions métier codées avec contrôle du statut et rollback sur exception ; auteur demandeur/validateur ; création de commande si absente ; annulation par changement de statut.",
+      "line_ranges": [
+        [
+          42,
+          118
+        ]
+      ],
+      "delta": "Fonctions d'achat examinées seulement comme exemple de mécanisme de transition. L'annulation lue ne prouve pas l'inversion de tous les effets antérieurs ni une compensation universelle.",
+      "kind": "implementation_read",
+      "review": "Extraits relus dans cette itération ; aucun test produit exécuté."
+    },
+    {
+      "id": "AX-TEMPLATE",
+      "local_path": "tmp/oss-audit-axelor/axelor-project/src/main/java/com/axelor/apps/project/service/ProjectTemplateServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "138a9ec1b09d45d1a520ea2ea5307e27a59224b66ec30717949877d783602fea",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-project/src/main/java/com/axelor/apps/project/service/ProjectTemplateServiceImpl.java#L59",
+      "line_ranges": [
+        [
+          59,
+          115
+        ]
+      ],
+      "observed": "Le service complète les modèles de tâches parents, puis appelle la création d’un projet depuis un modèle ou prépare son assistant.",
+      "delta": "Analogie partielle de composition réutilisable ; aucun algorithme d’adaptation de parcours engagé ni maintien d’engagements Supply démontré.",
+      "kind": "implementation_read",
+      "review": "Extraits relus ; aucun test produit exécuté."
+    },
+    {
+      "id": "OD-DEADLINE",
+      "local_path": "tmp/odoo20-audit/addons/mail/models/mail_activity.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "e0b0303a72f0e0597bfd395aa1d00eb9d025ad8e719ac8b93f5b48a68d82544a",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/mail/models/mail_activity.py#L227",
+      "line_ranges": [
+        [
+          227,
+          253
+        ]
+      ],
+      "observed": "État en retard/aujourd’hui/prévu en fonction de l’échéance et du fuseau ; date issue du type d’activité.",
+      "delta": "Les calendriers ouvrés, pauses et escalades FLOW ne sont pas démontrés par cet extrait ; ils sont dimensionnés comme travaux propres.",
+      "kind": "implementation_read",
+      "review": "Extraits relus ; aucun test produit exécuté."
+    },
+    {
+      "id": "OD-VISIBILITY",
+      "local_path": "tmp/odoo20-audit/addons/mail/models/mail_activity.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "e0b0303a72f0e0597bfd395aa1d00eb9d025ad8e719ac8b93f5b48a68d82544a",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/mail/models/mail_activity.py#L866",
+      "line_ranges": [
+        [
+          866,
+          955
+        ]
+      ],
+      "observed": "Regroupement par document/type des activités actives et terminées, dates, personnes affectées, contrôle des documents lisibles et pièces.",
+      "delta": "Analogie de vue agrégée ; ne prouve ni rapprochement multi-commandes ni sémantique engagement/réalisé/restant ou historique à deux dates.",
+      "kind": "implementation_read",
+      "review": "Extraits relus ; aucun test produit exécuté."
+    },
+    {
+      "id": "TY-ALERT",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/quality/quality.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/quality/quality.py#L636",
+      "line_ranges": [
+        [
+          636,
+          707
+        ]
+      ],
+      "observed": "Alerte qualité avec origine, société, responsables et états ouvert/en traitement/reporté/résolu, transitions et actions déclarées.",
+      "delta": "Analogie d’exception avec responsable ; portée multi-dossiers, preuve de remédiation et droits d’intervention propres à FLOW.",
+      "kind": "implementation_read",
+      "review": "Extraits relus ; aucun test produit exécuté."
+    },
+    {
+      "id": "F-SPRING",
+      "local_path": "audits/2026-10-29-experimentation-estimation/iteration-11-code-flowable/SpringProcessEngineConfiguration.java",
+      "commit": "11a1cf83a8c03e343040b4d8edc751f9534d7323",
+      "sha256": "4e73fce87f406c39573f6e0c4dedc61217a99e683c15d8f85d04403ed125a243",
+      "url": "https://raw.githubusercontent.com/flowable/flowable-engine/11a1cf83a8c03e343040b4d8edc751f9534d7323/modules/flowable-spring/src/main/java/org/flowable/spring/SpringProcessEngineConfiguration.java",
+      "line_ranges": [
+        [
+          104,
+          154
+        ]
+      ],
+      "observed": "Configuration crée l’intercepteur et le contexte transactionnels Spring et enveloppe le DataSource pour participer aux transactions.",
+      "delta": "Composition exacte de la transaction FLOW/moteur à qualifier ; aucun effet externe atomique déduit.",
+      "kind": "implementation_read",
+      "review": "Source figée téléchargée et extraits lus ; aucun essai runtime."
+    },
+    {
+      "id": "F-JOBS",
+      "local_path": "audits/2026-10-29-experimentation-estimation/iteration-11-code-flowable/DefaultJobManager.java",
+      "commit": "11a1cf83a8c03e343040b4d8edc751f9534d7323",
+      "sha256": "795cc125cac828f4bd9e2187da715b25399213613a41c057f5709b83ba02b915",
+      "url": "https://raw.githubusercontent.com/flowable/flowable-engine/11a1cf83a8c03e343040b4d8edc751f9534d7323/modules/flowable-job-service/src/main/java/org/flowable/job/service/impl/asyncexecutor/DefaultJobManager.java",
+      "line_ranges": [
+        [
+          237,
+          291
+        ]
+      ],
+      "observed": "Déplacement d’un job vers l’échec terminal et remise en job exécutable avec nombre de reprises, via gestionnaires persistants.",
+      "delta": "Reprise technique ne prouve ni succès du résultat métier ni effet externe unique ; les états métier restent FLOW.",
+      "kind": "implementation_read",
+      "review": "Source figée téléchargée et extraits lus ; aucun essai runtime."
+    },
+    {
+      "id": "F-TASK",
+      "local_path": "audits/2026-10-29-experimentation-estimation/iteration-11-code-flowable/TaskService.java",
+      "commit": "11a1cf83a8c03e343040b4d8edc751f9534d7323",
+      "sha256": "26a92d74e75cf9bfacc9371cc1a96a8d939e512de843e16284356a1e538a2fc7",
+      "url": "https://raw.githubusercontent.com/flowable/flowable-engine/11a1cf83a8c03e343040b4d8edc751f9534d7323/modules/flowable-engine/src/main/java/org/flowable/engine/TaskService.java",
+      "line_ranges": [
+        [
+          168,
+          192
+        ],
+        [
+          232,
+          280
+        ],
+        [
+          499,
+          509
+        ],
+        [
+          649,
+          657
+        ]
+      ],
+      "observed": "API de prise en charge, délégation/résolution, complétion, affectation et échéance. Le contrat précise que claim/setAssignee ne vérifient pas l’existence de l’utilisateur dans l’identité.",
+      "delta": "Déclaration d’API lue, non preuve d’exécution ; admissibilité, autorisations, calendriers ouvrés et parcours utilisateur restent à financer.",
+      "kind": "api_contract_read",
+      "review": "Source figée téléchargée et extraits lus ; aucun essai runtime."
+    },
+    {
+      "id": "F-RUNTIME",
+      "local_path": "audits/2026-10-29-experimentation-estimation/iteration-11-code-flowable/RuntimeService.java",
+      "commit": "11a1cf83a8c03e343040b4d8edc751f9534d7323",
+      "sha256": "9d818f3ab832e05a56fe4ae50237ad9c60c4d43c6ddf1c4b9d8eaba2f0cb856a",
+      "url": "https://raw.githubusercontent.com/flowable/flowable-engine/11a1cf83a8c03e343040b4d8edc751f9534d7323/modules/flowable-engine/src/main/java/org/flowable/engine/RuntimeService.java",
+      "line_ranges": [
+        [
+          1188,
+          1212
+        ],
+        [
+          1315,
+          1329
+        ],
+        [
+          1494,
+          1497
+        ]
+      ],
+      "observed": "API de suspension/reprise, message corrélé à une exécution et changement d’état. Suspension d’une instance n’implique pas celle de toute sa hiérarchie.",
+      "delta": "Déclaration d’API lue ; FLOW doit contrôler portée, droits, engagements et effets. Le message présuppose une exécution corrélée ; conservation des signaux précoces à composer.",
+      "kind": "api_contract_read",
+      "review": "Source figée téléchargée et extraits lus ; aucun essai runtime."
+    },
+    {
+      "id": "F-CHANGE",
+      "local_path": "audits/2026-10-29-experimentation-estimation/iteration-11-code-flowable/ChangeActivityStateCmd.java",
+      "commit": "11a1cf83a8c03e343040b4d8edc751f9534d7323",
+      "sha256": "2f8a3366c9518de5fffb3801214ed8e3afdd9595d706ed6fb96453ba138b3b36",
+      "url": "https://raw.githubusercontent.com/flowable/flowable-engine/11a1cf83a8c03e343040b4d8edc751f9534d7323/modules/flowable-engine/src/main/java/org/flowable/engine/impl/cmd/ChangeActivityStateCmd.java",
+      "line_ranges": [
+        [
+          25,
+          49
+        ]
+      ],
+      "observed": "La commande vérifie la présence des identifiants de mouvement/activation et de l’instance lorsque nécessaire, puis délègue au DynamicStateManager.",
+      "delta": "L’appel n’est pas une preuve de sûreté métier. Hypothèse retenue : adapter seulement les segments futurs à un point de contrôle, sans migration arbitraire.",
+      "kind": "implementation_read",
+      "review": "Source figée téléchargée et extraits lus ; aucun essai runtime."
+    },
+    {
+      "id": "F-POM",
+      "local_path": "audits/2026-10-29-experimentation-estimation/iteration-11-code-flowable/pom.xml",
+      "commit": "11a1cf83a8c03e343040b4d8edc751f9534d7323",
+      "sha256": "ef86b4829138806339d3c7ffc7d36f44acb7fbb67c2c4e5624fdfee1d20c6e49",
+      "url": "https://raw.githubusercontent.com/flowable/flowable-engine/11a1cf83a8c03e343040b4d8edc751f9534d7323/modules/flowable-dependencies/pom.xml",
+      "line_ranges": [
+        [
+          52,
+          58
+        ]
+      ],
+      "observed": "Le fichier de dépendances du commit étudié référence Spring Boot3.5.4, Spring Framework6.2.10 et Security6.5.3.",
+      "delta": "Ancre de comparaison figée, pas recommandation de version de production2026 ; la qualification des dépendances est E111.",
+      "kind": "build_configuration_read",
+      "review": "Source figée téléchargée et extraits lus ; aucun essai runtime."
+    }
+  ],
+  "license": {
+    "product": "Flowable OSS",
+    "commit": "11a1cf83a8c03e343040b4d8edc751f9534d7323",
+    "url": "https://raw.githubusercontent.com/flowable/flowable-engine/11a1cf83a8c03e343040b4d8edc751f9534d7323/LICENSE",
+    "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "observation": "Fichier LICENSE Apache License 2.0 ; aucun composant commercial Flowable supposé disponible. Qualification des dépendances et notices comprise dans E111 ; pas un avis juridique."
+  },
+  "docs": [
+    {
+      "url": "https://www.flowable.com/open-source/docs/bpmn/ch05-Spring",
+      "observed": "Documentation d’intégration transactionnelle Spring consultée ; le code figé reste l’ancre technique."
+    },
+    {
+      "url": "https://www.flowable.com/open-source/docs/bpmn/ch18-Advanced",
+      "observed": "Documentation du cycle des jobs, temporisations persistées et échecs terminaux ; configuration à qualifier."
+    }
+  ],
+  "limitations": [
+    "17 observations de code, dont deux contrats d’API et une configuration de build ; aucun benchmark exécuté.",
+    "Les trois ERP restent des comparables fonctionnels, pas des modules transplantés dans Spring.",
+    "La comparaison ne produit aucun JH observé, ratio de productivité ni gain calculé par lignes de code."
+  ]
+}

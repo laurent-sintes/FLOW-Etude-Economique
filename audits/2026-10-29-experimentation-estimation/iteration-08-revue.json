@@ -1,0 +1,103 @@
+{
+  "id": "iteration-08-revue",
+  "date": "2026-10-29",
+  "status": "Revue indépendante finale en lecture seule des résultats figés ; seul présent audit créé.",
+  "author": "Assistant LLM, agent COSMIC après gel du comptage ; aucune revue humaine attribuée.",
+  "scope": [
+    "iteration-08-methode.json",
+    "iteration-08-cocomo.py",
+    "iteration-08-calculs.json",
+    "iteration-08-taille.json",
+    "iteration-08-cosmic.json"
+  ],
+  "material_anomalies": [],
+  "checks": [
+    {
+      "id": "FORMULAS",
+      "result": "conforme",
+      "evidence": "Les constantes A=2.94,B=0.91,C=3.67,D=0.28 et les formules E/PM_NS/PM/F/TDEV concordent avec le manuel USC. Les facteurs et leurs unités sont cohérents.",
+      "source": "USC COCOMO II Model Definition Manual v2.1, §1.2, §3.2.2, §4"
+    },
+    {
+      "id": "SCED",
+      "result": "conforme",
+      "evidence": "Le délai utilise PM_NS, sans multiplicateur d'effort SCED. À SCED85%, effort ×1.14 et délai ×0.85 ; à SCED130%, effort inchangé et délai ×1.30.",
+      "source": "Manuel USC, tableau34 et §4"
+    },
+    {
+      "id": "UNITS",
+      "result": "conforme",
+      "evidence": "JH = PM×152/7. Cette conversion conserve les heures ; elle ne recalcule pas le calendrier. Le staffing moyen est PM/TDEV, pas un plan d'affectation.",
+      "source": "Manuel USC, §6.6"
+    },
+    {
+      "id": "LIFECYCLE",
+      "result": "frontiere_correctement_declaree",
+      "evidence": "Les jalons LCO→IOC ou SRR→SAR ne sont pas assimilés à toute la réalisation du contrat ni au déploiement Groupe. Les activités couvertes par l'effort logiciel ne justifient pas l'ajout automatique de l'ancienne QA/architecture.",
+      "source": "Manuel USC, §4 et §6"
+    },
+    {
+      "id": "INDEPENDENT_ARITHMETIC",
+      "result": "36_resultats_sans_ecart",
+      "evidence": "Recalcul séparé en PowerShell des 9 cas, 24 sensibilités unitaires et 3 variantes convertisseurs. Vérification des exposants, PM, JH, délai et staffing ; tolérance absolue 1e-8 sur les résultats. Sommes Java+TS puis division par1000 concordantes pour les trois tailles."
+    },
+    {
+      "id": "FROZEN_INPUTS",
+      "result": "conforme",
+      "evidence": "Les trois empreintes méthode, taille et script annoncées dans calculs.json correspondent aux fichiers lus."
+    },
+    {
+      "id": "NO_UNAUTHORIZED_TOTAL",
+      "result": "conforme",
+      "evidence": "full_contract_effort_jh, full_contract_months, full_core_jh, full_core_months, retained_estimate et new_effort_by_role restent null. Aucun cumul avec les anciennes charges ni remise Spring supplémentaire n'est appliqué."
+    }
+  ],
+  "interpretation_limits": [
+    {
+      "id": "SIZE_UNIT",
+      "severity": "limite_de_validite_deja_declaree",
+      "finding": "Le comptage Java et le comptage AST TypeScript/JSX sont reproductibles selon leurs conventions, mais leur équivalence avec les instructions logiques du corpus COCOMO n'est pas démontrée. Les propriétés d'objet et attributs JSX rendent cette question concrète. L'addition forme un proxy conditionnel ; elle ne devient pas une taille calibrée parce que le calcul accepte KSLOC.",
+      "consequence": "Conserver les libellés estimation de taille et sensibilité conditionnelle ; aucune correction numérique arbitraire."
+    },
+    {
+      "id": "ANALOGY",
+      "severity": "limite_de_validite_deja_declaree",
+      "finding": "Les blocs OSS sont des observations de code. Le choix des 53 types, 360 champs, blocs et densités cibles est une conception proposée, non un réalisé FLOW. Le classement controller/rule/workflow et les adaptations Spring ne possèdent pas de calibration d'effort démontrée.",
+      "consequence": "Les scénarios mathématiques ne valident ni l'architecture candidate ni les garanties S1."
+    },
+    {
+      "id": "SCOPE",
+      "severity": "limite_de_validite_deja_declaree",
+      "finding": "Transformations sémantiques entre versions canoniques, SQL et moyens de livraison/reprise restent explicitement hors de la taille de base. Les rôles et le cycle de vie ne sont pas réconciliés avec tout le contrat.",
+      "consequence": "Ne présenter aucune des neuf cases comme effort total de la famille ou du Core."
+    }
+  ],
+  "sensitivity_reading": [
+    "Taille : l'exposant nominal1.0997 produit une hausse d'effort plus que proportionnelle à la taille, tandis que le délai dépend de PM_NS à la puissance0.31794. Les trois densités concernent la même conception partielle, sans intervalle de confiance.",
+    "Paramètres : PERS-H abaisse l'effort de17% et RCPX-H l'augmente de33% par rapport au nominal, toutes autres notes constantes. Les effets combinés se multiplient et les facteurs d'échelle changent l'exposant ; les pourcentages ne s'additionnent pas.",
+    "Convertisseurs : l'ajout central hypothétique481 unités produit +4.6800% d'effort et +1.4648% de délai dans le scénario nominal. Ce test ne démontre pas que13 convertisseurs suffiraient et ne ferme pas l'inconnue.",
+    "Les cibles de charge/reprise/sécurité ne sont pas déclarées atteintes par une case favorable ; les notes d'équipe restent des hypothèses."
+  ],
+  "cosmic_crosscheck": {
+    "conditional_cfp": 350,
+    "changed": false,
+    "conversion_rate": null,
+    "percent_difference": null,
+    "finding": "Les350CFP et les unités de code ne mesurent pas la même grandeur et leurs périmètres partiels diffèrent : COSMIC laisse notamment la purge/habilitation ouvertes, tandis que la taille de code contient des blocs de purge mais exclut d'autres travaux. Aucun rapport CFP/LOC ni écart en pourcentage n'est interprétable comme validation de taille ou de productivité.",
+    "use": "Croiser les exigences et les omissions ; ne pas fabriquer une conversion pour rapprocher les résultats."
+  },
+  "decision": "modifier",
+  "decision_reason": "Les calculs conditionnels sont techniquement cohérents. La prochaine amélioration utile est de qualifier conception, conventions de taille et calibration applicable ; répéter une nouvelle boucle de chiffrage ne produit pas la preuve manquante.",
+  "source": {
+    "title": "USC COCOMO II Model Definition Manual v2.1,2000",
+    "url": "https://www.rose-hulman.edu/class/cs/csse372/201310/Homework/CII_modelman2000.pdf",
+    "consulted": "2026-10-29"
+  },
+  "input_sha256": {
+    "iteration-08-methode.json": "b0003888913743f6a37db5a5e635c94dca2d322910be0917b8c1e6ce11170444",
+    "iteration-08-cocomo.py": "ac7178152e1d0e3036014e2820f37a52780d3e0919b408e7aa314ee29ae2c996",
+    "iteration-08-calculs.json": "6cd9fbaccb2b3f028d040f13dacd3e509d1668212af6b09b24395d6982e67847",
+    "iteration-08-taille.json": "cd4f17fca69b1caa5235218f9a417dd03e0f757f6919c9a362c8259b9675f64f",
+    "iteration-08-cosmic.json": "153645fa64bf434891d9ed1f1efa746b57732e4f267e452d0bbbc1f32410303f"
+  }
+}

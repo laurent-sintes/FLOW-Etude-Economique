@@ -1,0 +1,32 @@
+{
+  "id": "iteration-04-execution-journal",
+  "events": [
+    {
+      "stage": "harness_before_tests",
+      "classification": "Windows subprocess pipe inheritance",
+      "observation": "PostgreSQL was ready but capture of pg_ctl stdout waited for the server to close its inherited handle. No Maven test executed.",
+      "resolution": "Stopped only the isolated cluster; redirected pg_ctl output to a regular file, retained PostgreSQL log.",
+      "functional_correction_consumed": false
+    },
+    {
+      "stage": "first_functional_pass",
+      "classification": "bounded test timeout and output capture",
+      "observed": "Stock6/6 and Ref4/5 pass; Ref10000 reaches the 180 second witness timeout. Worker inherited stdout caused Surefire protocol warnings.",
+      "resolution": "One final REF-only pass with900 second timeout and redirected worker logs; no business implementation or durability change.",
+      "functional_correction_consumed": false,
+      "run_ref": "iteration-04-run-initial.json"
+    },
+    {
+      "stage": "final_REF_only_pass",
+      "classification": "harness correction verified",
+      "observed": "5/5 REF tests pass; no Surefire stdout protocol warning in final log. 10000-row test completes. STOCK6/6 retained from unchanged initial sources.",
+      "run_ref": "iteration-04-run-ref-final.json",
+      "functional_correction_consumed": false
+    }
+  ],
+  "functional_corrections": {
+    "REF": 0,
+    "STOCK": 0
+  },
+  "local_loop_closed": true
+}

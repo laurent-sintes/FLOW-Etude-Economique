@@ -1,0 +1,561 @@
+{
+  "id": "iteration-07-cosmic",
+  "date": "2026-10-29",
+  "status": "Comptage fonctionnel partiel et conditionnel de trois consultations humaines. Aucune mesure complète de la famille ni conversion en effort.",
+  "purpose": "Éprouver une description indépendante de la taille fonctionnelle à partir du contrat d'opportunité figé, pour vérifier la décomposition et les objets échangés. Ne pas déduire la complexité ou la durée d'un nombre de mouvements.",
+  "inputs": [
+    {
+      "file": "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json",
+      "sha256": "4ff47d15b241859eea6bcc50c5c882478338ae31d8c44bb1192901066d81dbb3",
+      "role": "Contrat fonctionnel et scénario v1.1 figés"
+    },
+    {
+      "file": "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json",
+      "sha256": "0a6f8f0792d95c2dd6df00434bc10b75bb1dff9c171cf88e1be7b7e0052cc826",
+      "role": "Traçabilité vers les 14 fonctions et les sujets natifs ; reste inchangé"
+    },
+    {
+      "file": "audits/2026-10-29-experimentation-estimation/iteration-05-cosmic.json",
+      "role": "Locateurs normatifs déjà documentés ; aucun comptage antérieur ajouté au présent sous-total"
+    }
+  ],
+  "sources": [
+    {
+      "id": "COSMIC-MM5",
+      "title": "COSMIC Measurement Manual v5.0, combinaison septembre 2024",
+      "url": "https://cosmic-sizing.org/wp-content/uploads/2022/11/Combination-of-Parts-v5.0-Sep-2024.pdf",
+      "access": "Locateurs repris de iteration-05-cosmic.json#/source ; le téléchargement web du PDF a expiré lors de cette itération. Les règles utilisées ont été recoupées dans les pages officielles ci-dessous et les extraits officiels indexés.",
+      "locators": [
+        "Partie 1, pages imprimées 11–12 : règles 5, 7–10, frontière, utilisateurs et processus complet.",
+        "Partie 1, pages imprimées 13–14 : règles 11–16, groupes de données et mouvements distincts.",
+        "Partie 1, page imprimée 16 : règles 21–23, unité et agrégation."
+      ]
+    },
+    {
+      "id": "COSMIC-PROCESS",
+      "title": "COSMIC — Measurement Process",
+      "url": "https://cosmic-sizing.org/cosmic-sizing/intro/measurement-process/",
+      "access": "Page officielle lue le 29 octobre 2026.",
+      "locators": [
+        "Measurement Strategy : paramètres et hypothèses sur les exigences.",
+        "Mapping Phase : objets, groupes, déclencheurs, quatre mouvements, tous les résultats possibles.",
+        "Measurement Phase : un CFP par mouvement."
+      ],
+      "use": "Les occurrences, lignes, versions et appels physiques ne multiplient pas les types de mouvements ; les manipulations associées n'ont pas de score de difficulté séparé."
+    },
+    {
+      "id": "COSMIC-EXAMPLES",
+      "title": "COSMIC — Introductory Examples",
+      "url": "https://cosmic-sizing.org/cosmic-sizing/intro/introduction-567-examples/",
+      "access": "Contenu officiel indexé lu le 29 octobre 2026.",
+      "locators": [
+        "Personnel System : Read employee data."
+      ],
+      "use": "Exemple de consultation humaine : saisie d'identifiant, lectures et restitutions des groupes nécessaires, sortie d'erreur. Une seule requête peut concerner plusieurs objets."
+    },
+    {
+      "id": "COSMIC-ERROR",
+      "title": "COSMIC — Guide to Software Size Measurement v1.0",
+      "url": "https://cosmic-sizing.org/wp-content/uploads/2020/08/Measuring-software-size-v1.0-August-2020.pdf",
+      "access": "Extrait officiel indexé lu le 29 octobre 2026.",
+      "locators": [
+        "Page imprimée 38, section 3.5.11."
+      ],
+      "use": "Un message d'erreur/confirmation vers un humain est regroupé par processus ; les données métier supplémentaires réclament leurs propres sorties. La convention ne s'étend pas automatiquement aux messages entre logiciels."
+    }
+  ],
+  "strategy": {
+    "boundary": "Application Operational References, interface web et services applicatifs inclus dans une même frontière logique ; stockage persistant interne. Le détail REST/UI/ORM/base ne crée pas de frontière COSMIC supplémentaire.",
+    "layer": "Application",
+    "decomposition": "Application sans décomposition technique ; sous-ensemble de trois processus fonctionnels observables.",
+    "functional_users": [
+      {
+        "id": "FU-READER",
+        "label": "Lecteur humain habilité",
+        "interaction": "Sélectionne une référence depuis l'interface, puis reçoit sa restitution ou une explication sans divulgation."
+      }
+    ],
+    "granularity": "Chaque processus est déclenchable indépendamment, commence par une demande de consultation et se termine par une restitution complète ou un refus expliqué. Aucun mouvement d'un processus partiellement décrit n'entre dans le sous-total.",
+    "excluded_user_flows": "Les API des consommateurs, échanges avec les sources, exploitation, administration et authentification ne sont pas mesurés ici. Ils restent dans le contrat familial lorsqu'ils y sont requis.",
+    "measurement_unit": "CFP",
+    "implementation_independence": "Le choix Java/Spring, l'ORM, les jointures, caches et composants réutilisés ne modifient pas directement ce comptage."
+  },
+  "assumptions": [
+    {
+      "id": "H01",
+      "status": "Interprétation proposée du contrat, à confirmer",
+      "text": "Les trois détails sélectionnés sont des consultations humaines indépendantes. Une navigation interne ou une étape d'un autre processus n'est pas comptée comme un processus autonome.",
+      "invalidates": "Si le déclencheur n'est pas indépendant, reconstituer le processus fonctionnel complet avant de compter."
+    },
+    {
+      "id": "H02",
+      "status": "Hypothèse de restitution",
+      "text": "La vue d'accord restitue les données des parties, de leurs rôles contextualisés, de l'accord et du profil reçu, pas seulement les identifiants des trois premiers liens. Le payeur se déduit des liens de l'accord ; aucun second formulaire de sélection du profil n'est requis.",
+      "invalidates": "Une vue composée d'identifiants seuls ou une sélection interactive supplémentaire change les mouvements."
+    },
+    {
+      "id": "H03",
+      "status": "Hypothèse de portée des données",
+      "text": "Une version choisie de chaque objet est rendue avec ses attributs de provenance, validité et état. Ni assortiment détaillé, ni autre livre tarifaire, ni historique complet ne sont dépliés automatiquement.",
+      "invalidates": "Tout objet d'intérêt supplémentaire effectivement lu ou restitué impose un nouveau mouvement, même si une seule requête SQL ou un seul JSON le contient."
+    },
+    {
+      "id": "H04",
+      "status": "Hypothèse commune d'autorisation",
+      "text": "Identité et portées autorisées sont disponibles dans le contexte de l'utilisateur. Le contrôle de portée manipule ce contexte et les attributs lus ; il ne réclame pas une lecture fonctionnelle supplémentaire de politique ou d'habilitation.",
+      "invalidates": "Si les exigences imposent une lecture de droits ou de politique depuis le stockage dans chaque consultation, compter ce Read. Les travaux de sécurité restent requis dans tous les cas."
+    },
+    {
+      "id": "H05",
+      "status": "Hypothèse commune d'absence d'effet métier",
+      "text": "Consulter n'enregistre pas automatiquement une utilisation conservée, ne libère pas un usage, ne modifie pas la référence et n'écrit pas un journal métier de lecture. L'observabilité purement technique n'est pas un groupe métier.",
+      "invalidates": "Une obligation de trace métier ou de déclaration d'usage déclenchée par cette consultation ajoute des mouvements ; ne pas la traiter comme gratuite."
+    },
+    {
+      "id": "H06",
+      "status": "Hypothèse sur les réponses",
+      "text": "Les refus n'exposent que le motif utile au lecteur : demande invalide, accès refusé, référence absente ou non disponible, ambiguïté ou incohérence. Ils ne présentent ni liste détaillée de candidats ni données protégées.",
+      "invalidates": "Un diagnostic contenant des objets métier détaillés réclame les sorties correspondantes. Les confirmations/erreurs ne sont regroupées ici que parce que le destinataire est humain."
+    },
+    {
+      "id": "H07",
+      "status": "Hypothèse sur les groupes",
+      "text": "Unité, conversion et restriction de la fourniture sont des attributs de sa référence ; les conditions typées, base et paliers d'une ligne tarifaire décrivent cette ligne. Aucun référentiel autonome supplémentaire n'est lu pour la consultation.",
+      "invalidates": "Si unité, règle, palier ou condition est un objet autonome au sens des exigences, et doit être lu ou restitué séparément, revoir les groupes. Les tables physiques ne suffisent pas à décider."
+    },
+    {
+      "id": "H08",
+      "status": "Hypothèse de cohérence déjà portée",
+      "text": "La version publiée et les versions liées sont identifiables dans les groupes de référence consultés. Les lectures nécessaires à leur restitution sont couvertes ci-dessous ; aucun manifeste métier distinct n'est demandé au lecteur.",
+      "invalidates": "Si satisfaire la consultation réclame un autre groupe persistant de publication, de contrôle ou de rapprochement, le lire ajoute un Read. Cette réserve interdit de présenter le sous-total comme une mesure définitivement vérifiée."
+    }
+  ],
+  "data_groups": [
+    {
+      "id": "DG-PARTY",
+      "object": "Partie : personne ou organisation identifiée",
+      "attributes": "Identité, dénomination, identifiants d'origine, version, origine et validité.",
+      "distinction": "Une même personne peut porter plusieurs rôles ; le rôle contextualisé n'est pas confondu avec l'identité.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json#/reference_subjects/0"
+      ]
+    },
+    {
+      "id": "DG-ROLE",
+      "object": "Relation ou rôle contextualisé d'une partie",
+      "attributes": "Partie, rôle, autre partie ou organisation concernée, portée, période, origine et version.",
+      "distinction": "Objet relationnel distinct de la personne ; les occurrences acheteur/vendeur/payeur ne multiplient pas le type de groupe.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json#/reference_subjects/0"
+      ]
+    },
+    {
+      "id": "DG-AGREEMENT",
+      "object": "Version d'accord reçu",
+      "attributes": "Identité/version, parties liées, portée, périodes, conditions, engagements de quantité/valeur et identifiant de version d'assortiment figé.",
+      "distinction": "Ni engagement opérationnel d'une commande ni contenu de l'assortiment lié.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json#/reference_subjects/1"
+      ]
+    },
+    {
+      "id": "DG-CREDIT",
+      "object": "Profil de crédit reçu pour un payeur et une portée",
+      "attributes": "Payeur, classe, limites, devise, restrictions, portée, période, source/version.",
+      "distinction": "Ni exposition calculée ni autorisation de commande.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json#/reference_subjects/2"
+      ]
+    },
+    {
+      "id": "DG-INTERNAL",
+      "object": "Version de référence d'une fourniture ou d'un équipement",
+      "attributes": "Identité/type, unité, conversion, usage, restrictions, liens par identifiant, provenance et validité.",
+      "distinction": "Ni stock physique ni actif immobilisé ni maintenance.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json#/reference_subjects/9"
+      ]
+    },
+    {
+      "id": "DG-SERVICE-PRICE",
+      "object": "Version identifiée d'une ligne de tarif service",
+      "attributes": "Identifiants de ligne et livre, source/version, prestation et accord par identifiant, unité, devise, période, base, paliers et conditions typées.",
+      "distinction": "La ligne tarifaire est l'objet restitué ; les détails du prestataire, du service et de l'accord ne sont pas développés. Aucun prix d'ordre n'est calculé.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json#/reference_subjects/12"
+      ]
+    },
+    {
+      "id": "DG-ERROR",
+      "object": "Message d'erreur/confirmation adressé au lecteur humain",
+      "attributes": "Code et explication de refus ou indisponibilité sans objet métier supplémentaire.",
+      "distinction": "Convention COSMIC des messages à un humain ; une sortie par processus, sans stockage métier supposé.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9/acceptance"
+      ]
+    }
+  ],
+  "processes": [
+    {
+      "id": "CFP07-Q1",
+      "label": "Consulter un accord avec parties, rôles et profil reçu",
+      "capability_id": "cap-partner-agreement-reference-stewardship",
+      "native_function_ids": [
+        "BC-003.01",
+        "BC-003.02"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F05",
+        "F10",
+        "F11"
+      ],
+      "requirement": "Le lecteur sélectionne un accord identifié, sa version ou une date de validité, dans sa portée. Il reçoit un jeu cohérent présentant les quatre objets ou une explication d'indisponibilité/ambiguïté.",
+      "trigger": "Un lecteur a besoin de consulter les références associées à un accord connu.",
+      "triggering_user": "FU-READER",
+      "assumptions": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06",
+        "H08"
+      ],
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/4",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json#/functions/3",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json#/functions/4"
+      ],
+      "movements": [
+        {
+          "id": "Q1-E1",
+          "type": "E",
+          "group": "DG-AGREEMENT",
+          "description": "Recevoir l'identifiant de l'accord et le sélecteur version/date/portée de la consultation.",
+          "cfp": 1
+        },
+        {
+          "id": "Q1-R1",
+          "type": "R",
+          "group": "DG-AGREEMENT",
+          "description": "Lire la version d'accord et ses liens connus.",
+          "cfp": 1
+        },
+        {
+          "id": "Q1-R2",
+          "type": "R",
+          "group": "DG-PARTY",
+          "description": "Lire les parties liées nécessaires à la restitution.",
+          "cfp": 1
+        },
+        {
+          "id": "Q1-R3",
+          "type": "R",
+          "group": "DG-ROLE",
+          "description": "Lire les rôles et relations contextualisés nécessaires.",
+          "cfp": 1
+        },
+        {
+          "id": "Q1-R4",
+          "type": "R",
+          "group": "DG-CREDIT",
+          "description": "Lire le profil de crédit reçu du payeur concerné.",
+          "cfp": 1
+        },
+        {
+          "id": "Q1-X1",
+          "type": "X",
+          "group": "DG-AGREEMENT",
+          "description": "Restituer l'accord, sa version, sa période et ses conditions reçues.",
+          "cfp": 1
+        },
+        {
+          "id": "Q1-X2",
+          "type": "X",
+          "group": "DG-PARTY",
+          "description": "Restituer les données d'identité des parties du jeu.",
+          "cfp": 1
+        },
+        {
+          "id": "Q1-X3",
+          "type": "X",
+          "group": "DG-ROLE",
+          "description": "Restituer leurs rôles et relations dans le contexte.",
+          "cfp": 1
+        },
+        {
+          "id": "Q1-X4",
+          "type": "X",
+          "group": "DG-CREDIT",
+          "description": "Restituer le profil et les limites reçus sans décision de crédit.",
+          "cfp": 1
+        },
+        {
+          "id": "Q1-X5",
+          "type": "X",
+          "group": "DG-ERROR",
+          "description": "Expliquer une demande invalide, un refus, une absence, une incohérence ou une ambiguïté sans dévoiler d'autres données.",
+          "cfp": 1
+        }
+      ],
+      "responses": {
+        "success": "Les quatre groupes sont restitués de manière cohérente ; plusieurs parties ou rôles restent des occurrences.",
+        "failure": "Les réponses possibles de refus ou d'indisponibilité sont couvertes par la sortie de message. Aucune recherche détaillée de candidats ni correction n'est déclenchée.",
+        "write": "Aucun Write métier requis dans les hypothèses de ce processus."
+      },
+      "count": {
+        "E": 1,
+        "R": 4,
+        "X": 5,
+        "W": 0,
+        "cfp": 10
+      },
+      "status": "Complet sous les hypothèses de restitution énoncées ; confirmation fonctionnelle encore nécessaire."
+    },
+    {
+      "id": "CFP07-Q2",
+      "label": "Consulter une version identifiée de fourniture ou d'équipement",
+      "capability_id": "cap-internal-supplies-reference-stewardship",
+      "native_function_ids": [
+        "BC-006.01",
+        "BC-006.02"
+      ],
+      "contract_function_ids": [
+        "F08",
+        "F10",
+        "F11"
+      ],
+      "requirement": "Le lecteur obtient une référence identifiée avec unité, conversion, usages et restrictions reçus, ou une explication d'indisponibilité.",
+      "trigger": "Un lecteur a besoin de connaître une version de référence d'une fourniture ou d'un équipement.",
+      "triggering_user": "FU-READER",
+      "assumptions": [
+        "H01",
+        "H03",
+        "H04",
+        "H05",
+        "H06",
+        "H07",
+        "H08"
+      ],
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/7",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json#/functions/10",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json#/functions/11"
+      ],
+      "movements": [
+        {
+          "id": "Q2-E1",
+          "type": "E",
+          "group": "DG-INTERNAL",
+          "description": "Recevoir identifiant et version de la référence sélectionnée.",
+          "cfp": 1
+        },
+        {
+          "id": "Q2-R1",
+          "type": "R",
+          "group": "DG-INTERNAL",
+          "description": "Lire la référence avec ses attributs et restrictions reçues.",
+          "cfp": 1
+        },
+        {
+          "id": "Q2-X1",
+          "type": "X",
+          "group": "DG-INTERNAL",
+          "description": "Restituer la fiche de cette référence.",
+          "cfp": 1
+        },
+        {
+          "id": "Q2-X2",
+          "type": "X",
+          "group": "DG-ERROR",
+          "description": "Expliquer refus, demande invalide ou version absente/non disponible, sans données supplémentaires.",
+          "cfp": 1
+        }
+      ],
+      "responses": {
+        "success": "Une version est restituée ; ses unités et restrictions ne sont pas un calcul de stock ou de maintenance.",
+        "failure": "Toutes les réponses sans fiche sont des messages au lecteur selon H06.",
+        "write": "Aucun Write métier requis dans les hypothèses de ce processus."
+      },
+      "count": {
+        "E": 1,
+        "R": 1,
+        "X": 2,
+        "W": 0,
+        "cfp": 4
+      },
+      "status": "Complet sous les hypothèses de restitution énoncées ; confirmation fonctionnelle encore nécessaire."
+    },
+    {
+      "id": "CFP07-Q3",
+      "label": "Consulter une version identifiée de ligne tarifaire de service",
+      "capability_id": "cap-service-reference-stewardship",
+      "native_function_ids": [
+        "BC-007.02"
+      ],
+      "contract_function_ids": [
+        "F09",
+        "F10",
+        "F11"
+      ],
+      "requirement": "Le lecteur obtient les valeurs et conditions reçues d'une ligne de tarif déjà identifiée. Il ne lance pas une recherche contextuelle de tarifs ni un calcul de prix.",
+      "trigger": "Un lecteur a besoin de consulter la version connue d'une ligne tarifaire de service.",
+      "triggering_user": "FU-READER",
+      "assumptions": [
+        "H01",
+        "H03",
+        "H04",
+        "H05",
+        "H06",
+        "H07",
+        "H08"
+      ],
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/8",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json#/functions/13"
+      ],
+      "movements": [
+        {
+          "id": "Q3-E1",
+          "type": "E",
+          "group": "DG-SERVICE-PRICE",
+          "description": "Recevoir identifiant de ligne et version demandée.",
+          "cfp": 1
+        },
+        {
+          "id": "Q3-R1",
+          "type": "R",
+          "group": "DG-SERVICE-PRICE",
+          "description": "Lire valeurs, périodes, unité, devise, base, paliers et conditions de cette ligne.",
+          "cfp": 1
+        },
+        {
+          "id": "Q3-X1",
+          "type": "X",
+          "group": "DG-SERVICE-PRICE",
+          "description": "Restituer ces données reçues, avec liens par identifiant et sans prix engagé calculé.",
+          "cfp": 1
+        },
+        {
+          "id": "Q3-X2",
+          "type": "X",
+          "group": "DG-ERROR",
+          "description": "Expliquer refus, demande invalide ou version absente/non disponible, sans données supplémentaires.",
+          "cfp": 1
+        }
+      ],
+      "responses": {
+        "success": "Une ligne de tarif reçue est restituée, même si ses paliers ou conditions comportent plusieurs occurrences.",
+        "failure": "Toutes les réponses sans ligne sont des messages au lecteur selon H06.",
+        "write": "Aucun Write métier requis dans les hypothèses de ce processus."
+      },
+      "count": {
+        "E": 1,
+        "R": 1,
+        "X": 2,
+        "W": 0,
+        "cfp": 4
+      },
+      "status": "Complet sous les hypothèses de restitution énoncées ; confirmation fonctionnelle encore nécessaire."
+    }
+  ],
+  "unmeasured_required_scope": [
+    {
+      "area": "Réception, identité, contrôle d'autorité, publication, quarantaine et reprise",
+      "contract_function_ids": [
+        "F01",
+        "F02",
+        "F03",
+        "F04"
+      ],
+      "native_function_ids": [
+        "BC-002.01",
+        "BC-002.02",
+        "BC-002.03"
+      ],
+      "reason": "Le contrat fixe le résultat mais pas encore une décomposition exhaustive des événements observables, des groupes reçus dans chaque contribution et des réponses synchrones/asynchrones. Compter quelques E/R/W d'import ne constituerait pas un processus complet.",
+      "next_input": "Décrire un apport canonique représentatif, ses groupes métier, l'unité d'admission/publication, ses destinataires et ses résultats possibles."
+    },
+    {
+      "area": "Autres consultations, recherche, sélection contextuelle, export et changements",
+      "contract_function_ids": [
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09",
+        "F10",
+        "F11"
+      ],
+      "reason": "Les trois processus n'épuisent aucun de ces parcours. Les objets dépliés, critères, groupes de résultats et destinataires des autres processus ne sont pas complètement spécifiés.",
+      "next_input": "Confirmer les déclencheurs et formes de résultats des seuls processus nécessaires à une comparaison dimensionnelle utile, sans fabriquer un catalogue exhaustif."
+    },
+    {
+      "area": "Déclaration/libération d'utilisation, conservation, retrait et purge",
+      "contract_function_ids": [
+        "F03",
+        "F10"
+      ],
+      "reason": "Il s'agit de fonctions requises pouvant introduire des objets d'intérêt tels que l'utilisation déclarée et le rapprochement ; leur présence n'autorise ni à les ignorer ni à les compter comme de simples métadonnées techniques.",
+      "next_input": "Fixer les événements des consommateurs/gestionnaires, les données d'usage, les transitions et les résultats de chaque processus complet."
+    },
+    {
+      "area": "Restauration, nouvelle époque de curseur et réconciliation des usages",
+      "contract_function_ids": [
+        "F10"
+      ],
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/amendment"
+      ],
+      "reason": "L'amendement v1.1 est intégré à la portée étudiée, mais pas au sous-total COSMIC. La retransmission des sources ne suffit pas : les usages conservés doivent être rapprochés et la purge suspendue jusqu'à clôture autorisée.",
+      "next_input": "Décrire les déclencheurs de resynchronisation, déclarations et clôture, leurs utilisateurs et groupes de données. Un identifiant stable ou un état de job n'est pas automatiquement un objet métier ; un statut requis par le consommateur peut l'être."
+    },
+    {
+      "area": "Administration, contrats de source, autorités, droits et audit sensible",
+      "contract_function_ids": [
+        "F01",
+        "F02",
+        "F10",
+        "F11"
+      ],
+      "reason": "Les exigences sont présentes mais leurs processus fonctionnels ne sont pas mesurés dans le sous-ensemble. Les hypothèses H04/H05 ne suppriment aucun de ces travaux.",
+      "next_input": "Décrire les événements et données requis si leur taille devient nécessaire pour la comparaison."
+    }
+  ],
+  "result": {
+    "conditional_subset_cfp": 18,
+    "movements": {
+      "E": 3,
+      "R": 6,
+      "X": 9,
+      "W": 0
+    },
+    "functional_processes": 3,
+    "unconditional_subset_cfp": null,
+    "full_family_cfp": null,
+    "full_core_cfp": null,
+    "effort_jh": null,
+    "cfp_to_jh_rate": null,
+    "unique_capabilities_with_a_counted_fragment": 3,
+    "complete_capabilities_measured": 0,
+    "coverage_ratio": null,
+    "interpretation": "18 CFP sous hypothèses, pour trois processus de consultation seulement. Ce nombre n'est ni la taille des six capacités, ni un minimum certifié de leur taille, ni un pourcentage de couverture. Aucun des trois fragments ne vaut capacité entièrement mesurée.",
+    "aggregation": "Addition des trois processus dans la même frontière déclarée. Pas de multiplication par rôle, canal, instance, marque, ligne, volume, version ou nombre de capacités bénéficiaires ; pas d'ajout du comptage de l'itération 05.",
+    "prerequisites_for_measured_size": "Confirmer H01–H08 avec le responsable des exigences et faire relire l'identification des groupes/mouvements avant tout usage de productivité."
+  },
+  "verdict": {
+    "brings": "La description rend vérifiables les événements, les objets réellement consultés et la différence entre une fiche et un jeu multi-objets. Elle offre un contrôle de décomposition indépendant des paquets de travail de l'estimation d'ingénierie.",
+    "does_not_bring": "La taille ne démontre pas l'effort de composition multi-source, les contrôles de cohérence, la sécurité, la disponibilité, la restauration, la rétention ou la QA. Plusieurs consultations de même taille peuvent demander des garanties très différentes.",
+    "comparison_use": "Aucun taux de productivité homogène n'est établi pour ce sous-ensemble et ce scénario. Les charges de M1/M2 et les processus comptés ne sont pas une même assiette : diviser le total familial de JH par 18 serait invalide. Aucun chiffre M1/M2 courant n'a été utilisé pour choisir ce comptage.",
+    "next_decision": "Confirmer d'abord le contenu de sortie des trois consultations et les lectures communes imposées par autorisation/publication. Étendre le comptage à un processus représentatif d'import ou de conservation seulement si cette taille doit soutenir une comparaison documentée ; ne pas attendre un inventaire exhaustif pour l'étude d'opportunité.",
+    "limitations": "Comptage documentaire conditionnel par l'analyste, non mesure certifiée, non étalonnage empirique et non validation d'effort."
+  }
+}

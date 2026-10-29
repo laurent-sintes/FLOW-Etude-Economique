@@ -1,0 +1,113 @@
+{
+  "id": "iteration-04-contrat",
+  "date": "2026-10-29",
+  "started_utc": "2026-10-29 10:39:12 UTC",
+  "scope": "Complément borné de l’itération03. Aucun changement des sources actives, aucune réalisation complète du produit.",
+  "classification": "Hypothèses du témoin de conception, non spécification métier approuvée.",
+  "base_contract": "iteration-03-contrat.json",
+  "decisions": [
+    {
+      "id": "R1",
+      "decision": "CSV canonique UTF-8 ; types produit et variante, champs scalaires bornés (12/8 maximum). Liens résolus après traitement des produits. Un lot complet conserve les objets absents.",
+      "impact": "R02–R04 : pas d’instantané de remplacement, pas de mapping universel."
+    },
+    {
+      "id": "R2",
+      "decision": "Un worker d’import, état durable par ligne et lot. Écriture objet et état de ligne validés dans la même transaction. Reprise des lignes restantes ; nouvelle contribution pour corriger un rejet.",
+      "impact": "R03–R04 : essai Spring JDBC limité ; l’intégration Spring Batch reste une hypothèse distincte non vérifiée par ce témoin."
+    },
+    {
+      "id": "S1",
+      "decision": "Transaction locale READ COMMITTED ; clé de stock matérialisée avant verrouillage. Position, engagement et journal conservés ensemble.",
+      "impact": "S02–S05 : aucune garantie distribuée ou de débit de production."
+    },
+    {
+      "id": "S2",
+      "decision": "La clé de requête désigne une intention immuable. Même clé et même contenu : résultat mémorisé, y compris refus métier. Même clé et contenu différent : conflit. Nouvelle tentative après changement d’état : nouvelle clé. Échec technique avant commit : rollback, non mémorisé.",
+      "impact": "C04/S05 : distinction entre refus métier et échec technique ; pas d’ajout implicite d’ordonnanceur."
+    },
+    {
+      "id": "Q1",
+      "decision": "Pas de revue sécurité spécialisée STOCK distincte dans M1. Contrôles dev/QA et revue initiale COMMON conservés ; revue spécialisée supplémentaire reste une variante ouverte.",
+      "impact": "L’absence de contribution spécifique n’est ni une preuve de sécurité ni un travail gratuit."
+    }
+  ],
+  "targets": [
+    {
+      "id": "REF-REPRISE",
+      "question": "L’interruption d’un lot après commits partiels peut-elle être reprise sans perdre ni appliquer deux fois les lignes ?",
+      "observables": [
+        "10 000 lignes avec variantes avant leurs parents",
+        "Lignes valides conservées, rejets motivés et persistés",
+        "Arrêt du processus après commits partiels puis relance",
+        "Répétition, conflit de version et contribution corrigée",
+        "Absents du fichier complet conservés"
+      ],
+      "owners": [
+        "R02",
+        "R03",
+        "R04",
+        "R07"
+      ]
+    },
+    {
+      "id": "STOCK-ATOMICITE",
+      "question": "Les garanties de réservation et répétition sont-elles exprimables par une transaction locale et des verrous sur une clé ?",
+      "observables": [
+        "Physique10 ; demandes concurrentes7+7 ; total réservé10 au plus",
+        "Clé de stock initialement absente créée une fois",
+        "Doublon concurrent et conflit de contenu",
+        "Rollback avant commit et perte de réponse après commit",
+        "Consommation10/6→8/4 ; compensation−5 refusée ; libération puis nouvelle intention admise"
+      ],
+      "owners": [
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S07"
+      ]
+    }
+  ],
+  "uncertainty": {
+    "unit": "ensemble × rôle × périmètre",
+    "classes": {
+      "A": "Calibration confrontée à des réalisations comparables distinctes des données d’ajustement.",
+      "B": "Transposition explicitement justifiée d’efforts mesurés comparables.",
+      "C": "Estimation d’ingénierie documentée, sans calibration empirique.",
+      "D": "Estimation numérique dont les fondements sont insuffisants."
+    },
+    "not_a_class": [
+      "inconnu",
+      "inclus",
+      "sans objet",
+      "rôle non mobilisé distinctement"
+    ],
+    "probabilities": "Aucun percentile ni niveau de confiance probabiliste. Bas/central/haut restent des scénarios de sensibilité.",
+    "rule": "Un essai réussi ne relève pas automatiquement la classe, ne rétrécit pas la plage et ne calibre pas une productivité humaine."
+  },
+  "stop_rule": "Un passage et au maximum une correction fonctionnelle ciblée par prototype. Les corrections de compilation/harnais sont consignées séparément. Ensuite figer une version de méthode et conserver les inconnues, sans produire le logiciel.",
+  "revision_rule": "JH03 conservés à défaut de travail nouveau ou retiré démontré. Un changement de rôles ne devient pas une réduction de charge.",
+  "sources": [
+    {
+      "url": "https://www.postgresql.org/docs/17/explicit-locking.html",
+      "use": "Verrouillage des lignes et transactions"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/17/applevel-consistency.html",
+      "use": "Limites de cohérence sous READ COMMITTED"
+    },
+    {
+      "url": "https://docs.spring.io/spring-framework/reference/data-access/transaction/programmatic.html",
+      "use": "TransactionTemplate, mécanisme Spring proposé"
+    },
+    {
+      "url": "https://www.gao.gov/assets/d20195G.pdf",
+      "use": "Distinguer sensibilités, distributions et corrélations"
+    },
+    {
+      "url": "https://library.aacei.org/pgd02/pgd02.shtml",
+      "use": "La maturité des preuves ne fixe pas une précision automatique"
+    }
+  ]
+}

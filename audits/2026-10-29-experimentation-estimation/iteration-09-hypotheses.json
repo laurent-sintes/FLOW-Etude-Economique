@@ -1,0 +1,367 @@
+{
+  "id": "iteration-09-hypotheses",
+  "date": "2026-10-29",
+  "method": "Estimation d’ingénierie par comparaison produit et décomposition des travaux ; classe C, assistée par IA. Révision explicite de M1 de l’itération07, sans nouvelle mesure d’effort ni moyenne avec M2.",
+  "authorization": "Chiffrer les six capacités et les communs, par rôle, fourchette et délai ; audit uniquement, aucune application aux chiffres actifs.",
+  "scope": "Construction initiale générique des six capacités Operational References, avec les moyens communs nécessaires. Aucun total du Core complet.",
+  "assumptions": [
+    "Stack et contrat fonctionnel v1.1 conservés : Java/Spring, PostgreSQL, React, application modulaire, deux instances, trois environnements. Les versions sont celles de la référence examinée, pas une recommandation de mise à jour.",
+    "Intervenants autonomes maîtrisant la stack. Les charges couvrent conception, implémentation, tests développeur, QA indépendante, sécurité, livraison et transmission initiales. Aucun gain IA ni tarif appliqué.",
+    "Deux versions de contrat de données, transformations typées simples (ajout, renommage, conversion de format ou unité connue). Pas de migration sémantique arbitraire, de rapprochement probabiliste ni de langage de règles libre. Les différences réelles non connues sont remplacées par cette hypothèse de produit pour estimer.",
+    "Un hébergement avec PostgreSQL géré, sauvegardes et secours disponibles, un fournisseur OIDC conforme. Configuration, scripts SQL/migrations/indexes, automatisation et essais restent à réaliser et sont financés. Abonnements et Run exclus.",
+    "S1 est un scénario de dimensionnement, pas un engagement : 1 million d’objets, 10 millions de versions, 50 lectures/s, pic de 100 contributions/s, batch 100 000 lignes en 30 min, p95 lecture 1 s, publication 5 min, cible disponibilité 99,9 %, RPO 4 h et RTO 8 h.",
+    "Après restauration, sources capables de retransmettre 24 h de changements et consommateurs capables de redéclarer leurs usages. Reprise, état incomplet et suspension de purge sont affichés. Adaptateurs et participation réels du Groupe restent en intégration.",
+    "Sept parcours d’interface standard, réutilisation de composants. Conception et revues ciblées incluses, sans étude UX de grande ampleur.",
+    "Central : première réalisation puis un cycle principal de correction et retests ; bas : peu de reprises ; haut : deux à trois cycles sur les mécanismes sensibles. Même résultat fonctionnel visé, hypothèses de service inchangées."
+  ],
+  "exclusions": [
+    "Adaptations, mappings et règles spécifiques Beaumanoir",
+    "Migration des données des SI historiques et déploiement des marques",
+    "Pilotage du programme et conduite du changement",
+    "Run, MCO annuel, licences et achats cloud",
+    "Multi-région actif/actif, certification spécifique, transformations arbitraires"
+  ],
+  "uncertainty": "Fourchette d’ingénierie, non probabiliste. Facteurs par lot choisis par l’analyste selon les reprises possibles, jamais déduits d’un score de capacité. La somme conserve les risques communs ; aucune réduction statistique par diversification.",
+  "central_revisions": {
+    "C702": {
+      "effort": {
+        "dev_java": 14,
+        "plateforme": 20,
+        "qa": 5
+      },
+      "reason": "Remplace l’enveloppe initiale : Java 3 projet/dépendances + 7 persistance/SQL/migrations/indexes + 4 chaîne des tests ; plateforme 20 pour trois environnements et livraison gérée ; QA livraison 5. Aucun lot DBA ajouté."
+    },
+    "C704": {
+      "effort": {
+        "plateforme": 20,
+        "qa": 8
+      },
+      "reason": "Installation/configuration du secours et sauvegardes, un exercice complet de restauration puis correction/retest ; remplace 16 plateforme et 6 QA, ne s’y ajoute pas."
+    },
+    "I702": {
+      "effort": {
+        "dev_java": 42,
+        "architecture": 5
+      },
+      "reason": "Java 7 réception + 7 métadonnées + 8 concurrence/reprise + 14 compatibilité et conversions simples entre deux versions + 6 tests. Les 14 JH de conversions sont une hypothèse bornée, pas un nombre de lignes de code converti en charge."
+    },
+    "I704": {
+      "effort": {
+        "dev_java": 36
+      },
+      "reason": "Java 8 dépendances + 8 instantanés/manifeste + 13 publication/retraits + 7 migrations/tests ; jugement de reprise des liens plus prudent que M1."
+    },
+    "V707": {
+      "effort": {
+        "dev_java": 28,
+        "qa": 6
+      },
+      "reason": "Java 8 reproductibilité + 7 époque/curseurs + 7 réconciliation/purge + 6 tests ; QA 6 pour oracles de pertes et réordre. Réalisation métier distincte des moyens de C704 et de la campagne Q702."
+    },
+    "V708": {
+      "effort": {
+        "dev_frontend": 12,
+        "ux": 10
+      },
+      "reason": "Remplace le budget d’assemblage : 6 JH frontend cohérence des cinq vues + 6 états de restauration/réconciliation/purge suspendue ; 10 UX couvrent ces états et les revues. Ces états sont financés ici uniquement, sans refaire les sept parcours."
+    },
+    "Q701": {
+      "effort": {
+        "qa": 65,
+        "dev_java": 28,
+        "dev_frontend": 14
+      },
+      "reason": "QA : préparation/données/oracles 15 + automatisation 25 + exécution/retests 25 ; corrections issues de cette QA Java 28 et frontend 14. Les tests développeur nominaux restent dans les lots de réalisation."
+    },
+    "Q702": {
+      "effort": {
+        "qa": 18,
+        "dev_java": 20,
+        "architecture": 5,
+        "plateforme": 10
+      },
+      "reason": "Deux campagnes ciblées de charge/reprise avec correction intermédiaire : QA 18, plateforme 10, Java 20 et architecture 5. Les mêmes jours de réglage ne sont pas réajoutés ailleurs."
+    },
+    "Q704": {
+      "effort": {
+        "coordination": 36
+      },
+      "reason": "Coordination de la famille : 12 séquences de livraison/revue/arbitrage de 3 JH chacune. Les 36 remplacent les 16 antérieurs ; hors pilotage du programme."
+    },
+    "C707": {
+      "effort": {
+        "coordination": 10
+      },
+      "reason": "Préparation, revue et transmission du socle : 10 JH de coordination, remplaçant 8."
+    },
+    "I701": {
+      "effort": {
+        "coordination": 3
+      },
+      "reason": "Organisation de la validation initiale des contrats génériques : 3 JH, remplaçant 2 ; la clarification pendant réalisation est incluse, sans spécification préalable exigée du sponsor."
+    }
+  },
+  "ranges": {
+    "C701": [
+      0.8,
+      1.3,
+      "Reprises de conventions et frontières"
+    ],
+    "C702": [
+      0.8,
+      1.55,
+      "Automatisation, schémas et migrations SQL"
+    ],
+    "C703": [
+      0.8,
+      1.5,
+      "Portées, isolation logique et corrections de droits"
+    ],
+    "C704": [
+      0.75,
+      1.8,
+      "Bascule, restauration et procédures"
+    ],
+    "C705": [
+      0.85,
+      1.3,
+      "Composants et accessibilité standard"
+    ],
+    "C706": [
+      0.8,
+      1.5,
+      "Instrumentation et campagnes automatisées"
+    ],
+    "C707": [
+      0.85,
+      1.3,
+      "Documentation et réception du socle"
+    ],
+    "I701": [
+      0.8,
+      1.4,
+      "Arbitrage des contrats et critères d’acceptation"
+    ],
+    "I702": [
+      0.7,
+      1.85,
+      "Compatibilité des deux versions et reprise des imports"
+    ],
+    "I703": [
+      0.65,
+      1.9,
+      "Autorités concurrentes et versions composées"
+    ],
+    "I704": [
+      0.65,
+      2,
+      "Cohérence des liens et publication après correction"
+    ],
+    "I705": [
+      0.75,
+      1.6,
+      "Diagnostics et rejouabilité des rejets"
+    ],
+    "I706": [
+      0.8,
+      1.5,
+      "États asynchrones des parcours d’ingestion"
+    ],
+    "V701": [
+      0.85,
+      1.4,
+      "Modèles typés des parties et accords"
+    ],
+    "V702": [
+      0.75,
+      1.65,
+      "Liens catalogues/assortiments et contextes reçus"
+    ],
+    "V703": [
+      0.8,
+      1.5,
+      "Hiérarchies, quantités et unités"
+    ],
+    "V704": [
+      0.85,
+      1.3,
+      "Restrictions et unités des fournitures"
+    ],
+    "V705": [
+      0.75,
+      1.65,
+      "Réseau, conditions typées et tarifs reçus"
+    ],
+    "V706": [
+      0.7,
+      1.8,
+      "Historique, usages conservés, exports et purge"
+    ],
+    "V707": [
+      0.6,
+      2.2,
+      "Contenu perdu, resynchronisation et réconciliation après restauration"
+    ],
+    "V708": [
+      0.8,
+      1.6,
+      "Compréhension des diagnostics et états de reprise"
+    ],
+    "Q701": [
+      0.7,
+      1.8,
+      "Nombre de cycles de correction fonctionnelle"
+    ],
+    "Q702": [
+      0.65,
+      2,
+      "Réglages de performance et reprise sous concurrence"
+    ],
+    "Q703": [
+      0.75,
+      1.7,
+      "Corrections issues de la revue de sécurité"
+    ],
+    "Q704": [
+      0.8,
+      1.5,
+      "Nombre de séquences de livraison et arbitrages"
+    ]
+  },
+  "schedule": {
+    "jh_per_person_month": 18,
+    "meaning": "18 JH de contribution planifiable par personne et mois, convention de capacité de ce planning. Elle ne remplace pas les 152 h/personne-mois du modèle COCOMO.",
+    "formula": "Pour chaque phase et scénario : durée = max(plancher de phase, maximum par rôle des JH / (personnes disponibles × 18)). Phases séquentielles, parallélisme à l’intérieur. Délai total = somme des phases ; arrondi supérieur au mois pour communication.",
+    "phases": [
+      {
+        "id": "P1",
+        "label": "Socle et conventions",
+        "packages": [
+          "C701",
+          "C702",
+          "C703",
+          "C704",
+          "C705",
+          "C706"
+        ],
+        "floor_months": [
+          1.5,
+          2,
+          2.5
+        ],
+        "staff": {
+          "analyse_produit": 0.5,
+          "architecture": 1,
+          "dev_java": 2,
+          "dev_frontend": 1,
+          "ux": 0.5,
+          "qa": 1,
+          "plateforme": 1,
+          "securite": 0.5,
+          "coordination": 0.5
+        }
+      },
+      {
+        "id": "P2",
+        "label": "Mécanismes communs des référentiels",
+        "packages": [
+          "I701",
+          "I702",
+          "I703",
+          "I704",
+          "I705",
+          "V706",
+          "V707"
+        ],
+        "floor_months": [
+          2,
+          2.5,
+          3
+        ],
+        "staff": {
+          "analyse_produit": 1,
+          "architecture": 1,
+          "dev_java": 3,
+          "dev_frontend": 1,
+          "ux": 0.5,
+          "qa": 1,
+          "plateforme": 0.5,
+          "securite": 0.5,
+          "coordination": 0.5
+        }
+      },
+      {
+        "id": "P3",
+        "label": "Parcours et vues des six capacités",
+        "packages": [
+          "I706",
+          "V701",
+          "V702",
+          "V703",
+          "V704",
+          "V705",
+          "V708"
+        ],
+        "floor_months": [
+          1.5,
+          2,
+          2.5
+        ],
+        "staff": {
+          "analyse_produit": 1,
+          "architecture": 0.75,
+          "dev_java": 3,
+          "dev_frontend": 2,
+          "ux": 1,
+          "qa": 1,
+          "plateforme": 0.5,
+          "securite": 0.5,
+          "coordination": 0.5
+        }
+      },
+      {
+        "id": "P4",
+        "label": "Qualification transverse, corrections et transmission",
+        "packages": [
+          "Q701",
+          "Q702",
+          "Q703",
+          "Q704",
+          "C707"
+        ],
+        "floor_months": [
+          1.5,
+          2,
+          3
+        ],
+        "staff": {
+          "analyse_produit": 0.5,
+          "architecture": 0.75,
+          "dev_java": 2,
+          "dev_frontend": 1,
+          "ux": 0.25,
+          "qa": 2,
+          "plateforme": 1,
+          "securite": 0.75,
+          "coordination": 1
+        }
+      }
+    ],
+    "limits": [
+      "Organisation candidate, disponibilité non confirmée ; un rôle peut être assuré à temps partiel par une personne compétente.",
+      "Les plafonds de personnes sont mobilisés selon la charge, pas employés à plein temps pendant toute la phase. Le budget est en jours consommés ; la réservation à plein temps d’une équipe coûterait davantage.",
+      "Pas de recrutement, attente contractuelle ou blocage externe inclus. Pas de chemin critique détaillé ni promesse de livraison.",
+      "Pas de parallélisme entre phases présumé. Aucun délai par capacité additionné. Les dépendances partagées sont livrées avant les vues et la qualification finale."
+    ],
+    "coordination_allocation": {
+      "package": "Q704",
+      "role": "coordination",
+      "shares": {
+        "P2": 0.3333333333333333,
+        "P3": 0.3333333333333333,
+        "P4": 0.3333333333333333
+      },
+      "meaning": "Les 12 sequences de coordination sont reparties dans les phases de realisation et de qualification (quatre par phase), pas concentrees en reception. Financement Q704 unique."
+    }
+  }
+}

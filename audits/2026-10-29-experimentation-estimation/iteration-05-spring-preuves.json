@@ -1,0 +1,141 @@
+{
+  "id": "iteration-05-spring-evidence",
+  "date": "2026-10-29",
+  "method": "Lecture statique de fichiers aux commits ci-dessous par connecteur GitHub ; extraits ciblés, aucune compilation ni test Flowable/Timefold exécuté.",
+  "pins": {
+    "Flowable": {
+      "tag": "flowable-7.2.0",
+      "tag_object": "6026a7d7ef0ecb056a77a49ba9b50e0cecbd2a7f",
+      "commit": "11a1cf83a8c03e343040b4d8edc751f9534d7323"
+    },
+    "Timefold": {
+      "tag": "v1.26.0",
+      "commit": "e32850de3dad19a195b6f07fda0357024714d689"
+    }
+  },
+  "evidence": [
+    {
+      "id": "SPR-F01",
+      "product": "Flowable OSS 7.2.0",
+      "url": "https://github.com/flowable/flowable-engine/blob/11a1cf83a8c03e343040b4d8edc751f9534d7323/modules/flowable-dependencies/pom.xml#L52",
+      "path": "modules/flowable-dependencies/pom.xml",
+      "lines": [
+        52,
+        61
+      ],
+      "git_blob_sha": "6aedceb03906056c4abb25168269d68cd9d50e35",
+      "observation": "Dépendances Spring Boot 3.5.4, Framework 6.2.10 ; pom racine JDK17. Famille compatible avec la référence Boot3.5, sans démonstration d’exécution de la combinaison cible.",
+      "use": "Hypothèse de raccordement, pas validation runtime.",
+      "status": "source_code_read"
+    },
+    {
+      "id": "SPR-F02",
+      "product": "Flowable OSS 7.2.0",
+      "url": "https://github.com/flowable/flowable-engine/blob/11a1cf83a8c03e343040b4d8edc751f9534d7323/modules/flowable-spring/src/main/java/org/flowable/spring/SpringProcessEngineConfiguration.java#L104",
+      "path": "modules/flowable-spring/src/main/java/org/flowable/spring/SpringProcessEngineConfiguration.java",
+      "lines": [
+        104,
+        154
+      ],
+      "git_blob_sha": "d1c1e7816dcb727e23bef55cae29f1495940ff8e",
+      "observation": "Intercepteur et contexte de transaction Spring construits avec PlatformTransactionManager ; DataSource enveloppée dans TransactionAwareDataSourceProxy.",
+      "use": "Réutilisation du moteur dans transaction locale, composition FLOW à qualifier.",
+      "status": "source_code_read"
+    },
+    {
+      "id": "SPR-F03",
+      "product": "Flowable OSS 7.2.0",
+      "url": "https://github.com/flowable/flowable-engine/blob/11a1cf83a8c03e343040b4d8edc751f9534d7323/modules/flowable-job-service/src/main/java/org/flowable/job/service/impl/asyncexecutor/DefaultJobManager.java#L237",
+      "path": "modules/flowable-job-service/src/main/java/org/flowable/job/service/impl/asyncexecutor/DefaultJobManager.java",
+      "lines": [
+        237,
+        291
+      ],
+      "git_blob_sha": "f1ba4cea853b84a93e94f3a56216b575c0fb08ac",
+      "observation": "Transfert vers entité de job en échec terminal et remise en job exécutable avec retries via gestionnaires de persistance ; l’ancien état est supprimé après insertion.",
+      "use": "Mécanisme existant de gestion des jobs ; les garanties de reprise et d’effet métier FLOW ne sont pas déduites de cette lecture.",
+      "status": "source_code_read"
+    },
+    {
+      "id": "SPR-F04",
+      "product": "Flowable OSS 7.2.0",
+      "url": "https://github.com/flowable/flowable-engine/blob/11a1cf83a8c03e343040b4d8edc751f9534d7323/modules/flowable-job-service/src/main/java/org/flowable/job/service/impl/asyncexecutor/DefaultAsyncRunnableExecutionExceptionHandler.java#L55",
+      "path": "modules/flowable-job-service/src/main/java/org/flowable/job/service/impl/asyncexecutor/DefaultAsyncRunnableExecutionExceptionHandler.java",
+      "lines": [
+        45,
+        76
+      ],
+      "git_blob_sha": "b4e3c1e127cef5fe226fc62834fa9e017464b113",
+      "observation": "Traitement d’échec déclenché via FailedJobCommandFactory dans une transaction nouvelle et événement d’échec.",
+      "use": "Configuration et essais d’erreurs à financer, pas réécriture du mécanisme.",
+      "status": "source_code_read"
+    },
+    {
+      "id": "SPR-T01",
+      "product": "Timefold Solver 1.26.0",
+      "url": "https://github.com/TimefoldAI/timefold-solver/blob/e32850de3dad19a195b6f07fda0357024714d689/build/build-parent/pom.xml#L34",
+      "path": "build/build-parent/pom.xml",
+      "lines": [
+        20,
+        66
+      ],
+      "git_blob_sha": "22876a9fee7927274642fcaa2105066ec0a6031a",
+      "observation": "Build référence Spring Boot3.5.5 et Java17. Racine contient spring-integration.",
+      "use": "Patrimoine candidat pour Java21/Boot3.5.7 ; compilation cible non exécutée.",
+      "status": "source_code_read"
+    },
+    {
+      "id": "SPR-T02",
+      "product": "Timefold Solver 1.26.0",
+      "url": "https://github.com/TimefoldAI/timefold-solver/blob/e32850de3dad19a195b6f07fda0357024714d689/core/src/main/java/ai/timefold/solver/core/api/solver/SolverManager.java#L22",
+      "path": "core/src/main/java/ai/timefold/solver/core/api/solver/SolverManager.java",
+      "lines": [
+        22,
+        159
+      ],
+      "git_blob_sha": "0ec90ae01d84141e38e45e1f37a1820dd3332765",
+      "observation": "API solveBuilder/solve, retour immédiat, thread solveur et consumers ; arrêt anticipé exposé. Fournir le modèle et traiter résultat restent à la charge du client.",
+      "use": "Adapter les entrées et contraintes FLOW, gérer résultat, erreurs et arrêt.",
+      "status": "source_code_read"
+    },
+    {
+      "id": "SPR-T03",
+      "product": "Timefold Solver 1.26.0",
+      "url": "https://github.com/TimefoldAI/timefold-solver/blob/e32850de3dad19a195b6f07fda0357024714d689/core/src/main/java/ai/timefold/solver/core/impl/solver/DefaultSolverManager.java#L40",
+      "path": "core/src/main/java/ai/timefold/solver/core/impl/solver/DefaultSolverManager.java",
+      "lines": [
+        40,
+        182
+      ],
+      "git_blob_sha": "25d73163119d6feb701a0579ace93753e2860673",
+      "observation": "Pool de threads et ConcurrentHashMap des jobs, refus de deux jobs actifs de même identifiant, états retirés à la fin. Pas de journal durable dans cette implémentation.",
+      "use": "Persistance des entrées et résultats, reconnaissance d’interruption et relance explicite sont des travaux PLAN supplémentaires ; ne pas promettre reprise de l’état interne du solveur.",
+      "status": "source_code_read"
+    }
+  ],
+  "primary_docs": [
+    {
+      "url": "https://www.flowable.com/open-source/docs/oss-introduction/",
+      "observation": "Moteur OSS sous Apache2, Java17+ ; ne pas assimiler toutes les interfaces commerciales à ce périmètre."
+    },
+    {
+      "url": "https://www.flowable.com/open-source/docs/bpmn/ch05a-Spring-Boot",
+      "observation": "Intégration Spring Boot et configuration des exécuteurs."
+    },
+    {
+      "url": "https://docs.timefold.ai/timefold-solver/1.x/quickstart/spring-boot/spring-boot-quickstart",
+      "observation": "Intégration Spring, modèle de domaine et contraintes définies par application. Documentation vivante1.x ; version du code retenue ci-dessus distincte."
+    },
+    {
+      "url": "https://spring.io/blog/2026/06/25/spring-boot-3-5-16-available-now/",
+      "observation": "Fin du support OSS de la génération3.5 annoncée ; référence3.5.7 conservée pour comparaison expérimentale, cible production à réviser explicitement."
+    }
+  ],
+  "limitations": [
+    "Aucune taille de ces bibliothèques convertie en JH",
+    "Aucune mesure de charge réelle ou de productivité disponible",
+    "Présence de composants ne démontre ni qualité du résultat PLAN ni garanties ORCH",
+    "Les deux bibliothèques complètent les trois produits comparables, elles ne les remplacent pas comme références marché"
+  ],
+  "failed_lookup": "Premier chemin DefaultJobManager.java hors sous-répertoire asyncexecutor renvoyait404 ; répertoire lu puis chemin corrigé avant observation."
+}

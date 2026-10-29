@@ -1,0 +1,292 @@
+{
+  "schema_version": 1,
+  "id": "spring-funnel-iteration-02",
+  "date": "2026-10-29",
+  "status": "contrat_experimental_v1_non_valide_humainement",
+  "authority": {
+    "user_scope": "Étude d’opportunité du Core System générique ; estimation par rôle et unité métier ; priorité Spring ; expérimentations séparées.",
+    "active_economic_changes": false,
+    "user_input": "Aucun bilan de projet interne disponible pour l’instant (réponse du 29 octobre 2026).",
+    "methods": [
+      "source/methode-evaluation-core.yaml",
+      "source/methode-evaluation-marche.yaml"
+    ],
+    "prior_plan": "plan-iterations.json"
+  },
+  "purpose": "Trouver une maille et une méthode défendables pour l’investissement, en croisant fonctions de marché, réutilisation et travaux résiduels. Aucun score de complexité préalable n’est consommé.",
+  "boundaries": [
+    {
+      "id": "measurement",
+      "name": "Frontière de mesure",
+      "rule": "Application ou ensemble logiciel explicitement borné ; les mouvements internes changent de statut si la frontière change. La cartographie ne constitue pas une spécification exhaustive."
+    },
+    {
+      "id": "effort",
+      "name": "Frontière de l’effort",
+      "rule": "Ensemble de travaux réellement comparable à la référence, y compris ses activités et travaux communs. On ne crée pas autant de projets indépendants que de capacités."
+    },
+    {
+      "id": "reporting",
+      "name": "Restitution métier",
+      "rule": "Domaines, sous-domaines, Business Areas et capacités natives. Rattacher les lots à leurs bénéficiaires ; conserver une part commune visible lorsque sa ventilation serait arbitraire."
+    }
+  ],
+  "technical_baseline": {
+    "nature": "Instantané documentaire pour l’expérience ; ni dernière version annoncée ni recommandation de production.",
+    "java": "21",
+    "spring_boot": "3.5.7",
+    "versions": [
+      [
+        "Spring Framework",
+        "6.2.12"
+      ],
+      [
+        "Spring Data BOM",
+        "2025.0.5"
+      ],
+      [
+        "Spring Data JPA",
+        "3.5.5"
+      ],
+      [
+        "Hibernate ORM",
+        "6.6.33.Final"
+      ],
+      [
+        "Spring Security",
+        "6.5.6"
+      ],
+      [
+        "Spring Batch (optionnel)",
+        "5.2.4"
+      ],
+      [
+        "Flyway (candidat)",
+        "11.7.2"
+      ],
+      [
+        "Pilote JDBC PostgreSQL (candidat)",
+        "42.7.8"
+      ]
+    ],
+    "proof_refs": [
+      "SPRING-TAG",
+      "SPRING-BOM",
+      "DATA-BOM"
+    ],
+    "architecture_hypothesis": "Application modulaire avec API et base relationnelle pour le premier essai. Architecture distribuée = variante distincte, sans changement implicite du périmètre métier.",
+    "open_versions": [
+      "Distribution et correctif exact du JDK",
+      "Serveur PostgreSQL",
+      "React et outillage frontend",
+      "Identité externe, observabilité, chaîne de livraison"
+    ],
+    "condition": "Versions ouvertes à figer avant un prototype exécuté ou une mesure de taille dépendant de ces composants. Elles n’empêchent pas l’instruction documentaire actuelle.",
+    "reuse": [
+      {
+        "component": "Spring MVC, validation, persistance et transactions",
+        "treatment": "Usage de bibliothèques inchangées proposé",
+        "residual": "Modèle de données, contrats d’API, contraintes génériques, concurrence et tests du produit."
+      },
+      {
+        "component": "Spring Security",
+        "treatment": "Mécanisme disponible ; règles d’autorisation à définir",
+        "residual": "Droits métier, séparation des accès et tests. Fédération propre à Beaumanoir dans l’intégration."
+      },
+      {
+        "component": "Spring Batch",
+        "treatment": "Option à comparer pour l’ingestion par lots",
+        "residual": "Contrats d’entrée, identités, contrôles génériques, diagnostics et reprise fonctionnelle."
+      },
+      {
+        "component": "React",
+        "treatment": "Bibliothèque proposée dans la stack courante ; version ouverte",
+        "residual": "Parcours, écrans et contrôles génériques ; aucune interface métier supposée fournie."
+      }
+    ]
+  },
+  "effort_convention": {
+    "hours_per_jh": 7,
+    "status": "Convention explicite de l’expérience, cohérente avec les contrôles précédents ; ne remplace aucune convention des sources actives.",
+    "cocomo_hours_per_person_month": 152,
+    "basis": "Effort après réutilisation retenue, avant un gain IA éventuel ; aucun abattement supplémentaire automatique.",
+    "included": [
+      "Analyse et conception du produit générique",
+      "Réalisation backend et interface, tests développeur compris",
+      "QA indépendante",
+      "Architecture transverse",
+      "Industrialisation du produit et préparation de sa livraison",
+      "Expertise sécurité identifiée",
+      "Documentation du produit",
+      "Coordination technique du projet logiciel"
+    ],
+    "separate_or_excluded": [
+      "Règles propres aux marques et au Groupe",
+      "Connecteurs et correspondances propres au SI Beaumanoir",
+      "Reprises, nettoyage des données client et déploiements Groupe",
+      "Conduite du changement et pilotage du programme",
+      "Exploitation et MCO récurrents",
+      "Licences et ressources cloud : dépenses distinctes des JH"
+    ],
+    "warning": "Un total COCOMO ou ISBSG peut déjà comprendre analyse, tests et pilotage. Réconcilier les activités avant d’ajouter des rôles ou des compléments. Le terme « développeur » d’une référence ne suffit pas à définir son assiette."
+  },
+  "roles": [
+    {
+      "id": "analyse_produit",
+      "name": "Analyse produit et expertise métier",
+      "work": "Définir résultats génériques, objets, frontières et critères d’acceptation.",
+      "price_ref": null
+    },
+    {
+      "id": "architecture",
+      "name": "Architecture logicielle",
+      "work": "Définir contrats, transactions, dépendances, réutilisation et exigences transverses.",
+      "price_ref": "source/stacks/java-spring.yaml#interventions.tarifs.architecte"
+    },
+    {
+      "id": "dev_java",
+      "name": "Développement Java / Spring",
+      "work": "Concevoir, assembler, coder et tester le backend ; tests développeur inclus.",
+      "price_ref": "source/stacks/java-spring.yaml#interventions.tarifs.expert"
+    },
+    {
+      "id": "dev_frontend",
+      "name": "Développement des interfaces",
+      "work": "Réaliser les vues et contrôles génériques, avec leurs tests développeur.",
+      "price_ref": null
+    },
+    {
+      "id": "ux",
+      "name": "Conception UX",
+      "work": "Définir les parcours nécessaires lorsque leur conception demande un travail propre.",
+      "price_ref": null
+    },
+    {
+      "id": "qa",
+      "name": "QA indépendante",
+      "work": "Vérifier comportements, invariants, erreurs, concurrence et non-régression.",
+      "price_ref": "source/stacks/java-spring.yaml#interventions.tarifs.qa"
+    },
+    {
+      "id": "plateforme",
+      "name": "Ingénierie plateforme",
+      "work": "Industrialiser livraison, environnements de qualification, migrations et observabilité du produit.",
+      "price_ref": null
+    },
+    {
+      "id": "securite",
+      "name": "Expertise sécurité",
+      "work": "Analyser les menaces et vérifier les garanties ; réalisation des contrôles financée dans ses lots de développement.",
+      "price_ref": null
+    },
+    {
+      "id": "coordination",
+      "name": "Coordination technique",
+      "work": "Organiser la réalisation et ses dépendances ; distincte du pilotage du programme.",
+      "price_ref": null
+    }
+  ],
+  "role_rule": "Neuf contributions possibles, pas neuf personnes ni neuf postes à temps plein. Chaque lot dimensionne les rôles effectivement nécessaires. Aucun ratio historique ne remplit automatiquement cette matrice.",
+  "activity_role_matrix": [
+    {
+      "id": "A01",
+      "activity": "Délimiter le produit et ses comportements standards",
+      "roles": [
+        "analyse_produit",
+        "architecture"
+      ],
+      "owner": "lot fonctionnel",
+      "jh": null
+    },
+    {
+      "id": "A02",
+      "activity": "Concevoir les contrats et garanties transverses",
+      "roles": [
+        "architecture",
+        "dev_java",
+        "securite"
+      ],
+      "owner": "lot commun ou fonctionnel selon livrable",
+      "jh": null
+    },
+    {
+      "id": "A03",
+      "activity": "Réaliser et tester le backend",
+      "roles": [
+        "dev_java"
+      ],
+      "owner": "lot fonctionnel",
+      "jh": null
+    },
+    {
+      "id": "A04",
+      "activity": "Concevoir et réaliser les interfaces",
+      "roles": [
+        "ux",
+        "dev_frontend"
+      ],
+      "owner": "lot interface identifié",
+      "jh": null
+    },
+    {
+      "id": "A05",
+      "activity": "Qualifier indépendamment le produit",
+      "roles": [
+        "qa"
+      ],
+      "owner": "lot de QA relié aux livrables",
+      "jh": null
+    },
+    {
+      "id": "A06",
+      "activity": "Industrialiser et documenter la livraison",
+      "roles": [
+        "plateforme",
+        "dev_java",
+        "analyse_produit"
+      ],
+      "owner": "lot commun et compléments propres explicités",
+      "jh": null
+    },
+    {
+      "id": "A07",
+      "activity": "Vérifier la sécurité",
+      "roles": [
+        "securite"
+      ],
+      "owner": "lot de vérification dédié",
+      "jh": null
+    },
+    {
+      "id": "A08",
+      "activity": "Coordonner les travaux",
+      "roles": [
+        "coordination"
+      ],
+      "owner": "projet logiciel ; vérifier l’inclusion dans la référence",
+      "jh": null
+    }
+  ],
+  "quality_questions": [
+    "Volumétrie et concurrence attendues",
+    "Garanties de cohérence et de reprise",
+    "Traçabilité et historique",
+    "Disponibilité et performance",
+    "Séparation des accès",
+    "Évolutivité et compatibilité des contrats"
+  ],
+  "quality_rule": "Ces exigences font apparaître des travaux et variantes. Elles ne reçoivent pas une note /5 et ne deviennent pas des multiplicateurs inventés.",
+  "formulas": [
+    "JH(lot,rôle) = somme des heures justifiées des travaux du rôle dans le lot / 7",
+    "JH(périmètre,rôle) = somme des JH des lots financés une seule fois ; une inconnue conserve le total au statut partiel",
+    "Coût du travail = somme [JH(lot,rôle) × tarif du rôle] ; un tarif ou un effort manquant empêche un coût complet",
+    "Si une référence donne seulement un effort total : JH(rôle) exige une ventilation justifiée ; aucune multiplication automatique par un ancien ratio",
+    "Les affectations métier d’un même financement doivent conserver le total. À défaut de clé défendable, le lot commun reste non ventilé."
+  ],
+  "unknowns_policy": "null = inconnu ; zéro exige une justification ; inclus référence un propriétaire ; sans objet explique l’exclusion.",
+  "review": {
+    "producer": "Analyse assistée par IA ; trois instructions documentaires parallèles et revue méthodologique par un autre agent.",
+    "human_review": false,
+    "review_not_equivalent_to_empirical_validation": true
+  }
+}

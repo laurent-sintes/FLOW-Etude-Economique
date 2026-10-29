@@ -1,0 +1,373 @@
+{
+  "id": "iteration-06-guarantees",
+  "date": "2026-10-29",
+  "status": "Cadrage proposé pour l’étude d’opportunité, aucune exigence contractuelle nouvelle ni budget",
+  "areas": [
+    {
+      "id": "G01",
+      "label": "Volumes et pics de charge",
+      "origin": "hypothèse existante de comparaison",
+      "source_refs": [
+        "source/maintenance.yaml#/scenario_annuel/perimetre",
+        "source/maintenance.yaml#/scenario_annuel/justification"
+      ],
+      "known": {
+        "utilisateurs_nominatifs": 950,
+        "utilisateurs_simultanes_pointe": 100,
+        "messages_metier_mois": 2000000,
+        "contrats_flux": 30,
+        "applications_externes": 10
+      },
+      "expected": "Définir les volumes par objet et les pics par opération avant de qualifier les performances.",
+      "open": [
+        "Répartition des messages par fonction, taille, rafales et rattrapage",
+        "Nombre de produits, positions, commandes, événements et durées de conservation",
+        "Volumétrie réellement portée par le Core, distincte du RFI ERP global"
+      ],
+      "impact": "Peut modifier partitions, requêtes, traitements de fond, essais de charge et dimensionnement ; une moyenne mensuelle ne fixe pas la pointe.",
+      "owner": "TC-PERFORMANCE",
+      "next": "Conserver ces valeurs comme scénario proposé ; décrire trois profils de charge représentatifs des opérations critiques sans en inventer les valeurs."
+    },
+    {
+      "id": "G02",
+      "label": "Fraîcheur des données et temps de réponse",
+      "origin": "attente qualitative documentée et objectifs non fixés",
+      "source_refs": [
+        "source/ecarts-perimetre-flow-rfi.md",
+        "sources/cartographie-scm-2026-10-24.yaml"
+      ],
+      "known": {
+        "latence_cible": null,
+        "fraicheur_cible": null
+      },
+      "expected": "Séparer l’âge acceptable d’une donnée, le délai de réponse d’une consultation et le délai d’achèvement d’un calcul.",
+      "open": [
+        "Durée maximale pour promettre/réserver et pour publier un fait",
+        "Comportement quand une source est en retard ou indisponible",
+        "Temps de calcul et qualité minimale des recommandations"
+      ],
+      "impact": "Peut changer synchronisme, cache, projections et interdictions de décision sur données périmées.",
+      "owner": "TC-PERFORMANCE",
+      "next": "Qualifier les attentes par famille de décision ; le terme « presque temps réel » dans l’analyse fournisseur reste à rapprocher de sa pièce et n’est pas un objectif mesurable validé."
+    },
+    {
+      "id": "G03",
+      "label": "Disponibilité et service de support",
+      "origin": "hypothèse existante non validée",
+      "source_refs": [
+        "source/maintenance.yaml#/scenario_annuel/service"
+      ],
+      "known": {
+        "disponibilite_cible_pct": 99.9,
+        "exploitation": "Service applicatif continu, supervision automatisée",
+        "support_humain": "Jours ouvrés, 8h par jour"
+      },
+      "expected": "Définir la période de mesure, les interruptions admises, les services critiques et la prise en charge des incidents.",
+      "open": [
+        "Période de mesure et arrêts planifiés",
+        "Fonctions devant rester utilisables en incident",
+        "Couverture humaine des incidents critiques"
+      ],
+      "impact": "Peut modifier redondance, déploiement, modes dégradés et organisation d’exploitation. Le développement de l’exploitabilité et le coût récurrent du service sont distincts.",
+      "owner": "TC-EXPLOITATION",
+      "next": "Examiner la cohérence de ces objectifs proposés par type d’incident ; ne pas en déduire un SLA contractuel."
+    },
+    {
+      "id": "G04",
+      "label": "Perte de données tolérable et rétablissement",
+      "origin": "hypothèse existante non validée",
+      "source_refs": [
+        "source/maintenance.yaml#/scenario_annuel/service",
+        "source/maintenance.yaml#/scenario_annuel/volumes"
+      ],
+      "known": {
+        "perte_maximale_cible_heures": 4,
+        "retablissement_cible_heures": 8,
+        "exercices_restauration_annuels": 2
+      },
+      "expected": "Distinguer redémarrage local, restauration après sinistre et rattrapage des effets métier déjà transmis.",
+      "open": [
+        "Acceptabilité de4h pour les engagements et réservations",
+        "Possibilité de réobtenir les faits des sources et leurs identifiants",
+        "Cohérence après restauration avec effets déjà exécutés hors Core"
+      ],
+      "impact": "Peut changer journal durable, replay, rapprochement, sauvegardes et procédures. Les exercices annuels existants ne financent pas la construction initiale du mécanisme.",
+      "owner": "TC-EXPLOITATION",
+      "next": "Former un scénario de reprise par famille de faits/engagements et vérifier ce qui est perdu, rejouable ou à rapprocher."
+    },
+    {
+      "id": "G05",
+      "label": "Cohérence des décisions concurrentes",
+      "origin": "attentes fonctionnelles natives et garanties des pilotes partiels",
+      "source_refs": [
+        "source/grille-complexite.yaml",
+        "audits/2026-10-29-experimentation-estimation/iteration-03-contrat.json",
+        "audits/2026-10-29-experimentation-estimation/iteration-05-contrat-v1.1.json"
+      ],
+      "known": {
+        "production_scope": null
+      },
+      "expected": "Empêcher les effets incohérents lorsque plusieurs opérations utilisent la même ressource ou modifient le même engagement.",
+      "open": [
+        "Périmètre atomique d’une décision : une ligne, une commande, plusieurs ressources",
+        "Conflits et ordre de décision entre plan, promesse, réservation et exécution",
+        "Politique de refus, attente ou nouvelle tentative"
+      ],
+      "impact": "Peut modifier modèles transactionnels et tests de concurrence. L’essai de deux réservations sur une clé n’est pas une preuve de cohérence du Core complet.",
+      "owner": "TC-TRANSACTIONS",
+      "next": "Décrire les invariants par groupe et les frontières de transaction ; conserver l’application de ces invariants dans chaque groupe métier."
+    },
+    {
+      "id": "G06",
+      "label": "Traçabilité, corrections et lecture du passé",
+      "origin": "attentes fonctionnelles natives, portée technique à préciser",
+      "source_refs": [
+        "source/grille-complexite.yaml",
+        "source/capacite-realisation.yaml#/hotspots"
+      ],
+      "known": {
+        "history_granularity": null,
+        "clock_semantics": null
+      },
+      "expected": "Conserver origine, dates, version et correction des faits nécessaires aux décisions et à leur explication.",
+      "open": [
+        "État à date du fait ou état tel qu’il était connu à cette date",
+        "Effets d’une correction tardive sur décisions déjà prises",
+        "Durée de conservation et niveau de justification attendu"
+      ],
+      "impact": "Peut changer stockage des versions, projections, reconstruction et campagnes de tests. Logs techniques et registres métier ne sont pas interchangeables.",
+      "owner": "TC-TRACES",
+      "next": "Distinguer clairement les garanties de chaque registre métier des primitives de corrélation et d’observation partagées."
+    },
+    {
+      "id": "G07",
+      "label": "Accès, séparation des périmètres et sécurité",
+      "origin": "proposition de cadrage à confirmer, au-delà des trois profils des pilotes",
+      "source_refs": [
+        "source/conditions-realisation.yaml#/criteria",
+        "audits/2026-10-29-experimentation-estimation/iteration-03-contrat.json",
+        "audits/2026-10-29-experimentation-estimation/iteration-05-decision.json"
+      ],
+      "known": {
+        "isolation_cible": null
+      },
+      "expected": "Relier les droits aux actions et périmètres autorisés, tracer les interventions sensibles et limiter l’exécution de code ou règles non autorisés.",
+      "open": [
+        "Séparation logique ou physique des marques/propriétaires",
+        "Rôles et séparation des fonctions sensibles",
+        "Raccordement identité, secrets, revues et critères d’acceptation"
+      ],
+      "impact": "Peut changer modèles de droits, contrats de données, déploiement et essais. Les revues spécifiques des modules restent identifiées.",
+      "owner": "TC-SECURITE",
+      "next": "Proposer une matrice actions/périmètres pour les décisions critiques et un scénario d’isolation, sans inventer une organisation Beaumanoir."
+    },
+    {
+      "id": "G08",
+      "label": "Règles paramétrables et évolution des versions",
+      "origin": "principe générique demandé par l’utilisateur et propositions de produit",
+      "source_refs": [
+        "AGENTS.md",
+        "source/architecture.yaml#/rules/ownership",
+        "audits/2026-10-29-experimentation-estimation/iteration-05-contrat-v1.1.json"
+      ],
+      "known": {
+        "configuration_boundary": null
+      },
+      "expected": "Séparer mécanisme générique, paramètres et règles propres au Groupe ; maîtriser le changement d’une version déjà utilisée.",
+      "open": [
+        "Paramètres simples, règles déclaratives ou extension de code",
+        "Qui peut modifier et activer une règle",
+        "Effet d’une nouvelle version sur les commandes, dossiers et calculs en cours"
+      ],
+      "impact": "Peut changer validations, compatibilité et migration. Ne pas financer implicitement un moteur de règles universel ni attribuer toutes les règles client au Core.",
+      "owner": "TC-CONTRATS",
+      "next": "Fixer un contrat d’extension proposé pour chaque type de mécanisme ; les règles Beaumanoir restent patrimoine d’intégration."
+    },
+    {
+      "id": "G09",
+      "label": "Échanges, doublons et effets externes",
+      "origin": "attentes fonctionnelles natives et limites déjà documentées",
+      "source_refs": [
+        "source/architecture.yaml#/rules/ownership",
+        "source/stacks/java-spring.yaml",
+        "audits/2026-10-29-experimentation-estimation/iteration-05-contrat-v1.1.json"
+      ],
+      "known": {
+        "external_delivery_guarantee": null
+      },
+      "expected": "Donner un résultat explicable aux doublons, rejets, retards et réponses perdues, y compris quand une prestation a déjà été réalisée hors Core.",
+      "open": [
+        "Contrats d’accusé de réception et identifiants externes",
+        "Réémission, annulation et compensation possibles par destinataire",
+        "Compatibilité des versions et mode de rattrapage"
+      ],
+      "impact": "Peut changer conservation des demandes/résultats, orchestration et rapprochement. Le mécanisme local idempotent ne garantit pas une exécution distante unique.",
+      "owner": "TC-CONTRATS",
+      "next": "Définir les garanties de l’interface canonique ; financer chaque mapping/connexion fournisseur dans l’intégration, sans l’attribuer au Core."
+    },
+    {
+      "id": "G10",
+      "label": "Conservation, archivage et restitution des données",
+      "origin": "hypothèse quantitative existante et règles de conservation non fixées",
+      "source_refs": [
+        "source/maintenance.yaml#/scenario_annuel/perimetre"
+      ],
+      "known": {
+        "donnees_actives_to": 2,
+        "donnees_archives_to": 5
+      },
+      "expected": "Prévoir consultation, export, archivage et suppression contrôlée selon des durées et responsabilités définies.",
+      "open": [
+        "Durées par type de données et exigences de lecture après archivage",
+        "Données dérivées, index, logs, sauvegardes et réplications à ajouter",
+        "Formats de restitution et contraintes applicables à qualifier"
+      ],
+      "impact": "Peut modifier partitionnement, migrations, requêtes historiques et procédures. Les To de besoin logique ne dimensionnent pas seuls les moyens.",
+      "owner": "TC-DONNEES",
+      "next": "Construire une matrice type de données/durée/usages avec valeurs proposées ou inconnues ; ne pas inventer une durée légale."
+    },
+    {
+      "id": "G11",
+      "label": "Qualification et livraison du produit",
+      "origin": "conventions de qualification des pilotes, critères de réalisation existants et hypothèse de comparaison pour les environnements",
+      "source_refs": [
+        "source/conditions-realisation.yaml#/criteria",
+        "source/capacite-realisation.yaml#/gates",
+        "audits/2026-10-29-experimentation-estimation/iteration-03-contrat.json",
+        "source/maintenance.yaml#/scenario_annuel/perimetre/environnements"
+      ],
+      "known": {
+        "environnements_logiques": {
+          "production": 1,
+          "recette": 1,
+          "developpement": 1
+        }
+      },
+      "expected": "Rendre la livraison reproductible, vérifier les garanties critiques et séparer tests développeur, QA indépendante et acceptation métier.",
+      "open": [
+        "Jeux représentatifs et critères métier d’acceptation",
+        "Qualification transversale, sécurité, charge et reprise",
+        "Compatibilité lors des migrations et retour arrière"
+      ],
+      "impact": "Peut modifier outillage commun, campagnes transverses et effort de chaque groupe. La disponibilité d’une CI ne finance pas les scénarios propres à tous les domaines.",
+      "owner": "TC-QUALITE",
+      "next": "Former une matrice garantie/critère/preuve attendue/responsable de validation pour les parcours critiques ; pas de seuil de couverture de code arbitraire."
+    },
+    {
+      "id": "G12",
+      "label": "Maintien du produit et autonomie sur la durée",
+      "origin": "objectif sponsor et critères de réalisation, capacités non démontrées",
+      "source_refs": [
+        "AGENTS.md",
+        "source/conditions-realisation.yaml#/criteria",
+        "source/capacite-realisation.yaml#/proofs"
+      ],
+      "known": {
+        "equipe_confirmee": false,
+        "reference_effort_observe_disponible": false
+      },
+      "expected": "Permettre à une équipe identifiée de diagnostiquer, restaurer et faire évoluer le produit avec ses droits, documents et outils.",
+      "open": [
+        "Compétences, disponibilité et responsabilités réelles",
+        "Politique d’évolution et de maintenance des composants",
+        "Organisation de transfert et preuve de reprise par une autre équipe"
+      ],
+      "impact": "Change les conditions de réalisation et le risque d’investissement ; ne pas confondre effort théorique, capacité disponible et coût annuel.",
+      "owner": "TC-LIVRAISON",
+      "next": "Conserver l’hypothèse d’équipe autonome pour les estimations et qualifier séparément l’organisation nécessaire ; demander des références réelles quand elles seront disponibles."
+    }
+  ],
+  "technical_work_owners": [
+    {
+      "id": "TC-PERFORMANCE",
+      "label": "Qualification de charge et performance",
+      "scope": "Modèle de charge et moyens de mesure communs ; optimisations métier et jeux spécifiques dans leurs ensembles.",
+      "prior": [
+        "COMMON"
+      ],
+      "rule": "CI et environnement déjà financés ; essais de charge du Core complet restent inconnus."
+    },
+    {
+      "id": "TC-EXPLOITATION",
+      "label": "Déploiement, service et reprise",
+      "scope": "Moyens logiciels et procédures communes pour déployer, restaurer et observer le service.",
+      "prior": [
+        "COMMON",
+        "EXEC"
+      ],
+      "rule": "Construction initiale, infrastructure consommée et exploitation annuelle gardent des financements distincts."
+    },
+    {
+      "id": "TC-TRANSACTIONS",
+      "label": "Primitives transactionnelles",
+      "scope": "Infrastructure de transaction et identification des requêtes ; invariants métier dans chaque ensemble.",
+      "prior": [
+        "COMMON"
+      ],
+      "rule": "La composition avec stock, promesse, ordres et services n’est pas financée par la seule primitive."
+    },
+    {
+      "id": "TC-TRACES",
+      "label": "Corrélation et observation technique",
+      "scope": "Conventions de corrélation, traces et métriques communes.",
+      "prior": [
+        "COMMON"
+      ],
+      "rule": "Les registres métier STOCK et ORCH sont des fonctions distinctes ; ne pas les refacturer comme un registre universel."
+    },
+    {
+      "id": "TC-SECURITE",
+      "label": "Accès et protections communes",
+      "scope": "Identité, protections techniques et cadre de contrôle des accès.",
+      "prior": [
+        "COMMON",
+        "EXEC"
+      ],
+      "rule": "Les contrôles de droit et revues spécifiques restent dans les ensembles fonctionnels."
+    },
+    {
+      "id": "TC-CONTRATS",
+      "label": "Contrats techniques et extensions",
+      "scope": "Conventions des échanges, versionnement des interfaces et points d’extension.",
+      "prior": [
+        "COMMON",
+        "REF",
+        "EXEC"
+      ],
+      "rule": "Réutilisations antérieures partielles seulement ; types d’entrées, règles et connecteurs clients gardent leurs propriétaires."
+    },
+    {
+      "id": "TC-DONNEES",
+      "label": "Moyens communs de conservation et restitution",
+      "scope": "Infrastructure d’archivage/export/migrations ; sens et historique de chaque donnée dans son ensemble métier.",
+      "prior": [
+        "COMMON"
+      ],
+      "rule": "Aucun moteur d’archivage complet n’est présumé déjà financé."
+    },
+    {
+      "id": "TC-QUALITE",
+      "label": "Outillage et qualification transversale",
+      "scope": "Outillage commun et réception de l’assemblage.",
+      "prior": [
+        "COMMON",
+        "EXEC"
+      ],
+      "rule": "Tests propres aux fonctions, oracles et QA métier restent distincts ; ne pas refaire une même campagne dans deux lots."
+    },
+    {
+      "id": "TC-LIVRAISON",
+      "label": "Livraison, documentation et transfert",
+      "scope": "Conventions de livraison et documentation commune, démonstration du transfert technique.",
+      "prior": [
+        "COMMON"
+      ],
+      "rule": "Coordination technique, pilotage programme et montée en compétences client ne sont pas confondus."
+    }
+  ],
+  "funding_status": "Les identifiants TC sont des propriétaires proposés de travaux à instruire, pas neuf nouveaux budgets à additionner. Ils peuvent subdiviser les lots communs historiques avec conservation des mêmes dépenses.",
+  "scope_rule": "Les garanties métier détaillées restent chez les groupes fonctionnels. Le Core construit le mécanisme générique, l’intégration définit les adaptations et branchements client, le service récurrent finance son exploitation.",
+  "quantification_rule": "Aucun nouveau JH. Les objectifs existants sont des hypothèses de comparaison non validées. Leur acceptation ou remplacement demande une décision explicite.",
+  "evidence_limits": "Les valeurs de maintenance sont lues dans le modèle courant ; leur justification cite le RFI pour950 utilisateurs et qualifie la transposition. Le RFI original n’est pas relu dans cette itération.",
+  "review_correction": "G11 : provenance des environnements ajoutee apres revue, valeurs et hypotheses inchangees."
+}

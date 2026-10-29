@@ -1,0 +1,148 @@
+{
+  "id": "iteration-03-contract-v1",
+  "date": "2026-10-29",
+  "version": 1,
+  "classification": "Hypothèse de produit cible pour l’expérience, non spécification approuvée du Core complet.",
+  "basis": "Étude d’opportunité ; estimations d’ingénierie assistées par IA. Les références OSS justifient les mécanismes, pas leurs durées.",
+  "baseline": {
+    "stack": "Java 21 / Spring Boot 3.5.7 ; versions du contrat 02",
+    "database": "PostgreSQL relationnel ; version exacte ouverte, pas de benchmark de performance annoncé.",
+    "ui": "Interface web React standard, version exacte ouverte avant prototype.",
+    "architecture": "Une application modulaire, une base transactionnelle ; pas de distribution multi-services imposée.",
+    "team": "Intervenants autonomes familiers de Java/Spring, revue de code et tests développeur compris ; aucune remise IA ajoutée.",
+    "jh_hours": 7,
+    "environment": "Environnement d’essai et chaîne de livraison à construire une fois dans COMMON. Identité externe de test disponible ; aucune fédération Beaumanoir.",
+    "quality": "Contrats versionnés, contrôles d’accès lecteur/opérateur/administrateur, erreurs explicites, traçabilité et tests automatisés ; pas de SLA, de certification ou de débit garanti.",
+    "performance_assumption": "Essais fonctionnels avec deux requêtes concurrentes sur une même clé et import de 10 000 lignes comme jeu de qualification proposé. Ces nombres bornent un témoin, pas la volumétrie de production FLOW."
+  },
+  "roles": [
+    "analyse_produit",
+    "architecture",
+    "dev_java",
+    "dev_frontend",
+    "ux",
+    "qa",
+    "plateforme",
+    "securite",
+    "coordination"
+  ],
+  "COMMON": {
+    "id": "COMMON",
+    "name": "Mécanismes communs des deux pilotes",
+    "includes": [
+      "Création du projet modulaire, configuration, migrations et conventions d’API",
+      "Sécurité commune : intégration à une identité de test, trois profils d’accès, contrat d’autorisation",
+      "Primitive commune de traitement d’une clé de requête déjà reçue, utilisable dans une transaction",
+      "Infrastructure de journalisation, métriques techniques et diagnostic",
+      "Structure commune de navigation et composants d’interface",
+      "CI, environnement d’essai, tests intégration base et livraison reproductible",
+      "Revue initiale de sécurité et documentation du socle"
+    ],
+    "excludes": [
+      "Contrats et règles des références et du stock",
+      "Moteur générique d’import par lot (REF)",
+      "Écrans métier propres aux pilotes",
+      "Connecteurs SI Beaumanoir",
+      "Plateforme cloud de production, haute disponibilité, exploitation récurrente"
+    ],
+    "financing_rule": "Un financement unique ; ne pas répartir arbitrairement entre REF et STOCK."
+  },
+  "REF": {
+    "id": "REF",
+    "name": "Recevoir et maintenir une référence locale de produits et variantes",
+    "capabilities": [
+      "master-data-ingestion",
+      "cap-merchandise-reference-stewardship"
+    ],
+    "native_functions": [
+      "BC-002.01",
+      "BC-002.02",
+      "BC-002.03",
+      "BC-004.01"
+    ],
+    "includes": [
+      "Deux types liés : produit et variante ; identifiants externes et identifiant de source, version monotone par objet",
+      "Une source d’autorité par objet ; accepter plus récent, ignorer la répétition identique, rejeter même version/contenu différent et version plus ancienne",
+      "Contrat canonique CSV pour lot complet ou changements ; aucune interprétation libre de formats fournisseur",
+      "Validation des champs et des liens produit-variante, résultat par ligne, poursuite des lignes valides",
+      "État et diagnostic du lot persistés ; rejets conservés ; relance explicite des seules lignes corrigées",
+      "Consultation des références locales et des résultats d’import",
+      "Deux vues métier : dépôt/suivi/rejets d’import ; consultation produit/variantes"
+    ],
+    "excludes": [
+      "MDM, nettoyage client, génération de variantes commerciales",
+      "Arbitrage entre sources concurrentes, fusion de référentiels",
+      "Éditeur visuel universel de mappings, règles Fashion ou enrichissement automatique",
+      "Toutes les autres familles de références",
+      "Toutes les fonctions BC-004.02 et BC-004.03"
+    ],
+    "dependencies": [
+      "COMMON"
+    ],
+    "definition_of_done": [
+      "Une contribution répétée ne produit pas un second effet",
+      "Les objets incohérents restent dans les rejets et peuvent être corrigés puis rejoués",
+      "Les données acceptées et leurs versions sont consultables",
+      "Tests développeur et QA indépendante sur erreurs, répétitions, relations et reprise ; documentation des contrats"
+    ]
+  },
+  "STOCK": {
+    "id": "STOCK",
+    "name": "Position courante et cycle de réservation cohérent",
+    "capabilities": [
+      "D01.f",
+      "D01.g",
+      "D01.c",
+      "D02.c"
+    ],
+    "native_functions": [
+      "BC-009.01",
+      "BC-009.02",
+      "BC-010.01",
+      "BC-010.02",
+      "BC-011.01",
+      "BC-011.02",
+      "BC-018.01",
+      "BC-018.02",
+      "BC-018.03"
+    ],
+    "includes": [
+      "Clé de stock : propriétaire logique, produit/variante, emplacement ; unité de base et conversions fixes configurées",
+      "Réception de faits identifiés, date du fait et date de réception ; correction par écriture compensatrice ; journal non destructif",
+      "Position courante physique, réservée et disponible ; pas de reconstruction bitemporelle à une date passée",
+      "Réservation identifiée pour un besoin externe, partielle autorisée ; révision, libération, consommation et expiration explicite",
+      "Contrôles de quantités et d’états ; opération et réservation protégées dans une transaction ; absence de sur-réservation pour deux requêtes concurrentes au témoin",
+      "Répétition d’une demande retourne le résultat cohérent sans double effet ; conflits explicités",
+      "Une correction qui ferait passer le physique sous le réservé est signalée et bloquée pour traitement, sans réallocation automatique",
+      "Consultation des positions, engagements et mouvements explicatifs",
+      "Trois vues métier : positions ; engagements/actions ; journal et anomalies"
+    ],
+    "excludes": [
+      "ATP/CTP, prévision, allocation de ressources, optimisation et priorité commerciale",
+      "Lots, séries, colis, arborescences d’emplacements et unités variables",
+      "Reconstitution connu-à-date complète, corrections rétroactives automatiques en cascade",
+      "Traitement distribué exactement une fois, haute disponibilité et garantie de débit de production",
+      "Connecteurs WMS/ERP, données Beaumanoir et règles propres aux marques"
+    ],
+    "dependencies": [
+      "COMMON",
+      "Références locales produits/variantes disponibles : fournies par REF pour ce panier ; pas de reconstruction dans STOCK."
+    ],
+    "definition_of_done": [
+      "Disponibilité et quantités engagées se réconcilient après chaque transition retenue",
+      "Réservation concurrente ne dépasse pas la quantité disponible du témoin",
+      "Libération/consommation/expiration et leurs répétitions n’appliquent pas un double effet",
+      "Correction incompatible refusée et explicable",
+      "Tests développeur, QA indépendante et documentation des garanties retenues"
+    ]
+  },
+  "uncertainty_rule": "Même périmètre pour bas/central/haut : variation du travail nécessaire et des reprises de conception, pas suppression/ajout de fonctions. Les exigences supplémentaires sont des variantes séparées.",
+  "evaluation_protocol": {
+    "M1": "Décomposition en paquets de travaux par mécanisme et rôle, à estimer par les deux instructeurs de pilotes ; pas au niveau des méthodes de code.",
+    "M2": "Estimation globale de chaque ensemble par rôle, produite par un autre agent sans voir les chiffres M1 ; même contrat.",
+    "M3": "Restitution native des mêmes travaux et lots communs, sans réestimer ni créer un projet par BC.",
+    "limits": "Deux analyses assistées par IA ne sont pas deux observations indépendantes de réalisation. Leur écart révèle une instabilité de l’estimation ; leur accord ne valide pas sa précision.",
+    "selection": "Expliquer les écarts matériels (>15% ensemble, >25% rôle, conventions de pilotage du plan). Ne pas moyenner ni ajuster pour rapprocher.",
+    "scope_coverage": "Panier expérimental partiel de six capacités natives, jamais six capacités complètement couvertes ni le sous-domaine complet."
+  }
+}

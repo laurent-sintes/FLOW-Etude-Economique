@@ -1,0 +1,352 @@
+{
+  "evidence": [
+    {
+      "id": "O1",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "local_path": "tmp/odoo20-audit/addons/sale/models/sale_order.py",
+      "path": "addons/sale/models/sale_order.py",
+      "line_ranges": [
+        [
+          1619,
+          1675
+        ],
+        [
+          1791,
+          1800
+        ]
+      ],
+      "observed": "La confirmation vérifie l’état, écrit la confirmation et appelle un point d’extension ; annulation limitée aux factures brouillon dans cet extrait.",
+      "flow_delta": "FLOW doit suivre autorisation, version, quantité et effets partiels externes ; cet extrait ne démontre pas leur couverture complète.",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/sale/models/sale_order.py#L1619",
+      "basis": "Lecture du code figé ; ni exécution du produit ni temps de réalisation observé.",
+      "sha256": "d8e3220c43e660a4195a248f38fb9f692da4c912997c7ec78e2e2a7bfacb0f1f",
+      "excerpts": [
+        {
+          "start": 1619,
+          "end": 1675,
+          "text": "    def action_confirm(self):\n        \"\"\"Confirm the given quotation(s) and set their confirmation dates.\n\n        If the corresponding setting is enabled, also locks the Sale Order.\n\n        :return: True\n        :rtype: bool\n        :raise: UserError if trying to confirm cancelled SO's\n        \"\"\"\n        for order in self:\n            error_msg = order._confirmation_error_message()\n            if error_msg:\n                raise UserError(error_msg)\n\n        self.order_line._validate_analytic_distribution()\n\n        self.write(self._prepare_confirmation_values())\n\n        # Context key 'default_name' is sometimes propagated up to here.\n        # We don't need it and it creates issues in the creation of linked records.\n        context = self.env.context.copy()\n        context.pop(\"default_name\", None)\n        context.pop(\"default_user_id\", None)\n\n        self.with_context(context)._action_confirm()\n        self.filtered(lambda so: so._should_be_locked()).action_lock()\n\n        if self.env.context.get(\"send_email\"):\n            self._send_order_confirmation_mail()\n\n        return True\n\n    def _should_be_locked(self):\n        self.ensure_one()\n        # Public user can confirm SO, so we check the group on any record creator.\n        return self.env[\"res.groups\"]._is_feature_enabled(\"sale.group_auto_done_setting\")\n\n    def _confirmation_error_message(self):\n        \"\"\"Return whether order can be confirmed or not if not then return error message.\"\"\"\n        self.ensure_one()\n        if self.state not in {\"draft\", \"sent\"}:\n            return self.env._(\"Some orders are not in a state requiring confirmation.\")\n\n        return False\n\n    def _prepare_confirmation_values(self):\n        \"\"\"Prepare the sales order confirmation values.\n\n        Note: self can contain multiple records.\n\n        :return: Sales Order confirmation values\n        :rtype: dict\n        \"\"\"\n        return {\"state\": \"sale\", \"date_order\": fields.Datetime.now()}\n\n    def _action_confirm(self):\n        \"\"\"Provide a hook method between confirmation and lock/confirmation mail generation.\"\"\""
+        },
+        {
+          "start": 1791,
+          "end": 1800,
+          "text": "    def action_cancel(self):\n        \"\"\"Cancel sales order and related draft invoices.\"\"\"\n        if any(order.locked for order in self):\n            raise UserError(self.env._(\"You cannot cancel a locked order. Please unlock it first.\"))\n        return self._action_cancel()\n\n    def _action_cancel(self):\n        inv = self.invoice_ids.filtered(lambda inv: inv.state == \"draft\")\n        inv.button_cancel()\n        return self.write({\"state\": \"cancel\"})"
+        }
+      ]
+    },
+    {
+      "id": "O2",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "local_path": "tmp/odoo20-audit/addons/purchase/models/purchase_order.py",
+      "path": "addons/purchase/models/purchase_order.py",
+      "line_ranges": [
+        [
+          708,
+          731
+        ]
+      ],
+      "observed": "Confirmation soumise à validation ; annulation bloquée pour commande verrouillée ou facture non annulée/brouillon.",
+      "flow_delta": "L’approbation interne ne vaut pas confirmation partielle du fournisseur. FLOW reçoit prix, contrôles et résultats financiers.",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/purchase/models/purchase_order.py#L708",
+      "basis": "Lecture du code figé ; ni exécution du produit ni temps de réalisation observé.",
+      "sha256": "615950e6f537564c6e49945cb7cff6206d446730df895e47de6c3a955a723e36",
+      "excerpts": [
+        {
+          "start": 708,
+          "end": 731,
+          "text": "    def button_confirm(self):\n        for order in self:\n            if order.state not in ['draft', 'sent']:\n                continue\n            error_msg = order._confirmation_error_message()\n            if error_msg:\n                raise UserError(error_msg)\n            order.order_line._validate_analytic_distribution()\n            # Deal with double validation process\n            if order._approval_allowed():\n                order.button_approve()\n            else:\n                order.write({'state': 'to approve'})\n        return True\n\n    def button_cancel(self):\n        locked_purchase_orders = self.filtered(lambda po: po.locked)\n        if locked_purchase_orders:\n            raise UserError(self.env._(\"Unable to cancel purchase order(s): %s. You must first unlock them.\", locked_purchase_orders.mapped('display_name')))\n\n        purchase_orders_with_invoices = self.filtered(lambda po: any(i.state not in ('cancel', 'draft') for i in po.invoice_ids))\n        if purchase_orders_with_invoices:\n            raise UserError(_(\"Unable to cancel purchase order(s): %s. You must first cancel their related vendor bills.\", purchase_orders_with_invoices.mapped('display_name')))\n        self.write({'state': 'cancel'})"
+        }
+      ]
+    },
+    {
+      "id": "O3",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "local_path": "tmp/odoo20-audit/addons/stock/models/stock_picking.py",
+      "path": "addons/stock/models/stock_picking.py",
+      "line_ranges": [
+        [
+          936,
+          1012
+        ],
+        [
+          1014,
+          1048
+        ]
+      ],
+      "observed": "Retours liés aux mouvements d’origine et voisins, copie avec lieux inversés ; réalisation et absence de reliquat explicites.",
+      "flow_delta": "Analogie de filiation physique ; ne prouve ni l’ensemble d’un retour commercial, ni paiement/réparation, ni restructuration d’engagements.",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_picking.py#L936",
+      "basis": "Lecture du code figé ; ni exécution du produit ni temps de réalisation observé.",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "excerpts": [
+        {
+          "start": 936,
+          "end": 1012,
+          "text": "        origin_move = move_id.origin_returned_move_id or move_id\n        move_orig_to_link = origin_move.move_dest_ids.returned_move_ids\n        if not move_id.origin_returned_move_id:\n            # link to original move\n            move_orig_to_link |= origin_move\n            # link to siblings of original move, if any\n            move_orig_to_link |= origin_move\\\n                .move_dest_ids.filtered(lambda m: m.state not in ('cancel'))\\\n                .move_orig_ids.filtered(lambda m: m.state not in ('cancel'))\n        move_dest_to_link = origin_move.move_orig_ids.returned_move_ids\n        # link to children of originally returned moves, if any. Note that the use of\n        # 'origin_move.move_orig_ids.returned_move_ids.move_orig_ids.move_dest_ids'\n        # instead of 'origin_move.move_orig_ids.move_dest_ids' prevents linking a\n        # return directly to the destination moves of its parents. However, the return of\n        # the return will be linked to the destination moves.\n        move_dest_to_link |= origin_move.move_orig_ids.returned_move_ids\\\n            .move_orig_ids.filtered(lambda m: m.state not in ('cancel'))\\\n            .move_dest_ids.filtered(lambda m: m.state not in ('cancel'))\n\n        vals = {\n            'product_id': move_id.product_id.id,\n            'product_uom_qty': move_id.quantity if not self.show_return else 0,  # if exchange take quantity\n            'uom_id': move_id.uom_id.id or move_id.product_id.uom_id.id,\n            'picking_id': self.id,\n            'state': 'draft',\n            'date': fields.Datetime.now(),\n            'location_id': self.location_id.id or move_id.location_dest_id.id,\n            'location_dest_id': self.location_dest_id.id or move_id.location_id.id,\n            'forecasted_location_id': False,\n            'picking_type_id': self.picking_type_id.id,\n            'warehouse_id': self.picking_type_id.warehouse_id.id,\n            'origin_returned_move_id': move_id.id,\n            'procure_method': 'make_to_stock',\n            'reference_ids': origin_move.picking_id.reference_ids.ids,\n            'move_orig_ids': [Command.link(m.id) for m in move_orig_to_link],\n            'move_dest_ids': [Command.link(m.id) for m in move_dest_to_link],\n        }\n        if self.picking_type_id.code == 'outgoing':\n            vals['partner_id'] = self.partner_id.id\n        return vals\n\n    def _prepare_return_picking_default_values(self):\n        location = self.location_dest_id\n        return_type = self.picking_type_id.return_picking_type_id or self.picking_type_id\n        location_dest = return_type.default_location_dest_id if return_type and return_type.code == 'incoming' else self.location_id\n\n        vals = {\n            'move_ids': [],\n            'picking_type_id': return_type.id,\n            'state': 'draft',\n            'return_id': self.id,\n            'origin': _(\"Return of %(picking_name)s\", picking_name=self.name),\n            'user_id': False,\n            'location_id': location.id,\n            'location_dest_id': location_dest.id,\n        }\n        return vals\n\n    def _create_return(self):\n        self.ensure_one()\n        self.move_ids.move_dest_ids.filtered(lambda m: m.state not in ('done', 'cancel'))._do_unreserve()\n        new_picking = self.copy(self._prepare_return_picking_default_values())\n\n        new_picking.message_post_with_source(\n                'mail.message_origin_link',\n                render_values={'self': new_picking, 'origin': self},\n                subtype_xmlid='mail.mt_note',\n        )\n        moves_vals = []\n        for move in self.move_ids.filtered(lambda m: m.state != 'cancel'):\n            moves_vals.append(move.copy_data(new_picking._prepare_return_move_default_values(move))[0])\n\n        self.env['stock.move'].create(moves_vals)\n\n        # toggles between showing Return and Exchange buttons\n        new_picking.show_return = not new_picking.show_return\n        return new_picking"
+        },
+        {
+          "start": 1014,
+          "end": 1048,
+          "text": "    def _action_done(self):\n        \"\"\"Call `_action_done` on the `stock.move` of the `stock.picking` in `self`.\n        This method makes sure every `stock.move.line` is linked to a `stock.move` by either\n        linking them to an existing one or a newly created one.\n\n        If the context key `cancel_backorder` is present, backorders won't be created.\n\n        :return: True\n        :rtype: bool\n        \"\"\"\n        self._check_company()\n\n        todo_moves = self.move_ids.filtered(lambda self: self.state in ['draft', 'waiting', 'partially_available', 'assigned', 'confirmed'])\n        for picking in self:\n            if picking.owner_id:\n                picking.move_ids.write({'restrict_partner_id': picking.owner_id.id})\n                picking.move_line_ids.write({'owner_id': picking.owner_id.id})\n        todo_moves._action_done(cancel_backorder=self.env.context.get('cancel_backorder'))\n        self.write({'date_done': fields.Datetime.now(), 'priority': '0'})\n\n        # notify followers when no backorder was created but quantities are incomplete\n        if self.env.context.get('cancel_backorder'):\n            for picking in self:\n                prec = self.env['decimal.precision'].precision_get('Product Unit')\n                incomplete_moves = picking.move_ids.filtered(\n                    lambda m: float_compare(m.quantity, m.product_uom_qty, precision_digits=prec) < 0\n                )\n                if incomplete_moves:\n                    msg = self.env._(\n                        'No backorder has been planned for undelivered demanded quantities: %s',\n                        Markup('<ul>%s</ul>') % Markup().join(\n                            Markup('<li>%s</li>') % self.env._(\n                                'Only %(nbr_done)s %(uom)s of %(product)s delivered in contrast to the expected %(nbr_demanded)s %(uom)s',\n                                product=move.product_id.display_name,\n                                nbr_done=move.quantity,"
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/sale/sale.py",
+      "path": "modules/sale/sale.py",
+      "line_ranges": [
+        [
+          1082,
+          1124
+        ],
+        [
+          1182,
+          1192
+        ],
+        [
+          1216,
+          1255
+        ]
+      ],
+      "observed": "Groupement des expéditions, progression factures/mouvements et clôture ; confirmation enfile le traitement, traitement verrouille les ventes.",
+      "flow_delta": "Distinguer acceptation et traitement effectif. FLOW reçoit les faits externes au lieu de recréer facturation/expédition.",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/sale/sale.py#L1082",
+      "basis": "Lecture du code figé ; ni exécution du produit ni temps de réalisation observé.",
+      "sha256": "f325596b20755d5c6df1d3830943f6ac64759670eaa0063b071d15d060213a9c",
+      "excerpts": [
+        {
+          "start": 1082,
+          "end": 1124,
+          "text": "    def create_shipment(self, shipment_type):\n        '''\n        Create and return shipments of type shipment_type\n        '''\n        pool = Pool()\n        context = Transaction().context\n        if (self.shipment_method == 'manual'\n                and not context.get('_sale_manual_shipment', False)):\n            return\n\n        moves = self._get_shipment_moves(shipment_type)\n        if not moves:\n            return\n        if shipment_type == 'out':\n            keyfunc = partial(self._group_shipment_key, list(moves.values()))\n            Shipment = pool.get('stock.shipment.out')\n        elif shipment_type == 'return':\n            keyfunc = partial(self._group_return_key, list(moves.values()))\n            Shipment = pool.get('stock.shipment.out.return')\n        moves = moves.items()\n        moves = sorted(moves, key=sortable_values(keyfunc))\n\n        shipments = []\n        for key, grouped_moves in groupby(moves, key=keyfunc):\n            shipment = self._get_shipment_sale(Shipment, key)\n            shipment.moves = (list(getattr(shipment, 'moves', []))\n                + [x[1] for x in grouped_moves])\n            shipments.append(shipment)\n        return shipments\n\n    def is_done(self):\n        return ((self.invoice_state == 'paid'\n                or (self.invoice_state == 'none'\n                    and all(\n                        l.invoice_progress >= 1\n                        for l in self.line_lines\n                        if l.invoice_progress is not None)))\n            and (self.shipment_state == 'sent'\n                or (self.shipment_state == 'none'\n                    and all(\n                        l.moves_progress >= 1\n                        for l in self.line_lines\n                        if l.moves_progress is not None))))"
+        },
+        {
+          "start": 1182,
+          "end": 1192,
+          "text": "    def confirm(cls, sales):\n        transaction = Transaction()\n        context = transaction.context\n        cls.set_sale_date(sales)\n        cls.store_cache(sales)\n        for process_after, sub_sales in groupby(\n                sales, lambda s: s.process_after):\n            with transaction.set_context(\n                    queue_scheduled_at=process_after,\n                    queue_batch=context.get('queue_batch', True)):\n                cls.__queue__.process(sub_sales)"
+        },
+        {
+          "start": 1216,
+          "end": 1255,
+          "text": "    def process(cls, sales):\n        states = {'confirmed', 'processing', 'done'}\n        sales = [s for s in sales if s.state in states]\n        cls.lock(sales)\n        cls._process_invoice(sales)\n        cls._process_fulfillment(sales)\n        cls._process_invoice_fulfillment_states(sales)\n        cls._process_state(sales)\n\n    @classmethod\n    def _process_invoice(cls, sales):\n        pool = Pool()\n        Invoice = pool.get('account.invoice')\n\n        invoices = {}\n        for sale in sales:\n            invoice = sale.create_invoice()\n            if invoice:\n                invoices[sale] = invoice\n\n        Invoice.save(invoices.values())\n        for sale, invoice in invoices.items():\n            sale.copy_resources_to(invoice)\n\n    @classmethod\n    def _process_fulfillment(cls, sales):\n        pool = Pool()\n        ShipmentOut = pool.get('stock.shipment.out')\n        ShipmentOutReturn = pool.get('stock.shipment.out.return')\n        Config = pool.get('sale.configuration')\n        config = Config(1)\n\n        shipments_out, shipments_return = {}, {}\n        for sale in sales:\n            shipments = sale.create_shipment('out')\n            if shipments:\n                shipments_out[sale] = shipments\n            shipments = sale.create_shipment('return')\n            if shipments:\n                shipments_return[sale] = shipments"
+        }
+      ]
+    },
+    {
+      "id": "T2",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/sale_amendment/sale.py",
+      "path": "modules/sale_amendment/sale.py",
+      "line_ranges": [
+        [
+          104,
+          171
+        ],
+        [
+          474,
+          479
+        ]
+      ],
+      "observed": "Avenant incrémente révision, applique les lignes puis relance traitement ; nettoyage vise documents encore modifiables.",
+      "flow_delta": "Transposition aux révisions autorisées ; absence de preuve d’un graphe universel plusieurs-à-plusieurs ou de fusion après engagement.",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/sale_amendment/sale.py#L104",
+      "basis": "Lecture du code figé ; ni exécution du produit ni temps de réalisation observé.",
+      "sha256": "f6b3eb7ee8fb7a5906cb173c3fb4b45f0cd28ea6379fa1af3987b9ff1a8c80b4",
+      "excerpts": [
+        {
+          "start": 104,
+          "end": 171,
+          "text": "    def validate_amendment(cls, amendments):\n        pool = Pool()\n        Sale = pool.get('sale.sale')\n        transaction = Transaction()\n        context = transaction.context\n        sales = set()\n        for amendment in amendments:\n            sale = amendment.sale\n            if sale in sales:\n                raise AmendmentValidateError(\n                    gettext('sale_amendment.msg_one_sale_at_time',\n                        sale=sale.rec_name))\n            sales.add(sale)\n            sale.revision += 1\n            for line in amendment.lines:\n                line.apply(sale)\n            # Force saved lines\n            sale.lines = sale.lines\n\n        Sale.save(sales)\n        Sale.store_cache(sales)\n        cls._clear_sale(sales)\n        with transaction.set_context(\n                queue_batch=context.get('queue_batch', True)):\n            Sale.__queue__.process(sales)\n\n    @classmethod\n    def _clear_sale(cls, sales):\n        pool = Pool()\n        Invoice = pool.get('account.invoice')\n        InvoiceLine = pool.get('account.invoice.line')\n        Shipment = pool.get('stock.shipment.out')\n        ShipmentReturn = pool.get('stock.shipment.out.return')\n        Move = pool.get('stock.move')\n\n        invoices = set()\n        shipments = set()\n        shipment_returns = set()\n        invoice_lines = set()\n        moves = set()\n        for sale in sales:\n            for invoice in sale.invoices:\n                if invoice.state == 'draft':\n                    invoices.add(invoice)\n            for shipment in sale.shipments:\n                if shipment.state in ['draft', 'waiting']:\n                    shipments.add(shipment)\n            for shipment_return in sale.shipment_returns:\n                if shipment_return.state == 'draft':\n                    shipment_returns.add(shipment_return)\n\n            for line in sale.lines:\n                for invoice_line in line.invoice_lines:\n                    if invoice_line.invoice_state == 'draft':\n                        invoice_lines.add(invoice_line)\n                moves.update(cls._stock_moves(line))\n\n        shipments_waiting = [s for s in shipments if s.state == 'waiting']\n        Shipment.draft(shipments)  # Clear inventory moves\n        InvoiceLine.delete(invoice_lines)\n        Move.delete(moves)\n\n        Invoice.update_taxes([i for i in invoices if i.lines])\n        Invoice.delete([i for i in invoices if not i.lines])\n        Shipment.wait([s for s in shipments_waiting if s.outgoing_moves])\n        Shipment.delete([s for s in shipments if not s.outgoing_moves])\n        ShipmentReturn.delete(\n            [s for s in shipment_returns if not s.incoming_moves])"
+        },
+        {
+          "start": 474,
+          "end": 479,
+          "text": "    def _apply_line(self, sale, sale_line):\n        sale_line.product = self.product\n        sale_line.quantity = self.quantity\n        sale_line.unit = self.unit\n        sale_line.unit_price = self.unit_price\n        sale_line.description = self.description"
+        }
+      ]
+    },
+    {
+      "id": "T3",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/stock_consignment/stock.py",
+      "path": "modules/stock_consignment/stock.py",
+      "line_ranges": [
+        [
+          195,
+          251
+        ],
+        [
+          283,
+          305
+        ]
+      ],
+      "observed": "Consignation distinguée via parties/lieux ; création de lignes de facture depuis certains mouvements et transitions dédiées.",
+      "flow_delta": "Propriété/détention et effets financiers demandent une séparation FLOW ; pas preuve d’une commande d’apport/reprise autonome ni d’un moteur de clauses.",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock_consignment/stock.py#L195",
+      "basis": "Lecture du code figé ; ni exécution du produit ni temps de réalisation observé.",
+      "sha256": "d185cace6b5dd9fd9d9d80a6e411873a899c45ffbef355ec1f7c96c8c4ef0d9a",
+      "excerpts": [
+        {
+          "start": 195,
+          "end": 251,
+          "text": "    def is_supplier_consignment(self):\n        return (self.from_location.type == 'supplier'\n            and self.to_location.type in {'storage', 'production', 'customer'}\n            and self.from_location.consignment_party)\n\n    @property\n    def is_customer_consignment(self):\n        return (\n            self.from_location.type in {'storage', 'production', 'supplier'}\n            and self.to_location.type == 'customer'\n            and self.from_location.consignment_party)\n\n    def get_invoice_lines_consignment(self):\n        lines = []\n        if self.is_supplier_consignment:\n            lines.append(self._get_supplier_invoice_line_consignment())\n        if self.is_customer_consignment:\n            lines.append(self._get_customer_invoice_line_consignment())\n        return lines\n\n    def _get_supplier_invoice_line_consignment(self):\n        pool = Pool()\n        InvoiceLine = pool.get('account.invoice.line')\n        Product = pool.get('product.product')\n        ProductSupplier = pool.get('purchase.product_supplier')\n\n        with Transaction().set_context(\n                supplier=self.from_location.consignment_party.id):\n            pattern = ProductSupplier.get_pattern()\n        for product_supplier in self.product.product_suppliers_used(**pattern):\n            currency = product_supplier.currency\n            break\n        else:\n            currency = self.company.currency\n\n        line = InvoiceLine()\n        line.invoice_type = 'in'\n        line.type = 'line'\n        line.company = self.company\n        line.party = self.from_location.consignment_party\n        line.currency = currency\n        line.product = self.product\n        line.quantity = self.quantity\n        line.unit = self.unit\n        line.stock_moves = [self]\n        line.origin = self\n        line.on_change_product()\n\n        with Transaction().set_context(\n                currency=line.currency.id,\n                supplier=line.party.id,\n                uom=line.unit.id,\n                taxes=[t.id for t in line.taxes]):\n            line.unit_price = Product.get_purchase_price(\n                [line.product], line.quantity)[line.product.id]\n        return line\n"
+        },
+        {
+          "start": 283,
+          "end": 305,
+          "text": "    def draft(cls, moves):\n        super().draft(moves)\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('assigned')\n    @set_origin_consignment('assigned')\n    def assign(cls, moves):\n        super().assign(moves)\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('done')\n    @set_origin_consignment('done')\n    def do(cls, moves):\n        super().do(moves)\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('cancelled')\n    @unset_origin_consignment('cancelled')\n    def cancel(cls, moves):\n        super().cancel(moves)"
+        }
+      ]
+    },
+    {
+      "id": "T4",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/stock/shipment.py",
+      "path": "modules/stock/shipment.py",
+      "line_ranges": [
+        [
+          2920,
+          2954
+        ],
+        [
+          2964,
+          2969
+        ]
+      ],
+      "observed": "Départ exécute mouvements sortants ; arrivée exécute entrants et contrôle quantités en transit, dates distinctes.",
+      "flow_delta": "Analogie forte de séparation départ/arrivée, mais commande et autorité de révision FLOW restent à construire.",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/shipment.py#L2920",
+      "basis": "Lecture du code figé ; ni exécution du produit ni temps de réalisation observé.",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "excerpts": [
+        {
+          "start": 2920,
+          "end": 2954,
+          "text": "    def ship(cls, shipments):\n        pool = Pool()\n        Move = pool.get('stock.move')\n        Date = pool.get('ir.date')\n        Move.do([m for s in shipments for m in s.outgoing_moves])\n        cls._sync_moves(shipments)\n        for company, c_shipments in groupby(\n                shipments, key=lambda s: s.company):\n            with Transaction().set_context(company=company.id):\n                today = Date.today()\n            cls.write([s for s in c_shipments if not s.effective_start_date], {\n                    'effective_start_date': today,\n                    })\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('done')\n    @set_employee('done_by')\n    def do(cls, shipments):\n        pool = Pool()\n        Move = pool.get('stock.move')\n        Date = pool.get('ir.date')\n        incoming_moves = []\n        for shipment in shipments:\n            if shipment.transit_location:\n                shipment.check_quantity()\n            incoming_moves.extend(shipment.incoming_moves)\n        Move.do(incoming_moves)\n        for company, c_shipments in groupby(\n                shipments, key=lambda s: s.company):\n            with Transaction().set_context(company=company.id):\n                today = Date.today()\n            cls.write([s for s in c_shipments if not s.effective_date], {\n                    'effective_date': today,\n                    })"
+        },
+        {
+          "start": 2964,
+          "end": 2969,
+          "text": "    @classmethod\n    @ModelView.button\n    @Workflow.transition('cancelled')\n    def cancel(cls, shipments):\n        Move = Pool().get('stock.move')\n        Move.cancel([m for s in shipments for m in s.moves])"
+        }
+      ]
+    },
+    {
+      "id": "T5",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/sale/sale.py",
+      "path": "modules/sale/sale.py",
+      "line_ranges": [
+        [
+          2580,
+          2602
+        ]
+      ],
+      "observed": "Assistant de retour copie la vente avec origine et quantités inversées.",
+      "flow_delta": "Ne démontre pas les suites simultanées avoir/remboursement/remplacement/réparation attendues par FLOW.",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/sale/sale.py#L2580",
+      "basis": "Lecture du code figé ; ni exécution du produit ni temps de réalisation observé.",
+      "sha256": "f325596b20755d5c6df1d3830943f6ac64759670eaa0063b071d15d060213a9c",
+      "excerpts": [
+        {
+          "start": 2580,
+          "end": 2602,
+          "text": "class ReturnSale(Wizard):\n    __name__ = 'sale.return_sale'\n    start = StateView('sale.return_sale.start',\n        'sale.return_sale_start_view_form', [\n            Button('Cancel', 'end', 'tryton-cancel'),\n            Button('Return', 'return_', 'tryton-ok', default=True),\n            ])\n    return_ = StateAction('sale.act_sale_form')\n\n    def do_return_(self, action):\n        sales = self.records\n        return_sales = self.model.copy(sales, default={\n                'origin': lambda data: (\n                    '%s,%s' % (self.model.__name__, data['id'])),\n                'lines.quantity': lambda data: (\n                    data['quantity'] * -1 if data['type'] == 'line'\n                    else data['quantity']),\n                })\n\n        data = {'res_id': [s.id for s in return_sales]}\n        if len(return_sales) == 1:\n            action['views'].reverse()\n        return action, data"
+        }
+      ]
+    },
+    {
+      "id": "A1",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "local_path": "tmp/oss-audit-axelor/axelor-sale/src/main/java/com/axelor/apps/sale/service/saleorder/status/SaleOrderWorkflowServiceImpl.java",
+      "path": "axelor-sale/src/main/java/com/axelor/apps/sale/service/saleorder/status/SaleOrderWorkflowServiceImpl.java",
+      "line_ranges": [
+        [
+          66,
+          116
+        ]
+      ],
+      "observed": "Annulation limitée à des statuts de devis ; clôture contrôlée depuis confirmé, persistance transactionnelle.",
+      "flow_delta": "Le contrôle d’état est comparable ; une clôture de FLOW nécessite preuves et quantités propres, pas seulement le statut.",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-sale/src/main/java/com/axelor/apps/sale/service/saleorder/status/SaleOrderWorkflowServiceImpl.java#L66",
+      "basis": "Lecture du code figé ; ni exécution du produit ni temps de réalisation observé.",
+      "sha256": "5baa815bcd19d79ac14a5405ff035c68c207a43cda6be727cbc427d6045ad089",
+      "excerpts": [
+        {
+          "start": 66,
+          "end": 116,
+          "text": "  @Override\n  @Transactional(rollbackOn = {Exception.class})\n  public void cancelSaleOrder(\n      SaleOrder saleOrder, CancelReason cancelReason, String cancelReasonStr)\n      throws AxelorException {\n\n    List<Integer> authorizedStatus = new ArrayList<>();\n    authorizedStatus.add(SaleOrderRepository.STATUS_DRAFT_QUOTATION);\n    authorizedStatus.add(SaleOrderRepository.STATUS_FINALIZED_QUOTATION);\n    if (saleOrder.getStatusSelect() == null\n        || !authorizedStatus.contains(saleOrder.getStatusSelect())) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(SaleExceptionMessage.SALE_ORDER_CANCEL_WRONG_STATUS));\n    }\n\n    Query q =\n        JPA.em()\n            .createQuery(\n                \"select count(*) FROM SaleOrder as self WHERE self.statusSelect in (?1 , ?2) AND self.clientPartner = ?3 \");\n    q.setParameter(1, SaleOrderRepository.STATUS_ORDER_CONFIRMED);\n    q.setParameter(2, SaleOrderRepository.STATUS_ORDER_COMPLETED);\n    q.setParameter(3, saleOrder.getClientPartner());\n    if ((long) q.getSingleResult() == 0) {\n      saleOrder.getClientPartner().setIsCustomer(false);\n      saleOrder.getClientPartner().setIsProspect(true);\n    }\n    saleOrder.setStatusSelect(SaleOrderRepository.STATUS_CANCELED);\n    saleOrder.setCancelReason(cancelReason);\n    if (Strings.isNullOrEmpty(cancelReasonStr)) {\n      saleOrder.setCancelReasonStr(cancelReason.getName());\n    } else {\n      saleOrder.setCancelReasonStr(cancelReasonStr);\n    }\n    saleOrderRepo.save(saleOrder);\n  }\n\n  @Transactional(rollbackOn = {Exception.class})\n  public void completeSaleOrder(SaleOrder saleOrder) throws AxelorException {\n\n    if (saleOrder.getStatusSelect() == null\n        || saleOrder.getStatusSelect() != SaleOrderRepository.STATUS_ORDER_CONFIRMED) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(SaleExceptionMessage.SALE_ORDER_COMPLETE_WRONG_STATUS));\n    }\n\n    saleOrder.setStatusSelect(SaleOrderRepository.STATUS_ORDER_COMPLETED);\n    saleOrder.setOrderBeingEdited(false);\n\n    saleOrderRepo.save(saleOrder);"
+        }
+      ]
+    },
+    {
+      "id": "A2",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "local_path": "tmp/oss-audit-axelor/axelor-purchase/src/main/java/com/axelor/apps/purchase/service/PurchaseOrderWorkflowServiceImpl.java",
+      "path": "axelor-purchase/src/main/java/com/axelor/apps/purchase/service/PurchaseOrderWorkflowServiceImpl.java",
+      "line_ranges": [
+        [
+          68,
+          122
+        ]
+      ],
+      "observed": "Validation depuis demandé, utilisateur/date, vérification fournisseur ; fin et annulation soumises à statuts.",
+      "flow_delta": "Analogie d’autorisation et traçabilité ; engagement fournisseur externe partiel et prix reçu requièrent un contrat propre.",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-purchase/src/main/java/com/axelor/apps/purchase/service/PurchaseOrderWorkflowServiceImpl.java#L68",
+      "basis": "Lecture du code figé ; ni exécution du produit ni temps de réalisation observé.",
+      "sha256": "949619a6f475fb727d569dbaff1c70f1396b8021e24efb1b7696988af04a7c49",
+      "excerpts": [
+        {
+          "start": 68,
+          "end": 122,
+          "text": "  @Override\n  @Transactional(rollbackOn = {Exception.class})\n  public void validatePurchaseOrder(PurchaseOrder purchaseOrder) throws AxelorException {\n\n    if (purchaseOrder.getStatusSelect() == null\n        || purchaseOrder.getStatusSelect() != PurchaseOrderRepository.STATUS_REQUESTED) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(PurchaseExceptionMessage.PURCHASE_ORDER_VALIDATE_WRONG_STATUS));\n    }\n\n    purchaseOrderService.computePurchaseOrder(purchaseOrder);\n\n    purchaseOrder.setStatusSelect(PurchaseOrderRepository.STATUS_VALIDATED);\n    purchaseOrder.setValidationDateTime(\n        appPurchaseService.getTodayDateTime(purchaseOrder.getCompany()).toLocalDateTime());\n    purchaseOrder.setValidatedByUser(AuthUtils.getUser());\n\n    purchaseOrder.setSupplierPartner(purchaseOrderService.validateSupplier(purchaseOrder));\n    purchaseOrderTypeSelectService.setTypeSelect(purchaseOrder);\n\n    purchaseOrderService.updateCostPrice(purchaseOrder);\n  }\n\n  @Override\n  @Transactional(rollbackOn = {Exception.class})\n  public void finishPurchaseOrder(PurchaseOrder purchaseOrder) throws AxelorException {\n\n    if (purchaseOrder.getStatusSelect() == null\n        || purchaseOrder.getStatusSelect() != PurchaseOrderRepository.STATUS_VALIDATED) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(PurchaseExceptionMessage.PURCHASE_ORDER_FINISH_WRONG_STATUS));\n    }\n\n    purchaseOrder.setStatusSelect(PurchaseOrderRepository.STATUS_FINISHED);\n    purchaseOrderRepo.save(purchaseOrder);\n  }\n\n  @Override\n  @Transactional(rollbackOn = {Exception.class})\n  public void cancelPurchaseOrder(PurchaseOrder purchaseOrder) throws AxelorException {\n    List<Integer> authorizedStatus = new ArrayList<>();\n    authorizedStatus.add(PurchaseOrderRepository.STATUS_DRAFT);\n    authorizedStatus.add(PurchaseOrderRepository.STATUS_REQUESTED);\n    authorizedStatus.add(PurchaseOrderRepository.STATUS_VALIDATED);\n    if (purchaseOrder.getStatusSelect() == null\n        || !authorizedStatus.contains(purchaseOrder.getStatusSelect())) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(PurchaseExceptionMessage.PURCHASE_ORDER_CANCEL_WRONG_STATUS));\n    }\n\n    purchaseOrder.setStatusSelect(PurchaseOrderRepository.STATUS_CANCELED);\n    purchaseOrderRepo.save(purchaseOrder);"
+        }
+      ]
+    },
+    {
+      "id": "A3",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "local_path": "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "line_ranges": [
+        [
+          837,
+          918
+        ],
+        [
+          1231,
+          1292
+        ]
+      ],
+      "observed": "Reliquat copié lié à l’origine, quantité demandée moins réalisée ; scission vérifie quantité, copie et replanifie.",
+      "flow_delta": "Scission physique comparable ; ne démontre pas conservation des autorisations/prix et liens intercompany d’Order Structuring.",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java#L837",
+      "basis": "Lecture du code figé ; ni exécution du produit ni temps de réalisation observé.",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "excerpts": [
+        {
+          "start": 837,
+          "end": 918,
+          "text": "  public boolean mustBeSplit(StockMove stockMove) {\n    return stockMoveLineRepo\n            .all()\n            .filter(\"self.stockMove.id = :stockMoveId AND self.realQty != self.qty\")\n            .bind(\"stockMoveId\", stockMove.getId())\n            .count()\n        > 0;\n  }\n\n  @Override\n  public Optional<StockMove> copyAndSplitStockMove(StockMove stockMove) throws AxelorException {\n\n    if (stockMove == null || !isNewBackorderLinePossible(stockMove)) {\n      return Optional.empty();\n    }\n\n    StockMove newStockMove = stockMoveRepo.copy(stockMove, false);\n\n    setOrigin(stockMove, newStockMove);\n    newStockMove.setOrigin(stockMove.getOrigin());\n    newStockMove.setRealDate(null);\n    newStockMove.setStockMoveSeq(\n        stockMoveToolService.getSequenceStockMove(\n            newStockMove.getTypeSelect(), newStockMove.getCompany(), stockMove));\n    newStockMove.setName(\n        stockMoveToolService.computeName(\n            newStockMove,\n            newStockMove.getStockMoveSeq()\n                + \" \"\n                + I18n.get(StockExceptionMessage.STOCK_MOVE_7)\n                + \" \"\n                + stockMove.getStockMoveSeq()\n                + \" )\"));\n    newStockMove.setExTaxTotal(stockMoveToolService.compute(newStockMove));\n    newStockMove.setShipmentMode(null);\n    newStockMove.setFreightCarrierMode(null);\n    newStockMove.setCarrierPartner(null);\n    newStockMove.setForwarderPartner(null);\n    newStockMove.setIncoterm(null);\n    newStockMove.setTrackingNumber(null);\n    newStockMove.setModeOfTransport(null);\n    newStockMove.setNumOfPackages(0);\n    newStockMove.setNumOfPalettes(0);\n    newStockMove.setGrossMass(BigDecimal.ZERO);\n    newStockMove.setIsIspmRequired(false);\n    newStockMove.setIsNeedingConformityCertificate(false);\n    newStockMove.setSignatoryUser(null);\n    newStockMove.setIsConformityCertifSigned(false);\n    newStockMove.setElectronicSignature(null);\n    newStockMove.setStockMoveOrigin(stockMove);\n    newStockMove = stockMoveRepo.save(newStockMove);\n    stockMove.setBackorderId(newStockMove.getId());\n    stockMoveRepo.save(stockMove);\n    final StockMove[] newStockMoveHolder = new StockMove[] {newStockMove};\n    BatchProcessorHelper.of()\n        .<StockMoveLine, AxelorException>forEachByQuery(\n            getStockMoveLineQuery(stockMove.getId()),\n            line -> processBackorderLine(line, newStockMoveHolder[0]),\n            () -> newStockMoveHolder[0] = stockMoveRepo.find(newStockMoveHolder[0].getId()));\n    newStockMove = stockMoveRepo.find(newStockMove.getId());\n    plan(newStockMove);\n    return Optional.of(stockMoveRepo.find(newStockMove.getId()));\n  }\n\n  protected boolean isNewBackorderLinePossible(StockMove stockMove) throws AxelorException {\n    return stockMoveLineRepo\n            .all()\n            .filter(\"self.stockMove.id = :stockMoveId AND self.qty > self.realQty\")\n            .bind(\"stockMoveId\", stockMove.getId())\n            .count()\n        > 0;\n  }\n\n  protected StockMoveLine copySplittedStockMoveLine(StockMoveLine stockMoveLine)\n      throws AxelorException {\n    StockMoveLine newStockMoveLine = stockMoveLineRepo.copy(stockMoveLine, false);\n\n    newStockMoveLine.setQty(stockMoveLine.getQty().subtract(stockMoveLine.getRealQty()));\n\n    stockMoveLineService.fillRealQuantities(\n        newStockMoveLine, stockMoveLine.getStockMove(), newStockMoveLine.getQty());\n    return newStockMoveLine;"
+        },
+        {
+          "start": 1231,
+          "end": 1292,
+          "text": "  public StockMove splitInto2(\n      StockMove originalStockMove, List<StockMoveLine> modifiedStockMoveLines)\n      throws AxelorException {\n\n    int originalStatusSelect = originalStockMove.getStatusSelect();\n\n    if (originalStatusSelect == StockMoveRepository.STATUS_PLANNED) {\n      cancel(originalStockMove);\n      goBackToDraft(originalStockMove);\n    }\n\n    // Copy this stock move\n    StockMove newStockMove = stockMoveRepo.copy(originalStockMove, false);\n    newStockMove.setStockMoveLineList(new ArrayList<>());\n\n    modifiedStockMoveLines =\n        modifiedStockMoveLines.stream()\n            .filter(\n                stockMoveLine ->\n                    stockMoveLine.getQty().compareTo(BigDecimal.ZERO) != 0\n                        && stockMoveLine.getLineTypeSelect() == StockMoveLineRepository.TYPE_NORMAL)\n            .collect(Collectors.toList());\n    for (StockMoveLine moveLine : modifiedStockMoveLines) {\n\n      // find the original move line to update it\n      Optional<StockMoveLine> correspondingMoveLine =\n          originalStockMove.getStockMoveLineList().stream()\n              .filter(stockMoveLine -> stockMoveLine.getId().equals(moveLine.getId()))\n              .findFirst();\n      if (BigDecimal.ZERO.compareTo(moveLine.getQty()) > 0\n          || (correspondingMoveLine.isPresent()\n              && moveLine.getQty().compareTo(correspondingMoveLine.get().getRealQty()) > 0)) {\n        throw new AxelorException(\n            TraceBackRepository.CATEGORY_INCONSISTENCY,\n            I18n.get(StockExceptionMessage.STOCK_MOVE_16),\n            originalStockMove);\n      }\n\n      if (correspondingMoveLine.isPresent()) {\n        newStockMove.addStockMoveLineListItem(\n            createSplitStockMoveLine(originalStockMove, correspondingMoveLine.get(), moveLine));\n      }\n    }\n\n    if (!newStockMove.getStockMoveLineList().isEmpty()) {\n      newStockMove.setExTaxTotal(stockMoveToolService.compute(newStockMove));\n      newStockMove = stockMoveRepo.save(newStockMove);\n\n      originalStockMove = stockMoveRepo.save(originalStockMove);\n      BigDecimal exTaxTotal = stockMoveToolService.compute(originalStockMove);\n      originalStockMove = JpaModelHelper.ensureManaged(originalStockMove);\n      originalStockMove.setExTaxTotal(exTaxTotal);\n      originalStockMove = stockMoveRepo.save(originalStockMove);\n\n      if (originalStatusSelect == StockMoveRepository.STATUS_PLANNED) {\n        plan(originalStockMove);\n        plan(newStockMove);\n      }\n      return newStockMove;\n    } else {\n      return null;\n    }"
+        }
+      ]
+    }
+  ],
+  "method": "Lecture de 11 extraits ciblés dans trois OSS, pas preuve de leur couverture exhaustive ni mesure de charge."
+}

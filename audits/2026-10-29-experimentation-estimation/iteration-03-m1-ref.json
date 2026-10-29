@@ -1,0 +1,330 @@
+{
+  "id": "iteration-03-REF-M1",
+  "ensemble": "REF",
+  "method": "M1",
+  "contract_ref": "iteration-03-contrat.json",
+  "classification": "Estimation d’ingénierie assistée par IA, non calibrée ; aucun JH historique utilisé.",
+  "proof_catalog": {
+    "OD-IMPORT": "iteration-02-code-oss.json#/products/0/evidence/0",
+    "OD-ORM": "iteration-02-code-oss.json#/products/0/evidence/1",
+    "OD-PRODUCT": "iteration-02-code-oss.json#/products/0/evidence/2",
+    "OD-TEST": "iteration-02-code-oss.json#/products/0/evidence/3",
+    "TY-IMPORT": "iteration-02-code-oss.json#/products/1/evidence/0",
+    "TY-TEST": "iteration-02-code-oss.json#/products/1/evidence/7",
+    "AX-IMPORT": "iteration-02-code-oss.json#/products/2/evidence/0",
+    "AX-CSV": "iteration-02-code-oss.json#/products/2/evidence/2",
+    "SPRING": "iteration-02-cadre-spring.json#technical_baseline",
+    "CONTRAT": "iteration-03-contrat.json#REF"
+  },
+  "packages": [
+    {
+      "id": "R01",
+      "label": "Contrats, versions et critères d’acceptation",
+      "proof_refs": [
+        "CONTRAT",
+        "OD-IMPORT",
+        "OD-PRODUCT",
+        "TY-IMPORT"
+      ],
+      "work": "Fixer schémas, identités, décisions de version, résultats par ligne et états lot/rejet.",
+      "rationale": "Central : quatre séquences de clarification avec préparation/restitution et 2 JH de consolidation = analyse 6 ; architecture 3 ; stratégie QA 2 ; lancement/coordination 1. Les reprises font varier l’effort à garanties constantes.",
+      "effort": {
+        "analyse_produit": [
+          4,
+          6,
+          9
+        ],
+        "architecture": [
+          2,
+          3,
+          5
+        ],
+        "qa": [
+          1,
+          2,
+          3
+        ],
+        "coordination": [
+          0.5,
+          1,
+          1.5
+        ]
+      }
+    },
+    {
+      "id": "R02",
+      "label": "Modèle local, identités et application des versions",
+      "proof_refs": [
+        "OD-ORM",
+        "OD-PRODUCT",
+        "TY-IMPORT",
+        "SPRING",
+        "CONTRAT"
+      ],
+      "work": "Produit/variante, relation parent, identité de source, migrations et application atomique de la règle de version.",
+      "rationale": "Quatre unités backend : modèle/migrations, résolution d’identité, décisions de version, application transactionnelle COMMON. 8/12/18 JH développeur, tests inclus. Central analyse 2 et architecture 2 pour cas limites et revue.",
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "architecture": [
+          1,
+          2,
+          3
+        ],
+        "dev_java": [
+          8,
+          12,
+          18
+        ]
+      }
+    },
+    {
+      "id": "R03",
+      "label": "CSV et exécution persistée du lot",
+      "proof_refs": [
+        "OD-IMPORT",
+        "AX-IMPORT",
+        "AX-CSV",
+        "SPRING",
+        "CONTRAT"
+      ],
+      "work": "Lecture canonique, lots/lignes persistés, progression, traitement des lignes valides et reprise après interruption.",
+      "rationale": "Quatre unités backend : réception typée, état/progression, exécution/transactions, reprise ; 10/16/24 JH avec tests. Spring Batch réutilisé. Central : plateforme 2 pour réglages/métriques du job, sécurité 1 pour fichiers, architecture 2, analyse 1,5.",
+      "effort": {
+        "analyse_produit": [
+          1,
+          1.5,
+          2
+        ],
+        "architecture": [
+          1,
+          2,
+          3
+        ],
+        "dev_java": [
+          10,
+          16,
+          24
+        ],
+        "plateforme": [
+          1,
+          2,
+          3
+        ],
+        "securite": [
+          0.5,
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "id": "R04",
+      "label": "Validations, quarantaine et rejeu corrigé",
+      "proof_refs": [
+        "OD-PRODUCT",
+        "OD-TEST",
+        "TY-TEST",
+        "AX-IMPORT",
+        "CONTRAT"
+      ],
+      "work": "Contrôles de champs/liens, conservation du rejet, sélection des lignes corrigées et relance sans reprendre les acceptées.",
+      "rationale": "Quatre unités backend : contrôles, conservation, commande/transitions de rejeu, tests de cohérence ; 8/12/19 JH. Identité/version appelle R02, sans réécriture. Analyse centrale 2, architecture 1,5.",
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "architecture": [
+          1,
+          1.5,
+          2.5
+        ],
+        "dev_java": [
+          8,
+          12,
+          19
+        ]
+      }
+    },
+    {
+      "id": "R05",
+      "label": "Consultation et permissions du module",
+      "proof_refs": [
+        "OD-ORM",
+        "OD-PRODUCT",
+        "SPRING",
+        "CONTRAT"
+      ],
+      "work": "Recherche paginée et détail produit/variantes avec source/version ; application des profils communs.",
+      "rationale": "Deux unités backend : consultation ; permissions et tests. 5/8/12 JH. Les API d’import/rejeu sont déjà dans R03/R04. Central analyse 1, architecture 1, sécurité spécifique 1.",
+      "effort": {
+        "analyse_produit": [
+          0.5,
+          1,
+          1.5
+        ],
+        "architecture": [
+          0.5,
+          1,
+          1.5
+        ],
+        "dev_java": [
+          5,
+          8,
+          12
+        ],
+        "securite": [
+          0.5,
+          1,
+          1.5
+        ]
+      }
+    },
+    {
+      "id": "R06",
+      "label": "Deux vues métier et interactions",
+      "proof_refs": [
+        "OD-IMPORT",
+        "AX-IMPORT",
+        "CONTRAT",
+        "SPRING"
+      ],
+      "work": "Dépôt/suivi/rejets et consultation produit/variantes ; soumission de la contribution corrigée et relance.",
+      "rationale": "Deux vues à 6/9/13,5 JH frontend chacune, API et tests développeur compris. UX 3/5/7 ; analyse 1/2/3. Navigation et composants génériques déjà dans COMMON.",
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "ux": [
+          3,
+          5,
+          7
+        ],
+        "dev_frontend": [
+          12,
+          18,
+          27
+        ]
+      }
+    },
+    {
+      "id": "R07",
+      "label": "Qualification indépendante et corrections",
+      "proof_refs": [
+        "OD-TEST",
+        "TY-TEST",
+        "CONTRAT"
+      ],
+      "work": "Formats, relations, versions, répétitions, lignes partielles, rejets/rejeu, droits, interruption et témoin de 10 000 lignes.",
+      "rationale": "Hypothèse 24 scénarios en huit familles. QA centrale 6 préparation/données + 6 automatisation + 4 exécution/retest = 16. Développeurs : corrections révélées par cette QA seulement. Plateforme : données/instrumentation spécifiques, infrastructure exclue.",
+      "effort": {
+        "qa": [
+          10,
+          16,
+          25
+        ],
+        "dev_java": [
+          3,
+          5,
+          9
+        ],
+        "dev_frontend": [
+          1,
+          2,
+          4
+        ],
+        "plateforme": [
+          1,
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "id": "R08",
+      "label": "Documentation, livraison et coordination",
+      "proof_refs": [
+        "CONTRAT"
+      ],
+      "work": "Contrats et exemples, guide import/correction/reprise, vérification de livraison et coordination du lot.",
+      "rationale": "Central analyse 2, backend 2, frontend 1, plateforme 1, architecture 1. Coordination : trois revues de jalon à 1 JH + huit points à 0,5 JH = 7 ; aucune durée calendaire déduite. Ne finance pas la CI COMMON.",
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "architecture": [
+          0.5,
+          1,
+          2
+        ],
+        "dev_java": [
+          1,
+          2,
+          3
+        ],
+        "dev_frontend": [
+          0.5,
+          1,
+          2
+        ],
+        "plateforme": [
+          0.5,
+          1,
+          2
+        ],
+        "coordination": [
+          4,
+          7,
+          11
+        ]
+      }
+    }
+  ],
+  "assumptions": [
+    "Deux types fixes, au maximum 12 champs métier produit et 8 champs variante, scalaires, plus identité/source/version : convention de dimensionnement proposée, pas observation FLOW.",
+    "Une source d’autorité par objet, sans administration d’autorité ni rapprochement probabiliste.",
+    "CSV UTF-8 et schéma fixes ; ni Excel ni pièces jointes métier.",
+    "Lot complet = objets transmis ; aucune suppression implicite des absents.",
+    "Résolution des liens internes en deux phases ; parent absent = rejet.",
+    "Spring Batch retenu sans modification ; mécanisme d’import métier financé REF.",
+    "Correction par contribution corrigée, pas par un éditeur universel intégré.",
+    "Tests développeur inclus ; corrections de qualification isolées dans R07."
+  ],
+  "role_omission_rule": "Un rôle absent d’un paquet n’y est pas mobilisé séparément. Les neuf rôles contribuent au total REF. COMMON est exclu de ce total.",
+  "exclusions": [
+    "MDM, nettoyage client, génération de variantes commerciales",
+    "Arbitrage entre sources concurrentes, fusion de référentiels",
+    "Éditeur visuel universel de mappings, règles Fashion ou enrichissement automatique",
+    "Toutes les autres familles de références",
+    "Toutes les fonctions BC-004.02 et BC-004.03",
+    "Suppression implicite des absents du lot complet",
+    "Bitemporalité complète",
+    "SLA et capacité de production garantie"
+  ],
+  "variant": {
+    "id": "V-REF-SNAPSHOT",
+    "change": "Un lot complet retire ou désactive les objets absents et traite leurs dépendances.",
+    "delta_jh": null,
+    "reason": "Exige une sémantique d’instantané, des contrôles de complétude et des tests de récupération ; jamais absorbé dans la borne haute courante."
+  },
+  "timing": {
+    "start_utc": "2026-10-29 10:07:47 UTC",
+    "freeze_utc": "2026-10-29 10:10:14 UTC",
+    "elapsed_seconds": 147,
+    "scope": "Lecture, structuration, sommes ; rédaction finale exclue, pas temps humain de développement."
+  },
+  "frozen_total_jh": [
+    86,
+    141,
+    218.5
+  ]
+}

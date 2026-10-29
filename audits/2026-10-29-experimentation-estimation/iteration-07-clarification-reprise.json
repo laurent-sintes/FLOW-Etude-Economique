@@ -1,0 +1,18 @@
+{
+  "id": "iteration-07-clarification-reprise",
+  "from_contract": "iteration-07-contrat.json",
+  "from_sha256": "69f463194f9fdab2127f87bcd1d41d4807210d8b46a26e58f2b8b5dd92cceec9",
+  "reason": "La restauration de la base à un point antérieur peut perdre des versions déjà exposées, des déclarations d'utilisation et des positions de lecture des consommateurs. La seule retransmission des sources ne rétablit pas ces contrats.",
+  "retained_guarantee": "F10 : retrouver une version utilisée et ne pas purger un objet encore référencé ; scénario S1 de reprise.",
+  "work": [
+    "Construire les identifiants stables de contributions et versions composées à partir de leurs identités/version/contenu normalisé et dépendances, sans dépendre du seul ordre d'arrivée après rejeu.",
+    "À la restauration, ouvrir une nouvelle époque de lecture des changements. Refuser explicitement les anciens curseurs avec consigne de resynchronisation ; ne pas reprendre une séquence qui ferait ignorer des modifications.",
+    "Fournir un protocole générique de déclaration/réconciliation des usages conservés et son statut ; les consommateurs redéclarent les versions utilisées, avec identifiants d'usage stables.",
+    "Suspendre toute purge après restauration jusqu'à clôture autorisée du rapprochement des consommateurs. Les usages non déclarés restent indétectables ; aucune purge sûre automatique ne sera promise pour eux.",
+    "Qualifier disparition d'un pin et d'une version après restauration, réordre de contributions et ancien curseur ; distinguer état rétabli, incomplet et non rapproché."
+  ],
+  "external_assumptions": "Les sources retransmettent les changements complets, pas seulement leur dernier état, sur au moins 24 h. Les consommateurs conservent leurs usages et participent au protocole de redéclaration. Les raccordements Beaumanoir restent en intégration.",
+  "service_limit": "La borne de 8 h concerne le rétablissement et la reprise dans ce scénario de sources disponibles. Une purge peut rester suspendue si un consommateur n'a pas été rapproché ; l'incomplétude reste visible. Aucune garantie d'effets externes exactement une fois.",
+  "funding": "COMMON07 finance les moyens de sauvegarde/restauration et leur outillage ; REF07 finance l'identité sémantique, les époques/cursors, la réconciliation des usages et leur QA spécifique. Un seul financement de chaque travail.",
+  "pre_estimate_status": "Amendement figé avant le gel des chiffrages M1 et M2 ; v1 conservée. Aucune charge antérieure ajustée pour obtenir un accord."
+}

@@ -1,0 +1,551 @@
+{
+  "id": "iteration-05-cosmic",
+  "date": "2026-10-29",
+  "contract_ref": "iteration-05-contrat-v1.1.json",
+  "contract_sha256": "82e9d69ea9b7dd2e4c05230d0a009e9e89cc4584c623cfe4043ffe4de5efb071",
+  "status": "comptage_logique_partiel_conditionnel_a_revoir",
+  "purpose": "Éprouver l'identification de flux fonctionnels sur un sous-ensemble explicite du contrat ; aucune conversion en effort ni prétention de couverture intégrale.",
+  "produced_after_m2_freeze": true,
+  "m2_sha256_at_start": "c10c4da1db583448969f86117b94b255e509c8002410b2379313dbc986be7fff",
+  "scope": {
+    "measured_software": "Couche applicative métier FLOW pour cinq exigences de consultation ORCH/PLAN.",
+    "decomposition_level": "Fonctions logiques vues de l'utilisateur, sans addition des appels internes, classes Java, tables techniques ou composants moteur/solveur.",
+    "boundary": "L'utilisateur humain autorisé est externe. Les données persistantes métier sont à l'intérieur. Interface, logique applicative et accès à ces données sont considérés ensemble ; l'API n'est pas un second utilisateur à compter en plus de l'humain.",
+    "functional_users": [
+      "Lecteur autorisé",
+      "Opérateur autorisé"
+    ],
+    "persistent_storage_is_functional_user": false,
+    "preconditions": "Identité et contexte d'autorisation disponibles ; modèles, tâches, événements, tentatives et résultats ont été créés par d'autres processus non comptés ici.",
+    "excludes": "Production/modification des modèles, lancement/signal/décision/incident, saisie/capture des scénarios, recherche de solution, arrêt/reprise et adaptation d'EXEC ; détail des affectations et écrans complets non couverts.",
+    "significance": "Ces cinq consultations ne constituent ni tout ORCH/PLAN ni une fraction représentative dont on pourrait extrapoler les autres flux."
+  },
+  "source": {
+    "title": "COSMIC Measurement Manual version 5.0, combinaison septembre 2024",
+    "url": "https://cosmic-sizing.org/wp-content/uploads/2022/11/Combination-of-Parts-v5.0-Sep-2024.pdf",
+    "rules": [
+      {
+        "part": "1",
+        "printed_page": 11,
+        "pdf_page": 12,
+        "rule": "5,7,8,9",
+        "use": "Une couche, utilisateurs et frontières identifiés ; stockage à l'intérieur."
+      },
+      {
+        "part": "1",
+        "printed_page": 12,
+        "pdf_page": 13,
+        "rule": "10",
+        "use": "Chaque processus vient d'une exigence et d'un événement, avec Entry et résultat ; couvrir ses réponses possibles."
+      },
+      {
+        "part": "1",
+        "printed_page": 13,
+        "pdf_page": 14,
+        "rule": "11,12",
+        "use": "Groupes liés à un objet d'intérêt ; états intermédiaires purement techniques non comptés."
+      },
+      {
+        "part": "1",
+        "printed_page": 14,
+        "pdf_page": 15,
+        "rule": "13,14,15,16",
+        "use": "Compter les mouvements distincts par groupe et non leurs occurrences ; les lectures nécessaires à une validation s'ajoutent."
+      },
+      {
+        "part": "1",
+        "printed_page": 16,
+        "pdf_page": 17,
+        "rule": "21,22,23",
+        "use": "1 CFP par mouvement ; somme permise au périmètre logique déclaré."
+      },
+      {
+        "part": "2",
+        "printed_page": 17,
+        "pdf_page": 35,
+        "rule": "4.1",
+        "use": "La manipulation des données n'est pas mesurée séparément ; un nombre de CFP ne quantifie pas la difficulté d'un solveur."
+      }
+    ]
+  },
+  "data_groups": [
+    {
+      "id": "DG-MODEL-SELECTOR",
+      "object_of_interest": "Version de modèle demandée",
+      "attributes": [
+        "model_id",
+        "version_id"
+      ]
+    },
+    {
+      "id": "DG-MODEL-VERSION",
+      "object_of_interest": "Version de modèle",
+      "attributes": [
+        "model_id",
+        "version_id",
+        "definition_declarative",
+        "etat_activation"
+      ]
+    },
+    {
+      "id": "DG-TASK-SELECTOR",
+      "object_of_interest": "Sélection de tâches à traiter",
+      "attributes": [
+        "groupe_operateur",
+        "etat_recherche"
+      ]
+    },
+    {
+      "id": "DG-TASK",
+      "object_of_interest": "Tâche humaine",
+      "attributes": [
+        "task_id",
+        "dossier_id_reference",
+        "groupe",
+        "assignee_reference",
+        "etat",
+        "texte_court"
+      ]
+    },
+    {
+      "id": "DG-DOSSIER-SELECTOR",
+      "object_of_interest": "Dossier demandé",
+      "attributes": [
+        "dossier_id"
+      ]
+    },
+    {
+      "id": "DG-PROCESS-EVENT",
+      "object_of_interest": "Événement de processus",
+      "attributes": [
+        "event_id",
+        "dossier_id",
+        "type",
+        "date_fait",
+        "date_reception",
+        "statut",
+        "version_reference",
+        "decision",
+        "correction_reference"
+      ]
+    },
+    {
+      "id": "DG-ATTEMPT-SELECTOR",
+      "object_of_interest": "Tentative de calcul demandée",
+      "attributes": [
+        "attempt_id"
+      ]
+    },
+    {
+      "id": "DG-CALCULATION-ATTEMPT",
+      "object_of_interest": "Tentative de calcul",
+      "attributes": [
+        "attempt_id",
+        "scenario_version_reference",
+        "etat",
+        "progression",
+        "limites_calcul",
+        "motif"
+      ]
+    },
+    {
+      "id": "DG-COMPARISON-SELECTOR",
+      "object_of_interest": "Comparaison demandée",
+      "attributes": [
+        "scenario_A_version",
+        "scenario_B_version"
+      ]
+    },
+    {
+      "id": "DG-SCENARIO",
+      "object_of_interest": "Version de scénario",
+      "attributes": [
+        "scenario_id",
+        "version",
+        "input_set_reference",
+        "input_version",
+        "parametre_version",
+        "differences_declarees",
+        "date_reference"
+      ]
+    },
+    {
+      "id": "DG-CALCULATION-RESULT",
+      "object_of_interest": "Résultat synthétique d'une tentative",
+      "attributes": [
+        "attempt_id",
+        "scenario_version_reference",
+        "couverture",
+        "cout_total",
+        "synthese_dates",
+        "synthese_deficit"
+      ]
+    },
+    {
+      "id": "DG-SCENARIO-COMPARISON",
+      "object_of_interest": "Comparaison de scénarios",
+      "attributes": [
+        "scenario_A_reference",
+        "scenario_B_reference",
+        "ecarts_couverture_dates_cout",
+        "comparabilite",
+        "indication_anciennete"
+      ]
+    },
+    {
+      "id": "DG-MESSAGE",
+      "object_of_interest": "Retour d'erreur ou de confirmation de la requête",
+      "attributes": [
+        "code",
+        "motif"
+      ]
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "H01",
+      "statement": "Chaque consultation est une exigence déclenchable indépendamment. La décomposition doit être confirmée avec les contrats d'interface ; le regroupement physique sur une vue ne décide pas du nombre de processus.",
+      "invalidating_change": "Si une consultation n'est pas indépendante ou si un autre événement déclencheur est nécessaire, revoir les processus avant d'agréger."
+    },
+    {
+      "id": "H02",
+      "statement": "Un seul groupe sélectionne chaque consultation. Une seule famille de messages d'erreur/confirmation est envoyée à l'humain dans chaque processus ; les motifs possibles sont des occurrences, pas un multiplicateur.",
+      "invalidating_change": "Données de sélection relevant de plusieurs objets d'intérêt ou sorties fonctionnelles supplémentaires à analyser."
+    },
+    {
+      "id": "H03",
+      "statement": "Les droits sont vérifiés avec le contexte déjà fourni. Aucun Read métier supplémentaire d'habilitations n'est requis dans ce sous-périmètre. Les requêtes de consultation n'ajoutent pas d'événement au journal métier.",
+      "invalidating_change": "Si les exigences imposent une lecture d'habilitations/dossier ou une écriture d'audit métier pour ces consultations, ces mouvements doivent être ajoutés : le total conditionnel actuel ne suffit plus."
+    },
+    {
+      "id": "H04",
+      "statement": "Les groupes annoncés suffisent à la réponse : références d'identifiants, pas de fiches annexes. Tous les groupes du scénario nominal et des erreurs retenues sont comptés ; zéro Write parce que ces processus sont consultatifs, pas parce que la persistance est gratuite.",
+      "invalidating_change": "Enrichissement avec données du dossier, de l'opérateur, du groupe ou d'autres objets d'intérêt : compter les lectures et sorties réellement nécessaires."
+    },
+    {
+      "id": "H05",
+      "statement": "La comparaison lit une seule structure de version de scénario pour deux occurrences, puis une seule structure de résultat pour deux occurrences. L'affichage compare les synthèses déjà conservées, sans reconstituer les affectations détaillées.",
+      "invalidating_change": "Si les résultats n'existent pas sous cette forme, ou s'il faut relire demandes/affectations/ressources, revoir les groupes et mouvements ; aucun nombre de tables n'est présumé."
+    },
+    {
+      "id": "H06",
+      "statement": "L'indication d'ancienneté retenue se déduit des dates et versions déjà présentes. Aucun contrôle en direct des versions courantes REF/STOCK ou d'autres sources n'est compté dans la comparaison.",
+      "invalidating_change": "Une exigence de fraîcheur comparée en direct impose des mouvements supplémentaires. La fonction complète reste conditionnelle tant que cette interprétation n'est pas tranchée."
+    }
+  ],
+  "functional_processes": [
+    {
+      "id": "ORCH-C01",
+      "ensemble": "ORCH",
+      "label": "Consulter une version identifiée d'un modèle",
+      "triggering_event": "Un utilisateur demande le contenu et l'état d'une version déterminée.",
+      "functional_user": "Lecteur ou opérateur autorisé utilisant l'interface de la couche applicative métier",
+      "requirement_refs": [
+        "ORCH/includes/1",
+        "ORCH/includes/6"
+      ],
+      "movements": [
+        {
+          "id": "ORCH-C01-1",
+          "type": "E",
+          "data_group": "DG-MODEL-SELECTOR",
+          "reason": "Identifiant du modèle et de la version demandée.",
+          "cfp": 1
+        },
+        {
+          "id": "ORCH-C01-2",
+          "type": "R",
+          "data_group": "DG-MODEL-VERSION",
+          "reason": "Lire la définition déclarative et son état de version/activation.",
+          "cfp": 1
+        },
+        {
+          "id": "ORCH-C01-3",
+          "type": "X",
+          "data_group": "DG-MODEL-VERSION",
+          "reason": "Présenter cette version au demandeur.",
+          "cfp": 1
+        },
+        {
+          "id": "ORCH-C01-4",
+          "type": "X",
+          "data_group": "DG-MESSAGE",
+          "reason": "Retour d'erreur si identifiant/version non trouvé ou requête non admise.",
+          "cfp": 1
+        }
+      ],
+      "assumption_refs": [
+        "H01",
+        "H02",
+        "H03",
+        "H04"
+      ],
+      "conditional_cfp": 4
+    },
+    {
+      "id": "ORCH-C02",
+      "ensemble": "ORCH",
+      "label": "Consulter les tâches à traiter d'un groupe autorisé",
+      "triggering_event": "Un opérateur demande la liste des tâches du groupe sélectionné.",
+      "functional_user": "Lecteur ou opérateur autorisé utilisant l'interface de la couche applicative métier",
+      "requirement_refs": [
+        "ORCH/includes/3",
+        "ORCH/includes/6"
+      ],
+      "movements": [
+        {
+          "id": "ORCH-C02-1",
+          "type": "E",
+          "data_group": "DG-TASK-SELECTOR",
+          "reason": "Groupe opérateur et sélection de tâches à traiter.",
+          "cfp": 1
+        },
+        {
+          "id": "ORCH-C02-2",
+          "type": "R",
+          "data_group": "DG-TASK",
+          "reason": "Lire les tâches et leurs états, références et attributions.",
+          "cfp": 1
+        },
+        {
+          "id": "ORCH-C02-3",
+          "type": "X",
+          "data_group": "DG-TASK",
+          "reason": "Restituer les occurrences de tâches ; une liste ne multiplie pas les types de mouvement.",
+          "cfp": 1
+        },
+        {
+          "id": "ORCH-C02-4",
+          "type": "X",
+          "data_group": "DG-MESSAGE",
+          "reason": "Retour d'erreur de sélection ou d'autorisation.",
+          "cfp": 1
+        }
+      ],
+      "assumption_refs": [
+        "H01",
+        "H02",
+        "H03",
+        "H04"
+      ],
+      "conditional_cfp": 4
+    },
+    {
+      "id": "ORCH-C03",
+      "ensemble": "ORCH",
+      "label": "Consulter les événements d'un dossier",
+      "triggering_event": "Un utilisateur demande le journal du dossier identifié.",
+      "functional_user": "Lecteur ou opérateur autorisé utilisant l'interface de la couche applicative métier",
+      "requirement_refs": [
+        "ORCH/includes/5",
+        "ORCH/includes/6"
+      ],
+      "movements": [
+        {
+          "id": "ORCH-C03-1",
+          "type": "E",
+          "data_group": "DG-DOSSIER-SELECTOR",
+          "reason": "Identifiant du dossier dont le journal est demandé.",
+          "cfp": 1
+        },
+        {
+          "id": "ORCH-C03-2",
+          "type": "R",
+          "data_group": "DG-PROCESS-EVENT",
+          "reason": "Lire ses événements, dates, décisions et liens de correction.",
+          "cfp": 1
+        },
+        {
+          "id": "ORCH-C03-3",
+          "type": "X",
+          "data_group": "DG-PROCESS-EVENT",
+          "reason": "Restituer les événements sans lire une fiche dossier complète supplémentaire.",
+          "cfp": 1
+        },
+        {
+          "id": "ORCH-C03-4",
+          "type": "X",
+          "data_group": "DG-MESSAGE",
+          "reason": "Retour d'erreur de sélection ou d'accès.",
+          "cfp": 1
+        }
+      ],
+      "assumption_refs": [
+        "H01",
+        "H02",
+        "H03",
+        "H04"
+      ],
+      "conditional_cfp": 4
+    },
+    {
+      "id": "PLAN-C01",
+      "ensemble": "PLAN",
+      "label": "Consulter le statut d'une tentative de calcul",
+      "triggering_event": "Un utilisateur demande l'état courant de la tentative identifiée.",
+      "functional_user": "Lecteur ou opérateur autorisé utilisant l'interface de la couche applicative métier",
+      "requirement_refs": [
+        "PLAN/includes/5",
+        "PLAN/includes/7"
+      ],
+      "movements": [
+        {
+          "id": "PLAN-C01-1",
+          "type": "E",
+          "data_group": "DG-ATTEMPT-SELECTOR",
+          "reason": "Identifiant de la tentative de calcul.",
+          "cfp": 1
+        },
+        {
+          "id": "PLAN-C01-2",
+          "type": "R",
+          "data_group": "DG-CALCULATION-ATTEMPT",
+          "reason": "Lire état métier, version d'entrée référencée et limites de la tentative.",
+          "cfp": 1
+        },
+        {
+          "id": "PLAN-C01-3",
+          "type": "X",
+          "data_group": "DG-CALCULATION-ATTEMPT",
+          "reason": "Restituer le statut et ses limites, sans détailler les affectations.",
+          "cfp": 1
+        },
+        {
+          "id": "PLAN-C01-4",
+          "type": "X",
+          "data_group": "DG-MESSAGE",
+          "reason": "Retour d'erreur si tentative inconnue ou demande non admise.",
+          "cfp": 1
+        }
+      ],
+      "assumption_refs": [
+        "H01",
+        "H02",
+        "H03",
+        "H04"
+      ],
+      "conditional_cfp": 4
+    },
+    {
+      "id": "PLAN-C02",
+      "ensemble": "PLAN",
+      "label": "Comparer les synthèses de deux scénarios terminés",
+      "triggering_event": "Un utilisateur soumet la paire de scénarios dont il veut comparer les résultats.",
+      "functional_user": "Lecteur ou opérateur autorisé utilisant l'interface de la couche applicative métier",
+      "requirement_refs": [
+        "PLAN/includes/6",
+        "PLAN/includes/7"
+      ],
+      "movements": [
+        {
+          "id": "PLAN-C02-1",
+          "type": "E",
+          "data_group": "DG-COMPARISON-SELECTOR",
+          "reason": "Paire de scénarios/versions à comparer.",
+          "cfp": 1
+        },
+        {
+          "id": "PLAN-C02-2",
+          "type": "R",
+          "data_group": "DG-SCENARIO",
+          "reason": "Lire pour les deux occurrences les références d'entrées communes et les différences déclarées de paramètres.",
+          "cfp": 1
+        },
+        {
+          "id": "PLAN-C02-3",
+          "type": "R",
+          "data_group": "DG-CALCULATION-RESULT",
+          "reason": "Lire les synthèses de couverture, dates, déficit et coûts des deux résultats.",
+          "cfp": 1
+        },
+        {
+          "id": "PLAN-C02-4",
+          "type": "X",
+          "data_group": "DG-SCENARIO-COMPARISON",
+          "reason": "Restituer les écarts et indications de comparabilité/ancienneté déductibles des métadonnées.",
+          "cfp": 1
+        },
+        {
+          "id": "PLAN-C02-5",
+          "type": "X",
+          "data_group": "DG-MESSAGE",
+          "reason": "Retour d'erreur si paire incompatible, résultat indisponible ou demande non admise.",
+          "cfp": 1
+        }
+      ],
+      "assumption_refs": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "conditional_cfp": 5
+    }
+  ],
+  "uniqueness_cases": [
+    "Deux versions ou deux scénarios lus dans la même opération ne donnent pas automatiquement deux Reads du même groupe.",
+    "N tâches ou N événements restitués représentent des occurrences : pas N Exits.",
+    "Motifs d'erreur, lignes JSON, pagination physique et répétitions d'une consultation ne multiplient pas automatiquement les CFP.",
+    "Les 70 ressources, 50 demandes et 500 unités bornent les occurrences et l'investigation de PLAN ; ils ne deviennent pas des multiplicateurs de mouvements.",
+    "Les calculs de différences sont des manipulations associées aux mouvements ; aucun CFP supplémentaire par soustraction, contrainte, objectif ou itération du solveur."
+  ],
+  "unmeasured_required_processes": [
+    {
+      "ensemble": "ORCH",
+      "items": [
+        "Déposer/versionner/activer un modèle",
+        "Ouvrir un dossier et recevoir un signal",
+        "Prendre et décider une tâche",
+        "Traiter un délai, relancer ou abandonner un incident",
+        "Enregistrer les événements/corrections"
+      ],
+      "reason": "Processus obligatoires non comptés ; groupes d'événements, résultats, mémoire de requête et frontières asynchrones à décrire avant décompte."
+    },
+    {
+      "ensemble": "PLAN",
+      "items": [
+        "Recevoir/valider/versionner les données du scénario",
+        "Capturer les positions STOCK et leur provenance",
+        "Démarrer, arrêter, reprendre une tentative",
+        "Calculer besoin net, affectations et déficits",
+        "Vérifier/conserver la solution et traiter un résultat tardif"
+      ],
+      "reason": "Processus obligatoires non comptés ; distinguer commandes, calcul asynchrone, données fonctionnelles et états internes. Aucun remplacement par le comptage des consultations."
+    },
+    {
+      "ensemble": "EXEC",
+      "items": [
+        "Adaptateur et services d'exécution durable"
+      ],
+      "reason": "Hors mesure présente ; ne pas additionner à l'application les flux de la bibliothèque sans une mesure séparée de couche/frontière."
+    }
+  ],
+  "algorithm_limit": "Le total partiel ne mesure ni formulation mathématique, ni complexité des contraintes, ni qualité de recherche, ni preuve d'optimalité ou effort du spécialiste. Aucun score local ajouté aux CFP standard.",
+  "count": {
+    "unit": "CFP",
+    "status": "sous_hypotheses_non_certifie",
+    "conditional_by_ensemble": {
+      "ORCH": 12,
+      "PLAN": 9
+    },
+    "conditional_by_movement": {
+      "E": 5,
+      "X": 10,
+      "R": 6,
+      "W": 0
+    },
+    "conditional_subtotal_cfp": 21,
+    "unconditional_subtotal_cfp": null,
+    "full_orch_cfp": null,
+    "full_plan_cfp": null,
+    "full_core_cfp": null
+  },
+  "conversion_to_effort": {
+    "performed": false,
+    "jh": null,
+    "reason": "Aucun taux compatible et calibré pour ces périmètres/activités/rôles. Les JH M2 ont été gelés séparément avant ce comptage."
+  },
+  "next_evidence": "Faire relire frontières, objets d'intérêt et hypothèses H01–H06 sur les contrats d'interface, puis mesurer les autres processus fonctionnels sans extrapoler ce sous-total."
+}

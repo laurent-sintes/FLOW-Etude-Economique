@@ -1,0 +1,302 @@
+{
+  "schema_version": 1,
+  "id": "iteration-02-preuves",
+  "date": "2026-10-29",
+  "search": {
+    "initial_and_targeted_passes_completed": true,
+    "internal_project_records": "Aucun disponible, confirmé par l’utilisateur.",
+    "conclusion": "La recherche bornée a trouvé un contrepoint COSMIC historique exploitable pour des contrôles, mais aucune calibration Spring applicable directement à FLOW. Ce constat ne prouve pas l’absence de telles données.",
+    "reopen_condition": "Nouvelle référence ou question différente ; ne pas répéter les mêmes recherches."
+  },
+  "entries": [
+    {
+      "id": "COCOMO",
+      "title": "USC — COCOMO II Model Definition Manual v2.1",
+      "url": "https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf",
+      "locator": "§2.1, §2.4, RUSE, §3.3, §6.6 et §7",
+      "decision": "admis_methode_calcul_flow_conditionnel",
+      "supports": "Taille logique, adaptation, effort de réutilisation et estimation par projet.",
+      "limit": "RUSE concerne la construction pour réutilisation. Pas de coefficient Spring. Assiette incluant des activités de projet ; taille FLOW et calibration locale manquantes."
+    },
+    {
+      "id": "COSMIC",
+      "title": "COSMIC — Measurement Manual v5, édition combinée septembre 2024",
+      "url": "https://cosmic-sizing.org/wp-content/uploads/2022/11/Combination-of-Parts-v5.0-Sep-2024.pdf",
+      "locator": "Processus de mesure ; partie 2 §5 ; exemple client/serveur partie 3c §2.4.6",
+      "decision": "admis_mesure",
+      "supports": "Mesure fonctionnelle et normalisation des frontières.",
+      "limit": "La taille ne fournit pas directement l’effort ou les rôles ; comptages des pilotes encore partiels."
+    },
+    {
+      "id": "ISBSG-2012",
+      "title": "ISBSG / COSMIC — Performance of Business Application, Real-Time and Component Software Projects (2012)",
+      "url": "https://cosmic-sizing.org/wp-content/uploads/2015/07/Performance-of-Business-Application-Real-Time-and-Component-Software-Projects-2012.pdf",
+      "locator": "p.9 tableau 4 ; p.12 tableaux 7–8 ; p.13 exemple ; p.31 tableau 18 ; annexe A p.46–48",
+      "decision": "admis_contrepoint_historique_conditionnel",
+      "supports": "Java/multiplateforme : 15 projets, quartiles 15/19/29 h/CFP, tailles mélangées. Proposition interpolée : 20 ± 7 h/CFP à 100–200 CFP.",
+      "limit": "Données 1999–2011 ; Spring et réutilisation non isolés. Effort normalisé de l’équipe, avec planning et implémentation ; soutiens non affectés exclus. Les activités publiées ne sont pas des rôles.",
+      "data": {
+        "unit": "hours_per_CFP",
+        "interpolated_base": 20,
+        "interpolated_spread": 7,
+        "bands": [
+          {
+            "min": 10,
+            "max": 50,
+            "factor": 1.2
+          },
+          {
+            "min": 50,
+            "max": 100,
+            "factor": 1.1
+          },
+          {
+            "min": 100,
+            "max": 200,
+            "factor": 1
+          },
+          {
+            "min": 200,
+            "max": 300,
+            "factor": 0.9
+          },
+          {
+            "min": 300,
+            "max": 500,
+            "factor": 0.8
+          },
+          {
+            "min": 500,
+            "max": 1000,
+            "factor": 0.65
+          },
+          {
+            "min": 1000,
+            "max": null,
+            "factor": 0.5
+          }
+        ],
+        "published_example": {
+          "cfp": 400,
+          "hours": 6400,
+          "rounded_range_hours": [
+            4200,
+            8600
+          ]
+        }
+      },
+      "use_rule": "Contrôles de transposition seulement. Ni barème automatique par BC, ni intervalle de confiance FLOW ; aucune décote arbitraire pour retirer l’implémentation."
+    },
+    {
+      "id": "ISBSG-2023",
+      "title": "ISBSG — Analysis of Project Performance Estimation, 2023",
+      "url": "https://www.isbsg.org/wp-content/uploads/2023/10/Short-Paper-2023-09-Analysis-of-PPE3.pdf",
+      "locator": "Nouveaux développements Java 100–300 points de fonction",
+      "decision": "incompatible_conversion_directe_CFP",
+      "supports": "72 projets, qualité A/B ; 6,2 / 9,4 / 14,7 h/PF aux quartiles.",
+      "limit": "Mesures IFPUG/Nesma ; pas COSMIC. Aucun facteur de conversion retenu."
+    },
+    {
+      "id": "ZENODO",
+      "title": "Jeu public cosmic.arff — Zenodo 268482",
+      "url": "https://zenodo.org/records/268482",
+      "locator": "Fichier local cosmic.arff ; contrôle précédent dans results.json",
+      "decision": "hors_calibration_non_reconcilie",
+      "supports": "Référence inspectable et test arithmétique reproductible.",
+      "limit": "40 des 41 lignes calculables ne réconcilient pas N_PDR1 avec N_effort_level1/FS. Pas de correction officielle identifiée ; ne pas étendre ce constat à toute la base ISBSG."
+    },
+    {
+      "id": "ROLES-2006",
+      "title": "ISBSG — Planning Projects: Role Effort Ratios, 2006",
+      "url": "https://isbsg.org/wp-content/uploads/2017/03/Planning-Projects-Role-Effort-Ratios-2006.pdf",
+      "locator": "Guide de ratios par rôle",
+      "decision": "controle_plausibilite_uniquement",
+      "supports": "Guide historique combinant statistiques et jugement.",
+      "limit": "Pas de sous-échantillon Spring comparable ni justification d’une ventilation par lot FLOW."
+    },
+    {
+      "id": "SPRING-TAG",
+      "title": "Spring Boot 3.5.7 — exigences système",
+      "url": "https://raw.githubusercontent.com/spring-projects/spring-boot/v3.5.7/spring-boot-project/spring-boot-docs/src/docs/antora/modules/ROOT/pages/system-requirements.adoc",
+      "locator": "Tag v3.5.7",
+      "decision": "admis_technique",
+      "supports": "Compatibilité Java 17–25 ; instantané Java 21 proposé.",
+      "limit": "Aucune productivité déduite de cette compatibilité."
+    },
+    {
+      "id": "SPRING-BOM",
+      "title": "Spring Boot 3.5.7 — versions de dépendances",
+      "url": "https://raw.githubusercontent.com/spring-projects/spring-boot/v3.5.7/spring-boot-project/spring-boot-dependencies/build.gradle",
+      "locator": "Dépendances au tag v3.5.7",
+      "decision": "admis_technique",
+      "supports": "Versions candidates du contrat Spring.",
+      "limit": "Configuration documentaire ; aucun prototype exécuté ni coût de réutilisation mesuré."
+    },
+    {
+      "id": "DATA-BOM",
+      "title": "Spring Data BOM 2025.0.5",
+      "url": "https://raw.githubusercontent.com/spring-projects/spring-data-bom/2025.0.5/bom/pom.xml",
+      "locator": "spring-data-jpa",
+      "decision": "admis_technique",
+      "supports": "Spring Data JPA 3.5.5.",
+      "limit": "La gestion des versions ne prouve pas l’implémentation des invariants métier."
+    },
+    {
+      "id": "SPRING-LOCK",
+      "title": "Spring Data JPA — Locking",
+      "url": "https://docs.spring.io/spring-data/jpa/reference/3.5/jpa/locking.html",
+      "locator": "Documentation de la ligne 3.5 consultée le 29/10/2026 ; page évolutive",
+      "decision": "admis_technique",
+      "supports": "Mécanisme de verrouillage des requêtes.",
+      "limit": "Ne prouve pas la réalisation de la réservation FLOW."
+    },
+    {
+      "id": "SPRING-BATCH",
+      "title": "Spring Batch 5.2 — modèle de domaine",
+      "url": "https://docs.spring.io/spring-batch/reference/5.2/domain.html",
+      "locator": "Job / Step / execution",
+      "decision": "admis_technique",
+      "supports": "Mécanismes d’exécution et de reprise des lots.",
+      "limit": "Contrats de référence, rapprochement, règles génériques et traitement fonctionnel des rejets à instruire."
+    },
+    {
+      "id": "ERPNEXT-IMPORT",
+      "title": "ERPNext — Data Import",
+      "url": "https://docs.frappe.io/erpnext/data-import",
+      "locator": "Documentation courante, version précise à figer avant comptage complet",
+      "decision": "admis_fonctions_partielles",
+      "supports": "Import, création, mise à jour, validation et suivi.",
+      "limit": "Analogie de mécanismes ; FLOW n’est pas le maître d’entreprise de ces données."
+    },
+    {
+      "id": "ODOO-IMPORT",
+      "title": "Odoo 19 — Import and export data",
+      "url": "https://www.odoo.com/documentation/19.0/applications/general/export_import_data.html",
+      "locator": "Documentation 19.0",
+      "decision": "admis_fonctions_partielles",
+      "supports": "Test d’import et mise à jour par identifiant externe.",
+      "limit": "Ne prouve ni la couverture complète FLOW ni une charge de réalisation."
+    },
+    {
+      "id": "ERPNEXT-RESERVATION",
+      "title": "ERPNext — Stock Reservation",
+      "url": "https://docs.frappe.io/erpnext/stock-reservation",
+      "locator": "Page courante ; fonction annoncée depuis v15",
+      "decision": "admis_fonctions_partielles",
+      "supports": "Réservation et annulation d’un engagement pour une commande.",
+      "limit": "Version documentaire non figée ; différencier disponibilité générique et règles propres aux marques."
+    },
+    {
+      "id": "ODOO-RESERVATION",
+      "title": "Odoo 19 — Reservation methods",
+      "url": "https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/shipping_receiving/reservation_methods.html",
+      "locator": "Documentation 19.0",
+      "decision": "admis_fonctions_partielles",
+      "supports": "Modes de déclenchement d’une réservation.",
+      "limit": "La documentation 19 ne vaut pas preuve sur un autre commit Community."
+    },
+    {
+      "id": "ODOO-FORECAST",
+      "title": "Odoo 19 — Forecasted report",
+      "url": "https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/inventory/warehouses_storage/reporting/forecast.html",
+      "locator": "Réserver / libérer",
+      "decision": "admis_fonctions_partielles",
+      "supports": "Actions de réservation et libération depuis les positions.",
+      "limit": "Dépendances du registre et mouvements à rapprocher du périmètre FLOW."
+    },
+    {
+      "id": "ERP-CODE",
+      "title": "ERPNext — consultation des réservations, code figé",
+      "url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+      "locator": "get_stock_reservation_entries_for_voucher, lignes 2101–2151",
+      "decision": "admis_comptage_partiel_a_revoir",
+      "supports": "Témoin de 3 CFP déjà décrit dans pilot-inputs.json.",
+      "limit": "Un seul groupe métier supposé ; comptage assisté par IA. Ni capacité complète ni entrée admissible du benchmark projet."
+    },
+    {
+      "id": "LIONGATE",
+      "title": "Liongate — migration ERP vers Spring avec IA",
+      "url": "https://www.liongate.de/studies/liongate-modernises-legacy-erp-with-ai-in-65-person-days/",
+      "locator": "Récit fournisseur",
+      "decision": "contexte_effort_non_admis",
+      "supports": "65 jours-personnes et 1 100 FP déclarés.",
+      "limit": "Migration PHP ; méthode de comptage, assiette, heures/jour et rôles insuffisamment détaillés. Le gain annoncé n’est pas un facteur FLOW."
+    },
+    {
+      "id": "ANSELM",
+      "title": "ANSELM — From 2000 person-days to 72",
+      "url": "https://anselm.ing/articles/from-2000-person-days-to-72/",
+      "locator": "Reconstruction d’effort depuis les commits",
+      "decision": "rejete_effort_observe",
+      "supports": "Illustration d’un récit de productivité.",
+      "limit": "Les jours sont inférés depuis des commits et heures supposées ; ce n’est pas un relevé de travail."
+    },
+    {
+      "id": "GENCEL",
+      "title": "Gencel — étude de trois projets, 2008",
+      "url": "https://www.diva-portal.org/smash/get/diva2:836007/FULLTEXT01.pdf",
+      "locator": "Projet avec framework interne",
+      "decision": "admis_methode_non_transposable_taux",
+      "supports": "Intérêt d’expliciter ce que le framework fournit.",
+      "limit": "Le taux de 1,31 h/CFP exclut des activités et l’effort algorithmique ; pas un taux du cycle Core complet."
+    },
+    {
+      "id": "VALDES",
+      "title": "Valdés Souto et Assem — 2020",
+      "url": "https://ceur-ws.org/Vol-2725/paper10.pdf",
+      "locator": "165 processus fonctionnels, Java/MySQL",
+      "decision": "conditionnel_non_retenu",
+      "supports": "Observation à l’échelle de processus d’une équipe.",
+      "limit": "Framework, activités et autres rôles insuffisamment documentés pour transposition FLOW."
+    },
+    {
+      "id": "OPENLMIS-4055",
+      "title": "OpenLMIS — OLMIS-4055, temps journalisé et commits associés",
+      "url": "https://openlmis.atlassian.net/browse/OLMIS-4055",
+      "locator": "API Jira relue le 29/10/2026 ; commits b7890e8… et f2ffafb… de février 2018",
+      "decision": "admis_trace_effort_locale_non_calibration",
+      "supports": "Ticket terminé : 79 200 secondes journalisées = 22 h ; estimation initiale 86 400 secondes = 24 h. Les commits inspectés réalisent une vue Angular et ses appels aux services existants.",
+      "limit": "Extension d’une plateforme existante. Exhaustivité du temps et répartition par rôle inconnues ; pas un effort de construction du moteur stock ni un taux Spring."
+    }
+  ],
+  "routes": [
+    {
+      "id": "A",
+      "name": "COCOMO II avec réutilisation",
+      "state": "conditionnel",
+      "flow_jh_available": false,
+      "computable": "Contrôles mathématiques ; pas encore de taille logique résiduelle FLOW admissible.",
+      "required": [
+        "Taille logique par lot, neuf/adapté/réutilisé",
+        "Facteurs et frontière projet documentés",
+        "Activités et ventilation par rôle réconciliées"
+      ]
+    },
+    {
+      "id": "B",
+      "name": "COSMIC + ISBSG",
+      "state": "contrepoint_historique_conditionnel",
+      "flow_jh_available": false,
+      "computable": "Exemple publié et contrôles de transposition ; aucun JH FLOW issu de la consultation 3 CFP.",
+      "required": [
+        "Taille d’un ensemble complet et comparable",
+        "Rapprochement des activités et de la réutilisation",
+        "Ventilation justifiée des rôles"
+      ]
+    },
+    {
+      "id": "C",
+      "name": "Estimation d’ingénierie",
+      "state": "voie_de_repli_a_instruire",
+      "flow_jh_available": false,
+      "computable": "Formule par travaux et rôles prête ; temps unitaires et volumes non inventés pour fermer une étape.",
+      "required": [
+        "Travaux résiduels délimités",
+        "Volumes et durées explicitement argumentés",
+        "Revue de leurs hypothèses et sensibilités"
+      ]
+    }
+  ],
+  "role_effort_available": false,
+  "spring_calibration_available": false
+}

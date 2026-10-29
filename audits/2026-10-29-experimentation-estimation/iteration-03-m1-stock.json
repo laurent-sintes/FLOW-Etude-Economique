@@ -1,0 +1,384 @@
+{
+  "id": "iteration-03-STOCK-M1",
+  "ensemble": "STOCK",
+  "method": "M1",
+  "contract_ref": "iteration-03-contrat.json",
+  "classification": "Estimation d’ingénierie assistée par IA, non calibrée sur des efforts observés.",
+  "proof_catalog": {
+    "C": "iteration-03-contrat.json#STOCK",
+    "A_RES": "iteration-02-code-oss.json#/products/2/evidence/4",
+    "A_QTY": "iteration-02-code-oss.json#/products/2/evidence/5",
+    "A_UNIT": "iteration-02-code-oss.json#/products/2/evidence/6",
+    "O_RES": "iteration-02-code-oss.json#/products/0/evidence/4",
+    "O_LOCK": "iteration-02-code-oss.json#/products/0/evidence/9",
+    "T_RES": "iteration-02-code-oss.json#/products/1/evidence/3",
+    "T_TEST": "iteration-02-code-oss.json#/products/1/evidence/8",
+    "O_TEST": "iteration-02-code-oss.json#/products/0/evidence/8"
+  },
+  "evidence_limit": "Journal compensatoire et expiration explicite viennent du contrat cible ; les extraits OSS ne démontrent pas exactement cette couverture. Aucune durée n’est mesurée dans le code.",
+  "packages": [
+    {
+      "id": "S01",
+      "label": "Contrats et invariants du stock",
+      "proof_refs": [
+        "C",
+        "A_RES",
+        "O_RES",
+        "T_RES"
+      ],
+      "work": "Clés, quantités, états, sept commandes, erreurs, correction et critères de réception.",
+      "rationale": "Central analyse 6 = périmètre/données 2 + états/invariants 2 + réception 2 ; architecture 3 ; faisabilité Java 2 ; stratégie QA 2 ; coordination initiale 1.",
+      "effort": {
+        "analyse_produit": [
+          4,
+          6,
+          9
+        ],
+        "architecture": [
+          2,
+          3,
+          5
+        ],
+        "dev_java": [
+          1,
+          2,
+          3
+        ],
+        "qa": [
+          1,
+          2,
+          3
+        ],
+        "coordination": [
+          0.5,
+          1,
+          1.5
+        ]
+      }
+    },
+    {
+      "id": "S02",
+      "label": "Journal, position et unités fixes",
+      "proof_refs": [
+        "C",
+        "A_QTY",
+        "A_UNIT",
+        "O_RES"
+      ],
+      "work": "Modèles persistants, clés/contraintes, migrations, conversions et réconciliation des trois quantités.",
+      "rationale": "Java central 12 = journal/position/contraintes 6 + unités 2 + migrations/tests 4. Analyse 2, architecture 2, QA 2 pour précision, schéma et cas de conservation/arrondi. Les références produit viennent de REF.",
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "architecture": [
+          1,
+          2,
+          3
+        ],
+        "dev_java": [
+          8,
+          12,
+          18
+        ],
+        "qa": [
+          1,
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "id": "S03",
+      "label": "Faits et corrections compensatrices",
+      "proof_refs": [
+        "C",
+        "A_RES",
+        "A_QTY"
+      ],
+      "work": "Faits identifiés, dates du fait/réception, compensation, actualisation de position, refus d’une correction incompatible.",
+      "rationale": "Java central 11 = deux commandes/revue 6 + adaptation COMMON 2 + tests développeur 3. Analyse 2, architecture 1, QA 2 pour cas et atomicité.",
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "architecture": [
+          0.5,
+          1,
+          2
+        ],
+        "dev_java": [
+          7,
+          11,
+          17
+        ],
+        "qa": [
+          1,
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "id": "S04",
+      "label": "Cycle de réservation identifié",
+      "proof_refs": [
+        "C",
+        "A_RES",
+        "T_RES",
+        "O_RES"
+      ],
+      "work": "Création partielle, révision, libération, consommation, expiration explicite ; états, quantités, unités et erreurs.",
+      "rationale": "Java central 16 = cinq transitions/revue 10 + persistance/invariants 2 + tests 4. Analyse 2, architecture 1, matrice de QA 3. Aucun ordonnanceur autonome.",
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "architecture": [
+          0.5,
+          1,
+          2
+        ],
+        "dev_java": [
+          10,
+          16,
+          24
+        ],
+        "qa": [
+          2,
+          3,
+          5
+        ]
+      }
+    },
+    {
+      "id": "S05",
+      "label": "Concurrence et répétition sans double effet",
+      "proof_refs": [
+        "C",
+        "O_LOCK",
+        "T_RES",
+        "A_RES"
+      ],
+      "work": "Verrou de la clé stock, ordre des opérations, conflits et résultat de répétition dans la transaction métier.",
+      "rationale": "Java central 10 = transaction 2 + verrou 2 + conflits/résultats 2 + quatre témoins automatisés 4. Témoins : réservations simultanées, correction/réservation, consommation/libération, doublon concurrent. Architecture 3 et QA indépendante 4.",
+      "effort": {
+        "architecture": [
+          2,
+          3,
+          5
+        ],
+        "dev_java": [
+          6,
+          10,
+          16
+        ],
+        "qa": [
+          2,
+          4,
+          7
+        ]
+      }
+    },
+    {
+      "id": "S06",
+      "label": "Consultations et trois vues métier",
+      "proof_refs": [
+        "C",
+        "A_QTY",
+        "A_RES"
+      ],
+      "work": "Positions, engagements/actions, journal/anomalies ; filtres/pagination, erreurs, accès et actions.",
+      "rationale": "Frontend central 18 = trois vues sur COMMON 12 + actions/erreurs 4 + tests 2. Java 6 pour requêtes/filtres, UX 4, analyse 2, préparation QA 3. Ni dashboard analytique ni export avancé.",
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "ux": [
+          2,
+          4,
+          6
+        ],
+        "dev_frontend": [
+          12,
+          18,
+          27
+        ],
+        "dev_java": [
+          4,
+          6,
+          9
+        ],
+        "qa": [
+          2,
+          3,
+          5
+        ]
+      }
+    },
+    {
+      "id": "S07",
+      "label": "Qualification indépendante du cycle complet",
+      "proof_refs": [
+        "C",
+        "T_TEST",
+        "O_TEST"
+      ],
+      "work": "Parcours, erreurs, droits, arrondis, corrections, répétitions, réconciliation et traitement des défauts.",
+      "rationale": "QA centrale 13 = données/préparation 3 + automatisation 6 + exécution/analyse 4, pour 24 parcours composites proposés, distincts des témoins S05. Java 5, frontend 2 pour corrections ; analyse 2, architecture 1 pour écarts.",
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "architecture": [
+          0.5,
+          1,
+          2
+        ],
+        "dev_java": [
+          3,
+          5,
+          8
+        ],
+        "dev_frontend": [
+          1,
+          2,
+          3
+        ],
+        "qa": [
+          8,
+          13,
+          20
+        ]
+      }
+    },
+    {
+      "id": "S08",
+      "label": "Documentation, livraison et coordination",
+      "proof_refs": [
+        "C"
+      ],
+      "work": "Contrats, garanties/limites, guide opérations/erreurs, dossier QA, transfert et décisions.",
+      "rationale": "Coordination centrale 7 = dépendances/décisions 3 + revues 2 + transfert 2, en plus de S01. Analyse 2, architecture 1, Java 3, frontend 1, QA 2. CI/environnement financés COMMON ; documentation finale distincte des commentaires de code.",
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "architecture": [
+          0.5,
+          1,
+          2
+        ],
+        "dev_java": [
+          2,
+          3,
+          5
+        ],
+        "dev_frontend": [
+          0.5,
+          1,
+          2
+        ],
+        "qa": [
+          1,
+          2,
+          3
+        ],
+        "coordination": [
+          4,
+          7,
+          10
+        ]
+      }
+    }
+  ],
+  "included_roles": {
+    "plateforme": {
+      "state": "inclus",
+      "owner": "COMMON",
+      "reason": "Environnement, CI et livraison commune ; migrations dans dev_java, qualification dans QA."
+    },
+    "securite": {
+      "state": "inclus",
+      "owner": "COMMON",
+      "reason": "Revue initiale et identité communes ; application des profils dans développement et vérification dans QA. Pas de revue spécialisée séparée retenue dans ce M1 initial."
+    }
+  },
+  "assumptions": [
+    "Propriétaires logiques/emplacements configurés pour le témoin, pas d’interface d’administration nouvelle.",
+    "Sept commandes ; expiration explicite, sans ordonnanceur.",
+    "Tests développeur et revue dans développement ; QA distincte.",
+    "Les parcours de qualification sont proposés, pas exhaustivement validés.",
+    "Journal compensatoire non destructif et position courante ; pas connu-à-date complet."
+  ],
+  "exclusions": [
+    "ATP/CTP, prévision, allocation de ressources, optimisation et priorité commerciale",
+    "Lots, séries, colis, arborescences d’emplacements et unités variables",
+    "Reconstitution connu-à-date complète, corrections rétroactives automatiques en cascade",
+    "Traitement distribué exactement une fois, haute disponibilité et garantie de débit de production",
+    "Connecteurs WMS/ERP, données Beaumanoir et règles propres aux marques",
+    "COMMON et REF",
+    "Ordonnancement automatique des expirations"
+  ],
+  "variant": {
+    "id": "V-STOCK-EXPIRATION",
+    "change": "Déclenchement périodique des expirations et reprise après interruption, application unique.",
+    "classification": "Extension distincte, hors bornes de base.",
+    "effort": {
+      "analyse_produit": [
+        0.5,
+        1,
+        2
+      ],
+      "architecture": [
+        0.5,
+        1,
+        2
+      ],
+      "dev_java": [
+        2,
+        4,
+        6
+      ],
+      "qa": [
+        2,
+        3,
+        5
+      ],
+      "coordination": [
+        0.5,
+        1,
+        1.5
+      ]
+    },
+    "frozen_total_jh": [
+      5.5,
+      10,
+      16.5
+    ],
+    "reason": "Planification réutilisée, sélection paginée et commande idempotente ; ni haute disponibilité ni délai garanti."
+  },
+  "timing": {
+    "start_utc": "2026-10-29 10:07:58 UTC",
+    "freeze_utc": "2026-10-29 10:10:26 UTC",
+    "elapsed_seconds": 148,
+    "scope": "Fenêtre de raisonnement jusqu’au relevé ; aucun équivalent en effort humain de développement."
+  },
+  "frozen_total_jh": [
+    96,
+    159,
+    246.5
+  ]
+}

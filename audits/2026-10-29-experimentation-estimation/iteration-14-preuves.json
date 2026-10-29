@@ -1,0 +1,353 @@
+{
+  "evidence": [
+    {
+      "id": "O1",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "local_path": "tmp/odoo20-audit/addons/sale_stock/models/sale_order_line.py",
+      "path": "addons/sale_stock/models/sale_order_line.py",
+      "line_ranges": [
+        [
+          73,
+          149
+        ]
+      ],
+      "observed": "Disponibilité courante/prévisionnelle selon état de vente, entrepôt/date et consommation des quantités par les lignes traitées.",
+      "flow_delta": "Analogie ATP. L’extrait ne démontre pas une promesse réseau multilignes protégée, ni réservation atomique par consultation.",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/sale_stock/models/sale_order_line.py#L73",
+      "basis": "Lecture de code figé ; ni exécution du produit ni charge observée.",
+      "sha256": "47f7b4b827d632a9ecea5a4620009dec618a7e01797e4b2d83dabc576ce9b215",
+      "excerpts": [
+        {
+          "start": 73,
+          "end": 149,
+          "text": "    def _compute_qty_at_date(self):\n        \"\"\" Compute the quantity forecasted of product at delivery date. There are\n        two cases:\n         1. The quotation has a commitment_date, we take it as delivery date\n         2. The quotation hasn't commitment_date, we compute the estimated delivery\n            date based on lead time\"\"\"\n        treated = self.browse()\n        all_move_ids = {\n            move.id\n            for line in self\n            if line.state == 'sale'\n            for move in line.move_ids | self.env['stock.move'].browse(line.move_ids._rollup_move_origs())\n            if move.product_id == line.product_id\n        }\n        all_moves = self.env['stock.move'].browse(all_move_ids)\n        forecast_expected_date_per_move = dict(all_moves.mapped(lambda m: (m.id, m.forecast_expected_date)))\n        # If the state is already in sale the picking is created and a simple forecasted quantity isn't enough\n        # Then used the forecasted data of the related stock.move\n        for line in self.filtered(lambda l: l.state == 'sale'):\n            if not line.display_qty_widget:\n                continue\n            moves = line.move_ids | self.env['stock.move'].browse(line.move_ids._rollup_move_origs())\n            moves = moves.filtered(\n                lambda m: m.product_id == line.product_id and m.state not in ('cancel', 'done'))\n            line.forecast_expected_date = max(\n                (\n                    forecast_expected_date_per_move[move.id]\n                    for move in moves\n                    if forecast_expected_date_per_move[move.id]\n                ),\n                default=False,\n            )\n            line.qty_available_today = 0\n            line.free_qty_today = 0\n            for move in moves:\n                line.qty_available_today += move.uom_id._compute_quantity(move.quantity, line.product_uom_id)\n                line.free_qty_today += move.product_id.uom_id._compute_quantity(move.forecast_availability, line.product_uom_id)\n            line.scheduled_date = line.order_id.commitment_date or line._expected_date()\n            line.virtual_available_at_date = False\n            treated |= line\n\n        qty_processed_per_product = defaultdict(lambda: 0)\n        grouped_lines = defaultdict(lambda: self.env['sale.order.line'])\n        # We first loop over the SO lines to group them by warehouse and schedule\n        # date in order to batch the read of the quantities computed field.\n        for line in self.filtered(lambda l: l.state in ('draft', 'sent')):\n            if not (line.product_id and line.display_qty_widget):\n                continue\n            grouped_lines[line.warehouse_id, line.order_id.commitment_date or line._expected_date()] |= line\n\n        for (warehouse, scheduled_date), lines in grouped_lines.items():\n            product_qties = lines._read_qties(scheduled_date, warehouse.id)\n            qties_per_product = {\n                product['id']: (product['qty_available'], product['free_qty'], product['virtual_available'])\n                for product in product_qties\n            }\n            for line in lines:\n                line.scheduled_date = scheduled_date\n                qty_available_today, free_qty_today, virtual_available_at_date = qties_per_product[line.product_id.id]\n                line.qty_available_today = qty_available_today - qty_processed_per_product[line.product_id.id]\n                line.free_qty_today = free_qty_today - qty_processed_per_product[line.product_id.id]\n                line.virtual_available_at_date = virtual_available_at_date - qty_processed_per_product[line.product_id.id]\n                line.forecast_expected_date = False\n                product_qty = line.product_uom_qty\n                if line.product_uom_id and line.product_id.uom_id and line.product_uom_id != line.product_id.uom_id:\n                    line.qty_available_today = line.product_id.uom_id._compute_quantity(line.qty_available_today, line.product_uom_id)\n                    line.free_qty_today = line.product_id.uom_id._compute_quantity(line.free_qty_today, line.product_uom_id)\n                    line.virtual_available_at_date = line.product_id.uom_id._compute_quantity(line.virtual_available_at_date, line.product_uom_id)\n                    product_qty = line.product_uom_id._compute_quantity(product_qty, line.product_id.uom_id)\n                qty_processed_per_product[line.product_id.id] += product_qty\n            treated |= lines\n        remaining = (self - treated)\n        remaining.virtual_available_at_date = False\n        remaining.scheduled_date = False\n        remaining.forecast_expected_date = False\n        remaining.free_qty_today = False\n        remaining.qty_available_today = False"
+        }
+      ]
+    },
+    {
+      "id": "O2",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "local_path": "tmp/odoo20-audit/addons/mrp/models/mrp_workcenter.py",
+      "path": "addons/mrp/models/mrp_workcenter.py",
+      "line_ranges": [
+        [
+          348,
+          418
+        ]
+      ],
+      "observed": "Recherche de créneaux de travail en tenant compte des calendriers, fuseaux et conflits avec opérations déjà planifiées ; horizon/recherche bornés.",
+      "flow_delta": "Analogie de capacité finie et de précédence locale. Pas preuve d’un CTP complet matières/capacités/fournisseurs pour FLOW.",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/mrp/models/mrp_workcenter.py#L348",
+      "basis": "Lecture de code figé ; ni exécution du produit ni charge observée.",
+      "sha256": "da0b497dc86eef1ce093c9004db5602d2b857e4097bab297419f0d8042719af2",
+      "excerpts": [
+        {
+          "start": 348,
+          "end": 418,
+          "text": "    def _get_first_available_slot(self, start_datetime, duration, forward=True, leaves_to_ignore=False, extra_leaves_slots=[]):\n        \"\"\"Get the first available interval for the workcenter in `self`.\n\n        The available interval is disjoinct with all other workorders planned on this workcenter, but\n        can overlap the time-off of the related calendar (inverse of the working hours).\n        Return the first available interval (start datetime, end datetime) or,\n        if there is none before 700 days, a tuple error (False, 'error message').\n\n        :param duration: minutes needed to make the workorder (float)\n        :param start_datetime: begin the search at this datetime\n        :param forward: forward scheduling (search from start_datetime to 700 days after), or backward (from start_datetime to now)\n        :param leaves_to_ignore: typically, ignore allocated leave when re-planning a workorder\n        :param extra_leaves_slots: extra time slots (start, stop) to consider\n        :rtype: tuple\n        \"\"\"\n        self.ensure_one()\n        ICP = self.env['ir.config_parameter'].sudo()\n        max_planning_iterations = max(ICP.get_int('mrp.workcenter_max_planning_iterations', 50), 1)\n        resource = self.resource_id\n        revert = to_timezone(start_datetime.tzinfo)\n        start_datetime = start_datetime.astimezone(ZoneInfo(resource.tz or self.env.company.tz))\n        resources_per_tz = resource._get_resources_per_tz()\n        get_available_intervals = partial(self.resource_calendar_id._work_intervals_batch, resources_per_tz=resources_per_tz)\n        workorder_intervals_leaves_domain = [('count_as', '=', 'working_time')]\n        if leaves_to_ignore:\n            workorder_intervals_leaves_domain.append(('id', 'not in', leaves_to_ignore.ids))\n        get_workorder_intervals = partial(self.resource_calendar_id._leave_intervals_batch, domain=workorder_intervals_leaves_domain, resources_per_tz=resources_per_tz)\n        extra_leaves_slots_intervals = Intervals([(localized(start), localized(stop), self.env['resource.calendar.attendance']) for start, stop in extra_leaves_slots])\n\n        remaining = duration = max(duration, 1 / 60)\n        now = localized(datetime.now())\n        delta = timedelta(days=14)\n        start_interval, stop_interval = None, None\n        for n in range(max_planning_iterations):  # 50 * 14 = 700 days in advance\n            if forward:\n                date_start = start_datetime + delta * n\n                date_stop = date_start + delta\n                available_intervals = get_available_intervals(date_start, date_stop)[resource.id]\n                workorder_intervals = get_workorder_intervals(date_start, date_stop)[resource.id]\n                for start, stop, _records in available_intervals:\n                    start_interval = start_interval or start\n                    interval_minutes = (stop - start).total_seconds() / 60\n                    while (interval := Intervals([(start_interval or start, start + timedelta(minutes=min(remaining, interval_minutes)), _records)])) \\\n                      and (conflict := workorder_intervals.overlapping_with(interval) or extra_leaves_slots_intervals.overlapping_with(interval)):\n                        start = min(max(conflict_stop for _start, conflict_stop, _records in conflict), stop)  # restart available interval at conflicting interval stop\n                        interval_minutes = (stop - start).total_seconds() / 60\n                        start_interval, remaining = start if interval_minutes else None, duration\n                    if float_compare(interval_minutes, remaining, precision_digits=3) >= 0:\n                        return revert(start_interval), revert(start + timedelta(minutes=remaining))\n                    remaining -= interval_minutes\n            else:\n                # same process but starting from end on reversed intervals\n                date_stop = start_datetime - delta * n\n                date_start = date_stop - delta\n                available_intervals = get_available_intervals(date_start, date_stop)[resource.id]\n                available_intervals = reversed(available_intervals)\n                workorder_intervals = get_workorder_intervals(date_start, date_stop)[resource.id]\n                for start, stop, _records in available_intervals:\n                    stop_interval = stop_interval or stop\n                    interval_minutes = (stop - start).total_seconds() / 60\n                    while (interval := Intervals([(stop - timedelta(minutes=min(remaining, interval_minutes)), stop_interval or stop, _records)])) \\\n                      and (conflict := workorder_intervals.overlapping_with(interval) or extra_leaves_slots_intervals.overlapping_with(interval)):\n                        stop = max(min(conflict_start for conflict_start, _stop, _records in conflict), start)  # restart available interval at conflicting interval start\n                        interval_minutes = (stop - start).total_seconds() / 60\n                        stop_interval, remaining = stop if interval_minutes else None, duration\n                    if float_compare(interval_minutes, remaining, precision_digits=3) >= 0:\n                        return revert(stop - timedelta(minutes=remaining)), revert(stop_interval)\n                    remaining -= interval_minutes\n                if date_start <= now:\n                    break\n        return False, 'No available slot 700 days after the planned start'"
+        }
+      ]
+    },
+    {
+      "id": "O3",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "local_path": "tmp/odoo20-audit/addons/stock/models/stock_quant.py",
+      "path": "addons/stock/models/stock_quant.py",
+      "line_ranges": [
+        [
+          785,
+          804
+        ],
+        [
+          1119,
+          1155
+        ]
+      ],
+      "observed": "Sélection selon produit/lieu/lot/colis/propriétaire et expiration ; modification distincte de la quantité réservée.",
+      "flow_delta": "Frontière lecture/réservation. Les quotas logiques de groupes FLOW et revalidation globale ne sont pas démontrés par ces extraits.",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_quant.py#L785",
+      "basis": "Lecture de code figé ; ni exécution du produit ni charge observée.",
+      "sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+      "excerpts": [
+        {
+          "start": 785,
+          "end": 804,
+          "text": "    def _get_gather_domain(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False):\n        domains = [Domain('product_id', '=', product_id.id)]\n        if not strict:\n            if lot_id:\n                domains.append(Domain('lot_id', 'in', [lot_id.id, False]))\n            if package_id:\n                domains.append(Domain('package_id', '=', package_id.id))\n            if owner_id:\n                domains.append(Domain('owner_id', '=', owner_id.id))\n            domains.append(Domain('location_id', 'child_of', location_id.id))\n        else:\n            domains.extend((\n                Domain('lot_id', 'in', [False, lot_id.id if lot_id else False]),\n                Domain('package_id', '=', package_id.id if package_id else False),\n                Domain('owner_id', '=', owner_id.id if owner_id else False),\n                Domain('location_id', '=', location_id.id),\n            ))\n        if self.env.context.get('with_expiration'):\n            domains.append(Domain('removal_date', '>=', self.env.context['with_expiration']) | Domain('removal_date', '=', False))\n        return Domain.AND(domains)"
+        },
+        {
+          "start": 1119,
+          "end": 1155,
+          "text": "        if quant:\n            vals = {'in_date': in_date}\n            if quantity:\n                vals['quantity'] = quant.quantity + quantity\n            if reserved_quantity:\n                vals['reserved_quantity'] = max(0, quant.reserved_quantity + reserved_quantity)\n            quant.write(vals)\n        else:\n            vals = {\n                'product_id': product_id.id,\n                'location_id': location_id.id,\n                'lot_id': lot_id and lot_id.id,\n                'package_id': package_id and package_id.id,\n                'owner_id': owner_id and owner_id.id,\n                'in_date': in_date,\n            }\n            if quantity:\n                vals['quantity'] = quantity\n            if reserved_quantity:\n                vals['reserved_quantity'] = reserved_quantity\n            self.create(vals)\n        return self._get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True, allow_negative=True), in_date\n\n    @api.model\n    def _update_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):\n        \"\"\" Increase or decrease `reserved_quantity` of a set of quants for a given set of\n        product_id/location_id/lot_id/package_id/owner_id.\n\n        :param product_id:\n        :param location_id:\n        :param quantity:\n        :param lot_id:\n        :param package_id:\n        :param owner_id:\n        :return: available_quantity\n        \"\"\"\n        self._update_available_quantity(product_id, location_id, reserved_quantity=quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id)"
+        }
+      ]
+    },
+    {
+      "id": "T1",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/sale_stock_quantity/sale.py",
+      "path": "modules/sale_stock_quantity/sale.py",
+      "line_ranges": [
+        [
+          47,
+          59
+        ],
+        [
+          138,
+          205
+        ]
+      ],
+      "observed": "Disponibilité datée, soustraction d’autres ventes et des lignes de la vente ; horizon jusqu’au prochain approvisionnement. La branche production de date d’apport porte un TODO dans cet extrait.",
+      "flow_delta": "Contrôle de quantité comparable, pas preuve de capacité de production ni promesse ferme. Les limites sont locales à l’extrait, pas une absence dans tout Tryton.",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/sale_stock_quantity/sale.py#L47",
+      "basis": "Lecture de code figé ; ni exécution du produit ni charge observée.",
+      "sha256": "f3fde80e8e5b3fd7e3f838d1d87269c0586755473a00ca7490683c9ddcd477a1",
+      "excerpts": [
+        {
+          "start": 47,
+          "end": 59,
+          "text": "    def _stock_quantity_next_supply_date(cls, product):\n        pool = Pool()\n        try:\n            PurchaseRequest = pool.get('purchase.request')\n        except KeyError:\n            PurchaseRequest = None\n\n        if (getattr(PurchaseRequest, 'get_supply_dates', None)\n                and product.purchasable):\n            return PurchaseRequest.get_supply_dates(product)[0]\n        else:\n            # TODO compute supply date for production\n            return datetime.date.max"
+        },
+        {
+          "start": 138,
+          "end": 205,
+          "text": "        quantities = defaultdict(lambda: defaultdict(int))\n        w_getter = attrgetter('warehouse', 'shipping_date')\n        w_products = {}\n        for (warehouse, shipping_date), w_lines in groupby(\n                sorted(lines, key=sortable_values(w_getter)), key=w_getter):\n            if shipping_date is None:\n                shipping_date = today\n            w_products[warehouse] = products = {l.product for l in w_lines}\n            with transaction.set_context(\n                    locations=[warehouse.id],\n                    stock_date_end=shipping_date,\n                    stock_assign=True):\n                products = Product.browse(products)\n            quantities[warehouse].update(\n                (p, p.forecast_quantity) for p in products)\n\n            # Remove quantities from other sales\n            other_lines = Line.search([\n                    ('sale.company', '=', self.company.id),\n                    ('sale.state', 'in', self._stock_quantity_states()),\n                    ('sale.id', '!=', self.id),\n                    ('product', 'in', products),\n                    ('quantity', '>', 0),\n                    ])\n            for line in other_lines:\n                if line.warehouse != warehouse:\n                    continue\n                if (line.shipping_date\n                        and line.shipping_date > shipping_date):\n                    continue\n                product = line.product\n                date = line.sale.sale_date or today\n                if date > today:\n                    continue\n                quantity = Uom.compute_qty(line.unit, line.quantity,\n                    product.default_uom, round=False)\n                quantities[line.warehouse][product] -= quantity\n\n        for line in lines:\n            warehouse = line.warehouse\n            product = line.product\n            quantity = Uom.compute_qty(line.unit, line.quantity,\n                product.default_uom, round=False)\n            shipping_date = line.shipping_date or today\n            next_supply_date = self._stock_quantity_next_supply_date(product)\n            message_values = {\n                'line': line.rec_name,\n                'forecast_quantity': lang.format_number_symbol(\n                    quantities[warehouse][product],\n                    product.default_uom, product.default_uom.digits),\n                'quantity': lang.format_number_symbol(\n                    line.quantity, line.unit, line.unit.digits),\n                }\n            if (quantities[warehouse][product] < quantity\n                    and shipping_date < next_supply_date):\n                raise_(line.id, message_values)\n            # Update quantities if the same product is many times in lines\n            quantities[warehouse][product] -= quantity\n\n            # Check other dates until next supply date\n            if next_supply_date != datetime.date.max:\n                products = w_products[warehouse]\n                forecast_quantity = quantities[warehouse][product]\n                date = shipping_date + datetime.timedelta(1)\n                while date < next_supply_date:\n                    delta = get_delta(date, warehouse, products)\n                    forecast_quantity += delta.get(product.id, 0)\n                    if forecast_quantity < 0:"
+        }
+      ]
+    },
+    {
+      "id": "T2",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "local_path": "tmp/tryton-code-audit-2026-10-28/modules/sale_supply_production/sale.py",
+      "path": "modules/sale_supply_production/sale.py",
+      "line_ranges": [
+        [
+          69,
+          114
+        ]
+      ],
+      "observed": "Lien vente→demande de production, stock-first, quantité, date et nomenclature d’origine.",
+      "flow_delta": "La création d’une demande datée ne vérifie pas ici toutes les capacités finies. FLOW CTP doit contrôler la faisabilité sans émettre l’ordre.",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/sale_supply_production/sale.py#L69",
+      "basis": "Lecture de code figé ; ni exécution du produit ni charge observée.",
+      "sha256": "48c4b7e396ac3ceee3957233a13d1f45d94dfac2ea2ffb7d6e75cbb3199e2623",
+      "excerpts": [
+        {
+          "start": 69,
+          "end": 114,
+          "text": "    def get_production(self, product_quantities, bom_pattern=None):\n        \"Return production for the sale line\"\n        pool = Pool()\n        Production = pool.get('production')\n        Date = pool.get('ir.date')\n        Uom = pool.get('product.uom')\n\n        with Transaction().set_context(company=self.sale.company.id):\n            today = Date.today()\n\n        if (not self.supply_on_sale\n                or self.productions\n                or not self.ready_for_supply\n                or not self.product.producible):\n            return\n\n        product = self.product\n        quantity = self._get_move_quantity('out')\n        if product.supply_on_sale == 'stock_first':\n            available_qty = product_quantities[product]\n            available_qty = Uom.compute_qty(\n                product.default_uom, available_qty, self.unit,\n                round=False)\n            if quantity <= available_qty:\n                product_quantities[product] -= Uom.compute_qty(\n                    self.unit, quantity, product.default_uom, round=False)\n                return\n\n        date = self.shipping_date or today\n        if date <= today:\n            date = today\n        else:\n            date -= dt.timedelta(1)\n        pbom = product.get_bom(bom_pattern)\n        return Production(\n            planned_date=date,\n            company=self.sale.company,\n            warehouse=self.warehouse,\n            location=self.warehouse.production_location,\n            product=product,\n            bom=pbom.bom if pbom else None,\n            unit=self.unit,\n            quantity=quantity,\n            state='request',\n            origin=self,\n            )"
+        }
+      ]
+    },
+    {
+      "id": "A1",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "local_path": "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java",
+      "line_ranges": [
+        [
+          584,
+          666
+        ]
+      ],
+      "observed": "Quantité future = courant + entrées planifiées − sorties planifiées, avec conversions d’unité et filtre lieu/produit.",
+      "flow_delta": "Projection de stock comparable ; cet agrégat n’établit pas à lui seul date promettable, fermeté, protections ni cohérence de toutes les lignes.",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java#L584",
+      "basis": "Lecture de code figé ; ni exécution du produit ni charge observée.",
+      "sha256": "1519a988598214c7456bb0da20a95c1e9b3bc8e0d54c00d837aa1336c4d5e341",
+      "excerpts": [
+        {
+          "start": 584,
+          "end": 666,
+          "text": "  protected static final String STOCK_MOVE_LINE_FILTER =\n      \"(self.stockMove.archived IS NULL OR self.archived IS FALSE) \"\n          + \"AND self.stockMove.statusSelect = :planned \"\n          + \"AND self.product.id = :productId \";\n\n  @Override\n  public BigDecimal computeFutureQty(StockLocationLine stockLocationLine) throws AxelorException {\n    // future quantity = current quantity - planned outgoing + planned incoming\n    BigDecimal futureQty =\n        stockLocationLine.getCurrentQty() != null\n            ? stockLocationLine.getCurrentQty()\n            : BigDecimal.ZERO;\n\n    Product product = stockLocationLine.getProduct();\n\n    if (stockLocationLine.getUnit() == null) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_CONFIGURATION_ERROR,\n          I18n.get(StockExceptionMessage.LOCATION_LINE_MISSING_UNIT),\n          stockLocationLine.getStockLocation().getName(),\n          product.getFullName());\n    }\n\n    boolean isDetailsStockLocationLine = stockLocationLine.getDetailsStockLocation() != null;\n    Long stockLocationId =\n        isDetailsStockLocationLine\n            ? stockLocationLine.getDetailsStockLocation().getId()\n            : stockLocationLine.getStockLocation().getId();\n    Long trackingNumberId =\n        isDetailsStockLocationLine && stockLocationLine.getTrackingNumber() != null\n            ? stockLocationLine.getTrackingNumber().getId()\n            : null;\n\n    StringBuilder jpql = new StringBuilder();\n    jpql.append(\n        \"SELECT new com.axelor.apps.stock.utils.StockLocationLineQtyView(\"\n            + \" self.unit, \"\n            + \" SUM(CASE WHEN self.toStockLocation.id = :stockLocationId THEN COALESCE(self.qty, 0) ELSE 0 END), \"\n            + \" SUM(CASE WHEN self.fromStockLocation.id = :stockLocationId THEN COALESCE(self.qty, 0) ELSE 0 END) \"\n            + \") \"\n            + \" FROM StockMoveLine self \"\n            + \" WHERE (self.stockMove.archived IS NULL OR self.archived IS FALSE) \"\n            + \" AND self.stockMove.statusSelect = :planned \"\n            + \" AND self.product.id = :productId \"\n            + \" AND (self.toStockLocation.id = :stockLocationId OR self.fromStockLocation.id = :stockLocationId) \");\n    if (isDetailsStockLocationLine) {\n      jpql.append(\" AND self.trackingNumber.id = :trackingNumberId \");\n    }\n    jpql.append(\" GROUP BY self.unit\");\n\n    var query =\n        JPA.em()\n            .createQuery(jpql.toString(), StockLocationLineQtyView.class)\n            .setParameter(\"planned\", StockMoveRepository.STATUS_PLANNED)\n            .setParameter(\"productId\", product.getId())\n            .setParameter(\"stockLocationId\", stockLocationId);\n    if (isDetailsStockLocationLine) {\n      query.setParameter(\"trackingNumberId\", trackingNumberId);\n    }\n    query.setFlushMode(FlushModeType.COMMIT);\n    List<StockLocationLineQtyView> aggregates = query.getResultList();\n\n    for (StockLocationLineQtyView agg : aggregates) {\n      Unit aggUnit = agg.getUnit();\n      BigDecimal incoming = agg.getIncoming() != null ? agg.getIncoming() : BigDecimal.ZERO;\n      BigDecimal outgoing = agg.getOutgoing() != null ? agg.getOutgoing() : BigDecimal.ZERO;\n\n      if (incoming.compareTo(BigDecimal.ZERO) != 0) {\n        BigDecimal incConverted =\n            unitConversionService.convertWithAutoFlushFalse(\n                aggUnit, stockLocationLine.getUnit(), incoming, incoming.scale(), product);\n        futureQty = futureQty.add(incConverted);\n      }\n\n      if (outgoing.compareTo(BigDecimal.ZERO) != 0) {\n        BigDecimal outConverted =\n            unitConversionService.convertWithAutoFlushFalse(\n                aggUnit, stockLocationLine.getUnit(), outgoing, outgoing.scale(), product);\n        futureQty = futureQty.subtract(outConverted);\n      }\n    }\n\n    return futureQty;"
+        }
+      ]
+    },
+    {
+      "id": "A2",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "local_path": "tmp/oss-audit-axelor/axelor-sale/src/main/java/com/axelor/apps/sale/service/saleorder/SaleOrderMarginServiceImpl.java",
+      "path": "axelor-sale/src/main/java/com/axelor/apps/sale/service/saleorder/SaleOrderMarginServiceImpl.java",
+      "line_ranges": [
+        [
+          56,
+          107
+        ]
+      ],
+      "observed": "Somme de coûts, revenus et marges des lignes ; ratios conditionnés par un dénominateur non nul.",
+      "flow_delta": "Calcul économique comparable, pas sélection PTP sous service/autorité, ni traitement démontré des coûts inconnus.",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-sale/src/main/java/com/axelor/apps/sale/service/saleorder/SaleOrderMarginServiceImpl.java#L56",
+      "basis": "Lecture de code figé ; ni exécution du produit ni charge observée.",
+      "sha256": "88f28abdbbf29983a676897965bbd20058577e4880eabbde5d9fde9b4d1f4169",
+      "excerpts": [
+        {
+          "start": 56,
+          "end": 107,
+          "text": "  public void computeMarginSaleOrder(SaleOrder saleOrder) {\n    BigDecimal accountedRevenue = BigDecimal.ZERO;\n    BigDecimal totalCostPrice = BigDecimal.ZERO;\n    BigDecimal totalGrossMargin = BigDecimal.ZERO;\n\n    if (saleOrder.getSaleOrderLineList() != null && !saleOrder.getSaleOrderLineList().isEmpty()) {\n      boolean considerZeroCost = appSaleService.getAppSale().getConsiderZeroCost();\n      for (SaleOrderLine saleOrderLine : saleOrder.getSaleOrderLineList()) {\n        if (saleOrderLine.getProduct() == null\n            || (saleOrderLine.getExTaxTotal().compareTo(BigDecimal.ZERO) == 0\n                && !considerZeroCost)) {\n          continue;\n        }\n        totalGrossMargin = totalGrossMargin.add(saleOrderLine.getSubTotalGrossMargin());\n        totalCostPrice = totalCostPrice.add(saleOrderLine.getSubTotalCostPrice());\n        accountedRevenue = accountedRevenue.add(saleOrderLine.getCompanyExTaxTotal());\n      }\n    }\n\n    setSaleOrderMarginInfo(\n        saleOrder,\n        accountedRevenue,\n        totalCostPrice,\n        totalGrossMargin,\n        computeRate(accountedRevenue, totalGrossMargin),\n        computeRate(totalCostPrice, totalGrossMargin));\n  }\n\n  protected void setSaleOrderMarginInfo(\n      SaleOrder saleOrder,\n      BigDecimal accountedRevenue,\n      BigDecimal totalCostPrice,\n      BigDecimal totalGrossMargin,\n      BigDecimal marginRate,\n      BigDecimal markup) {\n    saleOrder.setAccountedRevenue(accountedRevenue);\n    saleOrder.setTotalCostPrice(totalCostPrice);\n    saleOrder.setTotalGrossMargin(totalGrossMargin);\n    saleOrder.setMarginRate(marginRate);\n    saleOrder.setMarkup(markup);\n  }\n\n  protected BigDecimal computeRate(BigDecimal saleCostPrice, BigDecimal totalGrossMargin) {\n    BigDecimal rate = BigDecimal.ZERO;\n    if (saleCostPrice.compareTo(BigDecimal.ZERO) != 0) {\n      rate =\n          totalGrossMargin\n              .multiply(new BigDecimal(100))\n              .divide(\n                  saleCostPrice, AppBaseService.DEFAULT_NB_DECIMAL_DIGITS, RoundingMode.HALF_UP);\n    }\n    return rate;"
+        }
+      ]
+    },
+    {
+      "id": "A3",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "local_path": "tmp/oss-audit-axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/MrpLineServiceImpl.java",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/MrpLineServiceImpl.java",
+      "line_ranges": [
+        [
+          115,
+          183
+        ]
+      ],
+      "observed": "Proposition d’achat transformée en commande avec fournisseur et regroupement éventuel par échéance.",
+      "flow_delta": "Point de passage vers Orders ; FLOW ne confond pas simulation CTP et émission autorisée d’achat.",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/MrpLineServiceImpl.java#L115",
+      "basis": "Lecture de code figé ; ni exécution du produit ni charge observée.",
+      "sha256": "bfd1449834cb7f73df08e8bd057d59a86bcf27b680ad22a3c837fdd843fce24e",
+      "excerpts": [
+        {
+          "start": 115,
+          "end": 183,
+          "text": "  public void generateProposal(MrpLine mrpLine) throws AxelorException {\n    generateProposal(mrpLine, null, null, false);\n  }\n\n  @Override\n  public void generateProposal(\n      MrpLine mrpLine,\n      Map<Pair<Partner, LocalDate>, PurchaseOrder> purchaseOrders,\n      Map<Partner, PurchaseOrder> purchaseOrdersPerSupplier,\n      boolean isProposalsPerSupplier)\n      throws AxelorException {\n\n    if (mrpLine.getMrpLineType().getElementSelect()\n        == MrpLineTypeRepository.ELEMENT_PURCHASE_PROPOSAL) {\n\n      this.generatePurchaseProposal(\n          mrpLine, purchaseOrders, purchaseOrdersPerSupplier, isProposalsPerSupplier);\n    }\n  }\n\n  @Transactional(rollbackOn = {Exception.class})\n  protected void generatePurchaseProposal(\n      MrpLine mrpLine,\n      Map<Pair<Partner, LocalDate>, PurchaseOrder> purchaseOrders,\n      Map<Partner, PurchaseOrder> purchaseOrdersPerSupplier,\n      boolean isProposalsPerSupplier)\n      throws AxelorException {\n\n    Product product = mrpLine.getProduct();\n    StockLocation stockLocation = mrpLine.getStockLocation();\n    LocalDate maturityDate = mrpLine.getMaturityDate();\n\n    Partner supplierPartner = mrpLine.getSupplierPartner();\n\n    if (supplierPartner == null) {\n      supplierPartner = product.getDefaultSupplierPartner();\n\n      if (supplierPartner == null) {\n        throw new AxelorException(\n            mrpLine,\n            TraceBackRepository.CATEGORY_CONFIGURATION_ERROR,\n            I18n.get(SupplychainExceptionMessage.MRP_LINE_1),\n            product.getFullName());\n      }\n    }\n\n    Company company = stockLocation.getCompany();\n\n    Pair<Partner, LocalDate> key = null;\n    PurchaseOrder purchaseOrder = null;\n\n    if (isProposalsPerSupplier) {\n      if (purchaseOrdersPerSupplier != null && !purchaseOrdersPerSupplier.isEmpty()) {\n        purchaseOrder = purchaseOrdersPerSupplier.get(supplierPartner);\n        if (purchaseOrder != null) {\n          purchaseOrder = purchaseOrderRepo.find(purchaseOrder.getId());\n        }\n      }\n    } else {\n      if (purchaseOrders != null) {\n        key = Pair.of(supplierPartner, maturityDate);\n        purchaseOrder = purchaseOrders.get(key);\n      }\n    }\n\n    if (purchaseOrder == null) {\n      purchaseOrder =\n          purchaseOrderRepo.save(\n              purchaseOrderCreateSupplychainService.createPurchaseOrder("
+        }
+      ]
+    },
+    {
+      "id": "A4",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "local_path": "tmp/oss-audit-axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorder/SaleOrderMarginSupplychainServiceImpl.java",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorder/SaleOrderMarginSupplychainServiceImpl.java",
+      "line_ranges": [
+        [
+          40,
+          44
+        ]
+      ],
+      "observed": "Extension du total de coût par les frais de livraison.",
+      "flow_delta": "Analogie de poste économique additionnel, sans preuve de comparaison d’options de promesse ni arbitrage économique universel.",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorder/SaleOrderMarginSupplychainServiceImpl.java#L40",
+      "basis": "Lecture de code figé ; ni exécution du produit ni charge observée.",
+      "sha256": "6890a9a9b1bb83e71bb51e73130a48ed45b9fce2f81de23115c95fdb4d9891d3",
+      "excerpts": [
+        {
+          "start": 40,
+          "end": 44,
+          "text": "  @Override\n  public void computeMarginSaleOrder(SaleOrder saleOrder) {\n    super.computeMarginSaleOrder(saleOrder);\n    saleOrder.setTotalCostPrice(saleOrder.getTotalCostPrice().add(saleOrder.getShippingCost()));\n  }"
+        }
+      ]
+    },
+    {
+      "id": "G1",
+      "repository": "google/or-tools",
+      "commit": "0d60e8afe450ec817f510aae965ab8898310cb41",
+      "path": "ortools/java/com/google/ortools/sat/CpModel.java",
+      "local_path": "audits/2026-10-29-experimentation-estimation/iteration-14-code-ortools/CpModel.java",
+      "line_ranges": [
+        [
+          810,
+          833
+        ],
+        [
+          867,
+          938
+        ],
+        [
+          941,
+          972
+        ]
+      ],
+      "observed": "API Java : intervalles optionnels, non-chevauchement, capacités cumulées, indications de solution et hypothèses.",
+      "flow_delta": "Ces primitives servent à formuler le modèle FLOW, elles ne le définissent pas ; aucun benchmark FLOW exécuté.",
+      "url": "https://raw.githubusercontent.com/google/or-tools/0d60e8afe450ec817f510aae965ab8898310cb41/ortools/java/com/google/ortools/sat/CpModel.java",
+      "snapshot_sha256": "e41eff515f7fa532d3e9f082d4cffa26ea1a717f0efd14406153beb62bebb118",
+      "basis": "Lecture du code Java figé ; pas exécution OR-Tools/Spring.",
+      "sha256": "e41eff515f7fa532d3e9f082d4cffa26ea1a717f0efd14406153beb62bebb118",
+      "excerpts": [
+        {
+          "start": 810,
+          "end": 833,
+          "text": "   * Creates an optional interval variable from three 1-var affine expressions start, size, end, and\n   * isPresent.\n   *\n   * <p>An optional interval variable is a constraint, that is itself used in other constraints like\n   * NoOverlap. This constraint is protected by an {@code isPresent} literal that indicates if it is\n   * active or not.\n   *\n   * <p>Internally, it ensures that {@code isPresent => start + size == end}.\n   *\n   * @param start the start of the interval. It needs to be an 1-var affine or constant expression.\n   * @param size the size of the interval. It needs to be an 1-var affine or constant expression.\n   * @param end the end of the interval. It needs to be an 1-var affine or constant expression.\n   * @param isPresent a literal that indicates if the interval is active or not. A inactive interval\n   *     is simply ignored by all constraints.\n   * @param name The name of the interval variable\n   * @return an IntervalVar object\n   */\n  public IntervalVar newOptionalIntervalVar(LinearArgument start, LinearArgument size,\n      LinearArgument end, Literal isPresent, String name) {\n    return new IntervalVar(modelBuilder,\n        getLinearExpressionProtoBuilderFromLinearArgument(start, /*negate=*/false),\n        getLinearExpressionProtoBuilderFromLinearArgument(size, /*negate=*/false),\n        getLinearExpressionProtoBuilderFromLinearArgument(end, /*negate=*/false),\n        isPresent.getIndex(), name);"
+        },
+        {
+          "start": 867,
+          "end": 938,
+          "text": "  /**\n   * Adds {@code NoOverlap(intervalVars)}.\n   *\n   * <p>A NoOverlap constraint ensures that all present intervals do not overlap in time.\n   *\n   * @param intervalVars the list of interval variables to constrain\n   * @return an instance of the Constraint class\n   */\n  public Constraint addNoOverlap(IntervalVar[] intervalVars) {\n    return addNoOverlap(Arrays.asList(intervalVars));\n  }\n\n  /**\n   * Adds {@code NoOverlap(intervalVars)}.\n   *\n   * @see addNoOverlap(IntervalVar[]).\n   */\n  public Constraint addNoOverlap(Iterable<IntervalVar> intervalVars) {\n    Constraint ct = new Constraint(modelBuilder);\n    NoOverlapConstraintProto.Builder noOverlap = ct.getBuilder().getNoOverlapBuilder();\n    for (IntervalVar var : intervalVars) {\n      noOverlap.addIntervals(var.getIndex());\n    }\n    return ct;\n  }\n\n  /**\n   * Adds {@code NoOverlap2D(xIntervals, yIntervals)}.\n   *\n   * <p>A NoOverlap2D constraint ensures that all present rectangles do not overlap on a plan. Each\n   * rectangle is aligned with the X and Y axis, and is defined by two intervals which represent its\n   * projection onto the X and Y axis.\n   *\n   * <p>Furthermore, one box is optional if at least one of the x or y interval is optional.\n   *\n   * @return an instance of the NoOverlap2dConstraint class. This class allows adding rectangles\n   *     incrementally.\n   */\n  public NoOverlap2dConstraint addNoOverlap2D() {\n    return new NoOverlap2dConstraint(modelBuilder);\n  }\n\n  /**\n   * Adds {@code Cumulative(capacity)}.\n   *\n   * <p>This constraint enforces that:\n   *\n   * <p>{@code forall t: sum(demands[i] if (start(intervals[t]) <= t < end(intervals[t])) and (t is\n   * present)) <= capacity}.\n   *\n   * @param capacity the maximum capacity of the cumulative constraint. It must be a positive 1-var\n   *     affine expression.\n   * @return an instance of the CumulativeConstraint class. this class allows adding (interval,\n   *     demand) pairs incrementally.\n   */\n  public CumulativeConstraint addCumulative(LinearArgument capacity) {\n    CumulativeConstraint ct = new CumulativeConstraint(this);\n    CumulativeConstraintProto.Builder cumul = ct.getBuilder().getCumulativeBuilder();\n    cumul.setCapacity(getLinearExpressionProtoBuilderFromLinearArgument(capacity, false));\n    return ct;\n  }\n\n  /**\n   * Adds {@code Cumulative(capacity)}.\n   *\n   * @see #addCumulative(LinearArgument capacity)\n   */\n  public CumulativeConstraint addCumulative(long capacity) {\n    CumulativeConstraint ct = new CumulativeConstraint(this);\n    CumulativeConstraintProto.Builder cumul = ct.getBuilder().getCumulativeBuilder();\n    cumul.setCapacity(getLinearExpressionProtoBuilderFromLong(capacity));\n    return ct;"
+        },
+        {
+          "start": 941,
+          "end": 972,
+          "text": "  /** Adds hinting to a variable */\n  public void addHint(IntVar var, long value) {\n    modelBuilder.getSolutionHintBuilder().addVars(var.getIndex());\n    modelBuilder.getSolutionHintBuilder().addValues(value);\n  }\n\n  /** Adds hinting to a literal */\n  public void addHint(Literal lit, boolean value) {\n    if (isPositive(lit)) {\n      modelBuilder.getSolutionHintBuilder().addVars(lit.getIndex());\n      modelBuilder.getSolutionHintBuilder().addValues(value ? 1 : 0);\n    } else {\n      modelBuilder.getSolutionHintBuilder().addVars(negated(lit.getIndex()));\n      modelBuilder.getSolutionHintBuilder().addValues(value ? 0 : 1);\n    }\n  }\n\n  /** Remove all solution hints */\n  public void clearHints() {\n    modelBuilder.clearSolutionHint();\n  }\n\n  /** Adds a literal to the model as assumption */\n  public void addAssumption(Literal lit) {\n    modelBuilder.addAssumptions(lit.getIndex());\n  }\n\n  /** Adds multiple literals to the model as assumptions */\n  public void addAssumptions(Literal[] literals) {\n    for (Literal lit : literals) {\n      addAssumption(lit);\n    }"
+        }
+      ]
+    },
+    {
+      "id": "G2",
+      "repository": "google/or-tools",
+      "commit": "0d60e8afe450ec817f510aae965ab8898310cb41",
+      "path": "ortools/java/com/google/ortools/sat/CpSolver.java",
+      "local_path": "audits/2026-10-29-experimentation-estimation/iteration-14-code-ortools/CpSolver.java",
+      "line_ranges": [
+        [
+          38,
+          68
+        ],
+        [
+          109,
+          130
+        ]
+      ],
+      "observed": "Résolution avec paramètres/callbacks, arrêt asynchrone, objectif et borne retournés.",
+      "flow_delta": "Interpréter statut et borne sur le seul modèle exploré ; domaine tronqué ou données incomplètes limitent la conclusion.",
+      "url": "https://raw.githubusercontent.com/google/or-tools/0d60e8afe450ec817f510aae965ab8898310cb41/ortools/java/com/google/ortools/sat/CpSolver.java",
+      "snapshot_sha256": "51c225652cd5651c9613a184e53973ef66d83d699d49e646ab8cd2c0ccb30f98",
+      "basis": "Lecture du code Java figé ; pas exécution OR-Tools/Spring.",
+      "sha256": "51c225652cd5651c9613a184e53973ef66d83d699d49e646ab8cd2c0ccb30f98",
+      "excerpts": [
+        {
+          "start": 38,
+          "end": 68,
+          "text": "  public CpSolverStatus solve(CpModel model) {\n    return solve(model, null);\n  }\n\n  /**\n   * Solves the given model, calls the solution callback at each incumbent solution, and returns the\n   * solve status.\n   */\n  public CpSolverStatus solve(CpModel model, CpSolverSolutionCallback cb) {\n    // Setup search.\n    createSolveWrapper(); // Synchronized.\n    solveWrapper.setParameters(solveParameters.build());\n    if (cb != null) {\n      solveWrapper.addSolutionCallback(cb);\n    }\n    if (logCallback != null) {\n      solveWrapper.addLogCallback(logCallback);\n    }\n    if (bestBoundCallback != null) {\n      solveWrapper.addBestBoundCallback(bestBoundCallback);\n    }\n\n    solveResponse = solveWrapper.solve(model.model());\n\n    // Cleanup search.\n    if (cb != null) {\n      solveWrapper.clearSolutionCallback(cb);\n    }\n    releaseSolveWrapper(); // Synchronized.\n\n    return solveResponse.getStatus();"
+        },
+        {
+          "start": 109,
+          "end": 130,
+          "text": "  private synchronized void releaseSolveWrapper() {\n    solveWrapper = null;\n  }\n\n  /** Stops the search asynchronously. */\n  public synchronized void stopSearch() {\n    if (solveWrapper != null) {\n      solveWrapper.stopSearch();\n    }\n  }\n\n  /** Returns the best objective value found during search. */\n  public double objectiveValue() {\n    return solveResponse.getObjectiveValue();\n  }\n\n  /**\n   * Returns the best lower bound found when minimizing, of the best upper bound found when\n   * maximizing.\n   */\n  public double bestObjectiveBound() {\n    return solveResponse.getBestObjectiveBound();"
+        }
+      ]
+    },
+    {
+      "id": "G3",
+      "repository": "google/or-tools",
+      "commit": "0d60e8afe450ec817f510aae965ab8898310cb41",
+      "path": "ortools/java/com/google/ortools/Loader.java",
+      "local_path": "audits/2026-10-29-experimentation-estimation/iteration-14-code-ortools/Loader.java",
+      "line_ranges": [
+        [
+          109,
+          138
+        ]
+      ],
+      "observed": "Chargement de jniortools, puis extraction/chargement de ressources natives.",
+      "flow_delta": "OR-Tools en Java nécessite de qualifier le packaging natif et les ressources ; il ne s’agit pas seulement d’ajouter une dépendance Java.",
+      "url": "https://raw.githubusercontent.com/google/or-tools/0d60e8afe450ec817f510aae965ab8898310cb41/ortools/java/com/google/ortools/Loader.java",
+      "snapshot_sha256": "a999b8cfdbebcaebd785ce50a3a47fe9546f890c5ac982c611f48e2af81461ad",
+      "basis": "Lecture du code Java figé ; pas exécution OR-Tools/Spring.",
+      "sha256": "a999b8cfdbebcaebd785ce50a3a47fe9546f890c5ac982c611f48e2af81461ad",
+      "excerpts": [
+        {
+          "start": 109,
+          "end": 138,
+          "text": "  public static synchronized void loadNativeLibraries() {\n    // prints the name of the Operating System\n    // System.out.println(\"OS: \" + System.getProperty(\"os.name\"));\n    if (loaded) {\n      return;\n    }\n    try {\n      // System.out.println(\"System.loadLibrary(\\\"jniortools\\\")\");\n      System.loadLibrary(\"jniortools\");\n      loaded = true;\n      return;\n    } catch (UnsatisfiedLinkError e) {\n      // Do nothing.\n      // System.out.println(\"Can't System.loadLibrary(jniortools)\");\n    }\n    try {\n      URI resourceURI = getNativeResourceURI();\n      Path tempPath = unpackNativeResources(resourceURI);\n      // Load the native library\n      // System.out.println(\"System.load(\" + System.mapLibraryName(\"jniortools\") + \")\");\n      System.load(tempPath.resolve(RESOURCE_PATH)\n              .resolve(System.mapLibraryName(\"jniortools\"))\n              .toAbsolutePath()\n              .toString());\n      loaded = true;\n      return;\n    } catch (IOException | UnsatisfiedLinkError e) {\n      // Do nothing.\n      // System.out.println(\"Can't System.load(jniortools)\");\n    }"
+        }
+      ]
+    }
+  ],
+  "method": "Lecture de 9 extraits ciblés dans trois ERP OSS et3 extraits OR-Tools Java, pas preuve de leur couverture exhaustive ni mesure de charge."
+}

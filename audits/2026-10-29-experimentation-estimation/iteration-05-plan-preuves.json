@@ -1,0 +1,1056 @@
+{
+  "id": "iteration-05-plan-preuves",
+  "date": "2026-10-29",
+  "status": "Instruction qualitative avant chiffrage ; aucune source active modifiée.",
+  "method_reference": "iteration-04-methode-candidate.json",
+  "baseline_reference": "iteration-03-contrat.json",
+  "exposure_prior": {
+    "declaration": "Instructeur déjà exposé à la méthode et aux pilotes COMMON/REF/STOCK, aux lectures Axelor stock/import et au témoin STOCK04. La famille réservée PLAN n'avait pas fait l'objet d'une lecture de corps de méthodes ou d'une estimation dédiée par cet instructeur avant cette tâche.",
+    "limits": "Cas réservé à l'itération05, mais pas expérimentation aveugle ni réalisation observée indépendante. Les montants historiques PLAN ne sont ni consultés ni utilisés. Des liens de métadonnées vers la calibration historique sont visibles dans la grille ; ils n'alimentent aucune hypothèse.",
+    "quantitative_result": null
+  },
+  "repositories": [
+    {
+      "id": "odoo",
+      "path": "tmp/odoo20-audit",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "tracked_diff_exit": 0
+    },
+    {
+      "id": "tryton",
+      "path": "tmp/tryton-code-audit-2026-10-28",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "tracked_diff_exit": 0
+    },
+    {
+      "id": "axelor",
+      "path": "tmp/oss-audit-axelor",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "tracked_diff_exit": 0
+    },
+    {
+      "id": "axelor_platform",
+      "path": "tmp/oss-audit-axelor-platform",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "inspection": "Commit vérifié ; cadre technique Guice/JPA connu par lecture antérieure, aucun module planning de plateforme ajouté à la preuve."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "PLAN-OD-01",
+      "product": "odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "tmp/odoo20-audit/addons/stock/models/stock_orderpoint.py",
+      "lines": [
+        [
+          411,
+          428
+        ],
+        [
+          454,
+          472
+        ],
+        [
+          499,
+          527
+        ]
+      ],
+      "symbol": "_compute_qty; _compute_qty_to_order_computed; _get_qty_to_order; _get_product_context",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_orderpoint.py#L411",
+      "finding": "Lit quantités disponibles/projetées et approvisionnements en cours, déclenche sous le minimum, calcule max(minimum,cible)-projection puis arrondit au multiple ; horizon par lieu et date.",
+      "classification": "Calcul déterministe de besoin/seuil ; comparable partiel D05.f/D05.e.",
+      "limits": "Pas de comparaison globale des affectations sous capacités communes dans ces méthodes ; projection de stock ne signifie pas prévision statistique.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-OD-02",
+      "product": "odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "tmp/odoo20-audit/addons/product/models/product_product.py",
+      "lines": [
+        [
+          1269,
+          1324
+        ]
+      ],
+      "symbol": "_prepare_sellers; _get_filtered_sellers; _select_seller",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/product/models/product_product.py#L1269",
+      "finding": "Filtre dates, unité, quantité et variante. Préclasse les fournisseurs par séquence/minimum/prix/id ; retient les lignes du premier partenaire admissible puis trie celles-ci par prix converti et critères configurés.",
+      "classification": "Sélection locale déterministe/heuristique de fournisseur.",
+      "limits": "Ne pas présenter cette sélection comme un optimum global entre tous fournisseurs et toutes demandes.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-OD-03",
+      "product": "odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "tmp/odoo20-audit/addons/stock/models/stock_orderpoint.py",
+      "lines": [
+        [
+          728,
+          809
+        ]
+      ],
+      "symbol": "_procure_orderpoint_confirm",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_orderpoint.py#L728",
+      "finding": "Forme les procurements par lots, exécute stock.rule dans un savepoint, isole les échecs et crée des activités de diagnostic ; curseur/commit spécifiques aux lots possibles.",
+      "classification": "Orchestration et gestion des erreurs autour du calcul.",
+      "limits": "FLOW05 s'arrête à une proposition : l'exécution de procurements n'est pas couverte ni à recopier.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-OD-04",
+      "product": "odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "tmp/odoo20-audit/addons/purchase_stock/models/stock_rule.py",
+      "lines": [
+        [
+          59,
+          114
+        ]
+      ],
+      "symbol": "_run_buy",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/purchase_stock/models/stock_rule.py#L59",
+      "finding": "Cherche le fournisseur, groupe les besoins par domaine de bon de commande, signale les prix/fournisseurs manquants et crée un purchase.order si nécessaire.",
+      "classification": "Dépendance fonctionnelle avec achats et engagements.",
+      "limits": "Effet opérationnel explicitement hors PLAN05 ; le comparable inclut davantage que le lot cible.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-OD-T1",
+      "product": "odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "tmp/odoo20-audit/addons/stock/tests/test_proc_rule.py",
+      "lines": [
+        [
+          27,
+          41
+        ],
+        [
+          605,
+          627
+        ],
+        [
+          653,
+          696
+        ]
+      ],
+      "symbol": "test_qty_to_order_remainder_decimal; test_replenishment_order_to_max; test_compute_qty_to_order; test_compute_qty_to_order_after_receipt_line_deletion",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/tests/test_proc_rule.py#L27",
+      "finding": "Assertions lues : arrondi 5,1 ; cible 200 depuis10 donne190 ; conditionnement douzaine mène à248 ; nouvelle demande change5 en6 ; suppression d'une réception change projection10/besoin0 en projection0/besoin10.",
+      "classification": "Preuves de cas de tests du calcul et de dépendances aux mouvements.",
+      "limits": "Présence et contenu lus uniquement, pas exécution ni couverture globale déduite.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-OD-T2",
+      "product": "odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "tmp/odoo20-audit/addons/purchase_stock/tests/test_reordering_rule.py",
+      "lines": [
+        [
+          1176,
+          1201
+        ]
+      ],
+      "symbol": "test_set_supplier_in_orderpoint",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/purchase_stock/tests/test_reordering_rule.py#L1176",
+      "finding": "Configure unité kg, fournisseur en tonnes avec minimum6 ; vérifie que le réapprovisionnement devient6000kg.",
+      "classification": "Test d'intégration d'un minimum fournisseur et d'une conversion d'unité.",
+      "limits": "Cette difficulté existe au comparable ; conversions variables et tailles de lots sont exclues du témoin05.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-TR-01",
+      "product": "tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "tmp/tryton-code-audit-2026-10-28/modules/stock_supply/purchase_request.py",
+      "lines": [
+        [
+          39,
+          150
+        ],
+        [
+          302,
+          364
+        ]
+      ],
+      "symbol": "PurchaseRequest.generate_requests; get_shortage",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock_supply/purchase_request.py#L39",
+      "finding": "Groupe produits par dates possibles d'approvisionnement, lit les positions projetées par entrepôt, parcourt les dates et détecte première rupture sous minimum et quantité minimale dans l'intervalle.",
+      "classification": "Calcul déterministe de besoins datés ; comparable partiel D05.f/D05.e.",
+      "limits": "Pas d'objectif global ni recherche de plans concurrents dans ces corps ; forecast=True désigne ici le contexte de quantité projetée.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-TR-02",
+      "product": "tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "tmp/tryton-code-audit-2026-10-28/modules/stock_supply/purchase_request.py",
+      "lines": [
+        [
+          163,
+          250
+        ],
+        [
+          253,
+          299
+        ]
+      ],
+      "symbol": "compare_requests; get_supply_dates; compute_request",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock_supply/purchase_request.py#L163",
+      "finding": "Rapproche les propositions des demandes déjà liées à des achats, calcule les dates des fournisseurs et quantité cible moins position, convertit/arrondit l'unité, crée une demande d'achat datée.",
+      "classification": "Rapprochement des apports déjà attendus et génération de proposition.",
+      "limits": "Dépend de commandes/achats/unités/fournisseurs non fournis par REF03 et STOCK03 ; ne prouve pas une règle générique de non-double-compte applicable sans adaptation.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-TR-03",
+      "product": "tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "tmp/tryton-code-audit-2026-10-28/modules/purchase_request/purchase_request.py",
+      "lines": [
+        [
+          299,
+          337
+        ]
+      ],
+      "symbol": "find_best_product_supplier; find_best_supplier",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/purchase_request/purchase_request.py#L299",
+      "finding": "Retourne le premier fournisseur de la séquence capable d'atteindre la date ; à défaut retourne le plus rapide, puis calcule la date d'achat.",
+      "classification": "Heuristique locale déterministe de fournisseur.",
+      "limits": "Le nom best ne démontre pas une minimisation globale des coûts, risques ou ressources partagées.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-TR-T1",
+      "product": "tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "tmp/tryton-code-audit-2026-10-28/modules/stock_supply/tests/scenario_stock_supply_purchase_request.rst",
+      "lines": [
+        [
+          111,
+          182
+        ]
+      ],
+      "symbol": "Scénario stock_supply purchase_request",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock_supply/tests/scenario_stock_supply_purchase_request.rst#L111",
+      "finding": "Assertions lues : demande brouillon2 ; minimum-2 supprime la proposition ; minimum5/cible10 donne12 ; minimum0 donne12 ; après passage en achat, relance sans nouveau brouillon.",
+      "classification": "Scénario d'intégration présent : seuils, reprise de calcul et non-recréation d'un achat.",
+      "limits": "Non exécuté ; ne valide pas l'optimisation globale ou la convergence des scénarios FLOW.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-AX-01",
+      "product": "axelor",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "tmp/oss-audit-axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/MrpServiceImpl.java",
+      "lines": [
+        [
+          194,
+          284
+        ],
+        [
+          368,
+          507
+        ],
+        [
+          744,
+          776
+        ]
+      ],
+      "symbol": "runCalculation; completeMrp; checkInsufficientCumulativeQty; computeCumulativeQty",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/MrpServiceImpl.java#L194",
+      "finding": "Réinitialise les lignes non éditées, collecte stock/achats/ventes/prévisions/historique, trie les lignes par échéance/type/séquence/id, cumule les quantités, détecte le passage sous minimum puis produit un apport et recommence ; garde-fou de1000 itérations.",
+      "classification": "Calcul MRP déterministe et itératif, pas preuve d'un solveur d'optimisation.",
+      "limits": "Nombre de passes n'est pas une recherche d'optimum démontrée ; état de service et repositories Axelor couplés ; scénario figé/versionné de FLOW à construire.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-AX-02",
+      "product": "axelor",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "tmp/oss-audit-axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/MrpServiceImpl.java",
+      "lines": [
+        [
+          541,
+          636
+        ]
+      ],
+      "symbol": "createProposalMrpLine",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/MrpServiceImpl.java#L541",
+      "finding": "Décale la proposition selon délai fournisseur/sécurité, applique minimum et multiple, rapproche d'une proposition précédente et conserve des origines ; distingue proposition d'achat et livraison estimée.",
+      "classification": "Mécanisme comparable de proposition datée et traçabilité.",
+      "limits": "Réutilisation de logique conceptuelle possible ; Java seul ne rend pas le service transplantable dans Spring.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-AX-03",
+      "product": "axelor",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockRulesServiceImpl.java",
+      "lines": [
+        [
+          61,
+          95
+        ],
+        [
+          99,
+          145
+        ]
+      ],
+      "symbol": "getQtyToOrder; useMinStockRules; getStockRules",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockRulesServiceImpl.java#L61",
+      "finding": "Calcule max(quantité de réapprovisionnement,cible-position) avec plafonnement éventuel ; choisit la règle du lieu le plus proche dans la hiérarchie.",
+      "classification": "Règle déterministe de seuil/cible.",
+      "limits": "Aucun choix de répartition globale ni adaptation optimale des cibles démontré dans ces méthodes.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    },
+    {
+      "id": "PLAN-AX-T1",
+      "product": "axelor",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "tmp/oss-audit-axelor/axelor-supplychain/src/test/java/com/axelor/apps/supplychain/service/TestMrpTool.java",
+      "lines": [
+        [
+          25,
+          75
+        ]
+      ],
+      "symbol": "TestMrpTool",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/test/java/com/axelor/apps/supplychain/service/TestMrpTool.java#L25",
+      "finding": "Sept tests de computeFullName avec nom/séquence présents, absents ou vides.",
+      "classification": "Tests de formatage du libellé uniquement.",
+      "limits": "Ne valide pas le calcul MRP. Recherche ciblée Mrp/Reorder/StockRules dans tests supplychain/stock/production : aucune preuve supplémentaire de tests de calcul identifiée ; absence produit générale non conclue.",
+      "inspection": "Corps des méthodes ou assertions lus ; aucun test OSS exécuté."
+    }
+  ],
+  "admission": [
+    {
+      "kind": "corps de méthodes OSS et tests présents",
+      "decision": "admis",
+      "use": "Mécanismes, dépendances, risques et différences de périmètre ; tests lus mais non exécutés."
+    },
+    {
+      "kind": "couverture exhaustive d'une capacité ou d'un produit",
+      "decision": "rejeté",
+      "reason": "Inspection ciblée, pas audit complet."
+    },
+    {
+      "kind": "calibration JH, productivité, LOC vers effort",
+      "decision": "rejeté",
+      "reason": "Aucun effort observé comparable fourni."
+    },
+    {
+      "kind": "Axelor directement réutilisable dans Spring",
+      "decision": "rejeté",
+      "reason": "MrpServiceImpl importe com.google.inject.persist.Transactional L78, utilise JPA et repositories/domaines Axelor ; supplychain/build.gradle dépend de purchase/sale/stock/account."
+    },
+    {
+      "kind": "solveur global dans les portions OSS inspectées",
+      "decision": "non démontré",
+      "reason": "Calculs de seuil/netting et choix locaux ; ne pas extrapoler cette limite aux produits complets."
+    },
+    {
+      "kind": "Timefold 1.26.0",
+      "decision": "instruction portée par le parent",
+      "reason": "Aucune seconde recherche de composant ; compatibilité, qualité des résultats et intégration persistante restent à qualifier dans le registre commun."
+    }
+  ],
+  "proposed_unit": {
+    "id": "PLAN",
+    "label": "Calculer une couverture datée et comparer des affectations sous contraintes",
+    "status": "Bornage convenu avec le parent avant tout JH ; hypothèse de produit générique, pas règle Beaumanoir.",
+    "scope": [
+      "Une variante de produit par scénario, une unité entière fixe, cinq nœuds au maximum, horizon de quatorze jours.",
+      "Au maximum cinquante demandes de dix unités chacune ; apports identifiés, quantités, dates, admissibilité et coûts fournis via JSON canonique.",
+      "Au maximum 70 lignes de ressources identifiees, avec date, noeud, cout et admissibilites propres ; aucune agregation implicite.",
+      "Publication datee des positions STOCK et prise en charge des entrees JSON manquantes financees dans PLAN ; producteurs et connecteurs Groupe complets exclus.",
+      "Geler et versionner les entrées, objectifs et contraintes ; calculer besoins nets et écarts puis chercher une affectation cohérente.",
+      "Affectations partielles permises ; conservation des quantités, admissibilité et dates comme contraintes ; couverture puis coût selon objectifs explicites.",
+      "Conserver résultat, déficit, conditions et statut du calcul ; comparer deux scénarios sur mêmes entrées et version d'objectifs.",
+      "En cas d'interruption, relance explicite d'un calcul à partir de l'entrée figée ; aucune reprise de l'état interne du solveur promise."
+    ],
+    "excluded": [
+      "Création, confirmation ou modification d'Orders ; réservation et exécution de transferts.",
+      "Prévision statistique, qualification complète de la prévision, optimisation de cibles ou de politiques de réservation.",
+      "Multi-échelons, substitution produit, assortiment, lots/conditionnements, unités variables, contraintes de transport ou d'atelier.",
+      "Revue complète du sous-domaine Master Plan, débit/SLA de production, optimum global garanti sans certificat/borne pertinente."
+    ],
+    "direct_mapping": [
+      {
+        "capability": "planning-data-provision",
+        "function_refs": [
+          "BC-012.01",
+          "BC-012.02"
+        ],
+        "coverage": "partiel",
+        "reason": "Capture et publication de positions courantes dans PLAN05 ; rattachement Inventory State Management conserve, sans second financement STOCK."
+      },
+      {
+        "capability": "D05.f",
+        "function_refs": [
+          "BC-035.01",
+          "BC-035.02",
+          "BC-035.03"
+        ],
+        "coverage": "partiel",
+        "reason": "Besoins nets/écarts sur entrées bornées ; préparation complète de la demande et du Supply Plan exclue."
+      },
+      {
+        "capability": "D03.o",
+        "function_refs": [
+          "BC-037.01",
+          "BC-037.02",
+          "BC-037.03"
+        ],
+        "coverage": "partiel",
+        "reason": "Vérifie admissibilité fournie et choisit des affectations ; construction de toutes règles d'admissibilité et tous engagements non couverte."
+      },
+      {
+        "capability": "BHV006",
+        "function_refs": [
+          "BC-045.01",
+          "BC-045.02",
+          "BC-045.03"
+        ],
+        "coverage": "partiel",
+        "reason": "Deux scénarios comparables avec couverture/coût/dates ; risque probabiliste et scénarios métier complets exclus."
+      }
+    ],
+    "adjacent_comparables": [
+      {
+        "capability": "D05.e",
+        "function_refs": [
+          "BC-043.01",
+          "BC-043.02",
+          "BC-043.03"
+        ],
+        "coverage": "non revendiquée",
+        "reason": "Calculs OSS de réapprovisionnement éclairent le netting ; le lot retenu affecte les ressources fournies sans construire un portefeuille complet d'apports."
+      },
+      {
+        "capability": "D05.c",
+        "function_refs": [
+          "BC-044.01",
+          "BC-044.02",
+          "BC-044.03"
+        ],
+        "coverage": "non revendiquée",
+        "reason": "Un arc entre nœuds ne démontre pas une politique complète de redistribution/consolidation des stocks."
+      }
+    ]
+  },
+  "discriminating_fixture": {
+    "classification": "Jeu d'essai fictif pour le mécanisme, aucune politique ni prix Beaumanoir.",
+    "supplies": {
+      "A": 10,
+      "B": 10
+    },
+    "demands": {
+      "D1": 10,
+      "D2": 10
+    },
+    "dates": "Toutes les ressources sont admissibles à la date requise.",
+    "unit_costs": {
+      "A-D1": 1,
+      "B-D1": 2,
+      "A-D2": 1,
+      "B-D2": 10
+    },
+    "feasible_solutions": [
+      {
+        "allocation": {
+          "A-D1": 10,
+          "B-D2": 10
+        },
+        "coverage": 20,
+        "cost": 110
+      },
+      {
+        "allocation": {
+          "B-D1": 10,
+          "A-D2": 10
+        },
+        "coverage": 20,
+        "cost": 30
+      }
+    ],
+    "discrimination": "Choisir A pour D1 parce que son coût unitaire est plus faible peut dégrader le coût global ; les capacités sont partagées.",
+    "expected_use": "Comparer au résultat exact obtenu par énumération du petit domaine. La réussite sur cette fixture ne prouve ni qualité sur tout jeu ni optimum global de la bibliothèque.",
+    "additional_checks": [
+      "Ressource tardive ou inadmissible",
+      "Quantité totale insuffisante avec déficit explicite",
+      "Même entrée/version sans double création de résultat",
+      "Interruption puis nouveau calcul à partir du snapshot",
+      "Contrôle indépendant des contraintes et du coût retourné"
+    ]
+  },
+  "inputs_and_financing": [
+    {
+      "id": "COMMON",
+      "state": "déjà financé dans le panier précédent",
+      "includes": "Projet, accès, infrastructure de tests et primitive de requête répétée.",
+      "excludes": "Modèle de plan, objectifs, stockage des snapshots, score et explication métier."
+    },
+    {
+      "id": "REF",
+      "state": "dépendance partiellement fournie",
+      "includes": "Identité produit/variante locale.",
+      "excludes": "Fournisseurs, lieux détaillés, coûts, délais, calendriers, capacités et demandes."
+    },
+    {
+      "id": "STOCK",
+      "state": "dépendance partiellement fournie",
+      "includes": "Position courante physique/réservée/disponible.",
+      "excludes": "Publication d'un snapshot de planification daté/versionné, apports futurs, provenance de tous les engagements."
+    },
+    {
+      "id": "planning-data-provision",
+      "function_refs": [
+        "BC-012.01",
+        "BC-012.02"
+      ],
+      "state": "Financement nouveau dans PLAN05, absent de STOCK03",
+      "work": "Capturer et publier le snapshot courant STOCK avec date, version et limites pour le scenario borne ; pas de reconstitution historique complete."
+    },
+    {
+      "id": "Autres producteurs d'entrées",
+      "state": "Reception et controle des entrees canoniques finances dans PLAN05",
+      "work": "Demandes, apports futurs, noeuds, admissibilites, couts et delais fournis par contrat JSON. Leurs producteurs et connecteurs metier reels sont hors lot ; leur absence ne rend pas la validation des entrees gratuite."
+    },
+    {
+      "id": "PLAN",
+      "state": "nouveau travail à dimensionner",
+      "work": "Réception/validation JSON borné, snapshots et versions, modèle mathématique, branchement solveur, contrôle du résultat, cycle de calcul et relance, restitution/comparaison."
+    },
+    {
+      "id": "EXEC",
+      "state": "moteur commun technique proposé par le parent",
+      "work": "Moteur Flowable financé une fois côté EXEC ; PLAN reste propriétaire de son cycle métier et de ses snapshots. Ne pas compter une deuxième installation/moteur."
+    }
+  ],
+  "double_count_rule": "L'entrée doit préciser si les réservations/protections sont déjà déduites et si les demandes correspondantes sont déjà couvertes. STOCK disponible + demande totale non rapprochée peut compter deux fois le même engagement. Une donnée manquante reste inconnue et ne vaut pas zéro.",
+  "spring_residual": {
+    "reusable": "Spring JDBC/transactions/validation et mécanismes COMMON à composer ; composant solveur Java instruit séparément par le parent.",
+    "to_build": [
+      "Domaines d'entrées et de résultats",
+      "Contrat des objectifs et contraintes",
+      "Conversion vers le modèle du solveur",
+      "Validation indépendante des solutions et petits oracles",
+      "Persistance/reprise du cycle",
+      "Explication des écarts et comparaison"
+    ],
+    "ownership": "Un expert optimisation peut être un rôle distinct nécessaire à la formulation et à la validation mathématique ; l'architecture, le développement et la QA gardent leurs responsabilités. Aucun transfert automatique ni charge proposée ici."
+  },
+  "conclusion": "La méthode figée permet d'identifier un ensemble cohérent et ses dépendances sans convertir un score ni copier une classe OSS. Cette lecture ne valide pas la précision des JH, ne chiffre pas le sous-domaine et laisse le total Core inconnu.",
+  "native_inventory": {
+    "capture": "sources/cartographie-scm-2026-10-24.yaml",
+    "function_owner": "source/grille-complexite.yaml",
+    "note": "Identifiants de capacites et Business Areas conserves dans la capture native ; references BC-xxx.xx et resultats repris de la grille de fonctions de l etude. Aucun score ni JH extrait.",
+    "nodes": [
+      {
+        "id": "domain-plan",
+        "kind": "area",
+        "name": "Master Plan",
+        "definition": "[Master Plan](glossary:TER111) : établir les besoins nets et décider comment les ressources disponibles ou attendues couvrent la demande retenue, y compris commande par commande en pénurie."
+      },
+      {
+        "id": "ba-master-plan-management",
+        "kind": "business_area",
+        "name": "Master Plan Management",
+        "definition": "Calculer et réviser les besoins nets à couvrir à partir de la demande opérationnelle, du stock et des apports attendus ; suivre les propositions et leurs effets autorisés."
+      },
+      {
+        "id": "ba-physical-stock-configuration-optimization",
+        "kind": "business_area",
+        "name": "Stock Optimization",
+        "definition": "Déterminer les cibles, droits et conditions d’usage du stock, les apports manquants et les redistributions utiles."
+      },
+      {
+        "id": "ba-order-backlog-management",
+        "kind": "business_area",
+        "name": "Order Backlog Management",
+        "definition": "Arbitrer les priorités, les affectations et les passages en livraison des commandes en concurrence dans le Master Plan."
+      },
+      {
+        "id": "ba-demand-supply-plan-preparation",
+        "kind": "business_area",
+        "name": "Demand & Supply Plan Preparation",
+        "definition": "[Demand & Supply Plan Preparation](glossary:TER374) : qualifier la demande, préparer les apports envisagés et rapprocher les deux plans avant le calcul des besoins nets."
+      },
+      {
+        "id": "plans-visibility",
+        "kind": "capability",
+        "name": "Supply Plan Visibility",
+        "definition": "Interpréter le [Supply Plan](glossary:TER098) qualifié, construit dans [Master Plan](glossary:TER111) ou alimenté par des contributions externes, pour identifier les apports et mouvements pertinents et leurs limites d’utilisation.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-master-plan-management",
+          "plans-visibility"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-033.01",
+            "resultat": "Interpréter les apports d’un plan qualifié"
+          },
+          {
+            "id": "BC-033.02",
+            "resultat": "Exposer leurs dates et mouvements et incertitudes"
+          },
+          {
+            "id": "BC-033.03",
+            "resultat": "Identifier les limites d’utilisation"
+          }
+        ]
+      },
+      {
+        "id": "demand-plan-visibility",
+        "kind": "capability",
+        "name": "Demand Plan Visibility",
+        "definition": "Interpréter le [Demand Plan](glossary:TER099) qualifié, construit dans [Master Plan](glossary:TER111) ou alimenté par des contributions externes, pour identifier les besoins pertinents dans le contexte de la demande et leurs limites d’utilisation.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-master-plan-management",
+          "demand-plan-visibility"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-031.01",
+            "resultat": "Sélectionner la contribution de demande pertinente"
+          },
+          {
+            "id": "BC-031.02",
+            "resultat": "Restituer besoins et hypothèses et limites"
+          },
+          {
+            "id": "BC-031.03",
+            "resultat": "Expliquer le contexte retenu"
+          }
+        ]
+      },
+      {
+        "id": "D05.f",
+        "kind": "capability",
+        "name": "Master Planning",
+        "definition": "Calculer les besoins nets de la demande opérationnelle et suivre leur couverture.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-master-plan-management",
+          "D05.f"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-035.01",
+            "resultat": "Calculer les besoins nets"
+          },
+          {
+            "id": "BC-035.02",
+            "resultat": "Rapprocher stock et arrivées et demande retenue"
+          },
+          {
+            "id": "BC-035.03",
+            "resultat": "Tenir les écarts de couverture du Master Plan"
+          }
+        ]
+      },
+      {
+        "id": "BHV006",
+        "kind": "capability",
+        "name": "Simulation & Analysis",
+        "definition": "Comparer les alternatives de planification et leurs effets sur le service, les dates, les coûts et les risques, en conservant leurs hypothèses.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-master-plan-management",
+          "BHV006"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-045.01",
+            "resultat": "Isoler les hypothèses d’un scénario"
+          },
+          {
+            "id": "BC-045.02",
+            "resultat": "Rejouer les calculateurs concernés"
+          },
+          {
+            "id": "BC-045.03",
+            "resultat": "Comparer service et coût et dates et risques"
+          }
+        ]
+      },
+      {
+        "id": "D02.e",
+        "kind": "capability",
+        "name": "Plan Application",
+        "definition": "Faire appliquer les choix autorisés et vérifier leurs effets.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-master-plan-management",
+          "D02.e"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-039.01",
+            "resultat": "Transmettre les changements autorisés aux responsables"
+          },
+          {
+            "id": "BC-039.02",
+            "resultat": "Suivre acceptation et refus et effets"
+          },
+          {
+            "id": "BC-039.03",
+            "resultat": "Réconcilier les effets partiels"
+          }
+        ]
+      },
+      {
+        "id": "plans-ingestion",
+        "kind": "capability",
+        "name": "Plan Ingestion",
+        "definition": "Recevoir et intégrer le [Forecast Plan](glossary:TER372) source et les contributions externes de [Supply Plan](glossary:TER098), de [Demand Plan](glossary:TER099) et de [Planned Purchase Order](glossary:TER033), avec leur nature, leur version et leur origine.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-master-plan-management",
+          "plans-ingestion"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-028.01",
+            "resultat": "Recevoir les contributions de plan selon leur nature"
+          },
+          {
+            "id": "BC-028.02",
+            "resultat": "Qualifier origine et version et horizon"
+          },
+          {
+            "id": "BC-028.03",
+            "resultat": "Identifier les contributions utilisables ou rejetées"
+          }
+        ]
+      },
+      {
+        "id": "D05.a",
+        "kind": "capability",
+        "name": "Physical Stock Target Optimization",
+        "definition": "Recommander les quantités de stock physique à viser et les seuils associés par produit, nœud de stockage et période selon le service recherché, les délais, les coûts et les risques.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-physical-stock-configuration-optimization",
+          "D05.a"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-040.01",
+            "resultat": "Proposer cibles et seuils physiques par produit et site"
+          },
+          {
+            "id": "BC-040.02",
+            "resultat": "Comparer service et coût et risque"
+          },
+          {
+            "id": "BC-040.03",
+            "resultat": "Soumettre les recommandations avec leurs hypothèses"
+          }
+        ]
+      },
+      {
+        "id": "D05.d",
+        "kind": "capability",
+        "name": "Logical Stock Protection Optimization",
+        "definition": "Recommander les droits d’usage du stock logique par canal ou groupe de bénéficiaires : quantités protégées, plafonds et périodes applicables.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-physical-stock-configuration-optimization",
+          "D05.d"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-041.01",
+            "resultat": "Proposer protections et plafonds de stock logique"
+          },
+          {
+            "id": "BC-041.02",
+            "resultat": "Comparer les effets entre bénéficiaires"
+          },
+          {
+            "id": "BC-041.03",
+            "resultat": "Réexaminer les périodes d’application"
+          }
+        ]
+      },
+      {
+        "id": "D05.e",
+        "kind": "capability",
+        "name": "Replenishment",
+        "definition": "Proposer les apports manquants et les ajustements de ceux attendus.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-physical-stock-configuration-optimization",
+          "D05.e"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-043.01",
+            "resultat": "Proposer les apports manquants"
+          },
+          {
+            "id": "BC-043.02",
+            "resultat": "Ajuster les apports attendus devenus inadéquats"
+          },
+          {
+            "id": "BC-043.03",
+            "resultat": "Expliquer les besoins et contraintes des propositions"
+          }
+        ]
+      },
+      {
+        "id": "D05.c",
+        "kind": "capability",
+        "name": "Stock Redistribution",
+        "definition": "Décider de redistribuer du stock physique entre sites.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-physical-stock-configuration-optimization",
+          "D05.c"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-044.01",
+            "resultat": "Identifier surplus et besoins entre sites"
+          },
+          {
+            "id": "BC-044.02",
+            "resultat": "Proposer les transferts physiques pertinents"
+          },
+          {
+            "id": "BC-044.03",
+            "resultat": "Évaluer leurs effets et contraintes"
+          }
+        ]
+      },
+      {
+        "id": "D05.h",
+        "kind": "capability",
+        "name": "Reservation Rule Optimization",
+        "definition": "Recommander les conditions de réservation d’une ressource pour une demande identifiée : jalon, moment, durée et réexamen, selon le risque de pénurie et le coût pour les autres demandes.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-physical-stock-configuration-optimization",
+          "D05.h"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-042.01",
+            "resultat": "Proposer jalon et durée de réservation"
+          },
+          {
+            "id": "BC-042.02",
+            "resultat": "Évaluer pénurie et coût pour les autres demandes"
+          },
+          {
+            "id": "BC-042.03",
+            "resultat": "Soumettre une règle de réexamen"
+          }
+        ]
+      },
+      {
+        "id": "D03.m",
+        "kind": "capability",
+        "name": "Demand Prioritization",
+        "definition": "Décider quelles demandes servir en priorité.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-order-backlog-management",
+          "D03.m"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-036.01",
+            "resultat": "Appliquer les critères de priorité aux demandes"
+          },
+          {
+            "id": "BC-036.02",
+            "resultat": "Arbitrer les conflits sous autorité"
+          },
+          {
+            "id": "BC-036.03",
+            "resultat": "Expliquer priorité et stabilité retenues"
+          }
+        ]
+      },
+      {
+        "id": "D03.o",
+        "kind": "capability",
+        "name": "Supply Assignment",
+        "definition": "Choisir les ressources qui couvrent chaque demande et réviser ces choix.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-order-backlog-management",
+          "D03.o"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-037.01",
+            "resultat": "Identifier les ressources admissibles par demande"
+          },
+          {
+            "id": "BC-037.02",
+            "resultat": "Choisir et réviser les affectations"
+          },
+          {
+            "id": "BC-037.03",
+            "resultat": "Expliquer demandes non couvertes et compromis"
+          }
+        ]
+      },
+      {
+        "id": "delivery-release-decision",
+        "kind": "capability",
+        "name": "Delivery Release Decision",
+        "definition": "Choisir les commandes, lignes et quantités à autoriser en livraison complète ou partielle, leur moment de libération et le reste à maintenir en attente, selon les engagements, ressources et règles applicables.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-order-backlog-management",
+          "delivery-release-decision"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-038.01",
+            "resultat": "Évaluer livraison complète ou partielle"
+          },
+          {
+            "id": "BC-038.02",
+            "resultat": "Choisir les quantités et le moment de libération"
+          },
+          {
+            "id": "BC-038.03",
+            "resultat": "Maintenir le reste en attente avec motif"
+          }
+        ]
+      },
+      {
+        "id": "demand-forecast-development",
+        "kind": "capability",
+        "name": "Demand Forecast Qualification",
+        "definition": "[Demand Forecast Qualification](glossary:TER361) : vérifier et qualifier une prévision de produit pour son emploi dans le plan opérationnel.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-demand-supply-plan-preparation",
+          "demand-forecast-development"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-029.01",
+            "resultat": "Vérifier la prévision reçue et ses unités"
+          },
+          {
+            "id": "BC-029.02",
+            "resultat": "Qualifier horizon et qualité d’utilisation"
+          },
+          {
+            "id": "BC-029.03",
+            "resultat": "Exposer les limites avant son usage opérationnel"
+          }
+        ]
+      },
+      {
+        "id": "demand-plan-development",
+        "kind": "capability",
+        "name": "Demand Plan Development",
+        "definition": "[Demand Plan Development](glossary:TER366) : calculer et réviser le [Demand Plan](glossary:TER099) en distinguant les commandes identifiées de la prévision encore à couvrir.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-demand-supply-plan-preparation",
+          "demand-plan-development"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-030.01",
+            "resultat": "Rapprocher commandes et prévision qualifiée"
+          },
+          {
+            "id": "BC-030.02",
+            "resultat": "Calculer la prévision résiduelle sans double besoin"
+          },
+          {
+            "id": "BC-030.03",
+            "resultat": "Versionner le plan de demande"
+          }
+        ]
+      },
+      {
+        "id": "supply-plan-development",
+        "kind": "capability",
+        "name": "Supply Plan Development",
+        "definition": "[Supply Plan Development](glossary:TER363) : projeter les besoins bruts et les apports envisagés à partir du plan de demande et des contraintes connues.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-demand-supply-plan-preparation",
+          "supply-plan-development"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-032.01",
+            "resultat": "Projeter les besoins bruts"
+          },
+          {
+            "id": "BC-032.02",
+            "resultat": "Établir les apports envisagés selon les contraintes connues"
+          },
+          {
+            "id": "BC-032.03",
+            "resultat": "Réviser les dates et hypothèses du plan"
+          }
+        ]
+      },
+      {
+        "id": "planning-scenario-reconciliation",
+        "kind": "capability",
+        "name": "Planning Scenario Reconciliation",
+        "definition": "[Planning Scenario Reconciliation](glossary:TER365) : qualifier les écarts entre demande et approvisionnement et retenir, sous autorité applicable, une version de plan cohérente ou un écart explicite.",
+        "path": [
+          "supply-chain-orchestration",
+          "domain-plan",
+          "ba-demand-supply-plan-preparation",
+          "planning-scenario-reconciliation"
+        ],
+        "function_refs": [
+          {
+            "id": "BC-034.01",
+            "resultat": "Rapprocher les versions de demande et d’approvisionnement"
+          },
+          {
+            "id": "BC-034.02",
+            "resultat": "Qualifier les écarts de couverture"
+          },
+          {
+            "id": "BC-034.03",
+            "resultat": "Retenir une version ou un écart sous autorité"
+          }
+        ]
+      }
+    ]
+  },
+  "contract_ref": "iteration-05-contrat-v1.1.json",
+  "contract_sha256": "82e9d69ea9b7dd2e4c05230d0a009e9e89cc4584c623cfe4043ffe4de5efb071",
+  "component_evidence_ref": "iteration-05-spring-preuves.json#SPR-T01/SPR-T02/SPR-T03",
+  "alignment_note": "Registre aligne sur le contrat v1.1 avant gel de M1 ; publication BC012 financee par PLAN et maximum70 ressources explicites. Aucun nouveau rattachement natif ni score."
+}

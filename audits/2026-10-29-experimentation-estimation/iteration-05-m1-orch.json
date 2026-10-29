@@ -1,0 +1,969 @@
+{
+  "id": "iteration-05-m1-orch",
+  "ensemble": "ORCH",
+  "method": "M1",
+  "date": "2026-10-29",
+  "contract_ref": "iteration-05-contrat.json#/ORCH",
+  "contract_sha256": "73648b45efa673924009600f811744e5902ae5244f11ff293becca8fcc6fd429",
+  "compatible_contract": {
+    "file": "iteration-05-contrat-v1.1.json",
+    "sha256": "82e9d69ea9b7dd2e4c05230d0a009e9e89cc4584c623cfe4043ffe4de5efb071",
+    "ORCH_and_EXEC_strictly_equal": true,
+    "verification": "Sections comparées comme objets JSON ; seul PLAN a été précisé, sans effet sur cette estimation."
+  },
+  "classification": "Estimation d'ingénierie assistée par IA, après réutilisation prévue, sans calibration empirique ; aucun gain IA déduit.",
+  "M2_consulted_before_freeze": false,
+  "other_current_estimates_consulted": false,
+  "proof_catalog": {
+    "CONTRAT": "iteration-05-contrat.json#/ORCH",
+    "EXEC": "iteration-05-contrat.json#/EXEC",
+    "COMMON": "iteration-03-contrat.json#/COMMON",
+    "OD-CRON": "iteration-05-orch-preuves.json#/evidence/0",
+    "OD-CRON-TEST": "iteration-05-orch-preuves.json#/evidence/1",
+    "OD-ACTIVITY": "iteration-05-orch-preuves.json#/evidence/2",
+    "OD-AUTOMATION": "iteration-05-orch-preuves.json#/evidence/3",
+    "TY-WORKFLOW": "iteration-05-orch-preuves.json#/evidence/4",
+    "TY-QUEUE": "iteration-05-orch-preuves.json#/evidence/5",
+    "TY-WORKER": "iteration-05-orch-preuves.json#/evidence/6",
+    "TY-TRIGGER": "iteration-05-orch-preuves.json#/evidence/7",
+    "TY-WORKFLOW-TEST": "iteration-05-orch-preuves.json#/evidence/8",
+    "AX-TASK": "iteration-05-orch-preuves.json#/evidence/9",
+    "AX-TASK-MODEL": "iteration-05-orch-preuves.json#/evidence/10",
+    "AX-WORKFLOW": "iteration-05-orch-preuves.json#/evidence/11",
+    "AX-SCHEDULER": "iteration-05-orch-preuves.json#/evidence/12",
+    "AX-JOB-RUNNER": "iteration-05-orch-preuves.json#/evidence/13",
+    "AX-JOB-SHELL": "iteration-05-orch-preuves.json#/evidence/14",
+    "SPR-F01": "iteration-05-spring-preuves.json#/evidence/0",
+    "SPR-F02": "iteration-05-spring-preuves.json#/evidence/1",
+    "SPR-F03": "iteration-05-spring-preuves.json#/evidence/2",
+    "SPR-F04": "iteration-05-spring-preuves.json#/evidence/3"
+  },
+  "proof_rule": "Les preuves OSS et Flowable justifient des mécanismes ou limites. Les durées ci-dessous sont des hypothèses d'actions, pas des efforts observés dans ces produits. Les preuves Spring sont l'instruction centrale référencée ; pas une nouvelle exécution du moteur par cet agent.",
+  "hours_per_jh": 7,
+  "roles": [
+    "analyse_produit",
+    "architecture",
+    "dev_java",
+    "dev_frontend",
+    "ux",
+    "qa",
+    "plateforme",
+    "securite",
+    "coordination",
+    "expert_optimisation"
+  ],
+  "packages": [
+    {
+      "id": "O01",
+      "label": "Contrat du dossier, états et critères d'acceptation",
+      "proof_refs": [
+        "CONTRAT",
+        "TY-WORKFLOW",
+        "OD-AUTOMATION",
+        "AX-WORKFLOW"
+      ],
+      "work": "Définir le résultat de chaque transition et refus, le modèle fermé, les frontières de transaction et les critères par rôle.",
+      "action_units": [
+        "Quatre séquences de clarification préparées : définition/version ; signal/idempotence ; tâche/délai ; incident/journal.",
+        "Consolidation d'une table de transitions, refus et responsabilités, sans catalogue exhaustif des processus FLOW."
+      ],
+      "central_basis": {
+        "analyse_produit": "4 séquences × 1,5 JH préparation/animation/restitution + 3 JH consolidation = 9.",
+        "architecture": "2 JH conception des frontières + 2 JH revue des garanties + 1 JH contrat avec EXEC = 5.",
+        "qa": "2 séances de critères et exemples à 1 JH = 2 ; automatisation en O08.",
+        "coordination": "1 JH d'organisation initiale et décisions."
+      },
+      "range_factors": [
+        "Variation du nombre de reprises de clarification et des exemples contradictoires, sans ajouter d'activité ou de rôle métier au contrat."
+      ],
+      "effort": {
+        "analyse_produit": [
+          6,
+          9,
+          13
+        ],
+        "architecture": [
+          3,
+          5,
+          7
+        ],
+        "qa": [
+          1,
+          2,
+          3
+        ],
+        "coordination": [
+          0.5,
+          1,
+          2
+        ]
+      },
+      "total_jh": [
+        10.5,
+        17,
+        25
+      ]
+    },
+    {
+      "id": "O02",
+      "label": "Modèles JSON fermés, compilation et versions",
+      "proof_refs": [
+        "CONTRAT",
+        "EXEC",
+        "SPR-F01",
+        "SPR-F02",
+        "TY-WORKFLOW",
+        "AX-WORKFLOW"
+      ],
+      "work": "Déposer/valider le modèle JSON borné, traduire les types et branches autorisés vers Flowable, gérer version/activation et liaison des nouvelles instances. Réutiliser le moteur et la politique technique de délégués EXEC.",
+      "action_units": [
+        "Parser/contrat typé : 2 JH Java centraux.",
+        "Validation structurelle, références et diagnostics : 4 JH.",
+        "Traduction des cinq types et de la branche exclusive : 6 JH.",
+        "Registre versions/activation : 4 JH.",
+        "Tests développeur des modèles invalides et de la traduction : 4 JH."
+      ],
+      "central_basis": {
+        "analyse_produit": "2 JH de revue des paramètres, erreurs et exemples du modèle fermé.",
+        "architecture": "2 JH de correspondance modèle/moteur + 1 JH de revue = 3.",
+        "dev_java": "2 + 4 + 6 + 4 + 4 = 20 JH ; moteur, runtime, schéma Flowable et exécuteur non reconstruits.",
+        "securite": "1 JH d'analyse du dépôt de modèles + 1 JH de cas négatifs + 1 JH de revue du compilateur/paramètres = 3. Vérification ORCH distincte de la politique technique EXEC."
+      },
+      "range_factors": [
+        "Bas : correspondance directe aux types retenus et diagnostics stabilisés.",
+        "Haut : reprises de traduction, validation structurelle et protection contre l'injection par paramètres ; aucune extension à un langage libre."
+      ],
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "architecture": [
+          1.5,
+          3,
+          4.5
+        ],
+        "dev_java": [
+          12,
+          20,
+          31
+        ],
+        "securite": [
+          1.5,
+          3,
+          5
+        ]
+      },
+      "total_jh": [
+        16,
+        28,
+        43.5
+      ]
+    },
+    {
+      "id": "O03",
+      "label": "Ouverture du dossier et signaux corrélés",
+      "proof_refs": [
+        "CONTRAT",
+        "COMMON",
+        "EXEC",
+        "SPR-F02",
+        "OD-AUTOMATION",
+        "TY-TRIGGER"
+      ],
+      "work": "Composer démarrage et signal avec l'adaptateur EXEC et la clé/résultat COMMON ; rattacher référence externe, version et réponse métier ; refuser absence d'attente ou conflit de contenu.",
+      "action_units": [
+        "Ouverture et liaison à la définition : 3 JH Java centraux.",
+        "Corrélation et raccordement de l'idempotence : 3 JH.",
+        "Réponses doublon/conflit/absence d'attente : 3 JH.",
+        "Tests développeur de composition transactionnelle : 3 JH."
+      ],
+      "central_basis": {
+        "analyse_produit": "1 JH contrat d'entrée + 1 JH table des résultats de réception = 2.",
+        "architecture": "1 JH frontière transactionnelle + 1 JH revue avec les adaptateurs communs = 2.",
+        "dev_java": "Quatre unités à 3 JH = 12 ; aucune deuxième primitive de clé de requête.",
+        "securite": "1 JH de vérification des droits d'ouverture/signal et des informations retournées."
+      },
+      "range_factors": [
+        "Variation des reprises sur corrélation et refus, avec le même type de signal et les mêmes résultats contractuels.",
+        "Les effets externes et la livraison exactement une fois restent hors base."
+      ],
+      "effort": {
+        "analyse_produit": [
+          1.5,
+          2,
+          3
+        ],
+        "architecture": [
+          1,
+          2,
+          4
+        ],
+        "dev_java": [
+          7,
+          12,
+          19
+        ],
+        "securite": [
+          0.5,
+          1,
+          2
+        ]
+      },
+      "total_jh": [
+        10,
+        17,
+        28
+      ]
+    },
+    {
+      "id": "O04",
+      "label": "Tâche humaine, prise en charge et décision",
+      "proof_refs": [
+        "CONTRAT",
+        "EXEC",
+        "OD-ACTIVITY",
+        "AX-TASK",
+        "AX-TASK-MODEL",
+        "SPR-F02"
+      ],
+      "work": "Créer/projeter la tâche du dossier vers le groupe opérateur ; protéger prise en charge et décision nominatives ; transmettre accepter/refuser et commentaire au parcours.",
+      "action_units": [
+        "Routage groupe et projection de tâche : 2 JH Java centraux.",
+        "Prise en charge et contrôle du détenteur : 3 JH.",
+        "Décision et variables du parcours : 3 JH.",
+        "Tests développeur des décisions concurrentes : 3 JH.",
+        "Contrats API et contrôles d'entrée spécifiques : 2 JH."
+      ],
+      "central_basis": {
+        "analyse_produit": "1 JH cycle de tâche + 1 JH exemples de décisions concurrentes = 2.",
+        "architecture": "1 JH conception de la protection + 1 JH revue de transaction = 2.",
+        "dev_java": "2 + 3 + 3 + 3 + 2 = 13 ; stockage/exécution des tâches du moteur réutilisés.",
+        "securite": "1 JH revue des autorisations de prise en charge et de décision ; pas de nouvel annuaire."
+      },
+      "range_factors": [
+        "Variation de la composition avec les droits communs et du traitement des pertes de course.",
+        "Aucune répartition optimisée, délégation riche, pièce jointe ou formulaire universel."
+      ],
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "architecture": [
+          1,
+          2,
+          3
+        ],
+        "dev_java": [
+          8,
+          13,
+          20
+        ],
+        "securite": [
+          0.5,
+          1,
+          2
+        ]
+      },
+      "total_jh": [
+        10.5,
+        18,
+        28
+      ]
+    },
+    {
+      "id": "O05",
+      "label": "Délais, incidents et interventions autorisées",
+      "proof_refs": [
+        "CONTRAT",
+        "EXEC",
+        "SPR-F03",
+        "SPR-F04",
+        "OD-CRON",
+        "TY-QUEUE",
+        "AX-SCHEDULER"
+      ],
+      "work": "Relier échéance et événements tardifs au dossier ; exposer incident, relance et abandon autorisés ; composer les reprises techniques fournies par EXEC avec les décisions métier.",
+      "action_units": [
+        "Projection de l'incident du moteur : 2 JH Java centraux.",
+        "Actions autorisées relancer/abandonner : 3 JH.",
+        "Résultats des délais et signaux tardifs : 3 JH.",
+        "Tests développeur des courses et états terminaux : 4 JH."
+      ],
+      "central_basis": {
+        "analyse_produit": "2 JH matrice incident/délai/intervention et résultats attendus.",
+        "architecture": "2 JH de conception/revue des courses et frontières d'annulation.",
+        "dev_java": "2 + 3 + 3 + 4 = 12 ; timer, acquisition des jobs et compteur de reprises techniques restent dans EXEC.",
+        "plateforme": "1 JH raccordement des diagnostics propres au dossier + 1 JH exercice de diagnostic = 2 ; aucune nouvelle chaîne ni infrastructure de logs.",
+        "securite": "1 JH revue des interventions opérateur et de leur traçabilité."
+      },
+      "range_factors": [
+        "Variation du débogage des courses signal/délai/abandon et des traductions d'erreurs du moteur.",
+        "Haut conserve reprise bornée et abandon sans compensation externe ; aucune reprise distribuée ajoutée."
+      ],
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "architecture": [
+          1,
+          2,
+          3
+        ],
+        "dev_java": [
+          7,
+          12,
+          20
+        ],
+        "plateforme": [
+          1,
+          2,
+          3
+        ],
+        "securite": [
+          0.5,
+          1,
+          2
+        ]
+      },
+      "total_jh": [
+        10.5,
+        19,
+        31
+      ]
+    },
+    {
+      "id": "O06",
+      "label": "Journal métier et lecture de la progression",
+      "proof_refs": [
+        "CONTRAT",
+        "COMMON",
+        "SPR-F02",
+        "TY-WORKFLOW",
+        "TY-TRIGGER",
+        "OD-ACTIVITY",
+        "AX-TASK-MODEL"
+      ],
+      "work": "Conserver événements reçus/acceptés/refusés, dates fait/réception, auteur/origine, version et corrections liées ; fournir consultation paginée et progression locale. Ne pas assimiler l'historique technique du moteur à ce journal métier.",
+      "action_units": [
+        "Modèle append-only et lien de correction : 3 JH Java centraux.",
+        "Couplage des écritures de transition et de journal, chemins de refus : 4 JH.",
+        "Projection de progression et rapprochement avec le moteur : 3 JH.",
+        "Lecture/pagination : 2 JH.",
+        "Tests développeur : 3 JH."
+      ],
+      "central_basis": {
+        "analyse_produit": "1 JH nomenclature d'événements + 1 JH refus/corrections + 0,5 JH exemples datés = 2,5.",
+        "architecture": "1,5 JH frontières d'acceptation/refus et rollback + 0,5 JH projection = 2.",
+        "dev_java": "3 + 4 + 3 + 2 + 3 = 15 ; journal spécifique, pas reconstruction des tables d'historique du moteur.",
+        "securite": "1 JH données visibles/conservation + 1 JH revue de l'absence de modification via les opérations applicatives = 2."
+      },
+      "range_factors": [
+        "Variation des reprises de contrat et de cohérence entre transition, refus et journal.",
+        "Append-only applicatif et correction par nouvel événement ; ni signature de non-répudiation ni résistance à un administrateur de base malveillant ajoutées."
+      ],
+      "effort": {
+        "analyse_produit": [
+          1.5,
+          2.5,
+          4
+        ],
+        "architecture": [
+          1,
+          2,
+          3
+        ],
+        "dev_java": [
+          9,
+          15,
+          24
+        ],
+        "securite": [
+          1,
+          2,
+          3
+        ]
+      },
+      "total_jh": [
+        12.5,
+        21.5,
+        34
+      ]
+    },
+    {
+      "id": "O07",
+      "label": "Trois vues métier et interactions",
+      "proof_refs": [
+        "CONTRAT",
+        "COMMON",
+        "OD-ACTIVITY",
+        "AX-TASK-MODEL"
+      ],
+      "work": "Versions/dépôt/activation ; tâches à traiter/prise en charge/décision ; dossier/progression/incident/journal. Réutiliser navigation, identité et composants COMMON ; raccorder les API déjà financées O02–O06.",
+      "action_units": [
+        "Vue versions avec dépôt et diagnostics : 6 JH frontend centraux.",
+        "Vue tâches et décision : 8 JH.",
+        "Vue dossier, incidents et journal : 10 JH.",
+        "Raccordement navigation/contrats et tests développeur transverses : 3 JH."
+      ],
+      "central_basis": {
+        "analyse_produit": "1 JH libellés/résultats visibles + 1 JH réception des parcours = 2.",
+        "ux": "3 vues × 1,5 JH conception + 2,5 JH revue des états d'erreur et interactions = 7.",
+        "dev_frontend": "6 + 8 + 10 + 3 = 27 JH, tests développeur inclus ; pas d'éditeur graphique ni d'API backend comptée ici."
+      },
+      "range_factors": [
+        "Variation des reprises de conception et de raccordement des états, pas du nombre de vues.",
+        "Les API métier sont financées en O02–O06 et la coque UI dans COMMON."
+      ],
+      "effort": {
+        "analyse_produit": [
+          1,
+          2,
+          3
+        ],
+        "ux": [
+          4,
+          7,
+          11
+        ],
+        "dev_frontend": [
+          17,
+          27,
+          42
+        ]
+      },
+      "total_jh": [
+        22,
+        36,
+        56
+      ]
+    },
+    {
+      "id": "O08",
+      "label": "Qualification indépendante et corrections révélées",
+      "proof_refs": [
+        "CONTRAT",
+        "EXEC",
+        "OD-CRON-TEST",
+        "TY-WORKFLOW-TEST",
+        "SPR-F02",
+        "SPR-F04"
+      ],
+      "work": "Qualifier les garanties du dossier sur le harnais EXEC disponible : versions, signaux, décision, délai, incidents, journal, droits et arrêts/reprises. Isoler les corrections révélées par cette campagne des tests développeur.",
+      "action_units": [
+        "Hypothèse de 30 scénarios dans sept familles : modèle/version6, ouverture/signaux4, tâche/décision4, délai/tardif4, incident/reprise/abandon4, journal/correction4, droits4. Ils organisent l'effort ; ils ne prouvent pas une couverture exhaustive.",
+        "QA centrale : préparation/oracles5 + automatisation10 + exécution/fautes/courses6 + bilan/retest4 = 25 JH.",
+        "Corrections découvertes par cette QA : Java7, frontend3 ; pas de second financement des tests unitaires déjà dans O02–O07."
+      ],
+      "central_basis": {
+        "qa": "25 JH selon les quatre activités ci-dessus ; stratégie initiale de 2 JH en O01 séparée.",
+        "dev_java": "7 JH de correction/revue/régression des défauts révélés par cette campagne.",
+        "dev_frontend": "3 JH de correction/revue/régression des défauts d'interaction révélés.",
+        "plateforme": "2 JH données/observabilité propres au témoin ORCH ; harnais de redémarrage et infrastructure EXEC/COMMON réutilisés.",
+        "securite": "2 JH de revue indépendante ciblée des modèles, accès, interventions et journal après réalisation."
+      },
+      "range_factors": [
+        "Bas : diagnostics clairs et peu de reprises ; haut : plusieurs cycles de correction et reproduction de courses, au même contrat.",
+        "La garantie générique de transaction/restart EXEC n'est pas reconstruite ; les résultats métier ORCH restent à qualifier."
+      ],
+      "effort": {
+        "qa": [
+          16,
+          25,
+          39
+        ],
+        "dev_java": [
+          4,
+          7,
+          12
+        ],
+        "dev_frontend": [
+          2,
+          3,
+          6
+        ],
+        "plateforme": [
+          1,
+          2,
+          4
+        ],
+        "securite": [
+          1,
+          2,
+          3
+        ]
+      },
+      "total_jh": [
+        24,
+        39,
+        64
+      ]
+    },
+    {
+      "id": "O09",
+      "label": "Documentation, livraison du module et coordination",
+      "proof_refs": [
+        "CONTRAT",
+        "EXEC",
+        "COMMON"
+      ],
+      "work": "Documenter modèle/versions, contrats et décisions, guider incident/reprise/abandon, livrer ORCH sur la chaîne existante et coordonner les dépendances. Sans formation structurée ni pilotage du programme.",
+      "action_units": [
+        "Documentation fonctionnelle et exemples : 3 JH analyse centraux.",
+        "Documentation API/définitions/délégués : 3 JH Java ; aide des trois vues : 2 JH frontend.",
+        "Vérification de livraison propre ORCH : 1 JH plateforme ; revue finale des frontières : 1 JH architecture.",
+        "Coordination : trois revues à 1 JH + dix synchronisations préparées à 0,5 JH = 8 JH ; lancement1 déjà O01."
+      ],
+      "central_basis": {
+        "analyse_produit": "3 JH guide d'utilisation, exemples de modèles et décisions.",
+        "architecture": "1 JH de revue des frontières et limites de livraison.",
+        "dev_java": "3 JH de documentation technique du module et raccordements.",
+        "dev_frontend": "2 JH d'aide liée aux vues et de vérification de livraison.",
+        "plateforme": "1 JH déploiement/configuration spécifique sur la chaîne existante ; pas de création de CI.",
+        "coordination": "3 + 10 × 0,5 = 8 JH ; effort de coordination, pas délai calendaire."
+      },
+      "range_factors": [
+        "Variation de la consolidation des livrables et des cycles de coordination, sans ajouter un déploiement Groupe.",
+        "La documentation de qualification QA est déjà financée O08."
+      ],
+      "effort": {
+        "analyse_produit": [
+          1.5,
+          3,
+          4.5
+        ],
+        "architecture": [
+          0.5,
+          1,
+          2
+        ],
+        "dev_java": [
+          1.5,
+          3,
+          5
+        ],
+        "dev_frontend": [
+          1,
+          2,
+          3
+        ],
+        "plateforme": [
+          0.5,
+          1,
+          2
+        ],
+        "coordination": [
+          5,
+          8,
+          13
+        ]
+      },
+      "total_jh": [
+        10,
+        18,
+        29.5
+      ]
+    }
+  ],
+  "totals_by_role": {
+    "analyse_produit": [
+      14.5,
+      24.5,
+      36.5
+    ],
+    "architecture": [
+      9,
+      17,
+      26.5
+    ],
+    "dev_java": [
+      48.5,
+      82,
+      131
+    ],
+    "dev_frontend": [
+      20,
+      32,
+      51
+    ],
+    "ux": [
+      4,
+      7,
+      11
+    ],
+    "qa": [
+      17,
+      27,
+      42
+    ],
+    "plateforme": [
+      2.5,
+      5,
+      9
+    ],
+    "securite": [
+      5,
+      10,
+      17
+    ],
+    "coordination": [
+      5.5,
+      9,
+      15
+    ],
+    "expert_optimisation": [
+      0,
+      0,
+      0
+    ]
+  },
+  "total_jh": [
+    126,
+    213.5,
+    339
+  ],
+  "frozen_total_jh": [
+    126,
+    213.5,
+    339
+  ],
+  "role_states": {
+    "analyse_produit": {
+      "state": "estime",
+      "jh": [
+        14.5,
+        24.5,
+        36.5
+      ],
+      "class": "C",
+      "cause_dominante": "Stabilisation des refus, dates, corrections et responsabilité des décisions ; contrat encore expérimental.",
+      "proof_next": "Revue du livrable et de la responsabilité attribuée ; effort humain observé comparable requis pour une classe B/A."
+    },
+    "architecture": {
+      "state": "estime",
+      "jh": [
+        9,
+        17,
+        26.5
+      ],
+      "class": "C",
+      "cause_dominante": "Composition de transactions, protection des courses et projection d'historique avec le moteur retenu.",
+      "proof_next": "Témoin de composition version/attente/décision/délai/journal sur Flowable, puis réalisation comparable pour calibrer l'effort."
+    },
+    "dev_java": {
+      "state": "estime",
+      "jh": [
+        48.5,
+        82,
+        131
+      ],
+      "class": "C",
+      "cause_dominante": "Traduction JSON/Flowable et composition des garanties métier avec EXEC ; aucune productivité observée.",
+      "proof_next": "Témoin de composition version/attente/décision/délai/journal sur Flowable, puis réalisation comparable pour calibrer l'effort."
+    },
+    "dev_frontend": {
+      "state": "estime",
+      "jh": [
+        20,
+        32,
+        51
+      ],
+      "class": "C",
+      "cause_dominante": "Raccordement de trois vues aux nombreux états et refus ; composants communs supposés disponibles.",
+      "proof_next": "Revue du livrable et de la responsabilité attribuée ; effort humain observé comparable requis pour une classe B/A."
+    },
+    "ux": {
+      "state": "estime",
+      "jh": [
+        4,
+        7,
+        11
+      ],
+      "class": "C",
+      "cause_dominante": "Lisibilité des versions, décisions et incidents dans les trois vues proposées.",
+      "proof_next": "Revue du livrable et de la responsabilité attribuée ; effort humain observé comparable requis pour une classe B/A."
+    },
+    "qa": {
+      "state": "estime",
+      "jh": [
+        17,
+        27,
+        42
+      ],
+      "class": "C",
+      "cause_dominante": "Reproduction des courses et arrêts et nombre de cycles de correction nécessaires.",
+      "proof_next": "Témoin de composition version/attente/décision/délai/journal sur Flowable, puis réalisation comparable pour calibrer l'effort."
+    },
+    "plateforme": {
+      "state": "estime",
+      "jh": [
+        2.5,
+        5,
+        9
+      ],
+      "class": "C",
+      "cause_dominante": "Part des diagnostics/données/livraison propres à ORCH, distincte des mécanismes communs.",
+      "proof_next": "Revue du livrable et de la responsabilité attribuée ; effort humain observé comparable requis pour une classe B/A."
+    },
+    "securite": {
+      "state": "estime",
+      "jh": [
+        5,
+        10,
+        17
+      ],
+      "class": "C",
+      "cause_dominante": "Revue ciblée du langage fermé, des accès aux tâches et des écritures de journal.",
+      "proof_next": "Revue du livrable et de la responsabilité attribuée ; effort humain observé comparable requis pour une classe B/A."
+    },
+    "coordination": {
+      "state": "estime",
+      "jh": [
+        5.5,
+        9,
+        15
+      ],
+      "class": "C",
+      "cause_dominante": "Stabilisation des dépendances entre contrats, modèle, interface, EXEC et qualification.",
+      "proof_next": "Revue du livrable et de la responsabilité attribuée ; effort humain observé comparable requis pour une classe B/A."
+    },
+    "expert_optimisation": {
+      "state": "non_necessaire_sur_ce_perimetre",
+      "jh": [
+        0,
+        0,
+        0
+      ],
+      "class": null,
+      "reason": "Aucun problème d'optimisation ni génération de parcours optimal dans ORCH ; branche exclusive à contrat fermé. Ce rôle n'est ni inconnu ni financé silencieusement ailleurs."
+    }
+  },
+  "role_omission_rule": "Un rôle absent d'un paquet n'y reçoit pas de contribution séparée ; toutes les contributions nécessaires du contrat borné sont dimensionnées dans les neuf paquets. Les mécanismes communs sont référencés, pas redistribués dans ces jours.",
+  "guarantees": [
+    {
+      "id": "G01",
+      "guarantee": "Modèle JSON fermé, diagnostics, compilation des types autorisés",
+      "packages": [
+        "O01",
+        "O02",
+        "O08"
+      ],
+      "funding_boundary": "EXEC encadre les délégués techniques ; ORCH valide/traduit son contrat JSON.",
+      "state": "dimensionnee_conditionnellement"
+    },
+    {
+      "id": "G02",
+      "guarantee": "V1 continue après activation V2 ; nouvelles instances en V2",
+      "packages": [
+        "O02",
+        "O03",
+        "O08"
+      ],
+      "funding_boundary": "Mécanismes moteur réutilisés ; registre/activation/liaison et essais métier ORCH.",
+      "state": "dimensionnee_conditionnellement"
+    },
+    {
+      "id": "G03",
+      "guarantee": "Ouverture idempotente et signal corrélé, conflit explicite",
+      "packages": [
+        "O03",
+        "O06",
+        "O08"
+      ],
+      "funding_boundary": "Clé/résultat COMMON et adaptateur EXEC financés ailleurs ; composition ORCH.",
+      "state": "dimensionnee_conditionnellement"
+    },
+    {
+      "id": "G04",
+      "guarantee": "Signal sans attente refusé ; doublon identique sans second effet",
+      "packages": [
+        "O03",
+        "O05",
+        "O06",
+        "O08"
+      ],
+      "funding_boundary": "Refus journalisé distinct d'une panne technique ; aucun tampon d'événements universel.",
+      "state": "dimensionnee_conditionnellement"
+    },
+    {
+      "id": "G05",
+      "guarantee": "Prise en charge et décision protégées contre deux requêtes",
+      "packages": [
+        "O04",
+        "O06",
+        "O08"
+      ],
+      "funding_boundary": "Primitives tâche/transaction moteur, autorisations et résultat de concurrence propres ORCH.",
+      "state": "dimensionnee_conditionnellement"
+    },
+    {
+      "id": "G06",
+      "guarantee": "Reprise technique bornée, incident, relance ou abandon autorisés",
+      "packages": [
+        "O05",
+        "O06",
+        "O08"
+      ],
+      "funding_boundary": "Retries/jobs EXEC ; intervention, droits et résultat du dossier ORCH. Pas de compensation externe.",
+      "state": "dimensionnee_conditionnellement"
+    },
+    {
+      "id": "G07",
+      "guarantee": "Délai et événements tardifs sans double transition",
+      "packages": [
+        "O05",
+        "O06",
+        "O08"
+      ],
+      "funding_boundary": "Timer EXEC ; politique du dossier et tests des courses ORCH.",
+      "state": "dimensionnee_conditionnellement"
+    },
+    {
+      "id": "G08",
+      "guarantee": "Journal append-only reçu/accepté/refusé, dates et correction liée",
+      "packages": [
+        "O06",
+        "O08"
+      ],
+      "funding_boundary": "Journal métier ORCH distinct des logs COMMON et métadonnées EXEC.",
+      "state": "dimensionnee_conditionnellement"
+    },
+    {
+      "id": "G09",
+      "guarantee": "Arrêt/redémarrage avant/après commit sans perte/double action locale",
+      "packages": [
+        "O03",
+        "O04",
+        "O05",
+        "O06",
+        "O08"
+      ],
+      "funding_boundary": "Socle transactionnel/reprise EXEC ; composition et assertions du dossier ORCH.",
+      "state": "dimensionnee_conditionnellement"
+    },
+    {
+      "id": "G10",
+      "guarantee": "Accès lecteur/opérateur/administrateur et modèle non exécutable librement",
+      "packages": [
+        "O02",
+        "O03",
+        "O04",
+        "O05",
+        "O06",
+        "O08"
+      ],
+      "funding_boundary": "Identité COMMON, garde-fous techniques EXEC, autorisations et revue spécifique ORCH.",
+      "state": "dimensionnee_conditionnellement"
+    },
+    {
+      "id": "G11",
+      "guarantee": "Trois vues du contrat et parcours d'erreur lisibles",
+      "packages": [
+        "O07",
+        "O08"
+      ],
+      "funding_boundary": "Composants génériques COMMON ; aucune interface commerciale supposée.",
+      "state": "dimensionnee_conditionnellement"
+    },
+    {
+      "id": "G12",
+      "guarantee": "Contrats documentés, livraison et limites explicites",
+      "packages": [
+        "O09"
+      ],
+      "funding_boundary": "Chaîne COMMON/EXEC déjà financée ; documentation et réception propres ORCH.",
+      "state": "dimensionnee_conditionnellement"
+    }
+  ],
+  "funding_boundaries": [
+    {
+      "owner": "COMMON",
+      "state": "inclus_ailleurs",
+      "items": [
+        "Projet/API/identité/profils communs",
+        "Primitive clé de requête",
+        "Infrastructure logs, CI/environnement, coque UI"
+      ],
+      "charge_in_ORCH_jh": 0
+    },
+    {
+      "owner": "EXEC",
+      "state": "inclus_ailleurs",
+      "items": [
+        "Moteur Flowable, schéma et transaction manager",
+        "Acquisition/jobs/timers/retries techniques et garde-fous de délégués",
+        "Adaptateur commun et qualification technique de redémarrage"
+      ],
+      "charge_in_ORCH_jh": 0
+    },
+    {
+      "owner": "ORCH",
+      "state": "estime_ici",
+      "items": [
+        "Contrat JSON et compilation/version métier",
+        "Composition dossier/signaux/tâches/interventions",
+        "Journal métier, vues, qualification propre et revue de sécurité spécifique"
+      ]
+    }
+  ],
+  "scope_assumptions": [
+    "Le contrat05 est l'assiette, y compris cinq types, six activités maximum, deux versions, trois vues, groupe opérateur, prise en charge nominative et dates fait/réception.",
+    "EXEC fournit un adaptateur conforme et réutilisable. Ses propres coûts, y compris compatibilité du moteur avec la stack témoin, sont exclus ici ; un échec de cette hypothèse exige une variante/retour de contrat, pas une remise de réutilisation inventée.",
+    "Le modèle JSON comporte uniquement les paramètres typés et choix autorisés par le contrat ; définir leurs noms et diagnostics relève O01/O02. Aucun évaluateur libre d'expressions utilisateur n'est construit.",
+    "Le branchement métier et l'action locale sont ceux du catalogue fermé ; aucune règle Beaumanoir ou prestation externe n'est ajoutée.",
+    "Les refus métier sont des résultats à journaliser ; les pannes techniques avant commit ne créent pas une transition acceptée. O06 et O08 financent cette distinction.",
+    "Développeurs autonomes familiers de l'intégration de bibliothèques ; test/revue développeur dans les paquets de réalisation. QA indépendante et sécurité spécialisée ont leurs contributions propres.",
+    "La sécurité ORCH porte modèles/paramètres compilés, décisions/interventions et journal ; elle ne reconstruit pas identité/SSO COMMON ni les garde-fous techniques EXEC.",
+    "30 scénarios est un volume de travail proposé pour la qualification bornée, pas un pourcentage de couverture ni une preuve de complétude des cas d'usage."
+  ],
+  "range_rule": "Même périmètre et mêmes garanties aux trois bornes. Les écarts représentent clarification, adaptation et reprises de conception/correction. Sommes de scénarios corrélés, pas percentiles ni intervalle de confiance.",
+  "mandatory_undimensioned_work": [],
+  "conditional_total": "Complet pour le travail propre ORCH du contrat et sous disponibilité des financements COMMON/EXEC ; pas coût autonome d'une solution livrée isolément.",
+  "precontract_proposal_reconciliation": [
+    "La fiche ORCH de preuves conserve une proposition antérieure ; seul le contrat05 est estimé.",
+    "Deux vues proposées deviennent trois vues ; cinq types incluant délai/fin et six activités maximum sont retenus.",
+    "L'affectation explicite proposée est remplacée par groupe opérateur, prise en charge nominative et décisions concurrentes.",
+    "Signal sans attente : refus explicite, ce point n'est plus ouvert.",
+    "BC-085.02 est partiellement inclus : dates fait/réception et corrections par événements liés ; aucune reconstitution historique complète.",
+    "Activité locale sans effet externe, reprises bornées et abandon sans compensation sont figés."
+  ],
+  "adjacent_beneficiary": {
+    "capability_ref": "BHV082",
+    "name": "Process, Tasks & Order Visibility",
+    "state": "benefice_adjacent_non_evalue",
+    "reason": "Les vues restituent les fonctions ORCH déjà financées. Aucun rapprochement complet commandes/tâches/parcours, nouvelle capacité chiffrée ou budget ajouté."
+  },
+  "exclusions": [
+    "Financement des mécanismes COMMON et EXEC",
+    "Tout Process Management hors contrat05 et toutes les capacités entières",
+    "Planification dynamique/optimisation, parallélisme/jointures/sous-processus, migration d'instances actives",
+    "Effets externes, transactions distribuées, compensation, haute disponibilité et SLA de production",
+    "Calendriers ouvrés, escalades riches, délégation, notifications omnicanal, pièces jointes",
+    "Process mining, registre bitemporel complet, suivi complet des commandes, gestion globale des exceptions",
+    "Designer graphique universel, langage de règles libre et interface commerciale Flowable",
+    "Formation structurée, connecteurs/déploiements Beaumanoir et pilotage du programme"
+  ],
+  "variant": {
+    "id": "ORCH-external-effects",
+    "change": "Introduire une activité à effet externe avec réponse perdue et compensation éventuelle.",
+    "delta_jh": null,
+    "reason": "Modifie le contrat d'effet, l'idempotence au destinataire et la remédiation ; hors des bornes courantes."
+  },
+  "next_discriminating_evidence": "Un témoin vertical sur moteur retenu : dossier V1 restant actif après V2, décision et délai concurrents puis signal tardif ; contrôler réponse, transition et journal de refus. Cela peut réviser des travaux ou frontières ; cela ne mesure pas leur durée humaine.",
+  "cumulative_context": {
+    "previous_pilot_gross_all_roles_central_jh": 409,
+    "ORCH_added_central_jh": 213.5,
+    "known_subtotal_previous_plus_ORCH_central_jh": 622.5,
+    "meaning": "Somme partielle des postes chiffrés à ce niveau ; EXEC et PLAN sont instruits par d'autres responsables et absents de ce sous-total.",
+    "full_core_jh": null
+  },
+  "timing": {
+    "estimation_started_utc": "2026-10-29 12:30:01 UTC",
+    "meaning": "Temps d'instruction assistée par IA, pas JH humain de réalisation ni productivité."
+  }
+}

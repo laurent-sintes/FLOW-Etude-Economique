@@ -1,0 +1,4636 @@
+{
+  "id": "iteration-08-cosmic",
+  "date": "2026-10-29",
+  "status": "Audit documentaire indépendant, scénario de comptage élargi conditionnel, non intégré au modèle courant.",
+  "purpose": "Tenter effectivement une mesure plus large des six capacités et quatorze fonctions du contrat v1.1, puis décider si COSMIC apporte une base d'estimation utilisable.",
+  "independence": {
+    "not_read": [
+      "iteration-07-m1.json",
+      "iteration-07-m2.json",
+      "iteration-08-m1*",
+      "iteration-08-m2*",
+      "nouvelle taille COCOMO ou résultats LOC"
+    ],
+    "used_no_effort_estimate": true,
+    "used_no_code_size": true,
+    "no_effort_conversion": true,
+    "review": "Assistance LLM ; aucune validation métier ou revue humaine attribuée."
+  },
+  "inputs": [
+    {
+      "path": "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json",
+      "use": "Périmètre autorisé et amendement de restauration ; scénario proposé, non exigences approuvées."
+    },
+    {
+      "path": "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json",
+      "use": "Identifiants natifs, définition des 14 fonctions et contenu des 13 sujets ; aucune estimation utilisée."
+    },
+    {
+      "path": "audits/2026-10-29-experimentation-estimation/iteration-07-cosmic.json",
+      "use": "18 CFP historiques sur trois consultations, hypothèses et frontière ; aucun ajout automatique."
+    },
+    {
+      "path": "source/methode-evaluation-core.yaml",
+      "use": "Méthode canonique et distinction mesure/estimation."
+    },
+    {
+      "path": "source/statut-evaluation.yaml",
+      "use": "Vérifier le statut non recalibré de la méthode."
+    }
+  ],
+  "sources": [
+    {
+      "id": "COSMIC-MM5",
+      "url": "https://cosmic-sizing.org/wp-content/uploads/2022/11/Combination-of-Parts-v5.0-Sep-2024.pdf",
+      "access": "Le PDF direct a expiré à cette itération ; extraits indexés officiels consultés le 29 octobre 2026, notamment règles 16-19 et messages humains. Ne pas présenter ceci comme une lecture complète du PDF.",
+      "use": "Processus complets ; mouvement d'un groupe ; distinction des messages humains et logiciels ; frontière de la portée."
+    },
+    {
+      "id": "COSMIC-PROCESS",
+      "url": "https://cosmic-sizing.org/cosmic-sizing/intro/measurement-process/",
+      "access": "Page officielle indexée consultée le 29 octobre 2026.",
+      "use": "Mouvements E/X/R/W, objet d'intérêt, tous les résultats d'un événement, types et non occurrences, agrégation."
+    }
+  ],
+  "strategy": {
+    "boundary": "Une seule application Operational References : interface React, API et logique métier/persistance dans la même frontière. Les échanges internes UI/API/services/ORM/base ne sont pas E/X ; les données persistées sont R/W.",
+    "layer": "Application",
+    "measurement_unit": "CFP",
+    "grain": "Processus déclenchés indépendamment par un utilisateur fonctionnel ; union des mouvements nécessaires à tous les résultats possibles du processus.",
+    "functional_users": [
+      {
+        "id": "FU-SOURCE",
+        "label": "Producteur externe transmettant les contributions canoniques"
+      },
+      {
+        "id": "FU-READER",
+        "label": "Lecteur humain autorisé ; les requêtes API équivalentes sont une variante de canal uniquement sous H05"
+      },
+      {
+        "id": "FU-OPERATOR",
+        "label": "Gestionnaire de réception et opérateur de reprise autorisé"
+      },
+      {
+        "id": "FU-ADMIN",
+        "label": "Administrateur fonctionnel des sources/contrats/autorités"
+      },
+      {
+        "id": "FU-CONSUMER",
+        "label": "Logiciel consommateur des références et déclarant ses usages"
+      }
+    ],
+    "excluded_as_functional_users": [
+      "Spring, Spring Batch, ORM, PostgreSQL, caches, composants React et API internes",
+      "Instances applicatives et threads"
+    ],
+    "rule": "Une seule taille par processus ; pas de multiplication par capacité utilisatrice, sujet documentaire, marque, source physique, volume, version, ligne, page ou occurrence. Les 23 groupes de référence résultent d'une analyse d'objets, pas des 13 sujets ni des tables."
+  },
+  "assumptions": [
+    {
+      "id": "H01",
+      "status": "Reprise",
+      "text": "Frontière applicative unique et stockage interne ; la couche technique ne multiplie pas les mouvements."
+    },
+    {
+      "id": "H02",
+      "status": "Interprétation minimale",
+      "text": "Identité et portées de l'acteur sont disponibles dans le contexte. Les contrôles d'accès utilisent ce contexte et les données lues. Le cycle d'habilitation et les interactions OIDC n'ont pas été mesurés ; cette hypothèse ne les supprime pas du contrat."
+    },
+    {
+      "id": "H03",
+      "status": "Règle",
+      "text": "Toute valeur E/R/W/X compte un type de mouvement d'un groupe ; erreurs et succès n'additionnent pas des exécutions. Les statuts machine sont analysés comme données ordinaires, sans appliquer mécaniquement la convention de message humain."
+    },
+    {
+      "id": "H04",
+      "status": "Complément nécessaire pour les vues",
+      "text": "Les douze consultations couvrent recherche et détail par critères typés/identité/version/date/contexte avec les mêmes groupes de résultat. Les liens non dépliés sont indiqués dans chaque processus. La version cohérente est portée par les groupes restitués ; pas de Read supplémentaire du manifeste de publication dans ces douze vues."
+    },
+    {
+      "id": "H05",
+      "status": "Complément nécessaire pour les canaux",
+      "text": "Une API de lecture et sa vue web ne constituent pas deux processus si elles correspondent exactement au même événement et aux mêmes groupes. Le comptage Q porte directement la restitution humaine ; l'équivalence de l'API reste à confirmer. Toute différence d'objet de résultat ou de dialogue machine impose un compte distinct ou des mouvements supplémentaires."
+    },
+    {
+      "id": "H06",
+      "status": "Complément nécessaire pour les groupes",
+      "text": "Les contextes/fenêtres sont portés par leurs associations au produit. Unités, conversions, conditions, paliers et restrictions sont des attributs des groupes indiqués. Un catalogue et son membre, un assortiment et sa sélection, un livre et sa ligne, une spécification et sa composition, un lieu et une liaison, un service et son accès sont des objets distingués. Une autre modélisation fonctionnelle exige de requalifier ces groupes, sans se fonder sur les tables."
+    },
+    {
+      "id": "H07",
+      "status": "Hypothèse déterminante nouvelle",
+      "text": "Une source fournit un apport canonique pouvant contenir les types autorisés des 23 groupes. L'événement est la contribution et son résultat, pas 23 événements indépendants. Le résultat conserve un statut par élément ; la publication porte un ensemble cohérent d'éléments admis. Les groupes E/R/W sont l'union des types supportés, éventuellement présents dans des exécutions différentes. Une réception synchrone ou un résultat différé est ici un même processus logique jusqu'à résultat durable."
+    },
+    {
+      "id": "H08",
+      "status": "Hypothèse déterminante nouvelle",
+      "text": "Le diagnostic par élément et le manifeste global sont deux objets. Les références rejetées/en attente sont conservées avec leur état ; les versions admises sont immuables et l'ensemble publié possède un pointeur fonctionnel. Aucun deuxième Write du même groupe n'est ajouté pour un staging/table technique. Si les exigences réclament deux objets fonctionnels réellement distincts, le comptage doit changer."
+    },
+    {
+      "id": "H09",
+      "status": "Complément nécessaire",
+      "text": "Réception, changement, correction sourcée et retrait sont des variantes du même événement de contribution. La décision de retrait est portée par l'autorité et le manifeste. Le retrait rend la référence inactive sans supprimer ses versions ; la purge est une fonction séparée et reste non comptée."
+    },
+    {
+      "id": "H10",
+      "status": "Complément nécessaire",
+      "text": "La nouvelle demande humaine de réexamen I02 est distincte de I01. Reprise technique après crash, retries internes, ordonnanceur et verrouillage ne créent pas chacun un processus. Les 23 groupes relus couvrent toutes les formes de contributions que I02 sait réexaminer."
+    },
+    {
+      "id": "H11",
+      "status": "Complément nécessaire",
+      "text": "Une interaction d'administration porte source/contrat/autorité ensemble ; toute création/édition indépendante exigée avec un autre événement doit être distinguée. Les configurations de personnes/rôles et l'audit consultable restent ouverts."
+    },
+    {
+      "id": "H12",
+      "status": "Complément nécessaire",
+      "text": "L'index d'identité/version contient une disponibilité fonctionnelle vérifiable. Déclaration/redéclaration d'usage est le même processus idempotent ; libération est un événement distinct. Un usage d'une version perdue après restauration reste enregistré en attente."
+    },
+    {
+      "id": "H13",
+      "status": "Complément nécessaire",
+      "text": "Un export est un ensemble canonique contenant les groupes autorisés avec manifeste durable. L'export confirmé est déclaré explicitement par son destinataire ; il n'est pas déduit d'un simple HTTP 200 ni du Write de fichier."
+    },
+    {
+      "id": "H14",
+      "status": "Complément nécessaire",
+      "text": "Le flux de changements retourne identifiants/version/nature et curseur, sans les 23 payloads complets. L'époque est un groupe fonctionnel distinct parce que le consommateur doit comprendre la resynchronisation requise."
+    },
+    {
+      "id": "H15",
+      "status": "Complément nécessaire pour restauration",
+      "text": "L'opérateur ouvre la nouvelle époque après restauration technique. Un manifeste fiable des consommateurs attendus survit hors de la base restaurée et est transmis à R01. La demande R02 comprend leur fin de redéclaration ; les usages sont rapprochés contre l'index de versions. Ces exigences d'échange doivent être confirmées : elles ne sont pas déduites d'une implémentation Spring."
+    }
+  ],
+  "data_groups": [
+    {
+      "id": "DG-PARTY",
+      "object": "Partie identifiée",
+      "attributes": "Identité, noms, origine, validité, version ; les rôles ne sont pas des identités nouvelles.",
+      "subject_id": "S-PARTY",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-ROLE",
+      "object": "Rôle ou relation contextualisée d'une partie",
+      "attributes": "Parties concernées, rôle, portée, période, origine et version.",
+      "subject_id": "S-PARTY",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-AGREEMENT",
+      "object": "Accord reçu",
+      "attributes": "Parties liées par identifiant, conditions, engagements de référence, portée, périodes, version d'assortiment figée.",
+      "subject_id": "S-AGREEMENT",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-CREDIT",
+      "object": "Profil de crédit reçu",
+      "attributes": "Payeur, portée, classe, limites, devise et périodes ; aucun calcul d'exposition.",
+      "subject_id": "S-CREDIT",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-PRODUCT",
+      "object": "Produit",
+      "attributes": "Identité, caractéristiques, unités et conversions reçues, provenance et version.",
+      "subject_id": "S-PRODUCT",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-VARIANT",
+      "object": "Variante de produit",
+      "attributes": "Identité propre, produit parent, caractéristiques et correspondances reçues.",
+      "subject_id": "S-PRODUCT",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-CONTEXT",
+      "object": "Association produit/contexte de planification",
+      "attributes": "Identité de contexte, produit, fenêtres, origine et validité ; contexte autonome non développé dans ce scénario.",
+      "subject_id": "S-PRODUCT",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-CATALOG",
+      "object": "Catalogue ou offre de marchandises",
+      "attributes": "Identité, clientèles/zones, dates et liens tarifaires ; les membres sont distincts.",
+      "subject_id": "S-CATALOG",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-CATALOG-MEMBER",
+      "object": "Appartenance à un catalogue",
+      "attributes": "Catalogue/version, produit ou variante, inclusion et portée de présentation.",
+      "subject_id": "S-CATALOG",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-ASSORTMENT",
+      "object": "Assortiment",
+      "attributes": "Identité, affectation, dates et version figée.",
+      "subject_id": "S-ASSORTMENT",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-ASSORTMENT-MEMBER",
+      "object": "Sélection d'un produit dans un assortiment",
+      "attributes": "Assortiment/version, produit ou variante, inclusion/exclusion et portée.",
+      "subject_id": "S-ASSORTMENT",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-PRODUCT-PRICEBOOK",
+      "object": "Livre tarifaire produit",
+      "attributes": "Identité du livre, origine, devise, portée et périodes communes.",
+      "subject_id": "S-PRODUCT-PRICE",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-PRODUCT-PRICE",
+      "object": "Ligne tarifaire produit",
+      "attributes": "Livre, produit, unité, base, valeur, paliers et conditions typées reçues.",
+      "subject_id": "S-PRODUCT-PRICE",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-PACK-MATERIAL",
+      "object": "Matériau ou type de contenant de référence",
+      "attributes": "Identité/type, dimensions, unités, poids, capacités et compatibilités reçues.",
+      "subject_id": "S-PACK-MATERIAL",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-PACK-SPEC",
+      "object": "Spécification de conditionnement",
+      "attributes": "Identité/version, validité et consignes réutilisables.",
+      "subject_id": "S-PACK-SPEC",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-PACK-COMPONENT",
+      "object": "Ligne de composition de conditionnement",
+      "attributes": "Spécification parente, référence enfant, niveau, quantité, unité et conversion reçue.",
+      "subject_id": "S-PACK-SPEC",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-INTERNAL",
+      "object": "Fourniture ou équipement de référence",
+      "attributes": "Identité/type, unité, conversion, usage, restrictions et liens par identifiant.",
+      "subject_id": "S-INTERNAL",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-SITE",
+      "object": "Lieu du réseau de référence",
+      "attributes": "Identité du lieu, caractéristiques, rattachements et responsables par identifiant.",
+      "subject_id": "S-NETWORK",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-NETWORK-LINK",
+      "object": "Liaison ou rattachement entre lieux",
+      "attributes": "Extrémités, nature, période et version ; aucun itinéraire décidé.",
+      "subject_id": "S-NETWORK",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-SERVICE",
+      "object": "Offre de prestation",
+      "attributes": "Résultat attendu, prestataire, unité, zones, éligibilité, consignes et SLA de référence.",
+      "subject_id": "S-SERVICE",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-SERVICE-ACCESS",
+      "object": "Accès de sollicitation ou de feedback",
+      "attributes": "Service lié, adresse, protocole, contrat et référence d'authentification ; aucun secret ni connecteur exécuté.",
+      "subject_id": "S-SERVICE",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-SERVICE-PRICEBOOK",
+      "object": "Livre tarifaire service",
+      "attributes": "Identité du livre, origine, devise, portée et périodes communes.",
+      "subject_id": "S-SERVICE-PRICE",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-SERVICE-PRICE",
+      "object": "Ligne tarifaire service",
+      "attributes": "Livre, service et accord par identifiant, unité, base, valeur, paliers et conditions reçues.",
+      "subject_id": "S-SERVICE-PRICE",
+      "status": "Groupe proposé à confirmer avec le responsable des exigences ; pas une table imposée."
+    },
+    {
+      "id": "DG-SOURCE",
+      "object": "Source contributrice",
+      "attributes": "Identité de source, statut, origine et périmètre déclaré.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    },
+    {
+      "id": "DG-CONTRACT",
+      "object": "Contrat canonique d'une source",
+      "attributes": "Version de schéma acceptée, modes complet/différentiel, portée et règles de complétude.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    },
+    {
+      "id": "DG-AUTHORITY",
+      "object": "Attribution d'autorité",
+      "attributes": "Source, groupe de champs/objet, portée, dates et autorisation de retrait.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    },
+    {
+      "id": "DG-IDENTITY",
+      "object": "Correspondance d'identité/version",
+      "attributes": "Alias source→identité interne, correspondances explicitement déclarées, identifiant stable de version et état de disponibilité. Hypothèse : cet index fonctionnel suffit pour vérifier une version déclarée par un consommateur, sans relire ses attributs métier.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    },
+    {
+      "id": "DG-CONTRIBUTION",
+      "object": "Contribution reçue",
+      "attributes": "Identité stable, source/contrat, empreinte, mode, manifeste, date, filiation, portée et résultat global.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    },
+    {
+      "id": "DG-DIAGNOSTIC",
+      "object": "Résultat d'admission d'un élément",
+      "attributes": "Contribution/élément, champ/lien, cause et état accepté/en attente/rejeté ; plusieurs lignes sont des occurrences.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    },
+    {
+      "id": "DG-PUBLICATION",
+      "object": "Ensemble cohérent publié",
+      "attributes": "Identité et pointeur de version, portée et membres par identifiant/version.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    },
+    {
+      "id": "DG-CHANGE",
+      "object": "Changement publié consultable",
+      "attributes": "Référence/version, nature du changement, position et curseur durable ; les valeurs de l'objet restent consultables séparément.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    },
+    {
+      "id": "DG-EPOCH",
+      "object": "Époque de lecture",
+      "attributes": "Identité d'époque, validité des curseurs et consigne de resynchronisation.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    },
+    {
+      "id": "DG-AUDIT",
+      "object": "Action sensible tracée",
+      "attributes": "Acteur, opération, cible, date, résultat et motif ; exigence fonctionnelle de traçabilité, distincte des logs techniques.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    },
+    {
+      "id": "DG-USAGE",
+      "object": "Utilisation conservée déclarée",
+      "attributes": "Identifiant d'usage stable, consommateur, référence/version exacte, état actif/libéré et époque de rapprochement.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    },
+    {
+      "id": "DG-RECONCILIATION",
+      "object": "Rapprochement après restauration",
+      "attributes": "Restauration/époque, consommateurs attendus, déclarations et état complet/incomplet/non rapproché ; clôture autorisée et suspension de purge.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    },
+    {
+      "id": "DG-EXPORT",
+      "object": "Export canonique",
+      "attributes": "Identité d'export, demande/portée/version, manifeste et état produit/confirmé/refusé.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    },
+    {
+      "id": "DG-OUTCOME",
+      "object": "Message humain de confirmation/erreur",
+      "attributes": "Un seul Exit par processus pour les messages sans objets métier supplémentaires ; cette convention n'est pas utilisée pour les statuts machine.",
+      "status": "Objet d'intérêt proposé à partir du contrat ; aucune assimilation automatique d'une métadonnée technique à un groupe."
+    }
+  ],
+  "processes": [
+    {
+      "id": "Q01",
+      "label": "Consulter les accords et leurs parties",
+      "functional_user": "FU-READER",
+      "trigger": "Le lecteur demande un jeu d'accords, par identité/version ou critères typés/date/contexte.",
+      "native_function_ids": [
+        "BC-003.01",
+        "BC-003.02"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F05",
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "movements": [
+        {
+          "id": "Q01-E1",
+          "type": "E",
+          "group": "DG-AGREEMENT",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Accord reçu."
+        },
+        {
+          "id": "Q01-R1",
+          "type": "R",
+          "group": "DG-AGREEMENT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Accord reçu."
+        },
+        {
+          "id": "Q01-R2",
+          "type": "R",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Partie identifiée."
+        },
+        {
+          "id": "Q01-R3",
+          "type": "R",
+          "group": "DG-ROLE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Rôle ou relation contextualisée d'une partie."
+        },
+        {
+          "id": "Q01-R4",
+          "type": "R",
+          "group": "DG-CREDIT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Profil de crédit reçu."
+        },
+        {
+          "id": "Q01-X1",
+          "type": "X",
+          "group": "DG-AGREEMENT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Accord reçu."
+        },
+        {
+          "id": "Q01-X2",
+          "type": "X",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Partie identifiée."
+        },
+        {
+          "id": "Q01-X3",
+          "type": "X",
+          "group": "DG-ROLE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Rôle ou relation contextualisée d'une partie."
+        },
+        {
+          "id": "Q01-X4",
+          "type": "X",
+          "group": "DG-CREDIT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Profil de crédit reçu."
+        },
+        {
+          "id": "Q01-X5",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 4,
+        "W": 0,
+        "X": 5,
+        "cfp": 10
+      },
+      "completion_and_responses": "Restituer les groupes listés avec provenance/validité/versions, ou expliquer refus, absence, incohérence ou ambiguïté. Le contenu de l'assortiment lié n'est pas déplié ; seules ses références/version le sont. Les résultats multiples sont des occurrences, la pagination ne crée pas de type de mouvement. Aucun Write métier.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/4",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "Q02",
+      "label": "Consulter les fournitures et équipements",
+      "functional_user": "FU-READER",
+      "trigger": "Le lecteur demande des fournitures/équipements, par identité/version ou critères typés/date/contexte.",
+      "native_function_ids": [
+        "BC-006.01",
+        "BC-006.02"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F08",
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "movements": [
+        {
+          "id": "Q02-E1",
+          "type": "E",
+          "group": "DG-INTERNAL",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Fourniture ou équipement de référence."
+        },
+        {
+          "id": "Q02-R1",
+          "type": "R",
+          "group": "DG-INTERNAL",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Fourniture ou équipement de référence."
+        },
+        {
+          "id": "Q02-X1",
+          "type": "X",
+          "group": "DG-INTERNAL",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Fourniture ou équipement de référence."
+        },
+        {
+          "id": "Q02-X2",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 1,
+        "W": 0,
+        "X": 2,
+        "cfp": 4
+      },
+      "completion_and_responses": "Restituer les groupes listés avec provenance/validité/versions, ou expliquer refus, absence, incohérence ou ambiguïté. Unité/conversion/restrictions sont des attributs de cette référence. Les résultats multiples sont des occurrences, la pagination ne crée pas de type de mouvement. Aucun Write métier.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/7",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "Q03",
+      "label": "Rechercher et consulter les tarifs de service reçus",
+      "functional_user": "FU-READER",
+      "trigger": "Le lecteur demande des lignes tarifaires de service candidates, par identité/version ou critères typés/date/contexte.",
+      "native_function_ids": [
+        "BC-007.02"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F09",
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "movements": [
+        {
+          "id": "Q03-E1",
+          "type": "E",
+          "group": "DG-SERVICE-PRICE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Ligne tarifaire service."
+        },
+        {
+          "id": "Q03-R1",
+          "type": "R",
+          "group": "DG-SERVICE-PRICE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ligne tarifaire service."
+        },
+        {
+          "id": "Q03-R2",
+          "type": "R",
+          "group": "DG-SERVICE-PRICEBOOK",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Livre tarifaire service."
+        },
+        {
+          "id": "Q03-X1",
+          "type": "X",
+          "group": "DG-SERVICE-PRICE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Ligne tarifaire service."
+        },
+        {
+          "id": "Q03-X2",
+          "type": "X",
+          "group": "DG-SERVICE-PRICEBOOK",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Livre tarifaire service."
+        },
+        {
+          "id": "Q03-X3",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 2,
+        "W": 0,
+        "X": 3,
+        "cfp": 6
+      },
+      "completion_and_responses": "Restituer les groupes listés avec provenance/validité/versions, ou expliquer refus, absence, incohérence ou ambiguïté. Restituer aussi le livre et ses conditions communes ; ne pas calculer le prix engagé. Cette hypothèse ajoute un Read et un Exit au détail isolé de l'itération 07. Les résultats multiples sont des occurrences, la pagination ne crée pas de type de mouvement. Aucun Write métier.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/8",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "Q04",
+      "label": "Consulter produits, variantes et contextes",
+      "functional_user": "FU-READER",
+      "trigger": "Le lecteur demande des produits avec leurs variantes/contextes, par identité/version ou critères typés/date/contexte.",
+      "native_function_ids": [
+        "BC-004.01",
+        "BC-004.03"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F06",
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "movements": [
+        {
+          "id": "Q04-E1",
+          "type": "E",
+          "group": "DG-PRODUCT",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Produit."
+        },
+        {
+          "id": "Q04-R1",
+          "type": "R",
+          "group": "DG-PRODUCT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Produit."
+        },
+        {
+          "id": "Q04-R2",
+          "type": "R",
+          "group": "DG-VARIANT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Variante de produit."
+        },
+        {
+          "id": "Q04-R3",
+          "type": "R",
+          "group": "DG-CONTEXT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Association produit/contexte de planification."
+        },
+        {
+          "id": "Q04-X1",
+          "type": "X",
+          "group": "DG-PRODUCT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Produit."
+        },
+        {
+          "id": "Q04-X2",
+          "type": "X",
+          "group": "DG-VARIANT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Variante de produit."
+        },
+        {
+          "id": "Q04-X3",
+          "type": "X",
+          "group": "DG-CONTEXT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Association produit/contexte de planification."
+        },
+        {
+          "id": "Q04-X4",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 3,
+        "W": 0,
+        "X": 4,
+        "cfp": 8
+      },
+      "completion_and_responses": "Restituer les groupes listés avec provenance/validité/versions, ou expliquer refus, absence, incohérence ou ambiguïté. Les fenêtres appartiennent à l'association de contexte ; les catalogues et prix se consultent séparément. Les résultats multiples sont des occurrences, la pagination ne crée pas de type de mouvement. Aucun Write métier.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/5",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "Q05",
+      "label": "Consulter catalogues et membres",
+      "functional_user": "FU-READER",
+      "trigger": "Le lecteur demande des catalogues/offres, par identité/version ou critères typés/date/contexte.",
+      "native_function_ids": [
+        "BC-004.02"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F06",
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "movements": [
+        {
+          "id": "Q05-E1",
+          "type": "E",
+          "group": "DG-CATALOG",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Catalogue ou offre de marchandises."
+        },
+        {
+          "id": "Q05-R1",
+          "type": "R",
+          "group": "DG-CATALOG",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Catalogue ou offre de marchandises."
+        },
+        {
+          "id": "Q05-R2",
+          "type": "R",
+          "group": "DG-CATALOG-MEMBER",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Appartenance à un catalogue."
+        },
+        {
+          "id": "Q05-X1",
+          "type": "X",
+          "group": "DG-CATALOG",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Catalogue ou offre de marchandises."
+        },
+        {
+          "id": "Q05-X2",
+          "type": "X",
+          "group": "DG-CATALOG-MEMBER",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Appartenance à un catalogue."
+        },
+        {
+          "id": "Q05-X3",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 2,
+        "W": 0,
+        "X": 3,
+        "cfp": 6
+      },
+      "completion_and_responses": "Restituer les groupes listés avec provenance/validité/versions, ou expliquer refus, absence, incohérence ou ambiguïté. Les membres restituent les identifiants produits/variantes, sans relire ni déplier leur fiche. Les résultats multiples sont des occurrences, la pagination ne crée pas de type de mouvement. Aucun Write métier.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/5",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "Q06",
+      "label": "Consulter assortiments et sélections",
+      "functional_user": "FU-READER",
+      "trigger": "Le lecteur demande des assortiments, par identité/version ou critères typés/date/contexte.",
+      "native_function_ids": [
+        "BC-004.02"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F06",
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "movements": [
+        {
+          "id": "Q06-E1",
+          "type": "E",
+          "group": "DG-ASSORTMENT",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Assortiment."
+        },
+        {
+          "id": "Q06-R1",
+          "type": "R",
+          "group": "DG-ASSORTMENT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Assortiment."
+        },
+        {
+          "id": "Q06-R2",
+          "type": "R",
+          "group": "DG-ASSORTMENT-MEMBER",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Sélection d'un produit dans un assortiment."
+        },
+        {
+          "id": "Q06-X1",
+          "type": "X",
+          "group": "DG-ASSORTMENT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Assortiment."
+        },
+        {
+          "id": "Q06-X2",
+          "type": "X",
+          "group": "DG-ASSORTMENT-MEMBER",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Sélection d'un produit dans un assortiment."
+        },
+        {
+          "id": "Q06-X3",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 2,
+        "W": 0,
+        "X": 3,
+        "cfp": 6
+      },
+      "completion_and_responses": "Restituer les groupes listés avec provenance/validité/versions, ou expliquer refus, absence, incohérence ou ambiguïté. Les sélections restituent les identifiants produits/variantes, sans relire ni déplier leur fiche. Les résultats multiples sont des occurrences, la pagination ne crée pas de type de mouvement. Aucun Write métier.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/5",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "Q07",
+      "label": "Rechercher les tarifs produits reçus",
+      "functional_user": "FU-READER",
+      "trigger": "Le lecteur demande des lignes tarifaires produit candidates, par identité/version ou critères typés/date/contexte.",
+      "native_function_ids": [
+        "BC-004.02"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F06",
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "movements": [
+        {
+          "id": "Q07-E1",
+          "type": "E",
+          "group": "DG-PRODUCT-PRICE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Ligne tarifaire produit."
+        },
+        {
+          "id": "Q07-R1",
+          "type": "R",
+          "group": "DG-PRODUCT-PRICE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ligne tarifaire produit."
+        },
+        {
+          "id": "Q07-R2",
+          "type": "R",
+          "group": "DG-PRODUCT-PRICEBOOK",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Livre tarifaire produit."
+        },
+        {
+          "id": "Q07-X1",
+          "type": "X",
+          "group": "DG-PRODUCT-PRICE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Ligne tarifaire produit."
+        },
+        {
+          "id": "Q07-X2",
+          "type": "X",
+          "group": "DG-PRODUCT-PRICEBOOK",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Livre tarifaire produit."
+        },
+        {
+          "id": "Q07-X3",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 2,
+        "W": 0,
+        "X": 3,
+        "cfp": 6
+      },
+      "completion_and_responses": "Restituer les groupes listés avec provenance/validité/versions, ou expliquer refus, absence, incohérence ou ambiguïté. Restituer ligne et livre avec les conditions ; plusieurs candidats restent visibles, sans décision de prix de commande. Les résultats multiples sont des occurrences, la pagination ne crée pas de type de mouvement. Aucun Write métier.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/5",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "Q08",
+      "label": "Consulter le conditionnement de référence",
+      "functional_user": "FU-READER",
+      "trigger": "Le lecteur demande des spécifications de conditionnement, par identité/version ou critères typés/date/contexte.",
+      "native_function_ids": [
+        "BC-005.01",
+        "BC-005.02"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F07",
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "movements": [
+        {
+          "id": "Q08-E1",
+          "type": "E",
+          "group": "DG-PACK-SPEC",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Spécification de conditionnement."
+        },
+        {
+          "id": "Q08-R1",
+          "type": "R",
+          "group": "DG-PACK-SPEC",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Spécification de conditionnement."
+        },
+        {
+          "id": "Q08-R2",
+          "type": "R",
+          "group": "DG-PACK-COMPONENT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ligne de composition de conditionnement."
+        },
+        {
+          "id": "Q08-R3",
+          "type": "R",
+          "group": "DG-PACK-MATERIAL",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Matériau ou type de contenant de référence."
+        },
+        {
+          "id": "Q08-X1",
+          "type": "X",
+          "group": "DG-PACK-SPEC",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Spécification de conditionnement."
+        },
+        {
+          "id": "Q08-X2",
+          "type": "X",
+          "group": "DG-PACK-COMPONENT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Ligne de composition de conditionnement."
+        },
+        {
+          "id": "Q08-X3",
+          "type": "X",
+          "group": "DG-PACK-MATERIAL",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Matériau ou type de contenant de référence."
+        },
+        {
+          "id": "Q08-X4",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 3,
+        "W": 0,
+        "X": 4,
+        "cfp": 8
+      },
+      "completion_and_responses": "Restituer les groupes listés avec provenance/validité/versions, ou expliquer refus, absence, incohérence ou ambiguïté. Une composition multi-niveaux répète les mêmes types de groupes. Elle ne crée pas d'unité logistique physique. Les résultats multiples sont des occurrences, la pagination ne crée pas de type de mouvement. Aucun Write métier.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/6",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "Q09",
+      "label": "Consulter le réseau de référence",
+      "functional_user": "FU-READER",
+      "trigger": "Le lecteur demande des lieux et leurs liaisons, par identité/version ou critères typés/date/contexte.",
+      "native_function_ids": [
+        "BC-007.01"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F09",
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "movements": [
+        {
+          "id": "Q09-E1",
+          "type": "E",
+          "group": "DG-SITE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Lieu du réseau de référence."
+        },
+        {
+          "id": "Q09-R1",
+          "type": "R",
+          "group": "DG-SITE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Lieu du réseau de référence."
+        },
+        {
+          "id": "Q09-R2",
+          "type": "R",
+          "group": "DG-NETWORK-LINK",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Liaison ou rattachement entre lieux."
+        },
+        {
+          "id": "Q09-X1",
+          "type": "X",
+          "group": "DG-SITE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Lieu du réseau de référence."
+        },
+        {
+          "id": "Q09-X2",
+          "type": "X",
+          "group": "DG-NETWORK-LINK",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Liaison ou rattachement entre lieux."
+        },
+        {
+          "id": "Q09-X3",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 2,
+        "W": 0,
+        "X": 3,
+        "cfp": 6
+      },
+      "completion_and_responses": "Restituer les groupes listés avec provenance/validité/versions, ou expliquer refus, absence, incohérence ou ambiguïté. Les parties responsables sont des liens par identifiant ; aucun itinéraire ou disponibilité n'est calculé. Les résultats multiples sont des occurrences, la pagination ne crée pas de type de mouvement. Aucun Write métier.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/8",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "Q10",
+      "label": "Consulter les offres de prestation",
+      "functional_user": "FU-READER",
+      "trigger": "Le lecteur demande des offres de prestation, par identité/version ou critères typés/date/contexte.",
+      "native_function_ids": [
+        "BC-007.01"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F09",
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "movements": [
+        {
+          "id": "Q10-E1",
+          "type": "E",
+          "group": "DG-SERVICE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Offre de prestation."
+        },
+        {
+          "id": "Q10-R1",
+          "type": "R",
+          "group": "DG-SERVICE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Offre de prestation."
+        },
+        {
+          "id": "Q10-R2",
+          "type": "R",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Partie identifiée."
+        },
+        {
+          "id": "Q10-R3",
+          "type": "R",
+          "group": "DG-SERVICE-ACCESS",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Accès de sollicitation ou de feedback."
+        },
+        {
+          "id": "Q10-X1",
+          "type": "X",
+          "group": "DG-SERVICE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Offre de prestation."
+        },
+        {
+          "id": "Q10-X2",
+          "type": "X",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Partie identifiée."
+        },
+        {
+          "id": "Q10-X3",
+          "type": "X",
+          "group": "DG-SERVICE-ACCESS",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Accès de sollicitation ou de feedback."
+        },
+        {
+          "id": "Q10-X4",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 3,
+        "W": 0,
+        "X": 4,
+        "cfp": 8
+      },
+      "completion_and_responses": "Restituer les groupes listés avec provenance/validité/versions, ou expliquer refus, absence, incohérence ou ambiguïté. Restituer le prestataire et les métadonnées d'accès ; les tarifs font l'objet de Q03. SLA et critères restent des données reçues. Les résultats multiples sont des occurrences, la pagination ne crée pas de type de mouvement. Aucun Write métier.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/8",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "I01",
+      "label": "Admettre et publier une contribution canonique complète ou différentielle",
+      "functional_user": "FU-SOURCE",
+      "trigger": "Une source transmet une contribution identifiée, éventuellement corrective, complète/différentielle ou portant un retrait explicite.",
+      "native_function_ids": [
+        "BC-002.01",
+        "BC-002.02",
+        "BC-002.03",
+        "BC-003.01",
+        "BC-003.02",
+        "BC-004.01",
+        "BC-004.02",
+        "BC-004.03",
+        "BC-005.01",
+        "BC-005.02",
+        "BC-006.01",
+        "BC-006.02",
+        "BC-007.01",
+        "BC-007.02"
+      ],
+      "contract_function_ids": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H07",
+        "H08",
+        "H09",
+        "H10"
+      ],
+      "movements": [
+        {
+          "id": "I01-E1",
+          "type": "E",
+          "group": "DG-CONTRIBUTION",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Contribution reçue."
+        },
+        {
+          "id": "I01-E2",
+          "type": "E",
+          "group": "DG-IDENTITY",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Correspondance d'identité/version."
+        },
+        {
+          "id": "I01-E3",
+          "type": "E",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Partie identifiée."
+        },
+        {
+          "id": "I01-E4",
+          "type": "E",
+          "group": "DG-ROLE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Rôle ou relation contextualisée d'une partie."
+        },
+        {
+          "id": "I01-E5",
+          "type": "E",
+          "group": "DG-AGREEMENT",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Accord reçu."
+        },
+        {
+          "id": "I01-E6",
+          "type": "E",
+          "group": "DG-CREDIT",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Profil de crédit reçu."
+        },
+        {
+          "id": "I01-E7",
+          "type": "E",
+          "group": "DG-PRODUCT",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Produit."
+        },
+        {
+          "id": "I01-E8",
+          "type": "E",
+          "group": "DG-VARIANT",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Variante de produit."
+        },
+        {
+          "id": "I01-E9",
+          "type": "E",
+          "group": "DG-CONTEXT",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Association produit/contexte de planification."
+        },
+        {
+          "id": "I01-E10",
+          "type": "E",
+          "group": "DG-CATALOG",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Catalogue ou offre de marchandises."
+        },
+        {
+          "id": "I01-E11",
+          "type": "E",
+          "group": "DG-CATALOG-MEMBER",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Appartenance à un catalogue."
+        },
+        {
+          "id": "I01-E12",
+          "type": "E",
+          "group": "DG-ASSORTMENT",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Assortiment."
+        },
+        {
+          "id": "I01-E13",
+          "type": "E",
+          "group": "DG-ASSORTMENT-MEMBER",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Sélection d'un produit dans un assortiment."
+        },
+        {
+          "id": "I01-E14",
+          "type": "E",
+          "group": "DG-PRODUCT-PRICEBOOK",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Livre tarifaire produit."
+        },
+        {
+          "id": "I01-E15",
+          "type": "E",
+          "group": "DG-PRODUCT-PRICE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Ligne tarifaire produit."
+        },
+        {
+          "id": "I01-E16",
+          "type": "E",
+          "group": "DG-PACK-MATERIAL",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Matériau ou type de contenant de référence."
+        },
+        {
+          "id": "I01-E17",
+          "type": "E",
+          "group": "DG-PACK-SPEC",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Spécification de conditionnement."
+        },
+        {
+          "id": "I01-E18",
+          "type": "E",
+          "group": "DG-PACK-COMPONENT",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Ligne de composition de conditionnement."
+        },
+        {
+          "id": "I01-E19",
+          "type": "E",
+          "group": "DG-INTERNAL",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Fourniture ou équipement de référence."
+        },
+        {
+          "id": "I01-E20",
+          "type": "E",
+          "group": "DG-SITE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Lieu du réseau de référence."
+        },
+        {
+          "id": "I01-E21",
+          "type": "E",
+          "group": "DG-NETWORK-LINK",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Liaison ou rattachement entre lieux."
+        },
+        {
+          "id": "I01-E22",
+          "type": "E",
+          "group": "DG-SERVICE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Offre de prestation."
+        },
+        {
+          "id": "I01-E23",
+          "type": "E",
+          "group": "DG-SERVICE-ACCESS",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Accès de sollicitation ou de feedback."
+        },
+        {
+          "id": "I01-E24",
+          "type": "E",
+          "group": "DG-SERVICE-PRICEBOOK",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Livre tarifaire service."
+        },
+        {
+          "id": "I01-E25",
+          "type": "E",
+          "group": "DG-SERVICE-PRICE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Ligne tarifaire service."
+        },
+        {
+          "id": "I01-R1",
+          "type": "R",
+          "group": "DG-SOURCE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Source contributrice."
+        },
+        {
+          "id": "I01-R2",
+          "type": "R",
+          "group": "DG-CONTRACT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Contrat canonique d'une source."
+        },
+        {
+          "id": "I01-R3",
+          "type": "R",
+          "group": "DG-AUTHORITY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Attribution d'autorité."
+        },
+        {
+          "id": "I01-R4",
+          "type": "R",
+          "group": "DG-IDENTITY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Correspondance d'identité/version."
+        },
+        {
+          "id": "I01-R5",
+          "type": "R",
+          "group": "DG-CONTRIBUTION",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Contribution reçue."
+        },
+        {
+          "id": "I01-R6",
+          "type": "R",
+          "group": "DG-DIAGNOSTIC",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Résultat d'admission d'un élément."
+        },
+        {
+          "id": "I01-R7",
+          "type": "R",
+          "group": "DG-PUBLICATION",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ensemble cohérent publié."
+        },
+        {
+          "id": "I01-R8",
+          "type": "R",
+          "group": "DG-EPOCH",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Époque de lecture."
+        },
+        {
+          "id": "I01-R9",
+          "type": "R",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Partie identifiée."
+        },
+        {
+          "id": "I01-R10",
+          "type": "R",
+          "group": "DG-ROLE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Rôle ou relation contextualisée d'une partie."
+        },
+        {
+          "id": "I01-R11",
+          "type": "R",
+          "group": "DG-AGREEMENT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Accord reçu."
+        },
+        {
+          "id": "I01-R12",
+          "type": "R",
+          "group": "DG-CREDIT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Profil de crédit reçu."
+        },
+        {
+          "id": "I01-R13",
+          "type": "R",
+          "group": "DG-PRODUCT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Produit."
+        },
+        {
+          "id": "I01-R14",
+          "type": "R",
+          "group": "DG-VARIANT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Variante de produit."
+        },
+        {
+          "id": "I01-R15",
+          "type": "R",
+          "group": "DG-CONTEXT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Association produit/contexte de planification."
+        },
+        {
+          "id": "I01-R16",
+          "type": "R",
+          "group": "DG-CATALOG",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Catalogue ou offre de marchandises."
+        },
+        {
+          "id": "I01-R17",
+          "type": "R",
+          "group": "DG-CATALOG-MEMBER",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Appartenance à un catalogue."
+        },
+        {
+          "id": "I01-R18",
+          "type": "R",
+          "group": "DG-ASSORTMENT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Assortiment."
+        },
+        {
+          "id": "I01-R19",
+          "type": "R",
+          "group": "DG-ASSORTMENT-MEMBER",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Sélection d'un produit dans un assortiment."
+        },
+        {
+          "id": "I01-R20",
+          "type": "R",
+          "group": "DG-PRODUCT-PRICEBOOK",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Livre tarifaire produit."
+        },
+        {
+          "id": "I01-R21",
+          "type": "R",
+          "group": "DG-PRODUCT-PRICE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ligne tarifaire produit."
+        },
+        {
+          "id": "I01-R22",
+          "type": "R",
+          "group": "DG-PACK-MATERIAL",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Matériau ou type de contenant de référence."
+        },
+        {
+          "id": "I01-R23",
+          "type": "R",
+          "group": "DG-PACK-SPEC",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Spécification de conditionnement."
+        },
+        {
+          "id": "I01-R24",
+          "type": "R",
+          "group": "DG-PACK-COMPONENT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ligne de composition de conditionnement."
+        },
+        {
+          "id": "I01-R25",
+          "type": "R",
+          "group": "DG-INTERNAL",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Fourniture ou équipement de référence."
+        },
+        {
+          "id": "I01-R26",
+          "type": "R",
+          "group": "DG-SITE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Lieu du réseau de référence."
+        },
+        {
+          "id": "I01-R27",
+          "type": "R",
+          "group": "DG-NETWORK-LINK",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Liaison ou rattachement entre lieux."
+        },
+        {
+          "id": "I01-R28",
+          "type": "R",
+          "group": "DG-SERVICE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Offre de prestation."
+        },
+        {
+          "id": "I01-R29",
+          "type": "R",
+          "group": "DG-SERVICE-ACCESS",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Accès de sollicitation ou de feedback."
+        },
+        {
+          "id": "I01-R30",
+          "type": "R",
+          "group": "DG-SERVICE-PRICEBOOK",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Livre tarifaire service."
+        },
+        {
+          "id": "I01-R31",
+          "type": "R",
+          "group": "DG-SERVICE-PRICE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ligne tarifaire service."
+        },
+        {
+          "id": "I01-W1",
+          "type": "W",
+          "group": "DG-IDENTITY",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Correspondance d'identité/version."
+        },
+        {
+          "id": "I01-W2",
+          "type": "W",
+          "group": "DG-CONTRIBUTION",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Contribution reçue."
+        },
+        {
+          "id": "I01-W3",
+          "type": "W",
+          "group": "DG-DIAGNOSTIC",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Résultat d'admission d'un élément."
+        },
+        {
+          "id": "I01-W4",
+          "type": "W",
+          "group": "DG-PUBLICATION",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Ensemble cohérent publié."
+        },
+        {
+          "id": "I01-W5",
+          "type": "W",
+          "group": "DG-CHANGE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Changement publié consultable."
+        },
+        {
+          "id": "I01-W6",
+          "type": "W",
+          "group": "DG-AUDIT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Action sensible tracée."
+        },
+        {
+          "id": "I01-W7",
+          "type": "W",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Partie identifiée."
+        },
+        {
+          "id": "I01-W8",
+          "type": "W",
+          "group": "DG-ROLE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Rôle ou relation contextualisée d'une partie."
+        },
+        {
+          "id": "I01-W9",
+          "type": "W",
+          "group": "DG-AGREEMENT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Accord reçu."
+        },
+        {
+          "id": "I01-W10",
+          "type": "W",
+          "group": "DG-CREDIT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Profil de crédit reçu."
+        },
+        {
+          "id": "I01-W11",
+          "type": "W",
+          "group": "DG-PRODUCT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Produit."
+        },
+        {
+          "id": "I01-W12",
+          "type": "W",
+          "group": "DG-VARIANT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Variante de produit."
+        },
+        {
+          "id": "I01-W13",
+          "type": "W",
+          "group": "DG-CONTEXT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Association produit/contexte de planification."
+        },
+        {
+          "id": "I01-W14",
+          "type": "W",
+          "group": "DG-CATALOG",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Catalogue ou offre de marchandises."
+        },
+        {
+          "id": "I01-W15",
+          "type": "W",
+          "group": "DG-CATALOG-MEMBER",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Appartenance à un catalogue."
+        },
+        {
+          "id": "I01-W16",
+          "type": "W",
+          "group": "DG-ASSORTMENT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Assortiment."
+        },
+        {
+          "id": "I01-W17",
+          "type": "W",
+          "group": "DG-ASSORTMENT-MEMBER",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Sélection d'un produit dans un assortiment."
+        },
+        {
+          "id": "I01-W18",
+          "type": "W",
+          "group": "DG-PRODUCT-PRICEBOOK",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Livre tarifaire produit."
+        },
+        {
+          "id": "I01-W19",
+          "type": "W",
+          "group": "DG-PRODUCT-PRICE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Ligne tarifaire produit."
+        },
+        {
+          "id": "I01-W20",
+          "type": "W",
+          "group": "DG-PACK-MATERIAL",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Matériau ou type de contenant de référence."
+        },
+        {
+          "id": "I01-W21",
+          "type": "W",
+          "group": "DG-PACK-SPEC",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Spécification de conditionnement."
+        },
+        {
+          "id": "I01-W22",
+          "type": "W",
+          "group": "DG-PACK-COMPONENT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Ligne de composition de conditionnement."
+        },
+        {
+          "id": "I01-W23",
+          "type": "W",
+          "group": "DG-INTERNAL",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Fourniture ou équipement de référence."
+        },
+        {
+          "id": "I01-W24",
+          "type": "W",
+          "group": "DG-SITE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Lieu du réseau de référence."
+        },
+        {
+          "id": "I01-W25",
+          "type": "W",
+          "group": "DG-NETWORK-LINK",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Liaison ou rattachement entre lieux."
+        },
+        {
+          "id": "I01-W26",
+          "type": "W",
+          "group": "DG-SERVICE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Offre de prestation."
+        },
+        {
+          "id": "I01-W27",
+          "type": "W",
+          "group": "DG-SERVICE-ACCESS",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Accès de sollicitation ou de feedback."
+        },
+        {
+          "id": "I01-W28",
+          "type": "W",
+          "group": "DG-SERVICE-PRICEBOOK",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Livre tarifaire service."
+        },
+        {
+          "id": "I01-W29",
+          "type": "W",
+          "group": "DG-SERVICE-PRICE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Ligne tarifaire service."
+        },
+        {
+          "id": "I01-X1",
+          "type": "X",
+          "group": "DG-CONTRIBUTION",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Contribution reçue."
+        },
+        {
+          "id": "I01-X2",
+          "type": "X",
+          "group": "DG-DIAGNOSTIC",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Résultat d'admission d'un élément."
+        }
+      ],
+      "count": {
+        "E": 25,
+        "R": 31,
+        "W": 29,
+        "X": 2,
+        "cfp": 87
+      },
+      "completion_and_responses": "Résultat durable envoyé à la source : répété déjà traité, accepté/publié, en attente ou rejeté. Les groupes métier admis et leur version sont persistés ; une publication cohérente, ses changements et l'action sensible sont persistés quand autorisés. Le rejet conserve la contribution, la filiation et le diagnostic ; un contenu impossible à parser reste dans le corps opaque de contribution. Une contribution complète comporte son manifeste ; un absent autorisé devient retiré, sans destruction de l'historique. Les alias explicites sont reçus via IDENTITY ; les autres identifiants sont des attributs des groupes reçus. On compte l'union des mouvements requis dans toutes les branches, pas tous les mouvements à chaque exécution.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/0",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/1",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/3",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/4",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/5",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/6",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/7",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/8"
+      ]
+    },
+    {
+      "id": "I02",
+      "label": "Réexaminer une contribution conservée",
+      "functional_user": "FU-OPERATOR",
+      "trigger": "Le gestionnaire demande explicitement un réexamen après correction sourcée ou disponibilité d'une dépendance.",
+      "native_function_ids": [
+        "BC-002.01",
+        "BC-002.02",
+        "BC-002.03",
+        "BC-003.01",
+        "BC-003.02",
+        "BC-004.01",
+        "BC-004.02",
+        "BC-004.03",
+        "BC-005.01",
+        "BC-005.02",
+        "BC-006.01",
+        "BC-006.02",
+        "BC-007.01",
+        "BC-007.02"
+      ],
+      "contract_function_ids": [
+        "F01",
+        "F02",
+        "F03",
+        "F04"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H07",
+        "H08",
+        "H09",
+        "H10"
+      ],
+      "movements": [
+        {
+          "id": "I02-E1",
+          "type": "E",
+          "group": "DG-CONTRIBUTION",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Contribution reçue."
+        },
+        {
+          "id": "I02-R1",
+          "type": "R",
+          "group": "DG-SOURCE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Source contributrice."
+        },
+        {
+          "id": "I02-R2",
+          "type": "R",
+          "group": "DG-CONTRACT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Contrat canonique d'une source."
+        },
+        {
+          "id": "I02-R3",
+          "type": "R",
+          "group": "DG-AUTHORITY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Attribution d'autorité."
+        },
+        {
+          "id": "I02-R4",
+          "type": "R",
+          "group": "DG-IDENTITY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Correspondance d'identité/version."
+        },
+        {
+          "id": "I02-R5",
+          "type": "R",
+          "group": "DG-CONTRIBUTION",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Contribution reçue."
+        },
+        {
+          "id": "I02-R6",
+          "type": "R",
+          "group": "DG-DIAGNOSTIC",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Résultat d'admission d'un élément."
+        },
+        {
+          "id": "I02-R7",
+          "type": "R",
+          "group": "DG-PUBLICATION",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ensemble cohérent publié."
+        },
+        {
+          "id": "I02-R8",
+          "type": "R",
+          "group": "DG-EPOCH",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Époque de lecture."
+        },
+        {
+          "id": "I02-R9",
+          "type": "R",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Partie identifiée."
+        },
+        {
+          "id": "I02-R10",
+          "type": "R",
+          "group": "DG-ROLE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Rôle ou relation contextualisée d'une partie."
+        },
+        {
+          "id": "I02-R11",
+          "type": "R",
+          "group": "DG-AGREEMENT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Accord reçu."
+        },
+        {
+          "id": "I02-R12",
+          "type": "R",
+          "group": "DG-CREDIT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Profil de crédit reçu."
+        },
+        {
+          "id": "I02-R13",
+          "type": "R",
+          "group": "DG-PRODUCT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Produit."
+        },
+        {
+          "id": "I02-R14",
+          "type": "R",
+          "group": "DG-VARIANT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Variante de produit."
+        },
+        {
+          "id": "I02-R15",
+          "type": "R",
+          "group": "DG-CONTEXT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Association produit/contexte de planification."
+        },
+        {
+          "id": "I02-R16",
+          "type": "R",
+          "group": "DG-CATALOG",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Catalogue ou offre de marchandises."
+        },
+        {
+          "id": "I02-R17",
+          "type": "R",
+          "group": "DG-CATALOG-MEMBER",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Appartenance à un catalogue."
+        },
+        {
+          "id": "I02-R18",
+          "type": "R",
+          "group": "DG-ASSORTMENT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Assortiment."
+        },
+        {
+          "id": "I02-R19",
+          "type": "R",
+          "group": "DG-ASSORTMENT-MEMBER",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Sélection d'un produit dans un assortiment."
+        },
+        {
+          "id": "I02-R20",
+          "type": "R",
+          "group": "DG-PRODUCT-PRICEBOOK",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Livre tarifaire produit."
+        },
+        {
+          "id": "I02-R21",
+          "type": "R",
+          "group": "DG-PRODUCT-PRICE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ligne tarifaire produit."
+        },
+        {
+          "id": "I02-R22",
+          "type": "R",
+          "group": "DG-PACK-MATERIAL",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Matériau ou type de contenant de référence."
+        },
+        {
+          "id": "I02-R23",
+          "type": "R",
+          "group": "DG-PACK-SPEC",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Spécification de conditionnement."
+        },
+        {
+          "id": "I02-R24",
+          "type": "R",
+          "group": "DG-PACK-COMPONENT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ligne de composition de conditionnement."
+        },
+        {
+          "id": "I02-R25",
+          "type": "R",
+          "group": "DG-INTERNAL",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Fourniture ou équipement de référence."
+        },
+        {
+          "id": "I02-R26",
+          "type": "R",
+          "group": "DG-SITE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Lieu du réseau de référence."
+        },
+        {
+          "id": "I02-R27",
+          "type": "R",
+          "group": "DG-NETWORK-LINK",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Liaison ou rattachement entre lieux."
+        },
+        {
+          "id": "I02-R28",
+          "type": "R",
+          "group": "DG-SERVICE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Offre de prestation."
+        },
+        {
+          "id": "I02-R29",
+          "type": "R",
+          "group": "DG-SERVICE-ACCESS",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Accès de sollicitation ou de feedback."
+        },
+        {
+          "id": "I02-R30",
+          "type": "R",
+          "group": "DG-SERVICE-PRICEBOOK",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Livre tarifaire service."
+        },
+        {
+          "id": "I02-R31",
+          "type": "R",
+          "group": "DG-SERVICE-PRICE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ligne tarifaire service."
+        },
+        {
+          "id": "I02-W1",
+          "type": "W",
+          "group": "DG-IDENTITY",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Correspondance d'identité/version."
+        },
+        {
+          "id": "I02-W2",
+          "type": "W",
+          "group": "DG-CONTRIBUTION",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Contribution reçue."
+        },
+        {
+          "id": "I02-W3",
+          "type": "W",
+          "group": "DG-DIAGNOSTIC",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Résultat d'admission d'un élément."
+        },
+        {
+          "id": "I02-W4",
+          "type": "W",
+          "group": "DG-PUBLICATION",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Ensemble cohérent publié."
+        },
+        {
+          "id": "I02-W5",
+          "type": "W",
+          "group": "DG-CHANGE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Changement publié consultable."
+        },
+        {
+          "id": "I02-W6",
+          "type": "W",
+          "group": "DG-AUDIT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Action sensible tracée."
+        },
+        {
+          "id": "I02-W7",
+          "type": "W",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Partie identifiée."
+        },
+        {
+          "id": "I02-W8",
+          "type": "W",
+          "group": "DG-ROLE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Rôle ou relation contextualisée d'une partie."
+        },
+        {
+          "id": "I02-W9",
+          "type": "W",
+          "group": "DG-AGREEMENT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Accord reçu."
+        },
+        {
+          "id": "I02-W10",
+          "type": "W",
+          "group": "DG-CREDIT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Profil de crédit reçu."
+        },
+        {
+          "id": "I02-W11",
+          "type": "W",
+          "group": "DG-PRODUCT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Produit."
+        },
+        {
+          "id": "I02-W12",
+          "type": "W",
+          "group": "DG-VARIANT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Variante de produit."
+        },
+        {
+          "id": "I02-W13",
+          "type": "W",
+          "group": "DG-CONTEXT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Association produit/contexte de planification."
+        },
+        {
+          "id": "I02-W14",
+          "type": "W",
+          "group": "DG-CATALOG",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Catalogue ou offre de marchandises."
+        },
+        {
+          "id": "I02-W15",
+          "type": "W",
+          "group": "DG-CATALOG-MEMBER",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Appartenance à un catalogue."
+        },
+        {
+          "id": "I02-W16",
+          "type": "W",
+          "group": "DG-ASSORTMENT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Assortiment."
+        },
+        {
+          "id": "I02-W17",
+          "type": "W",
+          "group": "DG-ASSORTMENT-MEMBER",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Sélection d'un produit dans un assortiment."
+        },
+        {
+          "id": "I02-W18",
+          "type": "W",
+          "group": "DG-PRODUCT-PRICEBOOK",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Livre tarifaire produit."
+        },
+        {
+          "id": "I02-W19",
+          "type": "W",
+          "group": "DG-PRODUCT-PRICE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Ligne tarifaire produit."
+        },
+        {
+          "id": "I02-W20",
+          "type": "W",
+          "group": "DG-PACK-MATERIAL",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Matériau ou type de contenant de référence."
+        },
+        {
+          "id": "I02-W21",
+          "type": "W",
+          "group": "DG-PACK-SPEC",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Spécification de conditionnement."
+        },
+        {
+          "id": "I02-W22",
+          "type": "W",
+          "group": "DG-PACK-COMPONENT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Ligne de composition de conditionnement."
+        },
+        {
+          "id": "I02-W23",
+          "type": "W",
+          "group": "DG-INTERNAL",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Fourniture ou équipement de référence."
+        },
+        {
+          "id": "I02-W24",
+          "type": "W",
+          "group": "DG-SITE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Lieu du réseau de référence."
+        },
+        {
+          "id": "I02-W25",
+          "type": "W",
+          "group": "DG-NETWORK-LINK",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Liaison ou rattachement entre lieux."
+        },
+        {
+          "id": "I02-W26",
+          "type": "W",
+          "group": "DG-SERVICE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Offre de prestation."
+        },
+        {
+          "id": "I02-W27",
+          "type": "W",
+          "group": "DG-SERVICE-ACCESS",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Accès de sollicitation ou de feedback."
+        },
+        {
+          "id": "I02-W28",
+          "type": "W",
+          "group": "DG-SERVICE-PRICEBOOK",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Livre tarifaire service."
+        },
+        {
+          "id": "I02-W29",
+          "type": "W",
+          "group": "DG-SERVICE-PRICE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Ligne tarifaire service."
+        },
+        {
+          "id": "I02-X1",
+          "type": "X",
+          "group": "DG-CONTRIBUTION",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Contribution reçue."
+        },
+        {
+          "id": "I02-X2",
+          "type": "X",
+          "group": "DG-DIAGNOSTIC",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Résultat d'admission d'un élément."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 31,
+        "W": 29,
+        "X": 2,
+        "cfp": 63
+      },
+      "completion_and_responses": "Relire les données de la contribution conservée, l'autorité et les références nécessaires, puis rendre et persister le résultat complet comme I01. Les 23 groupes relus/écrits sont les types éventuellement nécessaires selon le contenu, pas 23 nouvelles soumissions. Une correction contenant de nouvelles données passe par I01, non par une seconde édition locale. Reprendre une exécution interrompue n'ajoute pas un processus : le présent processus exige une nouvelle décision fonctionnelle de réexamen.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/0",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/1",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/3"
+      ]
+    },
+    {
+      "id": "A01",
+      "label": "Administrer une source, son contrat et son autorité",
+      "functional_user": "FU-ADMIN",
+      "trigger": "Un administrateur habilité enregistre une configuration de source/contrat/autorité.",
+      "native_function_ids": [
+        "BC-002.01",
+        "BC-002.02",
+        "BC-002.03"
+      ],
+      "contract_function_ids": [
+        "F01",
+        "F02",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H11"
+      ],
+      "movements": [
+        {
+          "id": "A01-E1",
+          "type": "E",
+          "group": "DG-SOURCE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Source contributrice."
+        },
+        {
+          "id": "A01-E2",
+          "type": "E",
+          "group": "DG-CONTRACT",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Contrat canonique d'une source."
+        },
+        {
+          "id": "A01-E3",
+          "type": "E",
+          "group": "DG-AUTHORITY",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Attribution d'autorité."
+        },
+        {
+          "id": "A01-R1",
+          "type": "R",
+          "group": "DG-SOURCE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Source contributrice."
+        },
+        {
+          "id": "A01-R2",
+          "type": "R",
+          "group": "DG-CONTRACT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Contrat canonique d'une source."
+        },
+        {
+          "id": "A01-R3",
+          "type": "R",
+          "group": "DG-AUTHORITY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Attribution d'autorité."
+        },
+        {
+          "id": "A01-W1",
+          "type": "W",
+          "group": "DG-SOURCE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Source contributrice."
+        },
+        {
+          "id": "A01-W2",
+          "type": "W",
+          "group": "DG-CONTRACT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Contrat canonique d'une source."
+        },
+        {
+          "id": "A01-W3",
+          "type": "W",
+          "group": "DG-AUTHORITY",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Attribution d'autorité."
+        },
+        {
+          "id": "A01-W4",
+          "type": "W",
+          "group": "DG-AUDIT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Action sensible tracée."
+        },
+        {
+          "id": "A01-X1",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 3,
+        "R": 3,
+        "W": 4,
+        "X": 1,
+        "cfp": 11
+      },
+      "completion_and_responses": "Création ou modification contrôlée des trois objets, ou refus expliqué. Lire l'existant et tracer la décision sensible. L'attribution d'habilitations à des personnes n'est pas incluse.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/0",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/1",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "A02",
+      "label": "Consulter les sources, contrats et autorités",
+      "functional_user": "FU-ADMIN",
+      "trigger": "Un administrateur demande les sources/contrats/autorités existants.",
+      "native_function_ids": [
+        "BC-002.01",
+        "BC-002.02",
+        "BC-002.03"
+      ],
+      "contract_function_ids": [
+        "F01",
+        "F02",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H11"
+      ],
+      "movements": [
+        {
+          "id": "A02-E1",
+          "type": "E",
+          "group": "DG-SOURCE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Source contributrice."
+        },
+        {
+          "id": "A02-R1",
+          "type": "R",
+          "group": "DG-SOURCE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Source contributrice."
+        },
+        {
+          "id": "A02-R2",
+          "type": "R",
+          "group": "DG-CONTRACT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Contrat canonique d'une source."
+        },
+        {
+          "id": "A02-R3",
+          "type": "R",
+          "group": "DG-AUTHORITY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Attribution d'autorité."
+        },
+        {
+          "id": "A02-X1",
+          "type": "X",
+          "group": "DG-SOURCE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Source contributrice."
+        },
+        {
+          "id": "A02-X2",
+          "type": "X",
+          "group": "DG-CONTRACT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Contrat canonique d'une source."
+        },
+        {
+          "id": "A02-X3",
+          "type": "X",
+          "group": "DG-AUTHORITY",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Attribution d'autorité."
+        },
+        {
+          "id": "A02-X4",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 3,
+        "W": 0,
+        "X": 4,
+        "cfp": 8
+      },
+      "completion_and_responses": "Restituer les configurations et leurs liens, ou expliquer le refus/l'absence sans données protégées.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/0",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/1",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "D01",
+      "label": "Consulter résultat, rejets et publication d'une contribution",
+      "functional_user": "FU-OPERATOR",
+      "trigger": "Le gestionnaire demande un diagnostic indépendant d'une contribution reçue.",
+      "native_function_ids": [
+        "BC-002.01",
+        "BC-002.02",
+        "BC-002.03"
+      ],
+      "contract_function_ids": [
+        "F01",
+        "F03",
+        "F04",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H08"
+      ],
+      "movements": [
+        {
+          "id": "D01-E1",
+          "type": "E",
+          "group": "DG-CONTRIBUTION",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Contribution reçue."
+        },
+        {
+          "id": "D01-R1",
+          "type": "R",
+          "group": "DG-CONTRIBUTION",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Contribution reçue."
+        },
+        {
+          "id": "D01-R2",
+          "type": "R",
+          "group": "DG-DIAGNOSTIC",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Résultat d'admission d'un élément."
+        },
+        {
+          "id": "D01-R3",
+          "type": "R",
+          "group": "DG-PUBLICATION",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ensemble cohérent publié."
+        },
+        {
+          "id": "D01-X1",
+          "type": "X",
+          "group": "DG-CONTRIBUTION",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Contribution reçue."
+        },
+        {
+          "id": "D01-X2",
+          "type": "X",
+          "group": "DG-DIAGNOSTIC",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Résultat d'admission d'un élément."
+        },
+        {
+          "id": "D01-X3",
+          "type": "X",
+          "group": "DG-PUBLICATION",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Ensemble cohérent publié."
+        },
+        {
+          "id": "D01-X4",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 3,
+        "W": 0,
+        "X": 4,
+        "cfp": 8
+      },
+      "completion_and_responses": "Restituer état, causes/éléments, filiation et version publiée, ou refus/absence. Regroupement par cause et résultats par ligne sont des manipulations/occurrences. Les payloads métier complets des 23 types ne sont pas dépliés.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/0",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/3",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "U01",
+      "label": "Déclarer ou redéclarer une utilisation conservée",
+      "functional_user": "FU-CONSUMER",
+      "trigger": "Un consommateur déclare l'utilisation stable d'une version exacte, y compris lors d'un rapprochement après restauration.",
+      "native_function_ids": [
+        "BC-003.01",
+        "BC-003.02",
+        "BC-004.01",
+        "BC-004.02",
+        "BC-004.03",
+        "BC-005.01",
+        "BC-005.02",
+        "BC-006.01",
+        "BC-006.02",
+        "BC-007.01",
+        "BC-007.02"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F10"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H12"
+      ],
+      "movements": [
+        {
+          "id": "U01-E1",
+          "type": "E",
+          "group": "DG-USAGE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Utilisation conservée déclarée."
+        },
+        {
+          "id": "U01-R1",
+          "type": "R",
+          "group": "DG-USAGE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Utilisation conservée déclarée."
+        },
+        {
+          "id": "U01-R2",
+          "type": "R",
+          "group": "DG-IDENTITY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Correspondance d'identité/version."
+        },
+        {
+          "id": "U01-R3",
+          "type": "R",
+          "group": "DG-RECONCILIATION",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Rapprochement après restauration."
+        },
+        {
+          "id": "U01-W1",
+          "type": "W",
+          "group": "DG-USAGE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Utilisation conservée déclarée."
+        },
+        {
+          "id": "U01-W2",
+          "type": "W",
+          "group": "DG-AUDIT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Action sensible tracée."
+        },
+        {
+          "id": "U01-X1",
+          "type": "X",
+          "group": "DG-USAGE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Utilisation conservée déclarée."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 3,
+        "W": 2,
+        "X": 1,
+        "cfp": 7
+      },
+      "completion_and_responses": "Enregistrer/reconnaître la déclaration sans second effet ; rendre actif, déjà connu, refusé ou en attente de reconstruction. Une version manquante après restauration n'efface pas la déclaration reçue. Les statuts sont des attributs de USAGE, pas la convention de message humain.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9"
+      ]
+    },
+    {
+      "id": "U02",
+      "label": "Libérer une utilisation déclarée",
+      "functional_user": "FU-CONSUMER",
+      "trigger": "Le consommateur notifie qu'un usage stable est terminé.",
+      "native_function_ids": [
+        "BC-003.01",
+        "BC-003.02",
+        "BC-004.01",
+        "BC-004.02",
+        "BC-004.03",
+        "BC-005.01",
+        "BC-005.02",
+        "BC-006.01",
+        "BC-006.02",
+        "BC-007.01",
+        "BC-007.02"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F10"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H12"
+      ],
+      "movements": [
+        {
+          "id": "U02-E1",
+          "type": "E",
+          "group": "DG-USAGE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Utilisation conservée déclarée."
+        },
+        {
+          "id": "U02-R1",
+          "type": "R",
+          "group": "DG-USAGE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Utilisation conservée déclarée."
+        },
+        {
+          "id": "U02-W1",
+          "type": "W",
+          "group": "DG-USAGE",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Utilisation conservée déclarée."
+        },
+        {
+          "id": "U02-W2",
+          "type": "W",
+          "group": "DG-AUDIT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Action sensible tracée."
+        },
+        {
+          "id": "U02-X1",
+          "type": "X",
+          "group": "DG-USAGE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Utilisation conservée déclarée."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 1,
+        "W": 2,
+        "X": 1,
+        "cfp": 5
+      },
+      "completion_and_responses": "Marquer l'usage libéré et restituer le résultat, ou signaler absent/interdit/déjà libéré. Ne purge pas automatiquement la version.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9"
+      ]
+    },
+    {
+      "id": "E01",
+      "label": "Exporter un ensemble canonique de références",
+      "functional_user": "FU-CONSUMER",
+      "trigger": "Un consommateur ou gestionnaire demande un export canonique autorisé, avec portée et sélection.",
+      "native_function_ids": [
+        "BC-003.01",
+        "BC-003.02",
+        "BC-004.01",
+        "BC-004.02",
+        "BC-004.03",
+        "BC-005.01",
+        "BC-005.02",
+        "BC-006.01",
+        "BC-006.02",
+        "BC-007.01",
+        "BC-007.02"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H13"
+      ],
+      "movements": [
+        {
+          "id": "E01-E1",
+          "type": "E",
+          "group": "DG-EXPORT",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Export canonique."
+        },
+        {
+          "id": "E01-R1",
+          "type": "R",
+          "group": "DG-PUBLICATION",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ensemble cohérent publié."
+        },
+        {
+          "id": "E01-R2",
+          "type": "R",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Partie identifiée."
+        },
+        {
+          "id": "E01-R3",
+          "type": "R",
+          "group": "DG-ROLE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Rôle ou relation contextualisée d'une partie."
+        },
+        {
+          "id": "E01-R4",
+          "type": "R",
+          "group": "DG-AGREEMENT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Accord reçu."
+        },
+        {
+          "id": "E01-R5",
+          "type": "R",
+          "group": "DG-CREDIT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Profil de crédit reçu."
+        },
+        {
+          "id": "E01-R6",
+          "type": "R",
+          "group": "DG-PRODUCT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Produit."
+        },
+        {
+          "id": "E01-R7",
+          "type": "R",
+          "group": "DG-VARIANT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Variante de produit."
+        },
+        {
+          "id": "E01-R8",
+          "type": "R",
+          "group": "DG-CONTEXT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Association produit/contexte de planification."
+        },
+        {
+          "id": "E01-R9",
+          "type": "R",
+          "group": "DG-CATALOG",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Catalogue ou offre de marchandises."
+        },
+        {
+          "id": "E01-R10",
+          "type": "R",
+          "group": "DG-CATALOG-MEMBER",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Appartenance à un catalogue."
+        },
+        {
+          "id": "E01-R11",
+          "type": "R",
+          "group": "DG-ASSORTMENT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Assortiment."
+        },
+        {
+          "id": "E01-R12",
+          "type": "R",
+          "group": "DG-ASSORTMENT-MEMBER",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Sélection d'un produit dans un assortiment."
+        },
+        {
+          "id": "E01-R13",
+          "type": "R",
+          "group": "DG-PRODUCT-PRICEBOOK",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Livre tarifaire produit."
+        },
+        {
+          "id": "E01-R14",
+          "type": "R",
+          "group": "DG-PRODUCT-PRICE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ligne tarifaire produit."
+        },
+        {
+          "id": "E01-R15",
+          "type": "R",
+          "group": "DG-PACK-MATERIAL",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Matériau ou type de contenant de référence."
+        },
+        {
+          "id": "E01-R16",
+          "type": "R",
+          "group": "DG-PACK-SPEC",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Spécification de conditionnement."
+        },
+        {
+          "id": "E01-R17",
+          "type": "R",
+          "group": "DG-PACK-COMPONENT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ligne de composition de conditionnement."
+        },
+        {
+          "id": "E01-R18",
+          "type": "R",
+          "group": "DG-INTERNAL",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Fourniture ou équipement de référence."
+        },
+        {
+          "id": "E01-R19",
+          "type": "R",
+          "group": "DG-SITE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Lieu du réseau de référence."
+        },
+        {
+          "id": "E01-R20",
+          "type": "R",
+          "group": "DG-NETWORK-LINK",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Liaison ou rattachement entre lieux."
+        },
+        {
+          "id": "E01-R21",
+          "type": "R",
+          "group": "DG-SERVICE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Offre de prestation."
+        },
+        {
+          "id": "E01-R22",
+          "type": "R",
+          "group": "DG-SERVICE-ACCESS",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Accès de sollicitation ou de feedback."
+        },
+        {
+          "id": "E01-R23",
+          "type": "R",
+          "group": "DG-SERVICE-PRICEBOOK",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Livre tarifaire service."
+        },
+        {
+          "id": "E01-R24",
+          "type": "R",
+          "group": "DG-SERVICE-PRICE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Ligne tarifaire service."
+        },
+        {
+          "id": "E01-W1",
+          "type": "W",
+          "group": "DG-EXPORT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Export canonique."
+        },
+        {
+          "id": "E01-W2",
+          "type": "W",
+          "group": "DG-AUDIT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Action sensible tracée."
+        },
+        {
+          "id": "E01-X1",
+          "type": "X",
+          "group": "DG-EXPORT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Export canonique."
+        },
+        {
+          "id": "E01-X2",
+          "type": "X",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Partie identifiée."
+        },
+        {
+          "id": "E01-X3",
+          "type": "X",
+          "group": "DG-ROLE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Rôle ou relation contextualisée d'une partie."
+        },
+        {
+          "id": "E01-X4",
+          "type": "X",
+          "group": "DG-AGREEMENT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Accord reçu."
+        },
+        {
+          "id": "E01-X5",
+          "type": "X",
+          "group": "DG-CREDIT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Profil de crédit reçu."
+        },
+        {
+          "id": "E01-X6",
+          "type": "X",
+          "group": "DG-PRODUCT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Produit."
+        },
+        {
+          "id": "E01-X7",
+          "type": "X",
+          "group": "DG-VARIANT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Variante de produit."
+        },
+        {
+          "id": "E01-X8",
+          "type": "X",
+          "group": "DG-CONTEXT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Association produit/contexte de planification."
+        },
+        {
+          "id": "E01-X9",
+          "type": "X",
+          "group": "DG-CATALOG",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Catalogue ou offre de marchandises."
+        },
+        {
+          "id": "E01-X10",
+          "type": "X",
+          "group": "DG-CATALOG-MEMBER",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Appartenance à un catalogue."
+        },
+        {
+          "id": "E01-X11",
+          "type": "X",
+          "group": "DG-ASSORTMENT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Assortiment."
+        },
+        {
+          "id": "E01-X12",
+          "type": "X",
+          "group": "DG-ASSORTMENT-MEMBER",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Sélection d'un produit dans un assortiment."
+        },
+        {
+          "id": "E01-X13",
+          "type": "X",
+          "group": "DG-PRODUCT-PRICEBOOK",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Livre tarifaire produit."
+        },
+        {
+          "id": "E01-X14",
+          "type": "X",
+          "group": "DG-PRODUCT-PRICE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Ligne tarifaire produit."
+        },
+        {
+          "id": "E01-X15",
+          "type": "X",
+          "group": "DG-PACK-MATERIAL",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Matériau ou type de contenant de référence."
+        },
+        {
+          "id": "E01-X16",
+          "type": "X",
+          "group": "DG-PACK-SPEC",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Spécification de conditionnement."
+        },
+        {
+          "id": "E01-X17",
+          "type": "X",
+          "group": "DG-PACK-COMPONENT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Ligne de composition de conditionnement."
+        },
+        {
+          "id": "E01-X18",
+          "type": "X",
+          "group": "DG-INTERNAL",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Fourniture ou équipement de référence."
+        },
+        {
+          "id": "E01-X19",
+          "type": "X",
+          "group": "DG-SITE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Lieu du réseau de référence."
+        },
+        {
+          "id": "E01-X20",
+          "type": "X",
+          "group": "DG-NETWORK-LINK",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Liaison ou rattachement entre lieux."
+        },
+        {
+          "id": "E01-X21",
+          "type": "X",
+          "group": "DG-SERVICE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Offre de prestation."
+        },
+        {
+          "id": "E01-X22",
+          "type": "X",
+          "group": "DG-SERVICE-ACCESS",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Accès de sollicitation ou de feedback."
+        },
+        {
+          "id": "E01-X23",
+          "type": "X",
+          "group": "DG-SERVICE-PRICEBOOK",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Livre tarifaire service."
+        },
+        {
+          "id": "E01-X24",
+          "type": "X",
+          "group": "DG-SERVICE-PRICE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Ligne tarifaire service."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 24,
+        "W": 2,
+        "X": 24,
+        "cfp": 51
+      },
+      "completion_and_responses": "Produire un manifeste et les groupes de référence de la portée autorisée, ou un état d'export refusé/incomplet sans données interdites. Les 23 groupes sont le contenu possible du même export canonique ; les lignes, fichiers et pages sont des occurrences. Conserver l'identité/manifeste de l'export, pas recopier le fichier en 23 Writes supplémentaires.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "E02",
+      "label": "Confirmer la réception d'un export",
+      "functional_user": "FU-CONSUMER",
+      "trigger": "Le destinataire confirme avoir reçu l'export identifié et son manifeste.",
+      "native_function_ids": [
+        "BC-003.01",
+        "BC-003.02",
+        "BC-004.01",
+        "BC-004.02",
+        "BC-004.03",
+        "BC-005.01",
+        "BC-005.02",
+        "BC-006.01",
+        "BC-006.02",
+        "BC-007.01",
+        "BC-007.02"
+      ],
+      "contract_function_ids": [
+        "F10"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H13"
+      ],
+      "movements": [
+        {
+          "id": "E02-E1",
+          "type": "E",
+          "group": "DG-EXPORT",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Export canonique."
+        },
+        {
+          "id": "E02-R1",
+          "type": "R",
+          "group": "DG-EXPORT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Export canonique."
+        },
+        {
+          "id": "E02-W1",
+          "type": "W",
+          "group": "DG-EXPORT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Export canonique."
+        },
+        {
+          "id": "E02-W2",
+          "type": "W",
+          "group": "DG-AUDIT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Action sensible tracée."
+        },
+        {
+          "id": "E02-X1",
+          "type": "X",
+          "group": "DG-EXPORT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Export canonique."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 1,
+        "W": 2,
+        "X": 1,
+        "cfp": 5
+      },
+      "completion_and_responses": "Marquer et restituer la confirmation ou une discordance/absence/refus. Ce succès est une condition possible de purge, sans affirmer qu'elle suffit.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9"
+      ]
+    },
+    {
+      "id": "C01",
+      "label": "Lire les changements depuis un curseur",
+      "functional_user": "FU-CONSUMER",
+      "trigger": "Un consommateur demande les changements depuis une position durable.",
+      "native_function_ids": [
+        "BC-003.01",
+        "BC-003.02",
+        "BC-004.01",
+        "BC-004.02",
+        "BC-004.03",
+        "BC-005.01",
+        "BC-005.02",
+        "BC-006.01",
+        "BC-006.02",
+        "BC-007.01",
+        "BC-007.02"
+      ],
+      "contract_function_ids": [
+        "F10"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H14"
+      ],
+      "movements": [
+        {
+          "id": "C01-E1",
+          "type": "E",
+          "group": "DG-CHANGE",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Changement publié consultable."
+        },
+        {
+          "id": "C01-R1",
+          "type": "R",
+          "group": "DG-CHANGE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Changement publié consultable."
+        },
+        {
+          "id": "C01-R2",
+          "type": "R",
+          "group": "DG-EPOCH",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Époque de lecture."
+        },
+        {
+          "id": "C01-X1",
+          "type": "X",
+          "group": "DG-CHANGE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Changement publié consultable."
+        },
+        {
+          "id": "C01-X2",
+          "type": "X",
+          "group": "DG-EPOCH",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Époque de lecture."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 2,
+        "W": 0,
+        "X": 2,
+        "cfp": 5
+      },
+      "completion_and_responses": "Rendre les références/version/nature des changements et le prochain curseur ; en cas d'ancienne époque, renvoyer explicitement l'époque courante et l'obligation de resynchronisation, sans prétendre continuer la séquence. Une page vide reste une occurrence du résultat. Les valeurs des 23 objets ne sont pas retournées ici.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9"
+      ]
+    },
+    {
+      "id": "R01",
+      "label": "Ouvrir un rapprochement après restauration",
+      "functional_user": "FU-OPERATOR",
+      "trigger": "Après restauration technique, un opérateur autorisé déclare la reprise à rapprocher.",
+      "native_function_ids": [
+        "BC-003.01",
+        "BC-003.02",
+        "BC-004.01",
+        "BC-004.02",
+        "BC-004.03",
+        "BC-005.01",
+        "BC-005.02",
+        "BC-006.01",
+        "BC-006.02",
+        "BC-007.01",
+        "BC-007.02"
+      ],
+      "contract_function_ids": [
+        "F10"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H12",
+        "H15"
+      ],
+      "movements": [
+        {
+          "id": "R01-E1",
+          "type": "E",
+          "group": "DG-RECONCILIATION",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Rapprochement après restauration."
+        },
+        {
+          "id": "R01-R1",
+          "type": "R",
+          "group": "DG-RECONCILIATION",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Rapprochement après restauration."
+        },
+        {
+          "id": "R01-R2",
+          "type": "R",
+          "group": "DG-EPOCH",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Époque de lecture."
+        },
+        {
+          "id": "R01-W1",
+          "type": "W",
+          "group": "DG-RECONCILIATION",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Rapprochement après restauration."
+        },
+        {
+          "id": "R01-W2",
+          "type": "W",
+          "group": "DG-EPOCH",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Époque de lecture."
+        },
+        {
+          "id": "R01-W3",
+          "type": "W",
+          "group": "DG-AUDIT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Action sensible tracée."
+        },
+        {
+          "id": "R01-X1",
+          "type": "X",
+          "group": "DG-RECONCILIATION",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Rapprochement après restauration."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 2,
+        "W": 3,
+        "X": 1,
+        "cfp": 7
+      },
+      "completion_and_responses": "Ouvrir/reconnaître l'époque et le rapprochement, suspendre la purge et rendre son état ; refuser une ouverture incohérente. Le manifeste reçu indique les consommateurs attendus ; sa conservation hors de la base restaurée est une hypothèse externe explicite. Restaurer la sauvegarde technique ne reçoit pas un CFP fictif.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9"
+      ]
+    },
+    {
+      "id": "R02",
+      "label": "Clore le rapprochement des consommateurs",
+      "functional_user": "FU-OPERATOR",
+      "trigger": "L'opérateur autorisé demande la clôture du rapprochement après les redéclarations.",
+      "native_function_ids": [
+        "BC-003.01",
+        "BC-003.02",
+        "BC-004.01",
+        "BC-004.02",
+        "BC-004.03",
+        "BC-005.01",
+        "BC-005.02",
+        "BC-006.01",
+        "BC-006.02",
+        "BC-007.01",
+        "BC-007.02"
+      ],
+      "contract_function_ids": [
+        "F10"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H12",
+        "H15"
+      ],
+      "movements": [
+        {
+          "id": "R02-E1",
+          "type": "E",
+          "group": "DG-RECONCILIATION",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Rapprochement après restauration."
+        },
+        {
+          "id": "R02-R1",
+          "type": "R",
+          "group": "DG-RECONCILIATION",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Rapprochement après restauration."
+        },
+        {
+          "id": "R02-R2",
+          "type": "R",
+          "group": "DG-USAGE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Utilisation conservée déclarée."
+        },
+        {
+          "id": "R02-R3",
+          "type": "R",
+          "group": "DG-IDENTITY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Correspondance d'identité/version."
+        },
+        {
+          "id": "R02-W1",
+          "type": "W",
+          "group": "DG-RECONCILIATION",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Rapprochement après restauration."
+        },
+        {
+          "id": "R02-W2",
+          "type": "W",
+          "group": "DG-AUDIT",
+          "cfp": 1,
+          "description": "Rendre persistant le résultat fonctionnel : Action sensible tracée."
+        },
+        {
+          "id": "R02-X1",
+          "type": "X",
+          "group": "DG-RECONCILIATION",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Rapprochement après restauration."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 3,
+        "W": 2,
+        "X": 1,
+        "cfp": 7
+      },
+      "completion_and_responses": "Vérifier les consommateurs déclarés et les usages/version disponibles ; clore ou conserver un état incomplet/non rapproché, avec motif. La demande contient la preuve de fin de déclaration par consommateur dans le manifeste de rapprochement. Lever la suspension ne déclenche pas la purge et ne prouve pas des usages externes non déclarés.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9"
+      ]
+    },
+    {
+      "id": "R03",
+      "label": "Consulter l'état du rapprochement",
+      "functional_user": "FU-OPERATOR",
+      "trigger": "L'opérateur demande l'état courant et les usages restant à rapprocher.",
+      "native_function_ids": [
+        "BC-003.01",
+        "BC-003.02",
+        "BC-004.01",
+        "BC-004.02",
+        "BC-004.03",
+        "BC-005.01",
+        "BC-005.02",
+        "BC-006.01",
+        "BC-006.02",
+        "BC-007.01",
+        "BC-007.02"
+      ],
+      "contract_function_ids": [
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H12",
+        "H15"
+      ],
+      "movements": [
+        {
+          "id": "R03-E1",
+          "type": "E",
+          "group": "DG-RECONCILIATION",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Rapprochement après restauration."
+        },
+        {
+          "id": "R03-R1",
+          "type": "R",
+          "group": "DG-RECONCILIATION",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Rapprochement après restauration."
+        },
+        {
+          "id": "R03-R2",
+          "type": "R",
+          "group": "DG-USAGE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Utilisation conservée déclarée."
+        },
+        {
+          "id": "R03-X1",
+          "type": "X",
+          "group": "DG-RECONCILIATION",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Rapprochement après restauration."
+        },
+        {
+          "id": "R03-X2",
+          "type": "X",
+          "group": "DG-USAGE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Utilisation conservée déclarée."
+        },
+        {
+          "id": "R03-X3",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 2,
+        "W": 0,
+        "X": 3,
+        "cfp": 6
+      },
+      "completion_and_responses": "Restituer état, consommateurs attendus et usages en attente, ou refus/absence. Les données métier complètes des références ne sont pas dépliées.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "Q11",
+      "label": "Consulter une partie, ses rôles et son profil reçu",
+      "functional_user": "FU-READER",
+      "trigger": "Le lecteur demande des parties avec leurs rôles/profils par identité/version ou critères typés/date/contexte.",
+      "native_function_ids": [
+        "BC-003.01"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F05",
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "movements": [
+        {
+          "id": "Q11-E1",
+          "type": "E",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Partie identifiée."
+        },
+        {
+          "id": "Q11-R1",
+          "type": "R",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Partie identifiée."
+        },
+        {
+          "id": "Q11-R2",
+          "type": "R",
+          "group": "DG-ROLE",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Rôle ou relation contextualisée d'une partie."
+        },
+        {
+          "id": "Q11-R3",
+          "type": "R",
+          "group": "DG-CREDIT",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Profil de crédit reçu."
+        },
+        {
+          "id": "Q11-X1",
+          "type": "X",
+          "group": "DG-PARTY",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Partie identifiée."
+        },
+        {
+          "id": "Q11-X2",
+          "type": "X",
+          "group": "DG-ROLE",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Rôle ou relation contextualisée d'une partie."
+        },
+        {
+          "id": "Q11-X3",
+          "type": "X",
+          "group": "DG-CREDIT",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Profil de crédit reçu."
+        },
+        {
+          "id": "Q11-X4",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 3,
+        "W": 0,
+        "X": 4,
+        "cfp": 8
+      },
+      "completion_and_responses": "Cette demande peut porter sur une partie qui ne possède aucun accord : elle est indépendante de Q01. Restituer les groupes listés avec provenance/validité, ou expliquer refus, absence, ambiguïté/incohérence. Aucun Write métier.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/4",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    },
+    {
+      "id": "Q12",
+      "label": "Consulter matériaux et types de contenants",
+      "functional_user": "FU-READER",
+      "trigger": "Le lecteur demande des matériaux/types de contenants par identité/version ou critères typés/date/contexte.",
+      "native_function_ids": [
+        "BC-005.01",
+        "BC-005.02"
+      ],
+      "contract_function_ids": [
+        "F03",
+        "F07",
+        "F10",
+        "F11"
+      ],
+      "assumption_ids": [
+        "H01",
+        "H02",
+        "H03",
+        "H04",
+        "H05",
+        "H06"
+      ],
+      "movements": [
+        {
+          "id": "Q12-E1",
+          "type": "E",
+          "group": "DG-PACK-MATERIAL",
+          "cfp": 1,
+          "description": "Recevoir du déclencheur/utilisateur : Matériau ou type de contenant de référence."
+        },
+        {
+          "id": "Q12-R1",
+          "type": "R",
+          "group": "DG-PACK-MATERIAL",
+          "cfp": 1,
+          "description": "Lire depuis le stockage persistant : Matériau ou type de contenant de référence."
+        },
+        {
+          "id": "Q12-X1",
+          "type": "X",
+          "group": "DG-PACK-MATERIAL",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Matériau ou type de contenant de référence."
+        },
+        {
+          "id": "Q12-X2",
+          "type": "X",
+          "group": "DG-OUTCOME",
+          "cfp": 1,
+          "description": "Restituer à l'utilisateur fonctionnel : Message humain de confirmation/erreur."
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 1,
+        "W": 0,
+        "X": 2,
+        "cfp": 4
+      },
+      "completion_and_responses": "Cette demande peut porter sur une matière sans spécification associée : elle est indépendante de Q08. Restituer les groupes listés avec provenance/validité, ou expliquer refus, absence, ambiguïté/incohérence. Aucun Write métier.",
+      "status": "Processus complet dans le scénario hypothétique déclaré ; ni exigence approuvée ni mesure certifiée.",
+      "source_refs": [
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/2",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/6",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/9",
+        "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#/functional_contract/10"
+      ]
+    }
+  ],
+  "native_function_status": [
+    {
+      "id": "BC-002.01",
+      "process_refs": [
+        "I01",
+        "I02",
+        "A01",
+        "A02",
+        "D01"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    },
+    {
+      "id": "BC-002.02",
+      "process_refs": [
+        "I01",
+        "I02",
+        "A01",
+        "A02",
+        "D01"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    },
+    {
+      "id": "BC-002.03",
+      "process_refs": [
+        "I01",
+        "I02",
+        "A01",
+        "A02",
+        "D01"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    },
+    {
+      "id": "BC-003.01",
+      "process_refs": [
+        "Q01",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03",
+        "Q11"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    },
+    {
+      "id": "BC-003.02",
+      "process_refs": [
+        "Q01",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    },
+    {
+      "id": "BC-004.01",
+      "process_refs": [
+        "Q04",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    },
+    {
+      "id": "BC-004.02",
+      "process_refs": [
+        "Q05",
+        "Q06",
+        "Q07",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    },
+    {
+      "id": "BC-004.03",
+      "process_refs": [
+        "Q04",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    },
+    {
+      "id": "BC-005.01",
+      "process_refs": [
+        "Q08",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03",
+        "Q12"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    },
+    {
+      "id": "BC-005.02",
+      "process_refs": [
+        "Q08",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03",
+        "Q12"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    },
+    {
+      "id": "BC-006.01",
+      "process_refs": [
+        "Q02",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    },
+    {
+      "id": "BC-006.02",
+      "process_refs": [
+        "Q02",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    },
+    {
+      "id": "BC-007.01",
+      "process_refs": [
+        "Q09",
+        "Q10",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    },
+    {
+      "id": "BC-007.02",
+      "process_refs": [
+        "Q03",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03"
+      ],
+      "status": "Résultat natif touché par des processus conditionnels ; taille complète de la fonction non démontrée.",
+      "unmeasured_shared": [
+        "PURGE",
+        "RIGHTS",
+        "API-EQUIVALENCE",
+        "RECOVERY-MANIFEST"
+      ]
+    }
+  ],
+  "capability_status": [
+    {
+      "id": "master-data-ingestion",
+      "native_function_ids": [
+        "BC-002.01",
+        "BC-002.02",
+        "BC-002.03"
+      ],
+      "process_refs": [
+        "I01",
+        "I02",
+        "A01",
+        "A02",
+        "D01"
+      ],
+      "status": "Couverture documentaire et mouvements conditionnels élargis ; capacité entièrement mesurée : non.",
+      "complete_measured": false
+    },
+    {
+      "id": "cap-partner-agreement-reference-stewardship",
+      "native_function_ids": [
+        "BC-003.01",
+        "BC-003.02"
+      ],
+      "process_refs": [
+        "Q01",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03",
+        "Q11"
+      ],
+      "status": "Couverture documentaire et mouvements conditionnels élargis ; capacité entièrement mesurée : non.",
+      "complete_measured": false
+    },
+    {
+      "id": "cap-merchandise-reference-stewardship",
+      "native_function_ids": [
+        "BC-004.01",
+        "BC-004.02",
+        "BC-004.03"
+      ],
+      "process_refs": [
+        "Q04",
+        "Q05",
+        "Q06",
+        "Q07",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03"
+      ],
+      "status": "Couverture documentaire et mouvements conditionnels élargis ; capacité entièrement mesurée : non.",
+      "complete_measured": false
+    },
+    {
+      "id": "cap-packaging-reference-stewardship",
+      "native_function_ids": [
+        "BC-005.01",
+        "BC-005.02"
+      ],
+      "process_refs": [
+        "Q08",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03",
+        "Q12"
+      ],
+      "status": "Couverture documentaire et mouvements conditionnels élargis ; capacité entièrement mesurée : non.",
+      "complete_measured": false
+    },
+    {
+      "id": "cap-internal-supplies-reference-stewardship",
+      "native_function_ids": [
+        "BC-006.01",
+        "BC-006.02"
+      ],
+      "process_refs": [
+        "Q02",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03"
+      ],
+      "status": "Couverture documentaire et mouvements conditionnels élargis ; capacité entièrement mesurée : non.",
+      "complete_measured": false
+    },
+    {
+      "id": "cap-service-reference-stewardship",
+      "native_function_ids": [
+        "BC-007.01",
+        "BC-007.02"
+      ],
+      "process_refs": [
+        "Q03",
+        "Q09",
+        "Q10",
+        "I01",
+        "I02",
+        "U01",
+        "U02",
+        "E01",
+        "E02",
+        "C01",
+        "R01",
+        "R02",
+        "R03"
+      ],
+      "status": "Couverture documentaire et mouvements conditionnels élargis ; capacité entièrement mesurée : non.",
+      "complete_measured": false
+    }
+  ],
+  "historical_18": {
+    "path": "audits/2026-10-29-experimentation-estimation/iteration-07-cosmic.json",
+    "cfp": 18,
+    "processes": 3,
+    "preserved_as_history": true,
+    "added_to_current_total": false,
+    "comparison": [
+      {
+        "old": "CFP07-Q1",
+        "new": "Q01",
+        "old_cfp": 10,
+        "new_cfp": 10,
+        "note": "Mouvements conservés ; recherche/contextes autorisés sous H04."
+      },
+      {
+        "old": "CFP07-Q2",
+        "new": "Q02",
+        "old_cfp": 4,
+        "new_cfp": 4,
+        "note": "Mouvements conservés sous H04."
+      },
+      {
+        "old": "CFP07-Q3",
+        "new": "Q03",
+        "old_cfp": 4,
+        "new_cfp": 6,
+        "note": "Lire et restituer le livre en plus de la ligne : +2 CFP conditionnels ; le nouveau processus remplace le détail dans ce scénario."
+      }
+    ],
+    "rule": "Les anciens 18 CFP ne sont ni un additif ni un minimum garanti. Les 20 CFP des trois processus correspondants sont déjà inclus dans le nouveau total."
+  },
+  "sensitivity": [
+    {
+      "id": "V-PUBLICATION",
+      "assumption": "H04",
+      "change": "Chaque consultation exige la lecture d'un manifeste persistant distinct.",
+      "delta_cfp": 12,
+      "calculation": "1 Read supplémentaire × 12 consultations ; aucun total de famille déduit."
+    },
+    {
+      "id": "V-CHANGES-VALUES",
+      "assumption": "H14",
+      "change": "Le flux des changements doit également lire et restituer les valeurs canoniques complètes des références.",
+      "delta_cfp": 46,
+      "calculation": "23 Read + 23 Exit dans C01, à confirmer selon le contenu exigé."
+    },
+    {
+      "id": "V-QUERY-AUDIT",
+      "assumption": "H04",
+      "change": "Chaque consultation requiert aussi une trace métier de lecture persistée.",
+      "delta_cfp": 12,
+      "calculation": "1 Write AUDIT × 12 consultations, seulement si cette exigence existe."
+    },
+    {
+      "id": "V-CONSUMER-AUTH",
+      "assumption": "H02",
+      "change": "Des politiques/habilitations persistées doivent être lues au-delà du contexte et des groupes déjà lus.",
+      "delta_cfp": null,
+      "calculation": "Relever les processus concernés et compter les groupes distincts nécessaires. Ne pas ajouter arbitrairement un Read partout."
+    },
+    {
+      "id": "V-BUNDLE",
+      "assumption": "H07",
+      "change": "Plusieurs événements d'admission/publication indépendants sont exigés selon les sujets ou des notifications séparées sont imposées.",
+      "delta_cfp": null,
+      "calculation": "Recomposer les processus complets. Multiplier I01 ou ses 23 groupes par les sujets serait invalide."
+    },
+    {
+      "id": "V-OBJECTS",
+      "assumption": "H06",
+      "change": "Contextes, unités, conversions, paliers, éligibilités ou conditions sont des objets autonomes réellement lus/écrits/restiués.",
+      "delta_cfp": null,
+      "calculation": "Identifier ces objets et leurs mouvements par processus ; aucune fourchette numérique défendable sans exigences."
+    },
+    {
+      "id": "V-EXPORT-DETAIL",
+      "assumption": "H13",
+      "change": "Plusieurs exports ou formes d'export indépendantes ont des événements/résultats distincts.",
+      "delta_cfp": null,
+      "calculation": "Ne pas répéter E01 seulement parce qu'il y a plusieurs formats, fichiers ou canaux ; spécifier le besoin."
+    }
+  ],
+  "remaining_checklist": [
+    {
+      "id": "PURGE",
+      "contract": [
+        "F03",
+        "F10"
+      ],
+      "required": true,
+      "measured": false,
+      "blocking_for_full_size": true,
+      "missing": "Déclencheur manuel/temps ; unité de purge ; groupes pour délai/politique, liens internes protégés et confirmation d'export ; résultat/rapport de refus ou succès et trace ; interaction avec rapprochement incomplet.",
+      "why_not_counted": "La simple suppression de versions ne forme pas un processus complet. Plusieurs données nécessaires sont connues, mais l'unité de décision et le résultat fonctionnel d'une purge restent indéterminés.",
+      "minimum_to_resolve": "Un exemple complet de demande/échéance de purge, portée, conditions et réponses ; pas un plan technique exhaustif."
+    },
+    {
+      "id": "RIGHTS",
+      "contract": [
+        "F10",
+        "F11"
+      ],
+      "required": true,
+      "measured": false,
+      "blocking_for_full_size": true,
+      "missing": "Qui crée/modifie/révoque les habilitations et périmètres ; données conservées par le Core ou IdP ; événements de connexion/session si fonctionnels.",
+      "why_not_counted": "H02 suppose le contexte disponible pour compter les autres processus ; elle ne démontre pas la taille des fonctions qui le produisent.",
+      "minimum_to_resolve": "Frontière du fournisseur d'identité et contrat d'administration des rôles/portées."
+    },
+    {
+      "id": "AUDIT-ACCESS",
+      "contract": [
+        "F10",
+        "F11"
+      ],
+      "required": "Audit des actions sensibles explicite ; consultation/export de cet audit à confirmer.",
+      "measured": false,
+      "blocking_for_full_size": true,
+      "missing": "Forme d'accès au journal sensible, filtres, destinataires et règles de conservation/purge du journal.",
+      "why_not_counted": "Les Writes AUDIT sont comptés ; le contrat ne décrit pas un processus complet de consultation/maintenance du journal.",
+      "minimum_to_resolve": "Confirmer si un accès utilisateur à cet audit fait partie du produit et son résultat."
+    },
+    {
+      "id": "API-EQUIVALENCE",
+      "contract": [
+        "F10",
+        "F11"
+      ],
+      "required": true,
+      "measured": "Sous H05 seulement",
+      "blocking_for_full_size": true,
+      "missing": "Valider que les API et parcours humains correspondent aux mêmes événements et objets, ou décrire leurs résultats machine propres.",
+      "why_not_counted": "Ne pas transformer automatiquement douze consultations humaines en douze API additionnelles ni supposer leur équivalence prouvée.",
+      "minimum_to_resolve": "Un exemple des contrats de requête/réponse par classe de résultat, avec cas refus/ambiguïté."
+    },
+    {
+      "id": "RECOVERY-MANIFEST",
+      "contract": [
+        "F10",
+        "amendment"
+      ],
+      "required": true,
+      "measured": "R01/R02/R03/U01 sous H12/H15",
+      "blocking_for_full_size": true,
+      "missing": "Autorité durable sur la liste des consommateurs, transport de leur fin de redéclaration et preuve que tous les usages disponibles ont été fournis.",
+      "why_not_counted": "Le manifeste proposé permet un compte conditionnel mais n'est pas une exigence déjà approuvée ; si chaque consommateur notifie directement sa clôture, un autre processus est nécessaire.",
+      "minimum_to_resolve": "Valider le protocole externe de rapprochement et les responsabilités de l'opérateur/consommateur."
+    },
+    {
+      "id": "PROCESS-DECOMPOSITION",
+      "contract": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F11"
+      ],
+      "required": true,
+      "measured": "Sous H07-H11",
+      "blocking_for_full_size": true,
+      "missing": "Confirmer unité de contribution/publication, distinction admission/rejeu, édition des contrats/autorités et éventuelle publication manuelle.",
+      "why_not_counted": "Les processus ont été complétés par hypothèses explicites pour dépasser réellement les consultations ; un catalogue d'API ne prouverait pas leur indépendance.",
+      "minimum_to_resolve": "Revue courte d'un parcours complet accepté, d'un conflit, d'un retrait et d'une reprise."
+    },
+    {
+      "id": "NONFUNCTIONAL",
+      "contract": [
+        "service_scenario"
+      ],
+      "required": true,
+      "measured": false,
+      "blocking_for_full_size": false,
+      "missing": "Aucune absence de CFP n'exclut les travaux de performance, sécurité, disponibilité, sauvegarde, restauration, observabilité, outillage ou QA.",
+      "why_not_counted": "Une garantie de latence/disponibilité/recovery n'est pas un flux inventé ; les fonctions qui la réalisent peuvent être dimensionnées séparément une fois spécifiées. Ces efforts ne sont pas représentés par une conversion universelle.",
+      "minimum_to_resolve": "Conserver un dimensionnement indépendant de ces garanties ; ne pas prétendre que 1 CFP les couvre."
+    }
+  ],
+  "result": {
+    "conditional_expanded_subset_cfp": 350,
+    "movements": {
+      "E": 51,
+      "R": 137,
+      "W": 75,
+      "X": 87,
+      "cfp": 350
+    },
+    "functional_processes": 25,
+    "reference_data_group_types": 23,
+    "complete_capabilities_measured": 0,
+    "unique_capabilities_touched": 6,
+    "native_functions_with_conditional_processes": 14,
+    "native_functions_total": 14,
+    "full_family_cfp": null,
+    "full_core_cfp": null,
+    "validated_cfp": null,
+    "coverage_ratio": null,
+    "effort_jh": null,
+    "cfp_to_loc": null,
+    "cfp_to_jh": null,
+    "interpretation": "Sous-total d'un scénario hypothétique nettement élargi, comprenant des processus d'entrée/écriture/reprise/consommation. Ce n'est ni la taille complète des six capacités, ni une borne basse/haute certifiée, ni 100 % de couverture parce que 14 fonctions sont reliées.",
+    "aggregation": "Somme unique des 25 processus décrits dans la même frontière ; les références d'un processus partagé dans plusieurs BC ne sont pas additionnées. Les 18 CFP historiques ne sont pas ajoutés.",
+    "measurement_bundles": [
+      {
+        "id": "READS",
+        "label": "Douze consultations de référence",
+        "cfp": 80
+      },
+      {
+        "id": "INGESTION",
+        "label": "Admission, réexamen et diagnostic",
+        "cfp": 158
+      },
+      {
+        "id": "SOURCE-ADMIN",
+        "label": "Configuration et consultation des sources",
+        "cfp": 19
+      },
+      {
+        "id": "CONSUMPTION",
+        "label": "Usages, export et changements",
+        "cfp": 73
+      },
+      {
+        "id": "RECOVERY",
+        "label": "Ouverture, clôture et statut du rapprochement",
+        "cfp": 20
+      }
+    ]
+  },
+  "verdict": {
+    "recommended_decision": "modifier",
+    "stop": "Arrêter la recherche d'une convergence en JH par répétition de chiffrages COSMIC sur ces seules exigences ; aucune neuvième boucle automatique.",
+    "keep": "Conserver ce compte comme contrôle indépendant des objets, des échanges et des oublis de périmètre. L'extension réussit à rendre explicites réception/rejeu, cinq vues métier, usages et rapprochement.",
+    "condition_to_continue": "Une poursuite utile exige une décision sur les quelques hypothèses de frontière/protocole et une référence empirique d'effort homogène si l'objectif est d'estimer des JH. Une nouvelle génération de mouvements ou un facteur CFP→LOC→JH ne fournit pas cette preuve.",
+    "limit": "Des processus de taille identique peuvent imposer des contrôles, algorithmes, garanties et efforts très différents. La mesure fonctionnelle et l'effort d'ingénierie ne sont pas interchangeables."
+  },
+  "input_sha256": {
+    "audits/2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json": "4ff47d15b241859eea6bcc50c5c882478338ae31d8c44bb1192901066d81dbb3",
+    "audits/2026-10-29-experimentation-estimation/iteration-07-perimetre.json": "0a6f8f0792d95c2dd6df00434bc10b75bb1dff9c171cf88e1be7b7e0052cc826",
+    "audits/2026-10-29-experimentation-estimation/iteration-07-cosmic.json": "30e02c00a50469532a8da0423e4419949306f79e68c385af56f2668eb1748b7b",
+    "source/methode-evaluation-core.yaml": "2d52431940b8c41daefe72983950cea5e242d266626dabcbcf7604946f8280f3",
+    "source/statut-evaluation.yaml": "aa51318fed77d0c96d79a3f9e57b35792eae3d8fb161c1f868a2d911af5818d6"
+  },
+  "mechanical_verification": {
+    "json_parse": true,
+    "movement_count": 350,
+    "processes": 25,
+    "groups_exist": true,
+    "process_counts_match": true,
+    "unique_movements": true,
+    "all_processes_complete_structure": true,
+    "six_capabilities": true,
+    "fourteen_native_functions": true,
+    "totals_match": true
+  }
+}
