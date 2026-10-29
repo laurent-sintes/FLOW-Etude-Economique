@@ -2,12 +2,12 @@ import {useEffect,useState} from 'react';
 import type {ReactNode} from 'react';
 import {SourceLink} from './components';
 import {isModelDataReference} from './documentVisibility';
-import {CoreEvaluationResults} from './CoreEvaluationPage';
+import {CoreEvaluationResults,CoreEvaluationTrace} from './CoreEvaluationPage';
 import {MethodText} from './MethodDocument';
 import {request,useStudy,useFormat,type Data} from './context';
 import './economicEvaluations.css';
 
-type EconomicOption={stack:string;name:string;mode:'Make'|'Buy';selection:null|{budget_eur_ht:number;months:number;source:string};integration:{budget_eur_ht:number;months:number;source:string};annual:{items:Record<string,number|null>;total_eur_ht:number;source:string}};
+type EconomicOption={stack:string;name:string;mode:'Make'|'Buy';core:Data|null;selection:null|{budget_eur_ht:number;months:number;source:string};integration:{budget_eur_ht:number;months:number;source:string;detail:Data[]};annual:{items:Record<string,number|null>;total_eur_ht:number;source:string;breakdown:Data[]}};
 type EconomicReading={model_version:string;editorial:Data;options:EconomicOption[];price_convention:{text:string;source:string}};
 
 function ReadingLinks({links}:{links:{href:string;label:string}[]}){
@@ -27,6 +27,26 @@ function EvidenceLinks({links}:{links:{path:string;label:string}[]}){
  return <ul className="economic-reading-links">{visible.map(link=><li key={link.path}><SourceLink path={link.path}>{link.label}</SourceLink></li>)}</ul>;
 }
 
+
+function IntegrationTrace({reading}:{reading:EconomicReading}){
+ const {amount,n}=useFormat(),L=reading.editorial.labels,S=reading.editorial.sections.integration;
+ const [stack,setStack]=useState(reading.options[0].stack),option=reading.options.find(row=>row.stack===stack)||reading.options[0];
+ return <div className="economic-trace"><h3>{S.detail_title}</h3><p><MethodText>{S.detail_note}</MethodText></p>
+  <label className="economic-trace-select">{L.choose_option}<select value={option.stack} onChange={event=>setStack(event.target.value)}>{reading.options.map(row=><option key={row.stack} value={row.stack}>{row.name}</option>)}</select></label>
+  <div className="core-method-table-scroll" tabIndex={0} role="region" aria-label={S.detail_title}><table className="core-method-table economic-trace-table"><caption>{S.detail_title+' · '+option.name}</caption><thead><tr><th scope="col">{L.annual_item}</th><th scope="col">{L.amount}</th><th scope="col">{L.period}</th></tr></thead><tbody>{option.integration.detail.map(row=><tr key={row.id}><th scope="row">{row.label}</th><td className="core-method-number">{amount(row.amount)}</td><td>{L.month_prefix} {n(row.start,0)}–{n(row.end,0)}</td></tr>)}</tbody><tfoot><tr><th scope="row">{L.total}</th><td className="core-method-number">{amount(option.integration.budget_eur_ht)}</td><td/></tr></tfoot></table></div>
+ </div>;
+}
+
+function AnnualTrace({reading}:{reading:EconomicReading}){
+ const {annualAmount}=useFormat(),L=reading.editorial.labels,S=reading.editorial.sections.annual;
+ const [stack,setStack]=useState(reading.options[0].stack),option=reading.options.find(row=>row.stack===stack)||reading.options[0];
+ return <div className="economic-trace"><h3>{S.detail_title}</h3><p><MethodText>{S.detail_note}</MethodText></p>
+  <label className="economic-trace-select">{L.choose_option}<select value={option.stack} onChange={event=>setStack(event.target.value)}>{reading.options.map(row=><option key={row.stack} value={row.stack}>{row.name}</option>)}</select></label>
+  <div className="economic-annual-breakdown">{option.annual.breakdown.filter(group=>group.items.length).map(group=><section key={group.id}><h4>{group.titre}</h4><p>{group.explication}</p><dl className="economic-line-values">{group.items.map((row:Data)=><div key={row.id}><dt>{row.nom}</dt><dd>{annualAmount(row.montant)}</dd></div>)}</dl><p className="economic-group-total"><strong>{L.total} : {annualAmount(group.total)}</strong></p></section>)}</div>
+  <p className="economic-annual-reconciliation"><strong>{L.annual_total} : {annualAmount(option.annual.total_eur_ht)}</strong></p>
+ </div>;
+}
+
 function EconomicReadingContent({reading}:{reading:EconomicReading}){
  const {data}=useStudy(),{amount,annualAmount,n}=useFormat();
  const E=reading.editorial,L=E.labels,S=E.sections,R=data.ui.essential.core_results;
@@ -42,7 +62,7 @@ function EconomicReadingContent({reading}:{reading:EconomicReading}){
  return <div className="essential-page core-method-page economic-evaluations-page">
   <nav className="core-method-navigation" aria-label={E.navigation_label}><h2>{E.navigation_label}</h2><ol>{chapters.map(chapter=><li key={chapter.id}><button type="button" aria-controls={headingId(chapter.id)} onClick={()=>goTo(chapter.id)}>{chapter.title}</button></li>)}</ol></nav>
   <section className="economic-introduction" aria-labelledby="economic-evaluation-intro"><h2 id="economic-evaluation-intro">{E.intro.title}</h2><p className="core-method-lead"><MethodText>{E.intro.text}</MethodText></p><ApplicationNote section={note('scope')}/><div className="economic-price-convention"><h3>{L.price_convention}</h3><p><MethodText>{reading.price_convention.text}</MethodText></p><SourceLink path={reading.price_convention.source}>{L.source}</SourceLink></div></section>
-  {chapter('core',<CoreEvaluationResults status={application.status}/>)}
+  {chapter('core',<><CoreEvaluationResults status={application.status}/><CoreEvaluationTrace options={reading.options} editorial={E}/></>)}
   {chapter('selection',<>
    <p className="core-method-lead"><MethodText>{S.selection.lead}</MethodText></p>
    <div className="core-method-table-scroll" role="region" tabIndex={0} aria-label={S.selection.caption}><table className="core-method-table economic-evaluation-table" data-evaluation="selection"><caption>{S.selection.caption}</caption><thead><tr><th scope="col">{L.option}</th><th scope="col">{L.budget}</th><th scope="col">{L.duration}</th></tr></thead><tbody>{reading.options.filter(option=>option.selection!==null).map(option=><tr key={option.stack} data-option={option.stack}><th scope="row">{option.name}</th><td className="core-method-number">{amount(option.selection!.budget_eur_ht)}</td><td className="core-method-number">{n(option.selection!.months,0)} {L.months}</td></tr>)}</tbody></table></div>
@@ -52,13 +72,13 @@ function EconomicReadingContent({reading}:{reading:EconomicReading}){
    <p className="core-method-lead"><MethodText>{S.integration.lead}</MethodText></p>
    <div className="core-method-table-scroll" role="region" tabIndex={0} aria-label={S.integration.caption}><table className="core-method-table economic-evaluation-table" data-evaluation="integration"><caption>{S.integration.caption}</caption><thead><tr><th scope="col">{L.option}</th><th scope="col">{L.budget}</th><th scope="col">{L.duration}</th>{integrationHasSources&&<th scope="col">{L.source}</th>}</tr></thead><tbody>{reading.options.map(option=><tr key={option.stack} data-option={option.stack}><th scope="row">{option.name}</th><td className="core-method-number">{amount(option.integration.budget_eur_ht)}</td><td className="core-method-number">{n(option.integration.months,0)} {L.months}</td>{integrationHasSources&&<td><SourceLink path={option.integration.source}>{L.source}</SourceLink></td>}</tr>)}</tbody></table></div>
    <dl className="economic-basis-list">{['Make',...reading.options.filter(option=>option.mode==='Buy').map(option=>option.stack)].map(key=><div key={key}><dt>{key==='Make'?key:reading.options.find(option=>option.stack===key)?.name}</dt><dd><MethodText>{S.integration.explanations[key]}</MethodText></dd></div>)}</dl>
-   <p className="economic-reading-note"><MethodText>{S.integration.note}</MethodText></p><ApplicationNote section={note('calendar')}/><EvidenceLinks links={S.integration.sources}/>
+   <p className="economic-reading-note"><MethodText>{S.integration.note}</MethodText></p><ApplicationNote section={note('calendar')}/><EvidenceLinks links={S.integration.sources}/><IntegrationTrace reading={reading}/>
   </>)}
   {chapter('annual',<>
    <p className="core-method-lead"><MethodText>{S.annual.lead}</MethodText></p>
    <div className="core-method-table-scroll" role="region" tabIndex={0} aria-label={S.annual.caption}><table className="core-method-table economic-annual-table" data-evaluation="annual"><caption>{S.annual.caption}</caption><thead><tr><th scope="col">{L.annual_item}</th>{reading.options.map(option=><th key={option.stack} scope="col" data-option={option.stack}>{option.name}</th>)}</tr></thead><tbody>{S.annual.rows.map((row:Data)=><tr key={row.id} data-post={row.id}><th scope="row">{row.label}<span className="economic-item-explanation">{row.explanation}</span></th>{reading.options.map(option=><td className="core-method-number" key={option.stack} data-option={option.stack}>{annualValue(option.annual.items[row.id])}</td>)}</tr>)}</tbody><tfoot><tr data-post="total"><th scope="row">{L.annual_total}</th>{reading.options.map(option=><td key={option.stack} className="core-method-number" data-option={option.stack}>{annualAmount(option.annual.total_eur_ht)}</td>)}</tr></tfoot></table></div>
    <p className="economic-reading-note"><MethodText>{S.annual.note}</MethodText></p>
-   {annualSources.length>0&&<div className="economic-annual-sources"><h3>{L.annual_sources}</h3><EvidenceLinks links={annualSources}/></div>}<EvidenceLinks links={S.annual.sources}/>
+   {annualSources.length>0&&<div className="economic-annual-sources"><h3>{L.annual_sources}</h3><EvidenceLinks links={annualSources}/></div>}<EvidenceLinks links={S.annual.sources}/><AnnualTrace reading={reading}/>
   </>)}
   {chapter('limits',<><p className="core-method-lead"><MethodText>{S.limits.lead}</MethodText></p><ApplicationNote section={note('maturity')}/><ReadingLinks links={E.links}/></>)}
  </div>;

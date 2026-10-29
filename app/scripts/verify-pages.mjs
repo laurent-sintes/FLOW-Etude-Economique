@@ -214,7 +214,7 @@ try{
   assert.equal(await page.locator('.synvance-provider').count(),1,'Each supplier page must show only its own detail.');
   assert.equal(await page.locator(`.synvance-provider[data-provider="${provider}"]`).count(),1);
   assert.equal(await page.locator('.synvance-document').count(),0,'Original document cards belong to the overview.');
-  const back=page.locator('main a[href="#synvance"]').first();await back.click();
+  const back=page.locator('main a[href="#synvance"]:visible').first();await back.click();
   await page.waitForFunction(()=>location.hash==='#synvance');await route('synvance');
   assert.equal(await page.locator('.synvance-provider').count(),0);
  }
@@ -241,9 +241,12 @@ try{
  const caseName=oracle.ui_case||Object.keys(oracle.cases).find(name=>name!=='reference');
  const personal=oracle.cases[caseName],base=oracle.cases.reference.parameters;
  await route('simuler');
+ assert.equal(await page.locator('.essential-comparison .essential-option').count(),data.baseline.options.length,'All options must be visible without filtering.');
+ assert.equal(await page.locator('.essential-simulation details,.essential-simulation [aria-expanded]').count(),0,'The economic workspace must read continuously.');
+ for(const spec of data.ui.parameters.common)assert.ok(await page.locator(`[id="simulation-common.${spec.key}"]`).isVisible());
  for(const [key,value] of Object.entries(personal.parameters.common)){
   if(value===base.common[key])continue;
-  const toggle=page.locator('.essential-common-toggle');if(await toggle.getAttribute('aria-expanded')==='false')await toggle.click();
+  assert.equal(await page.locator('.essential-common-toggle').count(),0,'Common hypotheses must remain visible without disclosure.');
   const spec=data.ui.parameters.common.find(row=>row.key===key);
   await page.locator(`[id="simulation-common.${key}"]`).fill(String(value/spec.scale));
  }

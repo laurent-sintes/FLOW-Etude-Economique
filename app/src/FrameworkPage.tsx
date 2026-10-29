@@ -45,7 +45,7 @@ function ParameterUsage({personal,status}:{personal?:Data;status?:string}){
 function ProofLinks({items}:{items:Data[]}){
  const unique=[...new Map<string,Data>(items.filter(item=>!isModelDataReference(item.path)).map(item=>[item.path,item])).values()];
  if(!unique.length)return null;
- return <ul className="framework-proof-links">{unique.map(item=><li key={item.path}><SourceLink path={item.path}>{item.title}</SourceLink></li>)}</ul>;
+ return <ul className="framework-proof-links">{unique.map(item=><li key={item.path}><SourceLink path={item.path}>{item.title}</SourceLink>{item.locator&&<small>{item.locator}</small>}</li>)}</ul>;
 }
 
 function ApplicationHypothesis({id}:{id:string}){
@@ -95,14 +95,14 @@ export function FrameworkPage(){
  const otherValue=(row:Data)=>row.unit==='annual'?annualAmount(row.value):n(row.value,0)+' '+T['other_unit_'+row.unit];
  const otherCard=(row:Data)=><article className="framework-fact" key={row.key}>
   <header><h3>{T.other_rows[row.key].label}</h3><strong className="framework-value">{otherValue(row)}</strong></header>
-  <p><MethodText>{T.other_rows[row.key].effect}</MethodText></p>
+  <p><MethodText>{row.method}</MethodText></p>
   <SourceLink path={row.source}>{T.source_method}</SourceLink>
  </article>;
  const retainedMeans=F.other.filter((row:Data)=>row.status==='retained'&&row.unit!=='daily');
  const replacedMeans=F.other.filter((row:Data)=>row.status==='replaced');
  const means=(rows:Data[])=><div className="framework-means">{groupByText(rows,'method').map(group=><article className="framework-means-group" key={group.items.map(row=>row.key).join('-')}>
   <dl className="framework-means-values">{group.items.map(row=><div key={row.key}><dt>{T.other_rows[row.key].label}</dt><dd className="framework-value">{otherValue(row)}</dd></div>)}</dl>
-  {[...new Set<string>(group.items.map(row=>T.other_rows[row.key].effect))].map(effect=><p key={effect}><MethodText>{effect}</MethodText></p>)}
+  <p className="framework-source-text"><MethodText>{group.text}</MethodText></p>
   {groupByText(group.items.map(row=>({...row,personalKey:JSON.stringify(row.personal)})),'personalKey').map(usage=><ParameterUsage key={usage.text} personal={usage.items[0].personal} status={usage.items[0].status==='replaced'?'replaced':'active'}/>)}
   <SourceLink path={group.items[0].source}>{T.source_method}</SourceLink>
  </article>)}</div>;
@@ -115,12 +115,11 @@ export function FrameworkPage(){
   <section className="core-method-introduction" aria-labelledby="framework-intro-title">
    <div className="core-method-principle"><h2 id="framework-intro-title">{T.intro_title}</h2><p><MethodText>{T.intro_text}</MethodText></p></div>
    <p className="framework-reference"><MethodText>{T.reference_note}</MethodText></p>
-   <p className="framework-reference"><strong>{T.usage_title} : </strong><MethodText>{T.usage_note}</MethodText></p>
-   <div className="framework-links">{T.method_links.map((link:Data)=><a key={link.href} href={link.href}>{link.label}</a>)}</div>
+   <div className="framework-retained-choices"><h3>{T.choices_title}</h3><ul className="core-method-bullets">{T.choices.map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ul></div>
+   <p className="framework-reference framework-reading-key"><strong>{T.usage_title} : </strong><MethodText>{T.usage_note}</MethodText></p>
   </section>
   <ol className="core-method-sections">
    <ParameterSection id="gains" title={T.ia_title} lead={T.ia_note}>
-    <ParameterUsage/>
     <Formulas items={[T.ia_formula]}/>
     <ApplicationHypothesis id="productivity"/>
     <div className="framework-group">
@@ -144,7 +143,10 @@ export function FrameworkPage(){
    </ParameterSection>
 
    <ParameterSection id="tarifs" title={T.tariffs_title} lead={T.tariffs_note}>
-    <ParameterUsage/>
+    <ParameterTable caption={T.tariffs_caption}><thead><tr><th scope="col">{T.tariff_profile}</th>{F.tariffs.map((option:Data)=><th scope="col" key={option.key}>{option.name}</th>)}</tr></thead>
+     <tbody>{roles.map(role=><tr key={role.label}><th scope="row">{role.label}</th>{F.tariffs.map((option:Data)=><td className="framework-price" key={option.key}>{dailyRate(price(option,role.key).value)}</td>)}</tr>)}</tbody>
+    </ParameterTable>
+    <Formulas items={T.tariff_formulas}/>
     <div className="framework-prose-group framework-tariff-context"><h3>{T.tariff_context_title}</h3>{contextGroups.map(group=>{
      const context=group.items[0].context;
      return <div key={group.text}>{contextGroups.length>1&&<h4>{group.items.map(option=>option.name).join(' · ')}</h4>}
@@ -152,10 +154,6 @@ export function FrameworkPage(){
       <p>{context.profile}</p><p>{context.geography}</p>
      </div>;
     })}</div>
-    <ParameterTable caption={T.tariffs_caption}><thead><tr><th scope="col">{T.tariff_profile}</th>{F.tariffs.map((option:Data)=><th scope="col" key={option.key}>{option.name}</th>)}</tr></thead>
-     <tbody>{roles.map(role=><tr key={role.label}><th scope="row">{role.label}</th>{F.tariffs.map((option:Data)=><td className="framework-price" key={option.key}>{dailyRate(price(option,role.key).value)}</td>)}</tr>)}</tbody>
-    </ParameterTable>
-    <Formulas items={T.tariff_formulas}/>
     <p><MethodText>{T.tariff_scope}</MethodText></p>
     <p><MethodText>{T.tariff_influence}</MethodText></p>
     <ul className="core-method-bullets">{roles.map(role=>role.note&&<li key={role.label}><strong>{role.label} : </strong><MethodText>{role.note}</MethodText></li>)}</ul>
@@ -163,9 +161,11 @@ export function FrameworkPage(){
      <dl className="framework-text-list">{groupByText(F.tariffs,'rule').map(group=><div key={group.text}><dt>{group.items.map(option=>option.name).join(' · ')}</dt><dd><MethodText>{group.text}</MethodText></dd></div>)}</dl>
     </div>
     <div className="framework-prose-group"><h3>{T.tariff_methods_title}</h3>
-     <dl className="framework-tariff-methods">{F.tariffs.map((option:Data)=><div key={option.key}>
-      <dt>{option.name}</dt><dd><p><MethodText>{price(option,'expert').method}</MethodText></p><SourceLink path={option.source}>{T.tariff_full_method}</SourceLink></dd>
-     </div>)}</dl>
+     <div className="framework-tariff-profiles">{[{key:'expert',label:T.expert},{key:'qa',label:T.qa},{key:'architecte',label:T.architect_title}].map(profile=><section key={profile.key} className="framework-tariff-profile">
+      <h4>{profile.label}</h4><dl className="framework-tariff-methods">{groupByText(F.tariffs.map((option:Data)=>({...option,method:price(option,profile.key).method})),'method').map(group=><div key={group.text}>
+       <dt>{group.items.map(option=>option.name).join(' · ')}</dt><dd><MethodText>{group.text}</MethodText></dd>
+      </div>)}</dl>
+     </section>)}</div>
      <p><MethodText>{T.tariff_secondary_note}</MethodText></p>
      <ProofLinks items={tariffEvidence}/>
     </div>
@@ -176,7 +176,7 @@ export function FrameworkPage(){
      {F.other.filter((row:Data)=>row.status==='retained'&&row.unit==='daily').map(otherCard)}
      {[{key:'frontend',title:T.frontend_title,note:T.frontend_note},{key:'support',title:T.support_title,note:T.support_note}].map(row=><article className="framework-fact" key={row.key}>
       <header><h3>{row.title}</h3><strong className="framework-value">{dailyRate(F[row.key].value)}</strong></header>
-      <p><MethodText>{row.note}</MethodText></p><SourceLink path={F[row.key].source}>{T.source_method}</SourceLink>
+      <p><MethodText>{F[row.key].method}</MethodText></p><SourceLink path={F[row.key].source}>{T.source_method}</SourceLink>
      </article>)}
     </div>
     <div className="framework-specialist"><h3>{T.specialist_title}</h3>
@@ -190,7 +190,6 @@ export function FrameworkPage(){
    </ParameterSection>
 
    <ParameterSection id="pilotage" title={T.pilotage_title} lead={T.pilotage_note}>
-    <ParameterUsage/>
     <Formulas items={[T.pilotage_formula]}/>
     <p><MethodText>{T.pilotage_scope}</MethodText></p>
     <ParameterTable caption={T.pilotage_caption}><thead><tr>{T.pilotage_columns.map((label:string)=><th scope="col" key={label}>{label}</th>)}</tr></thead><tbody>{pilotage.map(row=><tr key={row.key}>
@@ -232,7 +231,6 @@ export function FrameworkPage(){
    </ParameterSection>
 
    <ParameterSection id="build-run" title={T.activity_allocation_title} lead={T.activity_allocation_note}>
-    <ParameterUsage/>
     <Formulas items={[T.activity_formula]}/>
     <div className="framework-activity-allocations">{activityAllocations.map((row:Data)=><article className="framework-fact" key={row.key}>
      <h3>{row.title}</h3><CostActivityTags tags={row.activity_tags} allocation={row.activity_allocation}/><p>{row.activity_allocation.basis}</p>
@@ -251,7 +249,7 @@ export function FrameworkPage(){
     </div>}
    </ParameterSection>
   </ol>
-  <div className="framework-links"><a className="text-button" href="#simuler">{T.simulate_action} →</a></div>
+  <div className="framework-links">{T.method_links.map((link:Data)=><a key={link.href} href={link.href}>{link.label}</a>)}<a className="text-button" href="#simuler">{T.simulate_action} →</a></div>
   <a className="text-button essential-structure-next" href="#evaluation-core">{T.next} →</a>
  </div>;
 }

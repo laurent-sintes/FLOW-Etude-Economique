@@ -39,6 +39,25 @@ class MarketReadingTests(unittest.TestCase):
                 self.assertEqual(observation['evidence'],
                                  self.market['echelle_qualite_prix_source'][original['qualite_prix_source']])
 
+    def test_instruction_scope_and_normalization_provenance_remain_separate_from_prices(self):
+        from market_instruction import build_market_instruction
+        market = deepcopy(self.market)
+        market['instruction'] = build_market_instruction(market)
+        with patch.object(Path, 'read_bytes', side_effect=AssertionError('no source reread')):
+            reading = build_market_reading(market)
+        self.assertEqual(reading['instruction'], market['instruction'])
+        self.assertEqual(reading['comparison_scope'], market['reperes_build_core']['etude_oss']['perimetre'])
+        self.assertEqual(reading['monetary_sources'], market['sources_monetaires'])
+        self.assertEqual(reading['effort']['lignes'], market['reperes_build_core']['lignes'])
+        for source, shown in zip(market['references'], reading['projects']):
+            self.assertEqual(shown['review_date'], source['lecture_flow']['date_revue'])
+            self.assertEqual(shown['price'].get('reserve'), source['cout_publie'].get('reserve'))
+            self.assertEqual(shown['normalized'], source['normalisation_2026'])
+        reading['instruction']['qualifications'].clear()
+        self.assertTrue(market['instruction']['qualifications'])
+        reading['monetary_sources'].clear()
+        self.assertTrue(market['sources_monetaires'])
+
     def test_projection_works_from_frozen_content_without_disk_reads_or_shared_mutations(self):
         source = deepcopy(self.market)
         frozen = json.loads(json.dumps(source))

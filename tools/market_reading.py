@@ -26,6 +26,7 @@ def build_market_reading(market):
             source_ref=source_ref,
             sources=deepcopy(reference['sources']),
             proofs=deepcopy(reading['preuves']),
+            review_date=reading['date_revue'],
         )
         price = deepcopy(reference['cout_publie'])
         projects.append(dict(
@@ -49,6 +50,17 @@ def build_market_reading(market):
             ) for observation in reading['observations']],
         ))
     return dict(projects=projects, services=services,
+                instruction=deepcopy(market.get('instruction')),
+                comparison_scope=deepcopy(market['reperes_build_core']['etude_oss']['perimetre']),
+                effort={key:deepcopy(market['reperes_build_core'][key])
+                        for key in ('introduction','colonnes','lignes','conclusion')},
+                effort_sources=[market['dependances']['preuve_build_core'],market['dependances']['revue_referentiel']],
+                product_observations={key:dict(date=fiche['date_observation'],
+                    observations=deepcopy(fiche['evaluations']))
+                    for key,fiche in market['reperes_build_core']['fiches_produit'].items()},
+                review_source=market['dependances']['revue_referentiel'],
+                normalization_context=market['conventions']['prix_2026'],
+                monetary_sources=deepcopy(market['sources_monetaires']),
                 normalization=market['conventions']['normalisation'],
                 transposition=market['presentation_references']['transposition_note'],
                 operations_note=market['presentation_references']['observations_note'],

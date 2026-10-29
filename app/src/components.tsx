@@ -46,6 +46,7 @@ export function DocumentViewer({path,onClose}:{path:string;onClose:()=>void}){
   {doc&&isFull&&hasFragment&&<p>{F.complete}</p>}
   {doc?.content&&(doc.format==='.md'?<article className="markdown"><Markdown remarkPlugins={[remarkGfm]} components={{a:({href,children})=>{
    if(!href)return <span>{children}</span>;
+   if(href.startsWith('#')&&data.ui.essential.nav.some((route:Data)=>'#'+route.id===href))return <a href={href} onClick={onClose}>{children}</a>;
    const relative=new URL(href,'http://reference/'+doc.path);
    const target=/^https?:/.test(href)?href:decodeURIComponent(relative.pathname.slice(1))+relative.hash;
    return isModelDataReference(target)?<span>{children}</span>:<SourceLink path={target}>{children}</SourceLink>;

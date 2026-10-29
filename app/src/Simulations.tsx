@@ -6,6 +6,8 @@ import {useStudy,useFormat,request,type Data,type Parameters,type Projection,typ
 import {Disclosure,Drawer,Metric,Notice,Section,SourceLink} from './components';
 import {createSavedScenario,readScenarioCollection,restoreSavedScenario,scenarioRecovery,serializeScenarioCollection,type SavedScenario} from './savedScenarios';
 import {AnnualProjection,Comparison,EvidenceButton,HorizonPicker} from './EssentialViews';
+import {EconomicContext,EconomicNext} from './EconomicJourney';
+import {MethodText} from './MethodDocument';
 
 export function Simulations({view}:{view:string}){
  const {data,session,setSession}=useStudy();const {ui,baseline}=data;const L=ui.labels;const W=ui.simulation_workspace;const {money,amount,n,pct}=useFormat();
@@ -21,7 +23,6 @@ export function Simulations({view}:{view:string}){
  const focusField=useRef<string|null>(null);
  const [expandedYears,setExpandedYears]=useState<Set<number>>(()=>new Set());
  const [expandedAnnualTotal,setExpandedAnnualTotal]=useState(false);
- const [essentialAll,setEssentialAll]=useState(false),[essentialAnnual,setEssentialAnnual]=useState(false),[essentialCommon,setEssentialCommon]=useState(false);
  const toggleYear=(year:number)=>setExpandedYears(old=>{const next=new Set(old);if(next.has(year))next.delete(year);else next.add(year);return next;});
  const [savedCollection,setSavedCollection]=useState(()=>{try{return readScenarioCollection(localStorage.getItem(ui.storage_key));}catch{return readScenarioCollection(null);}});
  const saved=savedCollection.items,recovery=scenarioRecovery(savedCollection);
@@ -58,21 +59,23 @@ export function Simulations({view}:{view:string}){
  const max=Math.max(...result.options.map(o=>selected(o).totals.total),1);
  const M=W.parameter_matrix;
  if(view==='essential'){
-  const E=ui.essential,S=E.simulation;
+  const E=ui.essential,S=E.simulation,C=E.economic_context;
   const chosen=baseline.options.find(o=>o.stack===session.chosen)||baseline.options[0];
   const current=result.options.find(o=>o.stack===chosen.stack)!;
   const specs=ui.parameters.option.filter((spec:Data)=>spec.modes.includes(chosen.mode));
   return <div className="essential-page essential-simulation">
+   <EconomicContext page="simuler"/>
+   <nav className="core-method-navigation" aria-label={C.navigation}><h2>{C.navigation}</h2><ol>{C.chapters.map((chapter:Data)=><li key={chapter.id}><button type="button" onClick={()=>{const target=document.getElementById('economic-simulation-'+chapter.id);target?.focus({preventScroll:true});target?.scrollIntoView({block:'start'});}}>{chapter.label}</button></li>)}</ol></nav>
+   <p className="economic-simulation-guide"><MethodText>{C.simulation_guide}</MethodText></p>
    <div className="essential-toolbar"><HorizonPicker value={horizon} onChange={setHorizon}/><div className="essential-toolbar-actions"><span>{modified||pending?S.edited:S.no_change}</span><button className="secondary" onClick={reset} disabled={!changes.length}>{S.reset}</button><button className="secondary" onClick={()=>setSaving(true)}>{W.saved}</button></div></div>
    {(busy||issue)&&<div className="result-status" role={issue?'alert':'status'}>{issue?issueText||S.invalid:L.calculating}</div>}
    {notice&&!saving&&<Notice quiet>{notice}</Notice>}
-   {essentialAnnual?<AnnualProjection projection={result} stack={chosen.stack} onStackChange={stack=>setSession(s=>({...s,chosen:stack}))} onClose={()=>setEssentialAnnual(false)}/>:<>
-    <Comparison projection={result} horizon={horizon} showAll={essentialAll} onShowAll={setEssentialAll}/>
-    <button className="text-button essential-annual-link" onClick={()=>setEssentialAnnual(true)}>{S.annual}</button>
-    <section className="essential-edit"><h2>{S.option_parameters}</h2><label className="essential-select">{S.option}<select value={chosen.stack} onChange={e=>{setSession(s=>({...s,chosen:e.target.value}));if(!['java-spring','microsoft','sap'].includes(e.target.value))setEssentialAll(true);}}>{baseline.options.map(o=><option key={o.stack} value={o.stack}>{o.name}</option>)}</select></label><div className="essential-selected-result"><span>{S.selected_total} · {horizon} {E.years}</span><strong>{amount(selected(current).totals.total)}</strong></div><div className="essential-field-list">{specs.map((spec:Data)=>{const value=draft.options[chosen.stack][spec.key],id='simulation-options.'+chosen.stack+'.'+spec.key;return <div className="essential-field" key={spec.key}><div><label htmlFor={id}>{spec.label}</label><EvidenceButton proof={{title:spec.label,text:spec.help,source:spec.source}} label={S.help+' · '+spec.label}/></div><ParameterInput id={id} label={chosen.name+' · '+spec.label+' · '+spec.unit} spec={spec} value={value} onChange={v=>field(spec.key,v,chosen.stack)} changed={value!==baseline.parameters.options[chosen.stack][spec.key]} invalid={issue?.field==='options.'+chosen.stack+'.'+spec.key}/></div>;})}</div>
-    <button className="text-button essential-common-toggle" aria-expanded={essentialCommon} onClick={()=>setEssentialCommon(!essentialCommon)}>{S.common_toggle}</button>{essentialCommon&&<div className="essential-field-list">{ui.parameters.common.map((spec:Data)=>{const value=draft.common[spec.key],id='simulation-common.'+spec.key;return <div className="essential-field" key={spec.key}><div><label htmlFor={id}>{spec.label}</label><EvidenceButton proof={{title:spec.label,text:spec.help,source:spec.source}} label={S.help+' · '+spec.label}/></div><ParameterInput id={id} label={spec.label+' · '+spec.unit} spec={spec} value={value} onChange={v=>field(spec.key,v)} changed={value!==baseline.parameters.common[spec.key]} invalid={issue?.field==='common.'+spec.key}/></div>;})}</div>}
+   <Comparison projection={result} horizon={horizon}/>
+    <section className="essential-edit" id="economic-simulation-parameters" tabIndex={-1}><h2>{S.option_parameters}</h2><label className="essential-select">{S.option}<select value={chosen.stack} onChange={e=>setSession(s=>({...s,chosen:e.target.value}))}>{baseline.options.map(o=><option key={o.stack} value={o.stack}>{o.name}</option>)}</select></label><div className="essential-selected-result"><span>{S.selected_total} · {horizon} {E.years}</span><strong>{amount(selected(current).totals.total)}</strong></div><div className="essential-field-list">{specs.map((spec:Data)=>{const value=draft.options[chosen.stack][spec.key],id='simulation-options.'+chosen.stack+'.'+spec.key;return <div className="essential-field" key={spec.key}><div><label htmlFor={id}>{spec.label}</label><EvidenceButton proof={{title:spec.label,text:spec.help,source:spec.source}} label={S.help+' · '+spec.label}/></div><ParameterInput id={id} label={chosen.name+' · '+spec.label+' · '+spec.unit} spec={spec} value={value} onChange={v=>field(spec.key,v,chosen.stack)} changed={value!==baseline.parameters.options[chosen.stack][spec.key]} invalid={issue?.field==='options.'+chosen.stack+'.'+spec.key}/></div>;})}</div>
+    <h3 className="economic-common-heading">{S.common_parameters}</h3><div className="essential-field-list">{ui.parameters.common.map((spec:Data)=>{const value=draft.common[spec.key],id='simulation-common.'+spec.key;return <div className="essential-field" key={spec.key}><div><label htmlFor={id}>{spec.label}</label><EvidenceButton proof={{title:spec.label,text:spec.help,source:spec.source}} label={S.help+' · '+spec.label}/></div><ParameterInput id={id} label={spec.label+' · '+spec.unit} spec={spec} value={value} onChange={v=>field(spec.key,v)} changed={value!==baseline.parameters.common[spec.key]} invalid={issue?.field==='common.'+spec.key}/></div>;})}</div>
     </section>
-   </>}
+   <section id="economic-simulation-annual" tabIndex={-1}><AnnualProjection projection={result} stack={chosen.stack} onStackChange={stack=>setSession(s=>({...s,chosen:stack}))} showOptionPicker={false}/></section>
+   <EconomicNext page="simuler"/>
    {saving&&<Drawer title={L.saved_scenarios} onClose={()=>{setSaving(false);setNotice('');}}><p>{ui.pages.simulations.save_note}</p>{recovery!==null&&<Notice><p>{ui.saved_scenarios.recovery_note}</p><button className="secondary" onClick={()=>download(recovery,ui.id+'-saved-recovery.json')}>{ui.saved_scenarios.recovery_download}</button></Notice>}<div className="scenario-file-actions"><button className="secondary" disabled={busy||pending||!!issue} onClick={exportScenario}>{L.export}</button><button className="secondary" disabled={busy} onClick={()=>inputRef.current?.click()}>{L.import}</button><input ref={inputRef} hidden type="file" accept="application/json,.json" onChange={e=>importScenario(e.target.files?.[0])}/></div><label className="scenario-name">{L.scenario_name}<input value={name} maxLength={120} onChange={e=>setName(e.target.value)}/></label><button className="primary" disabled={busy||pending||!!issue||savedCollection.recovery!==null} onClick={save}>{saved.some(s=>s.name===name.trim())?W.replace_saved:L.save}</button>{notice&&<Notice quiet>{notice}</Notice>}<div className="saved-list">{saved.length===0?<p className="empty">{L.no_scenario}</p>:saved.map(s=><div key={s.name}><div><strong>{s.name}</strong><small>{s.model_version.slice(0,10)}</small></div><button className="secondary" disabled={busy} onClick={()=>load(s)}>{L.load}</button><button className="icon-button" aria-label={L.remove+' '+s.name} onClick={()=>persist(saved.filter(x=>x.name!==s.name))}><Trash2 size={17}/></button></div>)}</div></Drawer>}
   </div>;
  }

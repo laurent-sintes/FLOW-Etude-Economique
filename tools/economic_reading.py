@@ -26,15 +26,23 @@ SCHEMA = _object(dict(
     intro=_object(dict(title=TEXT, text=TEXT)),
     labels=_object({key:TEXT for key in ('option', 'budget', 'duration', 'months', 'source',
                                        'price_convention', 'annual_item', 'annual_total',
-                                       'not_applicable', 'annual_sources')}),
+                                       'not_applicable', 'annual_sources', 'choose_option', 'choose_capacity', 'nature',
+                                       'jh_before', 'jh_unit', 'amount', 'period', 'month_prefix', 'total',
+                                       'core_work', 'core_coordination', 'core_total', 'capacity', 'transverse')}),
     sections=_object(dict(
+        core=_object(dict(title=TEXT, lead=TEXT, caption=TEXT, note=TEXT, capacity_note=TEXT,
+                          links=dict(type='array', minItems=1, items=_object(dict(
+                              href=dict(enum=['#parametres', '#perimetre-retenu', '#complexite']), label=TEXT))))),
         selection=_object(SECTION),
-        integration=_object(dict(**SECTION, explanations=_object({key:TEXT for key in ('Make', 'microsoft', 'sap')}))),
-        annual=_object(dict(**SECTION, rows=dict(type='array', minItems=5, maxItems=5,
+        integration=_object(dict(**SECTION, detail_title=TEXT, detail_note=TEXT,
+            ledger_labels=_object({key:TEXT for key in ('travaux_communs','coordination_commune','deploiements',
+                'coordination_deploiements','programme','MAI-005/reception','MAI-006/reception','integration_initiale')}),
+            explanations=_object({key:TEXT for key in ('Make', 'microsoft', 'sap')}))),
+        annual=_object(dict(**SECTION, detail_title=TEXT, detail_note=TEXT, rows=dict(type='array', minItems=5, maxItems=5,
             items=_object(dict(id=dict(enum=list(ANNUAL_KEYS)), label=TEXT, explanation=TEXT))))),
         limits=_object(dict(title=TEXT, lead=TEXT)),
     )),
-    links=dict(type='array', minItems=1, items=_object(dict(href=dict(enum=['#parametres', '#se-projeter', '#comparer']), label=TEXT))),
+    links=dict(type='array', minItems=1, items=_object(dict(href=dict(enum=['#parametres', '#se-projeter', '#comparer', '#conditions-realisation', '#capacite-realisation']), label=TEXT))),
 ))
 
 
@@ -58,6 +66,7 @@ def compile_economic_evaluations(baseline, content, editorial, glossary, documen
             document_path(link['path'])
 
     options = []
+    capacities = {row['id']:row['capacite'] for row in content['complexity']['rows']}
     identifiers = [option['stack'] for option in baseline['options']]
     _require(len(identifiers) == len(set(identifiers)), 'duplicate option')
     _require(set(identifiers) == set(content['stacks']), 'inconsistent option coverage')
@@ -88,9 +97,36 @@ def compile_economic_evaluations(baseline, content, editorial, glossary, documen
         # Reconcile already calculated amounts; the published total remains the owner.
         parts_total = sum((Decimal(str(value)) for value in annual_items.values() if value is not None), Decimal(0))
         _require(abs(parts_total - Decimal(str(total))) < Decimal('0.005'), f'annual ownership:{slug}')
-        options.append(dict(stack=slug, name=option['name'], mode=mode, selection=selection,
-            integration=dict(budget_eur_ht=option['integration'], months=duration, source=integration_source),
-            annual=dict(items=annual_items, total_eur_ht=total, source=annual_source,
+        core = None
+        if mode == 'Make':
+            stack = content['stacks'][slug]
+            valued = {row['feature']:row for row in stack['economic']['features']}
+            features = []
+            for feature in stack['features']:
+                key = feature['feature']
+                capacity = capacities.get(key)
+                features.append(dict(id=key, name=capacity['nom'] if capacity else text['labels']['transverse'],
+                    definition=capacity['definition'] if capacity else '',
+                    justification=feature['justification'], charges=deepcopy(feature['plages_jh']['central']),
+                    amount=valued[key]['cout_eur_ht']))
+            natures = {key:sum(feature['charges'][key] for feature in features)
+                       for key in content['calibration']['natures'] + ['frontend']}
+            _require(sum(natures.values()) == stack['economic']['jh']['core_avant_ia'], f'core charge ownership:{slug}')
+            core = dict(natures=natures, features=features, total_jh=sum(natures.values()),
+                        amounts=deepcopy(stack['economic']['detail_build']), total_eur_ht=option['build'])
+            _require(abs(sum(Decimal(str(value)) for value in core['amounts'].values()) -
+                         Decimal(str(option['build']))) < Decimal('0.005'), f'core cost ownership:{slug}')
+        detail = []
+        for line in ledger:
+            _require(line['id'] in text['sections']['integration']['ledger_labels'], f'integration label:{line["id"]}')
+            detail.append(dict(id=line['id'], label=text['sections']['integration']['ledger_labels'][line['id']],
+                               amount=line['amount'], start=line['start'], end=line['end']))
+        breakdown = deepcopy(list(content['stacks'][slug]['economic_reading']['buckets'].values()))
+        _require(abs(sum(Decimal(str(group['total'])) for group in breakdown)-Decimal(str(total))) < Decimal('0.005'),
+                 f'annual detail ownership:{slug}')
+        options.append(dict(stack=slug, name=option['name'], mode=mode, selection=selection, core=core,
+            integration=dict(budget_eur_ht=option['integration'], months=duration, source=integration_source, detail=detail),
+            annual=dict(items=annual_items, total_eur_ht=total, source=annual_source, breakdown=breakdown,
                         service_allocation=deepcopy(option['services']))))
 
     price_source = 'source/calibration-couts.yaml#convention/prix'

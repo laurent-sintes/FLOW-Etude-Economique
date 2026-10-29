@@ -1,3 +1,4 @@
+import {useState} from 'react';
 import {SourceLink} from './components';
 import {useStudy,useFormat,type Data} from './context';
 import {MethodText} from './MethodDocument';
@@ -23,5 +24,26 @@ export function CoreEvaluationPage(){
   <section><h2>{R.make_title}</h2><CoreEvaluationResults/></section>
   <section className="core-method-note"><h2>{R.buy_title}</h2><p>{R.buy_note}</p><p>{buy.map(row=>row.name).join(' · ')}</p></section>
   <a className="text-button essential-structure-next" href="#comparer">{R.next} →</a>
+ </div>;
+}
+
+export function CoreEvaluationTrace({options,editorial}:{options:Data[];editorial:Data}){
+ const {data}=useStudy(),{n,amount}=useFormat(),L=editorial.labels,S=editorial.sections.core;
+ const make=options.filter(option=>option.core),[stack,setStack]=useState(make[0].stack),[capacity,setCapacity]=useState(make[0].core.features[0].id);
+ const current=make.find(option=>option.stack===stack)||make[0],core=current.core;
+ const feature=core.features.find((row:Data)=>row.id===capacity)||core.features[0];
+ const natureName=(key:string)=>key==='frontend'?data.ui.essential.framework.ia_frontend:data.ui.natures[key];
+ return <div className="economic-trace core-work-trace" aria-labelledby="core-work-trace-title">
+  <h3 id="core-work-trace-title">{S.title}</h3><p><MethodText>{S.lead}</MethodText></p>
+  <label className="economic-trace-select">{L.choose_option}<select value={current.stack} onChange={event=>setStack(event.target.value)}>{make.map(option=><option key={option.stack} value={option.stack}>{option.name}</option>)}</select></label>
+  <div className="core-method-table-scroll" tabIndex={0} role="region" aria-label={S.caption}><table className="core-method-table economic-trace-table"><caption>{S.caption+' · '+current.name}</caption><thead><tr><th scope="col">{L.nature}</th><th scope="col">{L.jh_before}</th></tr></thead><tbody>{Object.entries(core.natures).map(([key,value])=><tr key={key}><th scope="row">{natureName(key)}</th><td className="core-method-number">{n(value as number,0)} {L.jh_unit}</td></tr>)}</tbody><tfoot><tr><th scope="row">{L.total}</th><td className="core-method-number">{n(core.total_jh,0)} {L.jh_unit}</td></tr></tfoot></table></div>
+  <dl className="economic-value-summary"><div><dt>{L.core_work}</dt><dd>{amount(core.amounts.prestations)}</dd></div><div><dt>{L.core_coordination}</dt><dd>{amount(core.amounts.pilotage)}</dd></div><div><dt>{L.core_total}</dt><dd>{amount(core.total_eur_ht)}</dd></div></dl>
+  <p><MethodText>{S.note}</MethodText></p>
+  <h4>{L.capacity}</h4><p><MethodText>{S.capacity_note}</MethodText></p>
+  <label className="economic-trace-select">{L.choose_capacity}<select value={feature.id} onChange={event=>setCapacity(event.target.value)}>{core.features.map((row:Data)=><option key={row.id} value={row.id}>{row.name}</option>)}</select></label>
+  <article className="economic-capacity-work" aria-live="polite"><h4>{feature.name}</h4>{feature.definition&&<p>{feature.definition}</p>}<p><strong>{feature.justification}</strong></p>
+   <dl className="economic-nature-values">{Object.entries(feature.charges).map(([key,value])=><div key={key}><dt>{natureName(key)}</dt><dd>{n(value as number,0)} {L.jh_unit}</dd></div>)}</dl><p className="economic-capacity-amount"><strong>{L.core_work} : {amount(feature.amount)}</strong></p>
+  </article>
+  <ul className="economic-reading-links">{S.links.map((link:Data)=><li key={link.href}><a className="text-button" href={link.href}>{link.label} →</a></li>)}</ul>
  </div>;
 }

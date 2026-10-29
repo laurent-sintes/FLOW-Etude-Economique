@@ -13,7 +13,7 @@ class ApplicationFrameworkTests(unittest.TestCase):
         cls.document = read(ROOT / SOURCE)
         cls.glossary = read(ROOT / 'source/glossaire.yaml')
         cls.documents = read(ROOT / 'config/publication.yaml')['documents']
-        cls.routes = {'evaluation-core', 'etude-marche', 'parametres'}
+        cls.routes = set(read(ROOT / 'config/application.yaml')['essential']['pages'])
 
     def compile(self, document):
         return compile_application(document, self.glossary, self.routes, self.documents)

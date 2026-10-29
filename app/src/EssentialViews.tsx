@@ -2,10 +2,10 @@ import './workload.css';
 import {createContext,useContext,useEffect,useState,type ReactNode} from 'react';
 import {Info,Hammer,ShoppingCart,type LucideIcon} from 'lucide-react';
 import {useStudy,useFormat,request,type Data,type Option,type Projection} from './context';
-import {fileHref} from './transport';
 import {isModelDataReference} from './documentVisibility';
 import {Drawer,SourceLink} from './components';
 import {MethodText} from './MethodDocument';
+import {EconomicContext,EconomicNext} from './EconomicJourney';
 import {MarketSourceLink,MarketSourceList} from './MarketSources';
 import './essential.css';
 import './marketProducts.css';
@@ -16,15 +16,13 @@ export const useEvidence=()=>useContext(EvidenceContext);
 export function EvidenceProvider({open,children}:{open:(proof:Proof)=>void;children:ReactNode}){return <EvidenceContext.Provider value={open}>{children}</EvidenceContext.Provider>;}
 
 export function ProofDialog({proof,onClose}:{proof:Proof;onClose:()=>void}){
- const {data}=useStudy();const E=data.ui.essential;const [expanded,setExpanded]=useState(false),[excerpt,setExcerpt]=useState<Data|null>(null),[error,setError]=useState(false);
- useEffect(()=>{setExpanded(false);setExcerpt(null);setError(false);},[proof]);
- const source=proof.source&&!isModelDataReference(proof.source)?proof.source:undefined,local=Boolean(source&&/\.(yaml|md|py)#/.test(source));
- const show=()=>{setExpanded(true);if(!local||!source)return;request<Data>('/api/document?path='+encodeURIComponent(source)).then(setExcerpt).catch(()=>setError(true));};
- const full=source?fileHref(source):'';
+ const {data}=useStudy(),C=data.ui.essential.economic_context;
+ const source=proof.source&&!isModelDataReference(proof.source)?proof.source:undefined;
  return <Drawer title={proof.title} onClose={onClose}>
   {proof.value&&<p className="essential-proof-value">{proof.value}</p>}
-  <p>{proof.text}</p>
-  {source&&<div className="essential-proof-source"><button className="secondary" onClick={show} aria-expanded={expanded}>{E.show_source}</button>{expanded&&<div className="essential-source-excerpt">{error?<p>{data.ui.document_focus.missing}</p>:local&&!excerpt?<p>{data.ui.labels.loading}</p>:excerpt?<><p>{excerpt.focus?.status==='matched'?E.source_excerpt:E.source_full}</p><pre>{excerpt.content}</pre></>:<p>{E.source_document}</p>}<a href={full} target="_blank" rel="noreferrer">{E.full_source}</a></div>}</div>}
+  <p><MethodText>{proof.text}</MethodText></p>
+  {source&&<div className="essential-proof-source"><SourceLink path={source}>{data.ui.essential.full_source}</SourceLink></div>}
+  <section className="economic-proof-path"><h3>{C.proof_title}</h3><p>{C.proof_note}</p><ul>{C.proof_links.map((link:Data)=><li key={link.href}><a href={link.href} onClick={onClose}>{link.label}</a></li>)}</ul></section>
  </Drawer>;
 }
 
@@ -32,21 +30,30 @@ export function EvidenceButton({proof,label}:{proof:Proof;label?:string}){const 
 
 export function HorizonPicker({value,onChange}:{value:number;onChange:(value:number)=>void}){const {data}=useStudy();return <div className="essential-horizons" role="group" aria-label={data.ui.labels.horizon}>{data.ui.horizons.map((year:number)=><button key={year} type="button" className={value===year?'active':''} aria-pressed={value===year} onClick={()=>onChange(year)}>{year} {data.ui.labels.year}</button>)}</div>;}
 
-const defaultStacks=['java-spring','microsoft','sap'];
 const strategyIcons:Record<string,LucideIcon>={Make:Hammer,Buy:ShoppingCart};
-export function Comparison({projection,horizon,showAll,onShowAll}:{projection:Projection;horizon:number;showAll:boolean;onShowAll:(value:boolean)=>void}){
- const {data}=useStudy(),{amount,n}=useFormat(),E=data.ui.essential,open=useEvidence();
- const options=projection.options.filter(o=>showAll||defaultStacks.includes(o.stack));
+export function HorizonFacts({option,horizon}:{option:Option;horizon:number}){
+ const {data}=useStudy(),{amount,n}=useFormat(),E=data.ui.essential,C=E.economic_context;
+ const row=option.horizons.find(item=>item.years===horizon)!;
+ return <dl className="economic-horizon-facts">
+  <div><dt>{E.service_years}</dt><dd>{n(row.service_years,1)} {E.years}</dd></div>
+  <div><dt>{C.service_start}</dt><dd>{n(option.service_start_month,1)}</dd></div>
+  <div><dt>{E.remaining}</dt><dd>{amount(row.remaining)}</dd></div>
+ </dl>;
+}
+
+export function Comparison({projection,horizon}:{projection:Projection;horizon:number}){
+ const {data}=useStudy(),{amount}=useFormat(),E=data.ui.essential,C=E.economic_context;
  const h=(o:Option)=>o.horizons.find(item=>item.years===horizon)!;
  const phases=[{key:'build',label:E.costs.build},{key:'integration',label:E.costs.integration},{key:'mco_run',label:E.costs.services}];
- return <section className="essential-comparison" aria-label={E.comparison_title}>
-  <div className="essential-section-top"><h2>{E.comparison_title}</h2><button className="text-button" onClick={()=>onShowAll(!showAll)}>{showAll?E.less_options:E.all_options}</button></div>
-  <div className="essential-option-list">{options.map(o=>{const row=h(o),ModeIcon=strategyIcons[o.mode];return <article key={o.stack} className="essential-option">
+ return <section className="essential-comparison" id="economic-simulation-results" tabIndex={-1} aria-labelledby="economic-results-heading">
+  <div className="essential-section-top"><h2 id="economic-results-heading" tabIndex={-1}>{E.comparison_title} · {horizon} {E.years}</h2></div>
+  <div className="essential-option-list">{projection.options.map(o=>{const row=h(o),reference=h(data.baseline.options.find(item=>item.stack===o.stack)!),delta=row.totals.total-reference.totals.total,ModeIcon=strategyIcons[o.mode];return <article key={o.stack} className="essential-option" data-option={o.stack}>
    <div className="essential-option-main"><div><strong>{o.name}</strong><small className={'essential-mode essential-mode-'+o.mode.toLowerCase()}><ModeIcon aria-hidden="true" size={14}/>{o.mode}</small></div><div className="essential-option-total"><strong>{amount(row.totals.total)}</strong><EvidenceButton proof={{title:E.proofs.total.title+' · '+o.name,value:amount(row.totals.total),text:E.proofs.total.text,source:E.proofs.total.source}}/></div></div>
-   <div className="essential-option-facts"><span>{E.service_years}<strong>{n(row.service_years,1)} {E.years}</strong><EvidenceButton proof={{...E.proofs.calendar,title:E.service_years+' · '+o.name,value:n(row.service_years,1)+' '+E.years}}/></span><span>{E.remaining}<strong>{amount(row.remaining)}</strong><EvidenceButton proof={{...E.proofs.calendar,title:E.remaining+' · '+o.name,value:amount(row.remaining)}}/></span></div>
-   <button className="essential-breakdown-trigger" onClick={()=>open({title:E.breakdown+' · '+o.name,value:phases.map(p=>p.label+' : '+amount(row.totals[p.key as keyof typeof row.totals])).join(' · '),text:E.proofs.breakdown.text,source:E.proofs.breakdown.source})}>{E.breakdown}</button>
+   <div className="economic-reference-delta"><span>{C.reference_amount} <strong>{amount(reference.totals.total)}</strong></span><span>{C.delta} <strong>{delta>0?'+':''}{amount(delta)}</strong></span></div>
+   <HorizonFacts option={o} horizon={horizon}/>
+   <dl className="economic-budget-parts">{phases.map(phase=><div key={phase.key}><dt>{phase.label}</dt><dd>{amount(row.totals[phase.key as keyof typeof row.totals])}</dd></div>)}</dl>
   </article>;})}</div>
-  <p className="essential-caveat">{E.comparison_limit} <EvidenceButton proof={E.proofs.scope}/></p>
+  <p className="essential-caveat">{C.remaining_note}</p>
  </section>;
 }
 
@@ -65,28 +72,28 @@ function phaseAmount(option:Option,key:string){return key==='obtention'?option.o
 export function ComparePage(){
  const {data}=useStudy(),{amount,annualAmount}=useFormat(),E=data.ui.essential,parts=data.ui.composable.rows as Data[];
  const options=data.baseline.options;
- return <div className="essential-page essential-structure"><p className="essential-structure-scope">{E.structure.scope}</p>{E.structure.phases.map((phase:Data)=>{
+ return <div className="essential-page essential-structure"><EconomicContext page="comparer"/><p className="essential-structure-scope">{E.structure.scope}</p>{E.structure.phases.map((phase:Data)=>{
   const max=Math.max(...options.map(o=>phaseAmount(o,phase.key)),1);
   const legend=phase.key==='services'?parts.filter(p=>options.some(o=>o.annual_responsibilities[p.key]>0)):[];
-  return <section className="essential-structure-phase" key={phase.key}><div className="essential-structure-heading"><div><h2>{phase.title}</h2><small>{phase.unit}</small></div><EvidenceButton proof={phase.proof}/></div><div className="essential-structure-rows">{options.map(o=>{
+  return <section className="essential-structure-phase" key={phase.key}><div className="essential-structure-heading"><div><h2>{phase.title}</h2><small>{phase.unit}</small></div><EvidenceButton proof={phase.proof}/></div><p className="economic-phase-note"><MethodText>{phase.note}</MethodText></p><div className="essential-structure-rows">{options.map(o=>{
    const value=phaseAmount(o,phase.key),ModeIcon=strategyIcons[o.mode],format=phase.key==='services'?annualAmount:amount;
    const segments=phase.key==='services'?legend.map(p=>({key:p.key,label:p.annual_label||p.label,color:p.color,value:o.annual_responsibilities[p.key]||0})).filter(p=>p.value>0):[{key:phase.key,label:phase.title,color:phase.color,value}];
    return <div className="essential-structure-row" key={o.stack}><div className="essential-structure-option"><strong>{o.name}</strong><span className={'essential-mode essential-mode-'+o.mode.toLowerCase()}><ModeIcon size={14} aria-hidden="true"/>{o.mode}</span></div><div className="essential-structure-bar" role="img" aria-label={segments.map(p=>p.label+' : '+format(p.value)).join(' · ')}><div style={{width:100*value/max+'%'}}>{segments.map(p=><span key={p.key} style={{width:100*p.value/value+'%',background:p.color}} title={p.label+' · '+format(p.value)}/>)}</div></div><strong className="essential-structure-amount">{format(value)}</strong></div>;
   })}</div>{legend.length>0&&<div className="essential-structure-legend">{legend.map(p=><span key={p.key}><i style={{background:p.color}}/>{p.annual_label||p.label}</span>)}</div>}</section>;
- })}<a className="text-button essential-structure-next" href="#se-projeter">{E.projection.horizon_title} →</a></div>;
+ })}<EconomicNext page="comparer"/></div>;
 }
 
 export function ProjectionPage(){
  const {data,session,setSession}=useStudy(),{amount,money}=useFormat(),E=data.ui.essential,P=E.projection;
- const [stack,setStack]=useState(defaultStacks[0]);
+ const [stack,setStack]=useState(data.baseline.options[0].stack);
  const options=data.baseline.options,chosen=options.find(o=>o.stack===stack)||options[0];
  const yearMax=Math.max(...chosen.annual.map(row=>row.total),1);
  const horizonValue=(o:Option)=>o.horizons.find(h=>h.years===session.horizon)!.totals.total;
  const horizonMax=Math.max(...options.map(horizonValue),1);
- return <div className="essential-page essential-projection"><div className="essential-toolbar"><HorizonPicker value={session.horizon} onChange={horizon=>setSession(s=>({...s,horizon}))}/><span>{E.reference}</span></div>
-  <section className="essential-projection-panel"><div className="essential-section-top"><h2>{P.horizon_title}</h2><EvidenceButton proof={E.proofs.total}/></div><p>{P.horizon_note}</p><div className="essential-projection-bars">{options.map(o=><div key={o.stack} className="essential-projection-bar-row"><strong>{o.name}</strong><div role="img" aria-label={o.name+' · '+amount(horizonValue(o))}><span style={{width:100*horizonValue(o)/horizonMax+'%',background:data.ui.option_colors[o.stack]}}/></div><b>{amount(horizonValue(o))}</b></div>)}</div></section>
-  <section className="essential-projection-panel"><div className="essential-section-top"><h2>{P.chart_title}</h2><EvidenceButton proof={E.proofs.calendar}/></div><label className="essential-select">{P.selected_option}<select value={chosen.stack} onChange={e=>setStack(e.target.value)}>{options.map(o=><option key={o.stack} value={o.stack}>{o.name}</option>)}</select></label><small className="essential-chart-unit">{P.chart_unit}</small><div className="essential-chart-scroll"><svg viewBox="0 0 760 220" role="img" aria-label={P.chart_title+' · '+chosen.name}>{[0,0.5,1].map(f=><g key={f}><line x1="60" x2="745" y1={180-f*150} y2={180-f*150} className="chart-grid"/><text x="54" y={184-f*150} textAnchor="end">{money(yearMax*f)}</text></g>)}{chosen.annual.map((row,index)=>{const x=70+index*45,height=row.total/yearMax*150;return <g key={row.annee}><rect x={x} y={180-height} width="27" height={height} rx="3" fill={data.ui.option_colors[chosen.stack]}><title>{P.year+' '+row.annee+' · '+amount(row.total)}</title></rect><text x={x+13.5} y="205" textAnchor="middle">{row.annee}</text></g>;})}</svg></div></section>
-  <AnnualProjection projection={data.baseline} stack={chosen.stack} onStackChange={setStack} showOptionPicker={false}/>
+ return <div className="essential-page essential-projection"><EconomicContext page="se-projeter"/><div className="essential-toolbar"><HorizonPicker value={session.horizon} onChange={horizon=>setSession(s=>({...s,horizon}))}/><span>{E.reference}</span></div>
+  <section className="essential-projection-panel"><div className="essential-section-top"><h2>{P.horizon_title} · {session.horizon} {E.years}</h2><EvidenceButton proof={E.proofs.total}/></div><p>{P.horizon_note}</p><div className="essential-projection-bars">{options.map(o=><div key={o.stack} className="economic-projection-option"><div className="essential-projection-bar-row"><strong>{o.name}</strong><div role="img" aria-label={o.name+' · '+amount(horizonValue(o))}><span style={{width:100*horizonValue(o)/horizonMax+'%',background:data.ui.option_colors[o.stack]}}/></div><b>{amount(horizonValue(o))}</b></div><HorizonFacts option={o} horizon={session.horizon}/></div>)}</div><p className="essential-caveat">{E.economic_context.remaining_note}</p></section>
+  <section className="essential-projection-panel"><div className="essential-section-top"><h2>{P.chart_title}</h2><EvidenceButton proof={E.proofs.calendar}/></div><p>{E.economic_context.schedule_note}</p><label className="essential-select">{P.selected_option}<select value={chosen.stack} onChange={e=>setStack(e.target.value)}>{options.map(o=><option key={o.stack} value={o.stack}>{o.name}</option>)}</select></label><small className="essential-chart-unit">{P.chart_unit}</small><div className="essential-chart-scroll"><svg viewBox="0 0 760 220" role="img" aria-label={P.chart_title+' · '+chosen.name}>{[0,0.5,1].map(f=><g key={f}><line x1="60" x2="745" y1={180-f*150} y2={180-f*150} className="chart-grid"/><text x="54" y={184-f*150} textAnchor="end">{money(yearMax*f)}</text></g>)}{chosen.annual.map((row,index)=>{const x=70+index*45,height=row.total/yearMax*150;return <g key={row.annee}><rect x={x} y={180-height} width="27" height={height} rx="3" fill={data.ui.option_colors[chosen.stack]}><title>{P.year+' '+row.annee+' · '+amount(row.total)}</title></rect><text x={x+13.5} y="205" textAnchor="middle">{row.annee}</text></g>;})}</svg></div></section>
+  <AnnualProjection projection={data.baseline} stack={chosen.stack} onStackChange={setStack} showOptionPicker={false}/><EconomicNext page="se-projeter"/>
  </div>;
 }
 

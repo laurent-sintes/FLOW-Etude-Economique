@@ -66,7 +66,7 @@ def hydrate_application_framework(ui):
     if ui['essential'].get('application_framework') != {'source': SOURCE}:
         raise ValueError(f'{ERROR}:expected canonical application source')
     essential = ui['essential']
-    routes = {item['id'] for item in essential['nav']} & set(essential['pages'])
+    routes = set(essential['pages'])
     value = compile_application(read(ROOT / SOURCE), read(ROOT / 'source/glossaire.yaml'),
                                 routes, read(ROOT / 'config/publication.yaml')['documents'])
     result = deepcopy(ui)

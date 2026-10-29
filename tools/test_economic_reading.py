@@ -94,6 +94,37 @@ class EconomicReadingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'missing_document'):
             self.compile(editorial=editorial)
 
+    def test_readable_details_reconcile_and_preserve_their_source_work(self):
+        result = self.compile()
+        for option, original in zip(result['options'], self.study.baseline['options']):
+            with self.subTest(stack=option['stack']):
+                self.assertEqual([row['amount'] for row in option['integration']['detail']],
+                                 [row['amount'] for row in original['funding_ledger'] if row['phase']=='integration'])
+                self.assertAlmostEqual(sum(row['amount'] for row in option['integration']['detail']), original['integration'], places=2)
+                self.assertEqual(option['annual']['breakdown'], list(self.study.content['stacks'][option['stack']]['economic_reading']['buckets'].values()))
+                if option['mode']=='Make':
+                    core=option['core']
+                    self.assertEqual(core['total_jh'], self.study.content['stacks'][option['stack']]['economic']['jh']['core_avant_ia'])
+                    self.assertGreater(core['natures']['qualification'],0)
+                    self.assertEqual(len(core['features']), len(self.study.content['stacks'][option['stack']]['features']))
+                    for row, source in zip(core['features'], self.study.content['stacks'][option['stack']]['features']):
+                        self.assertEqual(row['charges'], source['plages_jh']['central'])
+                        self.assertEqual(row['justification'], source['justification'])
+                else:
+                    self.assertIsNone(option['core'])
+        result['options'][0]['core']['features'][0]['charges']['qualification']=-1
+        self.assertGreater(self.study.content['stacks'][result['options'][0]['stack']]['features'][0]['plages_jh']['central']['qualification'],0)
+
+    def test_inconsistent_documentary_decompositions_are_rejected(self):
+        content=deepcopy(self.study.content)
+        content['stacks']['java-spring']['features'][0]['plages_jh']['central']['qualification']+=1
+        with self.assertRaisesRegex(ValueError,'core charge ownership'):
+            self.compile(content=content)
+        content=deepcopy(self.study.content)
+        content['stacks']['java-spring']['economic_reading']['buckets']['socle']['total']+=1
+        with self.assertRaisesRegex(ValueError,'annual detail ownership'):
+            self.compile(content=content)
+
     def test_documentary_fragments_reach_complete_evidence(self):
         paths = set()
 
