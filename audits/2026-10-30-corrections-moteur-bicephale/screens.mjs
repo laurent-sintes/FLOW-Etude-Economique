@@ -1,0 +1,17 @@
+import {chromium} from '../../app/node_modules/playwright/index.mjs';
+import assert from 'node:assert/strict';
+const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+const page=await browser.newPage({viewport:{width:1440,height:1000}});
+await page.goto('http://127.0.0.1:8778/FLOW-Etude-Economique/#evaluation-core');
+const panel=page.locator('.calculation-alignment').first();
+await panel.waitFor();
+await page.getByRole('heading',{name:'Périmètres réellement comparés',exact:true}).first().waitFor();
+assert.equal(await panel.locator('tbody tr').count(),10);
+await panel.scrollIntoViewIfNeeded();
+await panel.screenshot({path:'audits/2026-10-30-corrections-moteur-bicephale/alignment-desktop.png'});
+await page.setViewportSize({width:390,height:844});
+await page.getByRole('heading',{name:'Périmètres réellement comparés',exact:true}).first().scrollIntoViewIfNeeded();
+await page.screenshot({path:'audits/2026-10-30-corrections-moteur-bicephale/comparison-mobile.png'});
+assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
+await browser.close();
+console.log('Écrans de comparaison vérifiés, sans débordement de page mobile.');

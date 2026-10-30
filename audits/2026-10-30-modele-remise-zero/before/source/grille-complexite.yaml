@@ -1,0 +1,3077 @@
+version: 1
+id: grille-complexite-scm
+date: '2026-10-24'
+statut: propose
+dependances:
+  schema: source/schema-grille-complexite.yaml
+  methode: source/methode-complexite.yaml
+  cartographie: sources/cartographie-scm-2026-10-24.yaml
+  audit: audits/2026-10-24-referentiel-fonctionnel.md
+reprise:
+  reference_fonctionnelle: La hiérarchie métier native porte les capacités, fonctions proposées et niveaux de complexité.
+    Les identifiants BC désignent leurs financements, sans seconde cartographie.
+  reference_economique: Les travaux Make sont dans source/recalibration-metier.yaml ; la couverture et les exceptions
+    Buy dans source/qualification-buy.yaml.
+  couverture_stacks: Les cinq options conservent une lecture de couverture ; les travaux par capacité financent
+    le Flow Core System. Les fonctions Buy à préciser sont dans le registre séparé.
+  chiffrage: Les niveaux ne sont pas convertis en coût. Les paquets de travaux explicitent les scénarios bas, central
+    et haut et leurs réutilisations ; les charges sont dans la calibration séparée.
+empreintes:
+  source/methode-complexite.yaml: 4dec4971535c8ff2ee8d4ccf812e9ef90b788314aa29acbaabcdb6a2fedd5864
+  sources/cartographie-scm-2026-10-24.yaml: a1fc16bac87e206124485aee8fa51b49b774a4352e36721731662e868dbe6976
+domaine_id: supply-chain-orchestration
+blocs:
+- id: BC-001
+  capacite_id: cap-service-provider-eligibility-control
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-policies
+  - ba-service-provider-controls
+  - cap-service-provider-eligibility-control
+  fonctions:
+  - id: BC-001.01
+    resultat: Tenir les autorisations et suspensions motivées
+  - id: BC-001.02
+    resultat: Contrôler une nouvelle sollicitation et expliquer le refus
+  variantes_source: []
+  frontiere: Ne sélectionne ni ne résilie une prestation.
+  complexite:
+    algorithmique:
+      niveau: 1
+      justification: Décision déterministe sur une portée définie
+    tests_ajustements:
+      niveau: 2
+      justification: Tester les changements de restriction sans annuler les travaux engagés
+    etendue_fonctionnelle:
+      niveau: 1
+      justification: Une autorisation consultable et une décision bornée
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-001
+    jh_par_stack: source/recalibration-metier.yaml#BC-001
+    couverture_buy: source/qualification-buy.yaml#BC-001
+- id: BC-002
+  capacite_id: master-data-ingestion
+  chemin:
+  - supply-chain-orchestration
+  - business-references
+  - ba-reference-maintenance
+  - master-data-ingestion
+  fonctions:
+  - id: BC-002.01
+    resultat: Recevoir les référentiels complets et leurs changements
+  - id: BC-002.02
+    resultat: Rapprocher les identités et versions
+  - id: BC-002.03
+    resultat: Mettre en quarantaine puis rejouer les rejets
+  variantes_source:
+  - master-data-ingestion-commerce
+  - master-data-ingestion-finance
+  - master-data-ingestion-design
+  frontiere: Ne nettoie pas les données Beaumanoir et ne remplace pas les maîtres PLM ou MDM.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Rapprochements déterministes entre objets et versions
+    tests_ajustements:
+      niveau: 3
+      justification: Doublons et désordre des changements sans perte des corrections
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Plusieurs familles de référentiels et vues de suivi des rejets
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-002
+    jh_par_stack: source/recalibration-metier.yaml#BC-002
+    couverture_buy: source/qualification-buy.yaml#BC-002
+- id: BC-003
+  capacite_id: cap-partner-agreement-reference-stewardship
+  chemin:
+  - supply-chain-orchestration
+  - business-references
+  - ba-partner-agreement-references
+  - cap-partner-agreement-reference-stewardship
+  fonctions:
+  - id: BC-003.01
+    resultat: Contrôler parties et rôles utiles
+  - id: BC-003.02
+    resultat: Restituer les accords applicables et leurs dates
+  variantes_source: []
+  frontiere: Ne négocie pas les contrats et ne tient pas le référentiel maître des partenaires.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Résolution de validité des rôles et accords
+    tests_ajustements:
+      niveau: 2
+      justification: Vérifier changements de partie et périodes concurrentes
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Vue locale des parties et accords avec leur provenance
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-003
+    jh_par_stack: source/recalibration-metier.yaml#BC-003
+    couverture_buy: source/qualification-buy.yaml#BC-003
+- id: BC-004
+  capacite_id: cap-merchandise-reference-stewardship
+  chemin:
+  - supply-chain-orchestration
+  - business-references
+  - ba-product-references
+  - cap-merchandise-reference-stewardship
+  fonctions:
+  - id: BC-004.01
+    resultat: Rapprocher produits et variantes
+  - id: BC-004.02
+    resultat: Qualifier les catalogues et assortiments utilisables
+  - id: BC-004.03
+    resultat: Exposer les contextes de planification reçus
+  variantes_source: []
+  frontiere: Ne conçoit pas les collections et n’impose pas une hiérarchie saisonnière.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cohérence entre variantes et périodes des assortiments
+    tests_ajustements:
+      niveau: 3
+      justification: Tester retraits et changements de contexte sans réécrire les engagements
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Plusieurs objets Fashion et vues locales datées
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-004
+    jh_par_stack: source/recalibration-metier.yaml#BC-004
+    couverture_buy: source/qualification-buy.yaml#BC-004
+- id: BC-005
+  capacite_id: cap-packaging-reference-stewardship
+  chemin:
+  - supply-chain-orchestration
+  - business-references
+  - ba-packaging-references
+  - cap-packaging-reference-stewardship
+  fonctions:
+  - id: BC-005.01
+    resultat: Distinguer matériaux et spécifications de conditionnement
+  - id: BC-005.02
+    resultat: Contrôler la validité des références locales
+  variantes_source: []
+  frontiere: Une spécification ne représente pas une unité logistique physiquement préparée.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Liens et validité des spécifications
+    tests_ajustements:
+      niveau: 2
+      justification: Vérifier substitutions et références incomplètes
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Deux familles de référence et leurs usages
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-005
+    jh_par_stack: source/recalibration-metier.yaml#BC-005
+    couverture_buy: source/qualification-buy.yaml#BC-005
+- id: BC-006
+  capacite_id: cap-internal-supplies-reference-stewardship
+  chemin:
+  - supply-chain-orchestration
+  - business-references
+  - ba-internal-supplies-equipment-references
+  - cap-internal-supplies-reference-stewardship
+  fonctions:
+  - id: BC-006.01
+    resultat: Qualifier fournitures et équipements utilisables
+  - id: BC-006.02
+    resultat: Restituer leurs unités et restrictions
+  variantes_source: []
+  frontiere: Ne gère ni les immobilisations ni l’entretien des équipements.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Contrôles de cohérence des références et unités
+    tests_ajustements:
+      niveau: 2
+      justification: Tester références retirées et conversions autorisées
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Vues locales des fournitures et équipements
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-006
+    jh_par_stack: source/recalibration-metier.yaml#BC-006
+    couverture_buy: source/qualification-buy.yaml#BC-006
+- id: BC-007
+  capacite_id: cap-service-reference-stewardship
+  chemin:
+  - supply-chain-orchestration
+  - business-references
+  - ba-service-references
+  - cap-service-reference-stewardship
+  fonctions:
+  - id: BC-007.01
+    resultat: Restituer le réseau et le catalogue des prestations
+  - id: BC-007.02
+    resultat: Qualifier les conditions de prix applicables
+  variantes_source: []
+  frontiere: Le catalogue ne prouve pas la disponibilité opérationnelle d’un exécutant.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Recherche de conditions selon portée et date
+    tests_ajustements:
+      niveau: 3
+      justification: Tester chevauchements tarifaires et services non admissibles
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Réseau de services et conditions de prix distincts des capacités réelles
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-007
+    jh_par_stack: source/recalibration-metier.yaml#BC-007
+    couverture_buy: source/qualification-buy.yaml#BC-007
+- id: BC-008
+  capacite_id: demand-fulfilment-policy-management
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-policies
+  - ba-protection-policies
+  - demand-fulfilment-policy-management
+  fonctions:
+  - id: BC-008.01
+    resultat: Versionner les politiques de satisfaction
+  - id: BC-008.02
+    resultat: Contrôler leur cohérence avant activation
+  - id: BC-008.03
+    resultat: Expliquer la règle applicable à une décision
+  variantes_source: []
+  frontiere: Ne prescrit ni moteur de règles particulier ni automatisation de tous les arbitrages.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Priorités et droits interdépendants à résoudre sans langage universel
+    tests_ajustements:
+      niveau: 3
+      justification: Non-régression des versions et résolution des règles contradictoires
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Admission et priorités et protections et stabilité avec vues de gouvernance
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-008
+    jh_par_stack: source/recalibration-metier.yaml#BC-008
+    couverture_buy: source/qualification-buy.yaml#BC-008
+- id: BC-009
+  capacite_id: D01.f
+  chemin:
+  - supply-chain-orchestration
+  - D01
+  - ba-inventory-position-management
+  - D01.f
+  fonctions:
+  - id: BC-009.01
+    resultat: Intégrer faits et états de stock avec leur provenance
+  - id: BC-009.02
+    resultat: Reconnaître doublons et corrections
+  - id: BC-009.03
+    resultat: Conserver la filiation des biens
+  variantes_source: []
+  frontiere: Ne reconstitue pas des mouvements inconnus et ne produit pas un second effet depuis Operations Tracking.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Corrélation des faits et corrections dans plusieurs temporalités
+    tests_ajustements:
+      niveau: 4
+      justification: Vérifier un seul effet malgré doubles envois et faits tardifs
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Faits et soldes externes et filiation avec vues de qualification
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-009
+    jh_par_stack: source/recalibration-metier.yaml#BC-009
+    couverture_buy: source/qualification-buy.yaml#BC-009
+- id: BC-010
+  capacite_id: D01.g
+  chemin:
+  - supply-chain-orchestration
+  - D01
+  - ba-inventory-position-management
+  - D01.g
+  fonctions:
+  - id: BC-010.01
+    resultat: Enregistrer les mouvements et états reconnus
+  - id: BC-010.02
+    resultat: Historiser corrections et justifications
+  - id: BC-010.03
+    resultat: Reconstituer une situation à date
+  variantes_source: []
+  frontiere: Ne confond pas correction documentaire et sortie physique.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Conservation des quantités et temporalités des corrections
+    tests_ajustements:
+      niveau: 4
+      justification: Oracles de relecture et écritures concurrentes avec corrections rétroactives
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Registre métier et preuves sans recopier la réception des faits
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-010
+    jh_par_stack: source/recalibration-metier.yaml#BC-010
+    couverture_buy: source/qualification-buy.yaml#BC-010
+- id: BC-011
+  capacite_id: D01.c
+  chemin:
+  - supply-chain-orchestration
+  - D01
+  - ba-inventory-position-management
+  - D01.c
+  fonctions:
+  - id: BC-011.01
+    resultat: Composer les positions présentes et projetées
+  - id: BC-011.02
+    resultat: Détailler les apports attendus et engagements
+  - id: BC-011.03
+    resultat: Expliquer provenance et incertitudes
+  variantes_source: []
+  frontiere: Une position projetée n’est pas une promesse ni une réservation.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Projections cohérentes de faits et attentes distinctes
+    tests_ajustements:
+      niveau: 3
+      justification: Rapprochement des vues avec les registres et invalidation des projections
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Axes produit et lieu et état et propriétaire avec vues de détail
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-011
+    jh_par_stack: source/recalibration-metier.yaml#BC-011
+    couverture_buy: source/qualification-buy.yaml#BC-011
+- id: BC-012
+  capacite_id: planning-data-provision
+  chemin:
+  - supply-chain-orchestration
+  - D01
+  - ba-inventory-position-management
+  - planning-data-provision
+  fonctions:
+  - id: BC-012.01
+    resultat: Publier les positions de stock utiles à un calcul
+  - id: BC-012.02
+    resultat: Associer date et version et limites de connaissance
+  variantes_source: []
+  frontiere: Réutilise les projections de stock ; ne recalcule pas le Master Plan.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Sélection d’une vue cohérente pour un contexte
+    tests_ajustements:
+      niveau: 3
+      justification: Tester fraîcheur et corrections reçues pendant la lecture
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Contrat de fourniture et diagnostic de qualité
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-012
+    jh_par_stack: source/recalibration-metier.yaml#BC-012
+    couverture_buy: source/qualification-buy.yaml#BC-012
+- id: BC-013
+  capacite_id: D01.d
+  chemin:
+  - supply-chain-orchestration
+  - D01
+  - ba-inventory-position-management
+  - D01.d
+  fonctions:
+  - id: BC-013.01
+    resultat: Préparer les vérifications de stock
+  - id: BC-013.02
+    resultat: Rapprocher comptages et mouvements concomitants
+  - id: BC-013.03
+    resultat: Proposer les corrections justifiées
+  variantes_source:
+  - BHV029
+  - BHV030
+  - BHV031
+  frontiere: Le comptage physique et ses terminaux restent du côté des exécutants.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Rapprochement temporel des comptages avec les mouvements
+    tests_ajustements:
+      niveau: 3
+      justification: Tester recomptages et écarts et mouvements pendant inventaire
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Campagnes et contrôles ponctuels avec instruction des écarts
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-013
+    jh_par_stack: source/recalibration-metier.yaml#BC-013
+    couverture_buy: source/qualification-buy.yaml#BC-013
+- id: BC-014
+  capacite_id: D01.h
+  chemin:
+  - supply-chain-orchestration
+  - D01
+  - ba-inventory-ownership-management
+  - D01.h
+  fonctions:
+  - id: BC-014.01
+    resultat: Évaluer les conditions de transfert de propriété
+  - id: BC-014.02
+    resultat: Reconnaître ou demander le transfert autorisé
+  - id: BC-014.03
+    resultat: Expliquer parties et quantités et date d’effet
+  variantes_source:
+  - BHV063
+  - BHV064
+  - BHV104
+  frontiere: Ne tient pas la valorisation comptable ; le transfert reconnu alimente le registre de propriété.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Accord et fait déclencheur et quantité doivent converger
+    tests_ajustements:
+      niveau: 4
+      justification: Tester consignation et transferts intercompany sans mouvement physique indu
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Décisions partielles et preuves avec ou sans acte distinct
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-014
+    jh_par_stack: source/recalibration-metier.yaml#BC-014
+    couverture_buy: source/qualification-buy.yaml#BC-014
+- id: BC-015
+  capacite_id: inventory-ownership-ledger
+  chemin:
+  - supply-chain-orchestration
+  - D01
+  - ba-inventory-ownership-management
+  - inventory-ownership-ledger
+  fonctions:
+  - id: BC-015.01
+    resultat: Inscrire les changements de propriétaire reconnus
+  - id: BC-015.02
+    resultat: Conserver accord et preuve et correction
+  - id: BC-015.03
+    resultat: Reconstituer la propriété d’une quantité à date
+  variantes_source: []
+  frontiere: Réutilise la persistance des registres sans confondre leurs invariants métier.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Filiation des transferts et corrections datées
+    tests_ajustements:
+      niveau: 4
+      justification: Conservation des quantités et séparation des chaînes intercompany
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Registre de propriété distinct du stock physique et de la comptabilité
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-015
+    jh_par_stack: source/recalibration-metier.yaml#BC-015
+    couverture_buy: source/qualification-buy.yaml#BC-015
+- id: BC-016
+  capacite_id: accounting-data-provision
+  chemin:
+  - supply-chain-orchestration
+  - D01
+  - ba-inventory-position-management
+  - accounting-data-provision
+  fonctions:
+  - id: BC-016.01
+    resultat: Sélectionner les faits des registres utiles à Finance
+  - id: BC-016.02
+    resultat: Transmettre justificatifs et corrections
+  - id: BC-016.03
+    resultat: Suivre acceptation et rejet des faits transmis
+  variantes_source: []
+  frontiere: Ne centralise pas tous les faits financiers et ne comptabilise pas les écritures.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Sélection et corrélation des versions de faits
+    tests_ajustements:
+      niveau: 3
+      justification: Tester corrections et rejets sans émission comptable en double
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Contrat des faits de stock et de propriété et vue de suivi
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-016
+    jh_par_stack: source/recalibration-metier.yaml#BC-016
+    couverture_buy: source/qualification-buy.yaml#BC-016
+- id: BC-017
+  capacite_id: product-feedback
+  chemin:
+  - supply-chain-orchestration
+  - D01
+  - ba-inventory-position-management
+  - product-feedback
+  fonctions:
+  - id: BC-017.01
+    resultat: Recueillir un constat terrain documenté
+  - id: BC-017.02
+    resultat: Le rattacher au produit et à son contexte
+  - id: BC-017.03
+    resultat: Transmettre le constat au responsable produit
+  variantes_source: []
+  frontiere: Ne reconstruit pas le processus de conception ou le PLM.
+  complexite:
+    algorithmique:
+      niveau: 1
+      justification: Association déterministe d’une observation
+    tests_ajustements:
+      niveau: 2
+      justification: Tester pièces et droits et doublons
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Saisie et consultation des observations avec provenance
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-017
+    jh_par_stack: source/recalibration-metier.yaml#BC-017
+    couverture_buy: source/qualification-buy.yaml#BC-017
+- id: BC-018
+  capacite_id: D02.c
+  chemin:
+  - supply-chain-orchestration
+  - D01
+  - ba-inventory-position-management
+  - D02.c
+  fonctions:
+  - id: BC-018.01
+    resultat: Établir et réviser un engagement de quantité
+  - id: BC-018.02
+    resultat: Consommer ou libérer la réservation
+  - id: BC-018.03
+    resultat: Traiter expiration et conflits d’usage
+  variantes_source: []
+  frontiere: N’affecte pas la demande à une ressource et ne calcule pas ATP.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Transitions concurrentes sur la même quantité
+    tests_ajustements:
+      niveau: 4
+      justification: Invariants de non-surengagement lors de reprises et doubles consommations
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Cycle de réservation et motifs et diagnostics des conflits
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-018
+    jh_par_stack: source/recalibration-metier.yaml#BC-018
+    couverture_buy: source/qualification-buy.yaml#BC-018
+- id: BC-019
+  capacite_id: D05.i
+  chemin:
+  - supply-chain-orchestration
+  - D06
+  - ba-inventory-disposition
+  - D05.i
+  fonctions:
+  - id: BC-019.01
+    resultat: Qualifier les devenirs admissibles d’un bien
+  - id: BC-019.02
+    resultat: Comparer les possibilités de récupération de valeur
+  - id: BC-019.03
+    resultat: Autoriser la destination et transmettre la décision
+  variantes_source:
+  - BHV048
+  - BHV049
+  frontiere: Ne réalise pas la réparation ni le rebut ; aucun optimiseur universel n’est présumé.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Règles d’état et d’autorisation et de valeur à rapprocher
+    tests_ajustements:
+      niveau: 3
+      justification: Tester interdictions et données de valeur manquantes
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Retour et stockage et réparation et rebut comme décisions distinctes
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-019
+    jh_par_stack: source/recalibration-metier.yaml#BC-019
+    couverture_buy: source/qualification-buy.yaml#BC-019
+- id: BC-020
+  capacite_id: D04.i
+  chemin:
+  - supply-chain-orchestration
+  - D04
+  - ba-order-lifecycle-management
+  - D04.i
+  fonctions:
+  - id: BC-020.01
+    resultat: Enregistrer commandes et lignes clients
+  - id: BC-020.02
+    resultat: Réviser les engagements autorisés
+  - id: BC-020.03
+    resultat: Rapprocher les résultats et le reste à servir
+  variantes_source:
+  - BHV066
+  - BHV067
+  - BHV068
+  - BHV069
+  - BHV096
+  - sales-order-preorder
+  frontiere: N’inclut pas le tunnel commercial ni les caisses ; une révision de plan ne modifie pas seule la commande.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Transitions de lignes et quantités partiellement satisfaites
+    tests_ajustements:
+      niveau: 4
+      justification: Conservation des engagements lors de révisions et résultats concurrents
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Commandes et reliquats et liens intercompany et contributions aux plans
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-020
+    jh_par_stack: source/recalibration-metier.yaml#BC-020
+    couverture_buy: source/qualification-buy.yaml#BC-020
+- id: BC-021
+  capacite_id: D04.j
+  chemin:
+  - supply-chain-orchestration
+  - D04
+  - ba-order-lifecycle-management
+  - D04.j
+  fonctions:
+  - id: BC-021.01
+    resultat: Émettre une demande d’achat autorisée
+  - id: BC-021.02
+    resultat: Intégrer les réponses et engagements fournisseur
+  - id: BC-021.03
+    resultat: Suivre modifications et reliquats
+  variantes_source:
+  - BHV058
+  - BHV059
+  - BHV060
+  - BHV078
+  frontiere: Ne reconstruit pas le sourcing fournisseur ni sa négociation.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Réconciliation demande et réponses partielles
+    tests_ajustements:
+      niveau: 3
+      justification: Tester refus et annulations et changements de délai
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Achats de biens et services et liens intercompany et plans
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-021
+    jh_par_stack: source/recalibration-metier.yaml#BC-021
+    couverture_buy: source/qualification-buy.yaml#BC-021
+- id: BC-022
+  capacite_id: D04.k
+  chemin:
+  - supply-chain-orchestration
+  - D04
+  - ba-order-lifecycle-management
+  - D04.k
+  fonctions:
+  - id: BC-022.01
+    resultat: Tenir origine et destination du transfert
+  - id: BC-022.02
+    resultat: Réviser les quantités et dates autorisées
+  - id: BC-022.03
+    resultat: Rapprocher départs et arrivées
+  variantes_source: []
+  frontiere: Ne tient pas les tâches internes du WMS ni le planning du transporteur.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Deux extrémités d’un transfert et quantités en cours
+    tests_ajustements:
+      niveau: 3
+      justification: Tester départs et arrivées partiels et écarts sans double stock
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Cycle de transfert et suivi des restes à satisfaire
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-022
+    jh_par_stack: source/recalibration-metier.yaml#BC-022
+    couverture_buy: source/qualification-buy.yaml#BC-022
+- id: BC-023
+  capacite_id: D04.r
+  chemin:
+  - supply-chain-orchestration
+  - D04
+  - ba-order-lifecycle-management
+  - D04.r
+  fonctions:
+  - id: BC-023.01
+    resultat: Demander une mise en consignation
+  - id: BC-023.02
+    resultat: Tenir quantités et conditions de l’accord
+  - id: BC-023.03
+    resultat: Rapprocher les apports et le reste attendu
+  variantes_source: []
+  frontiere: La mise à disposition physique ne vaut pas vente.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cycle spécialisé d’apport sous accord
+    tests_ajustements:
+      niveau: 3
+      justification: Vérifier absence de vente ou transfert de propriété implicite
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Apport initial et complémentaire avec suivi des quantités
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-023
+    jh_par_stack: source/recalibration-metier.yaml#BC-023
+    couverture_buy: source/qualification-buy.yaml#BC-023
+- id: BC-024
+  capacite_id: D04.t
+  chemin:
+  - supply-chain-orchestration
+  - D04
+  - ba-order-lifecycle-management
+  - D04.t
+  fonctions:
+  - id: BC-024.01
+    resultat: Demander la reprise de biens consignés
+  - id: BC-024.02
+    resultat: Vérifier les quantités encore détenues pour le propriétaire
+  - id: BC-024.03
+    resultat: Suivre restitution et écarts
+  variantes_source: []
+  frontiere: Ne traite pas la reprise comme un retour d’achat ordinaire.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cycle de reprise lié à l’accord de consignation
+    tests_ajustements:
+      niveau: 3
+      justification: Tester reprise partielle et quantités déjà cédées
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Demande et restitution et reste à reprendre
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-024
+    jh_par_stack: source/recalibration-metier.yaml#BC-024
+    couverture_buy: source/qualification-buy.yaml#BC-024
+- id: BC-025
+  capacite_id: D04.l
+  chemin:
+  - supply-chain-orchestration
+  - D04
+  - ba-order-lifecycle-management
+  - D04.l
+  fonctions:
+  - id: BC-025.01
+    resultat: Autoriser et enregistrer le retour client
+  - id: BC-025.02
+    resultat: Coordonner réception et décision de résolution
+  - id: BC-025.03
+    resultat: Suivre avoir ou remboursement ou remplacement
+  variantes_source:
+  - BHV050
+  - BHV051
+  - BHV052
+  - BHV053
+  - BHV054
+  - return-credit-resolution
+  - return-refund-resolution
+  - return-replacement-resolution
+  frontiere: Réutilise Billing et Payment ; ne réalise pas une seconde fonction de paiement.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Plusieurs suites logistiques et financières corrélées
+    tests_ajustements:
+      niveau: 4
+      justification: Tester retours partiels et résolutions concurrentes sans double remboursement
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Retour et résolution et engagements de remplacement
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-025
+    jh_par_stack: source/recalibration-metier.yaml#BC-025
+    couverture_buy: source/qualification-buy.yaml#BC-025
+- id: BC-026
+  capacite_id: D04.m
+  chemin:
+  - supply-chain-orchestration
+  - D04
+  - ba-order-lifecycle-management
+  - D04.m
+  fonctions:
+  - id: BC-026.01
+    resultat: Préparer le renvoi fournisseur selon accord
+  - id: BC-026.02
+    resultat: Suivre le retour sans remplacement ou avec remplacement
+  - id: BC-026.03
+    resultat: Suivre réparation et restitution du même bien
+  variantes_source:
+  - BHV055
+  - BHV056
+  - BHV057
+  frontiere: Ne décide pas les clauses commerciales de l’accord.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Suites distinctes selon accord et identité du bien
+    tests_ajustements:
+      niveau: 3
+      justification: Tester réparation et remplacement sans perdre la filiation
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Trois parcours de retour fournisseur et leurs reliquats
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-026
+    jh_par_stack: source/recalibration-metier.yaml#BC-026
+    couverture_buy: source/qualification-buy.yaml#BC-026
+- id: BC-027
+  capacite_id: D04.n
+  chemin:
+  - supply-chain-orchestration
+  - D04
+  - ba-order-lifecycle-management
+  - D04.n
+  fonctions:
+  - id: BC-027.01
+    resultat: Scinder ou regrouper des lignes et commandes
+  - id: BC-027.02
+    resultat: Maintenir les filiations et liens réciproques
+  - id: BC-027.03
+    resultat: Vérifier la conservation des quantités et engagements
+  variantes_source:
+  - BHV044
+  - BHV086
+  - BHV087
+  frontiere: La restructuration n’autorise pas un changement commercial non accepté.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Transformations liées de plusieurs commandes dont intercompany
+    tests_ajustements:
+      niveau: 4
+      justification: Oracles de conservation lors de transformations concurrentes
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Scission et regroupement et fusion avec preuves et vues de filiation
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-027
+    jh_par_stack: source/recalibration-metier.yaml#BC-027
+    couverture_buy: source/qualification-buy.yaml#BC-027
+- id: BC-028
+  capacite_id: plans-ingestion
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-master-plan-management
+  - plans-ingestion
+  fonctions:
+  - id: BC-028.01
+    resultat: Recevoir les contributions de plan selon leur nature
+  - id: BC-028.02
+    resultat: Qualifier origine et version et horizon
+  - id: BC-028.03
+    resultat: Identifier les contributions utilisables ou rejetées
+  variantes_source: []
+  frontiere: Ne construit pas la prévision commerciale produit.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Rapprochement déterministe de versions et contextes
+    tests_ajustements:
+      niveau: 3
+      justification: Tester doublons et contributions périmées et horizons incompatibles
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Forecast et Demand et Supply et Planned Purchase Order distincts
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-028
+    jh_par_stack: source/recalibration-metier.yaml#BC-028
+    couverture_buy: source/qualification-buy.yaml#BC-028
+- id: BC-029
+  capacite_id: demand-forecast-development
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-demand-supply-plan-preparation
+  - demand-forecast-development
+  fonctions:
+  - id: BC-029.01
+    resultat: Vérifier la prévision reçue et ses unités
+  - id: BC-029.02
+    resultat: Qualifier horizon et qualité d’utilisation
+  - id: BC-029.03
+    resultat: Exposer les limites avant son usage opérationnel
+  variantes_source: []
+  frontiere: Ne recrée pas un modèle statistique de prévision produit.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Contrôles de cohérence et d’admissibilité de la contribution
+    tests_ajustements:
+      niveau: 3
+      justification: Tester périodes manquantes et conversions et versions contradictoires
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Qualification d’une prévision reçue avec diagnostic
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-029
+    jh_par_stack: source/recalibration-metier.yaml#BC-029
+    couverture_buy: source/qualification-buy.yaml#BC-029
+- id: BC-030
+  capacite_id: demand-plan-development
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-demand-supply-plan-preparation
+  - demand-plan-development
+  fonctions:
+  - id: BC-030.01
+    resultat: Rapprocher commandes et prévision qualifiée
+  - id: BC-030.02
+    resultat: Calculer la prévision résiduelle sans double besoin
+  - id: BC-030.03
+    resultat: Versionner le plan de demande
+  variantes_source: []
+  frontiere: Les règles Beaumanoir de consommation seront configurées dans l’intégration.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Consommation de prévision par demandes identifiées selon périodes
+    tests_ajustements:
+      niveau: 4
+      justification: Oracles de non-double-compte lors d’annulations et contributions multiples
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Demande ferme et résiduelle et contextes et versions
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-030
+    jh_par_stack: source/recalibration-metier.yaml#BC-030
+    couverture_buy: source/qualification-buy.yaml#BC-030
+- id: BC-031
+  capacite_id: demand-plan-visibility
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-master-plan-management
+  - demand-plan-visibility
+  fonctions:
+  - id: BC-031.01
+    resultat: Sélectionner la contribution de demande pertinente
+  - id: BC-031.02
+    resultat: Restituer besoins et hypothèses et limites
+  - id: BC-031.03
+    resultat: Expliquer le contexte retenu
+  variantes_source: []
+  frontiere: Réutilise Demand Plan Development ou la contribution externe qualifiée.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Interprétation de versions selon le contexte
+    tests_ajustements:
+      niveau: 3
+      justification: Vérifier que la vue n’additionne pas des scénarios alternatifs
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Lecture des besoins sans recalcul du plan
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-031
+    jh_par_stack: source/recalibration-metier.yaml#BC-031
+    couverture_buy: source/qualification-buy.yaml#BC-031
+- id: BC-032
+  capacite_id: supply-plan-development
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-demand-supply-plan-preparation
+  - supply-plan-development
+  fonctions:
+  - id: BC-032.01
+    resultat: Projeter les besoins bruts
+  - id: BC-032.02
+    resultat: Établir les apports envisagés selon les contraintes connues
+  - id: BC-032.03
+    resultat: Réviser les dates et hypothèses du plan
+  variantes_source: []
+  frontiere: Ne produit pas automatiquement une commande ferme ni un ordonnanceur d’usine.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Projection temporelle des apports et contraintes connues
+    tests_ajustements:
+      niveau: 3
+      justification: Tester calendriers et délais et apports partiels
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Plan d’approvisionnement versionné et explication des hypothèses
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-032
+    jh_par_stack: source/recalibration-metier.yaml#BC-032
+    couverture_buy: source/qualification-buy.yaml#BC-032
+- id: BC-033
+  capacite_id: plans-visibility
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-master-plan-management
+  - plans-visibility
+  fonctions:
+  - id: BC-033.01
+    resultat: Interpréter les apports d’un plan qualifié
+  - id: BC-033.02
+    resultat: Exposer leurs dates et mouvements et incertitudes
+  - id: BC-033.03
+    resultat: Identifier les limites d’utilisation
+  variantes_source: []
+  frontiere: Ne recalcule pas Supply Plan Development.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Sélection des apports pertinents par contexte
+    tests_ajustements:
+      niveau: 3
+      justification: Vérifier versions incompatibles et apports révisés
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Vues d’approvisionnement et de provenance
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-033
+    jh_par_stack: source/recalibration-metier.yaml#BC-033
+    couverture_buy: source/qualification-buy.yaml#BC-033
+- id: BC-034
+  capacite_id: planning-scenario-reconciliation
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-demand-supply-plan-preparation
+  - planning-scenario-reconciliation
+  fonctions:
+  - id: BC-034.01
+    resultat: Rapprocher les versions de demande et d’approvisionnement
+  - id: BC-034.02
+    resultat: Qualifier les écarts de couverture
+  - id: BC-034.03
+    resultat: Retenir une version ou un écart sous autorité
+  variantes_source: []
+  frontiere: N’applique pas directement les effets aux commandes.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Cohérence croisée des versions et contextes
+    tests_ajustements:
+      niveau: 3
+      justification: Tester choix devenu périmé et écarts explicitement acceptés
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Arbitrage et décision motivée sur un ensemble de plans
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-034
+    jh_par_stack: source/recalibration-metier.yaml#BC-034
+    couverture_buy: source/qualification-buy.yaml#BC-034
+- id: BC-035
+  capacite_id: D05.f
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-master-plan-management
+  - D05.f
+  fonctions:
+  - id: BC-035.01
+    resultat: Calculer les besoins nets
+  - id: BC-035.02
+    resultat: Rapprocher stock et arrivées et demande retenue
+  - id: BC-035.03
+    resultat: Tenir les écarts de couverture du Master Plan
+  variantes_source:
+  - BHV016
+  - D04.s
+  - BHV097
+  - BHV098
+  - BHV099
+  - BHV100
+  - BHV101
+  frontiere: Appelle affectation et disponibilité ; ne redéveloppe pas leurs algorithmes.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Calcul net et versions cohérentes des entrées
+    tests_ajustements:
+      niveau: 4
+      justification: Oracles de conservation et recalculs après changements simultanés
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Plan commun versionné avec diagnostic des besoins et couvertures
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-035
+    jh_par_stack: source/recalibration-metier.yaml#BC-035
+    couverture_buy: source/qualification-buy.yaml#BC-035
+- id: BC-036
+  capacite_id: D03.m
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-order-backlog-management
+  - D03.m
+  fonctions:
+  - id: BC-036.01
+    resultat: Appliquer les critères de priorité aux demandes
+  - id: BC-036.02
+    resultat: Arbitrer les conflits sous autorité
+  - id: BC-036.03
+    resultat: Expliquer priorité et stabilité retenues
+  variantes_source: []
+  frontiere: Le classement ne démontre pas un besoin de solveur combinatoire.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Classement déterministe selon règles et arbitrages explicites
+    tests_ajustements:
+      niveau: 3
+      justification: Tester égalités et révisions et préservation des engagements
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Priorités et motifs et gestion des exceptions
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-036
+    jh_par_stack: source/recalibration-metier.yaml#BC-036
+    couverture_buy: source/qualification-buy.yaml#BC-036
+- id: BC-037
+  capacite_id: D03.o
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-order-backlog-management
+  - D03.o
+  fonctions:
+  - id: BC-037.01
+    resultat: Identifier les ressources admissibles par demande
+  - id: BC-037.02
+    resultat: Choisir et réviser les affectations
+  - id: BC-037.03
+    resultat: Expliquer demandes non couvertes et compromis
+  variantes_source:
+  - BHV102
+  - BHV103
+  frontiere: Règles et heuristique constituent le cadrage initial ; optimisation globale à démontrer.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Décisions couplées par la concurrence sur les ressources
+    tests_ajustements:
+      niveau: 4
+      justification: Tester conservation et stabilité et pénurie sur jeux représentatifs
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Affectation partielle et révision et arbitrage économique explicable
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-037
+    jh_par_stack: source/recalibration-metier.yaml#BC-037
+    couverture_buy: source/qualification-buy.yaml#BC-037
+- id: BC-038
+  capacite_id: delivery-release-decision
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-order-backlog-management
+  - delivery-release-decision
+  fonctions:
+  - id: BC-038.01
+    resultat: Évaluer livraison complète ou partielle
+  - id: BC-038.02
+    resultat: Choisir les quantités et le moment de libération
+  - id: BC-038.03
+    resultat: Maintenir le reste en attente avec motif
+  variantes_source: []
+  frontiere: Ne libère pas elle-même les tâches de prestation.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Engagements et disponibilité et règles de libération croisés
+    tests_ajustements:
+      niveau: 3
+      justification: Tester révision de ressource entre décision et application
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Commandes et lignes et quantités et attente expliquée
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-038
+    jh_par_stack: source/recalibration-metier.yaml#BC-038
+    couverture_buy: source/qualification-buy.yaml#BC-038
+- id: BC-039
+  capacite_id: D02.e
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-master-plan-management
+  - D02.e
+  fonctions:
+  - id: BC-039.01
+    resultat: Transmettre les changements autorisés aux responsables
+  - id: BC-039.02
+    resultat: Suivre acceptation et refus et effets
+  - id: BC-039.03
+    resultat: Réconcilier les effets partiels
+  variantes_source: []
+  frontiere: Les connecteurs Beaumanoir sont de l’intégration ; une compensation universelle n’est pas présumée.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Protocole d’application corrélé sans transaction globale présumée
+    tests_ajustements:
+      niveau: 4
+      justification: Tester reprises et refus tardifs et absence d’effet en double
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Décision et accusés et effets constatés et diagnostic de divergence
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-039
+    jh_par_stack: source/recalibration-metier.yaml#BC-039
+    couverture_buy: source/qualification-buy.yaml#BC-039
+- id: BC-040
+  capacite_id: D05.a
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-physical-stock-configuration-optimization
+  - D05.a
+  fonctions:
+  - id: BC-040.01
+    resultat: Proposer cibles et seuils physiques par produit et site
+  - id: BC-040.02
+    resultat: Comparer service et coût et risque
+  - id: BC-040.03
+    resultat: Soumettre les recommandations avec leurs hypothèses
+  variantes_source:
+  - BHV026
+  - BHV027
+  - BHV028
+  frontiere: Ni optimisation réseau globale ni prévision propriétaire imposées par la capacité.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Calcul de recommandations multicritères bornées
+    tests_ajustements:
+      niveau: 4
+      justification: Calibrer service et coût sur jeux de demande représentatifs
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Cibles datées et scénarios et explication des paramètres
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-040
+    jh_par_stack: source/recalibration-metier.yaml#BC-040
+    couverture_buy: source/qualification-buy.yaml#BC-040
+- id: BC-041
+  capacite_id: D05.d
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-physical-stock-configuration-optimization
+  - D05.d
+  fonctions:
+  - id: BC-041.01
+    resultat: Proposer protections et plafonds de stock logique
+  - id: BC-041.02
+    resultat: Comparer les effets entre bénéficiaires
+  - id: BC-041.03
+    resultat: Réexaminer les périodes d’application
+  variantes_source: []
+  frontiere: La recommandation ne crée pas une réservation ferme.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Arbitrage de droits concurrents sur la même ressource
+    tests_ajustements:
+      niveau: 4
+      justification: Tester privation de canaux et changements de protection
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Bénéficiaires et plafonds et périodes avec comparaison des effets
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-041
+    jh_par_stack: source/recalibration-metier.yaml#BC-041
+    couverture_buy: source/qualification-buy.yaml#BC-041
+- id: BC-042
+  capacite_id: D05.h
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-physical-stock-configuration-optimization
+  - D05.h
+  fonctions:
+  - id: BC-042.01
+    resultat: Proposer jalon et durée de réservation
+  - id: BC-042.02
+    resultat: Évaluer pénurie et coût pour les autres demandes
+  - id: BC-042.03
+    resultat: Soumettre une règle de réexamen
+  variantes_source:
+  - BHV032
+  - BHV033
+  - BHV034
+  - BHV035
+  frontiere: La recommandation est distincte du moteur qui exécute les réservations.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Compromis entre engagement et disponibilité future
+    tests_ajustements:
+      niveau: 4
+      justification: Tester sensibilité aux délais et concurrence des demandes
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Conditions de réservation et recommandation explicable
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-042
+    jh_par_stack: source/recalibration-metier.yaml#BC-042
+    couverture_buy: source/qualification-buy.yaml#BC-042
+- id: BC-043
+  capacite_id: D05.e
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-physical-stock-configuration-optimization
+  - D05.e
+  fonctions:
+  - id: BC-043.01
+    resultat: Proposer les apports manquants
+  - id: BC-043.02
+    resultat: Ajuster les apports attendus devenus inadéquats
+  - id: BC-043.03
+    resultat: Expliquer les besoins et contraintes des propositions
+  variantes_source:
+  - BHV083
+  - BHV084
+  - BHV085
+  frontiere: Réutilise promesse et affectation ; aucun solveur global implicite.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Besoins et lots et délais et ressources doivent être compatibles
+    tests_ajustements:
+      niveau: 4
+      justification: Tester pénurie et arrondis et révisions d’apports
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Réassort par besoin ou cible et propositions à arbitrer
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-043
+    jh_par_stack: source/recalibration-metier.yaml#BC-043
+    couverture_buy: source/qualification-buy.yaml#BC-043
+- id: BC-044
+  capacite_id: D05.c
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-physical-stock-configuration-optimization
+  - D05.c
+  fonctions:
+  - id: BC-044.01
+    resultat: Identifier surplus et besoins entre sites
+  - id: BC-044.02
+    resultat: Proposer les transferts physiques pertinents
+  - id: BC-044.03
+    resultat: Évaluer leurs effets et contraintes
+  variantes_source:
+  - BHV024
+  - BHV025
+  frontiere: Réutilise le cycle Transfer Order pour les décisions acceptées.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Choix de transferts couplés par les disponibilités des sites
+    tests_ajustements:
+      niveau: 4
+      justification: Tester absence de double mobilisation et stabilité des propositions
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Origines et destinations et coûts et propositions révisables
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-044
+    jh_par_stack: source/recalibration-metier.yaml#BC-044
+    couverture_buy: source/qualification-buy.yaml#BC-044
+- id: BC-045
+  capacite_id: BHV006
+  chemin:
+  - supply-chain-orchestration
+  - domain-plan
+  - ba-master-plan-management
+  - BHV006
+  fonctions:
+  - id: BC-045.01
+    resultat: Isoler les hypothèses d’un scénario
+  - id: BC-045.02
+    resultat: Rejouer les calculateurs concernés
+  - id: BC-045.03
+    resultat: Comparer service et coût et dates et risques
+  variantes_source: []
+  frontiere: Les algorithmes des calculateurs ne sont pas réalisés une seconde fois.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Isolation et cohérence des versions lors du rejeu
+    tests_ajustements:
+      niveau: 4
+      justification: Vérifier reproductibilité et absence d’effet sur le plan actif
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Scénarios comparables et écarts et hypothèses consultables
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-045
+    jh_par_stack: source/recalibration-metier.yaml#BC-045
+    couverture_buy: source/qualification-buy.yaml#BC-045
+- id: BC-046
+  capacite_id: D03.i
+  chemin:
+  - supply-chain-orchestration
+  - D03
+  - ba-order-promising
+  - D03.i
+  fonctions:
+  - id: BC-046.01
+    resultat: Sélectionner les ressources présentes et futures admissibles
+  - id: BC-046.02
+    resultat: Calculer quantité et date promettables
+  - id: BC-046.03
+    resultat: Expliquer les limites de la réponse
+  variantes_source:
+  - BHV002
+  - BHV004
+  frontiere: La réponse ATP ne confirme ni ne réserve seule la commande.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Projection des ressources sous calendriers et protections
+    tests_ajustements:
+      niveau: 4
+      justification: Oracles de non-surpromesse et fraîcheur des ressources
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Réponse quantité-date et détails de disponibilité
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-046
+    jh_par_stack: source/recalibration-metier.yaml#BC-046
+    couverture_buy: source/qualification-buy.yaml#BC-046
+- id: BC-047
+  capacite_id: D03.j
+  chemin:
+  - supply-chain-orchestration
+  - D03
+  - ba-order-promising
+  - D03.j
+  fonctions:
+  - id: BC-047.01
+    resultat: Identifier les apports possibles pour une promesse
+  - id: BC-047.02
+    resultat: Vérifier matières et capacités et délais
+  - id: BC-047.03
+    resultat: Choisir une possibilité faisable et expliquer les conditions
+  variantes_source:
+  - BHV075
+  - BHV076
+  frontiere: Pas de MES ni d’ordonnancement fin d’usine ; profondeur des dépendances à confirmer.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Faisabilité par dépendances d’apports bornées
+    tests_ajustements:
+      niveau: 4
+      justification: Oracles de faisabilité avec capacité insuffisante et délais variables
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Alternatives d’apport et conditions de promesse
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-047
+    jh_par_stack: source/recalibration-metier.yaml#BC-047
+    couverture_buy: source/qualification-buy.yaml#BC-047
+- id: BC-048
+  capacite_id: D03.k
+  chemin:
+  - supply-chain-orchestration
+  - D03
+  - ba-order-promising
+  - D03.k
+  fonctions:
+  - id: BC-048.01
+    resultat: Valoriser les options de promesse admissibles
+  - id: BC-048.02
+    resultat: Comparer conséquences économiques et service
+  - id: BC-048.03
+    resultat: Choisir sous autorité et expliciter les coûts inconnus
+  variantes_source:
+  - BHV107
+  - BHV108
+  frontiere: Réutilise ATP et CTP ; ne réduit pas la décision à un simple écran de coûts.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Choix multicritère parmi options faisables fournies
+    tests_ajustements:
+      niveau: 3
+      justification: Tester options dominées et unités et coûts manquants
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Décision économique et justification de l’option retenue
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-048
+    jh_par_stack: source/recalibration-metier.yaml#BC-048
+    couverture_buy: source/qualification-buy.yaml#BC-048
+- id: BC-049
+  capacite_id: D06.b
+  chemin:
+  - supply-chain-orchestration
+  - D06
+  - ba-service-planning
+  - D06.b
+  fonctions:
+  - id: BC-049.01
+    resultat: Recevoir les capacités déclarées des exécutants
+  - id: BC-049.02
+    resultat: Qualifier portée et période et incertitudes
+  - id: BC-049.03
+    resultat: Exposer les possibilités utilisables
+  variantes_source: []
+  frontiere: Ne planifie pas les ressources internes des exécutants.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Qualification de déclarations hétérogènes
+    tests_ajustements:
+      niveau: 3
+      justification: Tester obsolescence et capacités contradictoires
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Vues de capacité et provenance distinctes d’un engagement
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-049
+    jh_par_stack: source/recalibration-metier.yaml#BC-049
+    couverture_buy: source/qualification-buy.yaml#BC-049
+- id: BC-050
+  capacite_id: D07.a
+  chemin:
+  - supply-chain-orchestration
+  - D06
+  - ba-service-planning
+  - D07.a
+  fonctions:
+  - id: BC-050.01
+    resultat: Déduire les prestations nécessaires d’un besoin
+  - id: BC-050.02
+    resultat: Préciser biens et quantités et échéances
+  - id: BC-050.03
+    resultat: Définir résultats attendus et contraintes
+  variantes_source: []
+  frontiere: Ne prescrit pas les gestes opérationnels internes du prestataire.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Décomposition du besoin en prestations compatibles
+    tests_ajustements:
+      niveau: 3
+      justification: Tester prestations manquantes et contraintes contradictoires
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Exigences de service avant choix de l’exécutant
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-050
+    jh_par_stack: source/recalibration-metier.yaml#BC-050
+    couverture_buy: source/qualification-buy.yaml#BC-050
+- id: BC-051
+  capacite_id: D06.e
+  chemin:
+  - supply-chain-orchestration
+  - D06
+  - ba-service-planning
+  - D06.e
+  fonctions:
+  - id: BC-051.01
+    resultat: Identifier les services et exécutants admissibles
+  - id: BC-051.02
+    resultat: Comparer capacités et conditions et contraintes
+  - id: BC-051.03
+    resultat: Retenir un choix motivé
+  variantes_source: []
+  frontiere: Le contrôle d’éligibilité est réutilisé et non recodé.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Sélection multicritère sous admissibilité
+    tests_ajustements:
+      niveau: 3
+      justification: Tester indisponibilité et retrait d’autorisation et informations manquantes
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Alternatives et motifs de sélection et réexamen
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-051
+    jh_par_stack: source/recalibration-metier.yaml#BC-051
+    couverture_buy: source/qualification-buy.yaml#BC-051
+- id: BC-052
+  capacite_id: transport-plan-decision
+  chemin:
+  - supply-chain-orchestration
+  - D06
+  - ba-service-planning
+  - transport-plan-decision
+  fonctions:
+  - id: BC-052.01
+    resultat: Constituer des chargements admissibles
+  - id: BC-052.02
+    resultat: Proposer trajets et arrêts et échéances
+  - id: BC-052.03
+    resultat: Réviser le plan selon les contraintes et engagements
+  variantes_source:
+  - transport-load-consolidation
+  - transport-routing-scheduling
+  frontiere: La taille des problèmes et la qualité d’optimisation restent à établir ; pas de TMS complet.
+  complexite:
+    algorithmique:
+      niveau: 4
+      justification: Couplage de chargements et itinéraires sous fenêtres temporelles
+    tests_ajustements:
+      niveau: 4
+      justification: Vérifier faisabilité et qualité des propositions sur cas bornés
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Plan de transport et révision et justification des contraintes
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-052
+    jh_par_stack: source/recalibration-metier.yaml#BC-052
+    couverture_buy: source/qualification-buy.yaml#BC-052
+- id: BC-053
+  capacite_id: D06.d
+  chemin:
+  - supply-chain-orchestration
+  - D06
+  - ba-execution-coordination
+  - D06.d
+  fonctions:
+  - id: BC-053.01
+    resultat: Tenir les dépendances entre prestations
+  - id: BC-053.02
+    resultat: Déclencher les prestations autorisées
+  - id: BC-053.03
+    resultat: Suivre leur progression vers les résultats attendus
+  variantes_source: []
+  frontiere: Réutilise l’exécution durable de Process Orchestration.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Dépendances et états métier de plusieurs exécutants
+    tests_ajustements:
+      niveau: 4
+      justification: Tester événements simultanés et progression après reprise
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Coordination métier et diagnostics de blocage
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-053
+    jh_par_stack: source/recalibration-metier.yaml#BC-053
+    couverture_buy: source/qualification-buy.yaml#BC-053
+- id: BC-054
+  capacite_id: D06.f
+  chemin:
+  - supply-chain-orchestration
+  - D06
+  - ba-execution-coordination
+  - D06.f
+  fonctions:
+  - id: BC-054.01
+    resultat: Qualifier l’impact d’un aléa
+  - id: BC-054.02
+    resultat: Comparer les adaptations compatibles avec la promesse
+  - id: BC-054.03
+    resultat: Faire autoriser et appliquer l’adaptation retenue
+  variantes_source: []
+  frontiere: Ne suppose pas que tout acte physique est réversible.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Révision liée de prestations et engagements existants
+    tests_ajustements:
+      niveau: 4
+      justification: Tester décisions concurrentes et adaptations aux effets partiels
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Alternatives et arbitrage et explication du compromis
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-054
+    jh_par_stack: source/recalibration-metier.yaml#BC-054
+    couverture_buy: source/qualification-buy.yaml#BC-054
+- id: BC-055
+  capacite_id: service-order-release-decision
+  chemin:
+  - supply-chain-orchestration
+  - D06
+  - ba-execution-coordination
+  - service-order-release-decision
+  fonctions:
+  - id: BC-055.01
+    resultat: Sélectionner les ordres à libérer ensemble
+  - id: BC-055.02
+    resultat: Déterminer leur moment de libération
+  - id: BC-055.03
+    resultat: Expliquer attentes et regroupements retenus
+  variantes_source:
+  - BHV105
+  - BHV106
+  frontiere: Distinct de Delivery Release Decision qui porte les commandes à satisfaire.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Regroupements utiles sous échéances et engagements
+    tests_ajustements:
+      niveau: 3
+      justification: Tester attente excessive et libérations partielles
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Lots de prestations et calendrier de libération
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-055
+    jh_par_stack: source/recalibration-metier.yaml#BC-055
+    couverture_buy: source/qualification-buy.yaml#BC-055
+- id: BC-056
+  capacite_id: D07.d
+  chemin:
+  - supply-chain-orchestration
+  - D06
+  - ba-execution-assurance
+  - D07.d
+  fonctions:
+  - id: BC-056.01
+    resultat: Intégrer jalons et résultats de prestation
+  - id: BC-056.02
+    resultat: Corréler le fait à la demande et au service
+  - id: BC-056.03
+    resultat: Conserver corrections et distinction fait-estimation
+  variantes_source: []
+  frontiere: Ne remplace pas Inventory Tracking et n’impose pas un passage unique à tous les faits.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Corrélation temporelle de faits venant de plusieurs exécutants
+    tests_ajustements:
+      niveau: 4
+      justification: Tester doublons et faits tardifs et corrections sans effet stock répété
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Prestations physiques et humaines et numériques
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-056
+    jh_par_stack: source/recalibration-metier.yaml#BC-056
+    couverture_buy: source/qualification-buy.yaml#BC-056
+- id: BC-057
+  capacite_id: D07.c
+  chemin:
+  - supply-chain-orchestration
+  - D06
+  - ba-execution-assurance
+  - D07.c
+  fonctions:
+  - id: BC-057.01
+    resultat: Rapprocher prestation attendue et résultats
+  - id: BC-057.02
+    resultat: Qualifier manquants et non-conformités
+  - id: BC-057.03
+    resultat: Fournir les faits reconnus aux consommateurs
+  variantes_source: []
+  frontiere: Un accusé technique n’est pas un résultat métier reconnu.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Rapprochement de résultats partiels et corrigés
+    tests_ajustements:
+      niveau: 3
+      justification: Tester sur-réalisation et quantités refusées et pièces manquantes
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Écarts et reconnaissance métier et transmission
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-057
+    jh_par_stack: source/recalibration-metier.yaml#BC-057
+    couverture_buy: source/qualification-buy.yaml#BC-057
+- id: BC-058
+  capacite_id: operations-visibility
+  chemin:
+  - supply-chain-orchestration
+  - D06
+  - ba-execution-assurance
+  - operations-visibility
+  fonctions:
+  - id: BC-058.01
+    resultat: Restituer avancement et attentes des prestations
+  - id: BC-058.02
+    resultat: Expliquer les écarts et résultats connus
+  - id: BC-058.03
+    resultat: Naviguer vers les faits justificatifs
+  variantes_source:
+  - BHV079
+  - BHV080
+  - BHV081
+  frontiere: Réutilise Tracking et Reconciliation sans dupliquer leurs contrôles.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Projection des faits et attentes sans nouvelle décision
+    tests_ajustements:
+      niveau: 3
+      justification: Vérifier cohérence des vues avec les faits corrigés
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Vues transverses d’avancement et de détail
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-058
+    jh_par_stack: source/recalibration-metier.yaml#BC-058
+    couverture_buy: source/qualification-buy.yaml#BC-058
+- id: BC-059
+  capacite_id: service-order-picking
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-goods-processing-order-management
+  - service-order-picking
+  fonctions:
+  - id: BC-059.01
+    resultat: Porter les références et quantités à prélever
+  - id: BC-059.02
+    resultat: Tenir engagements et changements
+  - id: BC-059.03
+    resultat: Rapprocher prélèvements et manquants
+  variantes_source: []
+  frontiere: Ne gère pas les déplacements des opérateurs du WMS.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cycle de prestation avec résultats partiels
+    tests_ajustements:
+      niveau: 3
+      justification: Tester manquants et substitutions autorisées et corrections
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Exigences de prélèvement et engagements et résultats
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-059
+    jh_par_stack: source/recalibration-metier.yaml#BC-059
+    couverture_buy: source/qualification-buy.yaml#BC-059
+- id: BC-060
+  capacite_id: service-order-packing
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-goods-processing-order-management
+  - service-order-packing
+  fonctions:
+  - id: BC-060.01
+    resultat: Porter les exigences de conditionnement
+  - id: BC-060.02
+    resultat: Suivre conditionnement et reconditionnement
+  - id: BC-060.03
+    resultat: Rapprocher résultats et unités concernées
+  variantes_source: []
+  frontiere: Ne calcule pas le placement physique optimal des objets dans un colis.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cycle spécialisé et liens entre biens et conditionnements
+    tests_ajustements:
+      niveau: 3
+      justification: Tester reconditionnements et quantités partielles
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Exigences et résultats de conditionnement
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-060
+    jh_par_stack: source/recalibration-metier.yaml#BC-060
+    couverture_buy: source/qualification-buy.yaml#BC-060
+- id: BC-061
+  capacite_id: service-order-cross-docking
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-goods-processing-order-management
+  - service-order-cross-docking
+  fonctions:
+  - id: BC-061.01
+    resultat: Lier marchandises reçues et départs prévus
+  - id: BC-061.02
+    resultat: Tenir les engagements de passage
+  - id: BC-061.03
+    resultat: Qualifier retards et écarts de transit
+  variantes_source: []
+  frontiere: Ne reconstruit pas l’ordonnancement du quai.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Dépendance temporelle entre réception et départ
+    tests_ajustements:
+      niveau: 3
+      justification: Tester arrivée partielle et départ décalé
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Demande de transit et résultats corrélés
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-061
+    jh_par_stack: source/recalibration-metier.yaml#BC-061
+    couverture_buy: source/qualification-buy.yaml#BC-061
+- id: BC-062
+  capacite_id: service-order-labeling
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-goods-processing-order-management
+  - service-order-labeling
+  fonctions:
+  - id: BC-062.01
+    resultat: Porter les exigences de marquage ou étiquetage
+  - id: BC-062.02
+    resultat: Suivre engagements et résultats
+  - id: BC-062.03
+    resultat: Qualifier les non-conformités
+  variantes_source: []
+  frontiere: Les imprimantes et gestes d’étiquetage restent chez l’exécutant.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cycle de prestation borné par spécification
+    tests_ajustements:
+      niveau: 2
+      justification: Tester variante d’étiquette et prestation partielle
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Demande documentée et preuve du résultat
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-062
+    jh_par_stack: source/recalibration-metier.yaml#BC-062
+    couverture_buy: source/qualification-buy.yaml#BC-062
+- id: BC-063
+  capacite_id: service-order-kitting
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-goods-processing-order-management
+  - service-order-kitting
+  fonctions:
+  - id: BC-063.01
+    resultat: Porter les exigences de constitution ou séparation d’ensembles
+  - id: BC-063.02
+    resultat: Suivre les biens entrants et résultats
+  - id: BC-063.03
+    resultat: Qualifier les écarts de composition
+  variantes_source: []
+  frontiere: Ne développe pas une GPAO ni le pilotage des postes de travail.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Conservation des quantités entre composants et ensembles
+    tests_ajustements:
+      niveau: 3
+      justification: Tester décomposition et recomposition partielles
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Constitution et séparation et recomposition avec filiation
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-063
+    jh_par_stack: source/recalibration-metier.yaml#BC-063
+    couverture_buy: source/qualification-buy.yaml#BC-063
+- id: BC-064
+  capacite_id: service-order-garment-finishing
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-goods-processing-order-management
+  - service-order-garment-finishing
+  fonctions:
+  - id: BC-064.01
+    resultat: Porter les exigences de finition d’aspect
+  - id: BC-064.02
+    resultat: Suivre engagements et résultats
+  - id: BC-064.03
+    resultat: Qualifier la conformité obtenue
+  variantes_source: []
+  frontiere: Ne décrit pas les procédés industriels de finition.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cycle spécialisé sous consigne
+    tests_ajustements:
+      niveau: 2
+      justification: Tester résultat partiel et finition refusée
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Ordre de finition et preuve de résultat
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-064
+    jh_par_stack: source/recalibration-metier.yaml#BC-064
+    couverture_buy: source/qualification-buy.yaml#BC-064
+- id: BC-065
+  capacite_id: service-order-cleaning
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-goods-processing-order-management
+  - service-order-cleaning
+  fonctions:
+  - id: BC-065.01
+    resultat: Porter les exigences de nettoyage
+  - id: BC-065.02
+    resultat: Suivre les biens confiés et les résultats
+  - id: BC-065.03
+    resultat: Qualifier les écarts et suites attendues
+  variantes_source: []
+  frontiere: Ne pilote pas les équipements de nettoyage.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cycle de prestation sur biens identifiés
+    tests_ajustements:
+      niveau: 2
+      justification: Tester nettoyage partiel ou non conforme
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Consignes et engagements et résultats de nettoyage
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-065
+    jh_par_stack: source/recalibration-metier.yaml#BC-065
+    couverture_buy: source/qualification-buy.yaml#BC-065
+- id: BC-066
+  capacite_id: service-order-repair-alteration
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-goods-processing-order-management
+  - service-order-repair-alteration
+  fonctions:
+  - id: BC-066.01
+    resultat: Porter réparation et retouche demandées
+  - id: BC-066.02
+    resultat: Maintenir la filiation des biens confiés
+  - id: BC-066.03
+    resultat: Suivre résultat et restitution
+  variantes_source: []
+  frontiere: Le diagnostic technique de réparation reste chez l’exécutant.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cycle spécialisé avec identité du bien conservée
+    tests_ajustements:
+      niveau: 3
+      justification: Tester réparation impossible et restitution partielle
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Diagnostic reçu et exigences et résultat et restitution
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-066
+    jh_par_stack: source/recalibration-metier.yaml#BC-066
+    couverture_buy: source/qualification-buy.yaml#BC-066
+- id: BC-067
+  capacite_id: service-order-personalization
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-goods-processing-order-management
+  - service-order-personalization
+  fonctions:
+  - id: BC-067.01
+    resultat: Porter les spécifications de personnalisation
+  - id: BC-067.02
+    resultat: Lier la demande au bien concerné
+  - id: BC-067.03
+    resultat: Suivre réalisation et non-conformité
+  variantes_source: []
+  frontiere: Ne crée pas un studio graphique ni les procédés de fabrication.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cycle avec spécification individuelle
+    tests_ajustements:
+      niveau: 3
+      justification: Tester mauvaise association et changement après engagement
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Consigne individuelle et résultat documenté
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-067
+    jh_par_stack: source/recalibration-metier.yaml#BC-067
+    couverture_buy: source/qualification-buy.yaml#BC-067
+- id: BC-068
+  capacite_id: service-order-inspection
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-goods-processing-order-management
+  - service-order-inspection
+  fonctions:
+  - id: BC-068.01
+    resultat: Porter les exigences d’inspection
+  - id: BC-068.02
+    resultat: Collecter résultats et preuves
+  - id: BC-068.03
+    resultat: Suivre conclusions et écarts
+  variantes_source: []
+  frontiere: Ne remplace pas l’expertise technique de l’inspecteur.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cycle de contrôle avec résultats documentés
+    tests_ajustements:
+      niveau: 3
+      justification: Tester preuve incomplète et inspection partielle
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Inspection confiée et constat reçu et qualification
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-068
+    jh_par_stack: source/recalibration-metier.yaml#BC-068
+    couverture_buy: source/qualification-buy.yaml#BC-068
+- id: BC-069
+  capacite_id: service-order-receiving
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-goods-processing-order-management
+  - service-order-receiving
+  fonctions:
+  - id: BC-069.01
+    resultat: Porter quantités et conditions attendues
+  - id: BC-069.02
+    resultat: Rapprocher réceptions et engagements
+  - id: BC-069.03
+    resultat: Traiter refus et non-conformités et reliquats
+  variantes_source: []
+  frontiere: Ne tient pas la procédure opératoire de réception du WMS.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Rapprochement de réceptions partielles avec leurs conditions
+    tests_ajustements:
+      niveau: 3
+      justification: Tester refus et correction sans double entrée de stock
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Réception attendue et reconnue et écart avec preuves
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-069
+    jh_par_stack: source/recalibration-metier.yaml#BC-069
+    couverture_buy: source/qualification-buy.yaml#BC-069
+- id: BC-070
+  capacite_id: service-order-scrapping
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-goods-processing-order-management
+  - service-order-scrapping
+  fonctions:
+  - id: BC-070.01
+    resultat: Porter l’autorisation de rebut
+  - id: BC-070.02
+    resultat: Confier quantités et consignes
+  - id: BC-070.03
+    resultat: Reconnaître résultat et preuve de destruction
+  variantes_source: []
+  frontiere: La criticité du rebut n’implique pas un algorithme complexe.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cycle sous autorisation d’un acte irréversible
+    tests_ajustements:
+      niveau: 3
+      justification: Tester absence de preuve et quantités discordantes
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Demande et autorisation et preuve du rebut
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-070
+    jh_par_stack: source/recalibration-metier.yaml#BC-070
+    couverture_buy: source/qualification-buy.yaml#BC-070
+- id: BC-071
+  capacite_id: service-order-transport
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-transport-order-management
+  - service-order-transport
+  fonctions:
+  - id: BC-071.01
+    resultat: Porter quantités et lieux et conditions du déplacement
+  - id: BC-071.02
+    resultat: Suivre engagements acceptés et modifications
+  - id: BC-071.03
+    resultat: Qualifier les suites des écarts de transport
+  variantes_source:
+  - transport-multi-stop
+  - transport-multi-leg
+  - transport-scheduled
+  - transport-appointments
+  - transport-rescheduling-redirection
+  frontiere: Ne gère pas la flotte ni le dispatch interne du transporteur.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Engagements liés à collecte et livraison
+    tests_ajustements:
+      niveau: 3
+      justification: Tester étapes partielles et reports et refus
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Ordre de déplacement et conditions et résultats
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-071
+    jh_par_stack: source/recalibration-metier.yaml#BC-071
+    couverture_buy: source/qualification-buy.yaml#BC-071
+- id: BC-072
+  capacite_id: service-order-transport-booking
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-transport-order-management
+  - service-order-transport-booking
+  fonctions:
+  - id: BC-072.01
+    resultat: Demander une réservation autonome de capacité
+  - id: BC-072.02
+    resultat: Suivre confirmation et changement
+  - id: BC-072.03
+    resultat: Libérer la réservation selon les conditions
+  variantes_source: []
+  frontiere: Une réservation de transport n’est pas un Transport Order détaillé.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cycle de réservation distinct des instructions de transport
+    tests_ajustements:
+      niveau: 3
+      justification: Tester refus et expiration et libération partielle
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Demande de capacité et engagement et consommation
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-072
+    jh_par_stack: source/recalibration-metier.yaml#BC-072
+    couverture_buy: source/qualification-buy.yaml#BC-072
+- id: BC-073
+  capacite_id: service-order-customs-clearance
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-customs-services
+  - service-order-customs-clearance
+  fonctions:
+  - id: BC-073.01
+    resultat: Constituer la demande et le dossier de dédouanement
+  - id: BC-073.02
+    resultat: Suivre procédure et pièces manquantes
+  - id: BC-073.03
+    resultat: Reconnaître résultat et traiter les écarts
+  variantes_source: []
+  frontiere: Ne reconstruit ni moteur réglementaire douanier ni téléprocédure de déclaration.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: États de dossier et complétude documentaire interdépendants
+    tests_ajustements:
+      niveau: 3
+      justification: Tester rejet et complément et résultat partiel
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Prestation douanière avec documents et suivi de procédure
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-073
+    jh_par_stack: source/recalibration-metier.yaml#BC-073
+    couverture_buy: source/qualification-buy.yaml#BC-073
+- id: BC-074
+  capacite_id: service-order-billing
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-financial-service-order-management
+  - service-order-billing
+  fonctions:
+  - id: BC-074.01
+    resultat: Identifier les éléments éligibles à facturation
+  - id: BC-074.02
+    resultat: Demander et reconnaître facture ou avoir
+  - id: BC-074.03
+    resultat: Traiter rejets et corrections avec les justificatifs
+  variantes_source: []
+  frontiere: Ne reconstruit ni fiscalité ni comptabilité générale.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Faits facturables et pièces et corrections corrélés
+    tests_ajustements:
+      niveau: 4
+      justification: Tester émission en double et avoir partiel et chaîne intercompany
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Facturation des flux et suivi des pièces obtenues
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-074
+    jh_par_stack: source/recalibration-metier.yaml#BC-074
+    couverture_buy: source/qualification-buy.yaml#BC-074
+- id: BC-075
+  capacite_id: service-order-payment-collection
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-service-orders
+  - ba-financial-service-order-management
+  - service-order-payment-collection
+  fonctions:
+  - id: BC-075.01
+    resultat: Demander l’encaissement ou le remboursement autorisé
+  - id: BC-075.02
+    resultat: Rapprocher les résultats reçus
+  - id: BC-075.03
+    resultat: Tenir les montants restant à traiter
+  variantes_source: []
+  frontiere: N’opère pas le paiement bancaire et ne reconstruit pas le prestataire de paiement.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Corrélation de montants et résultats partiels
+    tests_ajustements:
+      niveau: 4
+      justification: Tester double demande et refus et remboursement partiel
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Encaissements et remboursements et soldes à traiter
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-075
+    jh_par_stack: source/recalibration-metier.yaml#BC-075
+    couverture_buy: source/qualification-buy.yaml#BC-075
+- id: BC-076
+  capacite_id: workflow-definition-management
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-process-management
+  - ba-reactive-workflow-management
+  - workflow-definition-management
+  fonctions:
+  - id: BC-076.01
+    resultat: Décrire les activités réutilisables et leurs contrats
+  - id: BC-076.02
+    resultat: Définir les règles de composition autorisées
+  - id: BC-076.03
+    resultat: Versionner les définitions applicables
+  variantes_source: []
+  frontiere: Aucun langage universel ou studio graphique libre n’est imposé.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Validation de compositions bornées et compatibles
+    tests_ajustements:
+      niveau: 3
+      justification: Tester version incompatible et activité manquante
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Bibliothèque de parcours Supply et règles de composition
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-076
+    jh_par_stack: source/recalibration-metier.yaml#BC-076
+    couverture_buy: source/qualification-buy.yaml#BC-076
+- id: BC-077
+  capacite_id: order-workflow-planning
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-process-management
+  - ba-reactive-workflow-management
+  - order-workflow-planning
+  fonctions:
+  - id: BC-077.01
+    resultat: Composer le parcours à partir des activités disponibles
+  - id: BC-077.02
+    resultat: Adapter le parcours au contexte
+  - id: BC-077.03
+    resultat: Vérifier les contraintes avant engagement
+  variantes_source: []
+  frontiere: Réutilise la bibliothèque ; pas de planificateur universel déduit du terme Planning.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Composition d’activités et dépendances dans une instance
+    tests_ajustements:
+      niveau: 4
+      justification: Tester adaptation à chaud sans invalider les actes engagés
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Parcours retenu et versions et diagnostic des incompatibilités
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-077
+    jh_par_stack: source/recalibration-metier.yaml#BC-077
+    couverture_buy: source/qualification-buy.yaml#BC-077
+- id: BC-078
+  capacite_id: order-workflow-sentry
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-process-management
+  - ba-reactive-workflow-management
+  - order-workflow-sentry
+  fonctions:
+  - id: BC-078.01
+    resultat: Détecter événements et conditions dans le dossier
+  - id: BC-078.02
+    resultat: Qualifier la réaction autorisée
+  - id: BC-078.03
+    resultat: Transmettre le déclenchement une seule fois
+  variantes_source: []
+  frontiere: Le choix de CMMN ou d’un autre moteur reste architectural.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Conditions corrélées aux faits et à la version du parcours
+    tests_ajustements:
+      niveau: 4
+      justification: Tester événements simultanés et retardés et réaction répétée
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Détection contextualisée et trace de la règle déclenchée
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-078
+    jh_par_stack: source/recalibration-metier.yaml#BC-078
+    couverture_buy: source/qualification-buy.yaml#BC-078
+- id: BC-079
+  capacite_id: order-workflow-orchestration
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-process-management
+  - ba-reactive-workflow-management
+  - order-workflow-orchestration
+  fonctions:
+  - id: BC-079.01
+    resultat: Exécuter les activités et attentes du parcours
+  - id: BC-079.02
+    resultat: Reprendre après interruption
+  - id: BC-079.03
+    resultat: Conserver résultats et progression du dossier
+  variantes_source: []
+  frontiere: Les règles de coordination Supply restent sous Fulfilment Coordination.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: État durable des attentes et résultats corrélés
+    tests_ajustements:
+      niveau: 4
+      justification: Tester panne et reprise et concurrence sans refaire un acte reconnu
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Dossiers et activités et attentes et résultats avec diagnostics
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-079
+    jh_par_stack: source/recalibration-metier.yaml#BC-079
+    couverture_buy: source/qualification-buy.yaml#BC-079
+- id: BC-080
+  capacite_id: human-task-management
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-process-management
+  - ba-human-work-management
+  - human-task-management
+  fonctions:
+  - id: BC-080.01
+    resultat: Solliciter une contribution humaine contextualisée
+  - id: BC-080.02
+    resultat: Recueillir décision et pièces et résultat
+  - id: BC-080.03
+    resultat: Rendre ce résultat exploitable par le parcours
+  variantes_source: []
+  frontiere: Ne crée pas un studio universel de formulaires ni un outil RH.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Cycle d’une tâche avec résultat structuré
+    tests_ajustements:
+      niveau: 3
+      justification: Tester tâche devenue périmée et résultats simultanés
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Formulaires bornés et pièces et validation de contribution
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-080
+    jh_par_stack: source/recalibration-metier.yaml#BC-080
+    couverture_buy: source/qualification-buy.yaml#BC-080
+- id: BC-081
+  capacite_id: work-assignment
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-process-management
+  - ba-human-work-management
+  - work-assignment
+  fonctions:
+  - id: BC-081.01
+    resultat: Déterminer les personnes ou collectifs admissibles
+  - id: BC-081.02
+    resultat: Attribuer et réattribuer le travail
+  - id: BC-081.03
+    resultat: Expliquer les conflits et équilibrages
+  variantes_source: []
+  frontiere: Une optimisation globale des effectifs n’est pas déduite de la répartition des tâches.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Règles d’admissibilité et affectation déterministe
+    tests_ajustements:
+      niveau: 3
+      justification: Tester prise simultanée et absence et réaffectation
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Files de travail et attributaires et motifs
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-081
+    jh_par_stack: source/recalibration-metier.yaml#BC-081
+    couverture_buy: source/qualification-buy.yaml#BC-081
+- id: BC-082
+  capacite_id: work-deadline-management
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-process-management
+  - ba-human-work-management
+  - work-deadline-management
+  fonctions:
+  - id: BC-082.01
+    resultat: Calculer les échéances applicables
+  - id: BC-082.02
+    resultat: Surveiller pauses et dépassements
+  - id: BC-082.03
+    resultat: Déclencher relance ou escalade autorisée
+  variantes_source: []
+  frontiere: Les calendriers et délais Beaumanoir sont des paramètres d’intégration.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Calcul temporel selon calendriers et pauses
+    tests_ajustements:
+      niveau: 3
+      justification: Tester changement de calendrier et échéance pendant interruption
+    etendue_fonctionnelle:
+      niveau: 2
+      justification: Dates utiles et alertes et suites autorisées
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-082
+    jh_par_stack: source/recalibration-metier.yaml#BC-082
+    couverture_buy: source/qualification-buy.yaml#BC-082
+- id: BC-083
+  capacite_id: process-intervention
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-process-management
+  - ba-process-supervision
+  - process-intervention
+  fonctions:
+  - id: BC-083.01
+    resultat: Vérifier portée et droits de l’intervention
+  - id: BC-083.02
+    resultat: Appliquer l’action autorisée
+  - id: BC-083.03
+    resultat: Constater son effet et conserver les preuves
+  variantes_source: []
+  frontiere: Aucun retour arrière universel des actes irréversibles.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Modification contrôlée d’un parcours déjà engagé
+    tests_ajustements:
+      niveau: 4
+      justification: Tester refus et effets partiels et interventions concurrentes
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Catalogue borné d’interventions et preuve de résultat
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-083
+    jh_par_stack: source/recalibration-metier.yaml#BC-083
+    couverture_buy: source/qualification-buy.yaml#BC-083
+- id: BC-084
+  capacite_id: process-exception-management
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-process-management
+  - ba-process-supervision
+  - process-exception-management
+  fonctions:
+  - id: BC-084.01
+    resultat: Qualifier l’exception et les parcours concernés
+  - id: BC-084.02
+    resultat: Instruire la remédiation sous responsabilité
+  - id: BC-084.03
+    resultat: Clore sur une résolution attestée
+  variantes_source: []
+  frontiere: Réutilise tâches et interventions et ne duplique pas l’orchestration durable.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Corrélation d’une exception sur plusieurs parcours
+    tests_ajustements:
+      niveau: 4
+      justification: Tester incidents simultanés et clôture sans effet constaté
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Dossier d’exception et responsabilités et preuves de résolution
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-084
+    jh_par_stack: source/recalibration-metier.yaml#BC-084
+    couverture_buy: source/qualification-buy.yaml#BC-084
+- id: BC-085
+  capacite_id: process-ledger
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-process-management
+  - ba-process-supervision
+  - process-ledger
+  fonctions:
+  - id: BC-085.01
+    resultat: Historiser les événements métier du dossier
+  - id: BC-085.02
+    resultat: Conserver origines et corrections et temporalités
+  - id: BC-085.03
+    resultat: Reconstituer les faits et la situation passée
+  variantes_source: []
+  frontiere: Les producteurs capturent leurs faits ; le registre ne recrée pas leurs fonctions.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Reconstitution temporelle des événements corrigés
+    tests_ajustements:
+      niveau: 4
+      justification: Tester relecture à date et complétude des liens entre dossiers
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Registre de dossier et événements et preuves distincts des traces techniques
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-085
+    jh_par_stack: source/recalibration-metier.yaml#BC-085
+    couverture_buy: source/qualification-buy.yaml#BC-085
+- id: BC-086
+  capacite_id: BHV082
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-process-management
+  - ba-process-supervision
+  - BHV082
+  fonctions:
+  - id: BC-086.01
+    resultat: Rapprocher parcours et tâches et commandes
+  - id: BC-086.02
+    resultat: Distinguer faits et engagements et attentes
+  - id: BC-086.03
+    resultat: Expliquer les restes à satisfaire et leurs causes
+  variantes_source: []
+  frontiere: La visibilité ne prend pas elle-même les décisions de réaffectation.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Projections corrélées de plusieurs objets dont liens intercompany
+    tests_ajustements:
+      niveau: 3
+      justification: Tester cohérence après correction et absence de double reste
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Vues de conduite et navigation vers les preuves
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-086
+    jh_par_stack: source/recalibration-metier.yaml#BC-086
+    couverture_buy: source/qualification-buy.yaml#BC-086
+- id: BC-087
+  capacite_id: process-mining
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-process-management
+  - ba-process-intelligence
+  - process-mining
+  fonctions:
+  - id: BC-087.01
+    resultat: Reconstituer les parcours depuis les traces corrélées
+  - id: BC-087.02
+    resultat: Identifier variantes et temps de passage
+  - id: BC-087.03
+    resultat: Comparer au parcours attendu lorsqu’il est défini
+  variantes_source: []
+  frontiere: Pas de découverte universelle ni d’alignement optimal imposé sans besoin démontré.
+  complexite:
+    algorithmique:
+      niveau: 3
+      justification: Reconstruction et comparaison bornée des séquences
+    tests_ajustements:
+      niveau: 3
+      justification: Tester événements manquants et biais de durée et variantes connues
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Parcours observés et écarts et diagnostics de qualité
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-087
+    jh_par_stack: source/recalibration-metier.yaml#BC-087
+    couverture_buy: source/qualification-buy.yaml#BC-087
+- id: BC-088
+  capacite_id: operational-analysis-reporting
+  chemin:
+  - supply-chain-orchestration
+  - subdomain-process-management
+  - ba-process-intelligence
+  - operational-analysis-reporting
+  fonctions:
+  - id: BC-088.01
+    resultat: Définir les indicateurs et leur assiette
+  - id: BC-088.02
+    resultat: Analyser les résultats et écarts Supply
+  - id: BC-088.03
+    resultat: Partager des vues explicables et traçables
+  variantes_source: []
+  frontiere: Ne reconstruit pas une plateforme BI universelle.
+  complexite:
+    algorithmique:
+      niveau: 2
+      justification: Agrégations déterministes selon indicateurs explicites
+    tests_ajustements:
+      niveau: 3
+      justification: Tester dénominateurs et corrections et comparabilité des périodes
+    etendue_fonctionnelle:
+      niveau: 3
+      justification: Tableaux de pilotage et axes métier et navigation de détail
+  revue:
+    statut: propose
+    validation_metier: null
+  calibration:
+    statut: calibre_ingenierie
+    couverture_par_stack: source/recalibration-metier.yaml#BC-088
+    jh_par_stack: source/recalibration-metier.yaml#BC-088
+    couverture_buy: source/qualification-buy.yaml#BC-088

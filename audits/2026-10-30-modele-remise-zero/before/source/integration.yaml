@@ -1,0 +1,406 @@
+version_schema: 1
+id: integration
+nom: Intégration
+produit: Flow Core System
+periode: jusqu_a_v1
+date_evaluation: '2026-10-22'
+dependances:
+  schema: source/schema-activites-cycle.yaml
+  preuves: sources/integration-maintenance-2026-10-22.yaml
+  stacks:
+  - source/stacks/java-spring.yaml
+  - source/stacks/dotnet.yaml
+  - source/stacks/rust.yaml
+  - source/stacks/microsoft.yaml
+  - source/stacks/sap.yaml
+  scenario: source/maintenance.yaml#scenario_annuel
+  metier: source/parcours-integration.yaml
+roles:
+  developpement:
+    nom: Ingénieur de développement
+    activite_tjm: developpement
+    perimetre: Conception applicative, code, plugins et tests locaux ; extensions client en Buy.
+  integration:
+    nom: Expert intégration et configuration
+    activite_tjm: integration
+    perimetre: Paramétrage, règles, données, flux et industrialisation applicative à niveau expert autonome.
+  support_n3:
+    nom: Expert support N3
+    activite_tjm: support_n3
+    perimetre: Diagnostic expert, exploitation applicative et qualification de corrections ; pas astreinte tarifée
+      implicitement.
+  support_n1:
+    nom: Support utilisateur N1
+    activite_tjm: support_n1
+    perimetre: Accueil, aide à l’usage, procédures et premier diagnostic ; pas remplacement des métiers ou d’un
+      consultant conduite du changement.
+activites:
+- id: INT-001
+  nom: Préparer l’adaptation et les décisions de configuration
+  nature: travail
+  description: Rapprocher les pratiques Beaumanoir du produit générique, spécifier les adaptations, contrats et
+    critères d’acceptation ; transmettre la connaissance de la solution.
+  livrable: Dossier de configuration et décisions d’adaptation traçables.
+  frontiere: Pas de reconstruction du Core, de cahier des charges général du produit ni de négociation contractuelle
+    facturée en ingénieur.
+  roles_pct:
+    developpement: 20
+    integration: 75
+    support_n3: 5
+    support_n1: 0
+  travaux_par_role:
+    developpement: Examiner les points d’extension.
+    integration: Traduire les besoins en configuration et contrats.
+    support_n3: Vérifier l’exploitabilité des choix.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition estimative du travail technique décrit ; non issue d’un baromètre. Les rôles
+    non sollicités valent 0 %.
+  sources:
+  - CADRE
+  - CARTO
+  - GOLIVE
+  adequation_tjm: compatible
+- id: INT-002
+  nom: Configurer les structures et paramètres de base
+  nature: travail
+  description: Renseigner et vérifier les structures d’organisation, réseaux, calendriers, unités, catégories et
+    paramètres d’usage dans les mécanismes du Core.
+  livrable: Jeu cohérent de configuration de référence, documenté et testable.
+  frontiere: Les masses de données historiques sont en INT-007, les règles de décision en INT-003 et les identités
+    techniques en INT-008.
+  roles_pct:
+    developpement: 5
+    integration: 85
+    support_n3: 10
+    support_n1: 0
+  travaux_par_role:
+    developpement: Petits scripts de configuration.
+    integration: Définir et saisir les paramètres.
+    support_n3: Vérifier et documenter l’administration.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition estimative du travail technique décrit ; non issue d’un baromètre. Les rôles
+    non sollicités valent 0 %.
+  sources:
+  - CADRE
+  - MS_DATA
+  adequation_tjm: compatible
+- id: INT-003
+  nom: Paramétrer les politiques et calibrer les décisions Supply
+  nature: travail
+  description: Définir valeurs, priorités, protections, contraintes, règles de promesse et jeux de cas Beaumanoir
+    ; ajuster les résultats avec les métiers.
+  livrable: Règles et paramètres acceptés, cas de référence et explications des décisions.
+  frontiere: Moteurs ATP/CTP, règles et contraintes déjà opérationnels dans le Core ; aucun second développement
+    de leurs mécanismes génériques.
+  roles_pct:
+    developpement: 20
+    integration: 70
+    support_n3: 10
+    support_n1: 0
+  travaux_par_role:
+    developpement: Configurer les extensions de règles autorisées.
+    integration: Formaliser les choix métier et ajuster les paramètres.
+    support_n3: Vérifier diagnostics et reproductibilité.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition estimative du travail technique décrit ; non issue d’un baromètre. Les rôles
+    non sollicités valent 0 %.
+  sources:
+  - CADRE
+  - CARTO
+  - SOLUTION
+  adequation_tjm: compatible
+- id: INT-004
+  nom: Configurer les parcours, formulaires et écrans low-code
+  nature: travail
+  description: Assembler les parcours Beaumanoir, tâches humaines, formulaires, vues et habilitations fonctionnelles
+    via les capacités du produit livré.
+  livrable: Parcours et interfaces configurés, versions déployables et tests locaux.
+  frontiere: L’éditeur de parcours et le Case Management existent déjà. Le code hors capacités déclaratives est
+    en INT-005, les valeurs de décision en INT-003.
+  roles_pct:
+    developpement: 30
+    integration: 60
+    support_n3: 10
+    support_n1: 0
+  travaux_par_role:
+    developpement: Adapter composants de formulaire et assemblages.
+    integration: Configurer parcours, écrans et règles de tâche.
+    support_n3: Vérifier la conduite des dossiers.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition estimative du travail technique décrit ; non issue d’un baromètre. Les rôles
+    non sollicités valent 0 %.
+  sources:
+  - CADRE
+  - SOLUTION
+  adequation_tjm: compatible
+- id: INT-005
+  nom: Réaliser les extensions et spécifiques nécessaires
+  nature: travail
+  description: Développer plugins, traitements et interfaces complémentaires propres à Beaumanoir via les contrats
+    supportés ; limiter le spécifique.
+  livrable: Extensions isolées, documentées et testées sans modification invasive du standard.
+  frontiere: 'Pas de fonctions génériques manquantes du Core : elles sont traitées dans Core System Solution. Le
+    mapping des flux est en INT-006.'
+  roles_pct:
+    developpement: 70
+    integration: 20
+    support_n3: 10
+    support_n1: 0
+  travaux_par_role:
+    developpement: Concevoir et coder les extensions et tests locaux.
+    integration: Vérifier les contrats et l’adéquation métier.
+    support_n3: Préparer le diagnostic des extensions.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition estimative du travail technique décrit ; non issue d’un baromètre. Les rôles
+    non sollicités valent 0 %.
+  sources:
+  - CADRE
+  - SOLUTION
+  adequation_tjm: compatible
+- id: INT-006
+  nom: Intégrer les flux avec les applications et partenaires
+  nature: travail
+  description: Créer les connexions iPaaS, mappings, transformations, synchronisations, rejets et reprises vers
+    les SI réellement présents.
+  livrable: Contrats de flux déployés et tests d’échanges locaux.
+  frontiere: Les API génériques sont fournies par le Core ; pas de doublon Camel/Logic Apps ou runtime embarqué/iPaaS.
+    Tests de bout en bout en INT-010.
+  roles_pct:
+    developpement: 25
+    integration: 65
+    support_n3: 10
+    support_n1: 0
+  travaux_par_role:
+    developpement: Compléter les adaptateurs indispensables.
+    integration: Réaliser flux, mappings et reprises.
+    support_n3: Préparer alertes et procédures de traitement.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition estimative du travail technique décrit ; non issue d’un baromètre. Les rôles
+    non sollicités valent 0 %.
+  sources:
+  - CADRE
+  - CARTO
+  - MS_DATA
+  adequation_tjm: partielle
+- id: INT-007
+  nom: Migrer, rapprocher et archiver les données
+  nature: travail
+  description: Inventorier et extraire les données sources, nettoyer avec les métiers, transformer, charger référentiels,
+    stocks, commandes et dossiers ouverts ; préserver l’historique consultable.
+  livrable: Reprises répétables, rapprochements de contrôle et plan d’archive/rétention.
+  frontiere: Extraction, nettoyage, essais et rapprochement compris ici ; exécution finale de bascule en INT-013
+    sans redévelopper les scripts. Pas reprise complète du SI Finance/PLM.
+  roles_pct:
+    developpement: 25
+    integration: 65
+    support_n3: 10
+    support_n1: 0
+  travaux_par_role:
+    developpement: Construire transformations et contrôles automatisés.
+    integration: Piloter techniquement les reprises et écarts.
+    support_n3: Préparer traces et reprise sur erreur.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition estimative du travail technique décrit ; non issue d’un baromètre. Les rôles
+    non sollicités valent 0 %.
+  sources:
+  - CADRE
+  - CARTO
+  - MS_DATA
+  - SAP_MIG
+  adequation_tjm: compatible
+- id: INT-008
+  nom: Préparer environnements, accès et intégration de sécurité
+  nature: travail
+  description: Provisionner et configurer les environnements client et services du socle, réseau, SSO, identités,
+    secrets, habilitations techniques et séparation des environnements.
+  livrable: Environnements accessibles et sécurisés pour développement, recette et production.
+  frontiere: Le code Core est livré, pas les environnements client. En Make, installer ou provisionner les composants
+    retenus ; en Buy, ne pas reconstruire les services techniques inclus. Les ressources consommées sont des achats
+    distincts des JH.
+  roles_pct:
+    developpement: 10
+    integration: 65
+    support_n3: 25
+    support_n1: 0
+  travaux_par_role:
+    developpement: Adapter les paramètres applicatifs.
+    integration: Raccorder réseau, identités et secrets.
+    support_n3: Vérifier accès et procédures opérationnelles.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition estimative du travail technique décrit ; non issue d’un baromètre. Les rôles
+    non sollicités valent 0 %.
+  sources:
+  - SHARED
+  - CICD
+  adequation_tjm: partielle
+- id: INT-009
+  nom: Industrialiser la chaîne de fabrication et de livraison
+  nature: travail
+  description: 'Créer et adapter la chaîne industrielle de fabrication et livraison : CI/CD, IaC, artefacts, contrôles
+    qualité/sécurité, jeux d’essai techniques, déploiement de configuration et retour arrière.'
+  livrable: Chaîne reproductible de fabrication et de promotion vers recette/production.
+  frontiere: Les YAML de features Core ne chiffrent pas la chaîne industrielle. Sa construction initiale non couverte
+    ailleurs appartient ici ; réutiliser les scripts/artefacts du produit et outils éditeur réellement disponibles,
+    sans présumer une CI/CD complète déjà financée. Contenu de recette métier en INT-010.
+  roles_pct:
+    developpement: 45
+    integration: 40
+    support_n3: 15
+    support_n1: 0
+  travaux_par_role:
+    developpement: Automatiser build, packaging et tests techniques.
+    integration: Assembler les promotions et paramètres.
+    support_n3: Préparer rollback et traçabilité opérationnelle.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition estimative du travail technique décrit ; non issue d’un baromètre. Les rôles
+    non sollicités valent 0 %.
+  sources:
+  - CICD
+  - MS_TEST
+  adequation_tjm: partielle
+- id: INT-010
+  nom: Qualifier la solution intégrée et accompagner la recette
+  nature: travail
+  description: Assembler les scénarios de bout en bout, jeux d’essai représentatifs, UAT, performance, sécurité
+    et non-régression des adaptations.
+  livrable: Preuves de bon fonctionnement intégré et écarts traités avec les responsables métier.
+  frontiere: Les tests locaux sont dans leurs activités productrices ; on ne recompte pas la qualification générique
+    du Core. Acceptation et temps des métiers restent identifiés hors TJM disponibles.
+  roles_pct:
+    developpement: 25
+    integration: 55
+    support_n3: 15
+    support_n1: 5
+  travaux_par_role:
+    developpement: Automatiser et analyser les défauts techniques.
+    integration: Préparer scénarios et accompagner UAT.
+    support_n3: Qualifier exploitation et non-fonctionnel.
+    support_n1: Préparer l’assistance aux utilisateurs de recette.
+  justification_roles: Répartition estimative du travail technique décrit ; non issue d’un baromètre. Les rôles
+    non sollicités valent 0 %.
+  sources:
+  - GOLIVE
+  - MS_TEST
+  - SHARED
+  adequation_tjm: partielle
+- id: INT-011
+  nom: Préparer l’exploitation, la continuité et le support
+  nature: travail
+  description: Compléter instrumentation et observabilité applicative, configurer sauvegardes client, procédures,
+    traitements planifiés, support et exercices de restauration avant ouverture.
+  livrable: Dossier d’exploitation et de support, restauration vérifiée et responsabilités convenues.
+  frontiere: La préparation du run non valorisée dans les features est portée ici, en réutilisant les mécanismes
+    déjà livrés. Un outil OpenTelemetry sélectionné ne fournit pas les alertes et procédures. Les services SaaS
+    inclus ne sont pas reconstruits ; la continuité métier reste à vérifier.
+  roles_pct:
+    developpement: 15
+    integration: 35
+    support_n3: 45
+    support_n1: 5
+  travaux_par_role:
+    developpement: Compléter instrumentation et diagnostics.
+    integration: Assembler procédures et responsabilités.
+    support_n3: Vérifier supervision, restauration et traitement d’incidents.
+    support_n1: Préparer accueil, triage et base de connaissance.
+  justification_roles: Répartition estimative du travail technique décrit ; non issue d’un baromètre. Les rôles
+    non sollicités valent 0 %.
+  sources:
+  - SHARED
+  - MS_RESTORE
+  - GOLIVE
+  adequation_tjm: partielle
+- id: INT-012
+  nom: Préparer les utilisateurs et transmettre la solution
+  nature: travail
+  description: Préparer aides d’usage, démonstrations, formation des relais, consignes, base de connaissance et
+    transfert vers les équipes de support.
+  livrable: Relais et support préparés, documentation des usages et procédures diffusables.
+  frontiere: Partie applicative valorisée avec les profils existants ; conduite du changement organisationnelle,
+    communication institutionnelle et temps des métiers non assimilés à du N1.
+  roles_pct:
+    developpement: 0
+    integration: 35
+    support_n3: 15
+    support_n1: 50
+  travaux_par_role:
+    developpement: Sans intervention prévue.
+    integration: Expliquer configuration et parcours métier.
+    support_n3: Transmettre les diagnostics et procédures N3.
+    support_n1: Préparer aides, accueil et exercices d’usage.
+  justification_roles: Répartition estimative du travail technique décrit ; non issue d’un baromètre. Les rôles
+    non sollicités valent 0 %.
+  sources:
+  - GOLIVE
+  - CADRE
+  adequation_tjm: partielle
+- id: INT-013
+  nom: Basculer vers la V1 et stabiliser le démarrage
+  nature: travail
+  description: Répéter la bascule, charger les deltas, rapprocher les engagements, ouvrir les usages, résoudre les
+    défauts de démarrage puis fermer les anciens flux concernés.
+  livrable: V1 opérationnelle, rapprochements acceptés et passage au service annuel.
+  frontiere: Scripts et nettoyage déjà faits en INT-007 ; stabilisation de démarrage ici, incidents de l’année stabilisée
+    dans Maintenance. Pas décommissionnement global d’applications encore utilisées hors FLOW.
+  roles_pct:
+    developpement: 15
+    integration: 45
+    support_n3: 30
+    support_n1: 10
+  travaux_par_role:
+    developpement: Corriger les défauts des adaptations.
+    integration: Exécuter et rapprocher les étapes de bascule.
+    support_n3: Conduire la stabilisation technique et le repli si nécessaire.
+    support_n1: Assister les utilisateurs au démarrage.
+  justification_roles: Répartition estimative du travail technique décrit ; non issue d’un baromètre. Les rôles
+    non sollicités valent 0 %.
+  sources:
+  - CUTOVER
+  - GOLIVE
+  adequation_tjm: compatible
+contributions_non_tarifees:
+- contribution: Métiers et responsables de données
+  activites:
+  - INT-001
+  - INT-003
+  - INT-007
+  - INT-010
+  - INT-012
+  - MAI-009
+  traitement: Décisions, nettoyage sémantique et acceptation nécessaires ; temps interne non valorisé par les quatre
+    TJM techniques, pas assimilé à zéro.
+- contribution: Direction de projet, achats et conduite du changement organisationnelle
+  activites:
+  - INT-001
+  - INT-012
+  - INT-013
+  traitement: Pilotage global et prestations à définir séparément ; ne pas ajouter un faux rôle technique ou une
+    surcharge ligne à ligne.
+- contribution: Expertises cloud, sécurité, audit externe et astreinte
+  activites:
+  - INT-006
+  - INT-008
+  - INT-009
+  - INT-010
+  - INT-011
+  - MAI-005
+  - MAI-007
+  - MAI-008
+  - MAI-013
+  traitement: Compétences ciblées potentiellement nécessaires ; le tarif des Stacks est un repère applicatif, non
+    une cotation spécialisée. Pas de permanence humaine 24/7 supposée.
+pilotage_global:
+  reference: source/calibration-couts.yaml#pilotage
+  programme_groupe_ref: source/deploiement-groupe.yaml#pilotage
+  precision: Pilotage technique selon les assiettes de la calibration ; direction et coordination du déploiement
+    Make selon le programme Groupe, sans appliquer les taux aux achats déjà pilotés.
+scenario_annuel: null
+regles_specifiques:
+- 'Départ : produit générique complet, vide de données et configurations Beaumanoir. Fin : V1 exploitée et stabilisée.'
+- Make en un lot, Buy par lots sans nombre ni dates imposés. Points sur l’ensemble de la V1 ; pas multiplier le
+  catalogue entier par le nombre de lots.
+- 'Les ressources/licences consommées avant ouverture sont des achats à rattacher aux mêmes contrats que Maintenance.
+  Leur quantité dépendra de la future roadmap : aucune année complète ajoutée arbitrairement.'
+- INT-002 est l’étalon de comparaison ; les autres activités sont évaluées sur tout leur périmètre, à partir du
+  scénario de service commun pour utilisateurs, flux et environnements.
+- 'Propriété des travaux non fonctionnels : environnements en INT-008, usine logicielle en INT-009, préparation
+  du run en INT-011. Ils ne sont pas supposés financés par les points des features Core.'

@@ -2,6 +2,7 @@
 import hashlib
 from jsonschema import Draft202012Validator
 from validate_stacks import ROOT, read
+from capability_catalog import analysis
 
 PATH='source/qualification-buy.yaml'
 
@@ -57,7 +58,7 @@ def integration_paths():
     scenarios={s['id']:s for s in catalog['scenarios']};paths={p['id']:p for p in catalog['paths']}
     assert len(scenarios)==len(catalog['scenarios']) and len(paths)==len(catalog['paths'])
     assert len(d['scenarios'])==len(scenarios) and {s['scenario'] for s in d['scenarios']}==scenarios.keys()
-    caps={b['capacite_id'] for b in read(ROOT/'source/grille-complexite.yaml')['blocs']}
+    caps={b['capacite_id'] for b in analysis()['blocs']}
     activities={a['id'] for a in read(ROOT/'source/integration.yaml')['activites']}
     lots={l['id']:l for l in d['lots']}
     assert len(lots)==len(d['lots'])

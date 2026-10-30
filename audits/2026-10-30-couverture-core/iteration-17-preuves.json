@@ -1,0 +1,178 @@
+{
+  "evidence": [
+    {
+      "id": "O171",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_rule.py",
+      "observation": "Un besoin détermine une règle et une action ; erreurs si aucune règle.",
+      "limit": "Analogie besoins→actions. FLOW sépare décision, autorisation et ordre de service ; pas reprise du moteur Odoo.",
+      "excerpts": [
+        {
+          "start": 426,
+          "end": 479,
+          "text": "    def run(self, procurements, raise_user_error=True):\n        \"\"\"Fulfil `procurements` with the help of stock rules.\n\n        Procurements are needs of products at a certain location. To fulfil\n        these needs, we need to create some sort of documents (`stock.move`\n        by default, but extensions of `_run_` methods allow to create every\n        type of documents).\n\n        :param procurements: the description of the procurement\n        :type procurements: list of `~odoo.addons.stock.models.stock_rule.ProcurementGroup.Procurement`\n        :param raise_user_error: will raise either an UserError or a ProcurementException\n        :type raise_user_error: boolan, optional\n        :raises UserError: if `raise_user_error` is True and a procurement isn't fulfillable\n        :raises ProcurementException: if `raise_user_error` is False and a procurement isn't fulfillable\n        \"\"\"\n\n        def raise_exception(procurement_errors):\n            if raise_user_error:\n                dummy, errors = zip(*procurement_errors)\n                raise UserError('\\n'.join(errors))\n            else:\n                raise ProcurementException(procurement_errors)\n        actions_to_run = defaultdict(list)\n        procurement_errors = []\n        for procurement in procurements:\n            procurement.values.setdefault('company_id', procurement.location_id.company_id)\n            procurement.values.setdefault('priority', '0')\n            procurement.values.setdefault('date_planned', procurement.values.get('date_planned', False) or fields.Datetime.now())\n            if self._skip_procurement(procurement):\n                continue\n            rule = self._get_rule(procurement.product_id, procurement.location_id, procurement.values)\n            if not rule:\n                error = _('No rule has been found to replenish \"%(product)s\" in \"%(location)s\".\\nVerify the routes configuration on the product.',\n                    product=procurement.product_id.display_name, location=procurement.location_id.display_name)\n                procurement_errors.append((procurement, error))\n            else:\n                action = 'pull' if rule.action == 'pull_push' else rule.action\n                actions_to_run[action].append((procurement, rule))\n\n        if procurement_errors:\n            raise_exception(procurement_errors)\n\n        for action, procurements in actions_to_run.items():\n            if hasattr(self.env['stock.rule'], '_run_%s' % action):\n                try:\n                    getattr(self.env['stock.rule'], '_run_%s' % action)(procurements)\n                except ProcurementException as e:\n                    procurement_errors += e.procurement_exceptions\n            else:\n                _logger.error(\"The method _run_%s doesn't exist on the procurement rules\" % action)\n\n        if procurement_errors:\n            raise_exception(procurement_errors)\n        return True"
+        }
+      ]
+    },
+    {
+      "id": "O172",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "addons/stock/models/stock_picking.py",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_picking.py",
+      "observation": "Quantités réalisées/incomplètes, reliquat et fractionnement contrôlé.",
+      "limit": "Exécution stock interne ; FLOW doit reconnaître les faits externes sans tenir un second stock.",
+      "excerpts": [
+        {
+          "start": 1014,
+          "end": 1057,
+          "text": "    def _action_done(self):\n        \"\"\"Call `_action_done` on the `stock.move` of the `stock.picking` in `self`.\n        This method makes sure every `stock.move.line` is linked to a `stock.move` by either\n        linking them to an existing one or a newly created one.\n\n        If the context key `cancel_backorder` is present, backorders won't be created.\n\n        :return: True\n        :rtype: bool\n        \"\"\"\n        self._check_company()\n\n        todo_moves = self.move_ids.filtered(lambda self: self.state in ['draft', 'waiting', 'partially_available', 'assigned', 'confirmed'])\n        for picking in self:\n            if picking.owner_id:\n                picking.move_ids.write({'restrict_partner_id': picking.owner_id.id})\n                picking.move_line_ids.write({'owner_id': picking.owner_id.id})\n        todo_moves._action_done(cancel_backorder=self.env.context.get('cancel_backorder'))\n        self.write({'date_done': fields.Datetime.now(), 'priority': '0'})\n\n        # notify followers when no backorder was created but quantities are incomplete\n        if self.env.context.get('cancel_backorder'):\n            for picking in self:\n                prec = self.env['decimal.precision'].precision_get('Product Unit')\n                incomplete_moves = picking.move_ids.filtered(\n                    lambda m: float_compare(m.quantity, m.product_uom_qty, precision_digits=prec) < 0\n                )\n                if incomplete_moves:\n                    msg = self.env._(\n                        'No backorder has been planned for undelivered demanded quantities: %s',\n                        Markup('<ul>%s</ul>') % Markup().join(\n                            Markup('<li>%s</li>') % self.env._(\n                                'Only %(nbr_done)s %(uom)s of %(product)s delivered in contrast to the expected %(nbr_demanded)s %(uom)s',\n                                product=move.product_id.display_name,\n                                nbr_done=move.quantity,\n                                nbr_demanded=move.product_uom_qty,\n                                uom=move.uom_id.name,\n                            ) for move in incomplete_moves)\n                    )\n                    picking.message_post(body=msg, subtype_xmlid='stock.mt_picking_state')\n\n        # if incoming/internal moves make other confirmed/partially_available moves available, assign them\n        done_incoming_moves = self.filtered(lambda p: p.picking_type_id.code in ('incoming', 'internal')).move_ids.filtered(lambda m: m.state == 'done')\n        done_incoming_moves._trigger_assign()"
+        },
+        {
+          "start": 1265,
+          "end": 1288,
+          "text": "    def action_split_transfer(self):\n        if self.state == 'done':\n            return\n        if all(m.uom_id.is_zero(m.quantity) for m in self.move_ids):\n            raise UserError(_(\"%s: Nothing to split. Fill the quantities you want in a new transfer in the done quantities\", self.display_name))\n        if all(m.uom_id.compare(m.quantity, m.product_uom_qty) == 0 for m in self.move_ids):\n            raise UserError(_(\"%s: Nothing to split, all demand is done. For split you need at least one line not fully fulfilled\", self.display_name))\n        if any(m.uom_id.compare(m.quantity, m.product_uom_qty) > 0 for m in self.move_ids):\n            raise UserError(_(\"%s: Can't split: quantities done can't be above demand\", self.display_name))\n\n        moves = self.move_ids.filtered(lambda m: m.state not in ('done', 'cancel') and m.quantity != 0)\n        backorder_moves = moves._create_backorder()\n        backorder_moves += self.move_ids.filtered(lambda m: m.quantity == 0)\n        backorder = self._create_backorder(backorder_moves=backorder_moves, from_manual_backorder=True)\n        backorder.message_post(\n            body=self.env._('Split from %(original_picking_link)s.', original_picking_link=self._get_html_link())\n        )\n        return {\n            'name': self.env._('Split Backorder'),\n            'type': 'ir.actions.act_window',\n            'res_model': 'stock.picking',\n            'view_mode': 'form',\n            'res_id': backorder.id,\n        }"
+        }
+      ]
+    },
+    {
+      "id": "T171",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "modules/carrier/carrier.py",
+      "sha256": "18c8cbcd01e6221fc4bde4116413e5145c84f273232d76d217b6f533bb5f9631",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/carrier/carrier.py",
+      "observation": "Sélection de transporteurs selon origine/destination et ordre des règles.",
+      "limit": "Analogie d'admissibilité ; ni suspension contractuelle ni sélection optimisée ou booking démontrés.",
+      "excerpts": [
+        {
+          "start": 77,
+          "end": 115,
+          "text": "class Selection(sequence_ordered(), MatchMixin, ModelSQL, ModelView):\n    __name__ = 'carrier.selection'\n    _get_carriers_cache = Cache(\n        'carrier.selection.get_carriers', context=False)\n\n    from_country = fields.Many2One('country.country', 'From Country',\n        ondelete='RESTRICT',\n        help=\"Apply only when shipping from this country.\\n\"\n        \"Leave empty for any countries.\")\n    to_country = fields.Many2One('country.country', 'To Country',\n        ondelete='RESTRICT',\n        help=\"Apply only when shipping to this country.\\n\"\n        \"Leave empty for any countries.\")\n    carrier = fields.Many2One('carrier', 'Carrier', required=True,\n        ondelete='CASCADE', help=\"The selected carrier.\")\n\n    @classmethod\n    def get_carriers(cls, pattern):\n        pool = Pool()\n        Carrier = pool.get('carrier')\n\n        key = tuple(sorted(pattern.items()))\n        carriers = cls._get_carriers_cache.get(key)\n        if carriers is not None:\n            return Carrier.browse(carriers)\n\n        carriers = []\n        selections = cls.search([])\n        if not selections:\n            with inactive_records():\n                carriers = Carrier.search([])\n        else:\n            for selection in selections:\n                if (selection.match(pattern)\n                        and selection.carrier not in carriers):\n                    carriers.append(selection.carrier)\n\n        cls._get_carriers_cache.set(key, list(map(int, carriers)))\n        return carriers"
+        }
+      ]
+    },
+    {
+      "id": "T172",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "modules/carrier_weight/carrier.py",
+      "sha256": "7572bdf97fe2b6b13dcfc65ea3b2ed765e7320b892a9785488d61ec4cec348ac",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/carrier_weight/carrier.py",
+      "observation": "Tarification selon poids avec devise.",
+      "limit": "Analogie économique partielle ; ne pas reproduire le zéro de défaut comme coût connu lorsque FLOW manque de données.",
+      "excerpts": [
+        {
+          "start": 47,
+          "end": 77,
+          "text": "    def compute_weight_price(self, weight):\n        \"Compute price based on weight\"\n        line = None\n        for line in reversed(self.weight_price_list):\n            if line.weight < weight:\n                return line.price\n        else:\n            if line and not line.weight and not weight:\n                return line.price\n        return Decimal(0)\n\n    def _get_weight_price(self):\n        weights = Transaction().context.get('weights', [])\n        if weights:\n            weight_price = sum(\n                self.compute_weight_price(w) for w in weights)\n        else:\n            weight_price = self.compute_weight_price(0)\n        return weight_price, self.weight_currency.id\n\n    def get_sale_price(self):\n        price, currency_id = super().get_sale_price()\n        if self.carrier_cost_method == 'weight':\n            price, currency_id = self._get_weight_price()\n        return price, currency_id\n\n    def get_purchase_price(self):\n        price, currency_id = super().get_purchase_price()\n        if self.carrier_cost_method == 'weight':\n            price, currency_id = self._get_weight_price()\n        return price, currency_id"
+        }
+      ]
+    },
+    {
+      "id": "T173",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/quality/quality.py",
+      "observation": "Points obligatoires, verdicts de contrôle et alertes.",
+      "limit": "Contrôle qualité distinct de la décision de disposition et de l'acte physique.",
+      "excerpts": [
+        {
+          "start": 490,
+          "end": 504,
+          "text": "    def validate_points(self):\n        points = {p.name: p.string for p in self.control.points}\n        missing = points.keys() - (self.points or {}).keys()\n        if missing:\n            raise InspectionValidationError(\n                gettext('quality.msg_quality_inspection_missing_point',\n                    inspection=self.rec_name,\n                    points=', '.join(points[m] for m in missing),\n                    ))\n\n    def check(self):\n        for point in self.control.points:\n            if not point.check(self.points.get(point.name)):\n                return False\n        return True"
+        },
+        {
+          "start": 552,
+          "end": 586,
+          "text": "    def process(cls, inspections):\n        for inspection in inspections:\n            inspection.validate_points()\n        cls.write([i for i in inspections if not i.processed_at], {\n                'processed_at': dt.datetime.now(),\n                })\n        with cls.bulk_func('pass_') as pass_, \\\n                cls.bulk_func('fail') as fail:\n            for inspection in inspections:\n                if inspection.check():\n                    pass_.push(inspection)\n                else:\n                    fail.push(inspection)\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('passed')\n    @reset_employee('failed_by')\n    @set_employee('passed_by')\n    def pass_(cls, inspections):\n        pass\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('failed')\n    @reset_employee('passed_by')\n    @set_employee('failed_by')\n    def fail(cls, inspections):\n        pool = Pool()\n        Alert = pool.get('quality.alert')\n        alerts = []\n        for inspection in inspections:\n            if not inspection.alerts:\n                alerts.append(inspection.get_alert())\n        Alert.save(alerts)"
+        }
+      ]
+    },
+    {
+      "id": "T174",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/shipment.py",
+      "observation": "Réception et réalisation sont distinctes ; contrôle des quantités.",
+      "limit": "Analogie de jalons, pas preuve des contrats externes d'une prestation FLOW.",
+      "excerpts": [
+        {
+          "start": 768,
+          "end": 805,
+          "text": "    def receive(cls, shipments):\n        Move = Pool().get('stock.move')\n        with Move.bulk_func('do', auto=False) as do:\n            for shipment in shipments:\n                do.extend(shipment.incoming_moves)\n        with Move.bulk_delete(auto=False) as delete:\n            for shipment in shipments:\n                for move in shipment.inventory_moves:\n                    if move.state in {'draft', 'cancelled'}:\n                        delete.push(move)\n        cls.create_inventory_moves(shipments)\n        # Set received state to allow done transition\n        cls.write(shipments, {'state': 'received'})\n        with cls.bulk_func('do', auto=False) as do:\n            for shipment in shipments:\n                if shipment.warehouse_storage == shipment.warehouse_input:\n                    do.push(shipment)\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('done')\n    @set_employee('done_by')\n    def do(cls, shipments):\n        pool = Pool()\n        Move = pool.get('stock.move')\n        Date = pool.get('ir.date')\n        inventory_moves = []\n        for shipment in shipments:\n            if shipment.warehouse_storage != shipment.warehouse_input:\n                shipment.check_quantity()\n            inventory_moves.extend(shipment.inventory_moves)\n        Move.do(inventory_moves)\n        for company, c_shipments in groupby(\n                shipments, key=lambda s: s.company):\n            with Transaction().set_context(company=company.id):\n                today = Date.today()\n            cls.write([s for s in c_shipments if not s.effective_date], {\n                    'effective_date': today,"
+        }
+      ]
+    },
+    {
+      "id": "A171",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/pricing/FreightCarrierPricingServiceImpl.java",
+      "sha256": "088cd29ad80a7102d592502769c14925440304063784b5eefe138efa6e664ccf",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/pricing/FreightCarrierPricingServiceImpl.java",
+      "observation": "Options transporteur/mode et calcul de prix/délai, puis choix appliqué.",
+      "limit": "Pas optimisation de tournées ni promesse de délai garanti.",
+      "excerpts": [
+        {
+          "start": 64,
+          "end": 128,
+          "text": "  public String computeFreightCarrierPricing(\n      List<FreightCarrierPricing> freightCarrierPricingList, Long saleOrderId)\n      throws AxelorException {\n    SaleOrder saleOrder = saleOrderRepository.find(saleOrderId);\n    if (saleOrder != null) {\n      this.checkSelectedFreightPricingMode(freightCarrierPricingList);\n      FreightCarrierPricing freightCarrierPricing = freightCarrierPricingList.get(0);\n      saleOrder.setFreightCarrierMode(\n          freightCarrierModeRepository.find(freightCarrierPricing.getFreightCarrierMode().getId()));\n      saleOrder.setCarrierPartner(\n          partnerRepository.find(freightCarrierPricing.getCarrierPartner().getId()));\n      saleOrder.setShippingCost(freightCarrierPricing.getPricingAmount());\n\n      if (saleOrder.getEstimatedShippingDate() != null) {\n        saleOrder.setEstimatedDeliveryDate(\n            saleOrder\n                .getEstimatedShippingDate()\n                .plusDays(freightCarrierPricing.getDelay().longValue()));\n      }\n\n      String message =\n          saleOrderShipmentService.createShipmentCostLine(saleOrder, saleOrder.getShipmentMode());\n      saleOrderRepository.save(saleOrder);\n      return message;\n    }\n    return null;\n  }\n\n  public Set<FreightCarrierPricing> getFreightCarrierPricingSet(\n      Long shipmentModeId, Long saleOrderId) {\n    Set<FreightCarrierPricing> freightCarrierPricings = new HashSet<>();\n    SaleOrder saleOrder = saleOrderRepository.find(saleOrderId);\n\n    List<FreightCarrierMode> freightCarrierModeList =\n        freightCarrierModeRepository\n            .all()\n            .filter(\"self.shipmentMode.id = :id\")\n            .bind(\"id\", shipmentModeId)\n            .fetch();\n\n    if (!freightCarrierModeList.isEmpty() && saleOrder != null) {\n      freightCarrierModeList.forEach(\n          fc -> {\n            freightCarrierPricings.add(this.createFreightCarrierPricing(fc, saleOrder));\n          });\n    }\n\n    return freightCarrierPricings;\n  }\n\n  @Override\n  public FreightCarrierPricing createFreightCarrierPricing(\n      FreightCarrierMode freightCarrierMode, SaleOrder saleOrder) {\n\n    if (freightCarrierMode == null) {\n      return null;\n    }\n\n    FreightCarrierPricing freightCarrierPricing = new FreightCarrierPricing();\n    freightCarrierPricing.setFreightCarrierMode(freightCarrierMode);\n    freightCarrierPricing.setCarrierPartner(freightCarrierMode.getCarrierPartner());\n    freightCarrierPricing.setPricing(freightCarrierMode.getFreightCarrierPricing());\n    freightCarrierPricing.setDelayPricing(freightCarrierMode.getFreightCarrierDelay());\n    freightCarrierPricing.setSaleOrder(saleOrder);\n    return freightCarrierPricing;"
+        },
+        {
+          "start": 152,
+          "end": 178,
+          "text": "  public void updateEstimatedDeliveryDateWithPricingDelay(SaleOrder saleOrder)\n      throws AxelorException {\n    FreightCarrierPricing freightCarrierPricing =\n        this.createFreightCarrierPricing(saleOrder.getFreightCarrierMode(), saleOrder);\n\n    if (freightCarrierPricing == null) {\n      return;\n    }\n\n    Pricing delay =\n        Optional.of(freightCarrierPricing).map(FreightCarrierPricing::getDelayPricing).orElse(null);\n\n    String errors =\n        freightCarrierApplyPricingService.computeFreightCarrierPricing(\n            delay, freightCarrierPricing);\n\n    if (errors.length() > 0) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_CONFIGURATION_ERROR,\n          I18n.get(SupplychainExceptionMessage.FREIGHT_CARRIER_MODE_PRICING_ERROR),\n          errors);\n    }\n\n    saleOrder.setEstimatedDeliveryDate(\n        saleOrder\n            .getEstimatedShippingDate()\n            .plusDays(freightCarrierPricing.getDelay().longValue()));"
+        }
+      ]
+    },
+    {
+      "id": "A172",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "observation": "Transition planifiée/réalisée contrôlée, conformité, traçabilité et dates.",
+      "limit": "Contrôle opérationnel interne ; FLOW réemploie le principe en gardant les autorités de stock et prestataires séparées.",
+      "excerpts": [
+        {
+          "start": 409,
+          "end": 457,
+          "text": "  protected void planStockMove(StockMove stockMove, boolean splitByTrackingNumber)\n      throws AxelorException {\n    if (stockMove.getStatusSelect() == null\n        || stockMove.getStatusSelect() != StockMoveRepository.STATUS_DRAFT) {\n      throw new AxelorException(\n          stockMove,\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(StockExceptionMessage.STOCK_MOVE_PLAN_WRONG_STATUS));\n    }\n\n    LOG.debug(\"Stock move planification : {} \", stockMove.getStockMoveSeq());\n\n    // This call will split move line by tracking number\n    // But only works if the line has not been already splited\n    if (splitByTrackingNumber) {\n      stockMoveLineService.splitStockMoveLineByTrackingNumber(stockMove);\n    }\n\n    stockMove = JpaModelHelper.ensureManaged(stockMove);\n    String draftSeq;\n\n    // Set the sequence.\n    if (Beans.get(SequenceService.class)\n        .isEmptyOrDraftSequenceNumber(stockMove.getStockMoveSeq())) {\n      draftSeq = stockMove.getStockMoveSeq();\n      stockMove.setStockMoveSeq(\n          stockMoveToolService.getSequenceStockMove(\n              stockMove.getTypeSelect(), stockMove.getCompany(), stockMove));\n    } else {\n      draftSeq = null;\n    }\n\n    if (Strings.isNullOrEmpty(stockMove.getName())\n        || draftSeq != null && stockMove.getName().startsWith(draftSeq)) {\n      stockMove.setName(stockMoveToolService.computeName(stockMove));\n    }\n\n    int initialStatus = stockMove.getStatusSelect();\n\n    setPlannedStatus(stockMove);\n\n    updateLocations(stockMove, initialStatus);\n    stockMove = JpaModelHelper.ensureManaged(stockMove);\n    stockMove.setCancelReason(null);\n    stockMove.setRealDate(null);\n\n    stockMove.setExTaxTotal(stockMoveToolService.compute(stockMove));\n\n    stockMoveRepo.save(stockMove);"
+        },
+        {
+          "start": 545,
+          "end": 608,
+          "text": "  protected String realizeStockMove(StockMove stockMove, boolean checkOngoingInventoryFlag)\n      throws AxelorException {\n    if (stockMove.getStatusSelect() == null\n        || stockMove.getStatusSelect() != StockMoveRepository.STATUS_PLANNED) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(StockExceptionMessage.STOCK_MOVE_REALIZATION_WRONG_STATUS));\n    }\n\n    LOG.debug(\"Stock realization : {} \", stockMove.getStockMoveSeq());\n\n    if (stockMove.getTypeSelect() == StockMoveRepository.TYPE_INCOMING\n        && !stockMove.getIsReversion()\n        && appStockService.getAppStock().getIsRequiredShipmentSupplierDetails()\n        && (stockMove.getSupplierShipmentDate() == null\n            || Strings.isNullOrEmpty(stockMove.getSupplierShipmentRef()))) {\n      throw new AxelorException(\n          stockMove,\n          TraceBackRepository.CATEGORY_MISSING_FIELD,\n          I18n.get(StockExceptionMessage.STOCK_MOVE_MISSING_SUPPLIER_SHIPMENT_DETAILS));\n    }\n\n    if (checkOngoingInventoryFlag) {\n      checkOngoingInventory(stockMove);\n    }\n\n    int initialStatus = stockMove.getStatusSelect();\n\n    String newStockSeq = null;\n    stockMoveLineService.checkTrackingNumber(stockMove);\n    stockMoveLineService.checkConformitySelection(stockMove);\n    fillRealizeWapPriceForStockMove(stockMove);\n\n    stockMoveLineService.checkExpirationDates(stockMove);\n\n    BigDecimal exTaxTotal = stockMoveToolService.compute(stockMove);\n    stockMove = JpaModelHelper.ensureManaged(stockMove);\n    setRealizedStatus(stockMove);\n    stockMove.setRealDate(appBaseService.getTodayDate(stockMove.getCompany()));\n    stockMove.setExTaxTotal(exTaxTotal);\n\n    stockMove = stockMoveRepo.save(stockMove);\n\n    stockMoveLineService.updateLocations(\n        initialStatus,\n        StockMoveRepository.STATUS_CANCELED,\n        getPlannedStockMoveLineIds(stockMove, true),\n        stockMove.getEstimatedDate(),\n        false,\n        false,\n        true);\n\n    stockMoveLineService.updateLocations(\n        StockMoveRepository.STATUS_DRAFT,\n        StockMoveRepository.STATUS_REALIZED,\n        getStockMoveLineIds(stockMove),\n        stockMove.getEstimatedDate(),\n        true,\n        true,\n        true);\n\n    stockMove = JpaModelHelper.ensureManaged(stockMove);\n    clearPlannedStockMoveLine(stockMove, true);\n    storeCustomsCodesForStockMove(stockMove);"
+        }
+      ]
+    },
+    {
+      "id": "A173",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorder/SaleOrderCheckBlockingSupplychainServiceImpl.java",
+      "sha256": "56ec1dfb21846b9d01fae3da0793bd32b90b8c5b4db29daafc7191fc0418e71f",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorder/SaleOrderCheckBlockingSupplychainServiceImpl.java",
+      "observation": "Un blocage produit une alerte empêchant de livrer.",
+      "limit": "Analogie limitée : ne prouve pas suspension contextualisée de prestataires, qui reste à réaliser.",
+      "excerpts": [
+        {
+          "start": 43,
+          "end": 50,
+          "text": "  @Override\n  public List<String> checkBlocking(SaleOrder saleOrder) {\n    List<String> alertList = new ArrayList<>();\n    if (saleOrderBlockingSupplychainService.hasOnGoingBlocking(saleOrder)\n        && appSupplychainService.getAppSupplychain().getCustomerStockMoveGenerationAuto()) {\n      alertList.add(I18n.get(SupplychainExceptionMessage.SALE_ORDER_LINES_CANNOT_DELIVER));\n    }\n    return alertList;"
+        }
+      ]
+    }
+  ],
+  "method": "Source code inspected at frozen revisions; these excerpts do not prove whole-product coverage or observed human effort."
+}

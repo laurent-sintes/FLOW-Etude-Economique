@@ -22,6 +22,15 @@ class MarketInstructionTests(unittest.TestCase):
             evidence_refs=[dict(source_ref='source/references-couts-integration.yaml', location='reperes_build_core/fiches_produit/erpnext/evaluations/transactions')],
             differences=['Périmètre du besoin à confirmer.'], unknowns=['Parité non démontrée.'], review=None)
 
+    def test_proposed_functions_belong_to_separate_analysis(self):
+        from test_support import study_copy
+        study=study_copy()
+        rows=study.content['market']['instruction']['capabilities']
+        for row in rows:
+            self.assertEqual(row['analysis_source'],'source/analyse-perimetre-core.yaml')
+            self.assertEqual([f['id'] for f in row['proposed_functions']],row['need_refs'])
+        self.assertTrue(all('fonctions' not in r for r in study.bootstrap(essential=True)['content']['complexity']['rows']))
+
     def test_all_capability_product_pairs_exist_without_fabricated_coverage(self):
         before = deepcopy(self.market)
         instruction = deepcopy(self.source)

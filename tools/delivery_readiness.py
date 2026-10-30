@@ -46,7 +46,9 @@ DOSSIER_SCHEMA = obj(dict(version=dict(const=1), id=dict(const='capacite-realisa
              'risk_label', 'action_label', 'available_label', 'gate_label', 'capability_label')})),
     sections=obj({key: obj(dict(title=TEXT, lead=TEXT)) for key in ('organisation', 'points-chauds', 'partenaire', 'jalons')}),
     scope=obj(dict(id=dict(const='perimetre'), title=TEXT, introduction=TEXT, note=TEXT, link=LINK,
-        labels=obj({key: TEXT for key in ('search', 'results', 'boundary', 'native_reference', 'back_label', 'capture_date', 'version')}))),
+        labels=obj({key: TEXT for key in ('search', 'results', 'boundary', 'native_reference', 'back_label', 'capture_date', 'version',
+            'navigation_title', 'hierarchy_summary', 'open_capabilities', 'back_to_navigation', 'capability_count', 'capability_count_one',
+            'results_one', 'no_results', 'subdomain', 'business_area')}))),
     proofs=array(obj(dict(id=ID, title=TEXT, status=dict(enum=['disponible', 'attendue']),
         kind=dict(enum=['document_entree', 'reference_partenaire', 'preuve_realisation']),
         source_ref=dict(type=['string', 'null']), href=dict(type=['string', 'null']), detail=TEXT))),
@@ -212,12 +214,23 @@ def compile_delivery(method, dossier, complexity, snapshot, decision, glossary, 
                  line(labels['reconsider_label'], gate['reconsider'])])])
     section('jalons', gate_blocks)
     scope = deepcopy(dossier['scope'])
-    scope['axes'] = [dict(id=key, label=axis['titre']) for key, axis in complexity['method']['axes'].items()]
     scope['source'] = dict(path=complexity['source'], date=snapshot['date_capture'],
         version=snapshot['provenance']['version'], revision=snapshot['provenance']['sha256'])
     scope['rows'] = [dict(id=row['id'], capability_id=row['capacite_id'], name=row['capacite']['nom'],
-        path=[node['nom'] for node in row['hierarchie']], complexity=deepcopy(row['complexite']), boundary=row['frontiere'],
+        path=[node['nom'] for node in row['hierarchie']], boundary=row['capacite']['perimetre'], definition=row['capacite']['definition'],
         href=ATLAS + '#/sheet?' + urlencode({'node': row['capacite_id']})) for row in complexity['rows']]
+    domains = {}
+    for row in complexity['rows']:
+        domain, subdomain, area = row['hierarchie']
+        domain_group = domains.setdefault(domain['id'], dict(id=domain['id'], label=domain['nom'], subdomains={}))
+        subdomain_group = domain_group['subdomains'].setdefault(subdomain['id'],
+            dict(id=subdomain['id'], label=subdomain['nom'], areas={}))
+        area_group = subdomain_group['areas'].setdefault(area['id'],
+            dict(id=area['id'], label=area['nom'], capability_ids=[]))
+        area_group['capability_ids'].append(row['capacite_id'])
+    scope['hierarchy'] = [dict(id=domain['id'], label=domain['label'], subdomains=[
+        dict(id=subdomain['id'], label=subdomain['label'], areas=list(subdomain['areas'].values()))
+        for subdomain in domain['subdomains'].values()]) for domain in domains.values()]
     result['scope'] = scope
     return method_page, result
 

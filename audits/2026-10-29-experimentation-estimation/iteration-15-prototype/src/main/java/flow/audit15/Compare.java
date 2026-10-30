@@ -1,0 +1,238 @@
+package flow.audit15;
+
+import java.util.*;
+import java.nio.file.*;
+import java.time.Duration;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.ortools.Loader;
+import com.google.ortools.sat.*;
+import ai.timefold.solver.core.api.domain.entity.PlanningEntity;
+import ai.timefold.solver.core.api.domain.lookup.PlanningId;
+import ai.timefold.solver.core.api.domain.solution.*;
+import ai.timefold.solver.core.api.domain.valuerange.ValueRangeProvider;
+import ai.timefold.solver.core.api.domain.variable.PlanningVariable;
+import ai.timefold.solver.core.api.score.buildin.hardsoft.HardSoftScore;
+import ai.timefold.solver.core.api.score.calculator.EasyScoreCalculator;
+import ai.timefold.solver.core.api.solver.SolverFactory;
+import ai.timefold.solver.core.config.solver.SolverConfig;
+import ai.timefold.solver.core.config.solver.termination.TerminationConfig;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+/** Disposable experiment: finite pre-enumerated options, not the FLOW product model. */
+public class Compare {
+ public static class Option {
+  public String id,group; public int cost,start,end;
+  public boolean admissible;
+  public Map<String,Integer> uses;
+ }
+ public static class TaskInput { public String id; public List<Option> options; }
+ public static class Instance {
+  public String id,label,kind; public boolean exact;
+  public Map<String,Integer> capacity,fixed;
+  public List<TaskInput> tasks; public List<List<Integer>> precedence;
+ }
+ public static class Batch {
+  public int schema,budget_ms,hybrid_timefold_ms; public List<Long> seeds;
+  public List<Instance> cases; public Map<String,Object> contract;
+ }
+ @PlanningEntity
+ public static class Task {
+  @PlanningId public String id;
+  @ValueRangeProvider(id="options") public List<Integer> domain;
+  public List<Option> options;
+  @PlanningVariable(valueRangeProviderRefs="options") public Integer chosenIndex;
+  public Task(){}
+ }
+ @PlanningSolution
+ public static class Plan {
+  @ProblemFactProperty public Instance instance;
+  @PlanningEntityCollectionProperty public List<Task> tasks;
+  @PlanningScore public HardSoftScore score;
+  public Plan(){}
+ }
+ public static class Score implements EasyScoreCalculator<Plan,HardSoftScore> {
+  public HardSoftScore calculateScore(Plan p){
+   int hard=0,cost=0;
+   Map<String,Integer> used=new HashMap<>(); Set<String> groups=new HashSet<>();
+   for(Task t:p.tasks){
+    if(t.chosenIndex==null)continue;
+    if(!t.domain.contains(t.chosenIndex)){hard++;continue;}
+    Option o=t.options.get(t.chosenIndex);
+    if(!o.admissible)hard++;
+    cost+=o.cost;groups.add(o.group);
+    for(var e:o.uses.entrySet())used.merge(e.getKey(),e.getValue(),Integer::sum);
+   }
+   for(var e:used.entrySet()) hard+=Math.max(0,e.getValue()-p.instance.capacity.getOrDefault(e.getKey(),0));
+   for(var pair:p.instance.precedence) {
+    Task ta=p.tasks.get(pair.get(0)),tb=p.tasks.get(pair.get(1));
+    Option a=ta.chosenIndex==null?null:ta.options.get(ta.chosenIndex),b=tb.chosenIndex==null?null:tb.options.get(tb.chosenIndex);
+    if(a!=null && b!=null && a.end>b.start)hard++;
+   }
+   for(String g:groups)cost+=p.instance.fixed.getOrDefault(g,0);
+   return HardSoftScore.of(-hard,-cost);
+  }
+ }
+ static Plan plan(Instance c,List<Integer> assignment){
+  Plan p=new Plan();p.instance=c;p.tasks=new ArrayList<>();
+  for(int i=0;i<c.tasks.size();i++){
+   TaskInput ti=c.tasks.get(i);Task t=new Task();t.id=ti.id;
+   t.options=ti.options;t.domain=new ArrayList<>();
+   for(int j=0;j<ti.options.size();j++)if(ti.options.get(j).admissible)t.domain.add(j);
+   if(assignment!=null && assignment.get(i)>=0)t.chosenIndex=assignment.get(i);
+   p.tasks.add(t);
+  }return p;
+ }
+ static List<Integer> choices(Plan p){
+  List<Integer> out=new ArrayList<>();
+  for(int i=0;i<p.tasks.size();i++){
+   Integer index=p.tasks.get(i).chosenIndex;
+   out.add(index==null?-1:index);
+  }return out;
+ }
+ static Map<String,Object> result(Instance c,String engine,String status,List<Integer> assignment,long start){
+  Map<String,Object> r=new LinkedHashMap<>();
+  Plan p=plan(c,assignment);HardSoftScore s=new Score().calculateScore(p);
+  boolean complete=!assignment.contains(-1);
+  boolean valid=complete && s.hardScore()==0;
+  r.put("engine",engine);r.put("status",status);r.put("assignment",assignment);
+  r.put("valid",valid);r.put("cost",valid?-s.softScore():null);
+  r.put("hard_violations",-s.hardScore());r.put("wall_ms",(System.nanoTime()-start)/1e6);
+  return r;
+ }
+ static List<Integer> empty(Instance c){return new ArrayList<>(Collections.nCopies(c.tasks.size(),-1));}
+ static Map<String,Object> greedy(Instance c){
+  long start=System.nanoTime();List<Integer> a=empty(c);Set<String> groups=new HashSet<>();
+  for(int i=0;i<c.tasks.size();i++){
+   final int task=i;
+   List<Integer> ids=new ArrayList<>();
+   for(int j=0;j<c.tasks.get(i).options.size();j++)if(c.tasks.get(i).options.get(j).admissible)ids.add(j);
+   ids.sort(Comparator.comparingInt(j->{Option o=c.tasks.get(task).options.get(j);return o.cost+(groups.contains(o.group)?0:c.fixed.getOrDefault(o.group,0));}));
+   for(int j:ids){
+    a.set(i,j);Plan p=plan(c,a);
+    if(new Score().calculateScore(p).hardScore()==0){groups.add(c.tasks.get(i).options.get(j).group);break;}
+    a.set(i,-1);
+   }
+  }
+  return result(c,"greedy","CONSTRUCTION_ONLY",a,start);
+ }
+ static Map<String,Object> timefold(Instance c,long seed,long ms,List<Integer> initial){
+  long start=System.nanoTime();Plan input=plan(c,initial);
+  if(input.tasks.stream().anyMatch(t->t.domain.isEmpty())) return result(c,"timefold","EMPTY_DOMAIN",empty(c),start);
+  SolverConfig cfg=new SolverConfig().withSolutionClass(Plan.class).withEntityClasses(Task.class)
+    .withEasyScoreCalculatorClass(Score.class).withRandomSeed(seed)
+    .withTerminationConfig(new TerminationConfig().withSpentLimit(Duration.ofMillis(ms)));
+  Plan solved=SolverFactory.<Plan>create(cfg).buildSolver().solve(input);
+  List<Integer> a=choices(solved);
+  boolean feasible=!a.contains(-1)&&new Score().calculateScore(solved).hardScore()==0;
+  Map<String,Object> r=result(c,"timefold",feasible?"FEASIBLE_NOT_PROVEN_OPTIMAL":"NO_FEASIBLE_FOUND",a,start);
+  r.put("score",solved.score.toString());return r;
+ }
+ static Map<String,Object> cp(Instance c,long seed,long ms,List<Integer> hint,boolean topOne){
+  long start=System.nanoTime();CpModel m=new CpModel();List<List<BoolVar>> vars=new ArrayList<>();
+  LinearExprBuilder objective=LinearExpr.newBuilder();
+  Map<String,List<BoolVar>> groupMembers=new HashMap<>();
+  for(int i=0;i<c.tasks.size();i++){
+   List<BoolVar> row=new ArrayList<>();LinearExprBuilder exactly=LinearExpr.newBuilder();
+   int retained=-1;
+   if(topOne)for(int j=0;j<c.tasks.get(i).options.size();j++){
+    Option o=c.tasks.get(i).options.get(j);
+    if(o.admissible&&(retained<0||o.cost<c.tasks.get(i).options.get(retained).cost))retained=j;
+   }
+   for(int j=0;j<c.tasks.get(i).options.size();j++){
+    Option o=c.tasks.get(i).options.get(j);BoolVar v=m.newBoolVar("x_"+i+"_"+j);
+    row.add(v);exactly.add(v);
+    if(!o.admissible||(topOne&&j!=retained))m.addEquality(v,0);
+    objective.addTerm(v,o.cost);groupMembers.computeIfAbsent(o.group,k->new ArrayList<>()).add(v);
+    if(hint!=null&&hint.get(i)>=0)m.addHint(v,hint.get(i)==j?1:0);
+   }
+   m.addEquality(exactly,1);vars.add(row);
+  }
+  for(var e:c.capacity.entrySet()){
+   LinearExprBuilder sum=LinearExpr.newBuilder();
+   for(int i=0;i<c.tasks.size();i++)for(int j=0;j<c.tasks.get(i).options.size();j++){
+    int use=c.tasks.get(i).options.get(j).uses.getOrDefault(e.getKey(),0);
+    if(use!=0)sum.addTerm(vars.get(i).get(j),use);
+   }m.addLessOrEqual(sum,e.getValue());
+  }
+  for(var pair:c.precedence){
+   int a=pair.get(0),b=pair.get(1);
+   for(int i=0;i<c.tasks.get(a).options.size();i++)for(int j=0;j<c.tasks.get(b).options.size();j++)
+    if(c.tasks.get(a).options.get(i).end>c.tasks.get(b).options.get(j).start)
+     m.addLessOrEqual(LinearExpr.sum(new IntVar[]{vars.get(a).get(i),vars.get(b).get(j)}),1);
+  }
+  for(var e:groupMembers.entrySet()){
+   BoolVar active=m.newBoolVar("group_"+e.getKey());
+   LinearExprBuilder sum=LinearExpr.newBuilder();
+   for(BoolVar v:e.getValue()){m.addLessOrEqual(v,active);sum.add(v);}
+   m.addLessOrEqual(active,sum);objective.addTerm(active,c.fixed.getOrDefault(e.getKey(),0));
+  }
+  m.minimize(objective);
+  CpSolver solver=new CpSolver();
+  solver.getParameters().setNumSearchWorkers(1).setRandomSeed((int)seed).setMaxTimeInSeconds(ms/1000.0);
+  CpSolverStatus status=solver.solve(m);List<Integer> a=empty(c);
+  if(status==CpSolverStatus.OPTIMAL||status==CpSolverStatus.FEASIBLE)
+   for(int i=0;i<vars.size();i++)for(int j=0;j<vars.get(i).size();j++)if(solver.booleanValue(vars.get(i).get(j)))a.set(i,j);
+  Map<String,Object> r=result(c,topOne?"ortools_top1":"ortools",status.toString(),a,start);
+  r.put("best_bound",status==CpSolverStatus.OPTIMAL||status==CpSolverStatus.FEASIBLE?solver.bestObjectiveBound():null);
+  r.put("solver_wall_seconds",solver.wallTime());return r;
+ }
+ @SuppressWarnings("unchecked")
+ static Map<String,Object> hybrid(Instance c,long seed,int tfMs,int totalMs){
+  long start=System.nanoTime();Map<String,Object> g=greedy(c);
+  Map<String,Object> t=timefold(c,seed,tfMs,(List<Integer>)g.get("assignment"));
+  List<Integer> hint=(Boolean)t.get("valid")?(List<Integer>)t.get("assignment"):null;
+  long spent=(System.nanoTime()-start)/1000000;
+  Map<String,Object> o=cp(c,seed,Math.max(0,totalMs-spent),hint,false);
+  Map<String,Object> best=o;
+  for(Map<String,Object> candidate:List.of(g,t)){
+   if((Boolean)candidate.get("valid") && (!(Boolean)best.get("valid") || (Integer)candidate.get("cost")<(Integer)best.get("cost")))best=candidate;
+  }
+  Map<String,Object> r=new LinkedHashMap<>(best);
+  r.put("engine","hybrid");r.put("selected_engine",best.get("engine"));r.put("wall_ms",(System.nanoTime()-start)/1e6);
+  r.put("stages",List.of(g,t,o));r.put("cp_budget_ms",Math.max(0,totalMs-spent));
+  return r;
+ }
+ static void validateInput(Instance c){
+  for(var v:c.capacity.values())if(v==null||v<0)throw new IllegalArgumentException("Unknown/negative capacity");
+  for(var t:c.tasks)for(var o:t.options)for(var e:o.uses.entrySet()){
+   if(!c.capacity.containsKey(e.getKey())||e.getValue()==null||e.getValue()<0)throw new IllegalArgumentException("Unknown/negative resource");
+  }
+ }
+ public static void main(String[] args)throws Exception{
+  ObjectMapper mapper=new ObjectMapper();Batch batch=mapper.readValue(Path.of(args[0]).toFile(),Batch.class);
+  long nativeStart=System.nanoTime();Loader.loadNativeLibraries();double nativeMs=(System.nanoTime()-nativeStart)/1e6;
+  List<Map<String,Object>> rows=new ArrayList<>();
+  // Warm both APIs before collecting rows; this does not equal a mature production JVM warmup.
+  Instance warm=batch.cases.get(0);cp(warm,0,100,null,false);timefold(warm,0,100,null);
+  try(var context=new AnnotationConfigApplicationContext()){
+   context.registerBean("solverHarness",Compare.class);context.refresh();
+   for(Instance c:batch.cases){
+    validateInput(c);
+    List<String> order=new ArrayList<>(List.of("greedy","ortools","timefold","hybrid"));
+    for(long seed:batch.seeds){
+     Collections.shuffle(order,new Random(seed));
+     for(String engine:order){
+      Map<String,Object> r=switch(engine){
+       case "greedy" -> greedy(c);
+       case "ortools" -> cp(c,seed,batch.budget_ms,null,false);
+       case "timefold" -> timefold(c,seed,batch.budget_ms,null);
+       default -> hybrid(c,seed,batch.hybrid_timefold_ms,batch.budget_ms);
+      };
+      r.put("case",c.id);r.put("seed",seed);rows.add(r);
+     }
+    }
+    System.out.println(c.id+" done");System.out.flush();
+   }
+   Instance trap=batch.cases.get(0);
+   var top=cp(trap,17,1000,null,true);top.put("case",trap.id);top.put("seed",17);rows.add(top);
+   var timeout=cp(batch.cases.get(batch.cases.size()-1),17,0,null,false);timeout.put("case","ZERO_BUDGET");timeout.put("seed",17);rows.add(timeout);
+   Map<String,Object> guards=new LinkedHashMap<>();
+   Instance unknown=mapper.readValue(mapper.writeValueAsString(trap),Instance.class);unknown.capacity.remove("A");
+   try{validateInput(unknown);guards.put("unknown_resource_rejected",false);}catch(IllegalArgumentException e){guards.put("unknown_resource_rejected",true);}
+   Map<String,Object> output=new LinkedHashMap<>();
+   output.put("rows",rows);output.put("guards",guards);output.put("spring_context_ok",context.getBean("solverHarness")!=null);
+   output.put("native_load_ms",nativeMs);output.put("timefold_score","EasyScoreCalculator: full recalculation, prototype not performance-tuned");
+   mapper.writerWithDefaultPrettyPrinter().writeValue(Path.of(args[1]).toFile(),output);
+  }
+ }
+}

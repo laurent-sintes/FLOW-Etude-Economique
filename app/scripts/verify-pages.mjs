@@ -21,7 +21,7 @@ const output=path.resolve(flags.get('--output')||'tmp/pages-validation-report.js
 await fs.mkdir(path.dirname(output),{recursive:true});
 const oracle=JSON.parse((await fs.readFile(casesPath,'utf8')).replace(/^\uFEFF/,''));
 assert.equal(Object.keys(oracle.cases).length,6,'Six current model scenarios are required.');
-const navRoutes=['synvance','perimetre-retenu','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler'];
+const navRoutes=['synvance','perimetre-retenu','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire'];
 const synvanceProviders=['microsoft','sap'];
 const routes=[navRoutes[0],...synvanceProviders.map(provider=>'synvance-'+provider),...navRoutes.slice(1)];
 const report={url:site.href,status:'running',routes:{},worker:{},proofs:{},storage:{},errors:[],warnings:[]};
@@ -122,7 +122,7 @@ try{
  const data=await bootstrapResponse.json();
  equalProjection(data.baseline,oracle.cases.reference.result,'The static reference differs from the Python reference.');
  assert.deepEqual(data.ui.essential.nav.map(item=>item.id),navRoutes);
- assert.equal(navRoutes.length,17);assert.equal(routes.length,19);
+ assert.equal(navRoutes.length,18);assert.equal(routes.length,20);
  await page.waitForFunction(()=>location.hash==='#vision');
  assert.equal(await page.locator('.brand-home').getAttribute('href'),'#vision','The home link must open the Vision.');
  await route('modele');await page.locator('.brand-home').click();await route('vision');
@@ -136,7 +136,7 @@ try{
    assert.ok(state.text.length>40,`Empty route: ${id}`);
    assert.doesNotMatch(state.text,/\{\{(?:notion|vue)\.|\bundefined\b|\bNaN\b/,`Unresolved content: ${id}`);
    assert.ok(state.overflow<=1,`Viewport overflow on ${width}/${id}: ${state.overflow}`);
-   assert.equal(await page.locator('main a[href]').evaluateAll(links=>links.filter(link=>/\.ya?ml(?:[?#]|$)/i.test(decodeURIComponent(link.getAttribute('href')||''))).length),0,`Model data link on ${id}`);
+   assert.equal(await page.locator('main a[href]').evaluateAll((links,allowed)=>links.filter(link=>/\.ya?ml(?:[?#]|$)/i.test(decodeURIComponent(link.getAttribute('href')||''))&&link.getAttribute('href')!==allowed).length,site.pathname+'exports/flow-modele-metier.yaml'),0,`Model data link on ${id}`);
    assert.equal(await page.locator('main details:visible').count(),0,`Disclosure on ${id}`);
    report.routes[width].push(id);
   }
@@ -153,13 +153,35 @@ try{
  assert.equal(await page.getByRole('button',{name:data.ui.essential.core_results.source,exact:true}).count(),0);
  assert.equal(await page.locator('.document-code:visible').count(),0);
  report.proofs.yamlHidden=true;
+ await route('modele');
+ const modelDownload=page.getByRole('link',{name:data.ui.model_download.label,exact:true});
+ const downloadHref=await modelDownload.getAttribute('href');
+ assert.equal(new URL(downloadHref,site).pathname,site.pathname+'exports/flow-modele-metier.yaml');
+ const downloadResponse=await context.request.get(new URL(downloadHref,site).href);
+ assert.ok(downloadResponse.ok());
+ const downloadBytes=await downloadResponse.body();
+ assert.match(downloadBytes.toString('utf8'),/^format: flow-business-model/m);
+ assert.match(downloadBytes.toString('utf8'),/^metamodel:/m);
+ assert.match(downloadBytes.toString('utf8'),/^model:/m);
+ assert.match(downloadBytes.toString('utf8'),/^format_version: 2/m);
+ assert.match(downloadBytes.toString('utf8'),/^evidence:/m);
+ assert.match(downloadBytes.toString('utf8'),/source\/calculs-estimation-core\.yaml/);
+ const downloadEvent=page.waitForEvent('download');
+ await modelDownload.click();
+ const downloaded=await downloadEvent;
+ assert.equal(downloaded.suggestedFilename(),'flow-modele-metier.yaml');
+ assert.equal(await downloaded.failure(),null);
+ const savedBytes=await fs.readFile(await downloaded.path());
+ assert.equal(createHash('sha256').update(savedBytes).digest('hex'),createHash('sha256').update(downloadBytes).digest('hex'));
+ report.proofs.businessModelDownload={bytes:downloadBytes.length,sha256:createHash('sha256').update(downloadBytes).digest('hex'),singleFile:true};
+
  await route('etude-marche');
  const marketNote=data.ui.essential.application_framework.market.sections.find(section=>section.id==='evidence_status').links[0];
  const sourceButton=page.getByRole('button',{name:marketNote.label,exact:true});
  await sourceButton.click();
  await page.locator('dialog[open] .markdown').waitFor({timeout:180000});
  assert.ok((await page.locator('dialog[open] .markdown').innerText()).length>100);
- assert.equal(await page.locator('dialog[open] a[href]').evaluateAll(links=>links.filter(link=>/\.ya?ml(?:[?#]|$)/i.test(decodeURIComponent(link.getAttribute('href')||''))).length),0);
+ assert.equal(await page.locator('dialog[open] a[href]').evaluateAll((links,allowed)=>links.filter(link=>/\.ya?ml(?:[?#]|$)/i.test(decodeURIComponent(link.getAttribute('href')||''))&&link.getAttribute('href')!==allowed).length,site.pathname+'exports/flow-modele-metier.yaml'),0);
  const documentTitle=data.ui.documents.find(document=>document.path===marketNote.href)?.title;assert.ok(documentTitle);
  await page.getByRole('dialog',{name:documentTitle,exact:true}).waitFor();report.accessibility.documentDialogNamed=true;
  const sourceDownload=await page.locator('dialog[open] .document-meta a').getAttribute('href');
@@ -176,13 +198,36 @@ try{
   assert.equal(response.reply.status,200,name);
   equalProjection(response.reply.data,testCase.result,`Python browser parity: ${name}`);
  }
+ for(const [name,testCase] of Object.entries(oracle.edge_cases||{})){
+  const response=await workerRequest(manifest,manifestUrl,'/api/simulate',{parameters:testCase.parameters,model_version:data.model_version});
+  assert.ok(!response.error,`${name}: ${JSON.stringify(response.error)}`);
+  assert.equal(response.reply.status,200,name);
+  equalProjection(response.reply.data,testCase.result,`Python browser edge-case parity: ${name}`);
+  assert.equal(response.reply.data.anchor.budget_apres_bonus_eur_ht,null,'Unavailable counterpoint must remain unknown, not zero.');
+ }
  const baselineAgain=await workerRequest(manifest,manifestUrl,'/api/simulate',{parameters:oracle.cases.reference.parameters,model_version:data.model_version});
  equalProjection(baselineAgain.reply.data,oracle.cases.reference.result,'A simulation mutated the reference.');
  const stale=await workerRequest(manifest,manifestUrl,'/api/simulate',{parameters:oracle.cases.reference.parameters,model_version:'obsolete'});
  assert.equal(stale.reply.status,422);assert.equal(stale.reply.data.error,'version');
- report.worker={scenarios:Object.keys(oracle.cases),referenceIsolation:true,versionRejection:true,seconds:Math.round(performance.now()-workerStarted)/1000};
+ report.worker={scenarios:Object.keys(oracle.cases),edgeCases:Object.keys(oracle.edge_cases||{}),referenceIsolation:true,versionRejection:true,seconds:Math.round(performance.now()-workerStarted)/1000};
 
+ await route('glossaire');
+ assert.equal(await page.locator('.glossary-entry').count(),Object.keys(data.glossary.notions).length,'The glossary must expose every canonical notion.');
+ await page.locator('#glossary-search').fill('JH');
+ assert.ok(await page.locator('.glossary-entry').count()>0,'JH must be searchable.');
+ assert.ok(await page.locator('.glossary-entry').count()<Object.keys(data.glossary.notions).length,'Search must narrow the glossary.');
+ await page.locator('#glossary-search').fill('');
+ await page.evaluate(()=>{location.hash='#glossaire?term=cocomo_ii';});
+ await page.waitForFunction(()=>document.activeElement?.id==='glossary-term-cocomo_ii');
+ assert.equal(await page.evaluate(()=>location.hash),'#glossaire?term=cocomo_ii');
+ await route('complexite');
+ const glossaryLink=page.locator('.method-glossary-link').first();
+ const glossaryTarget=await glossaryLink.getAttribute('href');
+ await glossaryLink.click();
+ await page.waitForFunction(target=>location.hash===target&&document.activeElement?.id==='glossary-term-'+new URLSearchParams(target.split('?')[1]).get('term'),glossaryTarget);
+ report.proofs.glossary={canonicalEntries:Object.keys(data.glossary.notions).length,search:true,directTerm:true,methodLink:true};
  await route('vision');
+ assert.deepEqual(await page.locator('.vision-reading-paths a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),['#modele','#comparer','#capacite-realisation']);
  assert.equal(await page.locator('.vision-matrix tbody tr').count(),2);
  assert.equal(await page.locator('.vision-matrix tbody td').count(),4);
  assert.equal(await page.locator('.vision-proof-levels>li').count(),4,'The Vision should distinguish four levels of evidence.');
@@ -194,9 +239,14 @@ try{
  assert.equal(await page.locator('.delivery-scope-capability').count(),scope.rows.length,'The full retained scope must be accessible.');
  assert.equal(await page.locator('.delivery-scope-source a').getAttribute('href'),scope.link.href);
  assert.ok((await page.locator('.delivery-scope-provenance').innerText()).includes(scope.source.version),'The retained cartography must identify its captured version.');
+ assert.equal(await page.locator('.delivery-scope-scale-axes li').count(),0);
+ assert.equal(await page.locator('.delivery-scope-area').count(),scope.hierarchy.flatMap(domain=>domain.subdomains.flatMap(subdomain=>subdomain.areas)).length);
+ const areaLink=page.locator('.delivery-scope-area-links button').last();
+ const areaTarget=await areaLink.getAttribute('aria-controls');await areaLink.click();
+ await page.waitForFunction(target=>document.activeElement?.id===target,areaTarget);
  const sample=scope.rows[0];await page.locator('#delivery-scope-search').fill(sample.capability_id);
  assert.equal(await page.locator('.delivery-scope-capability').count(),1,'The scope search must find the exact native capability.');
- assert.equal(await page.locator('.delivery-scope-axes>div').count(),scope.axes.length);
+ assert.equal(await page.locator('.delivery-scope-axes>div').count(),0);
  assert.equal(await page.locator('.delivery-scope-capability>.source-link').getAttribute('href'),sample.href);
  await page.locator('#delivery-scope-search').fill('');
  await route('modele');assert.equal(await page.locator('.model-map a[href="#perimetre-retenu"]').count(),1);

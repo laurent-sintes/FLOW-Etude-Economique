@@ -1,0 +1,223 @@
+date: '2026-10-29'
+statut: Six recommandations appliquées dans l’ordre validé ; contrôles réussis ; application locale actualisée.
+audit_ref: audits/2026-10-29-audit-global-application.yaml
+revision_de_depart: 5ce585e9eddd29a5376010d5192343069628777e
+realisation:
+- ordre: 1
+  id: seuil_sap_diagnostic
+  resultat: Les budgets SAP dans les bornes affichées restent calculables. Sous le seuil historique, les valeurs
+    du seul contrepoint sont nulles et une notice explique son indisponibilité. Les calculs Make actifs restent
+    autonomes.
+  references:
+  - tools/study_app.py
+  - app/src/Simulations.tsx
+  - tools/test_study_app.py
+- ordre: 2
+  id: reprise_calcul_reseau
+  resultat: L’alerte du parcours Simuler propose Réessayer. La relance réutilise le brouillon, conserve le dernier
+    résultat valide et maintient la protection de la sauvegarde/export pendant l’erreur.
+  references:
+  - app/src/Simulations.tsx
+- ordre: 3
+  id: echelles_complexite
+  resultat: Les notes affichent leur échelle sur 5. Les seuils des trois axes et la règle ordinale sont dérivés
+    de la méthode canonique et lisibles en continu. Aucune note n’a changé.
+  references:
+  - tools/delivery_readiness.py
+  - app/src/DeliveryReadinessPage.tsx
+- ordre: 4
+  id: acces_glossaire
+  resultat: Une entrée permanente Repères de lecture donne accès aux 92 notions canoniques, à la recherche, aux
+    familles et au sommaire alphabétique. Les liens ciblés des méthodes ouvrent la bonne définition et lui donnent
+    le focus. Les définitions restent chez leur propriétaire existant.
+  references:
+  - app/src/GlossaryPage.tsx
+  - app/src/App.tsx
+  - app/src/MethodDocument.tsx
+  - config/application.yaml
+- ordre: 5
+  id: navigation_perimetre
+  resultat: 'Un sommaire ouvert et des regroupements suivent la hiérarchie native : 1 domaine, 9 sous-domaines,
+    28 Business Areas et 88 capacités. Recherche, accès directs et retours au sommaire sont disponibles. Notes,
+    frontières et identifiants restent inchangés.'
+  references:
+  - tools/delivery_readiness.py
+  - app/src/DeliveryReadinessPage.tsx
+  - tools/test_delivery_readiness.py
+- ordre: 6
+  id: orientation_vision
+  resultat: 'La Vision propose trois suites : comprendre la méthode, consulter les résultats et vérifier les conditions
+    de réalisation.'
+  references:
+  - source/vision-framework.yaml
+  - tools/framework_vision.py
+  - app/src/FrameworkVisionPage.tsx
+preservation:
+  hypotheses_et_montants_actifs: Inchangés.
+  scenarios_temoin: Six projections intégrales identiques, hors identifiant technique ignoré par le comparateur
+    ; paramètres et contrat inchangés.
+  version_modele: 57d2e719ef05f5a653e7df1f0fa2ed37a0a05f5f8cc5fa05e509d807d5a45c79
+  contrat_simulation: bc978feedabf804d4d63f9dc1b1e998c20198eca536d1a94cc2c557a204f4ee9
+  temoin_local: tmp/audit-global-before.json
+  temoin_sha256: 7d0350c5632170cb771d306eb2b1549d493db41745ceedb071215768930016e7
+  stockage: Clés et contrats conservés. Essais dans des contextes navigateur isolés ; aucun accès aux simulations
+    personnelles de l’utilisateur.
+  yaml: Aucun lien de consultation ou téléchargement YAML/YML dans les 20 parcours vérifiés.
+  lecture: Aucun accordéon ni bloc éditorial à déplier ajouté.
+  publication: Aucun commit, push ou déploiement effectué.
+validation:
+  commande: python -m tools.check_model --full --preserve tmp/audit-global-before.json
+  python_tests: 270
+  scenarios_preserves: 6
+  frontend: tests, types, content, build passed
+  delta_reference_10_ans:
+    java-spring: 0.0
+    dotnet: 0.0
+    rust: 0.0
+    microsoft: 0.0
+    sap: 0.0
+  navigateur_statique:
+    statut: passed
+    routes: 20
+    largeurs:
+    - 390
+    - 1440
+    erreurs: []
+    moteur:
+      scenarios:
+      - reference
+      - make_build
+      - buy_integration
+      - annual_services
+      - calendar
+      - context_and_means
+      edgeCases:
+      - sap_below_counterpoint
+      - sap_zero_integration
+      referenceIsolation: true
+      versionRejection: true
+      seconds: 2.172
+    stockage:
+      uiCase: make_build
+      sessionReload: true
+      savedCollectionPreserved: true
+      savedScenarioReload: true
+      keys:
+        session: flow-study-reload-v1
+        saved: flow-study-scenarios-v1
+    preuves:
+      yamlHidden: true
+      markdown: true
+      focus: true
+      glossary:
+        canonicalEntries: 92
+        search: true
+        directTerm: true
+        methodLink: true
+      sponsorJourney:
+        visionLanding: true
+        evidenceLevels: true
+        realizationCriteria: true
+        readinessDossier: true
+        retainedScope: true
+        nativeCartography: true
+      synvanceSupplierPages:
+      - microsoft
+      - sap
+      pdf: true
+      originalDocuments: 7
+      pdfDownload: true
+      synvanceEntry: true
+      visionMatrix: true
+      unpublishedDocumentHandled: true
+  regressions_locales:
+    statut: passed
+    sap:
+    - budget: 1000000
+      status: 200
+      options: 5
+      makeUnchanged: true
+      counterpoint: null
+      noticeVisible: true
+    - budget: 0
+      status: 200
+      options: 5
+      makeUnchanged: true
+      counterpoint: null
+      noticeVisible: true
+    reseau:
+      failureText: 'Le service de calcul est indisponible. Vérifie que l’application locale est démarrée, puis réessaie.
+
+        Réessayer'
+      retryVisible: true
+      draftPreservedDuringFailure: true
+      lastValidResultPreserved: true
+      saveAndExportBlocked: true
+      recoveredWithoutInputChange: true
+      recoveredStatus: 200
+    stockage:
+      savedParametersExact: true
+      reloadDraftPreserved: true
+      savedBytesPreserved: true
+      scenarioName: Contrôle isolé — audit global
+      namedScenarioLoadPreserved: true
+      parameters:
+        common:
+          bonus_continuite_pct: 10
+          inflation_tjm: 0.025
+          inflation_cloud: 0.01
+          inflation_licences: 0.03
+        options:
+          java-spring:
+            hebergement: 72000
+            ipaas: 36000
+            licences_complementaires: 0
+            build: 10028700
+            build_mois: 48
+            services_core: 234306.43
+            services_integration: 589700.65
+          dotnet:
+            hebergement: 72000
+            ipaas: 36000
+            licences_complementaires: 0
+            build: 10579641.94
+            build_mois: 48
+            services_core: 274212.86
+            services_integration: 632744.42
+          rust:
+            hebergement: 72000
+            ipaas: 36000
+            licences_complementaires: 0
+            build: 13856319.91
+            build_mois: 48
+            services_core: 479429.28
+            services_integration: 827461.64
+          microsoft:
+            hebergement: 30000
+            ipaas: 36000
+            licences_complementaires: 24000
+            integration: 4416856
+            integration_mois: 38
+            services_grouped: 917371.4500000001
+          sap:
+            hebergement: 30000
+            ipaas: 100000
+            licences_complementaires: 0
+            integration: 0
+            integration_mois: 30
+            services_grouped: 1181839.93
+    erreurs: []
+  visuel: Captures du sommaire métier sur ordinateur/mobile, du glossaire mobile et des trois sorties de la Vision
+    relues.
+  traces_locales:
+  - tmp/check-model-last.json
+  - tmp/implementation-audit-global-2026-10-29/pages-report.json
+  - tmp/implementation-audit-global-2026-10-29/simulation-regressions.json
+serveur:
+  url: http://127.0.0.1:8766/
+  repertoire: C:/Dev/FLOW-Etude-Economique
+  pid_verifie: 16308
+  sources_current: true
+limites_metier: Les qualifications marché, la recalibration éventuelle du pilote et les preuves de capacité de réalisation
+  restent des travaux distincts. Aucune preuve de livraison, disponibilité d’équipe ou qualification retenue n’a
+  été inventée.

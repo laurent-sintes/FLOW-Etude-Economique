@@ -1,0 +1,317 @@
+id: audit-modele-metier-moteur-bicephale-2026-10-30
+date: '2026-10-30'
+verdict: Calculs retenus reproductibles et sources examinées intactes. Le dispositif conserve correctement la décision
+  Master Data, mais ses contrôles et certaines relations métier sont insuffisants pour généraliser aux autres unités.
+  La comparaison numérique des deux voies existe ; leur équivalence de périmètre et leur validité prédictive ne
+  sont pas démontrées.
+decision: Conserver les 1 500 JH et les 17 mois adoptés. Aucun nouveau chiffrage, coefficient ou budget n’est appliqué
+  par cet audit.
+evidence: evidence.json
+reproduction: 'Depuis la racine, avec les dépendances Python du projet : python -B audits/2026-10-30-audit-modele-bicephale/audit.py'
+preservation:
+  active_files_unchanged: 292
+  source_or_estimate_changes: false
+  commit_or_push: false
+controls:
+  existing_tests:
+    count: 34
+    result: passed
+    command: python -B -m unittest tools.test_estimation_calculation tools.test_retained_core tools.test_fundamentals_model
+      tools.test_core_method tools.test_export_business_model
+  independent_recalculations:
+    preparation:
+      recorded_file_measures_reconciled: true
+      complement_parts:
+        blocks: 5500.5
+        schemas: 2485
+        configuration: 326
+        structure: 190
+        method_refinement: -215
+      total_equivalent_complement_units: 8286.5
+      refined_treatments: 8
+      method_samples: 18
+      boundary: Recomposition depuis les mesures enregistrées et empreintes de code, pas nouvelle validation sémantique
+        des analogies.
+    E: 1.0997
+    F: 0.31794
+    AAM: 0.035
+    recomputed_four_references: true
+    role_total: 1500
+    activity_total: 1500.0
+    cosmic_recount:
+      processes: 29
+      groups: 42
+      CFP: 420
+      movements:
+        E: 55
+        R: 169
+        X: 94
+        W: 102
+      structural_issues: []
+  metamodel:
+    objects: 26
+    relations: 29
+    rules: 24
+    arithmetic_rules: 13
+    algorithm_rules: 11
+  nested_evidence_hashes:
+    verified: 11
+    failures: 0
+  oss_code_hashes:
+    verified: 2060
+    failures: 0
+    boundary: Contrôle des empreintes des fichiers sélectionnés, pas une nouvelle revue fonctionnelle exhaustive
+      du code.
+  stress_probes: Sept essais sur copies en mémoire sont acceptés alors que le contrat devrait les rejeter ou signaler
+    la non-comparabilité. Voir evidence.json. Aucun fichier actif modifié.
+  full_coverage_probe:
+    covered: 88
+    total: 88
+    remaining: 0
+    covered_pct: 100.0
+    remaining_capabilities: []
+    status: partially_estimated
+results:
+  total_jh: 1500
+  months: 17
+  unrounded_months: 16.73106117868435
+  roles:
+    coordination: 170
+    analyse_produit: 150
+    architecture: 130
+    dev_java: 480
+    dev_frontend: 180
+    qa: 200
+    plateforme: 130
+    ux: 30
+    securite: 30
+  rows:
+  - id: erpnext
+    common_jh: 514.7925379736049
+    complements_jh: 860.2261032730622
+    total_jh: 1375.0186412466671
+    complements_pct: 62.56105026279019
+  - id: odoo
+    common_jh: 657.342883464003
+    complements_jh: 872.4817943821573
+    total_jh: 1529.8246778461603
+    complements_pct: 57.03148909916424
+  - id: tryton
+    common_jh: 506.19833531526234
+    complements_jh: 859.4212508456094
+    total_jh: 1365.6195861608717
+    complements_pct: 62.93269806283875
+  - id: axelor
+    common_jh: 626.9245060182417
+    complements_jh: 870.0229932499443
+    total_jh: 1496.947499268186
+    complements_pct: 58.119806718356735
+  functional_jh: 1200.0
+  gap_pct: -19.836867987244375
+  spread_pct: 10.969328701612026
+  rounding_jh: 3.052500731814007
+positive_findings:
+- Le référentiel reçu est distinct des fonctions proposées et des hypothèses de coût.
+- Les quatre résultats sont recalculables à partir des mesures agrégées, hypothèses de réutilisation et compléments.
+  La décision arrondit Axelor 1 496,947499 à 1 500 JH.
+- 'Le recompte structurel retrouve 420 CFP : 29 processus, 42 groupes, 55 entrées, 169 lectures, 102 écritures et
+  94 sorties. Les mouvements référencent des groupes connus ; pas de doublon type/groupe par processus. La validité
+  métier des frontières reste à qualifier.'
+- Les activités et neuf rôles totalisent exactement 1 500 JH. Les clés activité/rôle sont explicitement hypothétiques.
+- Le délai recalculé est 16,731061 mois, arrondi à 17 ; le calendrier global provisoire reste distinct.
+- La valorisation ne rajoute pas de QA, d’architecture, de pilotage proportionnel ou de remise IA globale.
+- Les indicateurs reposent sur les résultats non arrondis. Aucune classe de confiance ni probabilité n’est déduite
+  de leur convergence.
+findings:
+- id: A01
+  priority: P1
+  nature: Défaut reproduit
+  title: Le calcul n’est pas lié de manière contrôlée à son unité métier et à sa stack.
+  references:
+  - tools/retained_core.py:27
+  - tools/retained_core.py:40
+  - source/schema-estimations-core-retenues.yaml:17
+  evidence: 'Une seconde décision sur BC-008 utilisant le calcul Master Data et ses véritables empreintes est acceptée
+    avec la première : 3 000 JH sont validés. Déclarer la décision comme Rust est aussi accepté. Aucun contrôle
+    ni empreinte n’est contourné dans ces deux essais.'
+  impact: Une erreur de rattachement peut financer une autre famille ou une autre stack sans estimation correspondante.
+  action: Lier calcul, unité, niveau métier, stack et version/empreinte du périmètre. Contrôler cette liaison lors
+    de l’adoption ; exiger une transposition explicite si la stack change.
+  acceptance: Rejeter les deux exemples. Une modification du périmètre doit déclencher une réévaluation explicite,
+    sans changer automatiquement la décision budgétaire.
+- id: A02
+  priority: P1
+  nature: Contrat métier incomplet
+  title: Le financement unique des mécanismes partagés est décrit mais pas représenté dans les instances actives.
+  references:
+  - source/fondamentaux.yaml:329
+  - source/fondamentaux.yaml:641
+  - tools/capability_catalog.py:20
+  - tools/retained_core.py:37
+  evidence: Le métamodèle déclare mécanismes, compléments et funding_owner. Le propriétaire annoncé pour les mécanismes,
+    analyse-perimetre-core.yaml, ne contient pas ce registre. Le contrôle de doublon ne vérifie que le couple stack/capacité.
+  impact: Deux familles distinctes peuvent réutiliser le même mécanisme et chacune en financer la construction.
+    Aucun tel doublon n’est démontré dans l’unique famille adoptée.
+  action: Instancier les mécanismes et compléments, leurs consommateurs et leur propriétaire de financement. Le
+    registre reste interne au calcul ; conserver les résultats par unité métier et rôle, sans imposer une présentation
+    Socle + Fonctions.
+  acceptance: Deux unités utilisant le même mécanisme ne financent qu’une fois son travail commun ; les adaptations
+    propres restent identifiées.
+- id: A03
+  priority: P2
+  nature: Défauts de validation reproduits
+  title: Les paramètres ne disposent pas de tous les contrôles métier nécessaires.
+  references:
+  - tools/estimation_calculation.py:40
+  - tools/estimation_calculation.py:99
+  - tools/estimation_calculation.py:110
+  - tools/estimation_calculation.py:112
+  - tools/estimation_calculation.py:131
+  evidence:
+  - 'Une clé négative est acceptée si les poids totalisent 1 : l’essai transfère 80 JH entre plateforme et Java.'
+  - Une cinquième colonne de phase est ignorée par zip.
+  - COSMIC à 8 h/JH face à COCOMO à 7 h/JH produit 1 050 JH sans changer le statut de comparabilité.
+  - Une décomposition commune/compléments à 1 JH + 1 JH est recopiée malgré le total de 1 375 JH.
+  - Une taille fonctionnelle négative est acceptée par la fonction arithmétique.
+  test_boundary: Ces cinq essais injectent des copies après le point de vérification d’empreinte. Ils prouvent l’absence
+    de validation sémantique des données, pas une possibilité de modifier les preuves actuelles sans alerte. Les
+    données adoptées ne contiennent pas ces erreurs.
+  impact: Une nouvelle entrée enregistrée avec une empreinte valide peut rester économiquement incohérente.
+  action: 'Ajouter des contrats typés pour entrées COCOMO, comptage COSMIC, productivité et ventilations : domaines
+    numériques, unités, dimensions des phases, réconciliation des décompositions. Dériver la comparabilité de ces
+    contrôles.'
+  acceptance: Rejeter poids/tailles négatifs, dimensions incompatibles et décompositions incohérentes. Convertir
+    explicitement les unités ou signaler la non-comparabilité.
+- id: A04
+  priority: P2
+  nature: Traçabilité active incomplète
+  title: Le moteur actif et le téléchargement ne transportent pas toute la préparation des tailles.
+  references:
+  - tools/estimation_calculation.py:85
+  - tools/export_business_model.py:26
+  - source/fondamentaux.yaml:361
+  evidence: 'Le moteur importe les tailles équivalentes et les 420 CFP de results.json puis applique les formules.
+    Les 11 dépendances amont référencées par ce résultat ne sont pas chargées dans ce flux. Dix documents JSON amont
+    manquent au téléchargement : mesures, choix de réutilisation, analogies, comptage détaillé, décision de productivité.'
+  positive_boundary: Les preuves existent et leurs empreintes correspondent. Le téléchargement permet de refaire
+    la dernière étape arithmétique et la ventilation des rôles ; il ne permet pas de reconstruire toutes les tailles
+    depuis les mesures.
+  impact: Une revue depuis le seul fichier exporté reste incomplète. Le chargement courant ne contrôle pas les dépendances
+    transitives ; certaines règles sont exécutées par des scripts d’audit historiques.
+  action: Déclarer une chaîne active et versionnée allant des mesures/comptages à la décision. Vérifier les empreintes
+    transitives et exporter ses données structurées, sans embarquer tous les dépôts OSS ou PDF ni réécrire les preuves
+    historiques. Dans l’export, distinguer les preuves historiques des valeurs actuellement adoptées.
+  acceptance: Le détail exporté recompose les tailles et les 420 CFP. Une dépendance absente ou modifiée est signalée.
+- id: A05
+  priority: P2
+  nature: Limite méthodologique connue et non résolue
+  title: L’équivalence de périmètre entre les deux voies reste conventionnelle.
+  references:
+  - audits/2026-10-30-master-data-comparable-reuse/inputs.json:45
+  - audits/2026-10-30-master-data-spring-reprise/results.json:469
+  - source/estimations-core-retenues.yaml:188
+  evidence: La base native inclut de la création et de l’édition directe des fiches. FLOW privilégie admission de
+    contributions, consultation et administration. La preuve reconnaît que ces fonctions natives n’ont pas été isolées.
+    Les exigences de service S1 ne sont pas appariées à la population ISBSG.
+  impact: Les 296,95 JH d’écart peuvent provenir de différences fonctionnelles et de contraintes, autant que des
+    méthodes, comptages ou productivités. Leur attribution précise n’est pas démontrée.
+  action: À partir des contrats et analogies existants, qualifier inclus commun, spécifique FLOW, natif inutile
+    et inconnu. Relier ces choix aux tailles et processus. Qualifier séparément fonctions, activités, unités et
+    contraintes.
+  acceptance: Chaque différence connue est conservée ou retirée explicitement. Toute conséquence en JH est une proposition
+    séparée de la décision actuelle ; aucun coefficient n’est choisi pour forcer la convergence.
+- id: A06
+  priority: P2
+  nature: Consolidation à définir avant extension
+  title: La somme des familles ne définit pas une estimation intégrée du Core System.
+  references:
+  - tools/calculate_costs.py:191
+  - source/fondamentaux.yaml:852
+  evidence: Les JH et coûts adoptés sont additionnés. La non-linéarité est traitée dans Master Data, sans préciser
+    si les futures familles seront des projets autonomes ou des composants intégrés.
+  impact: Additionner des décisions budgétaires autonomes est possible sous réserve des partages. Ce n’est pas automatiquement
+    un calcul COCOMO multi-composants. Le cas illustratif calculé dans evidence.json donne +7,16 % pour deux tailles
+    intégrées identiques face à deux calculs isolés ; ce n’est pas une marge à appliquer à FLOW.
+  action: Définir niveau d’agrégation, mécanismes partagés et intégration interne du Core, distincte de l’intégration
+    Beaumanoir. Choisir la règle adaptée à cette organisation.
+  acceptance: Nommer explicitement somme des décisions ou estimation intégrée. Ne pas sommer les délais ni en prendre
+    le maximum sans ressources et dépendances.
+- id: A07
+  priority: P3
+  nature: Défaut de statut reproduit
+  title: Une couverture complète reste marquée partielle.
+  references:
+  - tools/retained_core.py:101
+  evidence: Avec 88 capacités sur 88, coverage renvoie 100 %, zéro restante et partially_estimated.
+  impact: Indicateur futur incohérent ; aucun effet sur les 6/88 actuelles.
+  action: Distinguer absence, couverture partielle et complète, en gardant la maturité des hypothèses séparée.
+  acceptance: Contrôler 0/88, 6/88, 88/88 et le périmètre vide.
+assumptions_not_errors:
+- subject: Taille logique
+  statement: Le compteur AST/déclaratif fournit une convention reproductible, non calibrée entre technologies. La
+    précision de la formule ne valide pas la conversion en KSLOC.
+  reference: audits/2026-10-30-master-data-natif/measure.py:90
+- subject: Convergence des quatre OSS
+  statement: Les mêmes 8 286,5 unités complémentaires alimentent les quatre calculs. Elles représentent 870,02 JH,
+    soit 58,12 % du total Axelor. La dispersion de 10,97 % décrit leur écart, pas quatre validations indépendantes.
+  reference: evidence.json#baseline.rows
+- subject: COSMIC × ISBSG
+  statement: 420 CFP reste un comptage proposé ; 20 h/CFP et le retrait de 0,8 au profit de 1 restent les conventions
+    documentées. Le taux arithmétique qui égaliserait Axelor vaut 24,95 h/CFP ; ce n’est pas une observation et
+    il ne doit pas être retenu pour rapprocher les méthodes.
+  reference: audits/2026-10-30-master-data-decomposition-gap/benchmark-decision.json
+- subject: Rôles et délai
+  statement: Les activités publiées et clés proposées entre rôles sont distinctes. Les 17 mois sont conditionnels.
+    1 500/(17×18) donne 4,90 personnes en moyenne, sans démontrer leur disponibilité ni le séquencement.
+  reference: source/estimations-core-retenues.yaml#schedule
+- subject: Incertitude
+  statement: Garder écarts, dispersion et hypothèses. Aucune classe ABCDE, confiance ou probabilité ne peut être
+    déduite des seuls chiffres. L’audit ne fournit pas de nouvelle fourchette.
+  reference: source/fondamentaux.yaml#estimation_model.invariants
+primary_reference_checks:
+- title: COCOMO II Model Definition Manual 2.1
+  url: https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf
+  sections:
+  - équation 4
+  - §3.3
+  - table 57
+  - convention 152 h/mois-personne
+  conclusion: La simplification de réutilisation correspond au cas DM=CM=SU=0. Les extensions 1,18 et 1,25 correspondent
+    aux phases choisies. Le manuel distingue estimation multi-composants et somme indépendante.
+- title: COSMIC / ISBSG Performance of Business Application, Real-Time and Component Software Projects, 2012
+  url: https://cosmic-sizing.org/wp-content/uploads/2015/07/Performance-of-Business-Application-Real-Time-and-Component-Software-Projects-2012.pdf
+  sections:
+  - tables 7 et 8, pages 12–13
+  - annexe A, pages 46–47
+  conclusion: Le repère 20 h/CFP et le facteur publié 0,8 pour 300–500 CFP sont vérifiés. Le facteur 1 demeure la
+    décision d’étude. Les six activités normalisées de l’équipe ne couvrent pas automatiquement les spécialistes
+    extérieurs.
+next_iteration:
+  worthwhile: true
+  objective: Fiabiliser les contrats avant d’ajouter des chiffrages de familles.
+  sequence:
+  - 'A01 : lier calcul, périmètre et stack.'
+  - 'A03/A07 : valider les paramètres, les comparaisons et la couverture.'
+  - 'A02/A06 : instancier les financements partagés et définir la consolidation.'
+  - 'A04/A05 : rendre les entrées reconstructibles et qualifier les différences fonctionnelles déjà connues.'
+  constraints:
+  - Référentiel natif intact.
+  - 1 500 JH et 17 mois conservés comme décision.
+  - Aucune attente de bilans de projets externes ni spécification exhaustive.
+  - Utiliser les preuves existantes ; conserver inconnu si nécessaire.
+  exit_criteria:
+  - Rattachements et entrées incohérents rejetés.
+  - Mécanisme commun financé une seule fois.
+  - Tailles et comptages reconstructibles depuis les entrées exportées.
+  - Limites de comparaison explicites et contrôlées.
+  stop_rule: Arrêter cette itération lorsque ces contrats sont contrôlés ; ne pas multiplier les variantes de coefficients
+    sans information utile.
+progress:
+  new_estimated_capabilities: 0
+  retained_capabilities: 6
+  total_capabilities: 88
+  remaining_java_capabilities: 82
+  cumulative_adopted_jh: 1500
+  months: 17
+  interpretation: Progrès sur la connaissance et la maîtrise des défauts ; pas de réduction démontrée de l’incertitude
+    de charge par ce seul audit.

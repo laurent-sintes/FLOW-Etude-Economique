@@ -1,0 +1,181 @@
+{
+  "id": "master-data-21-inputs",
+  "date": "2026-10-30",
+  "status": "Calculs conditionnels de référence ; aucun budget complet retenu",
+  "scope": {
+    "capabilities": [
+      "BC-002",
+      "BC-003",
+      "BC-004",
+      "BC-005",
+      "BC-006",
+      "BC-007"
+    ],
+    "native_function_count": 14,
+    "contract_ref": "../2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json",
+    "full_family_estimate": false
+  },
+  "sources": {
+    "cosmic": "../2026-10-29-experimentation-estimation/iteration-08-cosmic.json",
+    "size": "../2026-10-29-experimentation-estimation/iteration-08-taille.json",
+    "cocomo": "../2026-10-29-experimentation-estimation/iteration-08-methode.json",
+    "java": "../2026-10-29-experimentation-estimation/iteration-08-java-mesures.json",
+    "typescript": "../2026-10-29-experimentation-estimation/iteration-08-ts-mesures.json",
+    "distributions": "repartitions-sources.json"
+  },
+  "units": {
+    "jh_hours": 7,
+    "cocomo_person_month_hours": 152,
+    "meaning": "Conversion des heures en JH ; aucun effectif ni délai manuel n'entre dans le calcul."
+  },
+  "benchmark": {
+    "publisher": "COSMIC et ISBSG",
+    "year": 2012,
+    "project_years": [
+      1999,
+      2011
+    ],
+    "url": "https://cosmic-sizing.org/wp-content/uploads/2015/07/Performance-of-Business-Application-Real-Time-and-Component-Software-Projects-2012.pdf",
+    "main": {
+      "id": "java_multiplatform_size_adjusted",
+      "language": "Java",
+      "platform": "Multi-platform",
+      "development_type": "New Development",
+      "table": 7,
+      "page": 12,
+      "base_size_band": [
+        100,
+        200
+      ],
+      "hours_per_cfp": 20,
+      "spread_hours_per_cfp": 7,
+      "spread_status": "Interpolation proposée par les auteurs, s'appuyant sur une plage P25–P75 ; pas quantiles prédictifs FLOW.",
+      "cohort_n": null,
+      "reason": "Application de la procédure publiée §2.2.5 et de son exemple p.13 ; pas sélection selon proximité avec COCOMO."
+    },
+    "size_correction": {
+      "table": 8,
+      "page": 12,
+      "applicable_band": [
+        300,
+        500
+      ],
+      "factor": 0.8,
+      "caption_anomaly": "Le titre mentionne Table9 ; texte §2.2.5 et exemple p.13 identifient Table7. Aucune correction de coefficient inventée."
+    },
+    "alternatives": [
+      {
+        "id": "java_multiplatform_unadjusted",
+        "table": 4,
+        "page": 9,
+        "cohort_n": 15,
+        "hours_per_cfp": 19,
+        "p25": 15,
+        "p75": 29,
+        "reason": "Sous-groupe observé Java/multiplateforme, tailles mélangées ; contraste à la correction par taille."
+      },
+      {
+        "id": "java_pc_size_adjusted",
+        "table": 7,
+        "page": 12,
+        "cohort_n": null,
+        "hours_per_cfp": 20,
+        "spread": 10,
+        "correction": 0.8,
+        "reason": "Classification plateforme alternative ; pas affirmation que le cloud moderne équivaut à PC."
+      },
+      {
+        "id": "java_all_platforms",
+        "table": 2,
+        "page": 8,
+        "cohort_n": 42,
+        "hours_per_cfp": 23,
+        "p25": null,
+        "p75": 38,
+        "reason": "Langage principal Java/J2EE ; sans filtrage plateforme/taille.",
+        "anomaly": "P25 imprimé158, supérieur à la médiane23. P25 exclu, aucune substitution par15 ou15,8."
+      }
+    ],
+    "effort_scope": "Effort normalisé niveau1 de l'équipe affectée : planning, spécification, conception, réalisation, test et mise en œuvre. Les activités absentes peuvent être reconstituées par ISBSG ; les experts externes à l'équipe peuvent être exclus. AnnexeA pp.46–47.",
+    "transfer_assumptions": [
+      "Application de gestion nouvelle, et non évolution d'un produit installé.",
+      "Java est utilisé comme langage principal du système ; la part React n'est pas un sous-échantillon mesuré.",
+      "Multi-platform est une analogie historique proposée pour Spring/React/PostgreSQL ; ce n'est pas une caractérisation certifiée.",
+      "Aucun facteur de progrès technique depuis1999–2011, gain IA ou remise Spring n'est inventé.",
+      "La similitude de qualité, sécurité, reprise et concurrence n'est pas démontrée."
+    ],
+    "disallowed": [
+      "Pas de conversion IFPUG/Nesma vers CFP COSMIC.",
+      "Pas de taux issu du fichier cosmic.arff non réconcilié.",
+      "Pas de moyenne entre les voies COCOMO et COSMIC×ISBSG.",
+      "Pas de JH par rôle par pourcentages inventés.",
+      "Pas d'addition de l'architecture/QA historiques aux efforts calculés."
+    ]
+  },
+  "reconciliation": [
+    {
+      "id": "functional_data",
+      "topic": "Réception et consultation",
+      "cosmic": "25 processus hypothétiques, dont12 consultations et des processus de contributions, administration, usages et reprise.",
+      "cocomo": "Blocs Java/API, modèles et interfaces proposés ; rattachements contractuels présents.",
+      "status": "recouvrement_partiel",
+      "impact": "Les deux voies touchent les six capacités, mais cela ne mesure pas un taux de couverture."
+    },
+    {
+      "id": "purge",
+      "topic": "Purge",
+      "cosmic": "Non comptée : déclencheur, unité et résultat restent ouverts.",
+      "cocomo": "V10A/V10B/PERSIST/API_F10 et RetentionRule contiennent des éléments de purge.",
+      "status": "perimetres_differents",
+      "impact": "Pas de déduction en JH inventée pour rendre les résultats comparables."
+    },
+    {
+      "id": "recovery",
+      "topic": "Rapprochement après restauration",
+      "cosmic": "R01/R02/R03 comptés sous manifeste et protocole supposés ;20CFP.",
+      "cocomo": "Pas de groupes RecoveryEpoch/Manifest ni de blocs R01/R02/R03 explicitement dédiés dans l'inventaire de taille.",
+      "status": "correspondance_non_demontree",
+      "impact": "C02 et autres reprises ne prouvent pas que ce protocole précis est dimensionné."
+    },
+    {
+      "id": "administration",
+      "topic": "Administration, publication et canaux",
+      "cosmic": "A01 regroupe source/contrat/autorité ; retrait/publication variants deI01 ; UI/API équivalents sousH05.",
+      "cocomo": "Endpoints séparés, dontmajContrat/majAutorite/publierCandidat/retirerReference ; séparation technique ou fonctionnelle non tranchée.",
+      "status": "hypotheses_a_reconcilier",
+      "impact": "Un endpoint ne vaut pas automatiquement un processus COSMIC supplémentaire."
+    },
+    {
+      "id": "conversion",
+      "topic": "Évolution des schémas",
+      "cosmic": "Groupes conservés sans décomposition des transformations sémantiques.",
+      "cocomo": "CANONICAL_VERSION_DELTA explicitement non dimensionné.",
+      "status": "reste_inconnu",
+      "impact": "Absence de chiffrage n'est pas charge nulle."
+    },
+    {
+      "id": "nonfunctional",
+      "topic": "Qualité, sécurité, SQL et livraison",
+      "cosmic": "La taille fonctionnelle n'isole pas toutes les exigences non fonctionnelles ; performances non démontrées.",
+      "cocomo": "Tests dans l'assiette d'effort ; DDL/IaC/support restent non dimensionnés et facteurs qualitatifs supposés.",
+      "status": "reste_inconnu",
+      "impact": "Ne pas ajouter des durées IA ni déclarer ces activités gratuites."
+    },
+    {
+      "id": "lifecycle",
+      "topic": "Phases et population d'effort",
+      "cosmic": "ISBSG niveau1 avec planning et mise en œuvre normalisés ; spécialistes non affectés exclus.",
+      "cocomo": "Effort logiciel selon les jalons du manuel, avec conception/QA/gestion ; phases initiale et transition à distinguer.",
+      "status": "assiettes_non_identiques",
+      "impact": "Une proximité numérique ne valide pas le total tous rôles."
+    }
+  ],
+  "previous_total_policy": "Les15775JH et les anciens lots de durée ne sont ni lus par le calculateur ni utilisés comme cible de réglage. Les chiffres actifs restent inchangés.",
+  "outcome_policy": {
+    "retained_family_jh": null,
+    "retained_family_months": null,
+    "effort_by_role": null,
+    "full_core_jh": null,
+    "reason": "Tailles encore hypothétiques et partielles, assiettes non réconciliées. Produire les calculs conditionnels et leurs limites, pas un faux total."
+  }
+}

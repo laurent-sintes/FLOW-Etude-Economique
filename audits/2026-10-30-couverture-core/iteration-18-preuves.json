@@ -1,0 +1,178 @@
+{
+  "evidence": [
+    {
+      "id": "O181",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "addons/stock/models/stock_picking.py",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_picking.py",
+      "observation": "Réalisation, écarts de quantité et reliquats de transferts.",
+      "limit": "Analogie d'ordre et résultat partiel ; pas de WMS à reconstruire.",
+      "excerpts": [
+        {
+          "start": 1014,
+          "end": 1057,
+          "text": "    def _action_done(self):\n        \"\"\"Call `_action_done` on the `stock.move` of the `stock.picking` in `self`.\n        This method makes sure every `stock.move.line` is linked to a `stock.move` by either\n        linking them to an existing one or a newly created one.\n\n        If the context key `cancel_backorder` is present, backorders won't be created.\n\n        :return: True\n        :rtype: bool\n        \"\"\"\n        self._check_company()\n\n        todo_moves = self.move_ids.filtered(lambda self: self.state in ['draft', 'waiting', 'partially_available', 'assigned', 'confirmed'])\n        for picking in self:\n            if picking.owner_id:\n                picking.move_ids.write({'restrict_partner_id': picking.owner_id.id})\n                picking.move_line_ids.write({'owner_id': picking.owner_id.id})\n        todo_moves._action_done(cancel_backorder=self.env.context.get('cancel_backorder'))\n        self.write({'date_done': fields.Datetime.now(), 'priority': '0'})\n\n        # notify followers when no backorder was created but quantities are incomplete\n        if self.env.context.get('cancel_backorder'):\n            for picking in self:\n                prec = self.env['decimal.precision'].precision_get('Product Unit')\n                incomplete_moves = picking.move_ids.filtered(\n                    lambda m: float_compare(m.quantity, m.product_uom_qty, precision_digits=prec) < 0\n                )\n                if incomplete_moves:\n                    msg = self.env._(\n                        'No backorder has been planned for undelivered demanded quantities: %s',\n                        Markup('<ul>%s</ul>') % Markup().join(\n                            Markup('<li>%s</li>') % self.env._(\n                                'Only %(nbr_done)s %(uom)s of %(product)s delivered in contrast to the expected %(nbr_demanded)s %(uom)s',\n                                product=move.product_id.display_name,\n                                nbr_done=move.quantity,\n                                nbr_demanded=move.product_uom_qty,\n                                uom=move.uom_id.name,\n                            ) for move in incomplete_moves)\n                    )\n                    picking.message_post(body=msg, subtype_xmlid='stock.mt_picking_state')\n\n        # if incoming/internal moves make other confirmed/partially_available moves available, assign them\n        done_incoming_moves = self.filtered(lambda p: p.picking_type_id.code in ('incoming', 'internal')).move_ids.filtered(lambda m: m.state == 'done')\n        done_incoming_moves._trigger_assign()"
+        },
+        {
+          "start": 1265,
+          "end": 1288,
+          "text": "    def action_split_transfer(self):\n        if self.state == 'done':\n            return\n        if all(m.uom_id.is_zero(m.quantity) for m in self.move_ids):\n            raise UserError(_(\"%s: Nothing to split. Fill the quantities you want in a new transfer in the done quantities\", self.display_name))\n        if all(m.uom_id.compare(m.quantity, m.product_uom_qty) == 0 for m in self.move_ids):\n            raise UserError(_(\"%s: Nothing to split, all demand is done. For split you need at least one line not fully fulfilled\", self.display_name))\n        if any(m.uom_id.compare(m.quantity, m.product_uom_qty) > 0 for m in self.move_ids):\n            raise UserError(_(\"%s: Can't split: quantities done can't be above demand\", self.display_name))\n\n        moves = self.move_ids.filtered(lambda m: m.state not in ('done', 'cancel') and m.quantity != 0)\n        backorder_moves = moves._create_backorder()\n        backorder_moves += self.move_ids.filtered(lambda m: m.quantity == 0)\n        backorder = self._create_backorder(backorder_moves=backorder_moves, from_manual_backorder=True)\n        backorder.message_post(\n            body=self.env._('Split from %(original_picking_link)s.', original_picking_link=self._get_html_link())\n        )\n        return {\n            'name': self.env._('Split Backorder'),\n            'type': 'ir.actions.act_window',\n            'res_model': 'stock.picking',\n            'view_mode': 'form',\n            'res_id': backorder.id,\n        }"
+        }
+      ]
+    },
+    {
+      "id": "O182",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/repair/models/repair.py",
+      "observation": "Ordre de réparation lié au bien, au lot/série et au propriétaire.",
+      "limit": "Preuve de mécanismes de filiation ; les gestes et diagnostics de réparation restent externes.",
+      "excerpts": [
+        {
+          "start": 542,
+          "end": 590,
+          "text": "    def action_repair_done(self):\n        \"\"\" Creates stock move for final product of repair order.\n        Writes move_id and move_ids state to 'done'.\n        Writes repair order state to 'Done'.\n        @return: True\n        \"\"\"\n\n        precision = self.env['decimal.precision'].precision_get('Product Unit')\n        product_move_vals = []\n\n        # Cancel moves with 0 quantity\n        self.move_ids.filtered(lambda m: m.uom_id.is_zero(m.quantity))._action_cancel()\n\n        no_service_policy = 'service_policy' not in self.env['product.template']\n        #SOL qty delivered = repair.move_ids.quantity\n        for repair in self:\n            if all(not move.picked for move in repair.move_ids):\n                repair.move_ids.picked = True\n            if repair.sale_order_line_id:\n                ro_origin_product = repair.sale_order_line_id.product_template_id\n                # TODO: As 'service_policy' only appears with 'sale_project' module, isolate conditions related to this field in a 'sale_project_repair' module if it's worth\n                if ro_origin_product.type == 'service' and (no_service_policy or ro_origin_product.service_policy == 'ordered_prepaid'):\n                    repair.sale_order_line_id.qty_delivered = repair.sale_order_line_id.product_uom_qty\n            if not repair.product_id:\n                continue\n\n            if repair.product_id.tracking in ['lot', 'serial'] and not repair.lot_id:\n                raise ValidationError(_(\n                    \"Serial number is required for product to repair : %s\",\n                    repair.product_id.display_name\n                ))\n\n            # Try to create move with the appropriate owner\n            owner_id = False\n            available_qty_owner = self.env['stock.quant']._get_available_quantity(repair.product_id, repair.location_id, repair.lot_id, owner_id=repair.partner_id, strict=True)\n            if float_compare(available_qty_owner, repair.product_qty, precision_digits=precision) >= 0:\n                owner_id = repair.partner_id.id\n\n            product_move_vals.append({\n                'product_id': repair.product_id.id,\n                'uom_id': repair.uom_id.id or repair.product_id.uom_id.id,\n                'product_uom_qty': repair.product_qty,\n                'partner_id': repair.partner_id.id,\n                'location_id': repair.product_location_src_id.id,\n                'location_dest_id': repair.product_location_dest_id.id,\n                'picked': True,\n                'picking_id': False,\n                'move_line_ids': [(0, 0, {\n                    'product_id': repair.product_id.id,"
+        }
+      ]
+    },
+    {
+      "id": "O183",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "addons/mrp/models/mrp_bom.py",
+      "sha256": "7bab83839cf57a693e64278b3b93d57be60e9ccbe9e8a3dc6abf31ae728bb9dd",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/mrp/models/mrp_bom.py",
+      "observation": "Décomposition d'une nomenclature, conversion d'unités et liens composants.",
+      "limit": "Analogie pour exigences de kit, sans reprendre une GPAO.",
+      "excerpts": [
+        {
+          "start": 455,
+          "end": 505,
+          "text": "    def explode(self, product, quantity, picking_type=False, never_attribute_values=False):\n        \"\"\"\n            Explodes the BoM and creates two lists with all the information you need: bom_done and line_done\n            Quantity describes the number of times you need the BoM: so the quantity divided by the number created by the BoM\n            and converted into its UoM\n        \"\"\"\n        self = self.with_context(bom_cost_share_cache=self.env.context.get('bom_cost_share_cache') or {})  # noqa: PLW0642\n        product_ids = set()\n        product_boms = {}\n        def update_product_boms():\n            products = self.env['product.product'].browse(product_ids)\n            product_boms.update(self._bom_find(products, picking_type=picking_type or self.picking_type_id,\n                company_id=self.company_id.id, bom_type='phantom'))\n            # Set missing keys to default value\n            for product in products:\n                product_boms.setdefault(product, self.env['mrp.bom'])\n\n        boms_done = [(self, self.env['mrp.bom.line']._prepare_bom_done_values(quantity, product, quantity, []))]\n        lines_done = []\n\n        bom_lines = []\n        for bom_line in self.bom_line_ids:\n            product_id = bom_line.product_id\n            bom_lines.append((bom_line, product, quantity, False))\n            product_ids.add(product_id.id)\n        update_product_boms()\n        product_ids.clear()\n        while bom_lines:\n            current_line, current_product, current_qty, parent_line = bom_lines[0]\n            bom_lines = bom_lines[1:]\n\n            if current_line._skip_bom_line(current_product, never_attribute_values):\n                continue\n\n            line_quantity = current_qty * current_line.product_qty\n            if current_line.product_id not in product_boms:\n                update_product_boms()\n                product_ids.clear()\n            bom = product_boms.get(current_line.product_id)\n            if bom:\n                converted_line_quantity = current_line.uom_id._compute_quantity(\n                    line_quantity / bom.product_qty, bom.uom_id, round=False\n                )\n                bom_lines = [(line, current_line.product_id, converted_line_quantity, current_line) for line in bom.bom_line_ids] + bom_lines\n                for bom_line in bom.bom_line_ids:\n                    if bom_line.product_id not in product_boms:\n                        product_ids.add(bom_line.product_id.id)\n                boms_done.append((bom, current_line._prepare_bom_done_values(converted_line_quantity, current_product, quantity, boms_done)))\n            else:\n                # We round up here because the user expects that if he has to consume a little more, the whole UOM unit\n                # should be consumed."
+        }
+      ]
+    },
+    {
+      "id": "T181",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/shipment.py",
+      "observation": "Rapprochement quantités source/cible et états de réception/réalisation.",
+      "limit": "Analogies pour réception et passage ; pas preuve d'ordres délégués de15 natures.",
+      "excerpts": [
+        {
+          "start": 294,
+          "end": 328,
+          "text": "class ShipmentCheckQuantity:\n    \"Check quantities per product between source and target moves\"\n    __slots__ = ()\n\n    @property\n    def _check_quantity_source_moves(self):\n        raise NotImplementedError\n\n    @property\n    def _check_quantity_target_moves(self):\n        raise NotImplementedError\n\n    def check_quantity(self):\n        pool = Pool()\n        Warning = pool.get('res.user.warning')\n        Lang = pool.get('ir.lang')\n        lang = Lang.get()\n\n        source_qties = defaultdict(float)\n        for move in self._check_quantity_source_moves:\n            source_qties[move.product] += move.internal_quantity\n\n        target_qties = defaultdict(float)\n        for move in self._check_quantity_target_moves:\n            target_qties[move.product] += move.internal_quantity\n\n        diffs = {}\n        for product, incoming_qty in source_qties.items():\n            unit = product.default_uom\n            incoming_qty = unit.round(incoming_qty)\n            inventory_qty = unit.round(target_qties.pop(product, 0))\n            diff = inventory_qty - incoming_qty\n            if diff:\n                diffs[product] = diff\n        diffs.update((k, v) for k, v in target_qties.items() if v)"
+        },
+        {
+          "start": 768,
+          "end": 805,
+          "text": "    def receive(cls, shipments):\n        Move = Pool().get('stock.move')\n        with Move.bulk_func('do', auto=False) as do:\n            for shipment in shipments:\n                do.extend(shipment.incoming_moves)\n        with Move.bulk_delete(auto=False) as delete:\n            for shipment in shipments:\n                for move in shipment.inventory_moves:\n                    if move.state in {'draft', 'cancelled'}:\n                        delete.push(move)\n        cls.create_inventory_moves(shipments)\n        # Set received state to allow done transition\n        cls.write(shipments, {'state': 'received'})\n        with cls.bulk_func('do', auto=False) as do:\n            for shipment in shipments:\n                if shipment.warehouse_storage == shipment.warehouse_input:\n                    do.push(shipment)\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('done')\n    @set_employee('done_by')\n    def do(cls, shipments):\n        pool = Pool()\n        Move = pool.get('stock.move')\n        Date = pool.get('ir.date')\n        inventory_moves = []\n        for shipment in shipments:\n            if shipment.warehouse_storage != shipment.warehouse_input:\n                shipment.check_quantity()\n            inventory_moves.extend(shipment.inventory_moves)\n        Move.do(inventory_moves)\n        for company, c_shipments in groupby(\n                shipments, key=lambda s: s.company):\n            with Transaction().set_context(company=company.id):\n                today = Date.today()\n            cls.write([s for s in c_shipments if not s.effective_date], {\n                    'effective_date': today,"
+        }
+      ]
+    },
+    {
+      "id": "T182",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/quality/quality.py",
+      "observation": "Points de contrôle obligatoires, résultat accepté/refusé et alerte.",
+      "limit": "Analogie de résultat qualité configurable. Ne prouve pas des prestations de finition/nettoyage/personnalisation complètes.",
+      "excerpts": [
+        {
+          "start": 490,
+          "end": 504,
+          "text": "    def validate_points(self):\n        points = {p.name: p.string for p in self.control.points}\n        missing = points.keys() - (self.points or {}).keys()\n        if missing:\n            raise InspectionValidationError(\n                gettext('quality.msg_quality_inspection_missing_point',\n                    inspection=self.rec_name,\n                    points=', '.join(points[m] for m in missing),\n                    ))\n\n    def check(self):\n        for point in self.control.points:\n            if not point.check(self.points.get(point.name)):\n                return False\n        return True"
+        },
+        {
+          "start": 552,
+          "end": 586,
+          "text": "    def process(cls, inspections):\n        for inspection in inspections:\n            inspection.validate_points()\n        cls.write([i for i in inspections if not i.processed_at], {\n                'processed_at': dt.datetime.now(),\n                })\n        with cls.bulk_func('pass_') as pass_, \\\n                cls.bulk_func('fail') as fail:\n            for inspection in inspections:\n                if inspection.check():\n                    pass_.push(inspection)\n                else:\n                    fail.push(inspection)\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('passed')\n    @reset_employee('failed_by')\n    @set_employee('passed_by')\n    def pass_(cls, inspections):\n        pass\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('failed')\n    @reset_employee('passed_by')\n    @set_employee('failed_by')\n    def fail(cls, inspections):\n        pool = Pool()\n        Alert = pool.get('quality.alert')\n        alerts = []\n        for inspection in inspections:\n            if not inspection.alerts:\n                alerts.append(inspection.get_alert())\n        Alert.save(alerts)"
+        }
+      ]
+    },
+    {
+      "id": "T183",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "modules/carrier/carrier.py",
+      "sha256": "18c8cbcd01e6221fc4bde4116413e5145c84f273232d76d217b6f533bb5f9631",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/carrier/carrier.py",
+      "observation": "Transporteurs sélectionnés selon portée géographique.",
+      "limit": "Référence d'exécutant, pas preuve d'un engagement autonome de capacité de transport.",
+      "excerpts": [
+        {
+          "start": 77,
+          "end": 115,
+          "text": "class Selection(sequence_ordered(), MatchMixin, ModelSQL, ModelView):\n    __name__ = 'carrier.selection'\n    _get_carriers_cache = Cache(\n        'carrier.selection.get_carriers', context=False)\n\n    from_country = fields.Many2One('country.country', 'From Country',\n        ondelete='RESTRICT',\n        help=\"Apply only when shipping from this country.\\n\"\n        \"Leave empty for any countries.\")\n    to_country = fields.Many2One('country.country', 'To Country',\n        ondelete='RESTRICT',\n        help=\"Apply only when shipping to this country.\\n\"\n        \"Leave empty for any countries.\")\n    carrier = fields.Many2One('carrier', 'Carrier', required=True,\n        ondelete='CASCADE', help=\"The selected carrier.\")\n\n    @classmethod\n    def get_carriers(cls, pattern):\n        pool = Pool()\n        Carrier = pool.get('carrier')\n\n        key = tuple(sorted(pattern.items()))\n        carriers = cls._get_carriers_cache.get(key)\n        if carriers is not None:\n            return Carrier.browse(carriers)\n\n        carriers = []\n        selections = cls.search([])\n        if not selections:\n            with inactive_records():\n                carriers = Carrier.search([])\n        else:\n            for selection in selections:\n                if (selection.match(pattern)\n                        and selection.carrier not in carriers):\n                    carriers.append(selection.carrier)\n\n        cls._get_carriers_cache.set(key, list(map(int, carriers)))\n        return carriers"
+        }
+      ]
+    },
+    {
+      "id": "A181",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "observation": "Engagement planifié, réalisation contrôlée, dates et qualité.",
+      "limit": "Le Core doit garder les états externes distincts des mouvements de stock.",
+      "excerpts": [
+        {
+          "start": 409,
+          "end": 457,
+          "text": "  protected void planStockMove(StockMove stockMove, boolean splitByTrackingNumber)\n      throws AxelorException {\n    if (stockMove.getStatusSelect() == null\n        || stockMove.getStatusSelect() != StockMoveRepository.STATUS_DRAFT) {\n      throw new AxelorException(\n          stockMove,\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(StockExceptionMessage.STOCK_MOVE_PLAN_WRONG_STATUS));\n    }\n\n    LOG.debug(\"Stock move planification : {} \", stockMove.getStockMoveSeq());\n\n    // This call will split move line by tracking number\n    // But only works if the line has not been already splited\n    if (splitByTrackingNumber) {\n      stockMoveLineService.splitStockMoveLineByTrackingNumber(stockMove);\n    }\n\n    stockMove = JpaModelHelper.ensureManaged(stockMove);\n    String draftSeq;\n\n    // Set the sequence.\n    if (Beans.get(SequenceService.class)\n        .isEmptyOrDraftSequenceNumber(stockMove.getStockMoveSeq())) {\n      draftSeq = stockMove.getStockMoveSeq();\n      stockMove.setStockMoveSeq(\n          stockMoveToolService.getSequenceStockMove(\n              stockMove.getTypeSelect(), stockMove.getCompany(), stockMove));\n    } else {\n      draftSeq = null;\n    }\n\n    if (Strings.isNullOrEmpty(stockMove.getName())\n        || draftSeq != null && stockMove.getName().startsWith(draftSeq)) {\n      stockMove.setName(stockMoveToolService.computeName(stockMove));\n    }\n\n    int initialStatus = stockMove.getStatusSelect();\n\n    setPlannedStatus(stockMove);\n\n    updateLocations(stockMove, initialStatus);\n    stockMove = JpaModelHelper.ensureManaged(stockMove);\n    stockMove.setCancelReason(null);\n    stockMove.setRealDate(null);\n\n    stockMove.setExTaxTotal(stockMoveToolService.compute(stockMove));\n\n    stockMoveRepo.save(stockMove);"
+        },
+        {
+          "start": 545,
+          "end": 608,
+          "text": "  protected String realizeStockMove(StockMove stockMove, boolean checkOngoingInventoryFlag)\n      throws AxelorException {\n    if (stockMove.getStatusSelect() == null\n        || stockMove.getStatusSelect() != StockMoveRepository.STATUS_PLANNED) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(StockExceptionMessage.STOCK_MOVE_REALIZATION_WRONG_STATUS));\n    }\n\n    LOG.debug(\"Stock realization : {} \", stockMove.getStockMoveSeq());\n\n    if (stockMove.getTypeSelect() == StockMoveRepository.TYPE_INCOMING\n        && !stockMove.getIsReversion()\n        && appStockService.getAppStock().getIsRequiredShipmentSupplierDetails()\n        && (stockMove.getSupplierShipmentDate() == null\n            || Strings.isNullOrEmpty(stockMove.getSupplierShipmentRef()))) {\n      throw new AxelorException(\n          stockMove,\n          TraceBackRepository.CATEGORY_MISSING_FIELD,\n          I18n.get(StockExceptionMessage.STOCK_MOVE_MISSING_SUPPLIER_SHIPMENT_DETAILS));\n    }\n\n    if (checkOngoingInventoryFlag) {\n      checkOngoingInventory(stockMove);\n    }\n\n    int initialStatus = stockMove.getStatusSelect();\n\n    String newStockSeq = null;\n    stockMoveLineService.checkTrackingNumber(stockMove);\n    stockMoveLineService.checkConformitySelection(stockMove);\n    fillRealizeWapPriceForStockMove(stockMove);\n\n    stockMoveLineService.checkExpirationDates(stockMove);\n\n    BigDecimal exTaxTotal = stockMoveToolService.compute(stockMove);\n    stockMove = JpaModelHelper.ensureManaged(stockMove);\n    setRealizedStatus(stockMove);\n    stockMove.setRealDate(appBaseService.getTodayDate(stockMove.getCompany()));\n    stockMove.setExTaxTotal(exTaxTotal);\n\n    stockMove = stockMoveRepo.save(stockMove);\n\n    stockMoveLineService.updateLocations(\n        initialStatus,\n        StockMoveRepository.STATUS_CANCELED,\n        getPlannedStockMoveLineIds(stockMove, true),\n        stockMove.getEstimatedDate(),\n        false,\n        false,\n        true);\n\n    stockMoveLineService.updateLocations(\n        StockMoveRepository.STATUS_DRAFT,\n        StockMoveRepository.STATUS_REALIZED,\n        getStockMoveLineIds(stockMove),\n        stockMove.getEstimatedDate(),\n        true,\n        true,\n        true);\n\n    stockMove = JpaModelHelper.ensureManaged(stockMove);\n    clearPlannedStockMoveLine(stockMove, true);\n    storeCustomsCodesForStockMove(stockMove);"
+        }
+      ]
+    },
+    {
+      "id": "A182",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "axelor-quality/src/main/java/com/axelor/apps/quality/service/QualityControlServiceImpl.java",
+      "sha256": "177eb4ff9cbe652d3fa128ee8c9ffa23eabb502774fd8967a2b26e7f22ec4ebe",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-quality/src/main/java/com/axelor/apps/quality/service/QualityControlServiceImpl.java",
+      "observation": "Instantiation de points de contrôle, points optionnels et actions correctives à partir d'un modèle.",
+      "limit": "Analogie de consignes/contrôles structurés, pas couverture de chaque prestation textile.",
+      "excerpts": [
+        {
+          "start": 53,
+          "end": 111,
+          "text": "  public void preFillOperations(QualityControl qualityControl, QualityProcess process)\n      throws AxelorException {\n\n    List<ControlPointModel> controlPointModelList = process.getControlPointModelList();\n    List<ControlPointModel> optionalControlPointModelList =\n        process.getOptionalControlPointModelList();\n    List<QualityCorrectiveAction> qualityCorrectiveActionList =\n        process.getQualityCorrectiveActionList();\n\n    if (controlPointModelList != null) {\n      qualityControl.getControlPointList().clear();\n\n      for (ControlPointModel model : controlPointModelList) {\n        ControlPoint point = new ControlPoint();\n        this.createControlPointListItem(model, point, qualityControl);\n        qualityControl.addControlPointListItem(point);\n      }\n    }\n\n    if (optionalControlPointModelList != null) {\n      qualityControl.getOptionalControlPointList().clear();\n\n      for (ControlPointModel model : optionalControlPointModelList) {\n        ControlPoint point = new ControlPoint();\n        this.createControlPointListItem(model, point, qualityControl);\n        qualityControl.addOptionalControlPointListItem(point);\n      }\n    }\n\n    if (qualityCorrectiveActionList != null) {\n      qualityControl.getQualityCorrectiveActionList().clear();\n\n      for (QualityCorrectiveAction qualityCorrectiveAction : qualityCorrectiveActionList) {\n        qualityCorrectiveAction =\n            Beans.get(QualityCorrectiveActionRepository.class).copy(qualityCorrectiveAction, true);\n        qualityControl.addQualityCorrectiveActionListItem(qualityCorrectiveAction);\n      }\n    }\n  }\n\n  @Transactional\n  public void createControlPointListItem(\n      ControlPointModel model, ControlPoint point, QualityControl qualityControl) {\n\n    point.setStatusSelect(ControlPointRepository.STATUS_ON_HOLD);\n    point.setName(model.getName());\n    point.setSequence(model.getSequence());\n    point.setNotes(model.getNotes());\n    point.setControlFrequency(model.getControlFrequency());\n    point.setControlPointType(model.getControlPointType());\n\n    for (QualityMeasuringPoint measuringPoint : model.getMeasuringPointList()) {\n      measuringPoint = Beans.get(QualityMeasuringPointRepository.class).copy(measuringPoint, true);\n      point.addMeasuringPointListItem(measuringPoint);\n    }\n\n    point.setControlPointDate(qualityControl.getStartDate());\n\n    controlPointRepo.save(point);"
+        }
+      ]
+    },
+    {
+      "id": "A183",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "observation": "Conservation des codes douaniers des lignes de mouvement.",
+      "limit": "Référence documentaire limitée ; ne démontre ni prestation de dédouanement ni moteur réglementaire.",
+      "excerpts": [
+        {
+          "start": 1882,
+          "end": 1889,
+          "text": "  protected void storeCustomsCodesForStockMove(StockMove stockMove) throws AxelorException {\n\n    Long stockMoveId = stockMove.getId();\n    Query<StockMoveLine> query = getStockMoveLineQuery(stockMoveId);\n\n    BatchProcessorHelper.of()\n        .<StockMoveLine, AxelorException>forEachByQuery(\n            query, stockMoveLineService::storeCustomsCodes);"
+        }
+      ]
+    }
+  ],
+  "method": "Source code inspected at frozen revisions; these excerpts do not prove whole-product coverage or observed human effort."
+}

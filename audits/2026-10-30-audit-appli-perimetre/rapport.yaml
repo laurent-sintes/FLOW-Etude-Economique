@@ -1,0 +1,213 @@
+date: '2026-10-30'
+statut: Audit terminé ; recommandations non appliquées.
+objet: Cohérence de l’application FLOW avec la méthode actuelle et le retrait attendu des facteurs de complexité.
+contexte:
+- Les évaluations de charge Build sont en cours dans une autre conversation.
+- Aucune nouvelle estimation ou adoption de charge dans cet audit. L’attente de résultats Build adoptés est un état
+  prévu.
+etat_audite:
+  projet: C:/Dev/FLOW-Etude-Economique
+  revision_git: fb7660db457c275a2548d6c246cc9cbba681ef75
+  arbre: 'Modifications locales préexistantes : audit du contenu courant, pas du seul commit.'
+  serveur:
+    id: flow-study
+    version: 2c5896ed18b00bf084264d02eafbfc089333b5ad87ab8d09e43ea36e9139e8fb
+    pid: 12116
+    mode: current
+    server_revision: 90bdbcf992b5b10f06a54c375432daffc9996d65711303327a977c04cc265494
+    client_build_sha256: fc7f136f3bc62edafef6c1dce3dccefb3bfa869408fbf888068d3a15b885ad2e
+    sources_current: true
+  empreintes_sha256:
+    AGENTS.md: 32a9d1ad47a132d9c5dc735d719d5804eee0112757e5c19af7935dd92b5aea3f
+    config/application.yaml: 3583aeac9f9b328629949dafc639959675723f457d0fddf68919ac4f0625de74
+    source/grille-complexite.yaml: 1f070ebd63ba9915d69ea2c4dec1ddb25a000f1b756a57b3ea631a9fb52262b8
+    source/methode-complexite.yaml: 4dec4971535c8ff2ee8d4ccf812e9ef90b788314aa29acbaabcdb6a2fedd5864
+    source/schema-grille-complexite.yaml: 49cc5a2e203c2600eabbeb03ad47f78f9b19308d68eafed4f11627eba4320091
+    source/recalibration-metier.yaml: 27dc58857d741fd1ca8ebd9ff837654ed054ae5ab324093a59b10eb7eb0097e5
+    source/statut-evaluation.yaml: b94446831ca67bcc550d7af0791439c8d57b9b4f24469f2dd53083f9ad47878f
+    source/capacite-realisation.yaml: c22ed230dfea173967f649c7f3c49466b5072eff591ae68cb11f579298c46720
+    source/vision-framework.yaml: f2b602cf5d196a279c901e4e5c7b9adc825da2e0d667bf35842f2884cde2a112
+    source/README.md: e2484f2b975be5c68b5a431780e9bdb840d662835940d3203bd133f83f09a461
+    tools/delivery_readiness.py: aeb33fb6e6259582077e3db42909175604a5bed50e46412265306ce6b4a43b59
+    tools/business_calibration.py: e6675e72ba12993bfe59fea2a2025b02378f5f3606d152187ae4042f7d82f276
+    tools/validate_complexity_grid.py: 7aadd21cf7afa9ee89df0bce6dd8d3d413ba6aca2ad4bb3c0be13f24455dffac
+    tools/test_delivery_readiness.py: 31a9f30e89f77a1fa4095ecd8de7c995db84c9b597ac7235d2d14941e09a40f5
+    app/src/App.tsx: f52de5b2faf6d7e0c724d8ef63324077b2c6a7227c3cd55a7acf55db95ff4ef9
+    app/src/DeliveryReadinessPage.tsx: b51b523fe84126e8340378861e8afbf5f78a47c10ad7439df86303d81c4b2f8f
+avis:
+  synthese: L’application fonctionne dans le parcours contrôlé. Le retrait des notes de complexité reste inachevé
+    dans la présentation, les contrats et les consignes.
+  calculs: Les notes sur cinq constituent une grille ordinale distincte des anciens points CSF. Aucun facteur note-vers-JH
+    n’a été trouvé dans les calculs actifs inspectés. Modifier les 264 notes en mémoire laisse la calibration des
+    travaux identique.
+  cause: Le périmètre utile et ses frontières restent liés à un ancien contrat qui impose aussi des notes. La méthode
+    COCOMO II / COSMIC × ISBSG cohabite avec cette présentation intermédiaire.
+  priorite: Retirer les scores du parcours public et découpler leur contrat, en conservant capacités, fonctions, frontières
+    et preuves.
+constats:
+- id: AUD-01
+  priorite: P1
+  titre: Les notes de complexité restent centrales dans le parcours public.
+  fait: 'Périmètre métier affiche 88 capacités et 264 notes sur cinq : mécanismes et règles, validation et ajustements,
+    richesse métier et interfaces. Un chapitre entier explique leur échelle. Ces appréciations sont proposées, pas
+    validées par le métier.'
+  impact: Le lecteur peut croire que ces notes sont une entrée nécessaire de l’estimation actuelle. L’avertissement
+    sur l’absence de conversion en JH ne répond pas à l’intention de les retirer.
+  etendue:
+  - 'Périmètre métier : introduction, échelle et notes par capacité.'
+  - 'Vue d’ensemble : deux passages conservent les niveaux et justifications de complexité.'
+  - 'Préparer la réalisation : quatre mentions de la grille comme appui documentaire.'
+  - 'Étude de marché : lien « Revoir les capacités et leur complexité ».'
+  preuves:
+  - app/src/DeliveryReadinessPage.tsx:53
+  - app/src/DeliveryReadinessPage.tsx:69
+  - config/application.yaml:1211
+  - config/application.yaml:1430
+  - source/vision-framework.yaml:26
+  - source/vision-framework.yaml:71
+  - source/capacite-realisation.yaml:50
+  - source/capacite-realisation.yaml:76
+  - browser.json
+  - scope-capability.png
+  recommandation: Retirer notes, échelle et formulations qui les présentent comme un repère courant. Garder les difficultés
+    utiles sous forme de faits, frontières et points à vérifier avec leur statut. Conserver les preuves historiques.
+- id: AUD-02
+  priorite: P2
+  titre: Le contenu fonctionnel du périmètre est omis au profit des notes.
+  fait: La grille décrit 258 fonctions proposées avec identifiants et résultats attendus. La projection de la page
+    conserve noms, chemins, frontières et notes, mais omet ces fonctions et le statut de revue de chaque capacité.
+  exemple: BC-001 décrit notamment « Tenir les autorisations et suspensions motivées » et « Contrôler une nouvelle
+    sollicitation et expliquer le refus ». Ces fonctions ne sont pas affichées sur la fiche du périmètre.
+  impact: Le lecteur voit une frontière souvent négative et des appréciations de difficulté, sans voir clairement
+    ce que le produit doit réaliser.
+  preuves:
+  - source/grille-complexite.yaml:32
+  - tools/delivery_readiness.py:222
+  - app/src/DeliveryReadinessPage.tsx:64
+  - complexity-probe.json
+  recommandation: Présenter nom, identifiant natif, alias de financement utile, résultat métier, fonctions proposées,
+    frontières et statut de validation. Garder les liens à la capture et à Atlas. Inclure les fonctions dans la recherche.
+- id: AUD-03
+  priorite: P2
+  titre: Le schéma, les projections et les tests imposent la conservation des scores.
+  fait: La propriété complexite est obligatoire sur chaque bloc. La supprimer d’une copie provoque 88 erreurs de validation.
+    Les compilateurs transportent les notes et les échelles ; des tests en imposent la restitution. La calibration
+    requiert aussi une dépendance à la méthode de complexité.
+  impact: Un masquage visuel seul laisserait les notes comme condition de chargement et permettrait leur réapparition
+    lors d’une évolution.
+  preuves:
+  - source/schema-grille-complexite.yaml:79
+  - tools/validate_complexity_grid.py:39
+  - tools/delivery_readiness.py:216
+  - tools/business_calibration.py:55
+  - tools/study_app.py:565
+  - tools/test_delivery_readiness.py:85
+  - complexity-probe.json
+  recommandation: Découpler le contrat actif du périmètre et le diagnostic historique. Adapter chargement, projections
+    et tests sans casser identifiants, fonctions et financements. Vérifier la parité économique et les simulations.
+    Ne pas modifier les travaux de chiffrage en cours.
+- id: AUD-04
+  priorite: P3
+  titre: Des consignes et descriptions de données conservent une lecture ancienne.
+  fait: AGENTS.md demande encore l’affichage des niveaux ordinaux sur la page Complexité. Le guide des sources attribue
+    les chiffres actifs à la calibration historique, alors que le statut canonique annonce le retrait des anciennes
+    charges et une construction à réestimer.
+  impact: La documentation peut réintroduire l’ancienne présentation et attribue au Build courant une provenance inexacte.
+  preuves:
+  - AGENTS.md:69
+  - source/README.md:9
+  - source/README.md:19
+  - source/README.md:21
+  - source/statut-evaluation.yaml:6
+  - audits/2026-10-29-application-audit-global.yaml:22
+  recommandation: Aligner consignes et documentation sur le périmètre sans notes et le statut canonique. Garder les
+    audits datés dans leur contexte historique, sans réécrire leurs constats passés.
+etats_attendus_non_classes_comme_anomalies:
+- Les charges Build Java, .NET et Rust sont en attente d’adoption. Les pages économiques affichent un avertissement
+  explicite. Les zéros techniques ne sont pas des estimations gratuites.
+- Les cinq options et les calendriers conservés restent consultables. Leurs totaux Make sont incomplets et ne permettent
+  pas de conclure Make/Buy. Une amélioration transitoire possible est le libellé « À estimer » au voisinage des valeurs
+  Build nulles, sans changer les données.
+- Le total humain en JH et l’agrégation monétaire Build/Run restent des limites déjà déclarées ; cet audit ne les
+  reconstruit pas.
+- Les preuves partenaire et validations attendues sont présentées comme à obtenir, sans engagement inventé.
+verifications:
+  navigateur:
+    routes:
+    - synvance
+    - synvance-microsoft
+    - synvance-sap
+    - perimetre-retenu
+    - vision
+    - modele
+    - conditions-realisation
+    - marche
+    - complexite
+    - calcul-net
+    - calcul-run
+    - leviers
+    - capacite-realisation
+    - etude-marche
+    - parametres
+    - evaluation-core
+    - comparer
+    - se-projeter
+    - simuler
+    - glossaire
+    formats_px:
+    - 1440
+    - 390
+    erreurs_javascript: []
+    requetes_http_en_echec: []
+    debordements_horizontaux: []
+    liens_yaml_visibles: []
+    blocs_editoriaux_a_deplier: []
+    accessibilite: 'Contrôles ciblés : noms des commandes, cibles aria-controls, menu mobile et focus du glossaire.
+      Pas une certification exhaustive.'
+    interactions: 'Durée Java 48 → 49 mois dans une session isolée : HTTP 200 et cinq options ; retour à 48 mois.
+      Recherche Plan Application : une capacité. Menu mobile et glossaire ciblé COCOMO : conformes.'
+  sonde_complexite:
+    capabilities: 88
+    functions: 258
+    scores_changed_in_memory: 264
+    calibration_unchanged: true
+    removing_scores_rejected_by_schema: 88
+    sample_error: '''complexite'' is a required property'
+    files_written_to_model: false
+  suite_complete:
+    mode: full
+    stages:
+      load_model: 10.375
+      python_tests: 187.51
+      frontend: 45.807
+      freeze_release: 1.659
+      load_release: 0.865
+    tests: 270
+    frontend: tests, types, content, build passed
+    bootstrap_bytes: 6618680
+    essential_bootstrap_bytes: 558475
+    release_bytes: 24356310
+    release_id: d78da8366f36
+    delta_10_years:
+      java-spring: -9928747.11
+      dotnet: -10579641.94
+      rust: -13856319.91
+      microsoft: 0.0
+      sap: 0.0
+    seconds: 248.714
+  interpretation_delta_release: Les deltas dix ans du journal comparent la base actuelle à un ancien instantané. Ils
+    reflètent notamment le retrait préexistant des charges Build ; ils ne résultent pas de cet audit.
+limites:
+- Application locale et code courant ; pas de nouvelle estimation ni de qualification fournisseur.
+- Liens externes et déploiement GitHub Pages non revalidés individuellement.
+- Les textes des vingt routes restent dans tmp/audit-appli-2026-10-30 ; les preuves principales sont conservées avec
+  ce rapport.
+sequence_recommandee:
+- Recomposer Périmètre métier autour des capacités, fonctions, frontières et statuts, sans notes.
+- Aligner la Vue d’ensemble, les liens, les preuves de réalisation et les consignes.
+- Découpler les contrats et tests de la complexité historique, en préservant les financements.
+- Lors de l’adoption des résultats de l’autre conversation, réconcilier séparément statut, charges par rôle, réutilisation,
+  activités, calendriers et cinq options.
+modifications_de_ce_tour:
+- Rapport, journaux et preuves écrits dans audits/ et tmp/.
+- Aucun fichier applicatif, de configuration ou du modèle économique modifié. Aucun instantané publié, commit ou push.

@@ -16,6 +16,7 @@ required:
 - estimation
 - activity_reading
 - reading
+- estimation_model
 properties:
   version:
     const: 1
@@ -26,10 +27,23 @@ properties:
   reading:
     type: object
     additionalProperties: false
-    required: [intro, toc_label, chapters, composition, strategy_note, strategy_links, costs_intro, costs_note, coverage_label, next_href, next_label]
+    required:
+    - intro
+    - toc_label
+    - chapters
+    - composition
+    - strategy_note
+    - strategy_links
+    - costs_intro
+    - costs_note
+    - coverage_label
+    - next_href
+    - next_label
     properties:
-      intro: &reading_text {type: string, minLength: 1}
-      toc_label: *reading_text
+      intro: &id001
+        type: string
+        minLength: 1
+      toc_label: *id001
       chapters:
         type: array
         minItems: 6
@@ -37,13 +51,23 @@ properties:
         items:
           type: object
           additionalProperties: false
-          required: [id, title, lead]
+          required:
+          - id
+          - title
+          - lead
           properties:
-            id: {enum: [scope, strategies, activities, workload, costs, calendar]}
-            title: *reading_text
-            lead: *reading_text
-      composition: *reading_text
-      strategy_note: *reading_text
+            id:
+              enum:
+              - scope
+              - strategies
+              - activities
+              - workload
+              - costs
+              - calendar
+            title: *id001
+            lead: *id001
+      composition: *id001
+      strategy_note: *id001
       strategy_links:
         type: array
         minItems: 2
@@ -51,29 +75,48 @@ properties:
         items:
           type: object
           additionalProperties: false
-          required: [href, label]
+          required:
+          - href
+          - label
           properties:
-            href: {enum: ['source/offres-synvance.md', '#etude-marche']}
-            label: *reading_text
-      costs_intro: *reading_text
-      costs_note: *reading_text
-      coverage_label: *reading_text
-      next_href: {const: '#conditions-realisation'}
-      next_label: *reading_text
+            href:
+              enum:
+              - source/offres-synvance.md
+              - '#etude-marche'
+            label: *id001
+      costs_intro: *id001
+      costs_note: *id001
+      coverage_label: *id001
+      next_href:
+        const: '#conditions-realisation'
+      next_label: *id001
   activity_reading:
     type: object
     additionalProperties: false
-    required: [title, intro, type_refs, summaries, note]
+    required:
+    - title
+    - intro
+    - type_refs
+    - summaries
+    - note
     properties:
-      title: {type: string, minLength: 1}
-      intro: {type: string, minLength: 1}
-      note: {type: string, minLength: 1}
+      title:
+        type: string
+        minLength: 1
+      intro:
+        type: string
+        minLength: 1
+      note:
+        type: string
+        minLength: 1
       type_refs:
         type: array
         minItems: 2
         maxItems: 2
         uniqueItems: true
-        items: {type: string, pattern: '^[a-z][a-z0-9_]*$'}
+        items:
+          type: string
+          pattern: ^[a-z][a-z0-9_]*$
       summaries:
         type: array
         minItems: 2
@@ -81,10 +124,14 @@ properties:
         items:
           type: object
           additionalProperties: false
-          required: [type_ref, text]
+          required:
+          - type_ref
+          - text
           properties:
-            type_ref: {type: string, pattern: '^[a-z][a-z0-9_]*$'}
-            text: *reading_text
+            type_ref:
+              type: string
+              pattern: ^[a-z][a-z0-9_]*$
+            text: *id001
   entities:
     type: array
     minItems: 1
@@ -95,19 +142,19 @@ properties:
       - id
       - kind
       properties:
-        id: &id001
+        id: &id002
           type: string
           pattern: ^[a-z][a-z0-9_-]*$
-        notion: *id001
-        label: &id002
+        notion: *id002
+        label: &id003
           type: string
           minLength: 1
-        definition: *id002
-        text: *id002
+        definition: *id003
+        text: *id003
         layer_refs:
           type: array
           minItems: 1
-          items: *id001
+          items: *id002
           uniqueItems: true
         kind:
           enum:
@@ -142,15 +189,15 @@ properties:
       - source
       - target
       properties:
-        id: *id001
+        id: *id002
         type:
           enum:
           - implements
           - composed_of
           - targets
           - unifies
-        source: *id001
-        target: *id001
+        source: *id002
+        target: *id002
   strategies:
     type: array
     minItems: 1
@@ -167,26 +214,26 @@ properties:
       - tags
       - text
       properties:
-        id: *id001
-        notion: *id001
+        id: *id002
+        notion: *id002
         mode:
           enum:
           - Make
           - Buy
-        target_ref: *id001
-        implementation_ref: *id001
+        target_ref: *id002
+        implementation_ref: *id002
         option_refs:
           type: array
           minItems: 1
-          items: *id001
+          items: *id002
           uniqueItems: true
         open_selection:
           type: boolean
         tags:
           type: array
           minItems: 1
-          items: *id002
-        text: *id002
+          items: *id003
+        text: *id003
   phases:
     type: array
     minItems: 1
@@ -199,19 +246,19 @@ properties:
       - costs
       - target_ref
       properties:
-        id: *id001
-        notion: *id001
-        text: *id002
+        id: *id002
+        notion: *id002
+        text: *id003
         bullets:
           type: array
           minItems: 1
-          items: *id002
+          items: *id003
         costs:
           type: array
           minItems: 1
-          items: *id001
+          items: *id002
           uniqueItems: true
-        target_ref: &id003
+        target_ref: &id004
           type: string
           minLength: 1
       anyOf:
@@ -219,8 +266,8 @@ properties:
         - text
       - required:
         - bullets
-  phase_reading: *id002
-  limitations: *id002
+  phase_reading: *id003
+  limitations: *id003
   business_map:
     type: object
     additionalProperties: false
@@ -247,7 +294,7 @@ properties:
           - node_ref
           - domain_relation_refs
           properties:
-            node_ref: *id001
+            node_ref: *id002
             domain_relation_refs:
               type: array
               minItems: 1
@@ -262,12 +309,12 @@ properties:
         - entity_ref
         - system_ref
         properties:
-          entity_ref: *id001
-          system_ref: *id001
+          entity_ref: *id002
+          system_ref: *id002
       outside_scope:
         type: array
         minItems: 1
-        items: *id001
+        items: *id002
         uniqueItems: true
       positioning:
         type: object
@@ -277,22 +324,28 @@ properties:
         - domain_ref
         - status
         properties:
-          entity_ref: *id001
-          domain_ref: *id001
+          entity_ref: *id002
+          domain_ref: *id002
           status:
             const: indicative
-      note: *id002
-      estimation: *id002
-      scope: *id002
-      scope_summary: *id002
-  program_ref: *id003
+      note: *id003
+      estimation: *id003
+      scope: *id003
+      scope_summary: *id003
+  program_ref: *id004
   estimation:
     type: object
     additionalProperties: false
-    required: [title, intro, stages, relations, note, links]
+    required:
+    - title
+    - intro
+    - stages
+    - relations
+    - note
+    - links
     properties:
-      title: *id002
-      intro: *id002
+      title: *id003
+      intro: *id003
       stages:
         type: array
         minItems: 3
@@ -300,12 +353,16 @@ properties:
         items:
           type: object
           additionalProperties: false
-          required: [id, notion, text, producer]
+          required:
+          - id
+          - notion
+          - text
+          - producer
           properties:
-            id: *id001
-            notion: *id001
-            producer: *id002
-            text: *id002
+            id: *id002
+            notion: *id002
+            producer: *id003
+            text: *id003
       relations:
         type: array
         minItems: 2
@@ -313,14 +370,20 @@ properties:
         items:
           type: object
           additionalProperties: false
-          required: [source_ref, target_ref, operation, text]
+          required:
+          - source_ref
+          - target_ref
+          - operation
+          - text
           properties:
-            source_ref: *id001
-            target_ref: *id001
+            source_ref: *id002
+            target_ref: *id002
             operation:
-              enum: [apply_productivity, add_project_activities]
-            text: *id002
-      note: *id002
+              enum:
+              - apply_productivity
+              - add_project_activities
+            text: *id003
+      note: *id003
       links:
         type: array
         minItems: 2
@@ -328,8 +391,215 @@ properties:
         items:
           type: object
           additionalProperties: false
-          required: [href, label]
+          required:
+          - href
+          - label
           properties:
             href:
-              enum: ['#complexite', '#calcul-net', '#evaluation-core']
-            label: *id002
+              enum:
+              - '#complexite'
+              - '#calcul-net'
+              - '#evaluation-core'
+            label: *id003
+  estimation_model:
+    type: object
+    additionalProperties: false
+    properties:
+      version:
+        const: 1
+      title: &id005
+        type: string
+        minLength: 1
+      authority:
+        const: source/fondamentaux.yaml
+      purpose: *id005
+      objects:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            id: *id005
+            label: *id005
+            owner: *id005
+            attributes: &id006
+              type: array
+              items: *id005
+          required:
+          - id
+          - label
+          - owner
+          - attributes
+      relations:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            id: *id005
+            source: *id005
+            target: *id005
+            cardinality:
+              enum:
+              - many-to-one
+              - many-to-many
+              - one-to-many
+              - one-to-one
+              - one-to-zero-or-one
+            meaning: *id005
+          required:
+          - id
+          - source
+          - target
+          - cardinality
+          - meaning
+      rules:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            id: *id005
+            title: *id005
+            expression: *id005
+            variables:
+              type: object
+              minProperties: 1
+              additionalProperties: *id005
+            unit: *id005
+            kind:
+              enum:
+              - arithmetic
+              - algorithm
+            note:
+              type: string
+            domains:
+              type: object
+              additionalProperties:
+                type: object
+                properties:
+                  minimum:
+                    type: number
+                  maximum:
+                    type: number
+                  exclusiveMinimum:
+                    type: number
+                additionalProperties: false
+          required:
+          - id
+          - title
+          - expression
+          - variables
+          - unit
+          - kind
+          - note
+      invariants: *id006
+      implementations:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            rules: *id006
+            path: *id005
+          required:
+          - rules
+          - path
+      labels:
+        type: object
+        additionalProperties: false
+        properties:
+          alignment: *id005
+          reference: *id005
+          candidate: *id005
+          effort: *id005
+          gap: *id005
+          relative_gap: *id005
+          spread: *id005
+          rounding: *id005
+          limitations: *id005
+          note: *id005
+          jh_unit:
+            type: string
+            minLength: 1
+          percent_unit:
+            type: string
+            minLength: 1
+          comparison_matrix:
+            type: string
+            minLength: 1
+          comparison_subject:
+            type: string
+            minLength: 1
+          cocomo_column:
+            type: string
+            minLength: 1
+          cosmic_column:
+            type: string
+            minLength: 1
+          comparison_decision:
+            type: string
+            minLength: 1
+          preparation:
+            type: string
+            minLength: 1
+          recorded_files:
+            type: string
+            minLength: 1
+          complement_units:
+            type: string
+            minLength: 1
+          cosmic_processes:
+            type: string
+            minLength: 1
+          cosmic_points:
+            type: string
+            minLength: 1
+          funding:
+            type: string
+            minLength: 1
+          funding_owner:
+            type: string
+            minLength: 1
+          consolidation:
+            type: string
+            minLength: 1
+          shared_assumptions:
+            type: string
+            minLength: 1
+          shared_assumptions_note:
+            type: string
+            minLength: 1
+          activity_scope:
+            type: string
+            minLength: 1
+          service_scope:
+            type: string
+            minLength: 1
+        required:
+        - alignment
+        - reference
+        - candidate
+        - effort
+        - gap
+        - relative_gap
+        - spread
+        - rounding
+        - limitations
+        - note
+        - jh_unit
+        - percent_unit
+    required:
+    - version
+    - title
+    - authority
+    - purpose
+    - objects
+    - relations
+    - rules
+    - invariants
+    - implementations
+    - labels

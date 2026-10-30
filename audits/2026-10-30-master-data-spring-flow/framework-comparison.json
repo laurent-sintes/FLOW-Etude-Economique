@@ -1,0 +1,182 @@
+{
+  "date": "2026-10-30",
+  "decision": {
+    "adjustment_factor": 1,
+    "observed_equivalence_of_effort": false,
+    "decision": "Pas de supplément ou remise forfaitaire Spring. Équivalence des services génériques retenue comme hypothèse d'étude d'opportunité, à productivité et maîtrise comparables. Les charges de composition normales sont déjà dans les références natives.",
+    "target": "Java 21, Spring Boot 4.1.2 avec Data JPA, Security, Batch à repository JDBC persistant, PostgreSQL géré, interface React équipée de composants CRUD réutilisables (React-admin Community comme candidat). Les exports CRUD sont protégés ; les commandes métier passent par les services, pas par écriture directe des tables.",
+    "compatibility": "Capacités documentées, assemblage et BOM non exécutés. Spring seul ne fournit pas le client métier de Frappe/Axelor ; la comparaison inclut les composants UI et API. Aucun produit n'est recopié dans FLOW."
+  },
+  "matrix": [
+    [
+      "Persistance, requêtes, transactions",
+      "Frappe Document / Odoo ORM / Tryton ModelSQL / Axelor JPA",
+      "Spring Data JPA, Hibernate, PostgreSQL",
+      "Service générique disponible ; règles de publication FLOW supplémentaires."
+    ],
+    [
+      "API et opérations courantes sur les données",
+      "API DocType / contrôleurs Odoo / RPC Tryton / services Axelor",
+      "Spring MVC et, pour les opérations compatibles, Spring Data REST",
+      "Pas de moteur API à refaire ; contrats métiers et sécurité à configurer."
+    ],
+    [
+      "Formulaires, listes, filtres, navigation",
+      "Clients pilotés par DocType, vues XML ou métadonnées",
+      "React équipé de composants CRUD, React-admin Community candidat",
+      "Équivalence de service plausible ; pas équivalence de nombre de déclarations ni assemblage testé."
+    ],
+    [
+      "Authentification et droits",
+      "Mécanismes natifs des quatre plateformes",
+      "Spring Security, fournisseur OIDC, contrôle des portées applicatives",
+      "Authentification réutilisée ; portées et audit FLOW spécifiques identifiés."
+    ],
+    [
+      "Import, traitements par lots, erreurs",
+      "Importeurs génériques, dont CSVImporter Axelor et ModelStorage Tryton",
+      "Parseurs, Spring Batch avec repository JDBC persistant",
+      "Ne pas réécrire le moteur de lot ; autorité des sources, idempotence métier et publication restent à traiter."
+    ],
+    [
+      "Configuration et exploitation initiale",
+      "Mécanismes de configuration et déploiement propres aux produits ; couverture exacte variable",
+      "Boot/Actuator, CI et hébergement géré",
+      "Capacité disponible ne signifie pas environnement déjà installé ; assemblage courant dans référence, exigences S1 additionnelles identifiées."
+    ]
+  ],
+  "docs": [
+    [
+      "Frappe : API et permissions",
+      "https://docs.frappe.io/framework/user/en/api/rest"
+    ],
+    [
+      "Frappe : droits",
+      "https://docs.frappe.io/framework/user/en/basics/users-and-permissions"
+    ],
+    [
+      "Odoo : vues déclaratives",
+      "https://www.odoo.com/documentation/19.0/developer/reference/user_interface/view_architectures.html"
+    ],
+    [
+      "Tryton : modèles, vues et stockage",
+      "https://docs.tryton.org/latest/server/ref/models.html"
+    ],
+    [
+      "Axelor 8.2 : modèles, vues, imports et services",
+      "https://docs.axelor.com/adk/8.2/dev-guide/index.html"
+    ],
+    [
+      "Spring Data JPA : verrouillage",
+      "https://docs.spring.io/spring-data/jpa/reference/jpa/locking.html"
+    ],
+    [
+      "Spring Data REST : exposition de ressources",
+      "https://docs.spring.io/spring-data/rest/reference/intro.html"
+    ],
+    [
+      "Spring Security : JWT",
+      "https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html"
+    ],
+    [
+      "Spring Batch : configuration et reprise",
+      "https://docs.spring.io/spring-batch/reference/job/configuring-job.html"
+    ],
+    [
+      "Spring Boot : supervision",
+      "https://docs.spring.io/spring-boot/reference/actuator/index.html"
+    ],
+    [
+      "React-admin : interfaces CRUD",
+      "https://marmelab.com/react-admin/CRUD.html"
+    ],
+    [
+      "React-admin : raccordement des API",
+      "https://marmelab.com/react-admin/DataProviders.html"
+    ],
+    [
+      "React-admin : sécurité",
+      "https://marmelab.com/react-admin/SecurityGuide.html"
+    ]
+  ],
+  "pinned_source_proofs": [
+    {
+      "repo": "frappe",
+      "path": "frappe/model/document.py",
+      "sha256": "467b5820abf3b65ff6e7862deec8ddcb3b3eaa1f829b3127371a6a8172f2cdda",
+      "url": "https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/model/document.py",
+      "purpose": "Mécanisme générique sélectionné et mesuré dans audit24, disponible côté produit ; ne prouve pas l'effort identique côté Spring."
+    },
+    {
+      "repo": "frappe",
+      "path": "frappe/permissions.py",
+      "sha256": "30e024992d81a066992a89d112a29b0e1df0b55ef3310b6b1576d1fda15ffaa6",
+      "url": "https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/permissions.py",
+      "purpose": "Mécanisme générique sélectionné et mesuré dans audit24, disponible côté produit ; ne prouve pas l'effort identique côté Spring."
+    },
+    {
+      "repo": "frappe",
+      "path": "frappe/public/js/frappe/form/form.js",
+      "sha256": "9b25eb5e790410fe09c58aa6272b04e9da5652a2cdf929870daade213d207951",
+      "url": "https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/public/js/frappe/form/form.js",
+      "purpose": "Mécanisme générique sélectionné et mesuré dans audit24, disponible côté produit ; ne prouve pas l'effort identique côté Spring."
+    },
+    {
+      "repo": "odoo",
+      "path": "odoo/addons/base/models/ir_access.py",
+      "sha256": "a719b2ae4f0aa1f7efbaac23e766f67f97cdf4267646e0aab3926cff1b5c067f",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/odoo/addons/base/models/ir_access.py",
+      "purpose": "Mécanisme générique sélectionné et mesuré dans audit24, disponible côté produit ; ne prouve pas l'effort identique côté Spring."
+    },
+    {
+      "repo": "odoo",
+      "path": "addons/base_import/models/base_import.py",
+      "sha256": "315a9e5a7748608d8176d77dc68f9a60cd73363804bfba37c10495c48ad07622",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/base_import/models/base_import.py",
+      "purpose": "Mécanisme générique sélectionné et mesuré dans audit24, disponible côté produit ; ne prouve pas l'effort identique côté Spring."
+    },
+    {
+      "repo": "odoo",
+      "path": "addons/web/static/src/views/form/form_view.js",
+      "sha256": "850715764aa6aabb37016684421a6ff8ab37e2ecbd422b29bd8992869eacc730",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/web/static/src/views/form/form_view.js",
+      "purpose": "Mécanisme générique sélectionné et mesuré dans audit24, disponible côté produit ; ne prouve pas l'effort identique côté Spring."
+    },
+    {
+      "repo": "tryton",
+      "path": "trytond/trytond/model/modelstorage.py",
+      "sha256": "b03e95142a10b520d669dacc2c29f0959cde90d6785ec9bceb84640095dcd80d",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/model/modelstorage.py",
+      "purpose": "Mécanisme générique sélectionné et mesuré dans audit24, disponible côté produit ; ne prouve pas l'effort identique côté Spring."
+    },
+    {
+      "repo": "tryton",
+      "path": "trytond/trytond/model/modelview.py",
+      "sha256": "583772d7e9ce6bff5e1b1d640f578aca2f2746e1130b24c23d1b852ebe3d9676",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/model/modelview.py",
+      "purpose": "Mécanisme générique sélectionné et mesuré dans audit24, disponible côté produit ; ne prouve pas l'effort identique côté Spring."
+    },
+    {
+      "repo": "tryton",
+      "path": "trytond/trytond/protocols/jsonrpc.py",
+      "sha256": "6be5b1090b80f213ae467df53a23b975beba2733cb9f947de48318672034383f",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/protocols/jsonrpc.py",
+      "purpose": "Mécanisme générique sélectionné et mesuré dans audit24, disponible côté produit ; ne prouve pas l'effort identique côté Spring."
+    },
+    {
+      "repo": "platform",
+      "path": "axelor-core/src/main/java/com/axelor/db/JPA.java",
+      "sha256": "bd57774d8e7addbea8af34f29eb1d02eb1c54599b97500ca8347939f06c687ae",
+      "url": "https://github.com/axelor/axelor-open-platform/blob/96caf51eb97fbab7750b7dadf10a371a55a490a3/axelor-core/src/main/java/com/axelor/db/JPA.java",
+      "purpose": "Mécanisme générique sélectionné et mesuré dans audit24, disponible côté produit ; ne prouve pas l'effort identique côté Spring."
+    },
+    {
+      "repo": "platform",
+      "path": "axelor-core/src/main/java/com/axelor/data/csv/CSVImporter.java",
+      "sha256": "385c2563d3f8e54b18f3c32d8ead5660417ae3ac3e40cbf1d6340f7c25a9d9b6",
+      "url": "https://github.com/axelor/axelor-open-platform/blob/96caf51eb97fbab7750b7dadf10a371a55a490a3/axelor-core/src/main/java/com/axelor/data/csv/CSVImporter.java",
+      "purpose": "Mécanisme générique sélectionné et mesuré dans audit24, disponible côté produit ; ne prouve pas l'effort identique côté Spring."
+    }
+  ],
+  "limitation": "Documentation de capacité ; pas de test comparatif de productivité. Documentation Odoo19 utilisée pour principes de vues, source locale Odoo20 pour preuve versionnée. Pas de statut 'absent produit' inféré d'une exclusion du périmètre commun."
+}

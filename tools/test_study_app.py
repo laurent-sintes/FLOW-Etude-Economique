@@ -245,20 +245,8 @@ class StudyTests(unittest.TestCase):
         self.assertEqual(sum(len(r['variantes']) for r in grid['rows']),74)
         self.assertEqual(len({r['hierarchie'][1]['id'] for r in grid['rows']}),9)
         self.assertEqual(len({r['hierarchie'][2]['id'] for r in grid['rows']}),28)
-        for row in grid['rows']:
-            self.assertEqual(row['calibration']['jh_par_stack'],'source/recalibration-metier.yaml#'+row['id'])
-            self.assertEqual(row['calibration']['couverture_par_stack'],row['calibration']['jh_par_stack'])
-            self.assertTrue(row['capacite']['comparaisons'])
-        for slug,stack in self.study.content['stacks'].items():
-            self.assertEqual(len(stack['features']),89 if self.study.options[slug]['mode']=='Make' else 0)
-            self.assertFalse(any(f['feature'].startswith('CSF') for f in stack['features']))
-        for slug in self.study.options:
-            if self.study.options[slug]['mode']!='Make':continue
-            rows=self.study.content['business']['rows']
-            total=sum(r['stacks'][slug]['valuation']['cout_eur_ht'] for r in rows)
-            option=next(o for o in self.study.economic['options'] if o['stack']==slug)
-            self.assertAlmostEqual(total,sum(f['cout_eur_ht'] for f in option['features']),places=2)
-        self.assertTrue(all(set(r['stacks'])=={'java-spring','dotnet','rust'} for r in self.study.content['business']['rows']))
+        self.assertTrue(all('calibration' not in r and 'complexite' not in r for r in grid['rows']))
+        self.assertTrue(all(not stack['features'] for slug,stack in self.study.content['stacks'].items() if self.study.options[slug]['mode']=='Make'))
         self.assertEqual(len(self.study.content['buy_review']['revues']),178)
         self.assertEqual(len(self.study.content['integration_paths']['scenarios']),43)
 
@@ -313,10 +301,10 @@ class StudyTests(unittest.TestCase):
     def test_essential_reader_groups_framework_before_economic_pages(self):
         from document_excerpt import document_excerpt
         essential=self.study.ui['essential']
-        self.assertEqual([item['id'] for item in essential['nav']],['synvance','perimetre-retenu','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler'])
-        self.assertEqual(set(essential['pages']),{'synvance','synvance-microsoft','synvance-sap','perimetre-retenu','vision','modele','conditions-realisation','complexite','calcul-net','calcul-run','marche','leviers','capacite-realisation','etude-marche','parametres','comparer','evaluation-core','se-projeter','simuler'})
+        self.assertEqual([item['id'] for item in essential['nav']],['synvance','perimetre-retenu','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire'])
+        self.assertEqual(set(essential['pages']),{'synvance','synvance-microsoft','synvance-sap','perimetre-retenu','vision','modele','conditions-realisation','complexite','calcul-net','calcul-run','marche','leviers','capacite-realisation','etude-marche','parametres','comparer','evaluation-core','se-projeter','simuler','glossaire'})
         self.assertEqual([group['items'] for group in essential['nav_groups']],
-                         [['synvance','perimetre-retenu'],['vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers'],['capacite-realisation'],['etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler']])
+                         [['synvance','perimetre-retenu'],['vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers'],['capacite-realisation'],['etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler'],['glossaire']])
         self.assertEqual([phase['key'] for phase in essential['structure']['phases']],['obtention','integration','services'])
         for concept in essential['concepts']:
             self.assertIn(concept['notion'],self.study.glossary['notions'])
@@ -340,15 +328,13 @@ class StudyTests(unittest.TestCase):
     def test_essential_complexity_keeps_native_capabilities_and_ordinal_axes(self):
         compact=self.study.bootstrap(essential=True)['content']['complexity']
         grid=self.study.content['complexity']
-        self.assertEqual(len(compact['rows']),len(grid['rows']))
         self.assertEqual(len(compact['rows']),88)
-        self.assertEqual(set(compact['axes']),{'algorithmique','tests_ajustements','etendue_fonctionnelle'})
-        self.assertEqual([row['capacite_id'] for row in compact['rows']],[row['capacite_id'] for row in grid['rows']])
+        self.assertFalse(compact['axes'])
+        self.assertEqual([r['capacite_id'] for r in compact['rows']],[r['capacite_id'] for r in grid['rows']])
         for row in compact['rows']:
-            self.assertEqual(set(row),{'id','capacite_id','name','path','complexite','fonctions','frontiere','source'})
-            self.assertTrue(row['source'].endswith('#'+row['id']))
-            self.assertEqual(set(row['complexite']),set(compact['axes']))
-            self.assertTrue(all(1<=value['niveau']<=5 and value['justification'] for value in row['complexite'].values()))
+            self.assertNotIn('complexite',row)
+            self.assertNotIn('fonctions',row)
+            self.assertIn('definition',row)
 
     def test_core_evaluation_exposes_derived_make_ranges_and_no_buy_build(self):
         rows=self.study.bootstrap(essential=True)['content']['core_evaluation']
@@ -360,8 +346,20 @@ class StudyTests(unittest.TestCase):
                 self.assertLessEqual(row['ranges_jh']['bas'],row['ranges_jh']['central'])
                 self.assertLessEqual(row['ranges_jh']['central'],row['ranges_jh']['haut'])
                 central=row['ranges_jh']['central']
-                self.assertEqual(row['uncertainty_pct']['down'],round(100*(central-row['ranges_jh']['bas'])/central,1))
-                self.assertEqual(row['uncertainty_pct']['up'],round(100*(row['ranges_jh']['haut']-central)/central,1))
+                if row['units']:
+                    self.assertEqual(central, sum(u['total_jh'] for u in row['units']))
+                    self.assertIsNone(row['uncertainty_pct'])
+                    self.assertEqual(row['estimation_status'], 'partially_estimated')
+                elif central:
+                    self.assertEqual(row['uncertainty_pct']['down'],round(100*(central-row['ranges_jh']['bas'])/central,1))
+                    self.assertEqual(row['uncertainty_pct']['up'],round(100*(row['ranges_jh']['haut']-central)/central,1))
+                else:
+                    self.assertIsNone(row['uncertainty_pct'])
+                    self.assertEqual(row['estimation_status'],'pending_reestimation')
+                    self.assertEqual(row['build_eur_ht'],0)
+                    self.assertGreater(baseline['integration'],0)
+                    self.assertGreater(baseline['services']['core'],0)
+                    self.assertGreater(baseline['initial_months'],0)
             else:
                 self.assertIsNone(row['ranges_jh'])
                 self.assertIsNone(row['uncertainty_pct'])
@@ -410,7 +408,7 @@ class StudyTests(unittest.TestCase):
         self.assertEqual(set(labels),{row['key'] for row in framework['other']})
         self.assertTrue(all(row['method'] and labels[row['key']]['effect'] for row in framework['other']))
         self.assertNotIn('make',framework['workload'])
-        self.assertTrue(framework['workload']['method']['principe'])
+        self.assertEqual(framework['workload']['method']['metamodel_ref'],'source/fondamentaux.yaml#estimation_model')
 
     def test_framework_accompaniment_status_follows_executed_funding(self):
         from unittest.mock import patch
@@ -435,7 +433,7 @@ class StudyTests(unittest.TestCase):
         from evaluation_status import load_status, status_notice
         essential=self.study.ui['essential']
         expected=status_notice('core')
-        self.assertNotEqual(essential['core_method']['notice'],expected)
+        self.assertEqual(essential['core_method']['notice'],expected)
         self.assertNotIn('status',essential['model_workload'])
         actual=essential['application_framework']['economic']['status']
         self.assertEqual({key:actual[key] for key in expected},expected)
@@ -443,21 +441,19 @@ class StudyTests(unittest.TestCase):
         self.assertEqual(essential['core_results']['status'],expected)
         gross=next(row for row in essential['model_workload']['stages'] if row['id']=='gross')
         self.assertNotEqual(gross['producer'],load_status('core')['producer'])
-        self.assertEqual(load_status('core')['calibration_status'],'legacy_unrecalibrated')
+        self.assertEqual(load_status('core')['calibration_status'],'partially_estimated')
 
     def test_qualification_documents_remain_separate_from_public_economic_inputs(self):
         full=self.study.content
         compact=self.study.bootstrap(essential=True)['content']
-        self.assertIn('core_qualification',full)
+        self.assertNotIn('core_qualification',full)
         self.assertNotIn('core_qualification',compact)
-        self.assertEqual(full['core_qualification']['document']['purpose'],'pilote_historique')
         matrix=full['market']['instruction']
         public=compact['market_method']['instruction']
         self.assertEqual(public['summary'],matrix['summary'])
         self.assertEqual(public['progress'],matrix['progress'])
         self.assertNotIn('rows',public)
         self.assertEqual(len(matrix['rows']),matrix['summary']['capabilities']*matrix['summary']['products'])
-        self.assertTrue(all(not row['complete'] for row in full['core_qualification']['summary']['ecosystems'].values()))
 
     def test_study_content_rejects_inconsistent_market_normalization(self):
         from unittest.mock import patch
@@ -598,6 +594,24 @@ class StudyTests(unittest.TestCase):
         self.assertAlmostEqual(result['anchor']['budget_apres_bonus_eur_ht']-self.study.baseline['anchor']['budget_apres_bonus_eur_ht'],90000)
         self.assertEqual(result['options'][3],self.study.baseline['options'][3])
 
+    def test_sap_budget_below_counterpoint_exclusions_keeps_all_options_calculable(self):
+        exclusions=self.study.data['sensibilite_finance_sap']
+        threshold=exclusions['retrait_indicatif_eur_ht']+exclusions['complements_generiques_exclus_ancre_make_eur_ht']
+        original=deepcopy(self.study.baseline)
+        for budget in (0,1_000_000,round(threshold-.01,2),threshold):
+            with self.subTest(budget=budget):
+                p=deepcopy(self.p);p['options']['sap']['integration']=budget
+                result=self.study.simulate(p)
+                self.assertEqual(result['parameters'],p)
+                self.assertEqual(len(result['options']),5)
+                self.assertEqual(result['options'][:4],original['options'][:4])
+                self.assertEqual(result['options'][4]['integration'],budget)
+                expected=None if budget<threshold else 0
+                for key in ('ancre_avant_bonus_eur_ht','reduction_eur_ht','budget_apres_bonus_eur_ht'):
+                    self.assertEqual(result['anchor'][key],expected)
+                self.assertTrue(all(h['totals']['total']>=0 for o in result['options'] for h in o['horizons']))
+        self.assertEqual(self.study.baseline,original)
+
     def test_buy_duration_does_not_change_autonomous_make(self):
         self.p['options']['microsoft']['integration_mois']=42
         result=self.study.simulate(self.p)
@@ -619,7 +633,7 @@ class StudyTests(unittest.TestCase):
 
     def test_no_scenario_mutates_reference(self):
         before=json.dumps(self.study.data,sort_keys=True)
-        self.p['options']['java-spring']['build']=0
+        self.p['options']['java-spring']['build']+=100000
         self.study.simulate(self.p)
         self.assertEqual(before,json.dumps(self.study.data,sort_keys=True))
         self.assertNotEqual(self.study.parameters,self.p)
@@ -630,8 +644,6 @@ class StudyTests(unittest.TestCase):
                 p=deepcopy(self.p);p['common']['bonus_continuite_pct']=value
                 with self.assertRaises(ScenarioError):self.study.simulate(p)
         p=deepcopy(self.p);p['options']['java-spring']['editor_prices']=0
-        with self.assertRaises(ScenarioError):self.study.simulate(p)
-        p=deepcopy(self.p);p['options']['sap']['integration']=0
         with self.assertRaises(ScenarioError):self.study.simulate(p)
         with self.assertRaises(ScenarioError):self.study.simulate(self.p,'other-version')
 

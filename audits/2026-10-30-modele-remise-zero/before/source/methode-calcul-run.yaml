@@ -1,0 +1,232 @@
+schema_version: 1
+id: run-calculation
+principle:
+  title: Des services à assurer aux dépenses de fonctionnement
+  text: >-
+    **Le calcul part du service à rendre, des interventions attendues et des moyens
+    consommés.** Les prestations humaines sont dimensionnées en [JH](#glossaire?term=jh), les ressources
+    techniques et les contrats en euros. Le calendrier détermine ensuite quand chaque
+    dépense est engagée. Ce parcours couvre **le [MCO](#glossaire?term=mco) de la {{notion.core_system}},
+    celui des adaptations Beaumanoir, l’exploitation et les moyens techniques**.
+    La dernière étape distingue leur part {{notion.build}} ou {{notion.run_activities}} :
+    le MCO du produit générique reste classé en {{notion.build}}.
+notice:
+  title: Calculer les dépenses avant de les classer
+  text: >-
+    **Le financement d’un service et son classement Build / Run sont deux traitements distincts.**
+    Dimensionner et valoriser les postes, les inscrire dans leurs périodes,
+    puis appliquer les conventions de classement. Une part non documentée reste
+    inconnue ; elle ne permet pas d’annoncer un total Run complet.
+navigation_label: Les six étapes du calcul des services et de leur part Run
+sections:
+  - id: definir-service
+    title: Définir le service à assurer
+    lead: >-
+      **Deux solutions ne sont comparables que si elles assurent un service comparable.**
+      Une année de référence fixe le périmètre et les obligations à financer,
+      indépendamment de la durée du projet.
+    blocks:
+      - kind: bullets
+        items:
+          - Décrire **les utilisateurs, les applications, les interfaces et les environnements** retenus, ainsi que les besoins de stockage et d’échanges.
+          - Préciser **les horaires de support, la disponibilité et les objectifs de reprise**. Une disponibilité applicative continue ne signifie pas une présence humaine permanente.
+          - Définir les volumes annuels de demandes, corrections, qualifications et opérations. Ce sont des **hypothèses de comparaison**, à confronter aux observations et aux engagements des fournisseurs.
+      - kind: paragraphs
+        items:
+          - >-
+            **Résultat : une base annuelle de service explicite.** Les variantes
+            changent des hypothèses identifiées ; elles ne changent pas silencieusement
+            le périmètre comparé.
+  - id: dimensionner-interventions
+    title: Dimensionner les interventions
+    lead: >-
+      **La charge doit s’expliquer par des activités et des fréquences.**
+      Séparer le travail fixe du travail lié aux volumes permet de comprendre
+      ce qui évolue avec l’usage.
+    blocks:
+      - kind: table
+        caption: Du service attendu aux charges annuelles
+        columns: [Calcul, Formule et unité]
+        rows:
+          - [Demandes de support, Demandes N1 / an = utilisateurs nominatifs × demandes par utilisateur et par an]
+          - [Diagnostics experts, Escalades N3 / an = demandes N1 / an × taux d’escalade / 100]
+          - ['{{notion.charge_brute}}', 'JH bruts / an = JH fixes / an + somme [volume annuel × JH par intervention]']
+          - [Charge nette de référence, JH nets / an = JH bruts / an × (1 − gain applicable / 100)]
+      - kind: bullets
+        items:
+          - Une escalade N3 ajoute **le diagnostic expert**, sans recompter l’accueil N1. Le diagnostic, la correction du code et la qualification transverse sont des travaux distincts.
+          - Les autres volumes viennent du scénario annuel. Chaque charge unitaire décrit le contenu de l’intervention et ses inclusions ; **le nombre d’activités n’est pas un coefficient de complexité**.
+          - Un gain représente un **taux de réduction de l’effort sur les mêmes activités**. Préciser son périmètre, sa période et sa justification ; ne pas appliquer un gain global à tout le Run. Les hypothèses de transition et de régime stabilisé sont déclarées séparément.
+      - kind: paragraphs
+        items:
+          - >-
+            **Résultat : des JH annuels par activité, rattachés à une hypothèse de volume
+            et d’effort unitaire.** Les activités déjà incluses dans un contrat restent
+            documentées, sans être ajoutées aux prestations à acheter.
+  - id: valoriser-prestations
+    title: Valoriser les prestations
+    lead: >-
+      **Une journée de support et une journée d’expertise n’ont pas le même tarif.**
+      La répartition entre profils et les règles de coordination rendent
+      la valorisation vérifiable.
+    blocks:
+      - kind: paragraphs
+        items:
+          - Les charges sont en **JH / an**, les tarifs et l’outillage par JH en **€ HT / JH**, les coûts obtenus en **€ HT / an**.
+      - kind: table
+        caption: Valorisation des prestations annuelles estimées
+        columns: [Calcul, Formule]
+        rows:
+          - [Répartition entre profils, JH du profil = JH nets de l’activité × part du profil / 100]
+          - [Coût d’une activité, 'Coût annuel = somme par profil [JH × (tarif journalier + outillage par JH applicable)]']
+          - [Journées revalorisées vers un profil spécialisé, 'JH concernés = min(plafond annuel d’expertise × coefficient du scénario de charge ; somme des JH nets du profil initial financés dans les activités retenues)']
+          - [Complément de tarif du profil spécialisé, Complément annuel = JH concernés × max(0 ; tarif du profil cible − tarif du profil initial)]
+          - [Coordination des prestations, Provision annuelle = coût des prestations estimées retenues × taux de coordination / 100]
+      - kind: links
+        items:
+          - href: '#parametres'
+            label: Consulter l’application de ces règles dans les {{vue.parametres_modele}}
+      - kind: bullets
+        items:
+          - Les parts de profils totalisent 100 %. Une revalorisation vers un profil spécialisé **remplace un tarif sur des JH déjà comptés** ; elle n’ajoute pas de journées.
+          - Le plafond est une hypothèse à justifier, avec les activités et le profil initial concernés. L’assiette est limitée aux JH financés et devient nulle si ces journées disparaissent ; la répartition entre activités doit être explicite.
+          - Le **coefficient du scénario de charge** fait varier les JH estimés et le plafond de la même manière. Il décrit une sensibilité, pas un gain de productivité. Les valeurs et leur origine sont exposées dans le dossier économique.
+          - L’assiette de coordination comprend les prestations estimées retenues, leur outillage par JH et le complément d’expertise applicable. **Les achats techniques, licences et forfaits déjà financés restent hors de cette assiette.**
+          - L’outillage annuel de support est un achat distinct de l’outillage de réalisation par JH. Les compléments explicitement chiffrés suivent leurs propres règles, sans gain ajouté automatiquement.
+      - kind: formula
+        text: Budget annuel des prestations estimées = prestations retenues + provision de coordination
+      - kind: paragraphs
+        items:
+          - >-
+            **Résultat : une base annuelle de prestations valorisées.** Les travaux
+            sont affectés à leur objet — produit générique, adaptations Beaumanoir
+            ou exploitation — avant la lecture Build / Run de la dernière étape.
+  - id: chiffrer-moyens-contrats
+    title: Chiffrer les moyens et les contrats
+    lead: >-
+      **Les consommations techniques et les offres fournisseur ne se déduisent pas
+      des JH développeur.** Leur calcul conserve leur unité, leur couverture
+      et leurs conditions tarifaires.
+    blocks:
+      - kind: table
+        caption: Bases monétaires retenues avant indexation
+        columns: [Poste, Calcul retenu]
+        rows:
+          - [Hébergement pendant la construction Make, Budget de la phase = enveloppe mensuelle des moyens × durée de la phase en mois]
+          - [Moyens pendant la transition Make, Budget de transition = base annuelle du moyen × durée de transition en mois / 12]
+          - [Moyens en régime stabilisé, Base annuelle = somme des enveloppes techniques retenues et achetées séparément]
+          - [Licences et forfaits Buy, Prix = montant documenté pour le périmètre et l’année contractuelle concernés]
+      - kind: bullets
+        items:
+          - Déclarer si le prix provient d’un **dimensionnement détaillé, d’une offre ou d’une enveloppe estimée**. Des volumes de données, d’environnements et d’échanges ne suffisent pas, sans règles de conversion, à calculer une facture cloud.
+          - Un message métier ne vaut pas nécessairement une unité facturable fournisseur. Toute conversion en appels, stockage ou consommation technique exige un dimensionnement documenté.
+          - Les prix Buy conservent leurs inclusions et leur séquence. **Un service inclus n’est pas financé une seconde fois** ; une part inconnue n’est pas un prix nul. Un service initial non récurrent ne devient pas un abonnement.
+      - kind: paragraphs
+        items:
+          - >-
+            **Résultat : des postes en euros avec un périmètre et une période de validité.**
+            Un forfait groupé conserve son prix global lorsque ses composantes
+            ne sont pas connues séparément.
+  - id: appliquer-calendrier
+    title: Positionner les dépenses dans le temps
+    lead: >-
+      **Une base annuelle n’est pas une dépense à compter dès le premier jour.**
+      Les dates de consommation, de réception et de contrat déterminent
+      les montants retenus à chaque horizon.
+    blocks:
+      - kind: bullets
+        items:
+          - Les moyens techniques commencent **avec leur consommation**, y compris pendant le Build. Le MCO des adaptations Beaumanoir commence après réception ; la stabilisation préalable reste dans l’intégration.
+          - '**Trois fenêtres financent la transition Make** : le {{notion.maintenance_core}} dès le début de l’intégration, les services partagés dès la première ouverture et les services locaux après réception. Le régime annuel complet prend le relais sans chevauchement.'
+      - kind: table
+        caption: Préparer les bases annuelles de transition
+        columns: [Base, Calcul]
+        rows:
+          - ['{{notion.maintenance_core}} · JH / an', JH = corrections génériques par an × JH par correction + campagnes de qualification des versions par an × JH par campagne]
+          - ['{{notion.maintenance_core}} · € HT / an', Base = coût des JH valorisés par profil × (1 + taux de coordination des services / 100) × facteur de service Core System]
+          - [Services partagés et locaux en € HT / an, Base = coût des JH fixes et des interventions valorisés par profil × (1 + taux de coordination des services / 100) × facteur de service Beaumanoir]
+      - kind: formula
+        text: Facteur de service = budget annuel du scénario (€ HT / an) / budget annuel de référence (€ HT / an), sur le même périmètre
+      - kind: bullets
+        items:
+          - 'Les deux facteurs sont distincts : l’un suit le **{{notion.maintenance_core}}**, l’autre les **{{notion.maintenance_integration}}**, qui comprennent aussi les prestations d’exploitation, le support et leur outillage. Ils ajustent les capacités transitoires correspondantes sans créer de nouvelles activités ni appliquer une remise de productivité.'
+          - Les charges et fréquences sont celles de la transition ; la QA client suit les versions prévues pendant le déploiement. La valorisation comprend l’outillage par JH. **Les gains du régime annuel stabilisé ne sont pas transposés à ces enveloppes.**
+          - Identifier les corrections déjà couvertes par la construction ou une garantie, **sans les financer une seconde fois**. La production et la qualification des versions génériques restent distinctes de leur QA et de leur déploiement chez le client.
+      - kind: table
+        caption: Services pendant la transition Make, en euros HT
+        columns: [Périmètre, Formule]
+        rows:
+          - ['{{notion.maintenance_core}}', Budget = base annuelle du produit générique pendant la transition × durée de l’intégration en mois / 12]
+          - [Service local, 'Budget = base annuelle à pleine capacité × somme [part d’utilisateurs de l’unité × mois après sa réception] / 12']
+          - [Service partagé ouvert avec le déploiement, Budget = base annuelle commune × mois depuis la première ouverture / 12]
+      - kind: paragraphs
+        items:
+          - Les durées sont bornées par la fin de transition. Pour les services locaux, les parts d’utilisateurs sont des fractions dont le total vaut 1. Les services partagés couvrent les contrats d’interface, la QA et le déploiement client des versions, l’exploitation cloud et la sécurité ; ils sont comptés une seule fois pour le Groupe.
+          - >-
+            **Les prestations de réception restent dans le budget d’intégration.**
+            Isoler les travaux sur les contrats d’interface, hors surveillance fixe,
+            et la QA et le déploiement client des versions. Partager leurs budgets transitoires entre
+            la période avant la première réception et celle qui la suit :
+      - kind: formula
+        text: Prestations partagées avant réception = somme [budget transitoire de la prestation × mois entre première ouverture et première réception / mois entre première ouverture et fin de transition]
+      - kind: paragraphs
+        items:
+          - La coordination et le facteur de service Beaumanoir sont déjà compris dans ces budgets. La surveillance fixe reste une prestation d’exploitation. Les parts avant et après réception conservent ensemble chaque financement au centime, selon la règle de répartition ci-dessous ; elles ne s’ajoutent pas à son montant.
+      - kind: table
+        caption: Indexation et calcul des annuités
+        columns: [Calcul, Formule et condition]
+        rows:
+          - [Prix en régime stabilisé, Base indexée en année n = base annuelle de référence × (1 + taux annuel / 100)^(n − 1)]
+          - [Annuité en régime stabilisé, Dépense en année n = base indexée en année n × mois couverts dans cette année / 12]
+          - [Prolongation d’un abonnement Buy, Prix de l’année contractuelle k après la dernière année documentée N = dernier prix documenté × (1 + taux annuel / 100)^(k − N)]
+          - [Répartition d’un financement sur les années, Dépense de l’intervalle = cumul à la fin arrondi au centime − cumul au début arrondi au centime]
+      - kind: bullets
+        items:
+          - Pour les services stabilisés, **n désigne l’année depuis le début du plan**, pas le nombre d’années depuis la mise en service. Les enveloppes de transition restent constantes ; le relais peut donc provoquer un saut de prix.
+          - Chaque catégorie conserve son taux. Les abonnements suivent leur début contractuel ; **les prix documentés priment**, puis l’indexation prolonge la séquence après sa dernière année connue. Pour chaque forfait de service, déclarer la base d’indexation applicable et les prestations incluses.
+          - Les cumuls sont proportionnels à la durée couverte, bornés entre zéro et le budget du financement. Les différences de cumuls arrondis conservent son montant au centime ; les annuités ne sont pas de nouveaux budgets.
+      - kind: paragraphs
+        items:
+          - >-
+            **Résultat : des dépenses annuelles et des cumuls par horizon**, issus
+            des mêmes financements et de leurs périodes propres.
+  - id: identifier-part-run
+    title: Identifier la part Run
+    lead: >-
+      **La récurrence ne suffit pas à classer une dépense en Run.**
+      Le classement s’applique aux postes déjà calculés selon la convention
+      du modèle, sans créer de coût supplémentaire.
+    blocks:
+      - kind: table
+        caption: Lecture des structures selon la convention Build / Run
+        columns: [Structure, Traitement]
+        rows:
+          - ['{{notion.maintenance_core}}', 'Entièrement Build, même pour les correctifs et évolutions financés annuellement.']
+          - ['{{notion.mco_plateforme_beaumanoir}}', Partage entre Build et Run selon la clé paramétrable. La part Build couvre les interventions importantes conduites en projet.]
+          - ['{{notion.socle_technique_cloud}} et {{notion.operations_support}}', 'Run sur leur périmètre financé, même pendant la réalisation.']
+          - ['{{notion.grouped_buy}}', Contrats pouvant couvrir Build et Run. Aucune part monétaire n’est déduite de leurs seuls tags.]
+      - kind: paragraphs
+        items:
+          - >-
+            **Règle de répartition du MCO des adaptations et interfaces**.
+            La clé doit être justifiée selon la part des interventions importantes
+            conduites en projet :
+      - kind: formula
+        text: Part Run (%) = 100 − part Build (%)
+      - kind: formula
+        text: Montant Run du MCO de l’intégration = montant de ce poste sur la période × part Run / 100
+      - kind: bullets
+        items:
+          - La clé porte sur le **MCO et les évolutions des adaptations et interfaces Beaumanoir**, pas sur le MCO de la {{notion.core_system}}. Elle répartit le poste, sans s’ajouter à son montant.
+          - Les fractions Build et Run reconstituent le financement d’origine. Pour un contrat Buy non ventilé, **la part Run reste inconnue** ; le contrat conserve son prix global dans la comparaison économique.
+      - kind: paragraphs
+        items:
+          - >-
+            **Résultat : une lecture du Run bornée par les parts documentées.**
+            Un sous-total de parts connues ne constitue pas un total Run complet.
+            L’évaluation économique précise les traitements effectivement réalisés
+            et les ventilations encore inconnues.
+examples: []
+next:
+  href: '#leviers'
+  label: Comprendre les paramètres qui font varier les scénarios — {{vue.leviers_calcul}}

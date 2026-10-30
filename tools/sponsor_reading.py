@@ -23,25 +23,11 @@ def exact_sum(values):
     return float(sum((Decimal(str(value)) for value in values), Decimal(0)))
 
 
-def work_metrics(assignments):
-    composition = {case: [sum(a['work'][case][i] for a in assignments) for i in range(6)]
-                   for case in CASES}
-    return dict(raw_jh={case: sum(values) for case, values in composition.items()},
-                composition=composition,
-                net_jh=exact_sum(a['valuation'][key] for a in assignments
-                                 for key in ('jh_backend', 'jh_frontend')),
-                prestations_eur_ht=exact_sum(a['valuation']['cout_eur_ht'] for a in assignments))
-
-
 def aggregate(rows):
-    """A group always retains its whole perimeter; UI search does not reprice it."""
-    return dict(capabilities=[row['capacite_id'] for row in rows],
-                stacks={slug: work_metrics([row['work']['stacks'][slug] for row in rows]) for slug in MAKE},
-                complexity={axis: dict(high=sum(row['complexite'][axis]['niveau'] >= 4 for row in rows),
-                                       count=len(rows)) for axis in rows[0]['complexite']},
-                buy={slug: dict(counts=dict(Counter(row['buy'][slug]['statut'] for row in rows)))
-                     for slug in ('microsoft', 'sap')})
-
+    return dict(capabilities=[r['capacite_id'] for r in rows],
+        stacks={slug:dict(status='pending_reestimation',raw_jh={'central':None,'bas':None,'haut':None},
+            prestations_eur_ht=None,retained_units=[]) for slug in MAKE},
+        buy={slug:dict(counts=dict(Counter(r['buy'][slug]['statut'] for r in rows))) for slug in ('microsoft','sap')})
 
 def atlas_metrics(business_map):
     rows = business_map['rows']
@@ -73,47 +59,44 @@ def atlas_metrics(business_map):
 
 
 def metrics(content, baseline):
-    business_map = content['business_map']
-    work_rows = [row['work'] for row in business_map['rows']] + [business_map['transverse']]
-    funds = business_map['funding']
-    assert len({fund['id'] for fund in funds}) == len(funds), 'Duplicate funding instance'
-    assert len({row['id'] for row in work_rows}) == len(work_rows), 'Duplicate work owner'
-    work_totals, options = {}, []
+    business_map=content['business_map']
+    funds=business_map['family_funding']
+    assert len({f['id'] for f in funds})==len(funds), 'Duplicate family funding'
+    assert not business_map['funding'], 'Legacy Make funding must not be active'
+    options=[];totals={}
     for option in baseline['options']:
-        slug = option['stack']
-        parameters = baseline['parameters']['options'][slug]
-        build_months = option.get('initial_months',parameters.get('build_mois', 0))
-        integration_months = (baseline['make_integration_months'] if option['mode'] == 'Make'
-                              else parameters['integration_mois'])
-        annual = content['stacks'][slug]['economic_reading']['total']
-        # Keep the existing published cents; baseline service sums may carry a
-        # binary floating-point tail, which is not another economic amount.
-        assert abs(annual - exact_sum([*option['annual_base'].values(), *option['editor_prices'][:1]])) < 0.000001, ('Annual total', slug)
-        options.append(dict(stack=slug, name=option['name'], mode=option['mode'],
-            build_eur_ht=option.get('obtention',option['build']), integration_eur_ht=option['integration'],
-            build_months=build_months, integration_months=integration_months,
-            annual_eur_ht=annual))
-        if slug not in MAKE:
-            continue
-        sums = work_metrics([row['stacks'][slug] for row in work_rows])
-        priced = content['stacks'][slug]['economic']['detail_build']
-        assert sums['prestations_eur_ht'] == priced['prestations'], ('Build funding reconciliation', slug)
-        assert sums['prestations_eur_ht'] == exact_sum(fund['valuation']['cout_eur_ht']
-            for fund in funds if fund['stack'] == slug), ('Atlas funding reconciliation', slug)
-        assert exact_sum([priced['prestations'], priced['pilotage']]) == option['build'], ('Build total', slug)
-        work_totals[slug] = dict(**sums, pilotage_eur_ht=priced['pilotage'], build_eur_ht=option['build'],
-                                build_months=build_months, integration_months=integration_months)
-    sap = content['stacks']['sap']
-    sum_lots = sap['economic']['detail_integration']['base_rfi']
-    printed = sap['pricing']['total_imprime_eur']
-    return dict(work_totals=work_totals, options=options, map=atlas_metrics(business_map),
-        transverse={slug: work_metrics([business_map['transverse']['stacks'][slug]]) for slug in MAKE},
-        natures=list(content['business']['method']['natures']),
-        market=dict(sap=dict(sum_lots_eur_ht=sum_lots, printed_total_eur_ht=printed,
-                            discrepancy_eur_ht=exact_sum([printed, -sum_lots])),
-                    references_count=len(content['market']['references']),
-                    eligible_count=content['market']['analyse_dispersion']['resultat_actuel']['references_eligibles']))
-
+        slug=option['stack'];parameters=baseline['parameters']['options'][slug]
+        build_months=option.get('initial_months',parameters.get('build_mois',0))
+        integration_months=baseline['make_integration_months'] if option['mode']=='Make' else parameters['integration_mois']
+        annual=content['stacks'][slug]['economic_reading']['total']
+        assert abs(annual-exact_sum([*option['annual_base'].values(),*option['editor_prices'][:1]]))<.000001
+        options.append(dict(stack=slug,name=option['name'],mode=option['mode'],
+            build_eur_ht=option.get('obtention',option['build']),integration_eur_ht=option['integration'],
+            build_months=build_months,integration_months=integration_months,annual_eur_ht=annual))
+        if slug not in MAKE:continue
+        units=content['stacks'][slug]['economic']['core_units']
+        priced=content['stacks'][slug]['economic']['detail_build']
+        charge=sum(u['total_jh'] for u in units)
+        cost=exact_sum(u['cost_eur_ht'] for u in units)
+        assert cost==priced['prestations']==exact_sum(f['cout_eur_ht'] for f in funds if f['stack']==slug)
+        assert priced['pilotage']==0
+        assert cost==option['build']
+        totals[slug]=dict(raw_jh={'central':charge,'bas':None,'haut':None},net_jh=charge,
+            prestations_eur_ht=cost,pilotage_eur_ht=0,build_eur_ht=cost,
+            build_months=build_months,integration_months=integration_months,
+            units=deepcopy(units),family_jh=charge,family_cost_eur_ht=cost)
+    atlas=atlas_metrics(business_map)
+    for slug,total in totals.items():
+        for node in [*atlas['areas'],*atlas['business_areas'],*atlas['capabilities'].values()]:
+            units=[dict(id=u['id'],label=u['label']) for u in total['units']
+                if set(node['capabilities']) & {c['native_id'] for c in u['capabilities']}]
+            node['stacks'][slug]['retained_units']=units
+            node['stacks'][slug]['status']='included_in_family' if units else 'pending_reestimation'
+    sap=content['stacks']['sap'];lots=sap['economic']['detail_integration']['base_rfi'];printed=sap['pricing']['total_imprime_eur']
+    return dict(work_totals=totals,options=options,map=atlas,transverse={},natures=[],
+        market=dict(sap=dict(sum_lots_eur_ht=lots,printed_total_eur_ht=printed,discrepancy_eur_ht=exact_sum([printed,-lots])),
+            references_count=len(content['market']['references']),
+            eligible_count=content['market']['analyse_dispersion']['resultat_actuel']['references_eligibles']))
 
 def validate_editorial(editorial, content, document_path):
     def validate_links(value):

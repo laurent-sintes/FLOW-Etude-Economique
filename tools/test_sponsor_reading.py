@@ -37,22 +37,13 @@ class SponsorReadingTests(unittest.TestCase):
             self.assertEqual(cap['block'], row['id'])
 
     def test_cost_layers_reconcile_owned_work_then_transverse_then_pilotage(self):
-        result = self.study.content['journey']['metrics']
-        atlas = result['map']
-        for slug in MAKE:
-            total = result['work_totals'][slug]
-            transverse = result['transverse'][slug]
-            for groups in (atlas['areas'], atlas['business_areas'], atlas['capabilities'].values()):
-                attributed = decimal_sum(group['stacks'][slug]['prestations_eur_ht'] for group in groups)
-                self.assertEqual(attributed + Decimal(str(transverse['prestations_eur_ht'])),
-                                 Decimal(str(total['prestations_eur_ht'])))
-                for case in ('bas', 'central', 'haut'):
-                    self.assertEqual(sum(group['stacks'][slug]['raw_jh'][case] for group in groups)
-                                     + transverse['raw_jh'][case], total['raw_jh'][case])
-            self.assertEqual(decimal_sum([total['prestations_eur_ht'], total['pilotage_eur_ht']]),
-                             Decimal(str(total['build_eur_ht'])))
-            self.assertEqual(sum(total['composition']['central']), total['raw_jh']['central'])
-            self.assertGreater(total['raw_jh']['central'], total['composition']['central'][2])
+        result=self.study.content['journey']['metrics']
+        self.assertFalse(result['transverse'])
+        for slug,total in result['work_totals'].items():
+            self.assertEqual(total['pilotage_eur_ht'],0)
+            self.assertEqual(total['build_eur_ht'],sum(u['cost_eur_ht'] for u in total['units']))
+            self.assertEqual(total['raw_jh']['central'],sum(u['total_jh'] for u in total['units']))
+            self.assertTrue(all(c['stacks'][slug]['raw_jh']['central'] is None for c in result['map']['capabilities'].values()))
 
     def test_five_operations_reuse_baseline_budget_duration_and_full_capacity_year(self):
         rows = self.study.content['journey']['metrics']['options']
@@ -67,40 +58,22 @@ class SponsorReadingTests(unittest.TestCase):
         self.assertEqual(len({row['integration_eur_ht'] for row in rows if row['mode'] == 'Make'}), 3)
 
     def test_atlas_preserves_complexity_axes_and_buy_statuses_without_coverage_score(self):
-        source = self.study.content['business_map']['rows']
-        atlas = self.study.content['journey']['metrics']['map']
-        for group in atlas['areas']:
-            members = [row for row in source if row['capacite_id'] in group['capabilities']]
-            for axis, values in group['complexity'].items():
-                self.assertEqual(values['high'], sum(row['complexite'][axis]['niveau'] >= 4 for row in members))
-                self.assertEqual(values['count'], len(members))
-                self.assertNotIn('average', values)
-            for slug in ('microsoft', 'sap'):
-                self.assertEqual(group['buy'][slug]['counts'], dict(Counter(row['buy'][slug]['statut'] for row in members)))
+        source=self.study.content['business_map']['rows']
+        for group in self.study.content['journey']['metrics']['map']['areas']:
+            members=[row for row in source if row['capacite_id'] in group['capabilities']]
+            self.assertNotIn('complexity',group)
+            for slug in ('microsoft','sap'):
+                self.assertEqual(group['buy'][slug]['counts'],dict(Counter(row['buy'][slug]['statut'] for row in members)))
 
     def test_source_change_updates_only_its_funded_owner_and_ancestors(self):
-        content, baseline = deepcopy(self.study.content), deepcopy(self.study.baseline)
-        before = content['journey']['metrics']
-        row = content['business_map']['rows'][0]
-        slug = MAKE[0]
-        row['work']['stacks'][slug] = deepcopy(row['work']['stacks'][slug])
-        assignment = row['work']['stacks'][slug]
-        assignment['work']['central'][2] += 1
-        assignment['valuation']['cout_eur_ht'] += 100
-        # The funding registry is a separate projection of the same owned price.
-        fund = next(f for f in content['business_map']['funding'] if f['id'] == assignment['funding_id'])
-        fund['valuation'] = deepcopy(assignment['valuation'])
-        content['stacks'][slug]['economic']['detail_build']['prestations'] += 100
-        next(o for o in baseline['options'] if o['stack'] == slug)['build'] += 100
-        after = metrics(content, baseline)
-        self.assertEqual(after['work_totals'][slug]['raw_jh']['central'], before['work_totals'][slug]['raw_jh']['central'] + 1)
-        for identifier, cap in after['map']['capabilities'].items():
-            old = before['map']['capabilities'][identifier]
-            delta = 1 if identifier == row['capacite_id'] else 0
-            self.assertEqual(cap['stacks'][slug]['raw_jh']['central'], old['stacks'][slug]['raw_jh']['central'] + delta)
-            self.assertEqual(decimal_sum([cap['stacks'][slug]['prestations_eur_ht'], -old['stacks'][slug]['prestations_eur_ht']]),
-                             Decimal(delta * 100))
-        self.assertEqual(after['transverse'], before['transverse'])
+        content,baseline=deepcopy(self.study.content),deepcopy(self.study.baseline)
+        content['business_map']['family_funding'][0]['cout_eur_ht']+=100
+        with self.assertRaises(AssertionError):
+            metrics(content,baseline)
+        content=deepcopy(self.study.content)
+        content['business_map']['funding'].append({'id':'unexpected-legacy'})
+        with self.assertRaisesRegex(AssertionError,'Legacy Make funding'):
+            metrics(content,baseline)
 
     def test_market_gap_is_documentary_and_tracks_existing_source_values(self):
         result = self.study.content['journey']['metrics']['market']

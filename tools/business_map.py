@@ -56,15 +56,6 @@ def build(complexity, business, buy, integration, scope):
             content=names[t['id']], rationale=t['justification'], source=t['source'], status=t['statut']))
 
     funding = []
-    for w in business['rows']:
-        for slug, a in w['stacks'].items():
-            a['proofs'] = proofs(a['coverage']['sources'], business['sources'])
-            # The instance is (work owner, option); a reusable estimate template is not a funding identity.
-            a['funding_id'] = w['id'] + ':' + slug
-            funding.append(dict(id=a['funding_id'], owner=w['capacite_id'], block=w['id'], stack=slug,
-                template=a['travaux_ref'], valuation=a['valuation'],
-                beneficiaries=[r['capacite_id'] for r in business['rows'] if any(x['proprietaire']==w['id'] for x in r['reuse'])]))
-    assert len({f['id'] for f in funding}) == len(funding)
     for r in rows:
         cid = r['capacite_id']
         r['work'] = work[r['id']]
@@ -81,4 +72,8 @@ def build(complexity, business, buy, integration, scope):
     return dict(source=dict(path=spec['cartographie'],date=snapshot['date_capture'],
         version=snapshot['provenance']['version'],revision=snapshot['provenance']['sha256'],
         domain=dict(id=spec['domaine'],nom=nodes[spec['domaine']]['fields']['name'])),
-        rows=rows,themes=themes,transverse=work['TRANSVERSE'],funding=funding)
+        rows=rows,themes=themes,transverse={'id':'TRANSVERSE','stacks':{}},funding=funding,
+        family_funding=[dict(id=u['id'],owner=u['id'],stack=u['stack'],
+            beneficiaries=[c['native_id'] for c in u['capabilities']],
+            total_jh=u['total_jh'],cout_eur_ht=u['cost_eur_ht'])
+            for u in business['retained_units']])

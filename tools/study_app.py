@@ -10,7 +10,8 @@ from calculate_costs import valuation
 from content_model import resolve_text_tree, validate_glossary_literals
 from project_investment import prepare, project, core_service_costs, phase_expense
 from validate_stacks import ROOT, read
-from business_calibration import active_doc, validate as validate_business_calibration
+from current_cost_inputs import active_doc, validate as validate_business_calibration
+from capability_catalog import catalog, analysis
 from buy_qualification import validate as validate_buy, integration_paths, coverage_sources
 from business_map import build as build_business_map
 from sponsor_reading import build as build_sponsor_reading
@@ -19,8 +20,8 @@ from model_context import scoped_model, model_memo, CURRENT
 from study_snapshot import pack_content, unpack_content
 from market_oss import enrich_market_products
 from analyze_cost_references import validate_market_references
-from evaluation_status import status_notice
-from core_qualification import validate as validate_core_qualification, summarize as summarize_core_qualification
+from evaluation_status import status_notice, load_status
+from retained_core import coverage as retained_coverage
 from market_instruction import build_market_instruction
 from core_method import hydrate_core_method, hydrate_market_method, hydrate_net_method, hydrate_run_method, hydrate_levers_method
 from architecture_model import load_architecture, hydrate_architecture, validate_economic_links, SOURCE as ARCHITECTURE_SOURCE
@@ -58,6 +59,7 @@ class Study:
         self.ui = resolve_text_tree(raw_ui, self.glossary, path='config/application.yaml')
         from model_inputs import buy_selection_inputs
         self.ui['buy_selection_migration']['preparation_eur']=buy_selection_inputs()['preparation_reaffectee_eur']
+        self.ui['essential']['core_results']['estimation_status'] = load_status()['calibration_status']
         self.validate_ui(self.ui)
         if any(t['id'] not in self.glossary['notions'] or not t['matches'] for t in self.ui['glossary_links']['terms']):
             raise ValueError('ERR_GLOSSARY_LINK')
@@ -157,10 +159,13 @@ class Study:
         d['taux'] = dict(tjm_ingenierie=common['inflation_tjm'], cloud=common['inflation_cloud'], licences_logiciels=common['inflation_licences'])
         duration = next(o['integration_mois'] for o in d['options'] if o['mode']=='Make')
         anchor = parameters['options']['sap']['integration']-d['sensibilite_finance_sap']['retrait_indicatif_eur_ht']-d['sensibilite_finance_sap']['complements_generiques_exclus_ancre_make_eur_ht']
-        if anchor < 0: raise ScenarioError('invalid_anchor','options.sap.integration')
-        integration = round(anchor*(1-common['bonus_continuite_pct']/100),2)
-        d['bonus_continuite_make'] = dict(taux_pct=common['bonus_continuite_pct'],ancre_avant_bonus_eur_ht=anchor,
-            reduction_eur_ht=round(anchor-integration,2),budget_apres_bonus_eur_ht=integration)
+        # This historical counterpoint never finances the active Make integration.
+        # A Buy budget below its historical exclusions invalidates only the diagnostic.
+        integration = round(anchor*(1-common['bonus_continuite_pct']/100),2) if anchor >= 0 else None
+        d['bonus_continuite_make'] = dict(taux_pct=common['bonus_continuite_pct'],
+            ancre_avant_bonus_eur_ht=anchor if anchor >= 0 else None,
+            reduction_eur_ht=round(anchor-integration,2) if integration is not None else None,
+            budget_apres_bonus_eur_ht=integration)
         d['scenario']['integration_make']['bonus_continuite_build_pct'] = common['bonus_continuite_pct']
         for o in d['options']:
             p = parameters['options'][o['stack']]
@@ -229,7 +234,6 @@ class Study:
         content['business_map'] = build_business_map(content['complexity'],content['business'],content['buy_review'],content['integration_paths'],content['scope'])
         content['journey'] = build_sponsor_reading(content,self.baseline,self.glossary,self.document_path)
         content['framework'] = self._framework_content(stacks,content['calibration'])
-        content['core_qualification'] = dict(document=validate_core_qualification(), summary=summarize_core_qualification())
         content['economic_evaluations'] = build_economic_evaluations(self.baseline, content, self.glossary, self.document_path)
         content['synvance_reference'] = build_synvance_reference(content['guide'], self.glossary, self.document_path)
         content['delivery_method'], content['delivery_readiness'] = build_delivery_readiness(
@@ -305,7 +309,7 @@ class Study:
                                          scenario=deployment['scenarios']['central']['nature'],
                                          justification=deployment['pilotage']['justification'],
                                          distinction=deployment['pilotage']['distinct_de'])),
-            workload=dict(method=read(ROOT/'source/recalibration-metier.yaml')['methode'],
+            workload=dict(method={'natures':[], 'metamodel_ref':'source/fondamentaux.yaml#estimation_model'},
                           valuation=calibration['calibration']['definition_jh'],
                           ia=calibration['ia'],
                           maintenance_ia={slug:[dict(id=row['activite'],label=maintenance_names[row['activite']],
@@ -382,21 +386,14 @@ class Study:
         return guide
 
     def _business_summary(self):
-        model=validate_business_calibration()
         grid=self._complexity_grid()
-        indexed={b['bloc']:b for b in model['blocs']}
-        economics={o['stack']:o for o in self.economic['options']}
-        calculated={s:{f['feature']:f for f in e['features']} for s,e in economics.items()}
-        rows=[]
-        for row in grid['rows']:
-            b=indexed[row['id']]
-            rows.append(dict(id=row['id'],capacite_id=row['capacite_id'],name=row['capacite']['nom'],path=[h['nom'] for h in row['hierarchie']],
-                scenario=b['scenario'],frontiere=b['frontiere'],reuse=b['reemploi'],review=b['hypothese'],stacks=b['stacks']))
-        t=model['transverse']
-        rows.append(dict(id=t['id'],capacite_id=None,name=t['nom'],path=[],scenario=t['frontiere'],frontiere=t['frontiere'],reuse=[],review=model['methode']['buy'],stacks=t['stacks']))
-        for row in rows:
-            row['stacks']={s:dict(**a,work=model['lots'][a['travaux_ref']],coverage=model['couvertures'][a['couverture_ref']],valuation=calculated[s][row['id']]) for s,a in row['stacks'].items()}
-        return dict(rows=rows,method=model['methode'],labels=resolve_text_tree(model['lecture'],self.glossary),sources=coverage_sources(model))
+        units=[deepcopy(u) for e in self.economic['options'] for u in e['core_units']]
+        rows=[dict(id=r['id'],capacite_id=r['capacite_id'],name=r['capacite']['nom'],
+                   path=[h['nom'] for h in r['hierarchie']],scenario=' ; '.join(f['resultat'] for f in r['fonctions']),
+                   frontiere=r['frontiere'],reuse=[],stacks={slug:dict(status='included_in_family' if any(u['stack']==slug and r['id'] in {c['id'] for c in u['capabilities']} for u in units) else 'pending_reestimation',
+                      jh=None,retained_units=[u['id'] for u in units if u['stack']==slug and r['id'] in {c['id'] for c in u['capabilities']}])
+                      for slug in ('java-spring','dotnet','rust')}) for r in grid['rows']]
+        return dict(rows=rows,retained_units=units,method={'natures':[]},sources={})
 
     def _sponsor_summary(self):
         content=read(ROOT/'source/synthese-sponsor.yaml')
@@ -462,24 +459,7 @@ class Study:
     @staticmethod
     @model_memo
     def _complexity_grid():
-        from validate_complexity_grid import validate
-        grid,snapshot,method=validate()
-        nodes={n['id']:n for n in snapshot['nodes']}
-        def plain(value):
-            import re
-            return re.sub(r'\[([^]]+)\]\([^)]+\)',r'\1',value or '')
-        def node(i):
-            n=nodes[i];f=n['fields']
-            return dict(id=i,kind=n['kind'],nom=f['name'],definition=plain(f.get('definition')),
-                        perimetre=plain(f.get('scope')),comparaisons=f.get('market_comparisons',[]))
-        rows=[]
-        for block in grid['blocs']:
-            rows.append(dict(**block,capacite=node(block['capacite_id']),hierarchie=[node(i) for i in block['chemin'][:3]],
-                             variantes=[node(i) for i in block['variantes_source']]))
-        order={n['id']:i for i,n in enumerate(snapshot['nodes'])}
-        rows.sort(key=lambda r:tuple(order[i] for i in r['chemin']))
-        return dict(rows=rows,method=method,reprise=grid['reprise'],source=grid['dependances']['cartographie'],
-                    changed_fields=len(snapshot['relecture']['champs_modifies']))
+        return catalog()
 
     @staticmethod
     def _architecture(stack,slug,spec):
@@ -524,7 +504,7 @@ class Study:
             if row['traitement']=='estimation':
                 cost=row['cout_diagnostique_eur_ht']; estimated+=cost
                 name=catalog[row['activite']]['nom']
-                source='source/recalibration-metier.yaml' if row['activite'] in {'MAI-003','MAI-004','MAI-006','MAI-009'} else f'source/chiffrage/chiffrage-{slug}.yaml'
+                source='source/unites-maintenance.yaml' if row['activite'] in {'MAI-003','MAI-004','MAI-006','MAI-009'} else f'source/chiffrage/chiffrage-{slug}.yaml'
                 if make and row['activite']==spec['evolutions_activite']:
                     core=round(core_costs[row['activite']],2)
                     if core>cost: raise ValueError('ERR_CORE_EVOLUTIONS')
@@ -535,7 +515,7 @@ class Study:
         extra=round(pieces['prestations_estimees']-estimated,2)
         if extra < -0.02: raise ValueError('ERR_ANNUAL_ESTIMATES')
         complement=spec['complements']['make' if make else 'buy']
-        add(complement['bucket'],'complements',complement['titre'],extra,f'source/chiffrage/chiffrage-{slug}.yaml' if make else 'source/recalibration-metier.yaml')
+        add(complement['bucket'],'complements',complement['titre'],extra,f'source/chiffrage/chiffrage-{slug}.yaml' if make else 'source/unites-maintenance.yaml')
         priced=0
         for p in prices:
             if p['id'] in spec['forfaits']:
@@ -560,11 +540,9 @@ class Study:
 
     def _essential_complexity(self):
         grid=self.content['complexity']
-        return dict(axes={key:dict(titre=value['titre'],niveaux=value['niveaux']) for key,value in grid['method']['axes'].items()},
-            rows=[dict(id=row['id'],capacite_id=row['capacite_id'],name=row['capacite']['nom'],
-                       path=[item['nom'] for item in row['hierarchie'][1:]],complexite=row['complexite'],
-                       fonctions=row['fonctions'],frontiere=row['frontiere'],
-                       source='source/grille-complexite.yaml#'+row['id']) for row in grid['rows']])
+        return dict(axes={}, rows=[dict(id=r['id'],capacite_id=r['capacite_id'],name=r['capacite']['nom'],
+            path=[n['nom'] for n in r['hierarchie'][1:]],source=grid['source'],
+            definition=r['capacite']['definition'],perimetre=r['capacite']['perimetre']) for r in grid['rows']])
 
     def _essential_market_method(self):
         frame=self.content['market']['reperes_build_core']['cadre_comparaison']
@@ -585,13 +563,18 @@ class Study:
                 features=self.content['stacks'][slug]['features']
                 ranges={case:sum(sum(feature['plages_jh'][case].values()) for feature in features)
                         for case in ('bas','central','haut')}
+                unit_jh = sum(u['total_jh'] for u in row['core_units'])
+                ranges = {case: value + unit_jh for case, value in ranges.items()}
                 assert ranges['central']==row['jh']['core_avant_ia']
             uncertainty=(dict(down=round(100*(ranges['central']-ranges['bas'])/ranges['central'],1),
                               up=round(100*(ranges['haut']-ranges['central'])/ranges['central'],1))
-                         if is_make else None)
+                         if is_make and ranges['central'] and not row['core_units'] else None)
             assert abs(row['synthese_eur_ht']['build_core']-baseline[slug]['build'])<0.01
             results.append(dict(stack=slug,name=baseline[slug]['name'],mode=baseline[slug]['mode'],
                                 ranges_jh=ranges,uncertainty_pct=uncertainty,
+                                units=deepcopy(row['core_units']),
+                                coverage=retained_coverage(row['core_units'], [r['id'] for r in self.content['complexity']['rows']]) if is_make else None,
+                                estimation_status=retained_coverage(row['core_units'], [r['id'] for r in self.content['complexity']['rows']])['status'] if is_make else 'not_applicable',
                                 build_eur_ht=row['synthese_eur_ht']['build_core']))
         return results
 

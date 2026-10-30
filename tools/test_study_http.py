@@ -82,7 +82,8 @@ class ApiTests(unittest.TestCase):
                          [row['capacite_id'] for row in small['content']['complexity']['rows']])
         for key in small:
             if key!='content':self.assertEqual(small[key],full[key])
-        self.assertLess(len(light),len(get('/api/bootstrap')[0])/10)
+        self.assertLess(len(light),1_100_000)
+        self.assertLess(len(light),len(get('/api/bootstrap')[0])/8)
         self.assertIn('business_map',full['content'])
 
     def test_capability_proof_uses_loaded_model_and_checks_version(self):
@@ -171,5 +172,29 @@ class ApiTests(unittest.TestCase):
                 self.assertIn('id="app-config"',html)
                 self.assertIn(self.study.ui['labels']['retry'],html)
                 self.assertNotIn('new-client',html)
+            finally:
+                server.shutdown();server.server_close();thread.join()
+
+    def test_yaml_download_compression_preserves_original_bytes(self):
+        with TemporaryDirectory() as folder:
+            root=Path(folder);(root/'index.html').write_text('<div id="root"></div>',encoding='utf-8')
+            (root/'exports').mkdir()
+            raw=('modèle: données métier\n'*2000).encode()
+            (root/'exports/model.yaml').write_bytes(raw)
+            server=ThreadingHTTPServer(('127.0.0.1',0),make_handler(self.study,static_root=root))
+            thread=Thread(target=server.serve_forever,daemon=True);thread.start()
+            try:
+                url=f'http://127.0.0.1:{server.server_port}/exports/model.yaml'
+                for encoding in ('gzip','identity','gzip;q=0'):
+                    with urlopen(Request(url,headers={'Accept-Encoding':encoding})) as response:
+                        body=response.read()
+                        self.assertIn('application/yaml',response.headers['Content-Type'])
+                        if encoding=='gzip':
+                            self.assertEqual(response.headers['Content-Encoding'],'gzip')
+                            self.assertEqual(gzip.decompress(body),raw)
+                            self.assertLess(len(body),len(raw))
+                        else:
+                            self.assertIsNone(response.headers.get('Content-Encoding'))
+                            self.assertEqual(body,raw)
             finally:
                 server.shutdown();server.server_close();thread.join()

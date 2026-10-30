@@ -48,7 +48,7 @@ def main():
         loader=unittest.TestLoader()
         suite=loader.discover(str(ROOT/'tools'),pattern='test_*.py') if args.release else loader.loadTestsFromNames([
             'test_model_runtime','test_model_inputs','test_cost_separation','test_composable_costs',
-            'test_architecture_model','test_market_references','test_core_qualification',
+            'test_architecture_model','test_market_references','test_estimation_calculation',
             'test_market_instruction','test_maintenance_specialisation'])
         result=stage('python_tests',lambda:unittest.TextTestRunner(verbosity=1).run(suite))
         report['tests']=result.testsRun

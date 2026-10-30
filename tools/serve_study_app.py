@@ -153,7 +153,7 @@ def make_handler(study, static_root=None):
                     body=(body.decode('utf-8').replace('<title></title>','<title>'+html.escape(study.ui['document_title'])+'</title>')
                           .replace('<div id="root"></div>',fallback)
                           .replace('</head>','<script id="app-config" type="application/json">'+config+'</script></head>')).encode('utf-8')
-                return self.reply(body,content_type=mimetypes.guess_type(relative)[0] or 'application/octet-stream',immutable=url.path.startswith('/assets/'),frozen=True)
+                return self.reply(body,content_type=('application/yaml; charset=utf-8' if Path(relative).suffix in ('.yaml','.yml') else mimetypes.guess_type(relative)[0] or 'application/octet-stream'),immutable=url.path.startswith('/assets/'),frozen=True)
             except ScenarioError as e: return self.reply(dict(error=e.code),404)
             except (OSError,ValueError): return self.reply(dict(error='internal'),500)
 

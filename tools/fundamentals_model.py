@@ -31,6 +31,8 @@ def compile_fundamentals(document, glossary, architecture, options, native):
     if errors:
         error = errors[0]
         fail('/'.join(map(str, error.absolute_path)), error.message)
+    from estimation_calculation import metamodel
+    metamodel(document)
     entities = index(document['entities'], 'id', 'entities')
     relations = index(document['relations'], 'id', 'relations')
     strategies = index(document['strategies'], 'id', 'strategies')
@@ -230,6 +232,7 @@ def hydrate_fundamentals(ui, document):
         target[key] = chapters[chapter]['title']
     target['model_complexity_link'] = document['reading']['next_label']
     target['model_workload'] = deepcopy(document['estimation'])
+    target['estimation_model'] = deepcopy(document['estimation_model'])
     target['model_activities'] = {key: deepcopy(document['activity_reading'][key])
                                 for key in ('title', 'intro', 'note', 'types')}
     index(e['concepts'], 'entity_ref', 'view/concepts')

@@ -1,0 +1,90 @@
+status: mesures_terminees_sans_modification_du_moteur
+conditions:
+  site: http://127.0.0.1:8766
+  browser: Edge sans interface graphique, 1440 × 1000
+  network: Boucle locale, sans ralentissement réseau simulé. Serveur déjà chargé pour les mesures navigateur.
+  samples: 5 ouvertures avec contextes navigateur neufs ; 3 chargements du modèle ; 20 simulations Python ; 2 validations
+    par variante.
+  limits:
+  - Cache disque du système non purgé. Les temps navigateur ne représentent pas un accès distant ni un appareil
+    mobile.
+  - 'Les durées des suites complètes viennent des exécutions précédentes : elles ne sont pas relancées pour ce diagnostic.
+    Les nombres de tests diffèrent.'
+  - 'Le profilage ralentit le programme : utiliser les mesures non instrumentées pour les durées réelles.'
+medians_seconds:
+  browser_open: 0.2841346000000003
+  page_model: 0.10735350000000017
+  page_estimation: 0.11099699999999985
+  simulation_visible: 0.41690500000000064
+  simulation_python: 0.020982599999115337
+  model_loading: 7.762655700003961
+  validation_standalone: 6.465820700002951
+  validation_one_snapshot: 2.286578699997335
+previous_full_runs:
+  before:
+    tests: 255
+    seconds: 272.042
+  after:
+    tests: 265
+    seconds: 620.913
+    python_seconds: 583.923
+findings:
+- id: PERF-01
+  priority: 1
+  subject: Les validations isolées relisent les mêmes données
+  evidence:
+    parses_without_session: 55
+    parses_with_session: 30
+    native_capture_without_session: 5
+    native_capture_with_session: 1
+    same_results: true
+    measured_speedup: 2.8277271628614775
+  recommendation: Encadrer chaque validation autonome dans un chargement isolé du modèle et partager les données
+    de référence immuables dans les tests. Conserver les copies des variantes et tous les contrôles de rejet.
+  limit: Le gain mesuré porte sur cette validation ; il ne prédit pas exactement la durée future de toute la suite.
+- id: PERF-02
+  priority: 2
+  subject: Le démarrage consacre surtout du temps à analyser et recopier les données
+  evidence: 'Profil instrumenté : environ 6,77 s dans le chargement YAML et 7,21 s dans deepcopy, sur 15,91 s profilées.
+    Le chargement réel médian sans profilage est de 7,76 s.'
+  recommendation: Réduire les copies profondes redondantes aux frontières réellement mutables ; conserver l’isolation
+    des simulations et la vérification des sources. Étudier séparément la lecture JSON des preuves JSON avec rejet
+    des doublons.
+- id: PERF-03
+  priority: 2
+  subject: La composition du téléchargement refait le travail même si les données sont inchangées
+  evidence:
+    compose_seconds: 0.2305192000058014
+    serialize_seconds: 3.937072000000626
+    file_bytes: 18139260
+  recommendation: Contrôler les empreintes des dépendances avant de reconstruire le modèle et le YAML ; réutiliser
+    uniquement un export dont les sources et le générateur sont inchangés, avec régénération si absent ou altéré.
+- id: PERF-04
+  priority: 2
+  subject: Le fichier téléchargeable est servi sans compression
+  evidence:
+    content_type: application/octet-stream
+    content_encoding: null
+    file_bytes: 18139260
+    gzip_trial_bytes: 2648115
+    gzip_trial_seconds: 0.3948960999987321
+  recommendation: Déclarer explicitement le type YAML sur le serveur local pour activer sa compression existante.
+    Le fichier reste identique après décompression.
+  limit: Le transfert local rapide masque le coût des 18,1 Mo sur une connexion distante ; la configuration de GitHub
+    Pages n’est pas mesurée ici.
+preserved:
+  active_files_checked: 275
+  economic_model_modified: false
+  server_running: true
+conclusion: Priorité aux relectures des validations et à la génération conditionnelle du téléchargement. Aucune
+  lenteur importante observée dans la navigation locale. Les formules COCOMO et COSMIC ne constituent pas le principal
+  coût de traitement.
+artifacts:
+- python.json
+- browser.json
+- validation-parses.json
+- study-profile.txt
+- study-load.prof
+- measure.py
+- browser.mjs
+- validation-parses.py

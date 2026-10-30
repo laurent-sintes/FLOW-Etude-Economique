@@ -43,15 +43,14 @@ class BusinessMapTests(unittest.TestCase):
                 self.assertTrue(all(p['reference'] for p in review['proofs']))
 
     def test_funding_instances_remain_distinct_from_reused_templates(self):
-        m=self.study.content['business_map'];funds=m['funding']
-        self.assertEqual(len({f['id'] for f in funds}),267)
-        self.assertEqual(len({f['template'] for f in funds}),36)
-        self.assertEqual(len([f for f in funds if f['owner'] is None]),3)
+        m=self.study.content['business_map']
+        self.assertFalse(m['funding'])
+        self.assertEqual(len(m['family_funding']),1)
+        self.assertEqual(len(m['family_funding'][0]['beneficiaries']),6)
         for o in self.study.economic['options']:
             if o['stack'] not in ('java-spring','dotnet','rust'):continue
-            total=sum(Decimal(str(f['valuation']['cout_eur_ht'])) for f in funds if f['stack']==o['stack'])
-            self.assertEqual(total,Decimal(str(o['detail_build']['prestations'])))
-        self.assertTrue(any(f['beneficiaries'] for f in funds))
+            family=sum(Decimal(str(f['cout_eur_ht'])) for f in m['family_funding'] if f['stack']==o['stack'])
+            self.assertEqual(family,Decimal(str(o['detail_build']['prestations'])))
 
     def test_scenarios_and_boundary_subjects_do_not_add_capabilities(self):
         m=self.study.content['business_map'];refs={s['id'] for r in m['rows'] for s in r['scenarios']}

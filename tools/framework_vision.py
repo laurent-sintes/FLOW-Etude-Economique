@@ -38,7 +38,7 @@ SCHEMA = _object(dict(
         levels=dict(type='array', minItems=4, maxItems=4, items=PROOF_LEVEL),
         links=dict(type='array', minItems=1, items=READING_LINK), limits_title=TEXT,
         limits=dict(type='array', minItems=1, items=TEXT))),
-    next=_object(dict(href=dict(const='#modele'), label=TEXT)),
+    next=_object(dict(title=TEXT, links=dict(type='array', minItems=3, maxItems=3, items=READING_LINK))),
 ))
 
 
@@ -62,7 +62,8 @@ def compile_vision(document, glossary, routes, documents):
                                 (document['evidence']['items'], 'id', 'evidence.items'),
                                 (document['evidence']['items'], 'href', 'evidence.items'),
                                 (document['dimensions']['items'], 'title', 'dimensions.items'),
-                                (document['confidence']['links'], 'href', 'confidence.links')):
+                                (document['confidence']['links'], 'href', 'confidence.links'),
+                                (document['next']['links'], 'href', 'next.links')):
         values = [row[key] for row in rows]
         if len(values) != len(set(values)):
             raise ValueError(f'{ERROR}:{SOURCE}:{location}:duplicate {key}')
@@ -70,7 +71,7 @@ def compile_vision(document, glossary, routes, documents):
     allowed = {'#' + route for route in routes} | {
         path for path in documents if path.startswith(('source/', 'sources/'))}
     for link in [document['adaptation'], *document['evidence']['items'],
-                 *document['confidence']['levels'], *document['confidence']['links'], document['next']]:
+                 *document['confidence']['levels'], *document['confidence']['links'], *document['next']['links']]:
         if link['href'] not in allowed:
             raise ValueError(f'{ERROR}:{SOURCE}:unknown reading link:{link["href"]}')
 

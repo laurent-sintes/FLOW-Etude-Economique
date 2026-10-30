@@ -41,8 +41,8 @@ class RuntimeTests(unittest.TestCase):
                     read(path);path.write_text('value: 3')
 
     def test_complexity_validation_is_shared_only_within_one_load(self):
-        from validate_complexity_grid import validate
-        with patch('validate_complexity_grid.validate',wraps=validate) as check:
+        from capability_catalog import catalog as validate
+        with patch('study_app.catalog',wraps=validate) as check:
             with model_session():
                 a=Study._complexity_grid();a['rows'].clear()
                 self.assertTrue(Study._complexity_grid()['rows'])

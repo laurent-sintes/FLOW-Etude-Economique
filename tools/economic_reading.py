@@ -100,19 +100,15 @@ def compile_economic_evaluations(baseline, content, editorial, glossary, documen
         core = None
         if mode == 'Make':
             stack = content['stacks'][slug]
-            valued = {row['feature']:row for row in stack['economic']['features']}
-            features = []
-            for feature in stack['features']:
-                key = feature['feature']
-                capacity = capacities.get(key)
-                features.append(dict(id=key, name=capacity['nom'] if capacity else text['labels']['transverse'],
-                    definition=capacity['definition'] if capacity else '',
-                    justification=feature['justification'], charges=deepcopy(feature['plages_jh']['central']),
-                    amount=valued[key]['cout_eur_ht']))
-            natures = {key:sum(feature['charges'][key] for feature in features)
-                       for key in content['calibration']['natures'] + ['frontend']}
-            _require(sum(natures.values()) == stack['economic']['jh']['core_avant_ia'], f'core charge ownership:{slug}')
-            core = dict(natures=natures, features=features, total_jh=sum(natures.values()),
+            features=[dict(id=r['id'],name=r['capacite']['nom'],definition=r['capacite']['definition'],
+                justification=r['frontiere'],charges={},amount=None) for r in content['complexity']['rows']]
+            natures={}
+            units = deepcopy(stack['economic']['core_units'])
+            total_jh = sum(natures.values()) + sum(u['total_jh'] for u in units)
+            _require(total_jh == stack['economic']['jh']['core_avant_ia'], f'core charge ownership:{slug}')
+            for feature in features:
+                feature['retained_unit'] = next((u['id'] for u in units if feature['id'] in {c['id'] for c in u['capabilities']}), None)
+            core = dict(natures=natures, units=units, features=features, total_jh=total_jh,
                         amounts=deepcopy(stack['economic']['detail_build']), total_eur_ht=option['build'])
             _require(abs(sum(Decimal(str(value)) for value in core['amounts'].values()) -
                          Decimal(str(option['build']))) < Decimal('0.005'), f'core cost ownership:{slug}')

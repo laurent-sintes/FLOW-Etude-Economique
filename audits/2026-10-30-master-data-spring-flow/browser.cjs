@@ -1,0 +1,24 @@
+const fs=require('fs'),path=require('path');
+const {pathToFileURL}=require('url');
+const {chromium}=require('C:/Users/laure/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+(async()=>{
+ const folder=__dirname,errors=[];
+ const browser=await chromium.launch({executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true});
+ const page=await browser.newPage({viewport:{width:1360,height:1000},deviceScaleFactor:1});
+ page.on('pageerror',e=>errors.push(String(e)));
+ await page.goto(pathToFileURL(path.join(folder,'index.html')).href);
+ await page.screenshot({path:path.join(folder,'desktop.png')});
+ const cards=await page.locator('.card').count();
+ const desktopWidth=await page.evaluate(()=>({body:document.documentElement.scrollWidth,window:innerWidth}));
+ await page.locator('nav a[href="#activites"]').click();
+ await page.screenshot({path:path.join(folder,'activities.png')});
+ await page.setViewportSize({width:390,height:844});
+ await page.goto(pathToFileURL(path.join(folder,'index.html')).href);
+ await page.screenshot({path:path.join(folder,'mobile.png')});
+ const mobileWidth=await page.evaluate(()=>({body:document.documentElement.scrollWidth,window:innerWidth}));
+ const links=await page.locator('a').evaluateAll(xs=>xs.map(a=>a.getAttribute('href')));
+ const missing=links.filter(x=>!x.startsWith('#')&&!x.startsWith('http')&&!fs.existsSync(path.join(folder,x)));
+ const result={passed:cards===3&&errors.length===0&&missing.length===0&&desktopWidth.body<=desktopWidth.window&&mobileWidth.body<=mobileWidth.window,cards,errors,missing,desktopWidth,mobileWidth};
+ fs.writeFileSync(path.join(folder,'browser-check.json'),JSON.stringify(result,null,2));
+ console.log(JSON.stringify(result));await browser.close();if(!result.passed)process.exit(1);
+})().catch(e=>{console.error(e);process.exit(1)});

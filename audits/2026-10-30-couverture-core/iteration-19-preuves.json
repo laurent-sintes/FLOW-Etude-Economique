@@ -1,0 +1,117 @@
+{
+  "evidence": [
+    {
+      "id": "O191",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "addons/account_payment/models/payment_transaction.py",
+      "sha256": "a84940aeb56888c072374df63ff23692a719d285c8d5b4f8512e1c85dfbee4d0",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/account_payment/models/payment_transaction.py",
+      "observation": "Post-traitement sur transaction confirmée, paiement unique lié et distinction transactions partielles.",
+      "limit": "Ne garantit pas l'unicité de l'acte distant ; FLOW ne reprend pas le moteur comptable Odoo.",
+      "excerpts": [
+        {
+          "start": 98,
+          "end": 140,
+          "text": "    def _post_process(self):\n        \"\"\" Override of `payment` to add account-specific logic to the post-processing.\n\n        In particular, for confirmed transactions we write a message in the chatter with the payment\n        and transaction references, post relevant fiscal documents, and create missing payments. For\n        draft, cancelled, or errored transactions, we cancel the payment.\n        \"\"\"\n        super()._post_process()\n        for tx in self.filtered(lambda t: t.state == 'done'):\n            # Validate invoices automatically once the transaction is confirmed.\n            tx.invoice_ids.filtered(lambda inv: inv.state == 'draft').action_post()\n\n            # Create and post missing payments.\n            if tx._should_create_payment():\n                tx.with_company(tx.company_id)._create_payment()\n\n            if tx.payment_id:\n                message = _(\n                    \"The payment related to transaction %(ref)s has been posted: %(link)s\",\n                    ref=tx._get_html_link(),\n                    link=tx.payment_id._get_html_link(),\n                )\n                tx._log_message_on_linked_documents(message)\n        for tx in self.filtered(lambda t: t.state in ('draft', 'cancel', 'error')):\n            tx.payment_id.action_cancel()\n\n    def _should_create_payment(self):\n        \"\"\"Return whether an `account.payment` should be created for this transaction.\n\n        :return: Whether a payment should be created.\n        :rtype: bool\n        \"\"\"\n        self.ensure_one()\n        return (\n            not self.payment_id\n            # There is nothing to reconcile for validation transactions as no payment is created for\n            # them. This is also true for validations with validity check (transfer of a small\n            # amount with immediate refund) because validation amounts are not included in payouts.\n            and self.operation != \"validation\"\n            # Reconciliation is done in the child transactions for partial voids and captures, thus\n            # no payment is created for their source transactions.\n            and not any(child.state in [\"done\", \"cancel\"] for child in self.child_transaction_ids)\n        )"
+        },
+        {
+          "start": 142,
+          "end": 178,
+          "text": "    def _create_payment(self, **extra_create_values):\n        \"\"\"Create an `account.payment` record for the current transaction.\n\n        If the transaction is linked to some invoices, their reconciliation is done automatically.\n\n        Note: self.ensure_one()\n\n        :param dict extra_create_values: Optional extra create values\n        :return: The created payment\n        :rtype: recordset of `account.payment`\n        \"\"\"\n        self.ensure_one()\n\n        payment_method_line = self.provider_id.journal_id.inbound_payment_method_line_ids\\\n            .filtered(lambda l: l.payment_provider_id == self.provider_id)\n        payment_values = {\n            'amount': abs(self.amount),  # A tx may have a negative amount, but a payment must >= 0\n            'payment_type': 'inbound' if self.amount > 0 else 'outbound',\n            'currency_id': self.currency_id.id,\n            'partner_id': self.partner_id.commercial_partner_id.id,\n            'partner_type': 'customer',\n            'journal_id': self.provider_id.journal_id.id,\n            'company_id': self.provider_id.company_id.id,\n            'payment_method_line_id': payment_method_line.id,\n            'payment_token_id': self.token_id.id,\n            'payment_transaction_id': self.id,\n            'memo': self.reference,\n            'write_off_line_vals': [],\n            'invoice_ids': self.invoice_ids,\n            **extra_create_values,\n        }\n\n        for invoice in self.invoice_ids:\n            if invoice.state != 'posted':\n                continue\n            next_payment_values = invoice._get_invoice_next_payment_values()\n            if next_payment_values['installment_state'] == 'epd' and self.amount == next_payment_values['amount_due']:"
+        }
+      ]
+    },
+    {
+      "id": "O192",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "addons/sale/models/payment_transaction.py",
+      "sha256": "1682048f15b94a6a3db4cbd4fbd01af10103d7f8470d0edbbb4403fe9e48c694",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/sale/models/payment_transaction.py",
+      "observation": "Facturation finale ou d'acompte selon paiements et commandes confirmées.",
+      "limit": "Analogie de filiation et éligibilité, pas autorité de facturation universelle.",
+      "excerpts": [
+        {
+          "start": 203,
+          "end": 231,
+          "text": "    def _invoice_sale_orders(self):\n        for tx in self.filtered(lambda tx: tx.sale_order_ids):\n            tx = tx.with_company(tx.company_id)\n\n            confirmed_orders = tx.sale_order_ids.filtered(lambda so: so.state == \"sale\")\n            if confirmed_orders:\n                # Filter orders between those fully paid and those partially paid.\n                fully_paid_orders = confirmed_orders.filtered(lambda so: so._is_paid())\n\n                # Create a down payment invoice for partially paid orders\n                downpayment_invoices = (\n                    (confirmed_orders - fully_paid_orders)\n                    .with_context(downpayment_fixed_amount=tx.amount)\n                    ._generate_downpayment_invoices()\n                )\n\n                # For fully paid orders create a final invoice.\n                fully_paid_orders._force_lines_to_invoice_policy_order()\n                final_invoices = fully_paid_orders.with_context(\n                    raise_if_nothing_to_invoice=False\n                )._create_invoices(final=True)\n                invoices = downpayment_invoices + final_invoices\n\n                # Setup access token in advance to avoid serialization failure between\n                # edi postprocessing of invoice and displaying the sale order on the portal\n                for invoice in invoices:\n                    invoice._portal_ensure_token()\n                if invoices:\n                    tx.invoice_ids = [Command.set(invoices.ids)]"
+        }
+      ]
+    },
+    {
+      "id": "T191",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "modules/account_payment/payment.py",
+      "sha256": "1e919329021661d52a4e83a70592c7f2fd9365e3db15a98e0dffac10e127afd7",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/account_payment/payment.py",
+      "observation": "États soumis/approuvés/en traitement/réussis/échoués et contrôles de rapprochement.",
+      "limit": "FLOW conserve inconnu et reprise ; le paiement bancaire réel reste externe.",
+      "excerpts": [
+        {
+          "start": 736,
+          "end": 808,
+          "text": "    def draft(cls, payments):\n        pass\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('submitted')\n    @set_employee('submitted_by')\n    def submit(cls, payments):\n        cls._check_reconciled(payments)\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('approved')\n    @set_employee('approved_by')\n    def approve(cls, payments):\n        cls._check_reconciled(payments)\n\n    @classmethod\n    @ModelView.button_action('account_payment.act_process_payments')\n    def process_wizard(cls, payments):\n        pass\n\n    @classmethod\n    def process_method_with_group(cls):\n        return ['manual']\n\n    @classmethod\n    @Workflow.transition('processing')\n    def process(cls, payments, group=None):\n        if payments:\n            if group:\n                group = group()\n                cls.write(payments, {\n                        'group': group.id,\n                        })\n            # Set state before calling process method\n            # as it may set a different state directly\n            cls.proceed(payments)\n            if group:\n                getattr(group, f'process_{group.process_method}')()\n            else:\n                for payment in payments:\n                    getattr(payment, f'process_{payment.process_method}')()\n            return group\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('processing')\n    def proceed(cls, payments):\n        cls._check_reconciled(\n            [p for p in payments if p.state not in {'succeeded', 'failed'}])\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('succeeded')\n    @set_employee('succeeded_by')\n    def succeed(cls, payments):\n        pass\n\n    @classmethod\n    @ModelView.button\n    @Workflow.transition('failed')\n    @set_employee('failed_by')\n    def fail(cls, payments):\n        pass\n\n    @classmethod\n    def _check_reconciled(cls, payments):\n        pool = Pool()\n        Warning = pool.get('res.user.warning')\n        for payment in payments:\n            if payment.line and payment.line.reconciliation:\n                key = Warning.format('submit_reconciled', [payment])"
+        }
+      ]
+    },
+    {
+      "id": "T192",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "modules/account_invoice/invoice.py",
+      "sha256": "1ebb7d29c75751e78c3b5bcde53f88bce497bd276ae04e6ac41aba9943403d3b",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/account_invoice/invoice.py",
+      "observation": "Reste à payer calculé à partir de lignes non rapprochées et de leur devise.",
+      "limit": "Les principes de reliquat et devise sont comparables ; la comptabilité et les conversions ne sont pas réécrites.",
+      "excerpts": [
+        {
+          "start": 976,
+          "end": 1020,
+          "text": "    def get_amount_to_pay(cls, invoices, name):\n        pool = Pool()\n        Currency = pool.get('currency.currency')\n        Date = pool.get('ir.date')\n\n        amounts = defaultdict(Decimal)\n        for company, grouped_invoices in groupby(\n                invoices, key=lambda i: i.company):\n            with Transaction().set_context(company=company.id):\n                today = Date.today()\n            for invoice in grouped_invoices:\n                if invoice.state != 'posted':\n                    continue\n                amount = Decimal(0)\n                amount_currency = Decimal(0)\n                for line in invoice.lines_to_pay:\n                    if line.reconciliation:\n                        continue\n                    if (name == 'amount_to_pay_today'\n                            and (not line.maturity_date\n                                or line.maturity_date > today)):\n                        continue\n                    if (line.second_currency\n                            and line.second_currency == invoice.currency):\n                        amount_currency += line.amount_second_currency\n                    else:\n                        amount += line.debit - line.credit\n                for line in invoice.payment_lines:\n                    if line.reconciliation:\n                        continue\n                    if (line.second_currency\n                            and line.second_currency == invoice.currency):\n                        amount_currency += line.amount_second_currency\n                    else:\n                        amount += line.debit - line.credit\n                if amount:\n                    with Transaction().set_context(date=invoice.currency_date):\n                        amount_currency += Currency.compute(\n                            invoice.company.currency, amount, invoice.currency)\n                if invoice.type == 'in' and amount_currency:\n                    amount_currency *= -1\n                if name == 'amount_to_pay_today':\n                    amount_currency = max(0, amount_currency)\n                amounts[invoice.id] = amount_currency\n        return amounts"
+        }
+      ]
+    },
+    {
+      "id": "A191",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "axelor-account/src/main/java/com/axelor/apps/account/service/invoice/InvoiceServiceImpl.java",
+      "sha256": "e88a8531b15557612607f092a684fe1ce21d284ff0908a79fde77b918a9bc847",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-account/src/main/java/com/axelor/apps/account/service/invoice/InvoiceServiceImpl.java",
+      "observation": "Validation de facture, ventilation comptable distincte et création d'avoir rattaché.",
+      "limit": "FLOW sépare reconnaissance documentaire et paiement ; ni fiscalité ni comptabilité générale ajoutées.",
+      "excerpts": [
+        {
+          "start": 242,
+          "end": 283,
+          "text": "  public void validateAndVentilate(Invoice invoice) throws AxelorException {\n    validate(invoice);\n    if (invoice.getOperationSubTypeSelect() != InvoiceRepository.OPERATION_SUB_TYPE_ADVANCE) {\n      ventilate(invoice);\n    }\n  }\n\n  /**\n   * Validation d'une facture. (Transaction)\n   *\n   * @param invoice Une facture.\n   * @throws AxelorException\n   */\n  @Override\n  public void validate(Invoice invoice) throws AxelorException {\n    if (invoice.getStatusSelect() == null\n        || invoice.getStatusSelect() != InvoiceRepository.STATUS_DRAFT) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(AccountExceptionMessage.INVOICE_VALIDATE_WRONG_STATUS));\n    }\n    validateProcess(invoice);\n    if (invoice.getOperationSubTypeSelect() != InvoiceRepository.OPERATION_SUB_TYPE_ADVANCE\n        && invoice.getInvoiceAutomaticMailOnValidate()) {\n      sendMail(invoice, invoice.getInvoiceMessageTemplateOnValidate());\n    }\n    invoiceCategoryService.setInvoiceCategory(invoice);\n  }\n\n  @Transactional(rollbackOn = {Exception.class})\n  protected void validateProcess(Invoice invoice) throws AxelorException {\n    log.debug(\"Invoice validation\");\n\n    compute(invoice);\n\n    validateFactory.getValidator(invoice).process();\n\n    // if the invoice is an advance payment invoice, we also \"ventilate\" it\n    // without creating the move\n    if (invoice.getOperationSubTypeSelect() == InvoiceRepository.OPERATION_SUB_TYPE_ADVANCE) {\n      ventilate(invoice);\n    }"
+        },
+        {
+          "start": 546,
+          "end": 563,
+          "text": "  public Invoice createRefund(Invoice invoice) throws AxelorException {\n\n    boolean isValidatedAdvancePayment =\n        invoice.getStatusSelect() == InvoiceRepository.STATUS_VALIDATED\n            && invoice.getOperationSubTypeSelect() == InvoiceRepository.OPERATION_SUB_TYPE_ADVANCE;\n    if (invoice.getStatusSelect() != InvoiceRepository.STATUS_VENTILATED\n        && !isValidatedAdvancePayment) {\n      throw new AxelorException(\n          invoice,\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(AccountExceptionMessage.INVOICE_CREATE_REFUND_WRONG_STATUS));\n    }\n\n    Invoice refund = new RefundInvoice(invoice).generate();\n    invoice.addRefundInvoiceListItem(refund);\n    invoiceRepo.save(invoice);\n\n    return refund;"
+        }
+      ]
+    },
+    {
+      "id": "A192",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "axelor-account/src/main/java/com/axelor/apps/account/service/payment/paymentsession/PaymentSessionServiceImpl.java",
+      "sha256": "0c8d2a94126341b8e43b40dd71e5f6f10e749fd55c70e560dd83a6a28216c02c",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-account/src/main/java/com/axelor/apps/account/service/payment/paymentsession/PaymentSessionServiceImpl.java",
+      "observation": "Paiements en attente et blocages conditionnels contrôlés avant traitement.",
+      "limit": "Analogies de garde et attente ; règlements fournisseurs et trésorerie générale hors périmètre Payment FLOW.",
+      "excerpts": [
+        {
+          "start": 338,
+          "end": 392,
+          "text": "  public boolean isNotAwaitingPayment(InvoiceTerm invoiceTerm) {\n    if (invoiceTerm == null) {\n      return false;\n    } else if (invoiceTerm.getInvoice() != null) {\n      Invoice invoice = invoiceTerm.getInvoice();\n\n      if (CollectionUtils.isNotEmpty(invoice.getInvoicePaymentList())) {\n        return invoice.getInvoicePaymentList().stream()\n            .filter(it -> it.getStatusSelect() == InvoicePaymentRepository.STATUS_PENDING)\n            .map(InvoicePayment::getInvoiceTermPaymentList)\n            .flatMap(Collection::stream)\n            .map(InvoiceTermPayment::getInvoiceTerm)\n            .noneMatch(it -> it.getId().equals(invoiceTerm.getId()));\n      }\n    }\n\n    return true;\n  }\n\n  protected boolean isBlocking(InvoiceTerm invoiceTerm, PaymentSession paymentSession) {\n    if (paymentSession.getPaymentMode().getTypeSelect() != PaymentModeRepository.TYPE_DD) {\n      return false;\n    }\n\n    if (invoiceTerm.getInvoice() != null) {\n      Invoice invoice = invoiceTerm.getInvoice();\n\n      if (invoice.getDebitBlockingOk()\n          && !paymentSession.getPaymentDate().isAfter(invoice.getDebitBlockingToDate())) {\n        return true;\n      }\n\n      if (this.isBlocking(invoice.getPartner(), paymentSession)) {\n        return true;\n      }\n\n      if (this.isLcrBlocking(invoice, invoiceTerm.getDueDate())\n          && paymentSession.getPaymentMode().getTypeSelect()\n              != PaymentModeRepository.TYPE_EXCHANGES) {\n        return true;\n      }\n    }\n\n    if (invoiceTerm.getMoveLine() != null) {\n      MoveLine moveLine = invoiceTerm.getMoveLine();\n\n      if (moveLine.getPartner() != null && this.isBlocking(moveLine.getPartner(), paymentSession)) {\n        return true;\n      } else if (moveLine.getMove().getPartner() != null\n          && this.isBlocking(moveLine.getMove().getPartner(), paymentSession)) {\n        return true;\n      }\n    }\n\n    return false;"
+        }
+      ]
+    }
+  ],
+  "method": "Source code inspected at frozen revisions; these excerpts do not prove whole-product coverage or observed human effort."
+}

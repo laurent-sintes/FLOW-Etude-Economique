@@ -12,9 +12,10 @@ import yaml
 from jsonschema import Draft202012Validator
 from validate_stacks import ROOT, read
 from model_context import scoped_model
+from retained_core import value_units, dependencies as retained_dependencies
 from model_inputs import annual_scenario
 from content_model import resolve_text_tree
-from business_calibration import apply as apply_business_calibration, validate as validate_business_calibration, PATH as BUSINESS_PATH
+from current_cost_inputs import apply as apply_business_calibration, validate as validate_business_calibration, PATH as BUSINESS_PATH, dependencies as current_dependencies
 
 SLUGS = ('java-spring', 'dotnet', 'rust', 'microsoft', 'sap')
 SCENARIOS = ('bas', 'central', 'haut')
@@ -186,6 +187,12 @@ def calculate_option(slug, doc, cal, sensitivity='central', service_years=15):
         backend+=b;frontend+=front;core_cost+=cost
         feature_results.append(dict(feature=f['feature'],traitement=f['traitement'],jh_backend=round(b,2),jh_frontend=round(front,2),cout_eur_ht=round(cost,2),jh_diagnostiques_avant_ia=round(sum(gross.values())+gross_front,2)))
     build_pilot=core_cost*cal['pilotage']['build_pct']/100 if make else 0
+    core_units = value_units(slug, doc['core'], tools) if make else []
+    retained_jh = sum(u['total_jh'] for u in core_units)
+    # Family totals already include QA, architecture and local management.
+    # Legacy coordination remains restricted to its original legacy cost base.
+    core_cost += sum(u['cost_eur_ht'] for u in core_units)
+    base_jh += retained_jh
     build=core_cost+build_pilot if make else 0
     integration_jh=integration_labour=0
     integration_rows=[]
@@ -257,10 +264,11 @@ def calculate_option(slug, doc, cal, sensitivity='central', service_years=15):
         maintenance_premiere_annee=annual[0]['total_eur_ht'],maintenance_moyenne_annuelle=round(maint15/diagnostic_years,2)),
       jh=dict(affectation_fonctionnelle='build_core' if make else 'complements_integration',
               core_avant_ia=round(base_jh,2),core_backend=round(backend,2),core_frontend=round(frontend,2),
+              core_project_roles_jh=retained_jh,
               integration_estimee_hors_rfi=round(integration_jh+(backend+frontend+automation if not make else 0),2),maintenance_annuelle_estimee_hors_forfaits=round(maintenance_jh,2)),
       detail_build=dict(prestations=round(core_cost,2) if make else 0,pilotage=round(build_pilot,2)),
       detail_integration=dict(base_rfi=source_integration,prestations_estimees=round(integration_labour,2),complements_flow=round(gap_cost,2),pilotage=round(pilot_integration,2),preparation=preparation,support_microsoft_premiere_annee=ms_support,reserve_ecart_sap=discrepancy),
-      features=feature_results,integration_activites=integration_rows,maintenance_activites=maintenance_rows,maintenance_annuelle=annual)
+      core_units=core_units,features=feature_results,integration_activites=integration_rows,maintenance_activites=maintenance_rows,maintenance_annuelle=annual)
     # Published subtotals are the accounting basis; do not round their raw sum separately.
     result['synthese_eur_ht']['build_core']=round(sum(result['detail_build'].values()),2)
     result['synthese_eur_ht']['integration']=round(sum(result['detail_integration'].values()),2)
@@ -283,9 +291,8 @@ def calculate(projection_only=False):
     for slug,doc in docs.items():
         files.add(f'source/chiffrage/chiffrage-{slug}.yaml')
         files.update(d['fichier'] for d in doc['dependances'].values())
-    files.update([BUSINESS_PATH,'source/schema-recalibration-metier.yaml','tools/business_calibration.py',
-                  'source/qualification-buy.yaml','source/schema-qualification-buy.yaml','tools/buy_qualification.py'])
-    files.update(business['dependances'])
+    files.update(current_dependencies())
+    files.update(retained_dependencies())
     files.update(('tools/model_inputs.py','tools/validate_cycle.py','source/integration.yaml','source/maintenance.yaml',
                   'source/schema-activites-cycle.yaml','source/schema-valorisation-cycle.yaml','sources/integration-maintenance-2026-10-22.yaml'))
     results=[]

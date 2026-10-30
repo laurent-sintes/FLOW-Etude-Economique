@@ -12,9 +12,9 @@ SCHEMA = {'type': 'object', 'additionalProperties': False, 'required': ['version
                            'title', 'producer', 'summary', 'text', 'active_source'],
               'properties': {'method_status': {'const': 'defined'},
                              'qualification_status': {'const': 'partial'},
-                             'calibration_status': {'const': 'legacy_unrecalibrated'},
+                             'calibration_status': {'enum': ['legacy_unrecalibrated', 'pending_reestimation', 'partially_estimated', 'fully_estimated', 'not_applicable']},
                              'title': TEXT, 'producer': TEXT, 'summary': TEXT, 'text': TEXT,
-                             'active_source': {'const': 'source/recalibration-metier.yaml'}}}}}
+                             'active_source': {'enum': ['source/recalibration-metier.yaml', 'source/estimations-core-retenues.yaml']}}}}}
 
 
 def load_status(ref='core'):

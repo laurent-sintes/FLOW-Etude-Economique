@@ -58,11 +58,37 @@ class DeliveryReadinessTests(unittest.TestCase):
         self.assertEqual(len(scope['rows']), len(self.complexity['rows']))
         for row, original in zip(scope['rows'], self.complexity['rows']):
             self.assertEqual(row['capability_id'], original['capacite_id'])
-            self.assertEqual(row['complexity'], original['complexite'])
-            self.assertEqual(row['boundary'], original['frontiere'])
+            self.assertNotIn('complexity', row)
+            self.assertEqual(row['definition'], original['capacite']['definition'])
+            self.assertEqual(row['boundary'], original['capacite']['perimetre'])
             self.assertEqual(row['name'], original['capacite']['nom'])
             self.assertEqual(row['path'], [node['nom'] for node in original['hierarchie']])
             self.assertEqual(parse_qs(urlsplit(row['href']).fragment.split('?',1)[1])['node'], [row['capability_id']])
+
+    def test_scope_hierarchy_partitions_capabilities_by_native_parentage(self):
+        _, dossier = self.compile()
+        scope = dossier['scope']
+        originals = {row['capacite_id']: row for row in self.complexity['rows']}
+        grouped_ids = []
+        for domain in scope['hierarchy']:
+            for subdomain in domain['subdomains']:
+                for area in subdomain['areas']:
+                    for capability_id in area['capability_ids']:
+                        grouped_ids.append(capability_id)
+                        original = originals[capability_id]
+                        self.assertEqual([domain['id'], subdomain['id'], area['id']],
+                                         [node['id'] for node in original['hierarchie']])
+                        self.assertEqual([domain['label'], subdomain['label'], area['label']],
+                                         [node['nom'] for node in original['hierarchie']])
+        self.assertEqual(len(grouped_ids), len(set(grouped_ids)))
+        self.assertEqual(set(grouped_ids), set(originals))
+
+    def test_scope_scale_uses_the_canonical_ordinal_definitions_without_regrading(self):
+        _, dossier = self.compile()
+        scope = dossier['scope']
+        self.assertNotIn('scale', scope)
+        self.assertNotIn('axes', scope)
+        self.assertTrue(all('complexity' not in row for row in scope['rows']))
 
     def test_missing_partner_proofs_are_never_presented_as_available(self):
         _, dossier = self.compile()
@@ -113,8 +139,8 @@ class DeliveryReadinessTests(unittest.TestCase):
         before = deepcopy((self.method, self.dossier, self.complexity, self.snapshot, self.decision))
         result = self.compile()
         self.assertEqual(before, (self.method, self.dossier, self.complexity, self.snapshot, self.decision))
-        result[1]['scope']['rows'][0]['complexity']['algorithmique']['niveau'] = 99
-        self.assertNotEqual(self.compile()[1]['scope']['rows'][0]['complexity']['algorithmique']['niveau'], 99)
+        result[1]['scope']['rows'][0]['name'] = 'mutated'
+        self.assertNotEqual(self.compile()[1]['scope']['rows'][0]['name'], 'mutated')
 
 
 if __name__ == '__main__':

@@ -41,6 +41,11 @@ export function ModelPage(){
    <div className="model-reading-relations">{E.model_workload.relations.map((relation:Data)=><Text key={relation.operation}>{relation.text}</Text>)}</div>
    <Text className="model-reading-callout">{R.workload_note}</Text>
    {links(E.model_workload.links)}
+   <section className="model-estimation-rules"><h3>{E.estimation_model.title}</h3><Text>{E.estimation_model.purpose}</Text>
+    {E.estimation_model.rules.map((rule:Data)=><article key={rule.id}><h4>{rule.title}</h4><p className="core-method-formula">{rule.expression} · {rule.unit}</p>
+     <dl>{Object.entries(rule.variables).map(([key,value])=><div key={key}><dt>{key}</dt><dd>{String(value)}</dd></div>)}</dl>{rule.note&&<Text>{rule.note}</Text>}</article>)}
+    <ul>{E.estimation_model.invariants.map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ul>
+   </section>
   </>,
   costs:<>
    <Text>{R.costs_intro}</Text>
@@ -57,6 +62,7 @@ export function ModelPage(){
   </>
  };
  return <div className="essential-page essential-model model-reading">
+  <section className="model-download"><a className="text-button" href={import.meta.env.BASE_URL+'exports/flow-modele-metier.yaml'} download="flow-modele-metier.yaml">{data.ui.model_download.label}</a><Text>{data.ui.model_download.description}</Text></section>
   <nav className="model-reading-navigation" aria-label={R.toc_label}><h2>{R.toc_label}</h2><ol>{R.chapters.map((chapter:Data)=><li key={chapter.id}><button type="button" aria-controls={sectionId(chapter.id)} onClick={()=>goToSection(chapter.id)}>{chapter.title}</button></li>)}</ol></nav>
   {R.chapters.map((chapter:Data,index:number)=><section className="model-reading-chapter" key={chapter.id} data-chapter={chapter.id} aria-labelledby={sectionId(chapter.id)}><h2 id={sectionId(chapter.id)} tabIndex={-1}><span aria-hidden="true">{index+1}</span>{chapter.title}</h2><Text className="model-reading-lead">{chapter.lead}</Text>{content[chapter.id]}</section>)}
   <a className="text-button essential-structure-next" href={R.next_href}>{R.next_label} <span aria-hidden="true">→</span></a>

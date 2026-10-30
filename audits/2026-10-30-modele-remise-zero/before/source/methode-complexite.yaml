@@ -1,0 +1,208 @@
+version: 1
+date: '2026-10-24'
+titre: Grille de complexité fonctionnelle SCM
+statut: Proposition d’ingénierie issue de la reprise de l’audit ; revue métier à réaliser.
+objet: Décrire le besoin commun aux cinq options avant de choisir les composants et de chiffrer le travail restant.
+grain: Un bloc de lecture par capacité, décomposé en fonctions observables et variantes source. Ce grain est révisable
+  ; ce n’est ni une tâche de développement ni une unité de facturation.
+axes:
+  algorithmique:
+    titre: Mécanismes et règles
+    niveaux:
+      1: Contrôle ou association déterministe bornée, sans interaction entre décisions.
+      2: Plusieurs règles, états ou versions ; calcul et rapprochement déterministes circonscrits.
+      3: Interactions temporelles, décisions ou engagements couplés ; invariants métier à préserver.
+      4: Recherche de solutions sous contraintes couplées ou exploration de combinaisons explicitement nécessaire.
+      5: Couplage global ou dynamique exceptionnel, à démontrer par un mandat et des cas représentatifs avant attribution.
+  tests_ajustements:
+    titre: Validation et ajustements
+    niveaux:
+      1: Cas nominaux et rejets locaux, résultats directement vérifiables.
+      2: Variantes et transitions bornées, vérifiables sur exemples représentatifs.
+      3: Versions, résultats partiels ou interactions ; jeux de non-régression et rapprochements nécessaires.
+      4: Concurrence, reprises, conservation ou qualité de décision ; oracles et jeux de calibration spécifiques.
+      5: Validation globale exceptionnelle ou comportement non déterministe à très grande échelle, à démontrer.
+  etendue_fonctionnelle:
+    titre: Richesse métier et interfaces
+    niveaux:
+      1: Un objet et une décision bornée avec consultation simple.
+      2: Un cycle circonscrit et quelques variantes, contrats et vues métier.
+      3: Plusieurs objets ou suites métier, variantes et vues de diagnostic ou d’arbitrage.
+      4: Plusieurs familles autonomes de processus et interfaces à décomposer avant estimation.
+      5: Périmètre trop agrégé pour une estimation fiable ; décomposition requise.
+lecture:
+  unite: Niveau sur 5
+  agregation: Aucune somme ni moyenne. Les trois axes sont ordinaux et se lisent séparément ; ils ne mesurent pas
+    un ratio d’effort.
+  reference: Le contrôle d’éligibilité d’un prestataire sert d’exemple borné. La validation des changements de restriction
+    le place à 2 sur l’axe de validation ; aucune obligation artificielle de trois notes identiques.
+  historique: Les points CSF à référence 100 appartiennent à l’évaluation précédente. Ils ne sont ni convertis ni
+    distribués aux nouvelles capacités.
+  couts: La calibration séparée estime des paquets de travaux résiduels et des plages de JH après revue des composants
+    ; aucune conversion niveau → JH ou couverture.
+  hypotheses: Les niveaux décrivent les fonctions et frontières retenues, sans volumes ou délais de production inventés.
+    Ils restent proposés, même lorsque la capacité métier est documentée.
+frontieres:
+  core: Contrats et mécanismes génériques, traitements métier et interfaces nécessaires à ces fonctions.
+  integration: Paramètres, règles propres aux marques, connecteurs, données reprises, habilitations locales, déploiement
+    et recette de bout en bout chez Beaumanoir.
+  run_mco: Exploitation, corrections et évolutions ultérieures ; les besoins annuels ne sont pas ajoutés à la complexité
+    initiale.
+  hors_scope: Les domaines maîtres, gestes physiques et systèmes exécutants conservent leurs responsabilités. Les
+    rapprochements marché ne valent ni achat inclus ni couverture démontrée.
+  buy: Le standard du Core est fourni par le produit acheté. Toute exception nécessite un écart fonctionnel identifié,
+    distinct du paramétrage et des parcours client. Un module non acheté appelle un choix de produit avant un développement
+    spécifique.
+  comportements: Un comportement générique précise aussi le Core. Les scénarios et leurs parcours mobilisent des
+    capacités ; leur déclinaison Beaumanoir détermine les travaux d’intégration, sans coût par scénario.
+qualifications_communes:
+- Définir les volumes représentatifs, délais de réponse, fraîcheur et concurrence attendus avant de qualifier les
+  garanties de production.
+- Valider les parcours nominaux, variantes et frontières avec les responsables métier et les exécutants.
+- Vérifier les contrats des mécanismes réutilisés ; l’existence d’un lien de réutilisation ne prouve pas une économie.
+- Distinguer une capacité du backlog, sa traduction fonctionnelle proposée et une réalisation installée.
+ordre_calibration:
+- Fixer les scénarios et résultats acceptables, y compris leurs variantes source.
+- Vérifier composant, édition, configuration et licence de chacune des cinq stacks sur le même scénario.
+- Décomposer configuration générique, extension, code, assemblage, frontend et qualification restant à réaliser.
+- Estimer une plage de JH avec hypothèses et contre-exemples ; documenter les mécanismes partagés une seule fois.
+- Appliquer TJM et gains IA par nature de travail une fois, puis recalculer les budgets et expliquer les différences.
+mecanismes_partages:
+- id: references
+  titre: Réception et qualification des références
+  capacite_responsable: master-data-ingestion
+  usages:
+  - cap-partner-agreement-reference-stewardship
+  - cap-merchandise-reference-stewardship
+  - cap-packaging-reference-stewardship
+  - cap-internal-supplies-reference-stewardship
+  - cap-service-reference-stewardship
+  contrat: Recevoir et qualifier une version ; les vues propres aux cinq familles conservent leurs contrôles et
+    résultats distincts.
+- id: politiques
+  titre: Version et applicabilité des politiques Supply
+  capacite_responsable: demand-fulfilment-policy-management
+  usages:
+  - D03.m
+  - D03.o
+  - D05.a
+  - D05.d
+  - D05.h
+  - D05.e
+  - D05.c
+  - D03.i
+  - delivery-release-decision
+  contrat: Résoudre la politique applicable ; chaque décision garde son calcul et ses garanties propres.
+- id: positions_stock
+  titre: Projections de positions de stock
+  capacite_responsable: D01.c
+  usages:
+  - planning-data-provision
+  - D03.i
+  - D05.f
+  - D05.e
+  - D05.c
+  contrat: Fournir une position cohérente et datée ; le consommateur ne reconstruit pas le registre mais garde sa
+    logique de décision.
+- id: orchestration
+  titre: État durable des parcours
+  capacite_responsable: order-workflow-orchestration
+  usages:
+  - D06.d
+  - D06.f
+  - human-task-management
+  - process-intervention
+  - process-exception-management
+  - order-workflow-sentry
+  contrat: Conserver attentes et résultats puis reprendre ; les règles métier ne sont pas transférées implicitement
+    au moteur.
+- id: promesse
+  titre: Faisabilité de promesse
+  capacite_responsable: D03.j
+  usages:
+  - D03.k
+  - D05.e
+  contrat: Réutiliser la possibilité faisable ; valorisation économique et décision de réassort restent propres
+    aux consommateurs.
+- id: simulation
+  titre: Rejeu des calculateurs métier
+  capacite_responsable: BHV006
+  usages:
+  - D05.f
+  - D03.o
+  - D05.a
+  - D05.d
+  - D05.h
+  - planning-scenario-reconciliation
+  contrat: Le dispositif de scénario appelle les calculateurs existants ; il ne finance pas une seconde réalisation
+    de leurs algorithmes.
+familles_reemploi_a_qualifier:
+- id: cycles_commandes
+  titre: Cycle commun des commandes
+  capacites:
+  - D04.i
+  - D04.j
+  - D04.k
+  - D04.l
+  - D04.m
+  - D04.r
+  - D04.t
+  - D04.n
+  decision: Étudier un noyau de cycle et de quantités partagé, puis chiffrer séparément les variantes de chaque
+    commande. Aucune quote-part des anciens forfaits CSF-011 à 013.
+- id: cycles_prestations
+  titre: Cycle commun des demandes de prestation
+  capacites:
+  - service-order-picking
+  - service-order-packing
+  - service-order-cross-docking
+  - service-order-labeling
+  - service-order-kitting
+  - service-order-garment-finishing
+  - service-order-cleaning
+  - service-order-repair-alteration
+  - service-order-personalization
+  - service-order-inspection
+  - service-order-receiving
+  - service-order-scrapping
+  - service-order-transport
+  - service-order-transport-booking
+  - service-order-customs-clearance
+  decision: Qualifier un cycle partagé, puis les exigences propres aux biens, au transport et à la douane. Conserver
+    leurs trois Business Areas ; ne pas multiplier quinze fois un moteur de cycle.
+- id: registres
+  titre: Services techniques des registres
+  capacites:
+  - D01.g
+  - inventory-ownership-ledger
+  - process-ledger
+  decision: Évaluer la persistance et la relecture communes ; conserver séparément les invariants de stock, de propriété
+    et de dossier. Aucun ledger universel présumé.
+qualifications_ciblees:
+  D03.o: Définir les objectifs et conflits d’affectation ; comparer règles, heuristique et solveur sur les mêmes
+    cas avant de choisir.
+  D05.a: Définir le service cible, les données et le niveau de couplage entre magasins et centres de distribution
+    ; le multi-échelon est une variante source à qualifier, pas un optimum global acquis.
+  D05.d: Préciser les bénéficiaires, droits concurrents et règles d’arbitrage ; comparer l’effet des protections
+    sur le service.
+  D05.h: Fixer les critères de risque et d’immobilisation qui justifient un ajustement de la règle de réservation.
+  D03.j: Fixer la profondeur des dépendances matière/capacité et les apports externes ; démontrer séparément tout
+    besoin d’ordonnancement détaillé.
+  transport-plan-decision: Définir nombre de chargements, arrêts, fenêtres et qualité de solution attendue ; évaluer
+    construction de chargement et routage séparément.
+  workflow-definition-management: Déterminer qui compose les parcours et avec quelles libertés ; ne pas financer
+    un studio libre à partir d’un besoin de paramétrage borné.
+  order-workflow-planning: Qualifier les changements autorisés pendant un parcours et ceux nécessitant une nouvelle
+    version.
+  order-workflow-orchestration: Définir les reprises et garanties d’exécution ; comparer les moteurs sur des dossiers
+    Supply représentatifs.
+  process-mining: Définir les variantes et indicateurs à détecter ; justifier séparément découverte automatique
+    et alignement optimal éventuels.
+  service-order-billing: Valider les faits déclencheurs, pièces et responsabilités de facturation de chaque chaîne
+    intercompany.
+  accounting-data-provision: Confirmer le contrat des faits des registres de stock et propriété avec Finance, distinct
+    des demandes de facturation et de paiement.
+statuts:
+  propose: Proposition à revoir avec le métier
+  non_recalibre: Couverture et JH non recalibrés sur cette grille
+  historique: Évaluation précédente, conservée pour traçabilité

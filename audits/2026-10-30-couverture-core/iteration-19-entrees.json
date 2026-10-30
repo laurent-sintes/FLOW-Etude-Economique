@@ -1,0 +1,297 @@
+{
+  "iteration": 19,
+  "title": "Facturation et encaissements/remboursements",
+  "capabilities": [
+    74,
+    75
+  ],
+  "strong_reserves": [
+    74,
+    75
+  ],
+  "repositories": {
+    "O": [
+      "tmp/odoo20-audit",
+      "odoo/odoo",
+      "299075f17026b830a9755f3c43f3e83143995946"
+    ],
+    "T": [
+      "tmp/tryton-code-audit-2026-10-28",
+      "tryton/tryton",
+      "e011222dc305c431677e586706fd241dffe02236"
+    ],
+    "A": [
+      "tmp/oss-audit-axelor",
+      "axelor/axelor-open-suite",
+      "e7cbea53bae88d2540f59a70b09bf0f326f1022e"
+    ]
+  },
+  "proofs": [
+    [
+      "O191",
+      "O",
+      "addons/account_payment/models/payment_transaction.py",
+      [
+        [
+          98,
+          140
+        ],
+        [
+          142,
+          178
+        ]
+      ],
+      "Post-traitement sur transaction confirmée, paiement unique lié et distinction transactions partielles.",
+      "Ne garantit pas l'unicité de l'acte distant ; FLOW ne reprend pas le moteur comptable Odoo."
+    ],
+    [
+      "O192",
+      "O",
+      "addons/sale/models/payment_transaction.py",
+      [
+        [
+          203,
+          231
+        ]
+      ],
+      "Facturation finale ou d'acompte selon paiements et commandes confirmées.",
+      "Analogie de filiation et éligibilité, pas autorité de facturation universelle."
+    ],
+    [
+      "T191",
+      "T",
+      "modules/account_payment/payment.py",
+      [
+        [
+          736,
+          808
+        ]
+      ],
+      "États soumis/approuvés/en traitement/réussis/échoués et contrôles de rapprochement.",
+      "FLOW conserve inconnu et reprise ; le paiement bancaire réel reste externe."
+    ],
+    [
+      "T192",
+      "T",
+      "modules/account_invoice/invoice.py",
+      [
+        [
+          976,
+          1020
+        ]
+      ],
+      "Reste à payer calculé à partir de lignes non rapprochées et de leur devise.",
+      "Les principes de reliquat et devise sont comparables ; la comptabilité et les conversions ne sont pas réécrites."
+    ],
+    [
+      "A191",
+      "A",
+      "axelor-account/src/main/java/com/axelor/apps/account/service/invoice/InvoiceServiceImpl.java",
+      [
+        [
+          242,
+          283
+        ],
+        [
+          546,
+          563
+        ]
+      ],
+      "Validation de facture, ventilation comptable distincte et création d'avoir rattaché.",
+      "FLOW sépare reconnaissance documentaire et paiement ; ni fiscalité ni comptabilité générale ajoutées."
+    ],
+    [
+      "A192",
+      "A",
+      "axelor-account/src/main/java/com/axelor/apps/account/service/payment/paymentsession/PaymentSessionServiceImpl.java",
+      [
+        [
+          338,
+          392
+        ]
+      ],
+      "Paiements en attente et blocages conditionnels contrôlés avant traitement.",
+      "Analogies de garde et attente ; règlements fournisseurs et trésorerie générale hors périmètre Payment FLOW."
+    ]
+  ],
+  "contract": "Demandes financières autorisées liées aux flux, éléments facturables, références de facture/avoir et paiements clients, résultats partiels et reste monétaire. Calculs décimaux et devise explicites. Fiscalité, comptabilité générale, paiement bancaire, recouvrement et paiements fournisseurs restent hors Core.",
+  "profile": "Hypothèses :1000 éléments par demande de facture, facturation partielle/avoir/acompte et intercompany par liens distincts ; une devise par demande, taux autorisés reçus si conversion requise ; autorisation/capture/annulation/remboursement et résultat inconnu. 10 demandes/s cible, non mesurée. Aucun secret carte ni certificat fiscal stocké par le Core.",
+  "reduced": "Les trois ERP montrent la nécessité de séparer transaction, paiement, document et comptabilisation. Le financement des demandes et du rapprochement est distingué des systèmes financiers spécialisés. Un avoir ou une autorisation ne vaut pas remboursement.",
+  "remaining": "Autorité sur l'éligibilité/montant, possibilités d'interrogation et d'idempotence des prestataires, états de règlement réellement reçus, intercompany et corrections. Sans réponse certaine, le Core doit exposer inconnu et permettre rapprochement ; pas d'exactement-une-fois distant présumé.",
+  "next": "Finir avec Process Mining et Reporting, puis vérifier la couverture fonctionnelle, les doublons de financement et les garanties transverses.",
+  "packages": [
+    {
+      "id": "E191",
+      "cap": null,
+      "label": "Contrats financiers et qualification des raccords",
+      "v": [
+        10,
+        16,
+        36,
+        12,
+        2,
+        26,
+        8,
+        12,
+        6,
+        4
+      ],
+      "f": [
+        0.6,
+        2.2
+      ],
+      "work": "Contrats montant/devise/autorité/référence externe, sécurisation et doubles de facturier/PSP ; liens vers Orders, prestations et faits, reprise sur résultat inconnu.",
+      "java": [
+        [
+          "Contrats et publication des demandes financières",
+          14
+        ],
+        [
+          "Rapprochement technique et consultation des inconnus",
+          10
+        ],
+        [
+          "Tests développeur doublons et réponses perdues",
+          12
+        ]
+      ],
+      "ui": [
+        [
+          "État inconnu et navigation justificatifs",
+          12
+        ]
+      ],
+      "evidence": [
+        "O191",
+        "T191",
+        "A192"
+      ],
+      "reuse": [
+        "11:S111/S112 exécution durable",
+        "13:S132 faits et liens Orders",
+        "18:S181/E181 engagements et pièces",
+        "12:S123 valeurs décimales"
+      ],
+      "risk": "Les connecteurs réels et agréments du Groupe sont externes ; les protocoles génériques et leurs doubles sont inclus."
+    },
+    {
+      "id": "B074",
+      "cap": 74,
+      "label": "Facturation",
+      "v": [
+        28,
+        20,
+        90,
+        38,
+        8,
+        38,
+        8,
+        12,
+        12,
+        8
+      ],
+      "f": [
+        0.6,
+        2.3
+      ],
+      "work": "Identifier les éléments facturables selon autorité reçue, quantités et montants connus ; demander facture/avoir, reconnaître document ou rejet, corriger par filiation, préserver intercompany et états incomplets.",
+      "java": [
+        [
+          "Éligibilité et assiette facturable",
+          26
+        ],
+        [
+          "Demande, document, avoir et corrections",
+          34
+        ],
+        [
+          "Tests développeur partiels, montants et filiation",
+          30
+        ]
+      ],
+      "ui": [
+        [
+          "Éléments éligibles et demandes",
+          20
+        ],
+        [
+          "Rejets, avoirs et justificatifs",
+          18
+        ]
+      ],
+      "evidence": [
+        "O192",
+        "T192",
+        "A191"
+      ],
+      "reuse": [
+        "19:E191 contrats financiers",
+        "18:E181 pièces",
+        "17:B057 faits reconnus",
+        "16:B008 règles d'éligibilité reçues"
+      ],
+      "risk": "Règles fiscales externalisées, mais sémantique de reconnaissance et intercompany à convenir ; pas de facturier réglementaire complet.",
+      "analogy": "Correspondances partielles directes sur documents, filiation et conditions. Les ERP font davantage de comptabilité que le contrat FLOW retenu."
+    },
+    {
+      "id": "B075",
+      "cap": 75,
+      "label": "Paiement client et remboursement",
+      "v": [
+        30,
+        24,
+        110,
+        38,
+        8,
+        48,
+        12,
+        20,
+        14,
+        8
+      ],
+      "f": [
+        0.55,
+        2.5
+      ],
+      "work": "Demander l'opération autorisée, distinguer autorisation/capture/résultat reconnu, traiter partiels/refus, contrôler remboursement et reste ; corréler notifications contradictoires, consulter ou traiter manuellement l'inconnu sans réémission aveugle.",
+      "java": [
+        [
+          "État et mandat des opérations monétaires",
+          30
+        ],
+        [
+          "Corrélation, partiels, reste et remboursement",
+          40
+        ],
+        [
+          "Tests développeur concurrence, déduplication et reprise",
+          40
+        ]
+      ],
+      "ui": [
+        [
+          "Demandes, résultats et reliquats",
+          22
+        ],
+        [
+          "Exceptions et rapprochement autorisé",
+          16
+        ]
+      ],
+      "evidence": [
+        "O191",
+        "T191",
+        "T192",
+        "A192"
+      ],
+      "reuse": [
+        "19:E191 contrats et sécurité",
+        "11:BC082 interventions",
+        "13:version et autorité Orders",
+        "18:S181 mécanismes d'engagement, états monétaires distincts"
+      ],
+      "risk": "Notification distante et règlement ne sont pas la même preuve ; opération ambiguë et plafond de remboursement restent des points durs.",
+      "analogy": "Comparaison directe partielle sur états, rattachements et restes. Aucune mesure de charge ni preuve universelle des garanties PSP."
+    }
+  ]
+}

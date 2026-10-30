@@ -1,0 +1,363 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Intégration et Maintenance — catalogue commun Make/Buy
+type: object
+additionalProperties: false
+properties:
+  version_schema:
+    const: 1
+  id:
+    enum:
+    - integration
+    - maintenance
+  nom: &id001
+    type: string
+    minLength: 1
+  produit:
+    const: Flow Core System
+  periode:
+    enum:
+    - jusqu_a_v1
+    - annuelle
+  date_evaluation:
+    type: string
+    pattern: ^\d{4}-\d{2}-\d{2}$
+  dependances:
+    type: object
+    additionalProperties: false
+    properties:
+      schema:
+        const: source/schema-activites-cycle.yaml
+      preuves:
+        const: sources/integration-maintenance-2026-10-22.yaml
+      stacks:
+        type: array
+        items: *id001
+        minItems: 5
+      scenario:
+        const: source/maintenance.yaml#scenario_annuel
+      metier:
+        type: string
+    required:
+    - schema
+    - preuves
+    - stacks
+    - scenario
+    - metier
+  roles:
+    type: object
+    additionalProperties: false
+    properties:
+      developpement:
+        type: object
+        additionalProperties: false
+        properties:
+          nom: *id001
+          activite_tjm:
+            const: developpement
+          perimetre: *id001
+        required:
+        - nom
+        - activite_tjm
+        - perimetre
+      integration:
+        type: object
+        additionalProperties: false
+        properties:
+          nom: *id001
+          activite_tjm:
+            const: integration
+          perimetre: *id001
+        required:
+        - nom
+        - activite_tjm
+        - perimetre
+      support_n3:
+        type: object
+        additionalProperties: false
+        properties:
+          nom: *id001
+          activite_tjm:
+            const: support_n3
+          perimetre: *id001
+        required:
+        - nom
+        - activite_tjm
+        - perimetre
+      support_n1:
+        type: object
+        additionalProperties: false
+        properties:
+          nom: *id001
+          activite_tjm:
+            const: support_n1
+          perimetre: *id001
+        required:
+        - nom
+        - activite_tjm
+        - perimetre
+    required:
+    - developpement
+    - integration
+    - support_n3
+    - support_n1
+  activites:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          pattern: ^(INT|MAI)-\d{3}$
+        nom: *id001
+        nature:
+          enum:
+          - travail
+          - achat
+        description: *id001
+        livrable: *id001
+        frontiere: *id001
+        roles_pct:
+          anyOf:
+          - type: object
+            additionalProperties: false
+            properties:
+              developpement: &id002
+                type: number
+                minimum: 0
+                maximum: 100
+              integration: *id002
+              support_n3: *id002
+              support_n1: *id002
+            required:
+            - developpement
+            - integration
+            - support_n3
+            - support_n1
+          - type: 'null'
+        travaux_par_role:
+          anyOf:
+          - type: object
+            additionalProperties: false
+            properties:
+              developpement: *id001
+              integration: *id001
+              support_n3: *id001
+              support_n1: *id001
+            required:
+            - developpement
+            - integration
+            - support_n3
+            - support_n1
+          - type: 'null'
+        justification_roles: *id001
+        sources:
+          type: array
+          items: *id001
+          minItems: 1
+        adequation_tjm:
+          enum:
+          - compatible
+          - partielle
+          - sans_objet
+        volumes_scenario:
+          type: array
+          items: *id001
+          minItems: 0
+      required:
+      - id
+      - nom
+      - nature
+      - description
+      - livrable
+      - frontiere
+      - roles_pct
+      - travaux_par_role
+      - justification_roles
+      - sources
+      - adequation_tjm
+    minItems: 1
+  contributions_non_tarifees:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        contribution: *id001
+        activites:
+          type: array
+          items: *id001
+          minItems: 1
+        traitement: *id001
+      required:
+      - contribution
+      - activites
+      - traitement
+    minItems: 1
+  pilotage_global:
+    type: object
+    additionalProperties: false
+    properties:
+      reference:
+        type: string
+      programme_groupe_ref:
+        type: string
+      precision:
+        type: string
+    required:
+    - reference
+    - programme_groupe_ref
+    - precision
+  scenario_annuel:
+    anyOf:
+    - type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        nature: *id001
+        periode: *id001
+        perimetre:
+          type: object
+          additionalProperties: false
+          properties:
+            utilisateurs_nominatifs: &id003
+              type: integer
+              minimum: 0
+            profils_utilisation:
+              type: object
+              additionalProperties: false
+              properties:
+                consultation_occasionnelle: *id003
+                operationnel: *id003
+                administration_et_usage_avance: *id003
+              required:
+              - consultation_occasionnelle
+              - operationnel
+              - administration_et_usage_avance
+            utilisateurs_simultanes_pointe: *id003
+            contrats_flux: *id003
+            applications_externes: *id003
+            environnements:
+              type: object
+              additionalProperties: false
+              properties:
+                production: *id003
+                recette: *id003
+                developpement: *id003
+              required:
+              - production
+              - recette
+              - developpement
+            donnees_actives_to: &id004
+              type: number
+              minimum: 0
+            donnees_archives_to: *id004
+            messages_metier_mois: *id003
+            definition_message: *id001
+            dimensionnement: *id001
+            instances_storeland:
+              type: integer
+              minimum: 1
+            ensembles_si:
+              type: integer
+              minimum: 1
+          required:
+          - utilisateurs_nominatifs
+          - profils_utilisation
+          - utilisateurs_simultanes_pointe
+          - contrats_flux
+          - applications_externes
+          - environnements
+          - donnees_actives_to
+          - donnees_archives_to
+          - messages_metier_mois
+          - definition_message
+          - dimensionnement
+        service:
+          type: object
+          additionalProperties: false
+          properties:
+            exploitation: *id001
+            support_humain: *id001
+            disponibilite_cible_pct: *id002
+            rpo_cible_heures: *id004
+            rto_cible_heures: *id004
+            precision: *id001
+          required:
+          - exploitation
+          - support_humain
+          - disponibilite_cible_pct
+          - rpo_cible_heures
+          - rto_cible_heures
+          - precision
+        volumes:
+          type: object
+          additionalProperties: false
+          properties:
+            demandes_n1_par_utilisateur_an: *id004
+            taux_escalade_n3_pct: *id002
+            corrections_core_an: *id003
+            corrections_extensions_an: *id003
+            contrats_flux_modifies_an: *id003
+            campagnes_qualification_versions_an: *id003
+            exercices_restauration_an: *id003
+            evolutions_fonctionnelles_an:
+              type: object
+              additionalProperties: false
+              properties:
+                core_generique: *id003
+                parametrage_metier: *id003
+                extensions_metier: *id003
+              required:
+              - core_generique
+              - parametrage_metier
+              - extensions_metier
+          required:
+          - demandes_n1_par_utilisateur_an
+          - taux_escalade_n3_pct
+          - corrections_core_an
+          - corrections_extensions_an
+          - contrats_flux_modifies_an
+          - campagnes_qualification_versions_an
+          - exercices_restauration_an
+          - evolutions_fonctionnelles_an
+        definitions:
+          type: array
+          items: *id001
+          minItems: 1
+        justification: *id001
+        sources:
+          type: array
+          items: *id001
+          minItems: 1
+        recalage: *id001
+      required:
+      - id
+      - nature
+      - periode
+      - perimetre
+      - service
+      - volumes
+      - definitions
+      - justification
+      - sources
+      - recalage
+    - type: 'null'
+  regles_specifiques:
+    type: array
+    items: *id001
+    minItems: 1
+required:
+- version_schema
+- id
+- nom
+- produit
+- periode
+- date_evaluation
+- dependances
+- roles
+- activites
+- contributions_non_tarifees
+- pilotage_global
+- scenario_annuel
+- regles_specifiques

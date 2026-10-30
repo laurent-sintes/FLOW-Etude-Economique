@@ -1,0 +1,838 @@
+{
+  "iteration": 17,
+  "title": "Choix, coordination et assurance des prestations",
+  "capabilities": [
+    1,
+    19,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58
+  ],
+  "strong_reserves": [
+    52,
+    54
+  ],
+  "repositories": {
+    "O": [
+      "tmp/odoo20-audit",
+      "odoo/odoo",
+      "299075f17026b830a9755f3c43f3e83143995946"
+    ],
+    "T": [
+      "tmp/tryton-code-audit-2026-10-28",
+      "tryton/tryton",
+      "e011222dc305c431677e586706fd241dffe02236"
+    ],
+    "A": [
+      "tmp/oss-audit-axelor",
+      "axelor/axelor-open-suite",
+      "e7cbea53bae88d2540f59a70b09bf0f326f1022e"
+    ]
+  },
+  "proofs": [
+    [
+      "O171",
+      "O",
+      "addons/stock/models/stock_rule.py",
+      [
+        [
+          426,
+          479
+        ]
+      ],
+      "Un besoin détermine une règle et une action ; erreurs si aucune règle.",
+      "Analogie besoins→actions. FLOW sépare décision, autorisation et ordre de service ; pas reprise du moteur Odoo."
+    ],
+    [
+      "O172",
+      "O",
+      "addons/stock/models/stock_picking.py",
+      [
+        [
+          1014,
+          1057
+        ],
+        [
+          1265,
+          1288
+        ]
+      ],
+      "Quantités réalisées/incomplètes, reliquat et fractionnement contrôlé.",
+      "Exécution stock interne ; FLOW doit reconnaître les faits externes sans tenir un second stock."
+    ],
+    [
+      "T171",
+      "T",
+      "modules/carrier/carrier.py",
+      [
+        [
+          77,
+          115
+        ]
+      ],
+      "Sélection de transporteurs selon origine/destination et ordre des règles.",
+      "Analogie d'admissibilité ; ni suspension contractuelle ni sélection optimisée ou booking démontrés."
+    ],
+    [
+      "T172",
+      "T",
+      "modules/carrier_weight/carrier.py",
+      [
+        [
+          47,
+          77
+        ]
+      ],
+      "Tarification selon poids avec devise.",
+      "Analogie économique partielle ; ne pas reproduire le zéro de défaut comme coût connu lorsque FLOW manque de données."
+    ],
+    [
+      "T173",
+      "T",
+      "modules/quality/quality.py",
+      [
+        [
+          490,
+          504
+        ],
+        [
+          552,
+          586
+        ]
+      ],
+      "Points obligatoires, verdicts de contrôle et alertes.",
+      "Contrôle qualité distinct de la décision de disposition et de l'acte physique."
+    ],
+    [
+      "T174",
+      "T",
+      "modules/stock/shipment.py",
+      [
+        [
+          768,
+          805
+        ]
+      ],
+      "Réception et réalisation sont distinctes ; contrôle des quantités.",
+      "Analogie de jalons, pas preuve des contrats externes d'une prestation FLOW."
+    ],
+    [
+      "A171",
+      "A",
+      "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/pricing/FreightCarrierPricingServiceImpl.java",
+      [
+        [
+          64,
+          128
+        ],
+        [
+          152,
+          178
+        ]
+      ],
+      "Options transporteur/mode et calcul de prix/délai, puis choix appliqué.",
+      "Pas optimisation de tournées ni promesse de délai garanti."
+    ],
+    [
+      "A172",
+      "A",
+      "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      [
+        [
+          409,
+          457
+        ],
+        [
+          545,
+          608
+        ]
+      ],
+      "Transition planifiée/réalisée contrôlée, conformité, traçabilité et dates.",
+      "Contrôle opérationnel interne ; FLOW réemploie le principe en gardant les autorités de stock et prestataires séparées."
+    ],
+    [
+      "A173",
+      "A",
+      "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorder/SaleOrderCheckBlockingSupplychainServiceImpl.java",
+      [
+        [
+          43,
+          50
+        ]
+      ],
+      "Un blocage produit une alerte empêchant de livrer.",
+      "Analogie limitée : ne prouve pas suspension contextualisée de prestataires, qui reste à réaliser."
+    ]
+  ],
+  "packages": [
+    {
+      "id": "E171",
+      "cap": null,
+      "label": "Contrats communs de prestations et raccords",
+      "v": [
+        12,
+        20,
+        54,
+        12,
+        0,
+        30,
+        12,
+        8,
+        10,
+        8
+      ],
+      "f": [
+        0.65,
+        2
+      ],
+      "work": "Relier besoins, décisions, activités, ordres de service et faits avec versions et identifiants ; contrats d'autorité et tests côté orchestration. Les implémentations des Service Orders arrivent en18.",
+      "java": [
+        [
+          "Contrats et corrélation intermodules",
+          26
+        ],
+        [
+          "Raccords, erreurs et reprise",
+          12
+        ],
+        [
+          "Tests développeur de compatibilité",
+          16
+        ]
+      ],
+      "ui": [
+        [
+          "Navigation entre décisions et ordres",
+          12
+        ]
+      ],
+      "evidence": [
+        "O171",
+        "T174",
+        "A172"
+      ],
+      "reuse": [
+        "11:S111/S112 contrats et orchestration durable",
+        "13:S131/S132 infrastructure d'ordres et faits",
+        "16:E161 contrats de politiques/capacités"
+      ],
+      "risk": "Diversité de partenaires et événements ; connecteurs réels exclus, contrat et doubles génériques inclus."
+    },
+    {
+      "id": "B001",
+      "cap": 1,
+      "label": "Admissibilité des prestataires",
+      "v": [
+        12,
+        8,
+        30,
+        14,
+        4,
+        12,
+        2,
+        8,
+        6,
+        0
+      ],
+      "f": [
+        0.7,
+        1.8
+      ],
+      "work": "Autorisations/suspensions motivées par prestataire, service, portée et date ; contrôle prospectif de nouvelle demande et explication sans résiliation des engagements existants.",
+      "java": [
+        [
+          "Restrictions, portée et dates",
+          12
+        ],
+        [
+          "Contrôle de sollicitation et explication",
+          10
+        ],
+        [
+          "Tests développeur d'autorité et de dates",
+          8
+        ]
+      ],
+      "ui": [
+        [
+          "Gestion et lecture des restrictions",
+          14
+        ]
+      ],
+      "evidence": [
+        "T171",
+        "A173"
+      ],
+      "reuse": [
+        "09:références partenaires/services",
+        "16:B008 portée et versions de politique"
+      ],
+      "risk": "Qualité des délégations reçues et combinaisons de restrictions ; sans qualification juridique automatique."
+    },
+    {
+      "id": "B019",
+      "cap": 19,
+      "label": "Disposition des biens",
+      "v": [
+        18,
+        12,
+        52,
+        24,
+        6,
+        20,
+        4,
+        4,
+        8,
+        12
+      ],
+      "f": [
+        0.65,
+        2
+      ],
+      "work": "Interpréter constats qualité/usage, construire les devenirs admissibles et comparer valeur/coûts connus ; autoriser puis transmettre sans réaliser réparation ou rebut.",
+      "java": [
+        [
+          "Constats et options de devenir",
+          18
+        ],
+        [
+          "Comparaison et décision autorisée",
+          20
+        ],
+        [
+          "Tests développeur filiation/inconnus",
+          14
+        ]
+      ],
+      "ui": [
+        [
+          "Comparaison des devenirs et décision",
+          24
+        ]
+      ],
+      "evidence": [
+        "T173",
+        "O172",
+        "A172"
+      ],
+      "reuse": [
+        "10:BC009/010 faits et stock",
+        "13:BC025/026 retours",
+        "16:B008 règles reçues",
+        "14:B048 comparaison de coûts"
+      ],
+      "risk": "Évaluation de valeur reçue et finalité de non-conformité ; pas d'optimiseur universel de récupération."
+    },
+    {
+      "id": "B050",
+      "cap": 50,
+      "label": "Détermination des prestations requises",
+      "v": [
+        24,
+        16,
+        66,
+        28,
+        8,
+        24,
+        4,
+        6,
+        10,
+        18
+      ],
+      "f": [
+        0.65,
+        2.1
+      ],
+      "work": "Transformer un besoin autorisé en exigences de prestations typées, quantités, dates, preuves et dépendances ; détecter cycles et exigences incompatibles avant choix de prestataire.",
+      "java": [
+        [
+          "Modèle d'exigences et dépendances",
+          24
+        ],
+        [
+          "Application des règles typées et explication",
+          24
+        ],
+        [
+          "Tests développeur cycles et variantes",
+          18
+        ]
+      ],
+      "ui": [
+        [
+          "Édition et justification des exigences",
+          28
+        ]
+      ],
+      "evidence": [
+        "O171",
+        "T173",
+        "A172"
+      ],
+      "reuse": [
+        "09:catalogue de services",
+        "11:BC076 définition de parcours",
+        "16:B008 politiques typées"
+      ],
+      "risk": "Nombre de combinaisons et conventions de résultat ; règles de parcours du Groupe hors Core."
+    },
+    {
+      "id": "B051",
+      "cap": 51,
+      "label": "Choix du service et de l'exécutant",
+      "v": [
+        22,
+        14,
+        54,
+        24,
+        6,
+        22,
+        4,
+        4,
+        8,
+        20
+      ],
+      "f": [
+        0.6,
+        2.2
+      ],
+      "work": "Filtrer selon l'admissibilité et les capacités, comparer conditions et retenir une option motivée ; conserver inconnu et hypothèses, sans réserver ou confirmer à la place de l'ordre.",
+      "java": [
+        [
+          "Construction des options admissibles",
+          18
+        ],
+        [
+          "Comparaison multicritère et décision",
+          20
+        ],
+        [
+          "Tests développeur données manquantes",
+          16
+        ]
+      ],
+      "ui": [
+        [
+          "Comparaison et justification du choix",
+          24
+        ]
+      ],
+      "evidence": [
+        "T171",
+        "T172",
+        "A171"
+      ],
+      "reuse": [
+        "17:B001 admissibilité",
+        "16:B049 capacités",
+        "14:S143/B048 combinaison/comparaison",
+        "12:S122 validateur"
+      ],
+      "risk": "Critères de service, coûts comparables et capacités fraîches ; aucun moteur d'achat général."
+    },
+    {
+      "id": "B052",
+      "cap": 52,
+      "label": "Plan de transport",
+      "v": [
+        36,
+        28,
+        130,
+        48,
+        12,
+        52,
+        14,
+        6,
+        18,
+        72
+      ],
+      "f": [
+        0.5,
+        2.6
+      ],
+      "work": "Former des chargements, proposer trajets/arrêts/fenêtres, vérifier poids/volume/incompatibilités et engagements, réviser le plan sous autorisation. OR-Tools Routing candidat, validation indépendante et repli explicite.",
+      "java": [
+        [
+          "Modèle transports, fenêtres et engagements",
+          32
+        ],
+        [
+          "Adaptation RoutingModel et recherche bornée",
+          40
+        ],
+        [
+          "Révision du plan et raccords",
+          24
+        ],
+        [
+          "Tests développeur et oracles petits cas",
+          34
+        ]
+      ],
+      "ui": [
+        [
+          "Plan, chargements et comparaison de variantes",
+          30
+        ],
+        [
+          "Explication des impossibilités et limites",
+          18
+        ]
+      ],
+      "evidence": [
+        "T171",
+        "T172",
+        "A171"
+      ],
+      "reuse": [
+        "14:E142 intégration Java/native OR-Tools déjà financée",
+        "12:E121 exécution des calculs/S122 validation",
+        "15:politique de combinaison des algorithmes"
+      ],
+      "risk": "Profil proposé100 arrêts/20 véhicules/2 dimensions de capacité/fenêtres et précédences ; matrices fournies, budget de recherche60s non validé. Pas de placement3D, moteur routier, TMS complet ni optimalité garantie. La validation Routing est distincte des essais CP-SAT15."
+    },
+    {
+      "id": "B053",
+      "cap": 53,
+      "label": "Coordination des prestations",
+      "v": [
+        20,
+        14,
+        58,
+        26,
+        6,
+        28,
+        8,
+        6,
+        10,
+        6
+      ],
+      "f": [
+        0.65,
+        2.1
+      ],
+      "work": "Instancier les dépendances autorisées, déclencher les sollicitations, attendre leurs résultats et suivre la progression ; adaptation des contrats métiers au moteur durable existant.",
+      "java": [
+        [
+          "Adaptation des activités et dépendances",
+          22
+        ],
+        [
+          "Résultats, reprises et attentes",
+          18
+        ],
+        [
+          "Tests développeur doublons et retards",
+          18
+        ]
+      ],
+      "ui": [
+        [
+          "Progression et interventions autorisées",
+          26
+        ]
+      ],
+      "evidence": [
+        "O171",
+        "T174",
+        "A172"
+      ],
+      "reuse": [
+        "11:S112/BC079 orchestration durable",
+        "17:E171 contrats",
+        "18:S181 cycle des Service Orders financé séparément"
+      ],
+      "risk": "Matrice des déclenchements et autorité ; pas de nouveau moteur de workflow ni de parcours global local."
+    },
+    {
+      "id": "B054",
+      "cap": 54,
+      "label": "Adaptation des prestations",
+      "v": [
+        24,
+        18,
+        66,
+        30,
+        8,
+        30,
+        6,
+        8,
+        10,
+        24
+      ],
+      "f": [
+        0.55,
+        2.4
+      ],
+      "work": "Qualifier l'impact d'un aléa, demander des variantes aux décisions spécialisées, comparer, faire autoriser et appliquer ; respecter promesses et actes physiques irréversibles.",
+      "java": [
+        [
+          "Impact et demande de variantes",
+          24
+        ],
+        [
+          "Autorisation et application versionnée",
+          22
+        ],
+        [
+          "Tests développeur irréversibilité/concurrence",
+          20
+        ]
+      ],
+      "ui": [
+        [
+          "Comparaison et circuit d'autorisation",
+          30
+        ]
+      ],
+      "evidence": [
+        "O172",
+        "T174",
+        "A172"
+      ],
+      "reuse": [
+        "17:B051/B052 sélection et plan",
+        "11:BC082/083 interventions/exceptions",
+        "13:version/autorité Orders",
+        "14:S141 revalidation de promesse"
+      ],
+      "risk": "Latitude réelle d'adaptation et compensation ; pas de reconfirmation autonome ni annulation physique supposée."
+    },
+    {
+      "id": "B055",
+      "cap": 55,
+      "label": "Libération des ordres de service",
+      "v": [
+        18,
+        12,
+        46,
+        22,
+        4,
+        20,
+        4,
+        4,
+        8,
+        16
+      ],
+      "f": [
+        0.65,
+        2.1
+      ],
+      "work": "Choisir les ordres libérables et leur moment, autoriser les regroupements et expliquer attentes ; respecter fenêtres et engagements, transmettre à l'ordre qui applique sa transition.",
+      "java": [
+        [
+          "Règles de libération et groupes compatibles",
+          18
+        ],
+        [
+          "Décision datée et application",
+          14
+        ],
+        [
+          "Tests développeur fenêtres et doubles demandes",
+          14
+        ]
+      ],
+      "ui": [
+        [
+          "Attentes et libération motivée",
+          22
+        ]
+      ],
+      "evidence": [
+        "O171",
+        "T174",
+        "A172"
+      ],
+      "reuse": [
+        "12:B038 mécanismes de décision de libération, sémantique distincte",
+        "16:B008 politiques",
+        "18:S181 transition de l'ordre"
+      ],
+      "risk": "Regroupement ne garantit ni chargement ni tournée interne du prestataire."
+    },
+    {
+      "id": "B056",
+      "cap": 56,
+      "label": "Collecte et corrélation des faits d'opération",
+      "v": [
+        18,
+        16,
+        64,
+        24,
+        4,
+        30,
+        10,
+        6,
+        10,
+        0
+      ],
+      "f": [
+        0.65,
+        2.1
+      ],
+      "work": "Recevoir jalons et résultats, identifier doublons/corrections/retards, distinguer prévu/engagé/constaté et corréler aux demandes/prestations ; publication sans imposer un passage unique des faits.",
+      "java": [
+        [
+          "Contrats événementiels et provenance",
+          20
+        ],
+        [
+          "Corrélation, correction et publication",
+          24
+        ],
+        [
+          "Tests développeur désordre et reprise",
+          20
+        ]
+      ],
+      "ui": [
+        [
+          "Consultation des événements et anomalies",
+          24
+        ]
+      ],
+      "evidence": [
+        "O172",
+        "T174",
+        "A172"
+      ],
+      "reuse": [
+        "10:S101/S103 journal/publication",
+        "11:BC084 ledger de processus",
+        "13:S132 structure de faits"
+      ],
+      "risk": "Identifiants et sémantique externe ; les connecteurs prestataires ne sont pas inclus."
+    },
+    {
+      "id": "B057",
+      "cap": 57,
+      "label": "Rapprochement des prestations",
+      "v": [
+        24,
+        18,
+        78,
+        30,
+        6,
+        34,
+        6,
+        6,
+        12,
+        8
+      ],
+      "f": [
+        0.6,
+        2.2
+      ],
+      "work": "Rapprocher attendu/engagé/réalisé par nature de résultat et preuve, qualifier manquants/non-conformités et émettre les faits reconnus ; ne pas tenir un second reliquat Order ou stock.",
+      "java": [
+        [
+          "Modèle d'attendus et rapprochement",
+          30
+        ],
+        [
+          "Reconnaissance et transmission autorisée",
+          24
+        ],
+        [
+          "Tests développeur partiels et contradictions",
+          24
+        ]
+      ],
+      "ui": [
+        [
+          "Écarts, preuves et reconnaissance",
+          30
+        ]
+      ],
+      "evidence": [
+        "O172",
+        "T173",
+        "T174",
+        "A172"
+      ],
+      "reuse": [
+        "17:B056 faits",
+        "13:S132 consommations de faits",
+        "18:S181 attentes et résultats d'ordres"
+      ],
+      "risk": "Tolérances et autorité de reconnaissance reçues ; pas de rapprochement bancaire."
+    },
+    {
+      "id": "B058",
+      "cap": 58,
+      "label": "Visibilité des opérations",
+      "v": [
+        16,
+        10,
+        32,
+        42,
+        10,
+        20,
+        6,
+        6,
+        6,
+        0
+      ],
+      "f": [
+        0.7,
+        1.8
+      ],
+      "work": "Projections d'avancement, attentes et écarts par prestation, navigation vers les faits ; état inconnu et frais de reconstruction explicites, droits par périmètre.",
+      "java": [
+        [
+          "Projections et requêtes contextualisées",
+          20
+        ],
+        [
+          "Tests développeur droits et reconstruction",
+          12
+        ]
+      ],
+      "ui": [
+        [
+          "Vues d'avancement et attentes",
+          26
+        ],
+        [
+          "Navigation justificatifs et filtres",
+          16
+        ]
+      ],
+      "evidence": [
+        "O172",
+        "T174",
+        "A172"
+      ],
+      "reuse": [
+        "17:B056/B057 faits et rapprochement",
+        "11:BC086 vues de processus",
+        "09:socle interface/droits"
+      ],
+      "risk": "Perspectives et volumétrie des projections ; pas de seconde coordination globale."
+    }
+  ],
+  "contract": "Application générique des politiques reçues, admissibilité prospective, décisions de service, plan de transport borné, déclenchements durables et reconnaissance des résultats. Les ordres de service restent autorités de leurs engagements ; les exécutants conservent l'organisation interne.",
+  "profile": "Hypothèses : parcours de50 prestations au plus par demande,100 lignes et1000 événements par prestation ;100000 prestations actives ; pointes50 événements/s et requêtes p95 2s visées, non testées. Transport :100 arrêts,20 véhicules, poids/volume, fenêtres et précédences, recherche60s à qualifier. Matrices et règles du réseau fournies par intégration.",
+  "reduced": "Financement partagé clarifié : pas de second moteur d'orchestration, pas de second stock ou moteur de promesse. Les analogies ERP séparent sélection/coûts, exécution, partiels et contrôle qualité. Le plan de transport reçoit un lot d'optimisation propre, sans extrapoler le benchmark CP-SAT15.",
+  "remaining": "Complexité de routage, qualité des matrices/contraintes, décisions d'adaptation et réponses externes. Les quantités/statuts des prestataires doivent être réconciliables ; les contrats de17 et les ordres18 nécessitent qualification commune.",
+  "next": "Continuer avec les15 types d'ordres de service : financer le cycle partagé une seule fois puis leurs différences métier.",
+  "supplemental_sources": [
+    {
+      "ref": "or-tools-routing-source.json",
+      "read_range": [
+        112,
+        185
+      ],
+      "observation": "RoutingModel Java, dimension temporelle, fenêtres et recherche heuristique.",
+      "limit": "Code lu, pas exécuté dans17 ; API distincte de CP-SAT15.",
+      "documentation": "https://developers.google.com/optimization/routing/vrptw"
+    }
+  ]
+}

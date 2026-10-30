@@ -1,0 +1,410 @@
+{
+  "id": "master-data-comparable-reuse-24",
+  "date": "2026-10-30",
+  "question": "Charge pour réaliser un périmètre Master Data commun dans la technologie de chaque OSS, en réutilisant les mécanismes génériques natifs.",
+  "meaning": "Estimation d'ingénierie d'un développement neuf des fonctions métier retenues au-dessus d'une plateforme native disponible et réutilisée sans modification. Ni effort historique observé, ni coût d'installation d'un OSS dont les fonctions métier existent déjà.",
+  "status": "candidat_comparatif_conditionnel_hors_budget_actif",
+  "previous_result_status": "Les montants de l'audit master-data-natif ne sont pas des coûts Master Data. Le présent calcul remplace leur utilisation pour la demande courante ; il ne leur applique aucun rabais global.",
+  "products": [
+    {
+      "id": "erpnext",
+      "label": "ERPNext + Frappe",
+      "technology": "Python / JavaScript / métadonnées DocType"
+    },
+    {
+      "id": "odoo",
+      "label": "Odoo Community",
+      "technology": "Python / JavaScript / XML"
+    },
+    {
+      "id": "tryton",
+      "label": "Tryton + Sao",
+      "technology": "Python / JavaScript / XML"
+    },
+    {
+      "id": "axelor",
+      "label": "Axelor Open Suite + Open Platform",
+      "technology": "Java / TypeScript / XML"
+    }
+  ],
+  "scope": {
+    "name": "Master Data commune aux quatre références",
+    "capabilities_in_family": [
+      "BC-002",
+      "BC-003",
+      "BC-004",
+      "BC-005",
+      "BC-006",
+      "BC-007"
+    ],
+    "same_outcomes": true,
+    "contracts": [
+      {
+        "id": "MD01",
+        "name": "Partenaires et contacts",
+        "expected": "Créer, consulter, modifier et désactiver des partenaires utilisables comme clients/fournisseurs ; rattacher des contacts et des adresses ; vérifier les identifiants et coordonnées selon les contrôles natifs.",
+        "proofs": {
+          "erpnext": [
+            [
+              "erpnext",
+              "erpnext/selling/doctype/customer/customer.json"
+            ],
+            [
+              "erpnext",
+              "erpnext/buying/doctype/supplier/supplier.json"
+            ],
+            [
+              "frappe",
+              "frappe/contacts/doctype/contact/contact.py"
+            ]
+          ],
+          "odoo": [
+            [
+              "odoo",
+              "odoo/addons/base/models/res_partner.py"
+            ]
+          ],
+          "tryton": [
+            [
+              "tryton",
+              "modules/party/party.py"
+            ],
+            [
+              "tryton",
+              "modules/party/contact_mechanism.py"
+            ]
+          ],
+          "axelor": [
+            [
+              "axelor",
+              "axelor-base/src/main/resources/domains/Partner.xml"
+            ],
+            [
+              "axelor",
+              "axelor-base/src/main/resources/domains/Address.xml"
+            ]
+          ]
+        },
+        "variation": "ERPNext distingue Customer/Supplier ; Odoo, Tryton et Axelor utilisent des structures de partenaire. Les règles légales nationales et la gestion du crédit sont exclues."
+      },
+      {
+        "id": "MD02",
+        "name": "Articles, fournitures et services",
+        "expected": "Identifier, décrire, classer et activer/désactiver une référence produit ; distinguer les types de produits, y compris consommables ou services ; rattacher unités et identifiants.",
+        "proofs": {
+          "erpnext": [
+            [
+              "erpnext",
+              "erpnext/stock/doctype/item/item.json"
+            ]
+          ],
+          "odoo": [
+            [
+              "odoo",
+              "addons/product/models/product_template.py"
+            ]
+          ],
+          "tryton": [
+            [
+              "tryton",
+              "modules/product/product.py"
+            ]
+          ],
+          "axelor": [
+            [
+              "axelor",
+              "axelor-base/src/main/resources/domains/Product.xml"
+            ]
+          ]
+        },
+        "variation": "Un service est une référence de catalogue. L'exécution de prestations, les contrats, les transporteurs et leurs algorithmes de tarification ne sont pas ajoutés."
+      },
+      {
+        "id": "MD03",
+        "name": "Attributs, variantes et classifications",
+        "expected": "Définir attributs/valeurs, catégories et variantes reliées au produit ; les consulter et les maintenir avec les contraintes d'identification natives.",
+        "proofs": {
+          "erpnext": [
+            [
+              "erpnext",
+              "erpnext/controllers/item_variant.py"
+            ]
+          ],
+          "odoo": [
+            [
+              "odoo",
+              "addons/product/models/product_template_attribute_line.py"
+            ]
+          ],
+          "tryton": [
+            [
+              "tryton",
+              "modules/product_attribute/product.py"
+            ]
+          ],
+          "axelor": [
+            [
+              "axelor",
+              "axelor-base/src/main/resources/domains/ProductVariant.xml"
+            ],
+            [
+              "axelor",
+              "axelor-base/src/main/java/com/axelor/apps/base/service/ProductVariantServiceImpl.java"
+            ]
+          ]
+        },
+        "variation": "La génération automatique de combinaisons est une commodité native conservée là où elle existe, pas une exigence commune ajoutée artificiellement à Tryton. Les configurations natives ne sont pas identiques champ par champ."
+      },
+      {
+        "id": "MD04",
+        "name": "Unités et conversions",
+        "expected": "Administrer des unités, leurs catégories et coefficients ; les associer aux références et convertir les quantités avec les contrôles natifs de compatibilité.",
+        "proofs": {
+          "erpnext": [
+            [
+              "erpnext",
+              "erpnext/stock/doctype/uom_conversion_detail/uom_conversion_detail.json"
+            ]
+          ],
+          "odoo": [
+            [
+              "odoo",
+              "addons/uom/models/uom_uom.py"
+            ]
+          ],
+          "tryton": [
+            [
+              "tryton",
+              "modules/product/uom.py"
+            ]
+          ],
+          "axelor": [
+            [
+              "axelor",
+              "axelor-base/src/main/resources/domains/UnitConversion.xml"
+            ]
+          ]
+        },
+        "variation": "Le conditionnement simple exprimé en unité/quantité est dans le périmètre. Kits, nomenclatures, palettisation et types de colis complexes ne sont pas assimilés à une même fonction."
+      },
+      {
+        "id": "MD05",
+        "name": "Catalogues et tarifs de référence",
+        "expected": "Administrer des listes de prix et leurs lignes par produit/catégorie, avec devise, unité/quantité et critères natifs de validité ; consulter un tarif de référence.",
+        "proofs": {
+          "erpnext": [
+            [
+              "erpnext",
+              "erpnext/stock/doctype/item_price/item_price.json"
+            ]
+          ],
+          "odoo": [
+            [
+              "odoo",
+              "addons/product/models/product_pricelist.py"
+            ],
+            [
+              "odoo",
+              "addons/product/models/product_pricelist_item.py"
+            ]
+          ],
+          "tryton": [
+            [
+              "tryton",
+              "modules/product_price_list/price_list.py"
+            ]
+          ],
+          "axelor": [
+            [
+              "axelor",
+              "axelor-base/src/main/resources/domains/PriceListLine.xml"
+            ]
+          ]
+        },
+        "variation": "Formules, remises et suppléments natifs restent dans les petits composants de tarif nécessaires. Cette différence de réalisation est conservée dans l'incertitude. Exécution d'une politique commerciale sur commandes et factures exclue."
+      },
+      {
+        "id": "MD06",
+        "name": "Sites et emplacements",
+        "expected": "Maintenir des emplacements nommés organisés en hiérarchie, avec activation, rattachement et contrôles de cohérence natifs.",
+        "proofs": {
+          "erpnext": [
+            [
+              "erpnext",
+              "erpnext/stock/doctype/warehouse/warehouse.py"
+            ]
+          ],
+          "odoo": [
+            [
+              "odoo",
+              "addons/stock/models/stock_location.py"
+            ]
+          ],
+          "tryton": [
+            [
+              "tryton",
+              "modules/stock/location.py"
+            ]
+          ],
+          "axelor": [
+            [
+              "axelor",
+              "axelor-stock/src/main/resources/domains/StockLocation.xml"
+            ]
+          ]
+        },
+        "variation": "Pas de mouvements, quantités disponibles, réapprovisionnement, stratégies de rangement ni optimisation du réseau."
+      },
+      {
+        "id": "MD07",
+        "name": "Administration et accès",
+        "expected": "Formulaires et listes, recherche, persistance, droits natifs, imports/exports et validations de base pour les objets précédents.",
+        "proofs": {
+          "erpnext": [
+            [
+              "frappe",
+              "frappe/model/document.py"
+            ],
+            [
+              "frappe",
+              "frappe/core/doctype/data_import/importer.py"
+            ]
+          ],
+          "odoo": [
+            [
+              "odoo",
+              "odoo/orm/models.py"
+            ],
+            [
+              "odoo",
+              "addons/base_import/models/base_import.py"
+            ]
+          ],
+          "tryton": [
+            [
+              "tryton",
+              "trytond/trytond/model/modelstorage.py"
+            ],
+            [
+              "tryton",
+              "sao/src/view/form.js"
+            ]
+          ],
+          "axelor": [
+            [
+              "platform",
+              "axelor-core/src/main/java/com/axelor/rpc/Resource.java"
+            ],
+            [
+              "platform",
+              "axelor-core/src/main/java/com/axelor/data/Importer.java"
+            ]
+          ]
+        },
+        "variation": "Mécanismes génériques réutilisés ; déclarations métier, vues, règles d'accès particulières et appels d'API sont dans le code neuf mesuré."
+      }
+    ],
+    "exclusions": [
+      "Garanties FLOW de publication multi-source versionnée, autorité par attribut, quarantaine/reprise, historique métier exhaustif, réseaux et contrats avancés.",
+      "Commandes, factures, production, mouvements/valorisation de stocks et comptabilité ; les blocs identifiés sont exclus par nom.",
+      "Reconstruction des frameworks, du client générique, de l'ORM ou du moteur d'import.",
+      "Migration et intégration Beaumanoir, interfaces spécifiques avec ses SI, conduite du changement, licences, infrastructure et exploitation.",
+      "Reconstruction des runtimes et bibliothèques disponibles, installation d'une plateforme d'entreprise à partir de zéro."
+    ],
+    "comparability": "Même contrat de résultats métier et même assiette d'activités. Les implémentations natives conservent des commodités et représentations différentes : comparabilité d'étude d'opportunité, pas certification d'équivalence fonctionnelle exhaustive.",
+    "coverage": "7 contrats communs instruits sur 4 OSS ; famille de 6 capacités concernée, sans prétendre que les 6 capacités FLOW complètes soient chiffrées."
+  },
+  "reuse": {
+    "classification": "Fonctions métier sélectionnées : code neuf équivalent. Composants génériques sélectionnés : réutilisation sans changement de conception ni de code. Runtimes et autres dépendances standards : préexistants, hors reconstruction.",
+    "DM": 0,
+    "CM": 0,
+    "SU": 0,
+    "AT": 0,
+    "formula": "AAF = 0.4 DM + 0.3 CM + 0.3 IM ; ici AAM = (AA + 0.3 IM) / 100. ESLOC = programme métier + w × déclaratif métier + AAM × (programme réutilisé + w × déclaratif réutilisé).",
+    "no_double_count": "Le code d'appel, de configuration et les déclarations propres aux objets figurent une fois dans le métier. AAM représente qualification/assimilation et intégration/vérification du composant réutilisé. La répartition d'activités est une ventilation du total, pas un ajout de QA, d'architecture ou d'intégration.",
+    "owner": "Le présent projet Master Data finance une seule qualification/intégration des composants sélectionnés. Leur construction historique reste à la charge de l'écosystème OSS et n'est pas financée ici. Le coût commun ne doit pas être recopié sans déduplication dans d'autres familles Flow.",
+    "AA_central_justification": "AA=2 correspond à une recherche/documentation de composants natifs identifiés. C'est une hypothèse de qualification légère, pas une mesure de leur adoption par une équipe réelle.",
+    "IM_central_justification": "IM=5 % du travail normal d'intégration d'un composant de même taille : hypothèse d'usage des extensions natives, sans modification du framework. Ce 5 % ne vient pas d'une observation des projets OSS."
+  },
+  "cocomo": {
+    "A": 2.94,
+    "B": 0.91,
+    "SF_sum": 18.97,
+    "C": 3.67,
+    "D": 0.28,
+    "month_hours": 152,
+    "day_hours": 7,
+    "effort_phase_factor": 1.18,
+    "schedule_phase_factor": 1.25,
+    "other_EM": 1,
+    "SCED": 1,
+    "REVL": 0,
+    "source": "https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf",
+    "source_locations": "Équation 4 et tables 6, 36, 57, 63 ; autres paramètres conservés nominaux.",
+    "activity_distribution_ref": "../2026-10-30-master-data-calcul/repartitions-sources.json#cocomo"
+  },
+  "scenarios": [
+    {
+      "id": "lower",
+      "label": "Favorable",
+      "declarative_weight": 0.5,
+      "AA": 0,
+      "IM": 0,
+      "PERS": 0.83,
+      "PREX": 0.87,
+      "assumption": "Équipe capable et expérimentée, composants déjà assimilés, intégration supplémentaire nulle au-delà des appels et tests du code neuf. Déclaratif léger."
+    },
+    {
+      "id": "central",
+      "label": "Central",
+      "declarative_weight": 1,
+      "AA": 2,
+      "IM": 5,
+      "PERS": 1,
+      "PREX": 1,
+      "assumption": "Équipe nominale, plateforme disponible, qualification légère des composants et intégration limitée ; aucune modification de leur code."
+    },
+    {
+      "id": "upper",
+      "label": "Prudent",
+      "declarative_weight": 2,
+      "AA": 4,
+      "IM": 15,
+      "PERS": 1.26,
+      "PREX": 1.12,
+      "assumption": "Équipe moins expérimentée ou moins stable, davantage d'évaluation et de tests d'intégration ; déclaratif plus coûteux, sans réécriture du framework."
+    }
+  ],
+  "uncertainty": {
+    "level": "Élevée, non calibrée",
+    "interval_type": "Enveloppe de scénarios conditionnels, non intervalle statistique",
+    "percentiles": null,
+    "coverage_probability": null,
+    "source_of_bounds": "Variations explicites du coût du déclaratif, de la qualification/réutilisation et des facteurs équipe/expérience COCOMO. Les bornes ne sont pas des écarts-types ni des quantiles.",
+    "remaining": [
+      "La taille logique est mesurée, mais son équivalence d'effort entre code et déclaratif n'est pas calibrée.",
+      "AA, IM, compétences/expérience et facteurs d'échelle ne sont pas observés sur une équipe de réalisation.",
+      "Commodités natives résiduelles et dépendances de blocs sélectionnés ; aucune extraction autonome compilée ni parité d'exécution démontrée.",
+      "Le périmètre avancé FLOW exclu ne peut pas être extrapolé par une proportion de capacités.",
+      "Les six commits sont figés ; l'assemblage Axelor Suite/Platform n'a pas été validé par compilation dans cet audit."
+    ]
+  },
+  "triangulation": {
+    "cocomo": "Calcul exécuté sur chaque référence avec réutilisation.",
+    "cosmic": "Le contrat commun prépare une mesure fonctionnelle ; aucun comptage complet certifié des quatre OSS n'est inventé.",
+    "isbsg": "Aucune charge réelle native comparable ni base récente Python/Java qualifiée ; le coefficient Java d'un ancien benchmark n'est pas appliqué aux quatre technologies.",
+    "conclusion": "Estimation COCOMO avec sources et hypothèses explicites ; pas une validation indépendante par trois méthodes."
+  },
+  "progress": {
+    "references_completed": 4,
+    "references_target": 4,
+    "common_contracts": 7,
+    "capabilities_in_family": 6,
+    "capabilities_added": 0,
+    "flow_full_family_budget": null,
+    "global_flow_jh": null,
+    "sum_of_alternatives": null,
+    "active_economics_modified": false
+  },
+  "next_iteration": "Oui, pour transposer le contrat commun à Spring en justifiant les composants réutilisés et instruire séparément les garanties FLOW exclues. Une nouvelle variation des seuls coefficients, sans nouvelle preuve, apporterait peu."
+}

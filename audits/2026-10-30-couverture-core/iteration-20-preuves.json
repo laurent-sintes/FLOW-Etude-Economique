@@ -1,0 +1,73 @@
+{
+  "evidence": [
+    {
+      "id": "O201",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "addons/sale/report/sale_report.py",
+      "sha256": "2f080eff65725dd069a201c08bd79d39055448cd8d2d655db800ecb2fa89849f",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/sale/report/sale_report.py",
+      "observation": "Agrégations de quantités, montants, dimensions et références aux commandes.",
+      "limit": "Analogie de reporting traçable ; aucune découverte de processus démontrée par ces requêtes.",
+      "excerpts": [
+        {
+          "start": 124,
+          "end": 184,
+          "text": "    def _table_sql(self) -> SQL:\n        today = fields.Date.today()\n        query = self.env['sale.order.line'].sudo().with_context(date_to=today)._search(self._order_line_domain())\n        query.groupby = SQL(\", \").join(self._groupby_list(query.table))\n        return query.subselect(*self._select_dict_to_list(self._select_dict(query.table)))\n\n    def _order_line_domain(self):\n        return Domain('display_type', '=', False)\n\n    def _select_dict_to_list(self, select_dict):\n        return [SQL(\"%s AS %s\", select_dict.get(fname, SQL(\"NULL\")), SQL.identifier(fname)) for fname, field in self._fields.items() if field.store]\n\n    def _select_dict(self, table: TableSQL):\n        uom_ratio = SQL(\"(COALESCE(%s, 1) / NULLIF(COALESCE(%s, 1), 0.0))\", table.product_uom_id.factor, table.product_id.uom_id.factor)\n        order_rate = self._case_value_or_one(table.order_id.currency_rate)\n        rate = SQL(\"%s / %s\", table.consolidation_rate, order_rate)\n        return {\n            'id': SQL(\"MIN(%s)\", table.id),\n            'product_id': table.product_id,\n            'line_name': table.name,\n            'line_invoice_status': SQL(\"%s\", table.invoice_status),\n            'product_uom_id': SQL(\"CASE WHEN %s IS NULL THEN %s ELSE %s END\", table.product_id, table.product_id.uom_id, table.product_uom_id),\n            'product_uom_qty': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END\", table.is_downpayment, table.product_uom_qty, uom_ratio),\n            'qty_delivered': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END\", table.is_downpayment, table.qty_delivered, uom_ratio),\n            'qty_to_deliver': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM((%s - %s) * %s) ELSE 0 END\", table.is_downpayment, table.product_uom_qty, table.qty_delivered, uom_ratio),\n            'qty_invoiced': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END\", table.is_downpayment, table.qty_invoiced, uom_ratio),\n            'qty_to_invoice': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END\", table.is_downpayment, table.qty_to_invoice, uom_ratio),\n            'price_unit': SQL(\"CASE WHEN %s IS NOT TRUE THEN AVG(%s * %s) ELSE 0 END\", table.is_downpayment, table.price_unit, rate),\n            'price_total': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END\", table.is_downpayment, table.price_total, rate),\n            'price_subtotal': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END\", table.is_downpayment, table.price_subtotal, rate),\n            'untaxed_amount_to_invoice': SQL(\"SUM(%s * %s)\", table.untaxed_amount_to_invoice, rate),\n            'untaxed_amount_invoiced': SQL(\"SUM(%s * %s)\", table.untaxed_amount_invoiced, rate),\n            'untaxed_delivered_amount': SQL(\"SUM(%s * %s * %s)\", table.price_unit, table.qty_delivered, rate),\n            'nbr': SQL(\"COUNT(*)\"),\n            'name': table.order_id.name,\n            'date': SQL(\"%s\", table.order_id.date_order),\n            'state': table.order_id.state,\n            'invoice_status': table.order_id.invoice_status,\n            'partner_id': table.order_id.partner_id,\n            'user_id': table.order_id.user_id,\n            'company_id': table.order_id.company_id,\n            'campaign_id': table.order_id.campaign_id,\n            'medium_id': table.order_id.medium_id,\n            'source_id': table.order_id.source_id,\n            'utm_reference': table.order_id.utm_reference,\n            'categ_id': table.product_id.categ_id,\n            'pricelist_id': table.order_id.pricelist_id,\n            'team_id': table.order_id.team_id,\n            'product_tmpl_id': table.product_id.product_tmpl_id,\n            'commercial_partner_id': table.order_id.partner_id.commercial_partner_id,\n            'country_id': table.order_id.partner_id.country_id,\n            'industry_id': table.order_id.partner_id.industry_id,\n            'state_id': table.order_id.partner_id.state_id,\n            'partner_zip': SQL(\"%s\", table.order_id.partner_id.zip),\n            'weight': SQL(\"SUM(%s * %s * %s)\", table.product_id.weight, table.product_uom_qty, uom_ratio),\n            'volume': SQL(\"SUM(%s * %s * %s)\", table.product_id.volume, table.product_uom_qty, uom_ratio),\n            'discount': table.discount,\n            'discount_amount': SQL(\"SUM(%s * %s * %s / 100.0 * %s)\", table.price_unit, table.product_uom_qty, table.discount, rate),\n            'currency_id': SQL(\"%s\", self.env.company.currency_id.id),\n            'order_reference': SQL(\"concat('sale.order', ',', %s)\", table.order_id),\n        }"
+        }
+      ]
+    },
+    {
+      "id": "T201",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/sale/sale_reporting.py",
+      "observation": "Requêtes groupées avec états de commande, société, devise et quantité.",
+      "limit": "Assiette et dimensionnement des mesures comparables ; pas équivalent complet Process Mining.",
+      "excerpts": [
+        {
+          "start": 24,
+          "end": 80,
+          "text": "class Abstract(ModelSQL):\n\n    company = fields.Many2One(\n        'company.company', lazy_gettext(\"sale.msg_sale_reporting_company\"))\n    number = fields.Integer(lazy_gettext(\"sale.msg_sale_reporting_number\"),\n        help=lazy_gettext(\"sale.msg_sale_reporting_number_help\"))\n    revenue = Monetary(\n        lazy_gettext(\"sale.msg_sale_reporting_revenue\"),\n        digits='currency', currency='currency')\n    revenue_trend = fields.Function(\n        fields.Char(lazy_gettext(\"sale.msg_sale_reporting_revenue_trend\")),\n        'get_trend')\n    time_series = None\n\n    currency = fields.Many2One(\n        'currency.currency', lazy_gettext(\"sale.msg_sale_reporting_currency\"))\n\n    @classmethod\n    def table_query(cls):\n        from_item, tables, withs = cls._joins()\n        return from_item.select(*cls._columns(tables, withs),\n            where=cls._where(tables, withs),\n            group_by=cls._group_by(tables, withs),\n            with_=withs.values())\n\n    @classmethod\n    def _sale_line(cls, length, index, company_id=None):\n        pool = Pool()\n        Line = pool.get('sale.line')\n        Sale = pool.get('sale.sale')\n\n        line = Line.__table__()\n        sale = Sale.__table__()\n\n        return (line\n            .join(sale, condition=line.sale == sale.id)\n            .select(\n                (line.id * length + index).as_('id'),\n                *cls._sale_line_columns(line, sale),\n                where=sale.state.in_(cls._sale_states())\n                & (sale.company == company_id),\n                ))\n\n    @classmethod\n    def _sale_line_columns(cls, line, sale):\n        return [\n            line.product.as_('product'),\n            Coalesce(line.actual_quantity, line.quantity).as_('quantity'),\n            line.unit_price.as_('unit_price'),\n            Concat('sale.sale,', line.sale).as_('order'),\n            sale.sale_date.as_('date'),\n            sale.company.as_('company'),\n            sale.currency.as_('currency'),\n            sale.party.as_('customer'),\n            sale.warehouse.as_('location'),\n            sale.shipment_address.as_('shipment_address'),\n            ]"
+        }
+      ]
+    },
+    {
+      "id": "T202",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "trytond/trytond/model/modelsql.py",
+      "sha256": "a2f56ec7a10066aa4d1eb49430e1ea0f19091e53ebaae2e3ed011c03e410d31c",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/model/modelsql.py",
+      "observation": "Lecture autorisée de révisions datées et utilisateur, triées.",
+      "limit": "Historique de modèles seulement ; ni reconstruction causale ni conformité de parcours complète prouvées.",
+      "excerpts": [
+        {
+          "start": 784,
+          "end": 808,
+          "text": "    def history_revisions(cls, ids):\n        pool = Pool()\n        ModelAccess = pool.get('ir.model.access')\n        User = pool.get('res.user')\n        cursor = Transaction().connection.cursor()\n\n        ModelAccess.check(cls.__name__, 'read')\n\n        table = cls.__table_history__()\n        user = User.__table__()\n        columns = [\n            Coalesce(table.write_date, table.create_date), table.id, user.name]\n        where = fields.SQL_OPERATORS['in'](table.id, ids)\n        cursor.execute(*table.join(user, 'LEFT',\n                Coalesce(table.write_uid, table.create_uid) == user.id)\n            .select(*columns, where=where, group_by=columns))\n        revisions = list(cursor)\n        revisions.sort(reverse=True)\n        # SQLite uses char for COALESCE\n        if revisions and isinstance(revisions[0][0], str):\n            strptime = datetime.datetime.strptime\n            format_ = '%Y-%m-%d %H:%M:%S.%f'\n            revisions = [(strptime(timestamp, format_), id_, name)\n                for timestamp, id_, name in revisions]\n        return revisions"
+        }
+      ]
+    },
+    {
+      "id": "A201",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "axelor-crm/src/main/java/com/axelor/apps/crm/service/CrmReportingServiceImpl.java",
+      "sha256": "44124e783817359a991ca9f6b0f8b0b140646f8d5c00945b0cc020fe497693a0",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-crm/src/main/java/com/axelor/apps/crm/service/CrmReportingServiceImpl.java",
+      "observation": "Filtres de période, agence, équipe et société dans les requêtes.",
+      "limit": "Analogie de filtres et périmètres ; aucune couverture complète du reporting logistique ou du process mining revendiquée.",
+      "excerpts": [
+        {
+          "start": 121,
+          "end": 168,
+          "text": "  protected String prepareQuery(CrmReporting crmReporting, boolean isPartner, String model) {\n    StringBuilder query = new StringBuilder();\n    model = Strings.isNullOrEmpty(model) ? \"\" : model + \".\";\n\n    if (isPartner) {\n      partnerQuery(query, crmReporting, model);\n    } else {\n      leadQuery(query, crmReporting, model);\n    }\n\n    if (!crmReporting.getAgencySet().isEmpty()\n        && ((AppCrm) appBaseService.getApp(\"crm\")).getAgenciesManagement())\n      this.addParams(\n          query,\n          \"self.\"\n              + model\n              + \"agency.id IN (\"\n              + StringHelper.getIdListString(crmReporting.getAgencySet())\n              + \")\");\n\n    if (!crmReporting.getIndustrySectorSet().isEmpty())\n      this.addParams(\n          query,\n          \"self.\"\n              + model\n              + \"industrySector.id IN (\"\n              + StringHelper.getIdListString(crmReporting.getIndustrySectorSet())\n              + \")\");\n\n    if (appBaseService.getAppBase().getTeamManagement() && !crmReporting.getTeamSet().isEmpty())\n      this.addParams(\n          query,\n          \"self.team.id IN (\" + StringHelper.getIdListString(crmReporting.getTeamSet()) + \")\");\n\n    if (crmReporting.getFromDate() != null)\n      this.addParams(query, \"date(self.createdOn) >= :fromDate\");\n\n    if (crmReporting.getToDate() != null) this.addParams(query, \"date(self.createdOn) <= :toDate\");\n\n    return query.toString();\n  }\n\n  private void partnerQuery(StringBuilder query, CrmReporting crmReporting, String model) {\n    if (appBaseService.getAppBase().getEnableMultiCompany()\n        && !crmReporting.getCompanySet().isEmpty())\n      this.addParams(\n          query,\n          \"(\" + companyQuery(\"self.\" + model + \"companySet\", crmReporting.getCompanySet()) + \")\");"
+        }
+      ]
+    }
+  ],
+  "method": "Source code inspected at frozen revisions; these excerpts do not prove whole-product coverage or observed human effort."
+}

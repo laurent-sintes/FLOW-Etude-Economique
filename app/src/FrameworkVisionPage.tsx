@@ -73,6 +73,6 @@ export function FrameworkVisionPage(){
     <ul>{V.confidence.limits.map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ul>
    </div>
   </section>
-  <a className="text-button essential-structure-next" href={V.next.href}>{V.next.label}<ArrowRight size={17} aria-hidden="true"/></a>
+  <nav className="vision-reading-paths" aria-labelledby="vision-reading-paths-title"><h2 id="vision-reading-paths-title">{V.next.title}</h2><ul>{V.next.links.map((link:Data)=><li key={link.href}><a className="text-button" href={link.href}>{link.label}<ArrowRight size={17} aria-hidden="true"/></a></li>)}</ul></nav>
  </div>;
 }

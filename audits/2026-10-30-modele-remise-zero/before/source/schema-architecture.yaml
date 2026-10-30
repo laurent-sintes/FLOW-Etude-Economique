@@ -1,0 +1,111 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+additionalProperties: false
+required: [version, id, allocation, layers, activity_types, cost_structures, conditions, rules]
+properties:
+  version: {const: 1}
+  id: {const: flow-architecture}
+  allocation: {const: qualitative_only}
+  activity_types:
+    type: array
+    minItems: 2
+    maxItems: 2
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, notion]
+      properties:
+        id: {enum: [build, run]}
+        notion: {$ref: '#/$defs/id'}
+  layers:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, label, definition]
+      properties:
+        id: {$ref: '#/$defs/id'}
+        label: {$ref: '#/$defs/text'}
+        definition: {$ref: '#/$defs/text'}
+        examples: {$ref: '#/$defs/text'}
+        parts:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, label, examples]
+            properties:
+              id: {$ref: '#/$defs/id'}
+              label: {$ref: '#/$defs/text'}
+              examples: {$ref: '#/$defs/text'}
+  cost_structures:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, notion, coverage, description, cost_nature_refs, activity_type_refs, activity_scope]
+      properties:
+        id: {$ref: '#/$defs/id'}
+        notion: {$ref: '#/$defs/id'}
+        activity_type_refs:
+          type: array
+          minItems: 1
+          maxItems: 2
+          uniqueItems: true
+          items: {$ref: '#/$defs/id'}
+        activity_scope: {$ref: '#/$defs/text'}
+        activity_allocation:
+          type: object
+          additionalProperties: false
+          required: [build_pct, basis]
+          properties:
+            build_pct: {type: number, minimum: 0, maximum: 100}
+            basis: {$ref: '#/$defs/text'}
+        cost_nature_refs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items: {$ref: '#/$defs/id'}
+        description:
+          type: object
+          additionalProperties: false
+          required: [examples]
+          anyOf:
+          - required: [text]
+          - required: [bullets]
+          properties:
+            text: {$ref: '#/$defs/text'}
+            bullets: {$ref: '#/$defs/texts'}
+            examples: {$ref: '#/$defs/texts'}
+            examples_label: {$ref: '#/$defs/text'}
+        coverage:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            additionalProperties: false
+            required: [layer]
+            properties:
+              layer: {$ref: '#/$defs/id'}
+              condition: {$ref: '#/$defs/id'}
+  conditions:
+    type: object
+    propertyNames: {$ref: '#/$defs/id'}
+    additionalProperties: {$ref: '#/$defs/text'}
+  rules:
+    type: object
+    additionalProperties: false
+    required: [financing, ownership]
+    properties:
+      financing: {$ref: '#/$defs/text'}
+      ownership: {$ref: '#/$defs/text'}
+$defs:
+  id: {type: string, pattern: '^[a-z][a-z0-9_]*$'}
+  text: {type: string, minLength: 1}
+  texts:
+    type: array
+    minItems: 1
+    items: {$ref: '#/$defs/text'}

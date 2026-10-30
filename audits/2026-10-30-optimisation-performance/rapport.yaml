@@ -1,0 +1,55 @@
+status: optimisations_validees
+changes:
+- Validation autonome dans un chargement isolé ; toutes les variantes explicites sont toujours contrôlées.
+- Cache du téléchargement vérifié par les empreintes des dépendances, du générateur et des bibliothèques ; invalidation
+  et réparation automatiques.
+- Type YAML explicite sur le serveur local, gzip négocié et compression mise en cache.
+measures:
+  validation_before_s: 6.465820700002951
+  validation_after_s: 2.034344300001976
+  full_suite_before_s: 620.913
+  full_suite_after_s: 418.79
+  uncached_export_path_s: 12.726517799994326
+  cached_export_s: 0.30411360001016874
+  cached_export_cli_s: 0.664746099995682
+  download_before_bytes: 18139260
+  download_after_bytes: 2648115
+  download_first_compression_s: 0.34416540000529494
+  download_warm_median_s: 0.005275900010019541
+  study_load_after_s: 7.666837299999315
+verification:
+  python_tests: 267
+  frontend: tests, types, content, build passed
+  browser_pages: 20
+  viewports:
+  - 390
+  - 1440
+  scenarios_unchanged: 6
+  edge_cases_unchanged: 2
+  saved_collection_reload: true
+  saved_scenario_reload: true
+  input_and_screen_files_unchanged: 197
+  export_sha256: 635e576f21e7176af4c76abb311e38a4cde1dcc57e5760b6683a3bcd84ba9c6f
+  export_content_identical_to_previous_version: true
+  server:
+    id: flow-study
+    version: 0e70e918ab1c3c71f83da75a2bde8f0f0f8d108da6324a574ec95cd44bcceb9e
+    pid: 26672
+    mode: current
+    server_revision: eda16c301ec06a22ac1100ef2923dde42c27debd841559b0b6d5b28f97927b35
+    client_build_sha256: 606af3018bc0468ee772fbe45dc2d249f62183246df479c336aebe2a249e7d81
+    sources_current: true
+limits:
+- Mesures locales sur la même machine, sans limitation réseau ou CPU ; caches disque non purgés.
+- Le chemin sans cache est une recomposition réelle mesurée après optimisation ; la mesure en ligne de commande
+  inclut le démarrage Python.
+- Un changement du modèle ou du générateur provoque toujours une reconstruction complète. Le chargement initial
+  du modèle reste autour de 7,7 s.
+- La première compression coûte environ 0,34 s ; les requêtes suivantes réutilisent la réponse compressée.
+- La compression est activée sur le serveur local. Le paramétrage de GitHub Pages reste celui de son hébergeur.
+artifacts:
+- after.json
+- browser.json
+- browser-validation.json
+- full-check.log
+- measure-after.py

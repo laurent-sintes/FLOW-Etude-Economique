@@ -1,0 +1,208 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+additionalProperties: false
+required: [version, id, status_ref, purpose, scope, evidence, functions, components, mechanisms, lots]
+properties:
+  version: {const: 1}
+  id: {$ref: '#/$defs/text'}
+  status_ref: {const: core}
+  purpose: {enum: [qualification, pilote_historique]}
+  scope:
+    type: object
+    additionalProperties: false
+    required: [capability_refs, ecosystems, exclusions]
+    properties:
+      capability_refs: {$ref: '#/$defs/refs'}
+      ecosystems:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items: {enum: [java-spring, dotnet, rust]}
+      exclusions: {$ref: '#/$defs/texts'}
+  evidence:
+    type: object
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      required: [reference, date, author, kind, scope]
+      properties:
+        reference: {$ref: '#/$defs/text'}
+        date: {$ref: '#/$defs/date'}
+        author: {$ref: '#/$defs/nullable_text'}
+        kind: {enum: [documentation, code, demonstration, mesure_effort, hypothese_historique, hypothese_ingenierie]}
+        scope: {$ref: '#/$defs/text'}
+  functions:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, capability_refs, need_refs, status, observations, unknowns]
+      properties:
+        id: {$ref: '#/$defs/text'}
+        capability_refs: {$ref: '#/$defs/refs'}
+        need_refs: {$ref: '#/$defs/refs'}
+        status: {enum: [non_etudie, a_qualifier, qualifie]}
+        unknowns: {$ref: '#/$defs/texts'}
+        market_qualification_refs:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            pattern: '^source/instruction-marche\.yaml#qualifications/.+$'
+        observations:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [product_ref, edition, version, classification, evidence_refs, differences]
+            properties:
+              product_ref: {$ref: '#/$defs/text'}
+              edition: {$ref: '#/$defs/nullable_text'}
+              version: {$ref: '#/$defs/nullable_text'}
+              classification: {enum: [fait_observe, analogie, inconnu]}
+              evidence_refs: {$ref: '#/$defs/texts'}
+              differences: {$ref: '#/$defs/nullable_text'}
+  components:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, ecosystem, component_ref, status, licence, version, interfaces, compatibility, limits, evidence_refs]
+      properties:
+        id: {$ref: '#/$defs/text'}
+        ecosystem: {enum: [java-spring, dotnet, rust]}
+        component_ref: {$ref: '#/$defs/text'}
+        status: {enum: [a_qualifier, retenu]}
+        licence: {$ref: '#/$defs/nullable_text'}
+        version: {$ref: '#/$defs/nullable_text'}
+        interfaces: {$ref: '#/$defs/nullable_text'}
+        compatibility: {$ref: '#/$defs/nullable_text'}
+        limits: {$ref: '#/$defs/nullable_text'}
+        evidence_refs: {$ref: '#/$defs/texts'}
+  mechanisms:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, owner_lot_ref, consumer_lot_refs, contract]
+      properties:
+        id: {$ref: '#/$defs/text'}
+        owner_lot_ref: {$ref: '#/$defs/text'}
+        consumer_lot_refs: {$ref: '#/$defs/refs'}
+        contract: {$ref: '#/$defs/text'}
+  lots:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, capability_refs, function_refs, result, exclusions, dependency_refs, component_refs, legacy_ref, estimates]
+      properties:
+        id: {$ref: '#/$defs/text'}
+        capability_refs: {$ref: '#/$defs/refs'}
+        function_refs: {$ref: '#/$defs/refs'}
+        result: {$ref: '#/$defs/text'}
+        exclusions: {$ref: '#/$defs/texts'}
+        dependency_refs: {$ref: '#/$defs/texts'}
+        component_refs: {$ref: '#/$defs/texts'}
+        legacy_ref:
+          oneOf:
+          - {type: 'null'}
+          - type: object
+            additionalProperties: false
+            required: [source, capability_ref]
+            properties:
+              source: {const: source/recalibration-metier.yaml}
+              capability_ref: {$ref: '#/$defs/text'}
+        estimates:
+          type: object
+          minProperties: 1
+          propertyNames: {enum: [java-spring, dotnet, rust]}
+          additionalProperties:
+            type: array
+            minItems: 1
+            items: {$ref: '#/$defs/effort'}
+$defs:
+  text: {type: string, minLength: 1}
+  nullable_text: {type: [string, 'null'], minLength: 1}
+  date: {type: [string, 'null'], format: date}
+  texts:
+    type: array
+    uniqueItems: true
+    items: {$ref: '#/$defs/text'}
+  refs:
+    type: array
+    minItems: 1
+    uniqueItems: true
+    items: {$ref: '#/$defs/text'}
+  effort:
+    type: object
+    additionalProperties: false
+    required: [id, kind, activity, status, decision, jh, included_in, mechanism_refs, explanation, provenance, conditions, uncertainty, review]
+    properties:
+      id: {$ref: '#/$defs/text'}
+      kind: {enum: [developpeur, qa_independante, architecture_transverse, pilotage, autre]}
+      activity: {$ref: '#/$defs/text'}
+      status: {enum: [inconnu, estime, inclus, sans_objet]}
+      decision: {enum: [a_qualifier, retenu]}
+      jh:
+        oneOf:
+        - {type: 'null'}
+        - type: object
+          additionalProperties: false
+          required: [bas, central, haut]
+          properties:
+            bas: {type: number, minimum: 0}
+            central: {type: number, minimum: 0}
+            haut: {type: number, minimum: 0}
+      included_in:
+        oneOf:
+        - {type: 'null'}
+        - type: object
+          additionalProperties: false
+          required: [lot_ref, effort_ref]
+          properties:
+            lot_ref: {$ref: '#/$defs/text'}
+            effort_ref: {$ref: '#/$defs/text'}
+      mechanism_refs: {$ref: '#/$defs/texts'}
+      explanation: {$ref: '#/$defs/nullable_text'}
+      provenance:
+        type: object
+        additionalProperties: false
+        required: [origin, author, date, evidence_refs, rationale, assisted_by_ai]
+        properties:
+          origin: {enum: [inconnue, mesuree, transposee, ingenierie]}
+          author: {$ref: '#/$defs/nullable_text'}
+          date: {$ref: '#/$defs/date'}
+          evidence_refs: {$ref: '#/$defs/texts'}
+          rationale: {$ref: '#/$defs/nullable_text'}
+          assisted_by_ai: {type: [boolean, 'null']}
+      conditions:
+        type: object
+        additionalProperties: false
+        required: [team, environment, quality, day_convention]
+        properties:
+          team: {$ref: '#/$defs/nullable_text'}
+          environment: {$ref: '#/$defs/nullable_text'}
+          quality: {$ref: '#/$defs/nullable_text'}
+          day_convention: {$ref: '#/$defs/nullable_text'}
+      uncertainty:
+        oneOf:
+        - {type: 'null'}
+        - type: object
+          additionalProperties: false
+          required: [lower_reason, upper_reason, shared_hypotheses]
+          properties:
+            lower_reason: {$ref: '#/$defs/text'}
+            upper_reason: {$ref: '#/$defs/text'}
+            shared_hypotheses: {$ref: '#/$defs/texts'}
+      review:
+        type: object
+        additionalProperties: false
+        required: [status, reviewer, date, evidence_refs]
+        properties:
+          status: {enum: [non_realisee, realisee]}
+          reviewer: {$ref: '#/$defs/nullable_text'}
+          date: {$ref: '#/$defs/date'}
+          evidence_refs: {$ref: '#/$defs/texts'}

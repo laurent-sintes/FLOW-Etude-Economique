@@ -11,11 +11,32 @@ export function BudgetComparison(){
 }
 
 export function BusinessCalibration(){
- const {data}=useStudy();const B=data.content.business,L=B.labels,T=L.colonnes;const {money,n}=useFormat();
- const options=data.baseline.options.filter(o=>o.mode==='Make');const reader=useReadingState();const query=reader.get('q'),setQuery=(q:string)=>reader.set({q});const selectedId=reader.get('capability');const selected=B.rows.find((r:Data)=>r.capacite_id===selectedId||r.id===selectedId);const choose=(r:Data)=>reader.set({capability:r.capacite_id||r.id},true);
+ const {data}=useStudy(),B=data.content.business,L=B.labels,T=L.colonnes,R=data.ui.essential.core_results;
+ const options=data.baseline.options.filter(o=>o.mode==='Make'),reader=useReadingState();
+ const query=reader.get('q'),selectedId=reader.get('capability');
+ const selected=B.rows.find((r:Data)=>r.capacite_id===selectedId||r.id===selectedId);
+ const choose=(r:Data)=>reader.set({capability:r.capacite_id||r.id},true);
  const rows=B.rows.filter((r:Data)=>matchesReadingText(query,r.name,r.path,r.scenario));
- const state=(a:Data)=>a.traitement==='inclus_rfi'?T.inclus:a.traitement==='build_core'?T.build:T.provision;
- const sum=(xs:number[])=>xs.reduce((a,b)=>a+b,0);
- return <><Section title={L.titre} description={L.note}><p className="small-prose">{data.ui.reading.work_values}</p><TableViewport title={L.titre} className="comparison-scroll" expandable tools={<><span className="table-unit" role="status">{rows.length+' / '+B.rows.length+' · '+data.ui.reading.results}</span>{query&&<button className="text-button" onClick={()=>setQuery('')}>{data.ui.reading.reset_filters}</button>}<SearchField label={data.ui.reading.search_capability} value={query} onChange={setQuery}/></>}><table className="business-matrix"><thead><tr><th>{T.capacite}</th>{options.map(o=><th key={o.stack}>{o.name}<small>{T.jh}</small></th>)}</tr></thead><tbody>{rows.map((r:Data)=><tr key={r.id}><th><button className="row-link" onClick={()=>choose(r)}><small>{r.path.join(' / ')}</small>{r.name}<small>{r.id}</small></button></th>{options.map(o=>{const a=r.stacks[o.stack];return <td key={o.stack}><button onClick={()=>choose(r)}><strong>{n(sum(a.work.central),0)}</strong><small>{n(sum(a.work.bas),0)+' – '+n(sum(a.work.haut),0)}</small></button></td>;})}</tr>)}</tbody></table></TableViewport>{!rows.length&&<Empty/>}<SourceLink path="source/recalibration-metier.yaml">{T.sources}</SourceLink></Section>{selected&&<Drawer title={selected.name} onClose={()=>reader.set({capability:''},true)} wide><p className="eyebrow">{selected.path.join(' / ')}</p>{selected.capacite_id&&<div className="reading-next"><a href={capabilityReadingHref('map',selected.capacite_id,location.hash)}>{data.ui.business_map.back_to_map}<span>→</span></a></div>}<p><GlossaryText>{selected.scenario}</GlossaryText></p><Notice quiet><GlossaryText>{selected.frontiere}</GlossaryText></Notice>{selected.reuse.length>0&&<Section title={T.reemploi}>{selected.reuse.map((r:Data)=><p key={r.proprietaire}>{r.proprietaire+' · '+r.contrat}</p>)}</Section>}<div className="business-options">{options.map(o=>{const a=selected.stacks[o.stack];return <Section key={o.stack} title={o.name} description={state(a)}><h4>{T.couverture}</h4><p><GlossaryText>{a.coverage.apport}</GlossaryText></p><p className="small-prose"><GlossaryText>{a.coverage.limites}</GlossaryText></p><h4>{T.reste}</h4><p><GlossaryText>{a.work.travail}</GlossaryText></p><p className="small-prose">{T.jh}</p><div className="table-scroll"><table><thead><tr><th>{data.ui.labels.role}</th><th>{T.bas}<small>{T.jh}</small></th><th>{T.central}<small>{T.jh}</small></th><th>{T.haut}<small>{T.jh}</small></th></tr></thead><tbody>{B.method.natures.map((k:string,i:number)=><tr key={k}><th>{data.ui.natures[k]||data.ui.labels[k]}</th>{['bas','central','haut'].map(c=><td key={c}>{n(a.work[c][i],0)}</td>)}</tr>)}</tbody></table></div><p className="small-prose">{T.prix+' : '+money(a.valuation.cout_eur_ht)+' '+data.ui.labels.money_unit}</p><p className="small-prose">{T.bas+' : '+a.work.hypothese_basse}</p><p className="small-prose">{T.haut+' : '+a.work.hypothese_haute}</p><div className="source-row">{a.coverage.sources.map((s:string)=><SourceLink key={s} path={B.sources[s].reference}>{B.sources[s].titre}</SourceLink>)}</div></Section>;})}</div><Section title={T.sources}><p>{selected.review}</p><p>{B.method.principe}</p><p>{B.method.fourchettes}</p><SourceLink path="source/recalibration-metier.yaml"/></Section></Drawer>}</>;
+ return <>
+  <Section title={L.titre} description={L.note}>
+   <p><GlossaryText>{R.make_note}</GlossaryText></p><a href="#evaluation-core">{R.family_link}</a>
+   <SearchField label={data.ui.reading.search_capability} value={query} onChange={q=>reader.set({q})}/>
+   <TableViewport title={L.titre} className="comparison-scroll" expandable><table className="business-matrix">
+    <thead><tr><th>{T.capacite}</th>{options.map(o=><th key={o.stack}>{o.name}</th>)}</tr></thead>
+    <tbody>{rows.map((r:Data)=><tr key={r.id}><th><button className="row-link" onClick={()=>choose(r)}><small>{r.path.join(' / ')}</small>{r.name}<small>{r.id}</small></button></th>{options.map(o=><td key={o.stack}><button onClick={()=>choose(r)}>{r.stacks[o.stack].retained_units.length?R.no_allocation:R.pending}</button></td>)}</tr>)}</tbody>
+   </table></TableViewport>{!rows.length&&<Empty/>}
+  </Section>
+  {selected&&<Drawer title={selected.name} onClose={()=>reader.set({capability:''},true)} wide>
+   <p className="eyebrow">{selected.path.join(' / ')}</p>
+   {selected.capacite_id&&<a href={capabilityReadingHref('map',selected.capacite_id,location.hash)}>{data.ui.business_map.back_to_map}</a>}
+   <p><GlossaryText>{selected.scenario}</GlossaryText></p><Notice quiet><GlossaryText>{selected.frontiere}</GlossaryText></Notice>
+   <div className="business-options">{options.map(o=>{const a=selected.stacks[o.stack];return <Section key={o.stack} title={o.name}>
+    <p><strong>{a.retained_units.length?R.no_allocation:R.pending}</strong></p>
+    {a.retained_units.length>0&&<a href="#evaluation-core">{R.family_link}</a>}
+    <h4>{T.couverture}</h4><p><GlossaryText>{a.coverage.apport}</GlossaryText></p><p><GlossaryText>{a.coverage.limites}</GlossaryText></p>
+    <h4>{T.reste}</h4><p><GlossaryText>{a.work.travail}</GlossaryText></p>
+    {(a.proofs||[]).map((proof:Data)=><SourceLink key={proof.id} path={proof.reference}>{proof.titre}</SourceLink>)}
+   </Section>;})}</div>
+  </Drawer>}
+ </>;
 }
-

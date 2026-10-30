@@ -7,7 +7,7 @@ No audit results are imported into the active calculation.
 from decimal import Decimal, ROUND_HALF_UP
 from validate_stacks import ROOT, read
 from calculate_costs import mixed_cost, role_rates, volume
-from business_calibration import active_doc
+from current_cost_inputs import active_doc
 from model_inputs import annual_scenario, funding_inputs, RESPONSIBILITIES
 
 PATH = 'source/modele-composable.yaml'
@@ -97,7 +97,7 @@ def initial_ledger(option, reference):
                  'integration' if phase=='integration' else 'exploitation' if responsibility=='run' else 'maintien')
         rows.append(dict(id=id,financement_id=id.split('/')[0],amount=money(amount),start=start,end=stop,
                          objet=obj,prestation=service,responsibility=responsibility,phase=phase,source=source))
-    add('construction_core',option['build'],0,b,'core_lifecycle','build','source/recalibration-metier.yaml')
+    add('construction_core',option['build'],0,b,'core_lifecycle','build','source/estimations-core-retenues.yaml')
     cursor=0
     for stage in cfg['hebergement_build']['phases']:
         months=b*stage['part_duree']

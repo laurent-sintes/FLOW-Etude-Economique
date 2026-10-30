@@ -30,7 +30,13 @@ BLOCK = dict(oneOf=[
     _object(dict(kind=dict(const='table'), caption=TEXT, columns=TEXTS,
                  rows=dict(type='array', minItems=1, items=TEXTS))),
     _object(dict(kind=dict(const='callout'), title=TEXT, text=TEXT)),
+    _object(dict(kind=dict(const='reference_cards'), cards=dict(type='array', minItems=1,
+        items=_object(dict(title=TEXT, subtitle=TEXT,
+            fields=dict(type='array', minItems=1, items=_object(dict(label=TEXT, items=TEXTS))),
+            note=TEXT, sources=dict(type='array', minItems=1, items=_object(dict(
+                label=TEXT, href=dict(type='string', pattern=r'^https://[A-Za-z0-9][^\s]*$'))))))))),
     _object(dict(kind=dict(const='formula'), text=TEXT)),
+    _object(dict(kind=dict(const='formula'), rule_ref=TEXT)),
     _object(dict(kind=dict(const='links'), items=dict(type='array', minItems=1,
                  items=_object(dict(href=dict(enum=READING_ROUTES), label=TEXT))))),
     _object(dict(kind=dict(const='example'), ref=IDENTIFIER)),
@@ -86,6 +92,13 @@ def _compile_document(document, schema, source, error_code):
         if source==METHOD_SOURCE and any(block['kind']=='example' for block in section['blocks']) and section.get('kind')!='example':
             raise ValueError(f'{error_code}:{source}:{section["id"]}:illustration must be separate from method steps')
         for block in section['blocks']:
+            if block['kind']=='formula' and 'rule_ref' in block:
+                from estimation_calculation import metamodel
+                rules = {r['id']:r for r in metamodel()['rules']}
+                ref = block.pop('rule_ref')
+                if ref not in rules: raise ValueError(error_code + ':unknown metamodel rule:' + ref)
+                rule = rules[ref]
+                block['text'] = rule['title'] + ' : ' + rule['expression'] + ' [' + rule['unit'] + ']'
             if block['kind']=='links':
                 hrefs=[item['href'] for item in block['items']]
                 if len(hrefs)!=len(set(hrefs)):

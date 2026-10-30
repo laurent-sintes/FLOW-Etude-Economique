@@ -161,3 +161,23 @@ node app/scripts/verify-pages.mjs --url http://127.0.0.1:8777/FLOW-Etude-Economi
 Le script vérifie les pages, les preuves, les simulations réelles dans Pyodide et la reprise des sauvegardes. Installer Chromium avec `pnpm --dir app exec playwright install chromium`, ou définir `PLAYWRIGHT_CHROMIUM_EXECUTABLE` vers un Chrome installé. Le workflow prépare une prévisualisation isolée et installe les dépendances système du navigateur sur son runner Linux. Les cas de référence de ce contrôle sont recalculés à chaque exécution, sans geler les hypothèses économiques.
 
 Garder `app/dist/` pour le serveur local sur 8766. Après modification, relancer `tools/start_study_app.ps1 -NoOpen` depuis `C:/Dev/FLOW-Etude-Economique` ; contrôler `/api/health`, son PID, l’empreinte du client et `sources_current`.
+
+## Calcul des familles et métamodèle
+
+Le contrat métier unique est `source/fondamentaux.yaml`, avec les règles dans `estimation_model`. `estimation_calculation.py` reproduit les références, calcule les écarts avant arrondi et la ventilation par rôle ; `retained_core.py` vérifie la concordance avec la décision puis valorise les rôles. `capability_catalog.py` restitue la capture native ; `current_cost_inputs.py` conserve les unités annuelles et compléments Buy sans les anciennes affectations Make.
+
+Le pilote `core_qualification.py --candidate` demeure un diagnostic historique et n’alimente plus le flux courant. Pour une évolution : modifier le contrat métier si nécessaire, ses instances et contrôles, puis les projections et le skill. Exécuter `python -B -m tools.check_model --full` ; ne pas publier d’instantané sans demande.
+
+## Téléchargement du modèle métier
+
+`python -B -m tools.export_business_model` compose `tmp/model-download/flow-modele-metier.yaml` depuis les dépendances structurées réellement chargées et validées par `Study`. Le fichier regroupe le métamodèle canonique, les données métier, les entrées auditées de calcul, les schémas et les empreintes des sources. Les pièces externes restent référencées. Aucun balayage des anciens fichiers ni scénario personnel.
+
+Le plugin `app/scripts/model-download.mjs` appelle ce programme à chaque construction Vite, y compris les commandes directes de CI. La comparaison du contenu évite une réécriture inutile ; les exports manquants ou altérés sont régénérés, par remplacement atomique. Une erreur bloque la construction. L’export est livré sous `exports/flow-modele-metier.yaml`, à la racine locale ou sous le préfixe Pages. En développement Vite, la route compose le fichier à la demande. `FLOW_PYTHON` permet de choisir le runtime ; les dépendances sont celles de `requirements-model.txt`.
+
+## Préparation contrôlée des deux voies
+
+`estimation_inputs.py` valide identité, stack, périmètre, financements et chaîne de preuves. `estimation_preparation.py` recompose tailles natives, réutilisation, compléments et mouvements COSMIC depuis les mesures enregistrées, sans dépendre de clones OSS dans `tmp/`. Les règles arithmétiques et leurs domaines viennent du métamodèle. Les tests `test_estimation_audit.py` rejouent les incohérences de l’audit et reproduisent les préparations depuis le téléchargement sans lecture disque.
+
+L’export YAML version 2 sépare `model` (instances actives), `metamodel`, `schemas` et `evidence` (pièces utilisées, y compris préparation historique). `sources` contient leurs empreintes. Une ancienne proposition incluse comme preuve ne vaut pas adoption ; les dépôts OSS et PDF restent référencés.
+
+Le téléchargement réutilise un cache local uniquement si les empreintes de toutes les dépendances, des modules du générateur et des bibliothèques sont inchangées et si le YAML conserve son empreinte. Le cache est régénérable ; il ne devient pas une source métier. Une construction Pages vérifie aussi la concordance avec le Study déjà chargé. Les validations autonomes ouvrent un chargement isolé, sans cache global ; les variantes sont toujours contrôlées. Le serveur local sert le YAML avec son type explicite pour négocier gzip.

@@ -1,0 +1,182 @@
+version: 1
+units:
+- id: master-data-java-spring
+  stack: java-spring
+  label: Master Data Java/Spring
+  status: retained
+  decision_date: '2026-10-30'
+  capabilities:
+  - id: BC-002
+    native_id: master-data-ingestion
+  - id: BC-003
+    native_id: cap-partner-agreement-reference-stewardship
+  - id: BC-004
+    native_id: cap-merchandise-reference-stewardship
+  - id: BC-005
+    native_id: cap-packaging-reference-stewardship
+  - id: BC-006
+    native_id: cap-internal-supplies-reference-stewardship
+  - id: BC-007
+    native_id: cap-service-reference-stewardship
+  total_jh: 1500
+  months: 17
+  method: COCOMO II
+  roles:
+  - id: coordination
+    label: Pilotage de l’équipe produit
+    jh: 170
+    rate_ref:
+      path: source/deploiement-groupe.yaml
+      pointer: pilotage.tarif_coordination_eur_jh
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: analyse_produit
+    label: Analyse métier et fonctionnelle
+    jh: 150
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: architecture
+    label: Architecture et conception technique
+    jh: 130
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: dev_java
+    label: Développement Java et tests développeur
+    jh: 480
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: dev_frontend
+    label: Développement interface et tests développeur
+    jh: 180
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: qa
+    label: QA et qualification indépendante
+    jh: 200
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.qa.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: plateforme
+    label: Plateforme / DevOps et mise en service
+    jh: 130
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: ux
+    label: UX et ergonomie
+    jh: 30
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: securite
+    label: Expertise et revue de sécurité
+    jh: 30
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  provenance:
+    path: audits/2026-10-30-master-data-consolidation/results.json
+    sha256: fbf073298599f122d3eca8949bdcf0e4a554af6c48dd80adc837ecc2bfc6a234
+    explanation: Ancrage Java/Axelor (1 496,95 JH) arrondi à la centaine, contrôlé par les trois autres références
+      natives. Choix de consolidation pour l’étude, pas moyenne des méthodes ni preuve que Java serait plus productif.
+      Les références ERPNext, Odoo et Tryton sont conservées. Pas de provision de risque ajoutée.
+  role_assumption: Répartition d’organisation retenue pour cette étude, issue des activités COCOMO et de clés activité/rôle
+    hypothétiques. Ce ne sont pas des temps observés dans les OSS.
+  schedule:
+    unrounded_months: 16.73106117868435
+    capacity_ref:
+      path: source/deploiement-groupe.yaml
+      pointer: calendrier_autonome.capacite.jours_productifs_etp_mois
+    explanation: Délai de cette famille, distinct du calendrier global du Core System, qui reste à revoir. Les rôles
+      ne sont pas neuf personnes à temps plein ; leur disponibilité reste à confirmer. Les annuités utilisent encore
+      le calendrier global provisoire, pas un planning de décaissement Master Data.
+    rule_ref: cocomo_schedule
+  uncertainty:
+    confidence_level: null
+    low_jh: null
+    high_jh: null
+    explanation: Estimation retenue pour une étude d’opportunité ; aucune probabilité de dépassement ni fourchette
+      statistique calibrée. Les écarts entre OSS ne couvrent pas les hypothèses communes.
+    status: unquantified
+  includes:
+  - analyse produit
+  - conception et architecture
+  - réalisation et tests développeur
+  - QA et qualification
+  - sécurité ciblée
+  - pilotage local du produit
+  - préparation de la livraison et mise en service initiale
+  excludes:
+  - autres familles du Core System
+  - raccordements et migrations Beaumanoir
+  - décision et acceptation métier côté client
+  - pilotage du programme et conduite du changement Groupe
+  - MCO et évolutions annuelles
+  - exploitation et achats cloud/licences
+  - certification et audits externes spécifiques non définis
+  assumptions:
+  - id: scope
+    hypothesis: Six capacités BC-002 à BC-007. Admission de contributions, consultation et administration ; pas
+      de création d’un PIM/MDM complet avec édition collaborative et workflows riches.
+    trigger: Ajout d’édition métier, validation multi-acteurs, fusion/dédoublonnage, recherche floue ou arbitrage
+      automatique de données.
+    effect: Hausse potentiellement importante. À l’inverse, isoler des fonctions natives non nécessaires à FLOW
+      peut réduire le périmètre commun. Effet non chiffré sans liste d’écarts.
+  - id: complements
+    hypothesis: 'Les compléments restent dimensionnés par analogie : 172 traitements, 313 champs et 42 modèles supplémentaires,
+      dont seules huit analogies de règle ont été affinées.'
+    trigger: Modification substantielle des versions, des règles d’autorité, des dépendances ou du protocole de
+      reprise.
+    effect: Une hausse isolée de 10 % de la taille complémentaire ajoute environ 90 JH dans le modèle. Ce n’est
+      ni une probabilité ni une marge à ajouter.
+  - id: reuse
+    hypothesis: Services comparables disponibles dans Spring, persistance, identité, import et composants UI ; base
+      de données, sauvegardes et chaîne de livraison disponibles.
+    trigger: Réécriture d’un mécanisme générique, intégration technique nettement plus difficile ou composants indisponibles.
+    effect: Hausse des JH et du délai. La réutilisation ne peut pas être remplacée par une remise forfaitaire ;
+      un mécanisme partagé garde un seul propriétaire de financement.
+  - id: service
+    hypothesis: 'Objectifs de comparaison S1 conservés : disponibilité 99,9 %, rétablissement après sinistre sous
+      8 h, perte de données cible au plus 4 h ; qualification d’un lot de 100 000 lignes en 30 min. Ils ne sont
+      pas démontrés.'
+    trigger: Exigences plus fortes, plusieurs régions actives, reprise automatique sans intervention, volumes très
+      supérieurs ou certification spécifique.
+    effect: Hausse possible de l’architecture, de la qualification et de la plateforme. Les achats et l’exploitation
+      récurrente restent hors des 1 500 JH.
+  - id: organization
+    hypothesis: Équipe maîtrisant Spring et les composants réutilisés, décideurs disponibles, environnements accessibles
+      et capacité moyenne voisine de cinq personnes à temps plein.
+    trigger: Équipe junior ou instable, attente de décisions, services partagés non disponibles, dépendances externes
+      bloquantes.
+    effect: Le délai de 17 mois devient fragile. À effort inchangé, quatre équivalents temps plein à 18 JH/mois
+      requièrent déjà 20.8 mois de capacité ; les dépendances peuvent ajouter du délai. Ce quotient n’est pas une
+      nouvelle prédiction COCOMO.
+  crosscheck:
+    method: COSMIC × ISBSG
+    jh: 1200.0
+    explanation: Comparaison conservée, pas réconciliation démontrée. Choix de consolidation à 1 500 JH, sans moyenne
+      des méthodes.
+  no_extra_ai_discount: true
+  no_extra_coordination: true
+  calculation:
+    id: master-data-java-spring-v1

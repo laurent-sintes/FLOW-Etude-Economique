@@ -11,6 +11,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 from market_oss import _reference
 from validate_stacks import ROOT, read
+from capability_catalog import analysis
 
 SOURCE = 'source/instruction-marche.yaml'
 SCHEMA = 'source/schema-instruction-marche.yaml'
@@ -26,7 +27,7 @@ def build_market_instruction(market, *, grid=None, instruction=None, core_functi
     `reperes_axes` means only that an existing selective axis cites the capability.
     It is deliberately not a functional coverage or parity assertion.
     """
-    grid = read(ROOT / 'source/grille-complexite.yaml') if grid is None else grid
+    grid = analysis() if grid is None else grid
     instruction = read(ROOT / SOURCE) if instruction is None else instruction
     errors = sorted(Draft202012Validator(read(ROOT / SCHEMA), format_checker=FormatChecker()).iter_errors(instruction), key=lambda e: str(e.path))
     if errors:
@@ -112,7 +113,7 @@ def build_market_instruction(market, *, grid=None, instruction=None, core_functi
             besoins_instruits=sum(row['functional_status'] == 'besoins_instruits' for row in product_rows)))
     return dict(id=instruction['id'], interpretation=instruction['interpretation'], source_ref=SOURCE,
         status_labels=deepcopy(instruction['status_labels']),
-        capabilities=[dict(bc_ref=block['id'], capability_ref=block['capacite_id'], path=list(block['chemin']), need_refs=[item['id'] for item in block['fonctions']]) for block in blocks],
+        capabilities=[dict(bc_ref=block['id'], capability_ref=block['capacite_id'], path=list(block['chemin']), need_refs=[item['id'] for item in block['fonctions']], proposed_functions=deepcopy(block['fonctions']), analysis_source='source/analyse-perimetre-core.yaml') for block in blocks],
         products=[dict(id=key, label=fiche['nom']) for key, fiche in fiches.items()], rows=rows, progress=progress,
         qualifications=deepcopy(records),
         summary=dict(capabilities=len(blocks), products=len(fiches), pairs=len(rows),

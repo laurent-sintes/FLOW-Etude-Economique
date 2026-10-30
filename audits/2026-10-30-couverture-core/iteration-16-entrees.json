@@ -1,0 +1,286 @@
+{
+  "iteration": 16,
+  "title": "Politiques et capacité de service",
+  "capabilities": [
+    8,
+    49
+  ],
+  "contract": "Core générique Spring : politiques typées, versions immuables, dates d'effet, activation atomique, explication de la règle appliquée ; capacités déclarées par fournisseur/service/site/unité/période avec fraîcheur, provenance et inconnu. Contrôles de cohérence structurels et sur jeux de situations, sans preuve générale de non-contradiction de règles arbitraires.",
+  "profile": "Hypothèse d'étude : 20 familles de paramètres et prédicats typés, 10 000 règles actives, 100 cas de simulation par activation ; 500 prestataires, horizon 180 jours, 100 000 cellules de capacité, consultation unitaire p95 visée 2 s. Aucun de ces volumes/SLA n'est mesuré. Les règles de marque et les flux prestataires réels sont de l'intégration.",
+  "reduced": "Les rôles des producteurs et consommateurs sont séparés. Gouverner une politique ne refait pas les optimiseurs12–15 ; exposer une capacité ne réserve rien. Les recouvrements de période et l'absence de charge connue deviennent des cas explicitement financés.",
+  "remaining": "Adéquation des schémas de politique aux marques, conflits sémantiques entre règles, unité/cadence des capacités externes, fraîcheur et origine des engagements. BC049 reçoit un disponible ou une charge explicitement sourcés ; aucun disponible déduit d'un plafond seul.",
+  "next": "Continuer avec admissibilité des prestataires, disposition des biens et orchestration des prestations ; les consommateurs peuvent maintenant référencer ces contrats.",
+  "proofs": [
+    [
+      "O161",
+      "O",
+      "addons/stock/models/stock_rule.py",
+      [
+        [
+          482,
+          543
+        ]
+      ],
+      "Recherche de règles par routes, entrepôts et ordre de priorité.",
+      "Analogie de sélection contextualisée. Version immuable, activation atomique et explication FLOW restent à construire."
+    ],
+    [
+      "O162",
+      "O",
+      "addons/resource/models/resource_calendar.py",
+      [
+        [
+          620,
+          653
+        ]
+      ],
+      "Intervalles effectifs calculés par soustraction des absences, avec fuseaux.",
+      "Analogie de calendrier. Un horaire interne ne prouve ni capacité externe disponible ni engagement du prestataire."
+    ],
+    [
+      "T161",
+      "T",
+      "modules/stock_supply/order_point.py",
+      [
+        [
+          15,
+          94
+        ]
+      ],
+      "Politique par produit et localisation, minimum/cible soumis à contraintes.",
+      "Analogie de schéma typé et cohérence numérique ; pas preuve d'un moteur universel de politiques de satisfaction."
+    ],
+    [
+      "T162",
+      "T",
+      "modules/production_work/work.py",
+      [
+        [
+          28,
+          63
+        ]
+      ],
+      "Centres de charge rattachés à société/entrepôt, catégorie et coût horaire/cycle.",
+      "Analogie des dimensions et unités ; pas de contrat de déclaration externe ou fraîcheur prouvé ici."
+    ],
+    [
+      "A161",
+      "A",
+      "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/StockRulesSupplychainServiceImpl.java",
+      [
+        [
+          102,
+          129
+        ]
+      ],
+      "Règles de stock distinguant alerte et demande d'achat selon configuration.",
+      "Ne pas confondre politique gouvernée et action consommatrice ; activation versionnée à réaliser pour FLOW."
+    ],
+    [
+      "A162",
+      "A",
+      "axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      [
+        [
+          63,
+          95
+        ]
+      ],
+      "Calendrier machine absent traité fermé et recherche de créneau disponible.",
+      "Montre le risque du défaut calendaire. FLOW doit distinguer fermé explicite et capacité externe inconnue."
+    ]
+  ],
+  "packages": [
+    {
+      "id": "E161",
+      "cap": null,
+      "label": "Raccords politiques et capacités aux consommateurs",
+      "v": [
+        6,
+        10,
+        24,
+        6,
+        0,
+        12,
+        6,
+        4,
+        6,
+        6
+      ],
+      "f": [
+        0.7,
+        1.7
+      ],
+      "work": "Contrats versionnés et compatibilité avec planification12, promesse14 et commandes13 ; doubles de prestataires, tests de fraîcheur et d'activation en concurrence.",
+      "java": [
+        [
+          "Contrats, versions consommées et invalidation",
+          14
+        ],
+        [
+          "Tests développeur des raccords et concurrence",
+          10
+        ]
+      ],
+      "ui": [
+        [
+          "Affichage de la provenance et des erreurs",
+          6
+        ]
+      ],
+      "evidence": [
+        "O161",
+        "O162",
+        "A162"
+      ],
+      "reuse": [
+        "09:I701–I706 identité/version/import",
+        "12:S123 évaluation des paramètres reçus",
+        "14:S141/S142 proposition et ressources"
+      ],
+      "risk": "Compatibilité des consommations et test des versions ; aucun second moteur de règles."
+    },
+    {
+      "id": "B008",
+      "cap": 8,
+      "label": "Gestion des politiques de satisfaction",
+      "v": [
+        30,
+        24,
+        110,
+        48,
+        10,
+        38,
+        8,
+        12,
+        14,
+        30
+      ],
+      "f": [
+        0.65,
+        2
+      ],
+      "work": "Définition typée, portée, priorités, périodes ; versions et habilitations ; contrôles structurels, simulation de cas, activation compare-and-swap ; explication et archivage de la version effectivement appliquée.",
+      "java": [
+        [
+          "Modèle typé et portée des politiques",
+          24
+        ],
+        [
+          "Versions, contrôle des conflits et activation atomique",
+          30
+        ],
+        [
+          "Simulation bornée et explication",
+          28
+        ],
+        [
+          "Tests développeur des conflits, dates et versions",
+          28
+        ]
+      ],
+      "ui": [
+        [
+          "Éditeur de politiques et versions",
+          26
+        ],
+        [
+          "Simulation, écarts et explication",
+          22
+        ]
+      ],
+      "evidence": [
+        "O161",
+        "T161",
+        "A161"
+      ],
+      "reuse": [
+        "09:I701–I706 versions/références",
+        "12:S123 évaluation reçue",
+        "11:BC082 interventions autorisées"
+      ],
+      "risk": "Conflits sémantiques et diversité des critères ; pas de langage arbitraire ni de politiques commerciales conçues pour le Groupe.",
+      "analogy": "Les trois ERP illustrent sélection, priorités ou contrôles de paramètres. Aucun extrait ne prouve à lui seul toute la gouvernance versionnée FLOW."
+    },
+    {
+      "id": "B049",
+      "cap": 49,
+      "label": "Visibilité de la capacité de service",
+      "v": [
+        20,
+        16,
+        66,
+        28,
+        6,
+        24,
+        8,
+        4,
+        8,
+        14
+      ],
+      "f": [
+        0.6,
+        2.2
+      ],
+      "work": "Déclarations révisables par portée, fuseau, période et unité ; distinguer plafond/charge/disponible, recouvrements et inconnus ; consultation datée avec fraîcheur, validité et origine.",
+      "java": [
+        [
+          "Schéma des déclarations et normalisation unité/période",
+          22
+        ],
+        [
+          "Révision, rapprochement et projection de capacité",
+          24
+        ],
+        [
+          "Tests développeur des doubles comptes, inconnu et fuseaux",
+          20
+        ]
+      ],
+      "ui": [
+        [
+          "Tableau de capacité et périodes",
+          16
+        ],
+        [
+          "Explication des inconnus et corrections",
+          12
+        ]
+      ],
+      "evidence": [
+        "O162",
+        "T162",
+        "A162"
+      ],
+      "reuse": [
+        "09:I701–I706 ingestion/références",
+        "10:S102 unités et dimensions",
+        "12:S121 horizons et instantanés",
+        "14:S142 rapprochement des ressources"
+      ],
+      "risk": "Comparabilité des déclarations et autorité des valeurs ; pas de planification des équipes des exécutants.",
+      "analogy": "Calendriers et centres de charge donnent des mécanismes partiels. Le contrat externe et la signification du disponible sont des écarts à développer."
+    }
+  ],
+  "repositories": {
+    "O": [
+      "tmp/odoo20-audit",
+      "odoo/odoo",
+      "299075f17026b830a9755f3c43f3e83143995946"
+    ],
+    "T": [
+      "tmp/tryton-code-audit-2026-10-28",
+      "tryton/tryton",
+      "e011222dc305c431677e586706fd241dffe02236"
+    ],
+    "A": [
+      "tmp/oss-audit-axelor",
+      "axelor/axelor-open-suite",
+      "e7cbea53bae88d2540f59a70b09bf0f326f1022e"
+    ]
+  },
+  "strong_reserves": [
+    8,
+    49
+  ]
+}

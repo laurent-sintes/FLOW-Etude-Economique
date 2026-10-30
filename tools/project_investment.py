@@ -9,7 +9,7 @@ from calculate_costs import valuation, sha, mixed_cost, role_rates, volume
 from validate_stacks import ROOT, read
 from model_inputs import annual_scenario, funding_inputs, buy_selection_inputs
 from content_model import resolve_text_tree
-from business_calibration import active_doc
+from current_cost_inputs import active_doc
 from composable_costs import annual_split, initial_ledger, service_parts, RESPONSIBILITIES, load_funding_model
 from model_context import scoped_model
 
@@ -301,7 +301,7 @@ def project(data, horizon_years=None):
         b=o['build_mois']+o.get('selection_mois',0); d=o['integration_mois']; end=b+d
         assert (o['mode']=='Buy' and o['build_mois']==0) or 36<=b<=60
         assert 6<=d<=60 and end<=120
-        
+
         ledger=initial_ledger(o,o['composable']['reference_services']) if o['mode']=='Make' else [
             dict(id='integration_initiale',financement_id='integration_initiale',amount=o['integration'],start=b,end=end,
                  objet='adaptations_client',prestation='integration',responsibility='integration_client',phase='integration',source=f"source/chiffrage/chiffrage-{o['stack']}.yaml")]

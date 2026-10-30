@@ -1,0 +1,280 @@
+{
+  "id": "master-data-native-23",
+  "date": "2026-10-30",
+  "status": "references_natives_conditionnelles_non_admises_au_budget_flow",
+  "user_decision": "Quatre références natives, puis transposition à Flow. Un total par OSS, sans découpage budgétaire Socle + Fonction FLOW ni consolidation prématurée.",
+  "calculation": {
+    "A": 2.94,
+    "B": 0.91,
+    "SF_sum": 18.97,
+    "EM": 1,
+    "C": 3.67,
+    "D": 0.28,
+    "person_month_hours": 152,
+    "day_hours": 7,
+    "declarative_weight": 1,
+    "declarative_weights_sensitivity": [
+      0,
+      1,
+      2
+    ],
+    "SCED": 1,
+    "REVL": 0,
+    "meaning": "Reconstruction théorique en code neuf de toute la sélection de chaque alternative, avec les mécanismes de plateforme retenus comptés une fois. Les bibliothèques et runtimes hors sélection restent disponibles. Hypothèse de financement à 100 % de cette sélection ; aucune allocation à d'autres domaines.",
+    "parameter_status": "Valeurs nominales communes, non calibrées sur l'équipe ou l'histoire des OSS. La convention 1 unité syntaxique ou déclarative = 1 SLOC équivalente est une hypothèse de mesure, non une conversion certifiée.",
+    "full_effort_factor": 1.18,
+    "full_schedule_factor": 1.25,
+    "source": "https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf",
+    "activities_ref": "../2026-10-30-master-data-calcul/repartitions-sources.json#cocomo",
+    "phase_extension_status": "Répartition par défaut MBASE/RUP appliquée conditionnellement ; elle ne mesure pas les phases historiques de ces OSS."
+  },
+  "products": [
+    {
+      "id": "erpnext",
+      "label": "ERPNext + Frappe",
+      "technology": "Python / JavaScript / DocType JSON",
+      "reconstruction": "ERPNext v16.52.1 + Frappe v16.54.0 ; périmètre sélectionné aux commits du manifeste",
+      "extra_scope": "Les contrôleurs Item, Customer, Supplier et get_item_details contiennent aussi des vérifications liées aux transactions, au stock ou à la comptabilité. Les contrôles et utilitaires Frappe retenus servent d'autres applications.",
+      "external_reuse": "Python, bases de données, bibliothèques Python/JavaScript et composants non sélectionnés restent disponibles ; leur reconstruction n'est pas financée."
+    },
+    {
+      "id": "odoo",
+      "label": "Odoo Community",
+      "technology": "Python / JavaScript / XML",
+      "reconstruction": "Odoo branche 20.0 au commit du manifeste",
+      "extra_scope": "Les fichiers warehouse/carrier, les utilitaires et webclient contiennent également des traitements de routes logistiques, expédition, rapports et navigation dépassant les seules fiches Master Data.",
+      "external_reuse": "Python, PostgreSQL, bibliothèques tierces et moteur OWL restent disponibles ; ils ne sont pas reconstruits."
+    },
+    {
+      "id": "tryton",
+      "label": "Tryton + Sao",
+      "technology": "Python / JavaScript / XML",
+      "reconstruction": "Serveur, modules retenus et client web Sao du même commit ; client bureau exclu",
+      "extra_scope": "Les modules company/country/carrier/product_kit et les contrôles génériques contiennent des comportements supplémentaires. Les kits Tryton ne sont pas une équivalence complète de tous les conditionnements FLOW.",
+      "external_reuse": "Python, PostgreSQL, bibliothèques tierces du serveur et du navigateur restent disponibles."
+    },
+    {
+      "id": "axelor",
+      "label": "Axelor Open Suite + Open Platform",
+      "technology": "Java / TypeScript-React / XML",
+      "reconstruction": "Deux commits du manifeste ; Platform v8.2.5. Assemblage des deux versions non compilé dans cet audit.",
+      "extra_scope": "Les services Partner/Product, le concepteur de formulaire et certaines API de plateforme débordent les seules fiches Master Data. Les extensions applicatives de stock et de tarifs sont sélectionnées explicitement.",
+      "external_reuse": "JDK, Hibernate, React et bibliothèques Maven restent disponibles, notamment axelor-utils 4.0.2, axelor-message 4.0.3 et axelor-studio 4.0.7 déclarés par la Suite ; leurs sources ne sont pas recomptées comme reconstruite."
+    }
+  ],
+  "scope": {
+    "label": "Panier natif élargi de référentiels Master Data et de leur administration",
+    "flow_family": "Master Data",
+    "flow_capabilities": [
+      "BC-002",
+      "BC-003",
+      "BC-004",
+      "BC-005",
+      "BC-006",
+      "BC-007"
+    ],
+    "boundary": "Sélection statique de fichiers entiers, puis ajout des sous-tables DocType. Ce n'est pas une extraction exécutable autonome ni une fermeture exhaustive du graphe des dépendances.",
+    "guarantee": "Présence de mécanismes dans le code, sans preuve de parité fonctionnelle exhaustive, de qualité identique ni de même difficulté d'exploitation.",
+    "out_of_comparison": [
+      "Exécution des commandes, production, mouvements de stock, facturation et comptabilité, sauf portions mêlées aux fichiers retenus signalées.",
+      "Publication multi-source versionnée, autorité par attribut, quarantaine/reprise et garanties complètes du contrat FLOW : pas affirmées couvertes par les quatre références.",
+      "Workflow complet des accords commerciaux, assortiment/planning et référentiels de réseaux/services spécifiques à FLOW : rapprochement restant à faire.",
+      "Migration et intégration Beaumanoir, conduite du changement, exploitation annuelle, infrastructure hébergée et licences.",
+      "Réécriture des runtimes et bibliothèques exclus ; styles CSS, médias, traductions, données initiales et infrastructure de build non dimensionnés séparément."
+    ],
+    "families": [
+      {
+        "label": "Produits, variantes et classifications",
+        "erpnext": [
+          "erpnext",
+          "erpnext/stock/doctype/item/item.json"
+        ],
+        "odoo": [
+          "odoo",
+          "addons/product/models/product_template.py"
+        ],
+        "tryton": [
+          "tryton",
+          "modules/product/product.py"
+        ],
+        "axelor": [
+          "axelor",
+          "axelor-base/src/main/resources/domains/Product.xml"
+        ],
+        "limit": "Structures natives différentes ; pas de parité certifiée des attributs, variantes ou catalogues."
+      },
+      {
+        "label": "Partenaires, rôles, contacts et adresses",
+        "erpnext": [
+          "erpnext",
+          "erpnext/selling/doctype/customer/customer.json"
+        ],
+        "odoo": [
+          "odoo",
+          "odoo/addons/base/models/res_partner.py"
+        ],
+        "tryton": [
+          "tryton",
+          "modules/party/party.py"
+        ],
+        "axelor": [
+          "axelor",
+          "axelor-base/src/main/resources/domains/Partner.xml"
+        ],
+        "limit": "Rôles et relations présents selon le modèle natif ; contrats commerciaux complets non inclus."
+      },
+      {
+        "label": "Unités et conversions",
+        "erpnext": [
+          "erpnext",
+          "erpnext/stock/doctype/uom_conversion_detail/uom_conversion_detail.json"
+        ],
+        "odoo": [
+          "odoo",
+          "addons/uom/models/uom_uom.py"
+        ],
+        "tryton": [
+          "tryton",
+          "modules/product/uom.py"
+        ],
+        "axelor": [
+          "axelor",
+          "axelor-base/src/main/resources/domains/UnitConversion.xml"
+        ],
+        "limit": "C'est la rubrique déjà examinée au détail dans l'audit précédent ; la nouvelle sélection en étend le contexte."
+      },
+      {
+        "label": "Conditionnements, compositions et kits",
+        "erpnext": [
+          "erpnext",
+          "erpnext/selling/doctype/product_bundle/product_bundle.json"
+        ],
+        "odoo": [
+          "odoo",
+          "addons/stock/models/stock_package_type.py"
+        ],
+        "tryton": [
+          "tryton",
+          "modules/product_kit/product.py"
+        ],
+        "axelor": [
+          "axelor",
+          "axelor-base/src/main/resources/domains/ProductPackaging.xml"
+        ],
+        "limit": "Comparabilité partielle : bundle, kit, type de colis et conditionnement sont des mécanismes proches, non identiques."
+      },
+      {
+        "label": "Catalogues tarifaires et prix de référence",
+        "erpnext": [
+          "erpnext",
+          "erpnext/stock/doctype/item_price/item_price.json"
+        ],
+        "odoo": [
+          "odoo",
+          "addons/product/models/product_pricelist.py"
+        ],
+        "tryton": [
+          "tryton",
+          "modules/product_price_list/price_list.py"
+        ],
+        "axelor": [
+          "axelor",
+          "axelor-base/src/main/resources/domains/PriceList.xml"
+        ],
+        "limit": "Règles de prix natives de portée différente ; pas de calcul de la politique commerciale Beaumanoir."
+      },
+      {
+        "label": "Sites et emplacements",
+        "erpnext": [
+          "erpnext",
+          "erpnext/stock/doctype/warehouse/warehouse.json"
+        ],
+        "odoo": [
+          "odoo",
+          "addons/stock/models/stock_location.py"
+        ],
+        "tryton": [
+          "tryton",
+          "modules/stock/location.py"
+        ],
+        "axelor": [
+          "axelor",
+          "axelor-stock/src/main/resources/domains/StockLocation.xml"
+        ],
+        "limit": "Arbres de sites/emplacements, pas une preuve de couverture de tout le réseau logistique FLOW."
+      },
+      {
+        "label": "Services et transporteurs",
+        "erpnext": [
+          "erpnext",
+          "erpnext/accounts/doctype/shipping_rule/shipping_rule.json"
+        ],
+        "odoo": [
+          "odoo",
+          "addons/delivery/models/delivery_carrier.py"
+        ],
+        "tryton": [
+          "tryton",
+          "modules/carrier/carrier.py"
+        ],
+        "axelor": [
+          "axelor",
+          "axelor-supplychain/src/main/resources/domains/FreightCarrierPricing.xml"
+        ],
+        "limit": "Produits de type service et références de livraison/tarifs ; pas d'orchestration ni d'optimisation."
+      },
+      {
+        "label": "Administration native des référentiels",
+        "erpnext": [
+          "frappe",
+          "frappe/core/doctype/data_import/importer.py"
+        ],
+        "odoo": [
+          "odoo",
+          "odoo/orm/models.py"
+        ],
+        "tryton": [
+          "tryton",
+          "trytond/trytond/model/modelstorage.py"
+        ],
+        "axelor": [
+          "platform",
+          "axelor-core/src/main/java/com/axelor/rpc/Resource.java"
+        ],
+        "limit": "Formulaires, listes, accès, persistance et imports ; fermeture complète des dépendances non démontrée."
+      }
+    ]
+  },
+  "uncertainty": {
+    "level": "Élevée et non calibrée",
+    "confidence_interval": null,
+    "percentile": null,
+    "declarative_sensitivity": "Seule variation du poids des déclarations de 0 à 2, programme constant. Ces bornes ne représentent pas l'incertitude totale ni un intervalle de confiance.",
+    "context_sensitivity": "À taille fixée, un produit EM de 0,75 ou 1,5 produit mécaniquement 75 % ou 150 % de l'effort. Illustration paramétrique seulement, pas valeurs qualifiées pour les OSS.",
+    "unquantified": [
+      "Périmètre utile et surplus de chaque fichier, dépendances non fermées.",
+      "Financement intégral ou réutilisation des mécanismes génériques.",
+      "Validité de la conversion des unités syntaxiques et déclaratives en taille COCOMO.",
+      "Facteurs d'échelle, productivité de l'équipe, qualité, évolution des exigences et contexte natif.",
+      "Comparabilité fonctionnelle et niveaux de garanties entre OSS."
+    ]
+  },
+  "triangulation": {
+    "cocomo": "Exécuté sur les quatre sélections natives ; effort conditionnel, pas charge observée.",
+    "cosmic": "Aucun comptage complet COSMIC des quatre paniers natifs. Le témoin des unités et les 350 CFP du précédent scénario FLOW ne sont pas extrapolés.",
+    "isbsg": "Aucune référence de productivité qualifiée pour l'ensemble de ces quatre périmètres natifs. Le coefficient Java historique ne devient pas une calibration Python.",
+    "conclusion": "Ces quatre résultats ne constituent pas encore une confrontation indépendante COCOMO–COSMIC–ISBSG. Aucune moyenne entre méthodes n'est produite."
+  },
+  "progress": {
+    "native_calculations_completed": 4,
+    "native_calculations_target": 4,
+    "source_repositories": 6,
+    "functional_families_examined_per_reference": 8,
+    "flow_capabilities_in_family": 6,
+    "new_flow_capabilities_admitted_for_budget": 0,
+    "global_flow_jh": null,
+    "aggregate_four_alternatives": null,
+    "flow_master_data_budget": null
+  },
+  "next_iteration": "Oui : définir dans chaque référence les mécanismes natifs réellement utiles et la réutilisation disponible pour leur transposition Spring ; conserver les écarts fonctionnels. Ne pas appliquer un rabais global, additionner les quatre alternatives ou les moyenner."
+}

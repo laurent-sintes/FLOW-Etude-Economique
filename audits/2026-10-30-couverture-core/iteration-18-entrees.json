@@ -1,0 +1,1078 @@
+{
+  "iteration": 18,
+  "title": "Quinze types d'ordres de service",
+  "capabilities": [
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73
+  ],
+  "strong_reserves": [
+    61,
+    63,
+    66,
+    72,
+    73
+  ],
+  "repositories": {
+    "O": [
+      "tmp/odoo20-audit",
+      "odoo/odoo",
+      "299075f17026b830a9755f3c43f3e83143995946"
+    ],
+    "T": [
+      "tmp/tryton-code-audit-2026-10-28",
+      "tryton/tryton",
+      "e011222dc305c431677e586706fd241dffe02236"
+    ],
+    "A": [
+      "tmp/oss-audit-axelor",
+      "axelor/axelor-open-suite",
+      "e7cbea53bae88d2540f59a70b09bf0f326f1022e"
+    ]
+  },
+  "proofs": [
+    [
+      "O181",
+      "O",
+      "addons/stock/models/stock_picking.py",
+      [
+        [
+          1014,
+          1057
+        ],
+        [
+          1265,
+          1288
+        ]
+      ],
+      "Réalisation, écarts de quantité et reliquats de transferts.",
+      "Analogie d'ordre et résultat partiel ; pas de WMS à reconstruire."
+    ],
+    [
+      "O182",
+      "O",
+      "addons/repair/models/repair.py",
+      [
+        [
+          542,
+          590
+        ]
+      ],
+      "Ordre de réparation lié au bien, au lot/série et au propriétaire.",
+      "Preuve de mécanismes de filiation ; les gestes et diagnostics de réparation restent externes."
+    ],
+    [
+      "O183",
+      "O",
+      "addons/mrp/models/mrp_bom.py",
+      [
+        [
+          455,
+          505
+        ]
+      ],
+      "Décomposition d'une nomenclature, conversion d'unités et liens composants.",
+      "Analogie pour exigences de kit, sans reprendre une GPAO."
+    ],
+    [
+      "T181",
+      "T",
+      "modules/stock/shipment.py",
+      [
+        [
+          294,
+          328
+        ],
+        [
+          768,
+          805
+        ]
+      ],
+      "Rapprochement quantités source/cible et états de réception/réalisation.",
+      "Analogies pour réception et passage ; pas preuve d'ordres délégués de15 natures."
+    ],
+    [
+      "T182",
+      "T",
+      "modules/quality/quality.py",
+      [
+        [
+          490,
+          504
+        ],
+        [
+          552,
+          586
+        ]
+      ],
+      "Points de contrôle obligatoires, résultat accepté/refusé et alerte.",
+      "Analogie de résultat qualité configurable. Ne prouve pas des prestations de finition/nettoyage/personnalisation complètes."
+    ],
+    [
+      "T183",
+      "T",
+      "modules/carrier/carrier.py",
+      [
+        [
+          77,
+          115
+        ]
+      ],
+      "Transporteurs sélectionnés selon portée géographique.",
+      "Référence d'exécutant, pas preuve d'un engagement autonome de capacité de transport."
+    ],
+    [
+      "A181",
+      "A",
+      "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      [
+        [
+          409,
+          457
+        ],
+        [
+          545,
+          608
+        ]
+      ],
+      "Engagement planifié, réalisation contrôlée, dates et qualité.",
+      "Le Core doit garder les états externes distincts des mouvements de stock."
+    ],
+    [
+      "A182",
+      "A",
+      "axelor-quality/src/main/java/com/axelor/apps/quality/service/QualityControlServiceImpl.java",
+      [
+        [
+          53,
+          111
+        ]
+      ],
+      "Instantiation de points de contrôle, points optionnels et actions correctives à partir d'un modèle.",
+      "Analogie de consignes/contrôles structurés, pas couverture de chaque prestation textile."
+    ],
+    [
+      "A183",
+      "A",
+      "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      [
+        [
+          1882,
+          1889
+        ]
+      ],
+      "Conservation des codes douaniers des lignes de mouvement.",
+      "Référence documentaire limitée ; ne démontre ni prestation de dédouanement ni moteur réglementaire."
+    ]
+  ],
+  "packages": [
+    {
+      "id": "S181",
+      "cap": null,
+      "label": "Cycle commun des ordres de service",
+      "v": [
+        30,
+        24,
+        96,
+        52,
+        12,
+        38,
+        12,
+        12,
+        16,
+        8
+      ],
+      "f": [
+        0.65,
+        2
+      ],
+      "work": "Infrastructure métier partagée : exigences versionnées, propositions et acceptations, refus, modification/annulation autorisée, engagements partiels, résultats reconnus et reste par nature. Adaptateurs de cycle par type ; aucun cycle unique imposé à toutes les prestations.",
+      "java": [
+        [
+          "Modèle d'engagement, version et invariants",
+          32
+        ],
+        [
+          "API et moteur de transitions spécialisé",
+          34
+        ],
+        [
+          "Tests développeur des partiels et concurrence",
+          30
+        ]
+      ],
+      "ui": [
+        [
+          "Écrans communs et composants de lignes",
+          32
+        ],
+        [
+          "Historique, preuves et changement autorisé",
+          20
+        ]
+      ],
+      "evidence": [
+        "O181",
+        "T181",
+        "A181"
+      ],
+      "reuse": [
+        "13:S131 noyau versionné Orders, sans recopier le cycle commercial",
+        "11:S111/S112 exécution durable",
+        "17:B056/B057 faits et rapprochement"
+      ],
+      "risk": "Point de mutualisation à confirmer avec les15 variantes ; éviter un cycle artificiellement universel."
+    },
+    {
+      "id": "E181",
+      "cap": null,
+      "label": "Pièces et raccords côté ordres de service",
+      "v": [
+        12,
+        14,
+        40,
+        18,
+        4,
+        24,
+        8,
+        8,
+        8,
+        0
+      ],
+      "f": [
+        0.65,
+        2.1
+      ],
+      "work": "Métadonnées métier de pièces requises/reçues/validées et filiation aux versions ; contrats avec orchestration17, stock10, promesse14 et politiques16. Tests côté ordres, sans refaire les tests de coordination E171.",
+      "java": [
+        [
+          "Métadonnées des pièces et liens aux versions",
+          14
+        ],
+        [
+          "Raccords et publication des résultats",
+          14
+        ],
+        [
+          "Tests développeur droits et compatibilité",
+          12
+        ]
+      ],
+      "ui": [
+        [
+          "Pièces manquantes et navigation intermodules",
+          18
+        ]
+      ],
+      "evidence": [
+        "O182",
+        "T182",
+        "A182",
+        "A183"
+      ],
+      "reuse": [
+        "09:socle documents, droits et références",
+        "17:E171 contrats de coordination",
+        "10:S103 publication durable"
+      ],
+      "risk": "Intégrité et confidentialité des documents ; stockage technique réemployé, pas une GED générale."
+    },
+    {
+      "id": "B059",
+      "cap": 59,
+      "label": "Prélèvement",
+      "v": [
+        12,
+        6,
+        28,
+        14,
+        3,
+        12,
+        2,
+        2,
+        4,
+        0
+      ],
+      "f": [
+        0.7,
+        1.8
+      ],
+      "work": "Exigences article/lot/lieu/date, engagements de prélèvement, quantités reconnues et manquants ; aucune gestion des déplacements WMS.",
+      "java": [
+        [
+          "Lignes et engagements de prélèvement",
+          18
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          10
+        ]
+      ],
+      "ui": [
+        [
+          "Prélèvement : exigences, engagements, résultats et écarts",
+          14
+        ]
+      ],
+      "evidence": [
+        "O181",
+        "T181",
+        "A181"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Granularité lot/pièce et origine du manquant ; unité de mesure explicite.",
+      "analogy_type": "directe_partielle",
+      "analogy": "Correspondance fonctionnelle partielle observée dans les extraits, avec différence entre exécution interne ERP et ordre délégué FLOW. Aucun transfert direct de code ou de productivité supposé."
+    },
+    {
+      "id": "B060",
+      "cap": 60,
+      "label": "Conditionnement",
+      "v": [
+        14,
+        8,
+        36,
+        18,
+        4,
+        14,
+        2,
+        2,
+        6,
+        0
+      ],
+      "f": [
+        0.65,
+        2
+      ],
+      "work": "Spécification versionnée de conditionnement et reconditionnement, filiation biens→unités logistiques, quantités conformes et reste ; aucun placement3D.",
+      "java": [
+        [
+          "Spécification et filiation des colis",
+          24
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          12
+        ]
+      ],
+      "ui": [
+        [
+          "Conditionnement : exigences, engagements, résultats et écarts",
+          18
+        ]
+      ],
+      "evidence": [
+        "O181",
+        "T181",
+        "A182"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Relations de manutention et preuves de conformité, pas calcul du meilleur emballage.",
+      "analogy_type": "transversale",
+      "analogy": "Les extraits étayent des mécanismes transversaux (dossier, engagement, filiation, résultat/qualité). Aucun produit complet équivalent à cette capacité n'est démontré dans cette lecture. Les spécificités décrites restent à réaliser."
+    },
+    {
+      "id": "B061",
+      "cap": 61,
+      "label": "Cross-docking",
+      "v": [
+        18,
+        12,
+        48,
+        20,
+        4,
+        20,
+        4,
+        2,
+        6,
+        8
+      ],
+      "f": [
+        0.6,
+        2.3
+      ],
+      "work": "Engagements de passage, liens multiples entrée/sortie, répartition des quantités et fenêtres, résultats partiels/retards ; aucun ordonnancement de quai.",
+      "java": [
+        [
+          "Filiation entrées/sorties et fenêtres",
+          32
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          16
+        ]
+      ],
+      "ui": [
+        [
+          "Cross-docking : exigences, engagements, résultats et écarts",
+          20
+        ]
+      ],
+      "evidence": [
+        "O181",
+        "T181",
+        "A181"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Cardinalité des passages et effets d'une entrée tardive sur plusieurs sorties.",
+      "analogy_type": "transversale",
+      "analogy": "Les extraits étayent des mécanismes transversaux (dossier, engagement, filiation, résultat/qualité). Aucun produit complet équivalent à cette capacité n'est démontré dans cette lecture. Les spécificités décrites restent à réaliser."
+    },
+    {
+      "id": "B062",
+      "cap": 62,
+      "label": "Étiquetage",
+      "v": [
+        10,
+        6,
+        26,
+        14,
+        3,
+        10,
+        2,
+        2,
+        4,
+        0
+      ],
+      "f": [
+        0.7,
+        1.9
+      ],
+      "work": "Contenu et version d'étiquette attendus, identité applicable, quantités traitées/conformes et reprises autorisées ; ne pilote pas les imprimantes.",
+      "java": [
+        [
+          "Exigences de marquage et résultat",
+          18
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          8
+        ]
+      ],
+      "ui": [
+        [
+          "Étiquetage : exigences, engagements, résultats et écarts",
+          14
+        ]
+      ],
+      "evidence": [
+        "T182",
+        "A182",
+        "O181"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Preuve structurée ou attestation ; formats d'impression du client externes.",
+      "analogy_type": "transversale",
+      "analogy": "Les extraits étayent des mécanismes transversaux (dossier, engagement, filiation, résultat/qualité). Aucun produit complet équivalent à cette capacité n'est démontré dans cette lecture. Les spécificités décrites restent à réaliser."
+    },
+    {
+      "id": "B063",
+      "cap": 63,
+      "label": "Constitution et séparation de kits",
+      "v": [
+        18,
+        12,
+        50,
+        22,
+        4,
+        20,
+        4,
+        2,
+        6,
+        12
+      ],
+      "f": [
+        0.6,
+        2.3
+      ],
+      "work": "Composition versionnée jusqu'à3 niveaux, entrants/sortants par lot, unités et écarts de composition ; séparation et reprise, sans GPAO.",
+      "java": [
+        [
+          "Composition et filiation multi-niveau",
+          32
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          18
+        ]
+      ],
+      "ui": [
+        [
+          "Constitution et séparation de kits : exigences, engagements, résultats et écarts",
+          22
+        ]
+      ],
+      "evidence": [
+        "O183",
+        "T181",
+        "A181"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Profondeur, substitutions autorisées et traçabilité des composants ; règles métier reçues.",
+      "analogy_type": "directe_partielle",
+      "analogy": "Correspondance fonctionnelle partielle observée dans les extraits, avec différence entre exécution interne ERP et ordre délégué FLOW. Aucun transfert direct de code ou de productivité supposé."
+    },
+    {
+      "id": "B064",
+      "cap": 64,
+      "label": "Finition d'aspect",
+      "v": [
+        10,
+        6,
+        24,
+        14,
+        3,
+        10,
+        2,
+        2,
+        4,
+        0
+      ],
+      "f": [
+        0.65,
+        2.1
+      ],
+      "work": "Consignes structurées de finition, engagements, attestation globale ou résultat par lot/pièce, conformité et reprise ; pas de procédé industriel.",
+      "java": [
+        [
+          "Consignes de finition et résultats distincts",
+          16
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          8
+        ]
+      ],
+      "ui": [
+        [
+          "Finition d'aspect : exigences, engagements, résultats et écarts",
+          14
+        ]
+      ],
+      "evidence": [
+        "T182",
+        "A182",
+        "O182"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Aucune analogie exacte de prestation textile démontrée ; analogie cycle+qualité seulement.",
+      "analogy_type": "transversale",
+      "analogy": "Les extraits étayent des mécanismes transversaux (dossier, engagement, filiation, résultat/qualité). Aucun produit complet équivalent à cette capacité n'est démontré dans cette lecture. Les spécificités décrites restent à réaliser."
+    },
+    {
+      "id": "B065",
+      "cap": 65,
+      "label": "Nettoyage",
+      "v": [
+        10,
+        6,
+        24,
+        14,
+        3,
+        10,
+        2,
+        2,
+        4,
+        0
+      ],
+      "f": [
+        0.65,
+        2.1
+      ],
+      "work": "Biens confiés, consignes de nettoyage, engagement, résultat de propreté et non-conformités, sans commande d'équipement.",
+      "java": [
+        [
+          "Consignes de nettoyage et biens confiés",
+          16
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          8
+        ]
+      ],
+      "ui": [
+        [
+          "Nettoyage : exigences, engagements, résultats et écarts",
+          14
+        ]
+      ],
+      "evidence": [
+        "T182",
+        "A182",
+        "O182"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Preuve du résultat, biens fongibles ou individualisés ; analogue transversal seulement.",
+      "analogy_type": "transversale",
+      "analogy": "Les extraits étayent des mécanismes transversaux (dossier, engagement, filiation, résultat/qualité). Aucun produit complet équivalent à cette capacité n'est démontré dans cette lecture. Les spécificités décrites restent à réaliser."
+    },
+    {
+      "id": "B066",
+      "cap": 66,
+      "label": "Réparation et retouche",
+      "v": [
+        18,
+        12,
+        50,
+        24,
+        4,
+        20,
+        4,
+        4,
+        6,
+        4
+      ],
+      "f": [
+        0.6,
+        2.3
+      ],
+      "work": "Demande, diagnostic reçu et accord de modification, identité et filiation du bien confié, résultat/restauration/restitution ; pas de diagnostic automatique.",
+      "java": [
+        [
+          "Filiation, accord de réparation et restitution",
+          32
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          18
+        ]
+      ],
+      "ui": [
+        [
+          "Réparation et retouche : exigences, engagements, résultats et écarts",
+          24
+        ]
+      ],
+      "evidence": [
+        "O182",
+        "T182",
+        "A181"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Changement d'exigence et preuve de restitution, dommages et réparations partielles.",
+      "analogy_type": "directe_partielle",
+      "analogy": "Correspondance fonctionnelle partielle observée dans les extraits, avec différence entre exécution interne ERP et ordre délégué FLOW. Aucun transfert direct de code ou de productivité supposé."
+    },
+    {
+      "id": "B067",
+      "cap": 67,
+      "label": "Personnalisation",
+      "v": [
+        12,
+        8,
+        32,
+        20,
+        5,
+        14,
+        4,
+        6,
+        4,
+        0
+      ],
+      "f": [
+        0.6,
+        2.2
+      ],
+      "work": "Spécification individualisée et fichiers référencés, version acceptée, lien demande/bien, résultat et non-conformité ; pas de studio graphique.",
+      "java": [
+        [
+          "Spécification individualisée et version acceptée",
+          22
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          10
+        ]
+      ],
+      "ui": [
+        [
+          "Personnalisation : exigences, engagements, résultats et écarts",
+          20
+        ]
+      ],
+      "evidence": [
+        "O182",
+        "T182",
+        "A182"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Confidentialité des contenus et forme de la preuve ; analogie de dossier et de contrôle seulement.",
+      "analogy_type": "transversale",
+      "analogy": "Les extraits étayent des mécanismes transversaux (dossier, engagement, filiation, résultat/qualité). Aucun produit complet équivalent à cette capacité n'est démontré dans cette lecture. Les spécificités décrites restent à réaliser."
+    },
+    {
+      "id": "B068",
+      "cap": 68,
+      "label": "Inspection",
+      "v": [
+        14,
+        8,
+        36,
+        22,
+        4,
+        16,
+        2,
+        4,
+        6,
+        4
+      ],
+      "f": [
+        0.65,
+        2
+      ],
+      "work": "Grille de contrôle autonome versionnée, points obligatoires, échantillons reçus, pièces et conclusions ; résultat ne déclenche pas automatiquement disposition.",
+      "java": [
+        [
+          "Contrôle autonome, preuves et conclusions",
+          24
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          12
+        ]
+      ],
+      "ui": [
+        [
+          "Inspection : exigences, engagements, résultats et écarts",
+          22
+        ]
+      ],
+      "evidence": [
+        "T182",
+        "A182",
+        "O182"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Échantillonnage déclaré et validité des conclusions ; expertise physique externe.",
+      "analogy_type": "directe_partielle",
+      "analogy": "Correspondance fonctionnelle partielle observée dans les extraits, avec différence entre exécution interne ERP et ordre délégué FLOW. Aucun transfert direct de code ou de productivité supposé."
+    },
+    {
+      "id": "B069",
+      "cap": 69,
+      "label": "Réception",
+      "v": [
+        14,
+        8,
+        36,
+        18,
+        4,
+        16,
+        2,
+        2,
+        6,
+        0
+      ],
+      "f": [
+        0.7,
+        1.9
+      ],
+      "work": "Avis et origine achat/transfert/retour, conditions et quantités, acceptation/refus partiels, engagements et clôture ; ne tient pas le stock local.",
+      "java": [
+        [
+          "Origines et résultats partiels de réception",
+          24
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          12
+        ]
+      ],
+      "ui": [
+        [
+          "Réception : exigences, engagements, résultats et écarts",
+          18
+        ]
+      ],
+      "evidence": [
+        "O181",
+        "T181",
+        "A181"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Unité annoncée/reçue et autorité de reconnaissance ; raccord stock via faits reconnus.",
+      "analogy_type": "directe_partielle",
+      "analogy": "Correspondance fonctionnelle partielle observée dans les extraits, avec différence entre exécution interne ERP et ordre délégué FLOW. Aucun transfert direct de code ou de productivité supposé."
+    },
+    {
+      "id": "B070",
+      "cap": 70,
+      "label": "Rebut",
+      "v": [
+        12,
+        8,
+        28,
+        16,
+        3,
+        14,
+        4,
+        6,
+        4,
+        0
+      ],
+      "f": [
+        0.65,
+        2.1
+      ],
+      "work": "Référence d'autorisation, biens et consignes, engagement de destruction, résultat partiel et attestation ; aucune destruction effectuée par le Core.",
+      "java": [
+        [
+          "Autorisation, preuve de destruction et clôture",
+          18
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          10
+        ]
+      ],
+      "ui": [
+        [
+          "Rebut : exigences, engagements, résultats et écarts",
+          16
+        ]
+      ],
+      "evidence": [
+        "T182",
+        "A182",
+        "O181"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Attestation recevable et conservation ; criticité n'implique pas un algorithme sophistiqué.",
+      "analogy_type": "transversale",
+      "analogy": "Les extraits étayent des mécanismes transversaux (dossier, engagement, filiation, résultat/qualité). Aucun produit complet équivalent à cette capacité n'est démontré dans cette lecture. Les spécificités décrites restent à réaliser."
+    },
+    {
+      "id": "B071",
+      "cap": 71,
+      "label": "Transport",
+      "v": [
+        20,
+        14,
+        56,
+        28,
+        6,
+        24,
+        6,
+        4,
+        8,
+        8
+      ],
+      "f": [
+        0.6,
+        2.2
+      ],
+      "work": "Origines/destinations, legs et fenêtres, unités et conditions, acceptations/modifications, événements et écarts ; pas de flotte ni dispatch interne.",
+      "java": [
+        [
+          "Engagements multi-trajets et modifications",
+          36
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          20
+        ]
+      ],
+      "ui": [
+        [
+          "Transport : exigences, engagements, résultats et écarts",
+          28
+        ]
+      ],
+      "evidence": [
+        "T183",
+        "O181",
+        "A181"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Portée des legs, changements acceptés et événements du transporteur ; plan calculé parB052.",
+      "analogy_type": "directe_partielle",
+      "analogy": "Correspondance fonctionnelle partielle observée dans les extraits, avec différence entre exécution interne ERP et ordre délégué FLOW. Aucun transfert direct de code ou de productivité supposé."
+    },
+    {
+      "id": "B072",
+      "cap": 72,
+      "label": "Réservation de capacité de transport",
+      "v": [
+        20,
+        14,
+        56,
+        24,
+        4,
+        24,
+        6,
+        6,
+        8,
+        10
+      ],
+      "f": [
+        0.55,
+        2.4
+      ],
+      "work": "Engagement autonome de capacité, référence prestataire, allocation partielle à plusieurs transports, expiration/libération selon conditions ; confirmation distante explicite.",
+      "java": [
+        [
+          "Booking, consommation et libération versionnées",
+          36
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          20
+        ]
+      ],
+      "ui": [
+        [
+          "Réservation de capacité de transport : exigences, engagements, résultats et écarts",
+          24
+        ]
+      ],
+      "evidence": [
+        "T183",
+        "A181",
+        "O181"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Lien booking/transports et portée contractuelle ; une disponibilitéBC049 ne crée pas cette réservation.",
+      "analogy_type": "transversale",
+      "analogy": "Les extraits étayent des mécanismes transversaux (dossier, engagement, filiation, résultat/qualité). Aucun produit complet équivalent à cette capacité n'est démontré dans cette lecture. Les spécificités décrites restent à réaliser."
+    },
+    {
+      "id": "B073",
+      "cap": 73,
+      "label": "Dédouanement délégué",
+      "v": [
+        20,
+        14,
+        54,
+        28,
+        6,
+        26,
+        6,
+        8,
+        8,
+        0
+      ],
+      "f": [
+        0.55,
+        2.5
+      ],
+      "work": "Dossier versionné, pièces exigées/reçues/rejetées, demande au déclarant, résultats distincts accusé/traité/libéré et écarts ; pas de moteur douanier ni télédéclaration.",
+      "java": [
+        [
+          "Dossier, pièces et états de procédure déléguée",
+          34
+        ],
+        [
+          "Tests développeur de la variante et de ses limites",
+          20
+        ]
+      ],
+      "ui": [
+        [
+          "Dédouanement délégué : exigences, engagements, résultats et écarts",
+          28
+        ]
+      ],
+      "evidence": [
+        "A183",
+        "T182",
+        "O181"
+      ],
+      "reuse": [
+        "18:S181 cycle commun et interface",
+        "18:E181 pièces et raccords",
+        "17:B056/B057 collecte et rapprochement",
+        "09:références biens/partenaires/services"
+      ],
+      "risk": "Multiplicité des régimes/pièces et autorités ; aucune preuve de couverture réglementaire par les extraits.",
+      "analogy_type": "transversale",
+      "analogy": "Les extraits étayent des mécanismes transversaux (dossier, engagement, filiation, résultat/qualité). Aucun produit complet équivalent à cette capacité n'est démontré dans cette lecture. Les spécificités décrites restent à réaliser."
+    }
+  ],
+  "contract": "15 capacités natives conservées. Un socle commun d'engagement et de versions, puis contrats, exigences et résultats propres à chaque prestation. La technique physique et les connecteurs du Groupe restent hors Core ; les contrats génériques, écrans et essais avec doubles sont inclus.",
+  "profile": "Hypothèses :1000 lignes maximum par ordre,20 versions d'engagement consultables, résultats partiels par lot/pièce, métadonnées de20 pièces par dossier, historique archivé ;100000 ordres actifs. Cibles de consultation2s et flux50 événements/s à qualifier. Aucun outil industriel ou format réglementaire multi-pays universel promis.",
+  "reduced": "La décomposition par mécanisme commun évite quinze réécritures d'un système d'ordres. Les écarts entre picking, qualité, transformation, restitution, transport, booking et procédure douanière sont explicités ; une attestation et un acte physique ne sont jamais confondus.",
+  "remaining": "Analogies exactes rares pour les prestations textile, booking et douane : plusieurs comparaisons sont uniquement transversales et leur réalisation reste une hypothèse. Partiels, filiation multi-biens, modifications et preuves de résultat peuvent élargir la charge.",
+  "next": "Continuer avec Billing et Payment, dont les opérations et autorités financières sont distinctes des prestations physiques."
+}

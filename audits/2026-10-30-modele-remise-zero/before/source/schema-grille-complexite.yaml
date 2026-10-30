@@ -1,0 +1,178 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Grille métier SCM et complexité commune
+type: object
+additionalProperties: false
+required:
+- version
+- id
+- date
+- statut
+- dependances
+- empreintes
+- reprise
+- domaine_id
+- blocs
+properties:
+  version:
+    const: 1
+  id:
+    const: grille-complexite-scm
+  date:
+    type: string
+    format: date
+  statut:
+    const: propose
+  domaine_id:
+    const: supply-chain-orchestration
+  dependances:
+    type: object
+    additionalProperties: false
+    required:
+    - schema
+    - methode
+    - cartographie
+    - audit
+    properties:
+      schema:
+        type: string
+      methode:
+        type: string
+      cartographie:
+        type: string
+      audit:
+        type: string
+  empreintes:
+    type: object
+    additionalProperties:
+      type: string
+      pattern: ^[a-f0-9]{64}$
+  reprise:
+    type: object
+    additionalProperties: false
+    required:
+    - reference_fonctionnelle
+    - reference_economique
+    - couverture_stacks
+    - chiffrage
+    properties:
+      reference_fonctionnelle:
+        $ref: '#/$defs/texte'
+      reference_economique:
+        $ref: '#/$defs/texte'
+      couverture_stacks:
+        $ref: '#/$defs/texte'
+      chiffrage:
+        $ref: '#/$defs/texte'
+  blocs:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - capacite_id
+      - chemin
+      - fonctions
+      - variantes_source
+      - frontiere
+      - complexite
+      - revue
+      - calibration
+      properties:
+        id:
+          type: string
+          pattern: ^BC-\d{3}$
+        capacite_id:
+          $ref: '#/$defs/texte'
+        chemin:
+          type: array
+          minItems: 4
+          maxItems: 4
+          uniqueItems: true
+          items:
+            $ref: '#/$defs/texte'
+        fonctions:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - id
+            - resultat
+            properties:
+              id:
+                type: string
+                pattern: ^BC-\d{3}\.\d{2}$
+              resultat:
+                $ref: '#/$defs/texte'
+        variantes_source:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: '#/$defs/texte'
+        frontiere:
+          $ref: '#/$defs/texte'
+        complexite:
+          type: object
+          additionalProperties: false
+          required:
+          - algorithmique
+          - tests_ajustements
+          - etendue_fonctionnelle
+          properties:
+            algorithmique:
+              $ref: '#/$defs/axe'
+            tests_ajustements:
+              $ref: '#/$defs/axe'
+            etendue_fonctionnelle:
+              $ref: '#/$defs/axe'
+        revue:
+          type: object
+          additionalProperties: false
+          required:
+          - statut
+          - validation_metier
+          properties:
+            statut:
+              const: propose
+            validation_metier:
+              type: 'null'
+        calibration:
+          type: object
+          additionalProperties: false
+          required:
+          - statut
+          - couverture_par_stack
+          - jh_par_stack
+          - couverture_buy
+          properties:
+            statut:
+              const: calibre_ingenierie
+            couverture_par_stack:
+              type: string
+              pattern: ^source/recalibration-metier[.]yaml#BC-[0-9]{3}$
+            jh_par_stack:
+              type: string
+              pattern: ^source/recalibration-metier[.]yaml#BC-[0-9]{3}$
+            couverture_buy:
+              type: string
+              pattern: ^source/qualification-buy[.]yaml#BC-[0-9]{3}$
+$defs:
+  texte:
+    type: string
+    minLength: 1
+  axe:
+    type: object
+    additionalProperties: false
+    required:
+    - niveau
+    - justification
+    properties:
+      niveau:
+        type: integer
+        minimum: 1
+        maximum: 5
+      justification:
+        $ref: '#/$defs/texte'

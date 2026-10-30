@@ -15,9 +15,10 @@ export function MarketInstruction({reading}:{reading:Data}){
  const pair=I.rows.find((row:Data)=>row.product_ref===product&&row.capability_ref===capability);
  const detail=I.qualifications.filter((row:Data)=>row.product_ref===product&&row.capability_ref===capability);
  const current=native(capability);
+ const proposedFunctions=I.capabilities.find((row:Data)=>row.capability_ref===capability)?.proposed_functions||[];
  const observation=reading.product_observations[product];
  const name=(id:string)=>{const row=native(id);return row?`${row.id} · ${row.name||row.capacite?.nom}`:id;};
- const needName=(id:string)=>{const need=current?.fonctions.find((row:Data)=>row.id===id);return need?`${id} · ${need.resultat}`:id;};
+ const needName=(id:string)=>{const need=proposedFunctions.find((row:Data)=>row.id===id);return need?`${id} · ${need.resultat}`:id;};
  return <div className="market-qualification-reading">
   <h3>{T.title}</h3><p><MethodText>{T.intro}</MethodText></p>
   <div className="market-qualification-selectors">
@@ -26,7 +27,7 @@ export function MarketInstruction({reading}:{reading:Data}){
   </div>
   <p className="market-qualification-status"><strong>{I.status_labels[pair.status]}</strong> · {T.product_date} {observation.date}</p>
   <p className="market-qualification-path">{(current?.path||current?.hierarchie?.slice(1).map((item:Data)=>item.nom))?.join(' › ')}</p>
-  <div className="market-qualification-needs"><h4>{T.needs}</h4><ul>{current?.fonctions.map((need:Data)=><li key={need.id}>{need.resultat}</li>)}</ul></div>
+  <div className="market-qualification-needs"><h4>{T.needs}</h4><ul>{proposedFunctions.map((need:Data)=><li key={need.id}>{need.resultat}</li>)}</ul></div>
   {detail.length>0?<div className="market-qualification-records">{detail.map((record:Data)=><article key={record.id} data-qualification={record.id}>
    <h4>{record.function_label}</h4>
    <dl className="market-reference-context">

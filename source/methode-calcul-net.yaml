@@ -2,195 +2,215 @@ schema_version: 1
 id: net-calculation
 principle:
   title: 'Activités de {{notion.build}} : des charges au budget de réalisation'
-  text: >-
-    **Ce chapitre explique le budget des activités de {{notion.build}}, en détaillant
-    la construction initiale du Core System et son intégration au Groupe.**
-    Les évaluations fournissent les charges, les hypothèses
-    précisent les gains et les tarifs, puis le moteur applique ces règles. Le passage
-    du brut au net conserve le même périmètre de travaux. Les autres efforts et les
-    achats retenus complètent le budget de réalisation. Le chiffrage des activités
-    récurrentes suit ses volumes, moyens et contrats propres. **Récurrent ne signifie
-    pas nécessairement {{notion.run_activities}}** : le MCO de la {{notion.core_system}} reste classé
-    en {{notion.build}} selon la convention de l’étude.
+  text: '**Ce chapitre explique le budget des activités de {{notion.build}}, en détaillant la construction initiale
+    du Core System et son intégration au Groupe.** Les évaluations fournissent les charges, les hypothèses précisent
+    les gains et les tarifs, puis le moteur applique ces règles. Le passage du [brut](#glossaire?term=charge_brute)
+    au [net](#glossaire?term=charge_nette) conserve le même périmètre de travaux. Les autres efforts et les achats
+    retenus complètent le budget de réalisation. Le chiffrage des activités récurrentes suit ses volumes, moyens
+    et contrats propres. **Récurrent ne signifie pas nécessairement {{notion.run_activities}}** : le MCO de la {{notion.core_system}}
+    reste classé en {{notion.build}} selon la convention de l’étude.'
 notice:
   title: Identifier la base avant de calculer
-  text: >-
-    **Une charge n’est exploitable qu’avec ses activités incluses et sa provenance.**
-    La sortie du skill couvre le développement brut. Une autre base peut déjà inclure
-    de la qualification indépendante ou d’autres travaux : les identifier avant
-    d’appliquer les gains ou d’ajouter des efforts complémentaires.
+  text: 'Les familles Core System retenues sont valorisées directement par rôle : leur effort projet inclut les activités
+    déclarées, sans remise IA globale ni pilotage supplémentaire. Le passage brut/net ci-dessous concerne les autres
+    activités éligibles du modèle. Les capacités non couvertes restent à réestimer.'
 navigation_label: Les cinq étapes de lecture du calcul
 sections:
-  - id: repartir-roles
-    title: Identifier les charges de départ
-    lead: >-
-      **Un gain n’a de sens que si l’on sait à quels travaux il s’applique.**
-      Identifier les activités et leurs inclusions permet de comparer les charges
-      avant et après gain sur une base commune.
-    blocks:
-      - kind: bullets
-        items:
-          - La base précise **les travaux, leur charge brute en JH, leur nature et leur écosystème**.
-          - Les inclusions sont explicites. Les tests développeur appartiennent au développement ; la qualification indépendante conserve ses propres travaux.
-          - Le total d’une base se lit selon **ses activités déclarées**, sans assimiler tous ses JH à la sortie du skill ni supposer qu’elle couvre le projet complet.
-      - kind: paragraphs
-        items:
-          - >-
-            **Résultat : une base de charges identifiée par activité**, avec son
-            périmètre et ses inclusions. Elle permet de choisir les gains pertinents
-            sans traiter tous les JH comme du développement.
-  - id: reemploi-et-productivite
-    title: Retenir les gains applicables
-    lead: >-
-      **Un même bénéfice doit être compté une seule fois.**
-      Distinguer la réutilisation du patrimoine et l’amélioration du travail restant
-      évite de réduire deux fois la même charge.
-    blocks:
-      - kind: paragraphs
-        items:
-          - >-
-            La **réutilisation du patrimoine logiciel** détermine les travaux restants,
-            raccordements et adaptations compris. Son effet est déjà pris en compte
-            dans le brut. Les gains de productivité portent ensuite sur l’effort
-            nécessaire pour réaliser ces travaux.
-      - kind: bullets
-        items:
-          - Pour chaque gain, les hypothèses du modèle précisent **les activités concernées, le taux retenu et sa justification**. Le moteur les applique ; le calcul ne démontre pas leur pertinence.
-          - Le gain est un **taux de réduction de l’effort nécessaire sur les mêmes travaux**, pas une hausse du tarif ni une réduction du périmètre. Distinguer un taux observé d’une hypothèse à éprouver, notamment pour l’assistance par IA.
-      - kind: paragraphs
-        items:
-          - >-
-            **Résultat : un gain explicite pour chaque activité éligible**, sans seconde
-            remise globale liée aux frameworks. Les activités sans gain prévu
-            conservent leur charge.
-  - id: calculer-jh-nets
-    title: Calculer le net sur le même périmètre
-    lead: >-
-      **Le calcul par activité rend la réduction d’effort vérifiable.**
-      Il permet de relier chaque charge nette à sa charge de départ et au gain retenu,
-      puis de consolider les résultats sur le périmètre annoncé.
-    blocks:
-      - kind: formula
-        text: JH nets d’une activité = JH bruts de cette activité × (1 − gain retenu / 100)
-      - kind: bullets
-        items:
-          - Le moteur applique les taux aux activités concernées, puis **additionne chaque charge nette une seule fois**. La qualification possède sa charge et son gain propres ; elle n’est pas ajoutée par une majoration des JH développeur.
-          - Déclarer les activités éligibles et les gains de chaque scénario. **Une activité sans gain retenu conserve sa charge brute.**
-          - Une charge inconnue reste inconnue ; elle ne devient pas zéro par le calcul. Tester l’absence de gain permet d’examiner la sensibilité à cette hypothèse.
-      - kind: formula
-        text: JH nets du périmètre = somme des JH nets des activités retenues, comptées une seule fois
-      - kind: paragraphs
-        items:
-          - >-
-            Les travaux Buy déjà compris dans un forfait restent financés par celui-ci.
-            Leurs JH diagnostiques ne sont pas ajoutés aux prestations à financer
-            séparément ; cette inclusion ne signifie pas que leur effort est nul.
-          - >-
-            **Résultat : des JH nets par activité et un total sur le périmètre déclaré.**
-            Les JH nets de développement couvrent le même travail que les JH bruts
-            correspondants ; ils ne deviennent pas une charge totale projet.
-  - id: construire-charge-totale
-    title: Situer les autres efforts du projet
-    lead: >-
-      **Le développement ne couvre pas à lui seul la réalisation du projet.**
-      Définir la {{notion.charge_totale_projet}} exige de situer les autres efforts
-      humains nécessaires, leurs inclusions, leurs exclusions et leurs inconnues.
-    blocks:
-      - kind: table
-        caption: Efforts à situer pour constituer le total projet
-        columns: [Activité, Périmètre et traitement]
-        rows:
-          - [QA indépendante et architecture transverse, Rattacher les travaux déjà présents dans la base et ajouter uniquement les compléments identifiés. Les tests et services logiciels déjà financés restent comptés une seule fois.]
-          - [Intégration et déploiement, 'Adaptations au Groupe, migration, raccordements et mises en service du périmètre retenu.']
-          - [Pilotage du programme, 'Direction du budget, des risques, des fournisseurs et des arbitrages, avec coordination fonctionnelle. Pour Make, ces efforts sont exprimés en JH mensuels multipliés par la durée de l’intégration Groupe.']
-          - ['{{notion.coordination_travaux_techniques}}', 'Suivi des dépendances, blocages et livraisons entre développeurs et intégrateurs. Si le budget est provisionné en pourcentage, cette provision ne dimensionne pas les missions, profils et JH.']
-          - [Conduite du changement et travaux métier, 'Déclarer le périmètre retenu et les exclusions, notamment temps interne métier et transformation organisationnelle.']
-      - kind: paragraphs
-        items:
-          - >-
-            Pour le pilotage du programme Make, **l’effort de chaque rôle est déjà calculable**
-            à partir de sa mobilisation mensuelle et de la durée de l’intégration Groupe :
-      - kind: formula
-        text: JH du rôle = JH mobilisés par mois × durée de l’intégration Groupe en mois
-      - kind: paragraphs
-        items:
-          - >-
-            **Définition du total à constituer** : les efforts retenus sont additionnés
-            après leurs traitements propres, en comptant chaque travail une seule fois.
-      - kind: formula
-        text: '{{notion.charge_totale_projet}} en JH = développement net + autres efforts humains retenus'
-      - kind: paragraphs
-        items:
-          - >-
-            Une provision en euros ne suffit pas à connaître les JH correspondants.
-            Une composante inconnue ou exclue ne vaut pas zéro.
-          - >-
-            **Résultat : un périmètre d’efforts explicite.** Le total humain ne peut être
-            annoncé complet que si tous les efforts nécessaires sont dimensionnés.
-            Les licences et forfaits fournisseur relèvent du budget de l’étape suivante.
-  - id: valoriser-et-piloter
-    title: Valoriser les travaux et compléter le budget
-    lead: >-
-      **Les JH mesurent l’effort ; les euros mesurent la dépense.**
-      Le budget combine les travaux valorisés, les provisions et les achats selon
-      leurs règles propres, même lorsque certains efforts humains restent à dimensionner.
-    blocks:
-      - kind: paragraphs
-        items:
-          - Les tarifs et l’outillage par JH s’expriment en **€ HT / JH** ; les coûts obtenus sont en **€ HT**.
-      - kind: table
-        caption: Formules de valorisation sur le périmètre retenu
-        columns: [Calcul, Formule]
-        rows:
-          - [Répartition entre profils, JH du profil = JH de l’activité × part du profil / 100]
-          - [Prestations techniques, 'Coût technique = somme par profil [JH retenus × (tarif journalier + outillage par JH applicable)]']
-          - [Pilotage du programme Make, Budget programme = JH direction × tarif direction + JH coordination fonctionnelle × tarif coordination]
-          - ['Coordination technique de la construction Make', 'Provision = coût des prestations techniques de construction × taux de coordination de construction / 100']
-          - ['Construction initiale de la {{notion.core_system}} Make', 'Budget de construction = prestations techniques de construction + provision de coordination technique']
-          - [Consolidation du budget, Budget du périmètre = travaux valorisés + provisions distinctes + achats et forfaits retenus]
-      - kind: bullets
-        items:
-          - Le moteur utilise **le tarif correspondant au travail**. La qualification est valorisée au tarif QA. Pour les JH d’expertise isolés en intégration, le tarif architecte remplace le tarif applicatif ; ces journées ne sont pas ajoutées une seconde fois.
-          - L’outillage est ajouté au **tarif de chaque JH technique concerné** et entre dans l’assiette de coordination de la construction. Le budget du programme Make utilise les tarifs de ses rôles, sans cet ajout d’outillage.
-          - La coordination technique produit **une provision en euros**, pas un pourcentage ajouté aux JH développeur. Les licences, le cloud et les forfaits fournisseur ne reçoivent pas cette surcharge.
-          - Les gains de productivité réduisent les charges éligibles, pas les tarifs ni les prix fournisseur. **Les achats et forfaits sont normalement chiffrés en euros** ; les prestations qu’ils incluent ne sont pas financées à nouveau.
-      - kind: paragraphs
-        items:
-          - >-
-            **L’intégration Make réunit les travaux communs, les déploiements et le
-            programme.** Les travaux communs et les déploiements ont chacun leur
-            assiette de coordination. S’y ajoutent les prestations partagées qui
-            préparent la réception.
-      - kind: table
-        caption: Construire le budget d’intégration Make, en euros HT
-        columns: [Financement, Calcul]
-        rows:
-          - [Travaux communs, Coût = somme des coûts des activités communes retenues et valorisées par profil]
-          - [Coordination des travaux communs, Provision = coût des travaux communs × taux de coordination de l’intégration / 100]
-          - [Déploiements, Coût = somme des JH des paquets par unité × tarif moyen des profils du déploiement avec leur outillage par JH]
-          - [Coordination des déploiements, Provision = coût des déploiements × taux de coordination des déploiements / 100]
-      - kind: formula
-        text: Budget d’intégration Make = travaux communs + leur coordination + déploiements + leur coordination + programme + prestations partagées avant réception
-      - kind: bullets
-        items:
-          - '**Dimensionner les travaux communs** : JH des interfaces = nombre d’interfaces × JH par interface. La migration additionne la charge retenue et le complément Groupe identifié. Les activités remplacées par les paquets de déploiement ne sont pas comptées une seconde fois.'
-          - '**Préparer la réception** : les travaux sur les contrats d’interface, hors surveillance fixe, et la QA et le déploiement client des versions sont affectés à l’intégration entre la première ouverture et la première réception. Leur budget comprend déjà la coordination des services ; aucune coordination d’intégration supplémentaire ne lui est appliquée.'
-          - Le {{notion.maintenance_core}}, les moyens techniques et les services après réception conservent leurs financements de fonctionnement, même lorsqu’ils sont consommés pendant l’intégration. **La somme ci-dessus porte sur le poste d’intégration, pas sur toutes les dépenses de cette période.**
-      - kind: links
-        items:
-          - href: '#calcul-run'
-            label: Calculer le MCO du produit générique et les prestations avant réception
-      - kind: paragraphs
-        items:
-          - >-
-            **Résultat : un budget dont chaque poste conserve son mode de calcul et
-            son périmètre**, sans financer deux fois le même travail ou le même service.
-            Les valeurs effectivement retenues et leurs justifications restent dans
-            le dossier économique.
-      - kind: links
-        items:
-          - href: '#parametres'
-            label: Consulter les {{vue.parametres_modele}}
+- id: repartir-roles
+  title: Identifier les charges de départ
+  lead: '**Un gain n’a de sens que si l’on sait à quels travaux il s’applique.** Identifier les activités et leurs
+    inclusions permet de comparer les charges avant et après gain sur une base commune.'
+  blocks:
+  - kind: callout
+    title: Condition de reprise des estimations du Core System
+    text: Conserver les parts analyse, conception, développement, tests et QA, puis expliciter leur correspondance
+      avec les rôles. Pour les familles retenues, cette ventilation est enregistrée avec la décision et valorisée
+      directement. Ne pas ajouter une QA, une architecture ou un pilotage déjà financés.
+  - kind: bullets
+    items:
+    - La base précise **les travaux, leur charge brute en JH, leur nature et leur écosystème**.
+    - Les inclusions sont explicites. Les tests développeur appartiennent au développement ; la qualification indépendante
+      conserve ses propres travaux.
+    - Le total d’une base se lit selon **ses activités déclarées**, sans assimiler tous ses JH à la sortie du skill
+      ni supposer qu’elle couvre le projet complet.
+  - kind: paragraphs
+    items:
+    - '**Résultat : une base de charges identifiée par activité**, avec son périmètre et ses inclusions. Elle permet
+      de choisir les gains pertinents sans traiter tous les JH comme du développement.'
+- id: reemploi-et-productivite
+  title: Retenir les gains applicables
+  lead: '**Un même bénéfice doit être compté une seule fois.** Distinguer la réutilisation du patrimoine et l’amélioration
+    du travail restant évite de réduire deux fois la même charge.'
+  blocks:
+  - kind: paragraphs
+    items:
+    - La **réutilisation du patrimoine logiciel** détermine les travaux restants, raccordements et adaptations compris.
+      Son effet est déjà pris en compte dans le brut. Les gains de productivité portent ensuite sur l’effort nécessaire
+      pour réaliser ces travaux.
+  - kind: bullets
+    items:
+    - Pour chaque gain, les hypothèses du modèle précisent **les activités concernées, le taux retenu et sa justification**.
+      Le moteur les applique ; le calcul ne démontre pas leur pertinence.
+    - Le gain est un **taux de réduction de l’effort nécessaire sur les mêmes travaux**, pas une hausse du tarif
+      ni une réduction du périmètre. Distinguer un taux observé d’une hypothèse à éprouver, notamment pour l’assistance
+      par IA.
+  - kind: paragraphs
+    items:
+    - '**Résultat : un gain explicite pour chaque activité éligible**, sans seconde remise globale liée aux frameworks.
+      Les activités sans gain prévu conservent leur charge.'
+- id: calculer-jh-nets
+  title: Calculer le net sur le même périmètre
+  lead: '**Le calcul par activité rend la réduction d’effort vérifiable.** Il permet de relier chaque charge nette
+    à sa charge de départ et au gain retenu, puis de consolider les résultats sur le périmètre annoncé.'
+  blocks:
+  - kind: formula
+    text: JH nets d’une activité = JH bruts de cette activité × (1 − gain retenu / 100)
+  - kind: bullets
+    items:
+    - Le moteur applique les taux aux activités concernées, puis **additionne chaque charge nette une seule fois**.
+      La qualification possède sa charge et son gain propres ; elle n’est pas ajoutée par une majoration des JH
+      développeur.
+    - Déclarer les activités éligibles et les gains de chaque scénario. **Une activité sans gain retenu conserve
+      sa charge brute.**
+    - Une charge inconnue reste inconnue ; elle ne devient pas zéro par le calcul. Tester l’absence de gain permet
+      d’examiner la sensibilité à cette hypothèse.
+  - kind: formula
+    text: JH nets du périmètre = somme des JH nets des activités retenues, comptées une seule fois
+  - kind: paragraphs
+    items:
+    - Les travaux Buy déjà compris dans un forfait restent financés par celui-ci. Leurs JH diagnostiques ne sont
+      pas ajoutés aux prestations à financer séparément ; cette inclusion ne signifie pas que leur effort est nul.
+    - '**Résultat : des JH nets par activité et un total sur le périmètre déclaré.** Les JH nets de développement
+      couvrent le même travail que les JH bruts correspondants ; ils ne deviennent pas une charge totale projet.'
+- id: construire-charge-totale
+  title: Situer les autres efforts du projet
+  lead: '**Le développement ne couvre pas à lui seul la réalisation du projet.** Définir la {{notion.charge_totale_projet}}
+    exige de situer les autres efforts humains nécessaires, leurs inclusions, leurs exclusions et leurs inconnues.'
+  blocks:
+  - kind: table
+    caption: Efforts à situer pour constituer le total projet
+    columns:
+    - Activité
+    - Périmètre et traitement
+    rows:
+    - - QA indépendante et architecture transverse
+      - Rattacher les travaux déjà présents dans la base et ajouter uniquement les compléments identifiés. Les tests
+        et services logiciels déjà financés restent comptés une seule fois.
+    - - Intégration et déploiement
+      - Adaptations au Groupe, migration, raccordements et mises en service du périmètre retenu.
+    - - Pilotage du programme
+      - Direction du budget, des risques, des fournisseurs et des arbitrages, avec coordination fonctionnelle. Pour
+        Make, ces efforts sont exprimés en JH mensuels multipliés par la durée de l’intégration Groupe.
+    - - '{{notion.coordination_travaux_techniques}}'
+      - Suivi des dépendances, blocages et livraisons entre développeurs et intégrateurs. Si le budget est provisionné
+        en pourcentage, cette provision ne dimensionne pas les missions, profils et JH.
+    - - Conduite du changement et travaux métier
+      - Déclarer le périmètre retenu et les exclusions, notamment temps interne métier et transformation organisationnelle.
+  - kind: paragraphs
+    items:
+    - 'Pour le pilotage du programme Make, **l’effort de chaque rôle est déjà calculable** à partir de sa mobilisation
+      mensuelle et de la durée de l’intégration Groupe :'
+  - kind: formula
+    text: JH du rôle = JH mobilisés par mois × durée de l’intégration Groupe en mois
+  - kind: paragraphs
+    items:
+    - '**Définition du total à constituer** : les efforts retenus sont additionnés après leurs traitements propres,
+      en comptant chaque travail une seule fois.'
+  - kind: formula
+    text: '{{notion.charge_totale_projet}} en JH = développement net + autres efforts humains retenus'
+  - kind: paragraphs
+    items:
+    - Une provision en euros ne suffit pas à connaître les JH correspondants. Une composante inconnue ou exclue
+      ne vaut pas zéro.
+    - '**Résultat : un périmètre d’efforts explicite.** Le total humain ne peut être annoncé complet que si tous
+      les efforts nécessaires sont dimensionnés. Les licences et forfaits fournisseur relèvent du budget de l’étape
+      suivante.'
+- id: valoriser-et-piloter
+  title: Valoriser les travaux et compléter le budget
+  lead: '**Les JH mesurent l’effort ; les euros mesurent la dépense.** Le budget combine les travaux valorisés,
+    les provisions et les achats selon leurs règles propres, même lorsque certains efforts humains restent à dimensionner.'
+  blocks:
+  - kind: paragraphs
+    items:
+    - Les tarifs et l’outillage par JH s’expriment en **€ HT / JH** ; les coûts obtenus sont en **€ HT**.
+  - kind: table
+    caption: Formules de valorisation sur le périmètre retenu
+    columns:
+    - Calcul
+    - Formule
+    rows:
+    - - Répartition entre profils
+      - JH du profil = JH de l’activité × part du profil / 100
+    - - Prestations techniques
+      - Coût technique = somme par profil [JH retenus × (tarif journalier + outillage par JH applicable)]
+    - - Pilotage du programme Make
+      - Budget programme = JH direction × tarif direction + JH coordination fonctionnelle × tarif coordination
+    - - Coordination technique de la construction Make
+      - Provision = coût des prestations techniques de construction × taux de coordination de construction / 100
+    - - Construction initiale de la {{notion.core_system}} Make
+      - Budget de construction = prestations techniques de construction + provision de coordination technique
+    - - Consolidation du budget
+      - Budget du périmètre = travaux valorisés + provisions distinctes + achats et forfaits retenus
+  - kind: bullets
+    items:
+    - Le moteur utilise **le tarif correspondant au travail**. La qualification est valorisée au tarif QA. Pour
+      les JH d’expertise isolés en intégration, le tarif architecte remplace le tarif applicatif ; ces journées
+      ne sont pas ajoutées une seconde fois.
+    - L’outillage est ajouté au **tarif de chaque JH technique concerné** et entre dans l’assiette de coordination
+      de la construction. Le budget du programme Make utilise les tarifs de ses rôles, sans cet ajout d’outillage.
+    - La coordination technique produit **une provision en euros**, pas un pourcentage ajouté aux JH développeur.
+      Les licences, le cloud et les forfaits fournisseur ne reçoivent pas cette surcharge.
+    - Les gains de productivité réduisent les charges éligibles, pas les tarifs ni les prix fournisseur. **Les achats
+      et forfaits sont normalement chiffrés en euros** ; les prestations qu’ils incluent ne sont pas financées à
+      nouveau.
+  - kind: paragraphs
+    items:
+    - '**L’intégration Make réunit les travaux communs, les déploiements et le programme.** Les travaux communs
+      et les déploiements ont chacun leur assiette de coordination. S’y ajoutent les prestations partagées qui préparent
+      la réception.'
+  - kind: table
+    caption: Construire le budget d’intégration Make, en euros HT
+    columns:
+    - Financement
+    - Calcul
+    rows:
+    - - Travaux communs
+      - Coût = somme des coûts des activités communes retenues et valorisées par profil
+    - - Coordination des travaux communs
+      - Provision = coût des travaux communs × taux de coordination de l’intégration / 100
+    - - Déploiements
+      - Coût = somme des JH des paquets par unité × tarif moyen des profils du déploiement avec leur outillage par
+        JH
+    - - Coordination des déploiements
+      - Provision = coût des déploiements × taux de coordination des déploiements / 100
+  - kind: formula
+    text: Budget d’intégration Make = travaux communs + leur coordination + déploiements + leur coordination + programme
+      + prestations partagées avant réception
+  - kind: bullets
+    items:
+    - '**Dimensionner les travaux communs** : JH des interfaces = nombre d’interfaces × JH par interface. La migration
+      additionne la charge retenue et le complément Groupe identifié. Les activités remplacées par les paquets de
+      déploiement ne sont pas comptées une seconde fois.'
+    - '**Préparer la réception** : les travaux sur les contrats d’interface, hors surveillance fixe, et la QA et
+      le déploiement client des versions sont affectés à l’intégration entre la première ouverture et la première
+      réception. Leur budget comprend déjà la coordination des services ; aucune coordination d’intégration supplémentaire
+      ne lui est appliquée.'
+    - Le {{notion.maintenance_core}}, les moyens techniques et les services après réception conservent leurs financements
+      de fonctionnement, même lorsqu’ils sont consommés pendant l’intégration. **La somme ci-dessus porte sur le
+      poste d’intégration, pas sur toutes les dépenses de cette période.**
+  - kind: links
+    items:
+    - href: '#calcul-run'
+      label: Calculer le MCO du produit générique et les prestations avant réception
+  - kind: paragraphs
+    items:
+    - '**Résultat : un budget dont chaque poste conserve son mode de calcul et son périmètre**, sans financer deux
+      fois le même travail ou le même service. Les valeurs effectivement retenues et leurs justifications restent
+      dans le dossier économique.'
+  - kind: links
+    items:
+    - href: '#parametres'
+      label: Consulter les {{vue.parametres_modele}}
 examples: []
 next:
   href: '#calcul-run'

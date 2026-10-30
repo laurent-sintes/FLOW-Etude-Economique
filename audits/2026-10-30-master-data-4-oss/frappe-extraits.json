@@ -1,0 +1,150 @@
+[
+  {
+    "id": "frappe_api",
+    "url": "https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/api/v1.py",
+    "git_blob_sha": "e03e4468df3e56dcc93eae68fd7ead793ceedd25",
+    "excerpts": [
+      {
+        "name": "create_doc",
+        "start_line": 44,
+        "end_line": 49,
+        "code": "def create_doc(doctype: str):\n\tdata = get_request_form_data()\n\tdata.pop(\"doctype\", None)\n\treturn frappe.new_doc(doctype, **data).insert()\n\n"
+      },
+      {
+        "name": "update_doc",
+        "start_line": 50,
+        "end_line": 67,
+        "code": "def update_doc(doctype: str, name: str):\n\tdata = get_request_form_data()\n\n\tdoc = frappe.get_doc(doctype, name, for_update=True)\n\tdoc.check_permission(\"write\")\n\tif \"flags\" in data:\n\t\tdel data[\"flags\"]\n\n\tdoc.update(data)\n\tdoc.save()\n\n\t# check for child table doctype\n\tif doc.get(\"parenttype\"):\n\t\tfrappe.get_doc(doc.parenttype, doc.parent).save()\n\n\treturn doc\n\n"
+      },
+      {
+        "name": "delete_doc",
+        "start_line": 68,
+        "end_line": 74,
+        "code": "def delete_doc(doctype: str, name: str):\n\t# TODO: child doc handling\n\tfrappe.delete_doc(doctype, name, ignore_missing=False)\n\tfrappe.response.http_status_code = 202\n\treturn \"ok\"\n\n"
+      },
+      {
+        "name": "read_doc",
+        "start_line": 75,
+        "end_line": 91,
+        "code": "def read_doc(doctype: str, name: str):\n\t# Backward compatiblity\n\tif \"run_method\" in frappe.form_dict:\n\t\treturn execute_doc_method(doctype, name)\n\n\tdoc = frappe.get_doc(doctype, name)\n\tdoc.check_permission(\"read\")\n\tdoc.apply_fieldlevel_read_permissions()\n\tif sbool(frappe.form_dict.get(\"expand_links\")):\n\t\tdoc_dict = doc.as_dict()\n\t\tget_values_for_link_and_dynamic_link_fields(doc_dict)\n\t\tget_values_for_table_and_multiselect_fields(doc_dict)\n\t\treturn doc_dict\n\n\treturn doc\n\n"
+      }
+    ],
+    "scope": "Entrées directes, pas fermeture complète des dépendances transitives"
+  },
+  {
+    "id": "frappe_client",
+    "url": "https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/client.py",
+    "git_blob_sha": "63bcd0a687cc2115bd89a7e83276a206b2ae7d55",
+    "excerpts": [
+      {
+        "name": "get_list",
+        "start_line": 27,
+        "end_line": 77,
+        "code": "def get_list(\n\tdoctype: str,\n\tfields: str | list[str | dict[str, Any]] | None = None,\n\tfilters: str | list | dict[str, Any] | None = None,\n\tgroup_by: str | list[str] | None = None,\n\torder_by: str | list[str] | None = None,\n\tlimit_start: int | str | None = None,\n\tlimit_page_length: int | str = 20,\n\tparent: str | None = None,\n\tdebug: bool | int = False,\n\tas_dict: bool | int = True,\n\tor_filters: str | list[list] | dict[str, Any] | None = None,\n\texpand: str | list[str] | None = None,\n):\n\t\"\"\"Return a list of records by filters, fields, ordering and limit.\n\n\t:param doctype: DocType of the data to be queried\n\t:param fields: fields to be returned. Default is `name`\n\t:param filters: filter list by this dict\n\t:param order_by: Order by this fieldname\n\t:param limit_start: Start at this index\n\t:param limit_page_length: Number of records to be returned (default 20)\"\"\"\n\n\targs = frappe._dict(\n\t\tdoctype=doctype,\n\t\tparent_doctype=parent,\n\t\tfields=fields,\n\t\tfilters=filters,\n\t\tor_filters=or_filters,\n\t\tgroup_by=group_by,\n\t\torder_by=order_by,\n\t\tlimit_start=limit_start,\n\t\tlimit_page_length=limit_page_length,\n\t\tdebug=debug,\n\t\tas_list=not as_dict,\n\t)\n\n\tvalidate_args(args)\n\t_list = frappe.get_list(**args)\n\n\tif not expand:\n\t\treturn _list\n\n\tif fields and not fields[0] == \"*\":\n\t\texpand = [f for f in expand if f in fields]\n\n\tattach_expanded_links(doctype, _list, expand)\n\n\treturn _list\n\n"
+      },
+      {
+        "name": "get",
+        "start_line": 95,
+        "end_line": 119,
+        "code": "def get(\n\tdoctype: str,\n\tname: str | int | None = None,\n\tfilters: str | list | dict[str, Any] | None = None,\n\tparent: str | None = None,\n):\n\t\"\"\"Return a document by name or filters.\n\n\t:param doctype: DocType of the document to be returned\n\t:param name: return document of this `name`\n\t:param filters: If name is not set, filter by these values and return the first match\"\"\"\n\n\tif name:\n\t\tdoc = frappe.get_doc(doctype, name)\n\telif filters or filters == {}:\n\t\tdoc = frappe.get_doc(doctype, frappe.parse_json(filters))\n\telse:\n\t\tdoc = frappe.get_doc(doctype)  # single\n\n\tdoc.check_permission()\n\tdoc.apply_fieldlevel_read_permissions()\n\n\treturn doc.as_dict()\n\n"
+      },
+      {
+        "name": "insert",
+        "start_line": 221,
+        "end_line": 230,
+        "code": "def insert(doc: str | dict[str, Any] | None = None):\n\t\"\"\"Insert a document\n\n\t:param doc: JSON or dict object to be inserted\"\"\"\n\tif isinstance(doc, str):\n\t\tdoc = json.loads(doc)\n\n\treturn insert_doc(doc).as_dict()\n\n"
+      },
+      {
+        "name": "save",
+        "start_line": 246,
+        "end_line": 258,
+        "code": "def save(doc: str | dict[str, Any]):\n\t\"\"\"Update (save) an existing document\n\n\t:param doc: JSON or dict object with the properties of the document to be updated\"\"\"\n\tif isinstance(doc, str):\n\t\tdoc = json.loads(doc)\n\n\tdoc = frappe.get_doc(doc)\n\tdoc.save()\n\n\treturn doc.as_dict()\n\n"
+      },
+      {
+        "name": "delete",
+        "start_line": 297,
+        "end_line": 304,
+        "code": "def delete(doctype: str, name: str | int):\n\t\"\"\"Delete a remote document\n\n\t:param doctype: DocType of the document to be deleted\n\t:param name: name of the document to be deleted\"\"\"\n\tdelete_doc(doctype, name)\n\n"
+      }
+    ],
+    "scope": "Entrées directes, pas fermeture complète des dépendances transitives"
+  },
+  {
+    "id": "frappe_document",
+    "url": "https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/model/document.py",
+    "git_blob_sha": "9f34dee1762c7f4569d05d5bde0589febddee9fa",
+    "excerpts": [
+      {
+        "name": "load_from_db",
+        "start_line": 489,
+        "end_line": 547,
+        "code": "\tdef load_from_db(self) -> \"Self\":\n\t\t\"\"\"Load document and children from database and create properties\n\t\tfrom fields\"\"\"\n\n\t\tis_doctype = self.doctype == \"DocType\"\n\n\t\tself.flags.ignore_children = True\n\t\tif not is_doctype and self.meta.issingle:\n\t\t\tsingle_doc = frappe.db.get_singles_dict(self.doctype, for_update=self.flags.for_update)\n\t\t\tif not single_doc:\n\t\t\t\tsingle_doc = frappe.new_doc(self.doctype, as_dict=True)\n\t\t\t\tsingle_doc[\"name\"] = self.doctype\n\t\t\t\tdel single_doc[\"__islocal\"]\n\n\t\t\tself.init_from_dict(single_doc)\n\t\t\tself.init_valid_columns()\n\t\t\tself._fix_numeric_types()\n\n\t\telse:\n\t\t\tif not is_doctype and isinstance(self.name, str | int):\n\t\t\t\tfor_update = \"\"\n\t\t\t\tif self.flags.for_update and frappe.db.db_type != \"sqlite\":\n\t\t\t\t\tfor_update = \"FOR UPDATE\"\n\t\t\t\t# Fast path - use raw SQL to avoid QB/ORM overheads.\n\t\t\t\td = frappe.db.sql(\n\t\t\t\t\t\"SELECT * FROM {table_name} WHERE `name` = %s {for_update}\".format(\n\t\t\t\t\t\ttable_name=get_table_name(self.doctype, wrap_in_backticks=True),\n\t\t\t\t\t\tfor_update=for_update,\n\t\t\t\t\t),\n\t\t\t\t\t(self.name),\n\t\t\t\t\tas_dict=True,\n\t\t\t\t)\n\t\t\t\td = d[0] if d else d\n\t\t\telse:\n\t\t\t\td = frappe.db.get_value(\n\t\t\t\t\tdoctype=self.doctype,\n\t\t\t\t\tfilters=self.name,\n\t\t\t\t\tfieldname=\"*\",\n\t\t\t\t\tfor_update=self.flags.for_update,\n\t\t\t\t\tas_dict=True,\n\t\t\t\t)\n\n\t\t\tif not d:\n\t\t\t\tfrappe.throw(\n\t\t\t\t\t_(\"{0} {1} not found\").format(_(self.doctype), self.name),\n\t\t\t\t\tfrappe.DoesNotExistError(doctype=self.doctype),\n\t\t\t\t)\n\n\t\t\tself.init_from_dict(d)\n\t\tself.flags.pop(\"ignore_children\", None)\n\n\t\tself.load_children_from_db()\n\n\t\t# sometimes __setup__ can depend on child values, hence calling again at the end\n\t\tif hasattr(self, \"__setup__\"):\n\t\t\tself.__setup__()\n\n\t\treturn self\n"
+      },
+      {
+        "name": "check_permission",
+        "start_line": 634,
+        "end_line": 638,
+        "code": "\tdef check_permission(self, permtype=\"read\", permlevel=None):\n\t\t\"\"\"Raise `frappe.PermissionError` if not permitted\"\"\"\n\t\tif not self.has_permission(permtype):\n\t\t\tself._handle_permission_failure(permtype)\n"
+      },
+      {
+        "name": "insert",
+        "start_line": 675,
+        "end_line": 765,
+        "code": "\tdef insert(\n\t\tself,\n\t\tignore_permissions=None,\n\t\tignore_links=None,\n\t\tignore_if_duplicate=False,\n\t\tignore_mandatory=None,\n\t\tset_name=None,\n\t\tset_child_names=True,\n\t) -> \"Self\":\n\t\t\"\"\"Insert the document in the database (as a new document).\n\t\tThis will check for user permissions and execute `before_insert`,\n\t\t`validate`, `on_update`, `after_insert` methods if they are written.\n\n\t\t:param ignore_permissions: Do not check permissions if True.\n\t\t:param ignore_links: Do not check validity of links if True.\n\t\t:param ignore_if_duplicate: Do not raise error if a duplicate entry exists.\n\t\t:param ignore_mandatory: Do not check missing mandatory fields if True.\n\t\t:param set_name: Name to set for the document, if valid.\n\t\t:param set_child_names: Whether to set names for the child documents.\n\t\t\"\"\"\n\t\tif self.flags.in_print:\n\t\t\treturn self\n\n\t\tself.flags.notifications_executed = []\n\n\t\tif ignore_permissions is not None:\n\t\t\tself.flags.ignore_permissions = ignore_permissions\n\n\t\tif ignore_links is not None:\n\t\t\tself.flags.ignore_links = ignore_links\n\n\t\tif ignore_mandatory is not None:\n\t\t\tself.flags.ignore_mandatory = ignore_mandatory\n\n\t\tself.set(\"__islocal\", True)\n\n\t\tself._set_defaults()\n\t\tself.set_user_and_timestamp()\n\t\tself.set_docstatus()\n\t\tself.check_permission(\"create\")\n\t\tself.check_if_latest()\n\t\tself._validate_links()\n\t\tself.run_method(\"before_insert\")\n\t\tself.set_new_name(set_name=set_name, set_child_names=set_child_names)\n\t\tself.set_parent_in_children()\n\t\tself.validate_higher_perm_levels()\n\n\t\tself.flags.in_insert = True\n\t\tself.run_before_save_methods()\n\t\tself._validate()\n\t\tself.set_docstatus()\n\t\tself.flags.in_insert = False\n\n\t\t# run validate, on update etc.\n\n\t\t# parent\n\t\tif getattr(self.meta, \"issingle\", 0):\n\t\t\tself.update_single(self.get_valid_dict())\n\t\telse:\n\t\t\tself.db_insert(ignore_if_duplicate=ignore_if_duplicate)\n\n\t\t# children\n\t\tif not getattr(self.meta, \"is_virtual\", False):\n\t\t\tfor d in self.get_all_children():\n\t\t\t\td.db_insert()\n\n\t\tself.reset_computed_child_tables()\n\t\tself.run_method(\"after_insert\")\n\t\tself.flags.in_insert = True\n\n\t\tif self.get(\"amended_from\"):\n\t\t\tself.validate_amended_from()\n\t\t\tself.copy_attachments_from_amended_from()\n\n\t\trelink_mismatched_files(self)\n\t\tself.run_post_save_methods()\n\t\tself.flags.in_insert = False\n\n\t\t# delete __islocal\n\t\tif hasattr(self, \"__islocal\"):\n\t\t\tdelattr(self, \"__islocal\")\n\n\t\t# clear unsaved flag\n\t\tif hasattr(self, \"__unsaved\"):\n\t\t\tdelattr(self, \"__unsaved\")\n\n\t\tif not (frappe.flags.in_migrate or frappe.local.flags.in_install or frappe.flags.in_setup_wizard):\n\t\t\tif frappe.get_cached_value(\"User\", frappe.session.user, \"follow_created_documents\"):\n\t\t\t\t_follow_document(self.doctype, self.name, frappe.session.user)\n\t\treturn self\n"
+      },
+      {
+        "name": "save",
+        "start_line": 792,
+        "end_line": 795,
+        "code": "\tdef save(self, *args, **kwargs) -> \"Self\":\n\t\t\"\"\"Wrapper for _save\"\"\"\n\t\treturn self._save(*args, **kwargs)\n"
+      },
+      {
+        "name": "_save",
+        "start_line": 796,
+        "end_line": 856,
+        "code": "\tdef _save(self, ignore_permissions=None, ignore_version=None) -> \"Self\":\n\t\t\"\"\"Save the current document in the database in the **DocType**'s table or\n\t\t`tabSingles` (for single types).\n\n\t\tThis will check for user permissions and execute\n\t\t`validate` before updating, `on_update` after updating triggers.\n\n\t\t:param ignore_permissions: Do not check permissions if True.\n\t\t:param ignore_version: Do not save version if True.\"\"\"\n\t\tif self.flags.in_print:\n\t\t\treturn self\n\n\t\tself.flags.notifications_executed = []\n\n\t\tif ignore_permissions is not None:\n\t\t\tself.flags.ignore_permissions = ignore_permissions\n\n\t\tself.flags.ignore_version = frappe.in_test if ignore_version is None else ignore_version\n\n\t\tif self.get(\"__islocal\") or not self.get(\"name\"):\n\t\t\treturn self.insert()\n\n\t\tself.check_if_locked()\n\t\tself._set_defaults()\n\t\tself._restore_masked_fields_from_db()\n\t\tself.check_permission(\"write\", \"save\")\n\n\t\tself.set_user_and_timestamp()\n\t\tself.set_docstatus()\n\t\tself.check_if_latest()\n\t\tself.set_parent_in_children()\n\t\tself.set_name_in_children()\n\n\t\tself.validate_higher_perm_levels()\n\t\tself._validate_links()\n\t\tself.run_before_save_methods()\n\n\t\tif self._action != \"cancel\":\n\t\t\tself._validate()\n\n\t\tif self._action == \"update_after_submit\":\n\t\t\tself.validate_update_after_submit()\n\n\t\tself.set_docstatus()\n\n\t\t# parent\n\t\tif self.meta.issingle:\n\t\t\tself.update_single(self.get_valid_dict())\n\t\telse:\n\t\t\tself.db_update()\n\n\t\tself.update_children()\n\t\tself.reset_computed_child_tables()\n\t\tself.run_post_save_methods()\n\n\t\t# clear unsaved flag\n\t\tif hasattr(self, \"__unsaved\"):\n\t\t\tdelattr(self, \"__unsaved\")\n\n\t\treturn self\n"
+      },
+      {
+        "name": "_validate",
+        "start_line": 1065,
+        "end_line": 1096,
+        "code": "\tdef _validate(self):\n\t\tself._validate_mandatory()\n\t\tself._validate_data_fields()\n\t\tself._validate_selects()\n\t\tself._validate_non_negative()\n\t\tself._fix_rating_value()\n\t\tself._validate_code_fields()\n\t\tself._sync_autoname_field()\n\t\tself._extract_images_from_text_editor()\n\t\tself._sanitize_content()\n\t\tself._save_passwords()\n\t\tself.validate_workflow()\n\t\tself._validate_length()\n\n\t\tfor d in self.get_all_children():\n\t\t\td._validate_data_fields()\n\t\t\td._validate_selects()\n\t\t\td._validate_non_negative()\n\t\t\td._fix_rating_value()\n\t\t\td._validate_code_fields()\n\t\t\td._sync_autoname_field()\n\t\t\td._extract_images_from_text_editor()\n\t\t\td._sanitize_content()\n\t\t\td._save_passwords()\n\t\t\td._validate_length()\n\t\tif self.is_new():\n\t\t\t# don't set fields like _assign, _comments for new doc\n\t\t\tfor fieldname in optional_fields:\n\t\t\t\tself.set(fieldname, None)\n\t\telse:\n\t\t\tself.validate_set_only_once()\n"
+      },
+      {
+        "name": "db_insert",
+        "start_line": 2740,
+        "end_line": 2815,
+        "code": "\tdef db_insert(self, ignore_if_duplicate=False):\n\t\t\"\"\"INSERT the document (with valid columns) in the database.\n\n\t\targs:\n\t\t        ignore_if_duplicate: ignore primary key collision\n\t\t                                        at database level (postgres)\n\t\t                                        in python (mariadb)\n\t\t\"\"\"\n\t\tif not self.name:\n\t\t\t# name will be set by document class in most cases\n\t\t\tset_new_name(self)\n\n\t\tconflict_handler = \"\"\n\t\treturning = \"\"\n\t\t# On postgres we can't implcitly ignore PK collision\n\t\t# So instruct pg to ignore `name` field conflicts\n\t\tif (\n\t\t\t(ignore_if_duplicate or self.meta.autoname == \"hash\")\n\t\t\tand frappe.db.db_type == \"postgres\"\n\t\t\tand (self.flags.retry_count or 0) < 5\n\t\t):\n\t\t\tconflict_handler = \"on conflict (name) do nothing\"\n\t\t\tif self.meta.autoname == \"hash\":\n\t\t\t\treturning = \"RETURNING name\"\n\n\t\tif not self.creation:\n\t\t\tself.creation = self.modified = now()\n\t\t\tself.owner = self.modified_by = frappe.session.user\n\n\t\t# if doctype is \"DocType\", don't insert null values as we don't know who is valid yet\n\t\td = self.get_valid_dict(\n\t\t\tconvert_dates_to_str=True,\n\t\t\tignore_nulls=self.doctype in DOCTYPES_FOR_DOCTYPE,\n\t\t\tignore_virtual=True,\n\t\t)\n\n\t\tcolumns = list(d)\n\t\ttry:\n\t\t\tname = frappe.db.sql(\n\t\t\t\t\"\"\"INSERT INTO `tab{doctype}` ({columns})\n\t\t\t\t\tVALUES ({values}) {conflict_handler} {returning}\"\"\".format(\n\t\t\t\t\tdoctype=self.doctype,\n\t\t\t\t\tcolumns=\", \".join(\"`\" + c + \"`\" for c in columns),\n\t\t\t\t\tvalues=\", \".join([\"%s\"] * len(columns)),\n\t\t\t\t\tconflict_handler=conflict_handler,\n\t\t\t\t\treturning=returning,\n\t\t\t\t),\n\t\t\t\tlist(d.values()),\n\t\t\t)\n\t\t\tif (\n\t\t\t\tfrappe.db.db_type == \"postgres\" and self.meta.autoname == \"hash\" and not name\n\t\t\t):  # To avoid a transaction block, we regen in try (pg specific)\n\t\t\t\treturn self._handle_hash_conflict()\n\t\texcept Exception as e:\n\t\t\tif frappe.db.is_primary_key_violation(e):\n\t\t\t\tif self.meta.autoname == \"hash\":\n\t\t\t\t\t# hash collision? try again\n\t\t\t\t\treturn self._handle_hash_conflict()\n\n\t\t\t\tif not ignore_if_duplicate:\n\t\t\t\t\tfrappe.msgprint(\n\t\t\t\t\t\t_(\"{0} {1} already exists\").format(_(self.doctype), frappe.bold(self.name)),\n\t\t\t\t\t\ttitle=_(\"Duplicate Name\"),\n\t\t\t\t\t\tindicator=\"red\",\n\t\t\t\t\t)\n\t\t\t\t\traise frappe.DuplicateEntryError(self.doctype, self.name, e)\n\n\t\t\telif frappe.db.is_unique_key_violation(e):\n\t\t\t\t# unique constraint\n\t\t\t\tself.show_unique_validation_message(e)\n\n\t\t\telse:\n\t\t\t\traise\n\n\t\tself.set(\"__islocal\", False)\n"
+      }
+    ],
+    "scope": "Entrées directes, pas fermeture complète des dépendances transitives"
+  },
+  {
+    "id": "frappe_permissions",
+    "url": "https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/permissions.py",
+    "git_blob_sha": "c266994a1992fcd153d5e61c754b1756f4dd1841",
+    "excerpts": [
+      {
+        "name": "has_permission",
+        "start_line": 81,
+        "end_line": 228,
+        "code": "def has_permission(\n\tdoctype,\n\tptype=\"read\",\n\tdoc=None,\n\tuser=None,\n\t*,\n\tparent_doctype=None,\n\tprint_logs=True,\n\tdebug=False,\n\tignore_share_permissions=False,\n) -> bool:\n\t\"\"\"Return True if user has permission `ptype` for given `doctype`.\n\tIf `doc` is passed, also check user, share and owner permissions.\n\n\t:param doctype: DocType to check permission for\n\t:param ptype: Permission Type to check\n\t:param doc: Check User Permissions for specified document.\n\t:param user: User to check permission for. Defaults to current user.\n\t:param print_logs: If True, will display a message using frappe.msgprint\n\t                which explains why the permission check failed.\n\t:param parent_doctype:\n\t        Required when checking permission for a child DocType (unless doc is specified)\n\t\"\"\"\n\n\tif not user:\n\t\tuser = frappe.session.user\n\n\tif user == \"Administrator\":\n\t\tdebug and _debug_log(\"Allowed everything because user is Administrator\")\n\t\treturn True\n\n\tif ptype == \"share\" and frappe.get_system_settings(\"disable_document_sharing\"):\n\t\tdebug and _debug_log(\"User can't share because sharing is disabled globally from system settings\")\n\t\treturn False\n\n\tif not doc and hasattr(doctype, \"doctype\"):\n\t\t# first argument can be doc or doctype\n\t\tdoc = doctype\n\t\tdoctype = doc.doctype\n\n\tif frappe.is_table(doctype):\n\t\treturn has_child_permission(\n\t\t\tdoctype,\n\t\t\tptype,\n\t\t\tdoc,\n\t\t\tuser,\n\t\t\tparent_doctype,\n\t\t\tdebug=debug,\n\t\t\tprint_logs=print_logs,\n\t\t)\n\n\tmeta = frappe.get_meta(doctype)\n\n\t# docname == doctype for single doctypes\n\tif not doc and meta.issingle and not meta.is_virtual:\n\t\tdoc = meta.name\n\n\tif doc:\n\t\tif isinstance(doc, str | int):\n\t\t\t# perf: Avoid loading child tables for perm checks\n\t\t\tdoc = frappe.get_lazy_doc(meta.name, doc)\n\t\tperm = get_doc_permissions(doc, user=user, ptype=ptype, debug=debug).get(ptype)\n\t\tif not perm:\n\t\t\tdebug and _debug_log(\n\t\t\t\t\"Permission check failed from role permission system. Check if user's role grant them permission to the document.\"\n\t\t\t)\n\t\t\tif not frappe.flags.get(\"has_permission_check_logs\"):\n\t\t\t\tmsg = _(\"User {0} does not have access to this document\").format(frappe.bold(user))\n\t\t\t\tif meta.issingle:\n\t\t\t\t\tmsg += f\": {_(doc.doctype)}\"\n\t\t\t\telif has_permission(doc.doctype, print_logs=False):\n\t\t\t\t\tmsg += f\": {_(doc.doctype)} - {doc.name}\"\n\t\t\t\tpush_perm_check_log(msg, debug=debug)\n\telse:\n\t\tif ptype == \"submit\" and not cint(meta.is_submittable):\n\t\t\tpush_perm_check_log(_(\"Document Type is not submittable\"), debug=debug)\n\t\t\treturn False\n\n\t\tif ptype == \"import\" and not cint(meta.allow_import):\n\t\t\tpush_perm_check_log(_(\"Document Type is not importable\"), debug=debug)\n\t\t\treturn False\n\n\t\trole_permissions = get_role_permissions(meta, user=user, debug=debug)\n\t\tdebug and _debug_log(\n\t\t\t\"User has following permissions using role permission system: \"\n\t\t\t+ frappe.as_json(role_permissions, indent=8)\n\t\t)\n\n\t\tperm = role_permissions.get(ptype)\n\n\t\tif not perm:\n\t\t\tpush_perm_check_log(\n\t\t\t\t_(\"User {0} does not have doctype access via role permission for document {1}\").format(\n\t\t\t\t\tfrappe.bold(user), frappe.bold(_(doctype))\n\t\t\t\t),\n\t\t\t\tdebug=debug,\n\t\t\t)\n\n\tdef false_if_not_shared():\n\t\tshare_rights = [\"read\", \"write\", \"share\", \"submit\", \"email\", \"print\"]\n\t\tcustom_rights = get_doctype_ptype_map().get(doctype, [])\n\n\t\tif ptype not in share_rights + custom_rights:\n\t\t\tdebug and _debug_log(f\"Permission type {ptype} can not be shared\")\n\t\t\treturn False\n\n\t\trights = [\"read\" if ptype in (\"email\", \"print\") else ptype]\n\n\t\tif doc:\n\t\t\tdoc_name = get_doc_name(doc)\n\t\t\tshared = frappe.share.get_shared(\n\t\t\t\tdoctype,\n\t\t\t\tuser,\n\t\t\t\trights=rights,\n\t\t\t\tfilters=[[\"share_name\", \"=\", doc_name]],\n\t\t\t\tlimit=1,\n\t\t\t)\n\t\t\tdebug and _debug_log(f\"Document is shared with user for {ptype}? {bool(shared)}\")\n\t\t\treturn bool(shared)\n\n\t\telif frappe.share.get_shared(doctype, user, rights=rights, limit=1):\n\t\t\t# if atleast one shared doc of that type, then return True\n\t\t\t# this is used in db_query to check if permission on DocType\n\t\t\tdebug and _debug_log(f\"At least one document is shared with user with perm: {rights}\")\n\t\t\treturn True\n\n\t\treturn False\n\n\tif not perm and not ignore_share_permissions:\n\t\tdebug and _debug_log(\"Checking if document/doctype is explicitly shared with user\")\n\t\tperm = false_if_not_shared()\n\n\t# select permission is implied by read permission\n\tif not perm and ptype == \"select\":\n\t\tperm = has_permission(\n\t\t\tdoctype,\n\t\t\tptype=\"read\",\n\t\t\tdoc=doc,\n\t\t\tuser=user,\n\t\t\tparent_doctype=parent_doctype,\n\t\t\tprint_logs=print_logs,\n\t\t\tdebug=debug,\n\t\t\tignore_share_permissions=ignore_share_permissions,\n\t\t)\n\n\treturn bool(perm)\n\n"
+      }
+    ],
+    "scope": "Entrées directes, pas fermeture complète des dépendances transitives"
+  },
+  {
+    "id": "frappe_meta",
+    "url": "https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/model/meta.py",
+    "git_blob_sha": "1fe9af96558f33b43cb5121de23617a53b697dc0",
+    "excerpts": [
+      {
+        "name": "get_meta",
+        "start_line": 68,
+        "end_line": 91,
+        "code": "def get_meta(doctype: \"str | DocType\", cached: bool = True) -> \"_Meta\":\n\t\"\"\"Get metadata for a doctype.\n\n\tArgs:\n\t    doctype: The doctype as a string object.\n\t    cached: Whether to use cached metadata (default: True).\n\n\tReturns:\n\t    Meta object for the given doctype.\n\t\"\"\"\n\tif (\n\t\tcached\n\t\tand isinstance(doctype, str)\n\t\tand (meta := frappe.client_cache.get_value(f\"doctype_meta::{doctype}\"))\n\t):\n\t\treturn meta\n\n\tmeta = Meta(doctype)\n\n\tkey = f\"doctype_meta::{meta.name}\"\n\tfrappe.client_cache.set_value(key, meta)\n\treturn meta\n\n"
+      }
+    ],
+    "scope": "Entrées directes, pas fermeture complète des dépendances transitives"
+  }
+]

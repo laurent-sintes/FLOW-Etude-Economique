@@ -64,9 +64,14 @@ def build_cases(study):
         raise ValueError('The six validation scenarios must be distinct')
     if study.parameters != before or cases['reference']['result'] != study.baseline:
         raise ValueError('Validation generation modified the current reference')
+    edge_cases = {}
+    for name, budget in (('sap_below_counterpoint', 1_000_000), ('sap_zero_integration', 0)):
+        parameters = deepcopy(before)
+        parameters['options']['sap']['integration'] = budget
+        edge_cases[name] = {'parameters': parameters, 'result': study.simulate(parameters)}
     return {'format': 1, 'contract': study.simulation_contract(), 'model_version': study.version,
             'provenance': 'Current Study inputs; generated validation data, not a historical economic constraint',
-            'ui_case': 'make_build', 'cases': cases}
+            'ui_case': 'make_build', 'cases': cases, 'edge_cases': edge_cases}
 
 
 def main():

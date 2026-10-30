@@ -1,0 +1,107 @@
+{
+  "evidence": [
+    {
+      "id": "O161",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_rule.py",
+      "observation": "Recherche de règles par routes, entrepôts et ordre de priorité.",
+      "limit": "Analogie de sélection contextualisée. Version immuable, activation atomique et explication FLOW restent à construire.",
+      "excerpts": [
+        {
+          "start": 482,
+          "end": 543,
+          "text": "    def _search_rule_for_warehouses(self, route_ids, packaging_uom_id, product_id, warehouse_ids, company_id, domain):\n        domain = Domain(domain)\n        if warehouse_ids:\n            domain &= Domain('warehouse_id', 'in', [False, *warehouse_ids.ids])\n        valid_route_ids = set()\n        if route_ids:\n            valid_route_ids |= set(route_ids.ids)\n        if packaging_uom_id:\n            packaging_routes = packaging_uom_id.package_type_id.route_ids\n            valid_route_ids |= set(packaging_routes.ids)\n        valid_route_ids |= set((product_id.route_ids | product_id.categ_id.total_route_ids).ids)\n        if warehouse_ids:\n            filter_function = partial(self._filter_warehouse_routes, product_id, warehouse_ids)\n            valid_route_ids |= set(warehouse_ids.route_ids.filtered(filter_function).ids)\n        if valid_route_ids:\n            domain &= Domain('route_id', 'in', list(valid_route_ids))\n        res = self.env[\"stock.rule\"].sudo()._read_group(  # sudo() needed for cross company warehouse usage\n            domain,\n            groupby=[\"location_dest_id\", \"warehouse_id\", \"route_id\"],\n            aggregates=[\"id:recordset\"],\n            order=\"route_sequence:min, sequence:min\",\n        )\n        rule_dict = defaultdict(OrderedDict)\n        for group in res:\n            rules = group[3]\n            if filtered_rules := rules.filtered(lambda r: company_id and r.company_id == company_id):\n                rules = filtered_rules\n\n            rule_dict[group[0].id, group[2].id][group[1].id] = rules.sorted(lambda rule: (rule.route_sequence, rule.sequence))[0]\n        return rule_dict\n\n    def _filter_warehouse_routes(self, product, warehouses, route):\n        return route\n\n    def _search_rule(self, route_ids, packaging_uom_id, product_id, warehouse_id, domain):\n        \"\"\" First find a rule among the ones defined on the procurement\n        group, then try on the routes defined for the product, finally fallback\n        on the default behavior\n        \"\"\"\n        Rule = self.env['stock.rule']\n        res = self.env['stock.rule']\n        domain = Domain(domain)\n        if warehouse_id:\n            domain &= Domain('warehouse_id', 'in', [False, warehouse_id.id])\n        domain = domain.optimize(Rule)\n        if route_ids:\n            res = Rule.search(Domain('route_id', 'in', route_ids.ids) & domain, order='route_sequence, sequence', limit=1)\n        if not res and packaging_uom_id:\n            packaging_routes = packaging_uom_id.package_type_id.route_ids\n            if packaging_routes:\n                res = Rule.search(Domain('route_id', 'in', packaging_routes.ids) & domain, order='route_sequence, sequence', limit=1)\n        if not res:\n            product_routes = product_id.route_ids | product_id.categ_id.total_route_ids\n            if product_routes:\n                res = Rule.search(Domain('route_id', 'in', product_routes.ids) & domain, order='route_sequence, sequence', limit=1)\n        if not res and warehouse_id:\n            warehouse_routes = warehouse_id.route_ids\n            if warehouse_routes:\n                res = Rule.search(Domain('route_id', 'in', warehouse_routes.ids) & domain, order='route_sequence, sequence', limit=1)\n        elif not res and not warehouse_id:\n            res = Rule.search(domain, order='route_sequence, sequence', limit=1)\n        return res"
+        }
+      ]
+    },
+    {
+      "id": "O162",
+      "repository": "odoo/odoo",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/resource/models/resource_calendar.py",
+      "observation": "Intervalles effectifs calculés par soustraction des absences, avec fuseaux.",
+      "limit": "Analogie de calendrier. Un horaire interne ne prouve ni capacité externe disponible ni engagement du prestataire.",
+      "excerpts": [
+        {
+          "start": 620,
+          "end": 653,
+          "text": "    def _work_intervals_batch(self, start_dt, end_dt, resources_per_tz=None, domain=None, compute_leaves=True):\n        \"\"\" Return the effective work intervals: attendance intervals minus leave intervals.\n        This is the method to use (and the one to override, as ``hr_work_entry`` does) to\n        know when resources actually work.\n\n        :param datetime start_dt: timezone-aware start of the period\n        :param datetime end_dt: timezone-aware end of the period\n        :param dict resources_per_tz: ``{ZoneInfo: resource.resource recordset}``, see\n            :meth:`_attendance_intervals_batch`\n        :param list domain: leave domain passed to :meth:`_leave_intervals_batch` (``None``\n            means leaves counted as absence). It does not filter attendances.\n        :param bool compute_leaves: when ``False``, leaves are not deducted and the result\n            equals :meth:`_attendance_intervals_batch`\n        :return: ``{resource_id: Intervals}``, with the key ``False`` for the calendar-level\n            result when ``self`` is set or ``resources_per_tz`` is empty. Intervals are\n            expressed in each resource's timezone and carry attendance records.\n        :rtype: dict\n        \"\"\"\n        all_resources = set()\n        if not resources_per_tz or self:\n            all_resources.add(self.env['resource.resource'])\n        if resources_per_tz:\n            for _, resources in resources_per_tz.items():\n                all_resources |= set(resources)\n\n        attendance_intervals = self._attendance_intervals_batch(start_dt, end_dt, resources_per_tz)\n        if compute_leaves:\n            leave_intervals = self._leave_intervals_batch(start_dt, end_dt, resources_per_tz, domain)\n            return {\n                r.id: (attendance_intervals[r.id] - leave_intervals[r.id]) for r in all_resources\n            }\n        return {\n            r.id: attendance_intervals[r.id] for r in all_resources\n        }"
+        }
+      ]
+    },
+    {
+      "id": "T161",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "modules/stock_supply/order_point.py",
+      "sha256": "e1f458cafb1f92a1d2e8b7ef58f8782d19212f0ed98286549f7eb49445c1cce7",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock_supply/order_point.py",
+      "observation": "Politique par produit et localisation, minimum/cible soumis à contraintes.",
+      "limit": "Analogie de schéma typé et cohérence numérique ; pas preuve d'un moteur universel de politiques de satisfaction.",
+      "excerpts": [
+        {
+          "start": 15,
+          "end": 94,
+          "text": "class OrderPoint(ModelSQL, ModelView):\n    \"\"\"\n    Provide a way to define a supply policy for each\n    product on each locations. Order points on warehouse are\n    considered by the supply scheduler to generate purchase requests.\n    \"\"\"\n    __name__ = 'stock.order_point'\n    product = fields.Many2One(\n        'product.product', \"Product\", required=True,\n        domain=[\n            ('type', '=', 'goods'),\n            ('consumable', '=', False),\n            ('purchasable', 'in',\n                If(Eval('type') == 'purchase',\n                    [True],\n                    [True, False])),\n            ],\n        context={\n            'company': Eval('company', -1),\n            },\n        depends={'company'})\n    location = fields.Many2One(\n        'stock.location', \"Location\", required=True,\n        domain=[\n            If(Eval('type') == 'internal',\n                ('type', '=', 'storage'),\n                ('type', '=', 'warehouse')),\n            ])\n    provisioning_location = fields.Many2One(\n        'stock.location', 'Provisioning Location',\n        domain=[\n            ['OR',\n                ('provisioning_location', '=', None),\n                ('provisioning_location.parent',\n                    'not child_of', [Eval('location', -1)]),\n                ],\n            ],\n        states={\n            'invisible': Eval('type') != 'internal',\n            'required': ((Eval('type') == 'internal')\n                & (Eval('min_quantity', None) != None)),  # noqa: E711\n        })\n    overflowing_location = fields.Many2One(\n        'stock.location', 'Overflowing Location',\n        domain=[\n            ['OR',\n                ('overflowing_location', '=', None),\n                ('overflowing_location.parent',\n                    'not child_of', [Eval('location', -1)]),\n                ],\n            ],\n        states={\n            'invisible': Eval('type') != 'internal',\n            'required': ((Eval('type') == 'internal')\n                & (Eval('max_quantity', None) != None)),  # noqa: E711\n            })\n    type = fields.Selection(\n        [('internal', 'Internal'),\n         ('purchase', 'Purchase')],\n        \"Type\", required=True)\n    min_quantity = fields.Float(\n        \"Minimal Quantity\", digits='unit',\n        states={\n            # required for purchase and production types\n            'required': Eval('type') != 'internal',\n            },\n        domain=['OR',\n            ('min_quantity', '=', None),\n            ('min_quantity', '<=', Eval('target_quantity', 0)),\n            ])\n    target_quantity = fields.Float(\n        \"Target Quantity\", digits='unit', required=True,\n        domain=[\n            ['OR',\n                ('min_quantity', '=', None),\n                ('target_quantity', '>=', Eval('min_quantity', 0)),\n                ],\n            ['OR',\n                ('max_quantity', '=', None),\n                ('target_quantity', '<=', Eval('max_quantity', 0)),"
+        }
+      ]
+    },
+    {
+      "id": "T162",
+      "repository": "tryton/tryton",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "path": "modules/production_work/work.py",
+      "sha256": "83a615a4eac21ddfd561564c1bb8728ed2a6b3c6040336cec14b8ae7194e6302",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/production_work/work.py",
+      "observation": "Centres de charge rattachés à société/entrepôt, catégorie et coût horaire/cycle.",
+      "limit": "Analogie des dimensions et unités ; pas de contrat de déclaration externe ou fraîcheur prouvé ici.",
+      "excerpts": [
+        {
+          "start": 28,
+          "end": 63,
+          "text": "class WorkCenterCategory(ModelSQL, ModelView):\n    __name__ = 'production.work.center.category'\n    name = fields.Char('Name', required=True, translate=True)\n\n\nclass WorkCenter(DeactivableMixin, tree(separator=' / '), ModelSQL, ModelView):\n    __name__ = 'production.work.center'\n    name = fields.Char('Name', required=True, translate=True)\n    parent = fields.Many2One('production.work.center', 'Parent',\n        domain=[\n            ('company', '=', Eval('company', -1)),\n            ('warehouse', '=', Eval('warehouse', -1)),\n            ])\n    children = fields.One2Many('production.work.center', 'parent', 'Children',\n        domain=[\n            ('company', '=', Eval('company', -1)),\n            ('warehouse', '=', Eval('warehouse', -1)),\n            ])\n    category = fields.Many2One('production.work.center.category', 'Category')\n    cost_price = fields.Numeric('Cost Price', digits=price_digits,\n        states={\n            'required': Bool(Eval('cost_method')),\n            })\n    cost_method = fields.Selection([\n            ('', ''),\n            ('cycle', 'Per Cycle'),\n            ('hour', 'Per Hour'),\n            ], 'Cost Method',\n        states={\n            'required': Bool(Eval('cost_price')),\n            })\n    company = fields.Many2One('company.company', \"Company\", required=True)\n    warehouse = fields.Many2One('stock.location', 'Warehouse', required=True,\n        domain=[\n            ('type', '=', 'warehouse'),\n            ])"
+        }
+      ]
+    },
+    {
+      "id": "A161",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/StockRulesSupplychainServiceImpl.java",
+      "sha256": "b2edce13b5844ca6a5704f33544c2d8b679fde8fef1f5e795124f3c652a33866",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/StockRulesSupplychainServiceImpl.java",
+      "observation": "Règles de stock distinguant alerte et demande d'achat selon configuration.",
+      "limit": "Ne pas confondre politique gouvernée et action consommatrice ; activation versionnée à réaliser pour FLOW.",
+      "excerpts": [
+        {
+          "start": 102,
+          "end": 129,
+          "text": "  @Override\n  public void processNonCompliantStockLocationLine(\n      StockRules stockRules, StockLocationLine stockLocationLine) throws AxelorException {\n\n    if (stockRules == null) {\n      return;\n    }\n\n    if (stockRules.getOrderAlertSelect().equals(StockRulesRepository.ORDER_ALERT_ALERT)) {\n      this.generateAndSendMessage(stockRules);\n      return;\n    }\n\n    StockLocation stockLocation = stockLocationLine.getStockLocation();\n\n    if (stockLocation == null\n        || !appSupplychainService.isApp(\"supplychain\")\n        || !stockRules\n            .getOrderAlertSelect()\n            .equals(StockRulesRepository.ORDER_ALERT_PURCHASE_ORDER)) {\n      return;\n    }\n\n    Product product = stockLocationLine.getProduct();\n\n    BigDecimal minReorderQty = getDefaultSupplierMinQty(product);\n    BigDecimal qtyToOrder =\n        stockRulesService.getQtyToOrder(stockLocationLine, stockRules, minReorderQty);"
+        }
+      ]
+    },
+    {
+      "id": "A162",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "path": "axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "sha256": "63a3a1a85d3f563cd9bdfaa4f8b5fb1f8b4294dd0050b6427bd368e78705712e",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "observation": "Calendrier machine absent traité fermé et recherche de créneau disponible.",
+      "limit": "Montre le risque du défaut calendaire. FLOW doit distinguer fermé explicite et capacité externe inconnue.",
+      "excerpts": [
+        {
+          "start": 63,
+          "end": 95,
+          "text": "  /**\n   * DayPlanningService treats a null DayPlanning as an unrestricted, fully open day. For machine\n   * availability that is the wrong default: a day missing from the machine's WeeklyPlanning (e.g.\n   * no Saturday/Sunday entry at all) must be treated as the machine being unavailable that day, not\n   * available around the clock. This returns a transient, non-persisted closed DayPlanning (all\n   * periods null) in that case, still linked to the weeklyPlanning so day-to-day jumps keep\n   * working.\n   */\n  protected DayPlanning findDayPlanningOrClosed(WeeklyPlanning weeklyPlanning, LocalDate date) {\n    DayPlanning dayPlanning = weeklyPlanningService.findDayPlanning(weeklyPlanning, date);\n    if (dayPlanning == null) {\n      dayPlanning = new DayPlanning();\n      dayPlanning.setWeeklyPlanning(weeklyPlanning);\n    }\n    return dayPlanning;\n  }\n\n  @Override\n  public MachineTimeSlot getClosestAvailableTimeSlotFrom(\n      Machine machine,\n      LocalDateTime startDateT,\n      LocalDateTime endDateT,\n      OperationOrder operationOrder)\n      throws AxelorException {\n\n    return getClosestAvailableTimeSlotFrom(\n        machine,\n        startDateT,\n        endDateT,\n        operationOrder,\n        DurationHelper.getSecondsDuration(Duration.between(startDateT, endDateT)),\n        false,\n        0);"
+        }
+      ]
+    }
+  ],
+  "method": "Source code inspected at frozen revisions; these excerpts do not prove whole-product coverage or observed human effort."
+}

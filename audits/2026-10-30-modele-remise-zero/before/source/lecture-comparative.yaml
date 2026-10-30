@@ -1,0 +1,220 @@
+version: 1
+date: '2026-10-24'
+role: Lecture des responsabilités économiques et des couches techniques, sans nouveau prix ni nouvelle charge.
+dependances:
+- source/stacks/
+- source/maintenance.yaml
+- source/maintenance/maintenance-microsoft.yaml
+- source/maintenance/maintenance-sap.yaml
+- source/maintenance/maintenance-java-spring.yaml
+- source/maintenance/maintenance-dotnet.yaml
+- source/maintenance/maintenance-rust.yaml
+- source/chiffrage/
+- source/calibration-couts.yaml
+- source/plan-investissement.yaml
+- source/ecarts-perimetre-flow-rfi.md
+economique:
+  titre: Socle / Intégration / Run & MCO
+  introduction: Le Core porte les mécanismes génériques ; l’intégration les adapte à Beaumanoir. Les deux continuent
+    d’évoluer après la mise en service.
+  annuel: Run & MCO — maintenance, évolutions et exploitation à pleine capacité
+  initial: Réalisation initiale
+  objet: Responsabilité
+  total_initial: Total initial
+  total_annuel: Total Run & MCO annuel
+  montant_identifie: Montant affecté à cette responsabilité
+  detail: Voir les achats et activités affectés
+  detail_court: Détail
+  source_detail: Détail des propositions et des compléments
+  regle: Les responsabilités sont ventilées quand les travaux le permettent. Les activités et achats sources ci-dessous
+    expliquent les prix ; leurs regroupements ne s’ajoutent pas à la lecture composable.
+  initial_socle:
+    titre: '{{notion.socle}} — initial'
+    statut: Produit éditeur existant
+    explication: Make finance la réalisation de Flow Core System. Buy s’appuie sur un progiciel existant ; son abonnement
+      est dans les charges annuelles, le paramétrage et les extensions client dans l’intégration.
+    make: Build de Flow Core System à partir des capacités SCM et des mécanismes partagés. Les charges couvrent
+      les travaux que la stack ne fournit pas.
+    microsoft: Microsoft et K3 fournissent les produits standard ; le client réalise leur configuration et ses extensions
+      dans l’intégration.
+    sap: SAP fournit les produits standard ; la réalisation client configure S/4 et les autres composants retenus.
+  initial_integration:
+    titre: Intégration — initiale
+    make: L’équipe d’intégration adapte le Core aux règles Beaumanoir, réalise les flux et reprises de données,
+      puis qualifie et déploie les parcours.
+    microsoft: L’intégrateur configure Dynamics et K3, adapte les parcours et réalise les interfaces, migrations
+      et déploiements par pôle.
+    sap: L’intégrateur réalise la convergence S/4, les adaptations, interfaces et reprises de données avec les applications
+      conservées.
+  buckets:
+  - id: socle
+    titre: Travaux du produit et droits complémentaires
+    explication: Make entretient les mécanismes génériques et finance leurs évolutions. Buy finance le maintien
+      et les versions du standard dans l’offre éditeur groupée ; seuls ses droits complémentaires sont isolés ici.
+    pieces:
+    - droits_complementaires
+  - id: integration
+    titre: Travaux sur les adaptations client
+    explication: Corriger et faire évoluer les adaptations Beaumanoir, maintenir leurs contrats d’interface et qualifier
+      les versions. Les évolutions demandées par le client sont distinctes de la roadmap éditeur ; les forfaits
+      communs restent sur leur ligne.
+    pieces: []
+  - id: run
+    titre: Services techniques et moyens achetés
+    explication: Assistance N1, surveillance, exploitation, sécurité, outillage, cloud et iPaaS achetés séparément.
+      L’expertise cloud et sécurité Make est incluse. Le cloud déjà financé par une offre éditeur reste sur sa ligne
+      groupée.
+    pieces:
+    - cloud_hors_panier
+    - ipaas
+    - outillage_audits
+    - reserve_drp_sap
+  - id: shared_editor
+    titre: Offre éditeur groupée — socle et exploitation
+    explication: Droits d’usage, versions du standard et infrastructure sont financés ensemble dans l’offre éditeur.
+    pieces:
+    - licences_rfi
+  - id: shared_services
+    titre: Prestations communes non ventilées
+    explication: Pilotage et forfaits couvrant plusieurs responsabilités, sans ventilation disponible.
+    pieces:
+    - pilotage
+  activites:
+    MAI-001: run
+    MAI-002: integration
+    MAI-003: socle
+    MAI-004: integration
+    MAI-005: run
+    MAI-006: integration
+    MAI-007: run
+    MAI-008: run
+    MAI-009: integration
+  forfaits:
+    rfi-mco:
+      bucket: shared_services
+      titre: MCO applicatif et exploitation non ventilés
+    rfi-monitoring:
+      bucket: run
+      titre: Monitoring des flux en horaires étendus
+    rfi-evolutions:
+      bucket: integration
+      titre: TMA évolutive des adaptations client
+  evolutions_activite: MAI-009
+  evolutions_core_bucket: socle
+  evolutions_core_titre: Évolutions fonctionnelles du Core System
+  evolutions_integration_titre: Évolutions des paramètres et extensions Beaumanoir
+  complements:
+    make:
+      bucket: run
+      titre: Complément de tarif pour l’expertise cloud et sécurité
+    buy:
+      bucket: integration
+      titre: Entretien des extensions additionnelles démontrées
+  pieces_titres:
+    droits_complementaires: Droits Power Platform complémentaires
+    cloud_hors_panier: Hébergement et capacité cloud achetés séparément
+    ipaas: Plateforme d’intégration achetée séparément
+    outillage_audits: Outillage de support et audits
+    reserve_drp_sap: Complément de reprise après sinistre
+    licences_rfi: Abonnement éditeur avec maintien du standard et cloud
+    pilotage: Pilotage des prestations annuelles estimées
+  zero: Aucun achat séparé dans le modèle
+  lecture:
+    make: L’équipe produit entretient et fait évoluer le Core. L’équipe d’intégration maintient les règles et flux
+      Beaumanoir ; l’exploitation assure le service quotidien.
+    microsoft: Microsoft et K3 maintiennent leurs standards. Le dispositif client entretient les extensions et les
+      interfaces, et assure le service résiduel.
+    sap: SAP maintient son standard. Les prestations client couvrent les adaptations, la surveillance des flux et
+      l’exploitation selon les contrats retenus.
+  detail_annuel: De quoi se compose le Run & MCO annuel ?
+architecture:
+  titre: Architecture des cinq stacks
+  introduction: Les couches regroupent les composants du modèle. Les cartes distinguent les produits cités dans
+    les offres, les propositions d’architecture et les choix ouverts. Cliquer sur un composant donne son rôle, ses
+    droits et ses limites.
+  layers:
+  - id: frontend
+    titre: Frontend
+    role: Écrans utilisés par les équipes métier et interfaces applicatives.
+    categories:
+    - id: interface
+      titre: Interfaces utilisateur
+      couches:
+      - interface
+  - id: backend
+    titre: Middleware / Backend
+    role: Traitements métier, règles, orchestration, données et services applicatifs.
+    categories:
+    - id: progiciel
+      titre: Progiciels métier
+      couches:
+      - progiciel
+    - id: execution
+      titre: Runtimes et frameworks
+      couches:
+      - runtime
+      - framework
+    - id: moteurs
+      titre: Moteurs métier
+      couches:
+      - moteur_metier
+    - id: donnees
+      titre: Données et accès aux données
+      couches:
+      - donnees
+    - id: messages
+      titre: Messagerie applicative
+      couches:
+      - messagerie
+  - id: ipaas
+    titre: iPaaS
+    role: Échanges avec les applications Beaumanoir, connecteurs et orchestration technique des flux.
+    categories:
+    - id: integration
+      titre: Plateforme d’intégration
+      couches:
+      - ipaas
+  - id: paas
+    titre: PaaS et infrastructure d’exécution
+    role: Environnements où s’exécutent les applications. L’infrastructure IaaS sous-jacente reste distincte des
+      services de plateforme.
+    categories:
+    - id: plateforme
+      titre: Services de plateforme
+      couches:
+      - paas
+    - id: infrastructure
+      titre: Infrastructure sous-jacente
+      couches:
+      - iaas
+  - id: transverse
+    titre: Services transverses
+    role: Identités, contrôle d’accès et observabilité partagés entre les couches.
+    categories:
+    - id: transverse
+      titre: Sécurité et observabilité
+      couches:
+      - securite
+      - observabilite
+  facettes_frontend:
+    microsoft:
+    - ref: extension-d365
+      nom: Interfaces Dynamics 365
+      description: Les écrans du progiciel et leur extension appartiennent à la plateforme Dynamics. Ils ne sont
+        pas un frontend React à reconstruire.
+    - ref: power-platform
+      nom: Applications Power Apps
+      description: Interfaces low-code proposées pour les extensions ; les droits et usages autonomes ne sont pas
+        tous inclus dans Dynamics.
+    sap:
+    - ref: abap-fiori
+      nom: SAP Fiori
+      description: Interface utilisateur du socle ABAP / Fiori. Cette carte montre la partie écran du composant
+        déjà présent dans le backend.
+  facette: Vue interface du même composant — aucun achat ajouté
+  fondements:
+    etude_client: Documenté dans l’étude
+    proposition: Architecture proposée
+    a_preciser: Choix à préciser
+  empty: Aucun composant autonome décrit dans le modèle ; cela ne démontre pas l’absence de cette fonction dans
+    le progiciel.

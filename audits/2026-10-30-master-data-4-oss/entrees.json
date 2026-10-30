@@ -1,0 +1,295 @@
+{
+  "id": "master-data-22-four-oss",
+  "date": "2026-10-30",
+  "status": "diagnostic_on_common_witness_not_flow_budget",
+  "scope": {
+    "label": "Référentiel des unités et coefficients de conversion",
+    "parent_family": "Master Data",
+    "capabilities_touched": [
+      "BC-004",
+      "BC-005"
+    ],
+    "full_capabilities_completed": 0,
+    "contract_ref": "../2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json#F06-F07",
+    "purpose": "Tester les modèles sur un témoin présent dans les quatre produits et identifier le rôle du socle. Ne pas extrapoler proportionnellement à toute la famille.",
+    "preconditions": [
+      "Même catégorie physique déjà connue ; coefficients linéaires, non nuls et positifs.",
+      "Unités et coefficients préalablement définis pour la consultation ; API/ORM et interface standard disponibles.",
+      "Référence vers une unité de base ou paire directe/inverse admissible dans les quatre implémentations."
+    ],
+    "exclusions": [
+      "Conversions arbitraires scriptées, prix, variantes produit, unités incompatibles et algorithmes de chemins généraux.",
+      "Publication multi-source versionnée, quarantaine, purge, reprise après restauration et contrats de source complets.",
+      "Installation complète du produit, migration Beaumanoir et exploitation."
+    ]
+  },
+  "cosmic": {
+    "status": "Comptage proposé du contrat témoin à la frontière application + socle ; pas quatre mesures certifiées des produits",
+    "object_groups": [
+      "Unité",
+      "Relation de conversion"
+    ],
+    "counting_rules": [
+      "Une lecture par groupe de données et processus ; deux unités lues ne font pas deux Read.",
+      "Écran et API équivalents non doublés.",
+      "Création et modification sont des processus distincts.",
+      "Accusé ou erreur sans autre donnée : une sortie X.",
+      "La séparation logique Unité/Relation reste une hypothèse ; Odoo persiste le facteur dans l'unité."
+    ],
+    "processes": [
+      {
+        "id": "U-C",
+        "label": "Enregistrer une unité",
+        "E": 1,
+        "R": 0,
+        "W": 1,
+        "X": 1
+      },
+      {
+        "id": "U-M",
+        "label": "Modifier une unité",
+        "E": 1,
+        "R": 1,
+        "W": 1,
+        "X": 1
+      },
+      {
+        "id": "U-R",
+        "label": "Consulter les unités",
+        "E": 1,
+        "R": 1,
+        "W": 0,
+        "X": 1
+      },
+      {
+        "id": "C-C",
+        "label": "Enregistrer un coefficient",
+        "E": 1,
+        "R": 1,
+        "W": 1,
+        "X": 1
+      },
+      {
+        "id": "C-M",
+        "label": "Modifier un coefficient",
+        "E": 1,
+        "R": 2,
+        "W": 1,
+        "X": 1
+      },
+      {
+        "id": "C-R",
+        "label": "Consulter les coefficients",
+        "E": 1,
+        "R": 1,
+        "W": 0,
+        "X": 1
+      },
+      {
+        "id": "C-F",
+        "label": "Résoudre le facteur entre deux unités connues",
+        "E": 1,
+        "R": 2,
+        "W": 0,
+        "X": 1
+      }
+    ],
+    "native_mapping_limit": "Contrat candidat de 7 processus, non sept processus natifs identiques démontrés : Odoo/Tryton portent le coefficient dans l'unité ; Tryton interdit de modifier un facteur existant. La mesure 26 CFP n'est donc pas une mesure certifiée du même logiciel que chacune des enveloppes sources."
+  },
+  "model": {
+    "A": 2.94,
+    "B": 0.91,
+    "scale_sum": 18.97,
+    "effort_multiplier": 1,
+    "C": 3.67,
+    "D": 0.28,
+    "person_month_hours": 152,
+    "jh_hours": 7,
+    "inception_fraction": 0.06,
+    "transition_fraction": 0.12,
+    "schedule_inception_fraction": 0.125,
+    "schedule_transition_fraction": 0.125,
+    "status": "Contexte nominal commun pour isoler la taille ; aucun facteur équipe réellement mesuré. Code spécifique traité comme à refaire dans son langage natif, pas comme adaptation ni comme portage Spring."
+  },
+  "isbsg": {
+    "reference": "../2026-10-30-master-data-calcul/entrees.json#benchmark",
+    "hours_per_cfp": 20,
+    "spread": 7,
+    "size_factor": 1.2,
+    "size_band": [
+      10,
+      50
+    ],
+    "status": "Repère Java/multiplateforme du contrat témoin. Pas de calibration Python, pas de calibration Spring ni de miniprojet sur framework comparable établie."
+  },
+  "products": [
+    {
+      "id": "erpnext",
+      "name": "ERPNext + Frappe",
+      "language": "Python + DocTypes JSON",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "framework_commit": "2fcb9397a1f1da353b21e53d2f97ec56653acd02",
+      "files": [
+        {
+          "path": "preuves-erpnext/erp_uom.py",
+          "kind": "python",
+          "relative_audit": true
+        },
+        {
+          "path": "preuves-erpnext/erp_factor_py.py",
+          "kind": "python",
+          "relative_audit": true
+        },
+        {
+          "path": "preuves-erpnext/erp_item.py",
+          "kind": "python",
+          "select_functions": [
+            "get_uom_conv_factor"
+          ],
+          "relative_audit": true
+        },
+        {
+          "path": "preuves-erpnext/erp_uom_json.json",
+          "kind": "doctype",
+          "relative_audit": true
+        },
+        {
+          "path": "preuves-erpnext/erp_factor_json.json",
+          "kind": "doctype",
+          "relative_audit": true
+        }
+      ],
+      "differences": "Les DocTypes portent les champs, les droits et le formulaire. Résolution directe, inverse et intermédiaire dans get_uom_conv_factor ; le cas intermédiaire dépasse le témoin. Frappe exécute l'essentiel du CRUD.",
+      "framework": "Document.insert/_save/load_from_db, métadonnées, permissions, API v1 et formulaire Frappe."
+    },
+    {
+      "id": "odoo",
+      "name": "Odoo",
+      "language": "Python + XML",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "root": "tmp/odoo20-audit",
+      "files": [
+        {
+          "path": "tmp/odoo20-audit/addons/uom/models/uom_uom.py",
+          "kind": "python"
+        },
+        {
+          "path": "tmp/odoo20-audit/addons/uom/views/uom_uom_views.xml",
+          "kind": "xml"
+        },
+        {
+          "path": "tmp/odoo20-audit/addons/uom/models/res_groups.py",
+          "kind": "python"
+        },
+        {
+          "path": "tmp/odoo20-audit/addons/uom/security/uom_security.xml",
+          "kind": "xml"
+        },
+        {
+          "path": "tmp/odoo20-audit/addons/uom/security/ir.access.csv",
+          "kind": "access_csv"
+        }
+      ],
+      "differences": "Facteur porté par chaque unité relative et sa hiérarchie. Le fichier comprend aussi arrondis, prix, contrôle du conditionnement, protection des unités système ; ce n'est pas strictement le seul noyau commun.",
+      "framework": "ORM create/write/read/search_read/unlink, contraintes, droits et vues du socle Odoo."
+    },
+    {
+      "id": "tryton",
+      "name": "Tryton",
+      "language": "Python + XML",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "root": "tmp/tryton-code-audit-2026-10-28",
+      "files": [
+        {
+          "path": "tmp/tryton-code-audit-2026-10-28/modules/product/uom.py",
+          "kind": "python"
+        },
+        {
+          "path": "tmp/tryton-code-audit-2026-10-28/modules/product/uom.xml",
+          "kind": "xml"
+        },
+        {
+          "path": "tmp/tryton-code-audit-2026-10-28/modules/product/view/uom_form.xml",
+          "kind": "xml"
+        },
+        {
+          "path": "tmp/tryton-code-audit-2026-10-28/modules/product/view/uom_tree.xml",
+          "kind": "xml"
+        },
+        {
+          "path": "tmp/tryton-code-audit-2026-10-28/modules/product/view/uom_category_form.xml",
+          "kind": "xml"
+        },
+        {
+          "path": "tmp/tryton-code-audit-2026-10-28/modules/product/view/uom_category_tree.xml",
+          "kind": "xml"
+        }
+      ],
+      "differences": "Unité, catégorie, facteur et taux réciproque ; contrôles de modification et précision. Prix et conversion intercatégories sont des suppléments dans le fichier mesuré. check_modification interdit les changements de facteur/taux existants : modification de coefficient non équivalente au contrat candidat.",
+      "framework": "ModelSQL/ModelStorage, champs, RPC transactionnel et vues Tryton."
+    },
+    {
+      "id": "axelor",
+      "name": "Axelor Open Suite + Open Platform",
+      "language": "Java + XML",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "framework_commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "root": "tmp/oss-audit-axelor",
+      "files": [
+        {
+          "path": "tmp/oss-audit-axelor/axelor-base/src/main/java/com/axelor/apps/base/service/UnitConversionServiceImpl.java",
+          "kind": "java"
+        },
+        {
+          "path": "tmp/oss-audit-axelor/axelor-base/src/main/java/com/axelor/apps/base/service/UnitConversionService.java",
+          "kind": "java"
+        },
+        {
+          "path": "tmp/oss-audit-axelor/axelor-base/src/main/resources/domains/Unit.xml",
+          "kind": "xml"
+        },
+        {
+          "path": "tmp/oss-audit-axelor/axelor-base/src/main/resources/domains/UnitConversion.xml",
+          "kind": "xml"
+        },
+        {
+          "path": "tmp/oss-audit-axelor/axelor-base/src/main/resources/views/Unit.xml",
+          "kind": "xml"
+        },
+        {
+          "path": "tmp/oss-audit-axelor/axelor-base/src/main/resources/views/UnitConversion.xml",
+          "kind": "xml"
+        }
+      ],
+      "differences": "Paire de conversion persistante, coefficient direct/inverse, cache. Groovy et formules contextuelles sont inclus dans l'enveloppe source mais hors contrat commun ; code Guice/Axelor et non Spring.",
+      "framework": "Génération des entités à partir du XML, Resource.save/fetch/search/remove, JPA, sécurité et interface générique."
+    }
+  ],
+  "counting": {
+    "python": "AST : instructions et déclarations, hors imports, docstrings, pass et types autogénérés. Décorateurs séparés. Une déclaration multiligne compte une fois.",
+    "java": "Instructions/déclarations terminées par ; hors parenthèses, entêtes de blocs, imports/package et annotations exclus. Proxy lexical non certifié.",
+    "xml": "Éléments ouvrants hors wrappers, données d'initialisation et traductions non ajoutées ; code CDATA compté séparément.",
+    "doctype": "Une unité par champ non décoratif, définition de DocType, règle de permission et propriété comportementale sélectionnée. Ce proxy n'est pas une équivalence SLOC calibrée.",
+    "scenarios": [
+      "Code logique seulement : diagnostic incomplet du produit déclaratif.",
+      "Code logique + déclarations à poids 1 : test explicite, non budget.",
+      "Poids déclaratif 0,5 et 2 : sensibilité de convention, pas intervalle de confiance."
+    ],
+    "access_csv": "Une règle d'accès déclarative par ligne, sans convertir les cellules ou octets en code."
+  },
+  "retained": {
+    "full_family_jh": null,
+    "full_core_jh": null,
+    "flow_socle_jh": null,
+    "flow_function_jh": null,
+    "effort_by_role": null
+  },
+  "policy": [
+    "Aucune somme entre les quatre produits alternatifs.",
+    "Aucune conversion de lignes Python vers Java.",
+    "Aucune moyenne COCOMO/COSMIC×ISBSG.",
+    "Aucun ratio de couverture transformé en effort.",
+    "Aucun ajout des JH historiques.",
+    "Pas de reprise du socle natif comme coût de reconstruction Spring."
+  ]
+}

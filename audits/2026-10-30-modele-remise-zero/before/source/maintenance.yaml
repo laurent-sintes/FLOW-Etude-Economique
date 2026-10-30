@@ -1,0 +1,472 @@
+version_schema: 1
+id: maintenance
+nom: Maintenance
+produit: Flow Core System
+periode: annuelle
+date_evaluation: '2026-10-22'
+dependances:
+  schema: source/schema-activites-cycle.yaml
+  preuves: sources/integration-maintenance-2026-10-22.yaml
+  stacks:
+  - source/stacks/java-spring.yaml
+  - source/stacks/dotnet.yaml
+  - source/stacks/rust.yaml
+  - source/stacks/microsoft.yaml
+  - source/stacks/sap.yaml
+  scenario: source/maintenance.yaml#scenario_annuel
+  metier: source/grille-complexite.yaml
+roles:
+  developpement:
+    nom: Ingénieur de développement
+    activite_tjm: developpement
+    perimetre: Conception applicative, code, plugins et tests locaux ; extensions client en Buy.
+  integration:
+    nom: Expert intégration et configuration
+    activite_tjm: integration
+    perimetre: Paramétrage, règles, données, flux et industrialisation applicative à niveau expert autonome.
+  support_n3:
+    nom: Expert support N3
+    activite_tjm: support_n3
+    perimetre: Diagnostic expert, exploitation applicative et qualification de corrections ; pas astreinte tarifée
+      implicitement.
+  support_n1:
+    nom: Support utilisateur N1
+    activite_tjm: support_n1
+    perimetre: Accueil, aide à l’usage, procédures et premier diagnostic ; pas remplacement des métiers ou d’un
+      consultant conduite du changement.
+activites:
+- id: MAI-001
+  nom: Assistance utilisateur et administration courante
+  nature: travail
+  description: Traiter les demandes simples, aider à l’usage, maintenir les consignes et prendre en charge le premier
+    diagnostic.
+  livrable: Demandes N1 traitées et base de connaissance tenue à jour.
+  frontiere: L’escalade ajoute seulement le diagnostic N3 de MAI-002. Pas de coût d’éditeur ou de permanence 24/7
+    implicite.
+  roles_pct:
+    developpement: 0
+    integration: 0
+    support_n3: 10
+    support_n1: 90
+  travaux_par_role:
+    developpement: Sans intervention prévue.
+    integration: Sans intervention prévue.
+    support_n3: Enrichir les consignes et traiter les questions expertes ponctuelles.
+    support_n1: Qualifier, aider à l’usage et résoudre les demandes simples.
+  justification_roles: Répartition d’intervention estimée sur le portefeuille annuel ; distincte des obligations
+    du fournisseur.
+  sources:
+  - CADRE
+  - GOLIVE
+  adequation_tjm: compatible
+  volumes_scenario:
+  - demandes_n1_an
+- id: MAI-002
+  nom: Diagnostic expert et remise en service
+  nature: travail
+  description: Diagnostiquer incidents applicatifs, anomalies de flux et de données ; rétablir le service et instruire
+    la cause.
+  livrable: Service rétabli et corrections à réaliser identifiées.
+  frontiere: Code correctif en MAI-003/004, modification durable de flux en MAI-005 ; pas trois facturations du
+    même diagnostic.
+  roles_pct:
+    developpement: 10
+    integration: 15
+    support_n3: 75
+    support_n1: 0
+  travaux_par_role:
+    developpement: Diagnostiquer le comportement du code.
+    integration: Diagnostiquer flux et configuration.
+    support_n3: Conduire investigation, contournement et remise en service.
+    support_n1: Déjà couvert en MAI-001.
+  justification_roles: Répartition d’intervention estimée sur le portefeuille annuel ; distincte des obligations
+    du fournisseur.
+  sources:
+  - CADRE
+  - SHARED
+  adequation_tjm: compatible
+  volumes_scenario:
+  - escalades_n3_an
+- id: MAI-003
+  nom: 'Maintenir la Plateforme Core System : correctifs et versions'
+  nature: travail
+  description: Maintenir la V1 générique, corriger ses défauts, intégrer les patchs de ses composants et produire
+    des versions maintenues.
+  livrable: Core générique maintenu sur des versions utilisables et supportées.
+  frontiere: En Make, responsabilité produit ; en Buy, correctifs du standard financés par l’abonnement. Extensions
+    client en MAI-004, qualification client des versions en MAI-006 et évolutions fonctionnelles nouvelles en MAI-009.
+  roles_pct:
+    developpement: 80
+    integration: 0
+    support_n3: 20
+    support_n1: 0
+  travaux_par_role:
+    developpement: Corriger le code produit et maintenir ses composants.
+    integration: Sans intervention prévue.
+    support_n3: Reproduire les défauts et qualifier les correctifs locaux.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition d’intervention estimée sur le portefeuille annuel ; distincte des obligations
+    du fournisseur.
+  sources:
+  - CADRE
+  - SOLUTION
+  - MS_UPDATES
+  adequation_tjm: compatible
+  volumes_scenario:
+  - corrections_core_an
+- id: MAI-004
+  nom: Maintenir les extensions et spécifiques sous responsabilité client
+  nature: travail
+  description: Corriger plugins, formulaires, traitements et compléments métier du Core dont le code ou la configuration
+    spécifique reste à la charge du client.
+  livrable: Extensions corrigées et tests locaux maintenus.
+  frontiere: Inclut en Buy les compléments génériques réalisés pour atteindre le périmètre commun, même s’ils ont
+    été construits avant l’intégration. N’inclut pas les défauts du standard éditeur.
+  roles_pct:
+    developpement: 65
+    integration: 20
+    support_n3: 15
+    support_n1: 0
+  travaux_par_role:
+    developpement: Corriger les extensions et leurs tests locaux.
+    integration: Vérifier les contrats et paramètres concernés.
+    support_n3: Reproduire et qualifier la correction locale.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition d’intervention estimée sur le portefeuille annuel ; distincte des obligations
+    du fournisseur.
+  sources:
+  - CADRE
+  - SOLUTION
+  adequation_tjm: compatible
+  volumes_scenario:
+  - corrections_extensions_an
+- id: MAI-005
+  nom: Maintenir les flux et la compatibilité avec le SI
+  nature: travail
+  description: Adapter les contrats, mappings et reprises aux évolutions des applications et partenaires ; maintenir
+    leurs tests locaux.
+  livrable: Flux compatibles et exploitables, données rapprochables.
+  frontiere: La réception d’une alerte est en MAI-007 et son diagnostic en MAI-002 ; le changement durable de flux
+    est compté ici.
+  roles_pct:
+    developpement: 20
+    integration: 65
+    support_n3: 15
+    support_n1: 0
+  travaux_par_role:
+    developpement: Adapter les composants de transformation.
+    integration: Modifier contrats, mappings et tests de flux.
+    support_n3: Vérifier exploitabilité et reprise.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition d’intervention estimée sur le portefeuille annuel ; distincte des obligations
+    du fournisseur.
+  sources:
+  - CADRE
+  - MS_DATA
+  adequation_tjm: partielle
+  volumes_scenario:
+  - contrats_flux_modifies_an
+- id: MAI-006
+  nom: Qualifier et déployer les nouvelles versions
+  nature: travail
+  description: Analyser les impacts, maintenir les campagnes de non-régression, qualifier les versions et promouvoir
+    les changements de solution.
+  livrable: Versions déployées avec preuves de compatibilité et possibilité de repli.
+  frontiere: Tests locaux déjà réalisés par les producteurs ; campagne transverse et déploiement seulement. En Buy,
+    l’édition d’une release ne finance pas automatiquement cette recette client.
+  roles_pct:
+    developpement: 25
+    integration: 45
+    support_n3: 30
+    support_n1: 0
+  travaux_par_role:
+    developpement: Adapter les tests automatisés et traiter la compatibilité.
+    integration: Conduire validation de configuration et processus.
+    support_n3: Préparer déploiement, contrôle et repli.
+    support_n1: Documentation d’usage mise à jour en MAI-001.
+  justification_roles: Répartition d’intervention estimée sur le portefeuille annuel ; distincte des obligations
+    du fournisseur.
+  sources:
+  - MS_UPDATES
+  - CICD
+  - MS_TEST
+  adequation_tjm: compatible
+  volumes_scenario:
+  - campagnes_qualification_versions_an
+- id: MAI-007
+  nom: Exploiter la plateforme et les traitements
+  nature: travail
+  description: Superviser, traiter les alertes simples, contrôler jobs et capacité, maintenir la chaîne de livraison
+    et les environnements client.
+  livrable: Service exploitable, traitements surveillés et capacité maîtrisée.
+  frontiere: Travail humain distinct de la facture cloud. Exclure les opérations techniques déjà prises en charge
+    par le SaaS/PaaS ; incidents complexes en MAI-002.
+  roles_pct:
+    developpement: 10
+    integration: 20
+    support_n3: 70
+    support_n1: 0
+  travaux_par_role:
+    developpement: Maintenir diagnostics et automatisations.
+    integration: Maintenir paramètres et chaîne applicative.
+    support_n3: Surveiller, administrer et ajuster le service client.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition d’intervention estimée sur le portefeuille annuel ; distincte des obligations
+    du fournisseur.
+  sources:
+  - SHARED
+  - CICD
+  adequation_tjm: partielle
+  volumes_scenario:
+  - environnements
+  - contrats_flux
+  - messages_metier_mois
+- id: MAI-008
+  nom: Maintenir la sécurité et la continuité
+  nature: travail
+  description: Revoir habilitations, secrets et rétention, vérifier sauvegardes, restauration et continuité de bout
+    en bout ; traiter les contrôles opérationnels.
+  livrable: Accès revus, sauvegardes contrôlées et exercices de restauration réalisés.
+  frontiere: Correctifs logiciels en MAI-003/004 et qualification en MAI-006. Audit externe spécialisé, SOC et astreinte
+    ne sont pas inclus dans les TJM applicatifs.
+  roles_pct:
+    developpement: 10
+    integration: 35
+    support_n3: 55
+    support_n1: 0
+  travaux_par_role:
+    developpement: Vérifier les contrôles applicatifs.
+    integration: Maintenir identités, règles de sécurité et rétention.
+    support_n3: Tester restauration et continuité opérationnelle.
+    support_n1: Sans intervention prévue.
+  justification_roles: Répartition d’intervention estimée sur le portefeuille annuel ; distincte des obligations
+    du fournisseur.
+  sources:
+  - SHARED
+  - MS_RESTORE
+  - SAP_CONTRACT
+  adequation_tjm: partielle
+  volumes_scenario:
+  - exercices_restauration_an
+  - donnees_actives_to
+  - donnees_archives_to
+- id: MAI-009
+  nom: Faire évoluer le Core et l’adaptation métier
+  nature: travail
+  description: Réaliser le portefeuille annuel limité d’améliorations génériques, changements de paramétrage et
+    extensions métier.
+  livrable: Évolutions acceptées, tests locaux et documentation technique.
+  frontiere: Même objectif fonctionnel dans les cinq options. Une évolution demandée n’est pas supposée livrée par
+    la roadmap Buy ; prévoir configuration ou extension supportée. Refonte ou nouveau domaine hors scénario.
+  roles_pct:
+    developpement: 45
+    integration: 45
+    support_n3: 10
+    support_n1: 0
+  travaux_par_role:
+    developpement: Faire évoluer le Flow Core System ou les extensions client Buy.
+    integration: Configurer les règles et parcours métier nouveaux.
+    support_n3: Qualifier l’exploitabilité des changements.
+    support_n1: Aides d’usage en MAI-001.
+  justification_roles: Répartition d’intervention estimée sur le portefeuille annuel ; distincte des obligations
+    du fournisseur.
+  sources:
+  - CADRE
+  - SOLUTION
+  - MS_UPDATES
+  adequation_tjm: compatible
+  volumes_scenario:
+  - evolutions_fonctionnelles_an
+- id: MAI-010
+  nom: Licences, abonnements et droits aux versions
+  nature: achat
+  description: Droits logiciels et services indissociables financés par les contrats éditeur.
+  livrable: Droits et services souscrits pour le périmètre retenu.
+  frontiere: Un contrat groupé reste un achat unique ; hébergement ou support inclus sont des renvois, pas une nouvelle
+    facture.
+  roles_pct: null
+  travaux_par_role: null
+  justification_roles: 'Achat de droits, capacité ou forfait : aucun rôle en pourcentage, aucun point de complexité
+    de prestation.'
+  sources:
+  - CADRE
+  - SAP_CONTRACT
+  - MS_UPDATES
+  adequation_tjm: sans_objet
+  volumes_scenario:
+  - utilisateurs_nominatifs
+  - profils_utilisation
+- id: MAI-011
+  nom: Cloud et capacité d’hébergement
+  nature: achat
+  description: Ressources d’exécution, stockage, sauvegarde, réseau et capacité technique nécessaires au scénario.
+  livrable: Capacité et services techniques financés.
+  frontiere: Hébergement standard inclus en Buy renvoyé à MAI-010. Capacité supplémentaire ou ressources externes
+    facturées seulement si réellement distinctes.
+  roles_pct: null
+  travaux_par_role: null
+  justification_roles: 'Achat de droits, capacité ou forfait : aucun rôle en pourcentage, aucun point de complexité
+    de prestation.'
+  sources:
+  - SHARED
+  - SAP_CONTRACT
+  adequation_tjm: sans_objet
+  volumes_scenario:
+  - environnements
+  - donnees_actives_to
+  - donnees_archives_to
+  - utilisateurs_simultanes_pointe
+- id: MAI-012
+  nom: Exécution iPaaS et échanges
+  nature: achat
+  description: Souscription et consommation iPaaS, connecteurs et capacités des échanges.
+  livrable: Droits et capacité d’intégration financés.
+  frontiere: Le développement des flux et leur MCO sont du travail séparé. Ne pas additionner crédit BTP et service
+    qu’il finance.
+  roles_pct: null
+  travaux_par_role: null
+  justification_roles: 'Achat de droits, capacité ou forfait : aucun rôle en pourcentage, aucun point de complexité
+    de prestation.'
+  sources:
+  - CADRE
+  adequation_tjm: sans_objet
+  volumes_scenario:
+  - contrats_flux
+  - messages_metier_mois
+- id: MAI-013
+  nom: Outillage et support complémentaire acheté
+  nature: achat
+  description: Outillage de fabrication/supervision et éventuels contrats de support ou audits non déjà inclus.
+  livrable: Outils et prestations contractuelles complémentaires identifiés.
+  frontiere: Si un forfait finance les interventions MAI-001 à MAI-008, retirer la prestation remplacée de leur
+    assiette. Ni forfait éditeur ni licence commerciale OSS présumés.
+  roles_pct: null
+  travaux_par_role: null
+  justification_roles: 'Achat de droits, capacité ou forfait : aucun rôle en pourcentage, aucun point de complexité
+    de prestation.'
+  sources:
+  - CADRE
+  - SAP_CONTRACT
+  adequation_tjm: sans_objet
+  volumes_scenario:
+  - environnements
+contributions_non_tarifees:
+- contribution: Métiers et responsables de données
+  activites:
+  - INT-001
+  - INT-003
+  - INT-007
+  - INT-010
+  - INT-012
+  - MAI-009
+  traitement: Décisions, nettoyage sémantique et acceptation nécessaires ; temps interne non valorisé par les quatre
+    TJM techniques, pas assimilé à zéro.
+- contribution: Direction de projet, achats et conduite du changement organisationnelle
+  activites:
+  - INT-001
+  - INT-012
+  - INT-013
+  traitement: Pilotage global et prestations à définir séparément ; ne pas ajouter un faux rôle technique ou une
+    surcharge ligne à ligne.
+- contribution: Expertises cloud, sécurité, audit externe et astreinte
+  activites:
+  - INT-006
+  - INT-008
+  - INT-009
+  - INT-010
+  - INT-011
+  - MAI-005
+  - MAI-007
+  - MAI-008
+  - MAI-013
+  traitement: Compétences ciblées potentiellement nécessaires ; le tarif des Stacks est un repère applicatif, non
+    une cotation spécialisée. Pas de permanence humaine 24/7 supposée.
+pilotage_global:
+  reference: source/calibration-couts.yaml#pilotage
+  programme_groupe_ref: source/deploiement-groupe.yaml#pilotage
+  precision: Pilotage technique selon les assiettes de la calibration ; direction et coordination du déploiement
+    Make selon le programme Groupe, sans appliquer les taux aux achats déjà pilotés.
+scenario_annuel:
+  id: service-annuel-reference-v1
+  nature: hypothese_de_travail_modifiable
+  periode: Une année de fonctionnement stabilisé de la V1 ; aucune durée de projet ou de TCO.
+  perimetre:
+    utilisateurs_nominatifs: 950
+    profils_utilisation:
+      consultation_occasionnelle: 600
+      operationnel: 300
+      administration_et_usage_avance: 50
+    utilisateurs_simultanes_pointe: 100
+    contrats_flux: 30
+    applications_externes: 10
+    environnements:
+      production: 1
+      recette: 1
+      developpement: 1
+    donnees_actives_to: 2
+    donnees_archives_to: 5
+    messages_metier_mois: 2000000
+    definition_message: Échange métier logique ; un message peut déclencher plusieurs actions Logic Apps, appels
+      API ou unités SAP. Ne pas appliquer directement un prix par message fournisseur.
+    dimensionnement: Les To sont un besoin logique ; réplication, sauvegardes, index, logs et ressources CPU/RAM
+      restent à dimensionner par stack. Trois environnements sont logiques, pas trois factures identiques.
+    instances_storeland: 8
+    ensembles_si: 2
+  service:
+    exploitation: Service applicatif disponible en continu ; supervision automatisée.
+    support_humain: Jours ouvrés, 8 heures par jour ; pas de permanence humaine 24/7.
+    disponibilite_cible_pct: 99.9
+    rpo_cible_heures: 4
+    rto_cible_heures: 8
+    precision: Objectifs proposés pour comparer ; ni SLA contractuel ni niveau déjà validé par Beaumanoir.
+  volumes:
+    demandes_n1_par_utilisateur_an: 6
+    taux_escalade_n3_pct: 20
+    corrections_core_an: 12
+    corrections_extensions_an: 12
+    contrats_flux_modifies_an: 10
+    campagnes_qualification_versions_an: 4
+    exercices_restauration_an: 2
+    evolutions_fonctionnelles_an:
+      core_generique: 6
+      parametrage_metier: 12
+      extensions_metier: 6
+  definitions:
+  - Une demande N1 comprend qualification et résolution simple. Une escalade N3 ajoute le diagnostic expert, sans
+    recompter le premier accueil.
+  - Une correction est un défaut localisé avec tests locaux ; pas un incident majeur de sécurité ni une refonte.
+    Le diagnostic est en MAI-002, le code en MAI-003/004, la campagne de release en MAI-006.
+  - Une évolution est limitée à une règle, un traitement ou un écran existant et son contrat ; pas un nouveau domaine.
+    Six évolutions génériques sont un objectif commun, non une promesse de roadmap éditeur.
+  - Les quatre campagnes regroupent la qualification des changements. Leur nombre est une hypothèse ; les obligations
+    de mises à jour de chaque produit peuvent imposer une révision.
+  - Les points annuels évaluent le portefeuille complet ci-dessus, pas une unité à multiplier de nouveau par les
+    volumes. Ils ne sont pas des JH ni un montant.
+  justification: 950 utilisateurs est un repère du RFI ERP global, transposé provisoirement au SCM. Profils, simultanéité,
+    flux, données, support et changements sont des hypothèses nouvelles de comparaison, non des mesures et non des
+    anciens abaques réinjectés.
+  sources:
+  - RFI_USERS
+  - CADRE
+  - CARTO
+  recalage: Demandes N1 et escalades sont dérivées des utilisateurs, fréquence et taux. Licences, moyens et autres
+    charges restent des hypothèses indépendantes à requalifier selon le périmètre.
+regles_specifiques:
+- Le service complet commence après stabilisation Groupe ; les prestations transitoires et leurs réceptions sont
+  décrites dans le modèle composable.
+- Le service générique assuré par l’éditeur est financé via MAI-010 ; ses extensions client restent à maintenir
+  en MAI-004.
+- Six évolutions génériques demandées sont incluses dans MAI-009 pour toutes les stacks. Une roadmap Buy ne les
+  finance que si la couverture est démontrée ; sinon adaptation supportée à prévoir.
+- 'La valorisation_annuelle des fichiers par stack est la référence économique : prix documentés prioritaires, estimation
+  du complément seulement. Les points restent explicatifs ; ne pas additionner leur conversion en JH à un forfait
+  couvrant le même travail.'
+- Les montants annuels documentés sont repris sans inflation additionnelle. Après leur dernière année seulement,
+  une indexation peut être proposée comme hypothèse. Un prix annuel source unique peut être indexé pour les années
+  suivantes ; un service de première année sans récurrence établie ne peut pas l’être.
+- Les années tarifaires relatives du RFI ne constituent ni une roadmap FLOW ni des années civiles imposées. Les
+  prix historiques restent en euros de leur date source ; aucun recalage silencieux en euros 2026. Une montée en
+  capacité source ne devient pas de l’inflation.
+- Un panier RFI est repris sans ventilation artificielle entre usage, maintien évolutif et cloud. Les écarts de
+  périmètre, de service et les anomalies restent visibles ; aucune somme partielle de prix connus ne vaut un coût
+  annuel FLOW complet.

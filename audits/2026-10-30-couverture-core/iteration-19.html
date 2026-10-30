@@ -1,0 +1,335 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Itération 19 — Facturation et encaissements/remboursements</title><style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{overflow-wrap:anywhere;margin:0;background:#FAF8F4;color:#182632;font:16px/1.55 Aptos,'Segoe UI',Arial,sans-serif}main{max-width:1200px;margin:auto;padding:28px}header{background:#D9F2EA;padding:30px;border-radius:16px;border-top:5px solid #236159}h1{font-size:2.25rem;line-height:1.15;margin:8px 0 18px}h2{font-size:1.65rem;margin:0 0 16px}h3{font-size:1.2rem}a{color:#236159;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}a:focus-visible{outline:3px solid #C24F00;outline-offset:3px}nav{background:white;padding:18px 24px;margin:22px 0;border-radius:12px}nav a{display:block;padding:3px 0}section{margin:26px 0;background:white;padding:28px;border-radius:12px;scroll-margin-top:18px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:22px}.metric{background:white;border-radius:10px;padding:18px}.metric strong{font-size:2rem;display:block;color:#236159}.note{background:#FFF0DB;border-left:4px solid #C24F00;padding:18px;margin:18px 0}.muted,small{color:#45525A}.scroll{overflow:auto}table{width:100%;border-collapse:collapse;font-size:.95rem}th{background:#F4F8F6;text-align:left}td,th{padding:12px;border-bottom:1px solid #dbe3df;vertical-align:top}td.num,th.num{white-space:nowrap;text-align:right}tr.total{font-weight:700;background:#D9F2EA}.tag{display:inline-block;background:#FFF0DB;color:#763400;padding:2px 7px;border-radius:5px;font-weight:650}.cap{font-size:.88rem}.cap td{min-width:90px}.cap td:nth-child(2){min-width:280px}.lot{border-top:2px solid #D9F2EA;padding-top:16px;margin-top:28px}ul{padding-left:24px}li{margin:6px 0}code{overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.85rem;background:#f4f8f6;padding:16px}footer{padding:12px 0 30px;color:#45525A}@media(max-width:650px){main{padding:12px}header,section{padding:20px}h1{font-size:1.8rem}.grid{grid-template-columns:1fr}.metric strong{font-size:1.7rem}}@media print{body{background:white}main{max-width:none}section{break-inside:auto}.scroll{overflow:visible}nav{display:none}}</style></head><body><main><header><div>FLOW · Étude d’opportunité · Audit du 30 octobre 2026</div><h1>Itération 19 — Facturation et encaissements/remboursements</h1><p><a href="index.html">Retour au bilan des 88 capacités</a></p></header><nav aria-label="Sommaire"><strong>Dans ce rapport</strong><a href="#resultat">Résultat de cette itération</a><a href="#roles">Charges nouvelles par rôle</a><a href="#incertitude">Progrès et limites</a><a href="#capacites">Capacités et fonctions natives</a><a href="#lots">Travaux, rôles et réutilisation</a><a href="#calendrier">Scénario de délai</a><a href="#sources">Preuves source et limites</a><a href="#audit">Traçabilité</a></nav><section id="resultat"><h2>Résultat de cette itération</h2><p>Ajout :<strong>706 JH</strong> (402–1 676,5). Cumul :<strong>14 797 JH</strong> (9 497,5–30 364). 86/88 capacités étudiées.</p><p>Demandes financières autorisées liées aux flux, éléments facturables, références de facture/avoir et paiements clients, résultats partiels et reste monétaire. Calculs décimaux et devise explicites. Fiscalité, comptabilité générale, paiement bancaire, recouvrement et paiements fournisseurs restent hors Core.</p><div class="note">Hypothèses :1000 éléments par demande de facture, facturation partielle/avoir/acompte et intercompany par liens distincts ; une devise par demande, taux autorisés reçus si conversion requise ; autorisation/capture/annulation/remboursement et résultat inconnu. 10 demandes/s cible, non mesurée. Aucun secret carte ni certificat fiscal stocké par le Core.</div></section><section id="roles"><h2>Charges nouvelles par rôle</h2><div class="scroll"><table class=""><thead><tr><th>Rôle</th><th>Bas</th><th>Central</th><th>Haut</th></tr></thead><tbody><tr><td>Analyse produit</td><td>39 JH</td><td>68 JH</td><td>161,5 JH</td></tr><tr><td>Architecture</td><td>34,5 JH</td><td>60 JH</td><td>141,5 JH</td></tr><tr><td>Développement Java</td><td>136 JH</td><td>236 JH</td><td>561,5 JH</td></tr><tr><td>Développement interface</td><td>50 JH</td><td>88 JH</td><td>209 JH</td></tr><tr><td>Conception des parcours (UX)</td><td>9,5 JH</td><td>18 JH</td><td>43 JH</td></tr><tr><td>QA indépendante</td><td>64 JH</td><td>112 JH</td><td>265 JH</td></tr><tr><td>Plateforme et livraison</td><td>15,5 JH</td><td>28 JH</td><td>66,5 JH</td></tr><tr><td>Sécurité</td><td>25 JH</td><td>44 JH</td><td>104,5 JH</td></tr><tr><td>Coordination technique</td><td>18 JH</td><td>32 JH</td><td>76,5 JH</td></tr><tr><td>Modélisation et optimisation</td><td>10,5 JH</td><td>20 JH</td><td>47,5 JH</td></tr><tr><td><strong>Total tous rôles</strong></td><td><strong>402 JH</strong></td><td><strong>706 JH</strong></td><td><strong>1 676,5 JH</strong></td></tr></tbody></table></div><p>Tous rôles ; les charges Java/interface sont incluses, les lots communs comptés une fois. Estimation de classe C, aucune calibration par des temps observés.</p></section><section id="incertitude"><h2>Progrès et limites</h2><p><strong>Moins incertain :</strong> Les trois ERP montrent la nécessité de séparer transaction, paiement, document et comptabilisation. Le financement des demandes et du rapprochement est distingué des systèmes financiers spécialisés. Un avoir ou une autorisation ne vaut pas remboursement.</p><p><strong>Reste incertain :</strong> Autorité sur l&#x27;éligibilité/montant, possibilités d&#x27;interrogation et d&#x27;idempotence des prestataires, états de règlement réellement reçus, intercompany et corrections. Sans réponse certaine, le Core doit exposer inconnu et permettre rapprochement ; pas d&#x27;exactement-une-fois distant présumé.</p><p><strong>Itération suivante :</strong> Finir avec Process Mining et Reporting, puis vérifier la couverture fonctionnelle, les doublons de financement et les garanties transverses.</p></section><section id="capacites"><h2>Capacités et fonctions natives</h2><article class="lot"><h3>BC-074 · Billing</h3><p>Identifier les éléments facturables selon autorité reçue, quantités et montants connus ; demander facture/avoir, reconnaître document ou rejet, corriger par filiation, préserver intercompany et états incomplets.</p><p><strong>Frontière native :</strong> Ne reconstruit ni fiscalité ni comptabilité générale.</p><div class="scroll"><table class=""><thead><tr><th>Fonction native</th><th>Résultat attendu</th></tr></thead><tbody><tr><td>BC-074.01</td><td>Identifier les éléments éligibles à facturation</td></tr><tr><td>BC-074.02</td><td>Demander et reconnaître facture ou avoir</td></tr><tr><td>BC-074.03</td><td>Traiter rejets et corrections avec les justificatifs</td></tr></tbody></table></div><p>Correspondances partielles directes sur documents, filiation et conditions. Les ERP font davantage de comptabilité que le contrat FLOW retenu.</p></article><article class="lot"><h3>BC-075 · Payment</h3><p>Demander l&#x27;opération autorisée, distinguer autorisation/capture/résultat reconnu, traiter partiels/refus, contrôler remboursement et reste ; corréler notifications contradictoires, consulter ou traiter manuellement l&#x27;inconnu sans réémission aveugle.</p><p><strong>Frontière native :</strong> N’opère pas le paiement bancaire et ne reconstruit pas le prestataire de paiement.</p><div class="scroll"><table class=""><thead><tr><th>Fonction native</th><th>Résultat attendu</th></tr></thead><tbody><tr><td>BC-075.01</td><td>Demander l’encaissement ou le remboursement autorisé</td></tr><tr><td>BC-075.02</td><td>Rapprocher les résultats reçus</td></tr><tr><td>BC-075.03</td><td>Tenir les montants restant à traiter</td></tr></tbody></table></div><p>Comparaison directe partielle sur états, rattachements et restes. Aucune mesure de charge ni preuve universelle des garanties PSP.</p></article></section><section id="lots"><h2>Travaux, rôles et réutilisation</h2><article class="lot" id="lot-E191"><h3>E191 · Contrats financiers et qualification des raccords</h3><p>Contrats montant/devise/autorité/référence externe, sécurisation et doubles de facturier/PSP ; liens vers Orders, prestations et faits, reprise sur résultat inconnu.</p><p><strong>Réutilisation déjà financée :</strong> 11:S111/S112 exécution durable · 13:S132 faits et liens Orders · 18:S181/E181 engagements et pièces · 12:S123 valeurs décimales</p><p><strong>Incertitude :</strong> Les connecteurs réels et agréments du Groupe sont externes ; les protocoles génériques et leurs doubles sont inclus.</p><div class="scroll"><table class=""><thead><tr><th>Rôle</th><th>Bas</th><th>Central</th><th>Haut</th></tr></thead><tbody><tr><td>Analyse produit</td><td>6 JH</td><td>10 JH</td><td>22 JH</td></tr><tr><td>Architecture</td><td>9,5 JH</td><td>16 JH</td><td>35,5 JH</td></tr><tr><td>Développement Java</td><td>21,5 JH</td><td>36 JH</td><td>79,5 JH</td></tr><tr><td>Développement interface</td><td>7 JH</td><td>12 JH</td><td>26,5 JH</td></tr><tr><td>Conception des parcours (UX)</td><td>1 JH</td><td>2 JH</td><td>4,5 JH</td></tr><tr><td>QA indépendante</td><td>15,5 JH</td><td>26 JH</td><td>57,5 JH</td></tr><tr><td>Plateforme et livraison</td><td>4,5 JH</td><td>8 JH</td><td>18 JH</td></tr><tr><td>Sécurité</td><td>7 JH</td><td>12 JH</td><td>26,5 JH</td></tr><tr><td>Coordination technique</td><td>3,5 JH</td><td>6 JH</td><td>13,5 JH</td></tr><tr><td>Modélisation et optimisation</td><td>2 JH</td><td>4 JH</td><td>9 JH</td></tr><tr><td><strong>Total tous rôles</strong></td><td><strong>77,5 JH</strong></td><td><strong>132 JH</strong></td><td><strong>292,5 JH</strong></td></tr></tbody></table></div><p>Décomposition des actions de développement (durées proposées, non observées) :</p><div class="scroll"><table class=""><thead><tr><th>Action</th><th>JH centraux</th></tr></thead><tbody><tr><td>Contrats et publication des demandes financières</td><td>14</td></tr><tr><td>Rapprochement technique et consultation des inconnus</td><td>10</td></tr><tr><td>Tests développeur doublons et réponses perdues</td><td>12</td></tr><tr><td>État inconnu et navigation justificatifs</td><td>12</td></tr></tbody></table></div><p>Sources : <a href="#preuve-O191">O191</a>, <a href="#preuve-T191">T191</a>, <a href="#preuve-A192">A192</a>.</p></article><article class="lot" id="lot-B074"><h3>B074 · Facturation</h3><p>Identifier les éléments facturables selon autorité reçue, quantités et montants connus ; demander facture/avoir, reconnaître document ou rejet, corriger par filiation, préserver intercompany et états incomplets.</p><p><strong>Réutilisation déjà financée :</strong> 19:E191 contrats financiers · 18:E181 pièces · 17:B057 faits reconnus · 16:B008 règles d&#x27;éligibilité reçues</p><p><strong>Incertitude :</strong> Règles fiscales externalisées, mais sémantique de reconnaissance et intercompany à convenir ; pas de facturier réglementaire complet.</p><div class="scroll"><table class=""><thead><tr><th>Rôle</th><th>Bas</th><th>Central</th><th>Haut</th></tr></thead><tbody><tr><td>Analyse produit</td><td>16,5 JH</td><td>28 JH</td><td>64,5 JH</td></tr><tr><td>Architecture</td><td>12 JH</td><td>20 JH</td><td>46 JH</td></tr><tr><td>Développement Java</td><td>54 JH</td><td>90 JH</td><td>207 JH</td></tr><tr><td>Développement interface</td><td>22,5 JH</td><td>38 JH</td><td>87,5 JH</td></tr><tr><td>Conception des parcours (UX)</td><td>4,5 JH</td><td>8 JH</td><td>18,5 JH</td></tr><tr><td>QA indépendante</td><td>22,5 JH</td><td>38 JH</td><td>87,5 JH</td></tr><tr><td>Plateforme et livraison</td><td>4,5 JH</td><td>8 JH</td><td>18,5 JH</td></tr><tr><td>Sécurité</td><td>7 JH</td><td>12 JH</td><td>28 JH</td></tr><tr><td>Coordination technique</td><td>7 JH</td><td>12 JH</td><td>28 JH</td></tr><tr><td>Modélisation et optimisation</td><td>4,5 JH</td><td>8 JH</td><td>18,5 JH</td></tr><tr><td><strong>Total tous rôles</strong></td><td><strong>155 JH</strong></td><td><strong>262 JH</strong></td><td><strong>604 JH</strong></td></tr></tbody></table></div><p>Décomposition des actions de développement (durées proposées, non observées) :</p><div class="scroll"><table class=""><thead><tr><th>Action</th><th>JH centraux</th></tr></thead><tbody><tr><td>Éligibilité et assiette facturable</td><td>26</td></tr><tr><td>Demande, document, avoir et corrections</td><td>34</td></tr><tr><td>Tests développeur partiels, montants et filiation</td><td>30</td></tr><tr><td>Éléments éligibles et demandes</td><td>20</td></tr><tr><td>Rejets, avoirs et justificatifs</td><td>18</td></tr></tbody></table></div><p>Sources : <a href="#preuve-O192">O192</a>, <a href="#preuve-T192">T192</a>, <a href="#preuve-A191">A191</a>.</p></article><article class="lot" id="lot-B075"><h3>B075 · Paiement client et remboursement</h3><p>Demander l&#x27;opération autorisée, distinguer autorisation/capture/résultat reconnu, traiter partiels/refus, contrôler remboursement et reste ; corréler notifications contradictoires, consulter ou traiter manuellement l&#x27;inconnu sans réémission aveugle.</p><p><strong>Réutilisation déjà financée :</strong> 19:E191 contrats et sécurité · 11:BC082 interventions · 13:version et autorité Orders · 18:S181 mécanismes d&#x27;engagement, états monétaires distincts</p><p><strong>Incertitude :</strong> Notification distante et règlement ne sont pas la même preuve ; opération ambiguë et plafond de remboursement restent des points durs.</p><div class="scroll"><table class=""><thead><tr><th>Rôle</th><th>Bas</th><th>Central</th><th>Haut</th></tr></thead><tbody><tr><td>Analyse produit</td><td>16,5 JH</td><td>30 JH</td><td>75 JH</td></tr><tr><td>Architecture</td><td>13 JH</td><td>24 JH</td><td>60 JH</td></tr><tr><td>Développement Java</td><td>60,5 JH</td><td>110 JH</td><td>275 JH</td></tr><tr><td>Développement interface</td><td>20,5 JH</td><td>38 JH</td><td>95 JH</td></tr><tr><td>Conception des parcours (UX)</td><td>4 JH</td><td>8 JH</td><td>20 JH</td></tr><tr><td>QA indépendante</td><td>26 JH</td><td>48 JH</td><td>120 JH</td></tr><tr><td>Plateforme et livraison</td><td>6,5 JH</td><td>12 JH</td><td>30 JH</td></tr><tr><td>Sécurité</td><td>11 JH</td><td>20 JH</td><td>50 JH</td></tr><tr><td>Coordination technique</td><td>7,5 JH</td><td>14 JH</td><td>35 JH</td></tr><tr><td>Modélisation et optimisation</td><td>4 JH</td><td>8 JH</td><td>20 JH</td></tr><tr><td><strong>Total tous rôles</strong></td><td><strong>169,5 JH</strong></td><td><strong>312 JH</strong></td><td><strong>780 JH</strong></td></tr></tbody></table></div><p>Décomposition des actions de développement (durées proposées, non observées) :</p><div class="scroll"><table class=""><thead><tr><th>Action</th><th>JH centraux</th></tr></thead><tbody><tr><td>État et mandat des opérations monétaires</td><td>30</td></tr><tr><td>Corrélation, partiels, reste et remboursement</td><td>40</td></tr><tr><td>Tests développeur concurrence, déduplication et reprise</td><td>40</td></tr><tr><td>Demandes, résultats et reliquats</td><td>22</td></tr><tr><td>Exceptions et rapprochement autorisé</td><td>16</td></tr></tbody></table></div><p>Sources : <a href="#preuve-O191">O191</a>, <a href="#preuve-T191">T191</a>, <a href="#preuve-T192">T192</a>, <a href="#preuve-A192">A192</a>.</p></article></section><section id="calendrier"><h2>Scénario de délai</h2><div class="scroll"><table class=""><thead><tr><th>Phase</th><th>Bas · mois</th><th>Central · mois</th><th>Haut · mois</th></tr></thead><tbody><tr><td>Définition et contrats</td><td>1,9</td><td>3,3</td><td>7,9</td></tr><tr><td>Réalisation et raccords</td><td>3,2</td><td>5,6</td><td>13,3</td></tr><tr><td>Qualification et stabilisation</td><td>2,5</td><td>4,4</td><td>10,3</td></tr></tbody></table></div><p>Délais arrondis : 8 / 14 / 32 mois (bas / central / haut). 18 JH/personne/mois ; dépendances supposées disponibles. Ces durées ne sont pas un calendrier de programme.</p><div class="scroll"><table class=""><thead><tr><th>Rôle</th><th>Personnes mobilisables</th></tr></thead><tbody><tr><td>Analyse produit</td><td>0,8</td></tr><tr><td>Architecture</td><td>0,5</td></tr><tr><td>Développement Java</td><td>2</td></tr><tr><td>Développement interface</td><td>1</td></tr><tr><td>Conception des parcours (UX)</td><td>0,3</td></tr><tr><td>QA indépendante</td><td>1</td></tr><tr><td>Plateforme et livraison</td><td>0,4</td></tr><tr><td>Sécurité</td><td>0,3</td></tr><tr><td>Coordination technique</td><td>0,3</td></tr><tr><td>Modélisation et optimisation</td><td>0,5</td></tr></tbody></table></div></section><section id="sources"><h2>Preuves source et limites</h2><article class="lot" id="preuve-O191"><h3>O191 · odoo/odoo</h3><p>Post-traitement sur transaction confirmée, paiement unique lié et distinction transactions partielles.</p><p><strong>Limite :</strong> Ne garantit pas l&#x27;unicité de l&#x27;acte distant ; FLOW ne reprend pas le moteur comptable Odoo.</p><p><a href="https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/account_payment/models/payment_transaction.py">Source à la révision figée</a> · <code>299075f17026b830a9755f3c43f3e83143995946</code></p><p>Lignes 98–140</p><pre>    def _post_process(self):
+        &quot;&quot;&quot; Override of `payment` to add account-specific logic to the post-processing.
+
+        In particular, for confirmed transactions we write a message in the chatter with the payment
+        and transaction references, post relevant fiscal documents, and create missing payments. For
+        draft, cancelled, or errored transactions, we cancel the payment.
+        &quot;&quot;&quot;
+        super()._post_process()
+        for tx in self.filtered(lambda t: t.state == &#x27;done&#x27;):
+            # Validate invoices automatically once the transaction is confirmed.
+            tx.invoice_ids.filtered(lambda inv: inv.state == &#x27;draft&#x27;).action_post()
+
+            # Create and post missing payments.
+            if tx._should_create_payment():
+                tx.with_company(tx.company_id)._create_payment()
+
+            if tx.payment_id:
+                message = _(
+                    &quot;The payment related to transaction %(ref)s has been posted: %(link)s&quot;,
+                    ref=tx._get_html_link(),
+                    link=tx.payment_id._get_html_link(),
+                )
+                tx._log_message_on_linked_documents(message)
+        for tx in self.filtered(lambda t: t.state in (&#x27;draft&#x27;, &#x27;cancel&#x27;, &#x27;error&#x27;)):
+            tx.payment_id.action_cancel()
+
+    def _should_create_payment(self):
+        &quot;&quot;&quot;Return whether an `account.payment` should be created for this transaction.
+
+        :return: Whether a payment should be created.
+        :rtype: bool
+        &quot;&quot;&quot;
+        self.ensure_one()
+        return (
+            not self.payment_id
+            # There is nothing to reconcile for validation transactions as no payment is created for
+            # them. This is also true for validations with validity check (transfer of a small
+            # amount with immediate refund) because validation amounts are not included in payouts.
+            and self.operation != &quot;validation&quot;
+            # Reconciliation is done in the child transactions for partial voids and captures, thus
+            # no payment is created for their source transactions.
+            and not any(child.state in [&quot;done&quot;, &quot;cancel&quot;] for child in self.child_transaction_ids)
+        )</pre><p>Lignes 142–178</p><pre>    def _create_payment(self, **extra_create_values):
+        &quot;&quot;&quot;Create an `account.payment` record for the current transaction.
+
+        If the transaction is linked to some invoices, their reconciliation is done automatically.
+
+        Note: self.ensure_one()
+
+        :param dict extra_create_values: Optional extra create values
+        :return: The created payment
+        :rtype: recordset of `account.payment`
+        &quot;&quot;&quot;
+        self.ensure_one()
+
+        payment_method_line = self.provider_id.journal_id.inbound_payment_method_line_ids\
+            .filtered(lambda l: l.payment_provider_id == self.provider_id)
+        payment_values = {
+            &#x27;amount&#x27;: abs(self.amount),  # A tx may have a negative amount, but a payment must &gt;= 0
+            &#x27;payment_type&#x27;: &#x27;inbound&#x27; if self.amount &gt; 0 else &#x27;outbound&#x27;,
+            &#x27;currency_id&#x27;: self.currency_id.id,
+            &#x27;partner_id&#x27;: self.partner_id.commercial_partner_id.id,
+            &#x27;partner_type&#x27;: &#x27;customer&#x27;,
+            &#x27;journal_id&#x27;: self.provider_id.journal_id.id,
+            &#x27;company_id&#x27;: self.provider_id.company_id.id,
+            &#x27;payment_method_line_id&#x27;: payment_method_line.id,
+            &#x27;payment_token_id&#x27;: self.token_id.id,
+            &#x27;payment_transaction_id&#x27;: self.id,
+            &#x27;memo&#x27;: self.reference,
+            &#x27;write_off_line_vals&#x27;: [],
+            &#x27;invoice_ids&#x27;: self.invoice_ids,
+            **extra_create_values,
+        }
+
+        for invoice in self.invoice_ids:
+            if invoice.state != &#x27;posted&#x27;:
+                continue
+            next_payment_values = invoice._get_invoice_next_payment_values()
+            if next_payment_values[&#x27;installment_state&#x27;] == &#x27;epd&#x27; and self.amount == next_payment_values[&#x27;amount_due&#x27;]:</pre></article><article class="lot" id="preuve-O192"><h3>O192 · odoo/odoo</h3><p>Facturation finale ou d&#x27;acompte selon paiements et commandes confirmées.</p><p><strong>Limite :</strong> Analogie de filiation et éligibilité, pas autorité de facturation universelle.</p><p><a href="https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/sale/models/payment_transaction.py">Source à la révision figée</a> · <code>299075f17026b830a9755f3c43f3e83143995946</code></p><p>Lignes 203–231</p><pre>    def _invoice_sale_orders(self):
+        for tx in self.filtered(lambda tx: tx.sale_order_ids):
+            tx = tx.with_company(tx.company_id)
+
+            confirmed_orders = tx.sale_order_ids.filtered(lambda so: so.state == &quot;sale&quot;)
+            if confirmed_orders:
+                # Filter orders between those fully paid and those partially paid.
+                fully_paid_orders = confirmed_orders.filtered(lambda so: so._is_paid())
+
+                # Create a down payment invoice for partially paid orders
+                downpayment_invoices = (
+                    (confirmed_orders - fully_paid_orders)
+                    .with_context(downpayment_fixed_amount=tx.amount)
+                    ._generate_downpayment_invoices()
+                )
+
+                # For fully paid orders create a final invoice.
+                fully_paid_orders._force_lines_to_invoice_policy_order()
+                final_invoices = fully_paid_orders.with_context(
+                    raise_if_nothing_to_invoice=False
+                )._create_invoices(final=True)
+                invoices = downpayment_invoices + final_invoices
+
+                # Setup access token in advance to avoid serialization failure between
+                # edi postprocessing of invoice and displaying the sale order on the portal
+                for invoice in invoices:
+                    invoice._portal_ensure_token()
+                if invoices:
+                    tx.invoice_ids = [Command.set(invoices.ids)]</pre></article><article class="lot" id="preuve-T191"><h3>T191 · tryton/tryton</h3><p>États soumis/approuvés/en traitement/réussis/échoués et contrôles de rapprochement.</p><p><strong>Limite :</strong> FLOW conserve inconnu et reprise ; le paiement bancaire réel reste externe.</p><p><a href="https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/account_payment/payment.py">Source à la révision figée</a> · <code>e011222dc305c431677e586706fd241dffe02236</code></p><p>Lignes 736–808</p><pre>    def draft(cls, payments):
+        pass
+
+    @classmethod
+    @ModelView.button
+    @Workflow.transition(&#x27;submitted&#x27;)
+    @set_employee(&#x27;submitted_by&#x27;)
+    def submit(cls, payments):
+        cls._check_reconciled(payments)
+
+    @classmethod
+    @ModelView.button
+    @Workflow.transition(&#x27;approved&#x27;)
+    @set_employee(&#x27;approved_by&#x27;)
+    def approve(cls, payments):
+        cls._check_reconciled(payments)
+
+    @classmethod
+    @ModelView.button_action(&#x27;account_payment.act_process_payments&#x27;)
+    def process_wizard(cls, payments):
+        pass
+
+    @classmethod
+    def process_method_with_group(cls):
+        return [&#x27;manual&#x27;]
+
+    @classmethod
+    @Workflow.transition(&#x27;processing&#x27;)
+    def process(cls, payments, group=None):
+        if payments:
+            if group:
+                group = group()
+                cls.write(payments, {
+                        &#x27;group&#x27;: group.id,
+                        })
+            # Set state before calling process method
+            # as it may set a different state directly
+            cls.proceed(payments)
+            if group:
+                getattr(group, f&#x27;process_{group.process_method}&#x27;)()
+            else:
+                for payment in payments:
+                    getattr(payment, f&#x27;process_{payment.process_method}&#x27;)()
+            return group
+
+    @classmethod
+    @ModelView.button
+    @Workflow.transition(&#x27;processing&#x27;)
+    def proceed(cls, payments):
+        cls._check_reconciled(
+            [p for p in payments if p.state not in {&#x27;succeeded&#x27;, &#x27;failed&#x27;}])
+
+    @classmethod
+    @ModelView.button
+    @Workflow.transition(&#x27;succeeded&#x27;)
+    @set_employee(&#x27;succeeded_by&#x27;)
+    def succeed(cls, payments):
+        pass
+
+    @classmethod
+    @ModelView.button
+    @Workflow.transition(&#x27;failed&#x27;)
+    @set_employee(&#x27;failed_by&#x27;)
+    def fail(cls, payments):
+        pass
+
+    @classmethod
+    def _check_reconciled(cls, payments):
+        pool = Pool()
+        Warning = pool.get(&#x27;res.user.warning&#x27;)
+        for payment in payments:
+            if payment.line and payment.line.reconciliation:
+                key = Warning.format(&#x27;submit_reconciled&#x27;, [payment])</pre></article><article class="lot" id="preuve-T192"><h3>T192 · tryton/tryton</h3><p>Reste à payer calculé à partir de lignes non rapprochées et de leur devise.</p><p><strong>Limite :</strong> Les principes de reliquat et devise sont comparables ; la comptabilité et les conversions ne sont pas réécrites.</p><p><a href="https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/account_invoice/invoice.py">Source à la révision figée</a> · <code>e011222dc305c431677e586706fd241dffe02236</code></p><p>Lignes 976–1020</p><pre>    def get_amount_to_pay(cls, invoices, name):
+        pool = Pool()
+        Currency = pool.get(&#x27;currency.currency&#x27;)
+        Date = pool.get(&#x27;ir.date&#x27;)
+
+        amounts = defaultdict(Decimal)
+        for company, grouped_invoices in groupby(
+                invoices, key=lambda i: i.company):
+            with Transaction().set_context(company=company.id):
+                today = Date.today()
+            for invoice in grouped_invoices:
+                if invoice.state != &#x27;posted&#x27;:
+                    continue
+                amount = Decimal(0)
+                amount_currency = Decimal(0)
+                for line in invoice.lines_to_pay:
+                    if line.reconciliation:
+                        continue
+                    if (name == &#x27;amount_to_pay_today&#x27;
+                            and (not line.maturity_date
+                                or line.maturity_date &gt; today)):
+                        continue
+                    if (line.second_currency
+                            and line.second_currency == invoice.currency):
+                        amount_currency += line.amount_second_currency
+                    else:
+                        amount += line.debit - line.credit
+                for line in invoice.payment_lines:
+                    if line.reconciliation:
+                        continue
+                    if (line.second_currency
+                            and line.second_currency == invoice.currency):
+                        amount_currency += line.amount_second_currency
+                    else:
+                        amount += line.debit - line.credit
+                if amount:
+                    with Transaction().set_context(date=invoice.currency_date):
+                        amount_currency += Currency.compute(
+                            invoice.company.currency, amount, invoice.currency)
+                if invoice.type == &#x27;in&#x27; and amount_currency:
+                    amount_currency *= -1
+                if name == &#x27;amount_to_pay_today&#x27;:
+                    amount_currency = max(0, amount_currency)
+                amounts[invoice.id] = amount_currency
+        return amounts</pre></article><article class="lot" id="preuve-A191"><h3>A191 · axelor/axelor-open-suite</h3><p>Validation de facture, ventilation comptable distincte et création d&#x27;avoir rattaché.</p><p><strong>Limite :</strong> FLOW sépare reconnaissance documentaire et paiement ; ni fiscalité ni comptabilité générale ajoutées.</p><p><a href="https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-account/src/main/java/com/axelor/apps/account/service/invoice/InvoiceServiceImpl.java">Source à la révision figée</a> · <code>e7cbea53bae88d2540f59a70b09bf0f326f1022e</code></p><p>Lignes 242–283</p><pre>  public void validateAndVentilate(Invoice invoice) throws AxelorException {
+    validate(invoice);
+    if (invoice.getOperationSubTypeSelect() != InvoiceRepository.OPERATION_SUB_TYPE_ADVANCE) {
+      ventilate(invoice);
+    }
+  }
+
+  /**
+   * Validation d&#x27;une facture. (Transaction)
+   *
+   * @param invoice Une facture.
+   * @throws AxelorException
+   */
+  @Override
+  public void validate(Invoice invoice) throws AxelorException {
+    if (invoice.getStatusSelect() == null
+        || invoice.getStatusSelect() != InvoiceRepository.STATUS_DRAFT) {
+      throw new AxelorException(
+          TraceBackRepository.CATEGORY_INCONSISTENCY,
+          I18n.get(AccountExceptionMessage.INVOICE_VALIDATE_WRONG_STATUS));
+    }
+    validateProcess(invoice);
+    if (invoice.getOperationSubTypeSelect() != InvoiceRepository.OPERATION_SUB_TYPE_ADVANCE
+        &amp;&amp; invoice.getInvoiceAutomaticMailOnValidate()) {
+      sendMail(invoice, invoice.getInvoiceMessageTemplateOnValidate());
+    }
+    invoiceCategoryService.setInvoiceCategory(invoice);
+  }
+
+  @Transactional(rollbackOn = {Exception.class})
+  protected void validateProcess(Invoice invoice) throws AxelorException {
+    log.debug(&quot;Invoice validation&quot;);
+
+    compute(invoice);
+
+    validateFactory.getValidator(invoice).process();
+
+    // if the invoice is an advance payment invoice, we also &quot;ventilate&quot; it
+    // without creating the move
+    if (invoice.getOperationSubTypeSelect() == InvoiceRepository.OPERATION_SUB_TYPE_ADVANCE) {
+      ventilate(invoice);
+    }</pre><p>Lignes 546–563</p><pre>  public Invoice createRefund(Invoice invoice) throws AxelorException {
+
+    boolean isValidatedAdvancePayment =
+        invoice.getStatusSelect() == InvoiceRepository.STATUS_VALIDATED
+            &amp;&amp; invoice.getOperationSubTypeSelect() == InvoiceRepository.OPERATION_SUB_TYPE_ADVANCE;
+    if (invoice.getStatusSelect() != InvoiceRepository.STATUS_VENTILATED
+        &amp;&amp; !isValidatedAdvancePayment) {
+      throw new AxelorException(
+          invoice,
+          TraceBackRepository.CATEGORY_INCONSISTENCY,
+          I18n.get(AccountExceptionMessage.INVOICE_CREATE_REFUND_WRONG_STATUS));
+    }
+
+    Invoice refund = new RefundInvoice(invoice).generate();
+    invoice.addRefundInvoiceListItem(refund);
+    invoiceRepo.save(invoice);
+
+    return refund;</pre></article><article class="lot" id="preuve-A192"><h3>A192 · axelor/axelor-open-suite</h3><p>Paiements en attente et blocages conditionnels contrôlés avant traitement.</p><p><strong>Limite :</strong> Analogies de garde et attente ; règlements fournisseurs et trésorerie générale hors périmètre Payment FLOW.</p><p><a href="https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-account/src/main/java/com/axelor/apps/account/service/payment/paymentsession/PaymentSessionServiceImpl.java">Source à la révision figée</a> · <code>e7cbea53bae88d2540f59a70b09bf0f326f1022e</code></p><p>Lignes 338–392</p><pre>  public boolean isNotAwaitingPayment(InvoiceTerm invoiceTerm) {
+    if (invoiceTerm == null) {
+      return false;
+    } else if (invoiceTerm.getInvoice() != null) {
+      Invoice invoice = invoiceTerm.getInvoice();
+
+      if (CollectionUtils.isNotEmpty(invoice.getInvoicePaymentList())) {
+        return invoice.getInvoicePaymentList().stream()
+            .filter(it -&gt; it.getStatusSelect() == InvoicePaymentRepository.STATUS_PENDING)
+            .map(InvoicePayment::getInvoiceTermPaymentList)
+            .flatMap(Collection::stream)
+            .map(InvoiceTermPayment::getInvoiceTerm)
+            .noneMatch(it -&gt; it.getId().equals(invoiceTerm.getId()));
+      }
+    }
+
+    return true;
+  }
+
+  protected boolean isBlocking(InvoiceTerm invoiceTerm, PaymentSession paymentSession) {
+    if (paymentSession.getPaymentMode().getTypeSelect() != PaymentModeRepository.TYPE_DD) {
+      return false;
+    }
+
+    if (invoiceTerm.getInvoice() != null) {
+      Invoice invoice = invoiceTerm.getInvoice();
+
+      if (invoice.getDebitBlockingOk()
+          &amp;&amp; !paymentSession.getPaymentDate().isAfter(invoice.getDebitBlockingToDate())) {
+        return true;
+      }
+
+      if (this.isBlocking(invoice.getPartner(), paymentSession)) {
+        return true;
+      }
+
+      if (this.isLcrBlocking(invoice, invoiceTerm.getDueDate())
+          &amp;&amp; paymentSession.getPaymentMode().getTypeSelect()
+              != PaymentModeRepository.TYPE_EXCHANGES) {
+        return true;
+      }
+    }
+
+    if (invoiceTerm.getMoveLine() != null) {
+      MoveLine moveLine = invoiceTerm.getMoveLine();
+
+      if (moveLine.getPartner() != null &amp;&amp; this.isBlocking(moveLine.getPartner(), paymentSession)) {
+        return true;
+      } else if (moveLine.getMove().getPartner() != null
+          &amp;&amp; this.isBlocking(moveLine.getMove().getPartner(), paymentSession)) {
+        return true;
+      }
+    }
+
+    return false;</pre></article></section><section id="audit"><h2>Traçabilité</h2><p><a href="iteration-19-entrees.json">Hypothèses et vecteurs de charge</a> · <a href="iteration-19-resultats.json">Calcul complet</a> · <a href="iteration-19-preuves.json">Extraits et empreintes</a></p><p>5 illustrations analytiques de frontières vérifiées. Ce ne sont pas des tests d’un produit réalisé. Chaque fichier actif surveillé est resté identique.</p></section><footer>Estimation assistée par IA, sans revue humaine attribuée. Dossier expérimental distinct du modèle économique courant.</footer></main></body></html>

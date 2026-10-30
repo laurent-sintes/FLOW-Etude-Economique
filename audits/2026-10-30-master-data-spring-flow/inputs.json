@@ -1,0 +1,3574 @@
+{
+  "id": "audit25-master-data-spring-equivalence",
+  "date": "2026-10-30",
+  "status": "estimation_conditionnelle_non_calibree_non_appliquee",
+  "scope": "Master Data FLOW, BC-002 à BC-007, contrat07 v1.1 et scénario S1. Total de projet initial ; ni ensemble du Core System, ni intégration Beaumanoir, ni exploitation annuelle.",
+  "framework_policy": {
+    "adjustment_factor": 1,
+    "observed_equivalence_of_effort": false,
+    "decision": "Pas de supplément ou remise forfaitaire Spring. Équivalence des services génériques retenue comme hypothèse d'étude d'opportunité, à productivité et maîtrise comparables. Les charges de composition normales sont déjà dans les références natives.",
+    "target": "Java 21, Spring Boot 4.1.2 avec Data JPA, Security, Batch à repository JDBC persistant, PostgreSQL géré, interface React équipée de composants CRUD réutilisables (React-admin Community comme candidat). Les exports CRUD sont protégés ; les commandes métier passent par les services, pas par écriture directe des tables.",
+    "compatibility": "Capacités documentées, assemblage et BOM non exécutés. Spring seul ne fournit pas le client métier de Frappe/Axelor ; la comparaison inclut les composants UI et API. Aucun produit n'est recopié dans FLOW."
+  },
+  "reference_choice": {
+    "id": "axelor",
+    "reason": "Référence Java parmi les quatre estimations natives ; pas sélection du chiffre le plus proche d'une durée souhaitée. Les trois autres restent des sensibilités de référence, sans moyenne.",
+    "equivalent_size_meaning": "La taille équivalente native conserve le travail d'intégration de sa plateforme. Sous l'hypothèse d'équivalence, c'est une ancre de charge équivalente, PAS une mesure ni une traduction des sources Spring. Les nouveaux blocs sont des analogies Java/TS mesurées. Ce pont est une hypothèse, non une preuve de productivité identique."
+  },
+  "assumptions": [
+    "Deux versions canoniques ; 26 transformations déclarées utilisant quatre opérations partagées. Une modification sémantique non représentable exige une nouvelle estimation.",
+    "Un seul stockage transactionnel, monolithe modulaire, deux instances applicatives ; fournisseur DB/backup/CI géré, modules standards existants ; pas de plateforme cloud à reconstruire.",
+    "Identité/authentification et administration des rôles au fournisseur d'identité. FLOW applique l'organisation/portée sur tous les accès ; pas d'éditeur générique de politique.",
+    "Le manifeste des consommateurs est conservé hors du point de restauration par l'opérateur ; clôture opérateur après vérification, sans nouveau callback indépendant par consommateur. Usages non déclarés indétectables.",
+    "Publication sur admission cohérente ; une action manuelle de validation/rejeu utilise le même processus I02 avec les mêmes objets/résultats. Pas de moteur de workflow général.",
+    "Interfaces humaines et machine utilisent le même contrat de résultats ; pas de double comptage des mêmes processus COSMIC.",
+    "Les garanties S1 sont des objectifs : ni charge de 100k lignes/30min, ni disponibilité99.9%, ni RTO8h ne sont prouvés par une documentation de framework.",
+    "Tests développeur, QA, analyse, conception, gestion et préparation initiale inclus dans COCOMO quatre phases ; pas d'ajout de tests LOC ou d'un pourcentage QA. Exploitation, MCO, fournisseur et intégration client exclus.",
+    "Les défauts ordinaires et optimisations relèvent de l'effort estimé. Une refonte d'architecture ou une exigence au-delà de S1 nécessite une réestimation ; l'enveloppe n'est pas une garantie d'exhaustivité."
+  ],
+  "native_results_ref": "../2026-10-30-master-data-comparable-reuse/results.json",
+  "contract_ref": "../2026-10-29-experimentation-estimation/iteration-07-contrat-v1.1.json",
+  "contract_sha256": "4ff47d15b241859eea6bcc50c5c882478338ae31d8c44bb1192901066d81dbb3",
+  "cocomo": {
+    "A": 2.94,
+    "B": 0.91,
+    "SF_sum": 18.97,
+    "C": 3.67,
+    "D": 0.28,
+    "month_hours": 152,
+    "day_hours": 7,
+    "effort_phase_factor": 1.18,
+    "schedule_phase_factor": 1.25,
+    "other_EM": 1,
+    "SCED": 1,
+    "REVL": 0,
+    "source": "https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf",
+    "source_locations": "Équation 4 et tables 6, 36, 57, 63 ; autres paramètres conservés nominaux.",
+    "activity_distribution_ref": "../2026-10-30-master-data-calcul/repartitions-sources.json#cocomo"
+  },
+  "scenarios": [
+    {
+      "id": "lower",
+      "label": "Favorable",
+      "declarative_weight": 0.5,
+      "AA": 0,
+      "IM": 0,
+      "PERS": 0.83,
+      "PREX": 0.87,
+      "assumption": "Équipe capable et expérimentée, composants déjà assimilés, intégration supplémentaire nulle au-delà des appels et tests du code neuf. Déclaratif léger."
+    },
+    {
+      "id": "central",
+      "label": "Central",
+      "declarative_weight": 1,
+      "AA": 2,
+      "IM": 5,
+      "PERS": 1,
+      "PREX": 1,
+      "assumption": "Équipe nominale, plateforme disponible, qualification légère des composants et intégration limitée ; aucune modification de leur code."
+    },
+    {
+      "id": "upper",
+      "label": "Prudent",
+      "declarative_weight": 2,
+      "AA": 4,
+      "IM": 15,
+      "PERS": 1.26,
+      "PREX": 1.12,
+      "assumption": "Équipe moins expérimentée ou moins stable, davantage d'évaluation et de tests d'intégration ; déclaratif plus coûteux, sans réécriture du framework."
+    }
+  ],
+  "blocks": [
+    {
+      "id": "C01/extraire_organisations_et_portees",
+      "family": "PROTECTION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F10",
+        "F11"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "C01/construire_predicat_de_portee",
+      "family": "PROTECTION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F10",
+        "F11"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "C01/masquer_diagnostics_sensibles",
+      "family": "PROTECTION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F10",
+        "F11"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "C01/journaliser_action_sensible",
+      "family": "PROTECTION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F10",
+        "F11"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN01/valider_enveloppe_et_version",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN01/valider_manifeste_complet",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN01/empreinte_canonique",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN01/enregistrer_origine_et_resultat",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN02/recevoir_JSON_et_lot",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F01",
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN02/creer_identite_lot_idempotent",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F01",
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN02/persister_resultats_par_ligne",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F01",
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN03/resoudre_cle_externe",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F02"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN03/valider_correspondance_declaree",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F02"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN03/valider_groupe_autorite",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F02"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN03/valider_domaine_source",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F02"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN03/comparer_versions_sources",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F02"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN04/attribuer_identite_stable",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F02"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN04/enregistrer_alias_sans_fusion",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F02"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN04/composer_champs_autorises",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F02"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN04/mettre_en_quarantaine_conflit_cle",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F02"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN04/mettre_en_quarantaine_conflit_version_autorite",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F02"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN05/verifier_intervalles_dates",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN05/resoudre_liens_versions",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN05/detecter_cycle_graphe",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN05/verifier_limites_profondeur",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN05/classifier_absence_ambiguite",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN06/figer_revision_immutable",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN06/mettre_en_attente_dependances",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN06/retester_dependances_resolues",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN06/assembler_candidat_publication",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN06/verifier_coherence_ensemble",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN06/commuter_pointeur_atomique",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN06/retirer_absents_apres_manifeste",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN06/preserver_liens_historiques",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN07/normaliser_rejet_champ_lien",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN07/grouper_rejets_par_cause",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN07/verifier_filiation_correction",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN07/identifier_lignes_deja_acceptees",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN08/persister_quarantaine",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN08/recevoir_correction_sourcee",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "IN08/publier_correction_tardive",
+      "family": "ADMISSION",
+      "kind": "workflow",
+      "contracts": [
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V05/verifier_parties_accord",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F05"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V05/valider_portee_accord",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F05"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V05/valider_engagement_quantite_valeur",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F05"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V05/verifier_assortiment_fige",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F05"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V05/valider_profil_credit_recu",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F05"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V05/selectionner_accords_applicables",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F05"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V05/restituer_absences_et_conflits",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F05"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V06/verifier_correspondances_usages",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F06"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V06/valider_offre_catalogue",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F06"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V06/verifier_membres_catalogue",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F06"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V06/valider_assortiment",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F06"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V06/verifier_membres_assortiment",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F06"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V06/valider_contexte_planification",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F06"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V06/verifier_fenetres_produit_contexte",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F06"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V06/lier_offre_accord_tarif",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F06"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V07/valider_specification",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F07"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V07/verifier_quantites_niveaux",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F07"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V07/verifier_compatibilites",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F07"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V07/restituer_conditionnement",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F07"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V08/verifier_usage_restrictions",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F08"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V08/verifier_correspondances_usages",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F08"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V09/valider_relation_reseau",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V09/verifier_responsable_executant",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V09/valider_offre_prestataire",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V09/verifier_resultat_niveau_service",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V09/verifier_metadata_acces_sans_secret",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V09/valider_zone_periode",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V09/valider_livre_tarif_service",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V09/valider_bases_paliers",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V09/selectionner_candidats_service",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V09/restituer_ambiguite_et_connaissance",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "VCOMMON/valider_arbre_condition_type",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "VCOMMON/evaluer_egalite_ensemble",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "VCOMMON/evaluer_intervalle_date",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "VCOMMON/composer_ET_OU_et_inconnu",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "VCOMMON/valider_limites_paliers",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "VCOMMON/restituer_origine_validite_contexte",
+      "family": "SEMANTIQUE",
+      "kind": "rule",
+      "contracts": [
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V10A/resoudre_revision_a_date",
+      "family": "PROTECTION",
+      "kind": "rule",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V10A/verifier_contexte_applicable",
+      "family": "PROTECTION",
+      "kind": "rule",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V10A/encoder_curseur_durable",
+      "family": "PROTECTION",
+      "kind": "rule",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V10A/verifier_droit_utilisation_version",
+      "family": "PROTECTION",
+      "kind": "rule",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V10A/verifier_eligibilite_purge",
+      "family": "PROTECTION",
+      "kind": "rule",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V10B/rechercher_detail_version",
+      "family": "PROTECTION",
+      "kind": "workflow",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V10B/exporter_canonique_par_flux",
+      "family": "PROTECTION",
+      "kind": "workflow",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V10B/lire_changements_par_curseur",
+      "family": "PROTECTION",
+      "kind": "workflow",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V10B/enregistrer_utilisation_consommateur",
+      "family": "PROTECTION",
+      "kind": "workflow",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V10B/liberer_utilisation_consommateur",
+      "family": "PROTECTION",
+      "kind": "workflow",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V10B/preparer_export_avant_purge",
+      "family": "PROTECTION",
+      "kind": "workflow",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V10B/confirmer_export",
+      "family": "PROTECTION",
+      "kind": "workflow",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "V10B/purger_sans_liens_proteges",
+      "family": "PROTECTION",
+      "kind": "workflow",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F02/declarerCorrespondance",
+      "family": "ADMISSION",
+      "kind": "controller",
+      "contracts": [
+        "F02"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F03/etatPublication",
+      "family": "ADMISSION",
+      "kind": "controller",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F03/publierCandidat",
+      "family": "ADMISSION",
+      "kind": "controller",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F03/retirerReference",
+      "family": "ADMISSION",
+      "kind": "controller",
+      "contracts": [
+        "F03"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F04/soumettreCorrection",
+      "family": "ADMISSION",
+      "kind": "controller",
+      "contracts": [
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F04/relancerLot",
+      "family": "ADMISSION",
+      "kind": "controller",
+      "contracts": [
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F05-F09/versionsReference",
+      "family": "SEMANTIQUE",
+      "kind": "controller",
+      "contracts": [
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F05-F09/validiteContexte",
+      "family": "SEMANTIQUE",
+      "kind": "controller",
+      "contracts": [
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F05-F09/relationsReference",
+      "family": "SEMANTIQUE",
+      "kind": "controller",
+      "contracts": [
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F05-F09/membresReference",
+      "family": "SEMANTIQUE",
+      "kind": "controller",
+      "contracts": [
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F05-F09/candidatsAccords",
+      "family": "SEMANTIQUE",
+      "kind": "controller",
+      "contracts": [
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F05-F09/candidatsServices",
+      "family": "SEMANTIQUE",
+      "kind": "controller",
+      "contracts": [
+        "F05",
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F10/exporter",
+      "family": "PROTECTION",
+      "kind": "controller",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F10/lireChangements",
+      "family": "PROTECTION",
+      "kind": "controller",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F10/declarerUtilisation",
+      "family": "PROTECTION",
+      "kind": "controller",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F10/libererUtilisation",
+      "family": "PROTECTION",
+      "kind": "controller",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F10/confirmerExport",
+      "family": "PROTECTION",
+      "kind": "controller",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "API_F10/demanderPurge",
+      "family": "PROTECTION",
+      "kind": "controller",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "PERSIST/chercher_contribution_par_empreinte",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "PERSIST/verrouiller_identite_source",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "PERSIST/chercher_versions_conflictuelles",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "PERSIST/chercher_dependances_en_attente",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "PERSIST/parcourir_liens_pour_cycle",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "PERSIST/charger_manifest_et_absents",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "PERSIST/chercher_revisions_a_date",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "PERSIST/verifier_liens_proteges_pour_purge",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "PERSIST/lire_evenements_ordonnes",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "PERSIST/chercher_rejets_par_cause",
+      "family": "ADMISSION",
+      "kind": "rule",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Inventaire08, après retrait des fonctions déjà financées par MD01–MD07."
+    },
+    {
+      "id": "REPRISE/rejouer_revision_sans_second_effet",
+      "family": "REPRISE",
+      "kind": "workflow",
+      "contracts": [
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Amendement07 : protocole métier au-dessus des checkpoints et sauvegardes réutilisés."
+    },
+    {
+      "id": "REPRISE/reconstruire_identite_semantique_et_dependances",
+      "family": "REPRISE",
+      "kind": "workflow",
+      "contracts": [
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Amendement07 : protocole métier au-dessus des checkpoints et sauvegardes réutilisés."
+    },
+    {
+      "id": "REPRISE/ouvrir_epoque_et_invalider_curseurs",
+      "family": "REPRISE",
+      "kind": "workflow",
+      "contracts": [
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Amendement07 : protocole métier au-dessus des checkpoints et sauvegardes réutilisés."
+    },
+    {
+      "id": "REPRISE/enregistrer_manifeste_consommateurs",
+      "family": "REPRISE",
+      "kind": "workflow",
+      "contracts": [
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Amendement07 : protocole métier au-dessus des checkpoints et sauvegardes réutilisés."
+    },
+    {
+      "id": "REPRISE/rapprocher_usages_avec_identites_stables",
+      "family": "REPRISE",
+      "kind": "workflow",
+      "contracts": [
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Amendement07 : protocole métier au-dessus des checkpoints et sauvegardes réutilisés."
+    },
+    {
+      "id": "REPRISE/controler_cloture_et_suspendre_purge",
+      "family": "REPRISE",
+      "kind": "workflow",
+      "contracts": [
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Amendement07 : protocole métier au-dessus des checkpoints et sauvegardes réutilisés."
+    },
+    {
+      "id": "API_REPRISE/ouvrirRapprochement",
+      "family": "REPRISE",
+      "kind": "controller",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Trois opérations externes du protocole de rapprochement proposé."
+    },
+    {
+      "id": "API_REPRISE/etatRapprochement",
+      "family": "REPRISE",
+      "kind": "controller",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Trois opérations externes du protocole de rapprochement proposé."
+    },
+    {
+      "id": "API_REPRISE/cloreRapprochement",
+      "family": "REPRISE",
+      "kind": "controller",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Trois opérations externes du protocole de rapprochement proposé."
+    },
+    {
+      "id": "AUDIT/consulter_journal_sensible",
+      "family": "PROTECTION",
+      "kind": "workflow",
+      "contracts": [
+        "F10",
+        "F11"
+      ],
+      "quantity": 1,
+      "basis": "Accès administrateur au journal et maintenance, distincts de l'écriture de trace déjà dimensionnée."
+    },
+    {
+      "id": "AUDIT/exporter_journal_sensible",
+      "family": "PROTECTION",
+      "kind": "workflow",
+      "contracts": [
+        "F10",
+        "F11"
+      ],
+      "quantity": 1,
+      "basis": "Accès administrateur au journal et maintenance, distincts de l'écriture de trace déjà dimensionnée."
+    },
+    {
+      "id": "AUDIT/appliquer_retention_journal",
+      "family": "PROTECTION",
+      "kind": "workflow",
+      "contracts": [
+        "F10",
+        "F11"
+      ],
+      "quantity": 1,
+      "basis": "Accès administrateur au journal et maintenance, distincts de l'écriture de trace déjà dimensionnée."
+    },
+    {
+      "id": "API_AUDIT/lireAudit",
+      "family": "PROTECTION",
+      "kind": "controller",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Accès protégé au journal."
+    },
+    {
+      "id": "API_AUDIT/exporterAudit",
+      "family": "PROTECTION",
+      "kind": "controller",
+      "contracts": [
+        "F10"
+      ],
+      "quantity": 1,
+      "basis": "Accès protégé au journal."
+    },
+    {
+      "id": "VERSION/renommer_champ",
+      "family": "VERSIONS",
+      "kind": "rule",
+      "contracts": [
+        "F01"
+      ],
+      "quantity": 1,
+      "basis": "Quatre transformateurs typés communs réutilisés pour les treize sujets ; aucune migration métier arbitraire."
+    },
+    {
+      "id": "VERSION/ajouter_valeur_par_defaut",
+      "family": "VERSIONS",
+      "kind": "rule",
+      "contracts": [
+        "F01"
+      ],
+      "quantity": 1,
+      "basis": "Quatre transformateurs typés communs réutilisés pour les treize sujets ; aucune migration métier arbitraire."
+    },
+    {
+      "id": "VERSION/traduire_enumeration",
+      "family": "VERSIONS",
+      "kind": "rule",
+      "contracts": [
+        "F01"
+      ],
+      "quantity": 1,
+      "basis": "Quatre transformateurs typés communs réutilisés pour les treize sujets ; aucune migration métier arbitraire."
+    },
+    {
+      "id": "VERSION/convertir_unite_declaree",
+      "family": "VERSIONS",
+      "kind": "rule",
+      "contracts": [
+        "F01"
+      ],
+      "quantity": 1,
+      "basis": "Quatre transformateurs typés communs réutilisés pour les treize sujets ; aucune migration métier arbitraire."
+    },
+    {
+      "id": "VERSION/dispatcher_version_sujet",
+      "family": "VERSIONS",
+      "kind": "workflow",
+      "contracts": [
+        "F01",
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Deux versions canoniques ; incompatibilité sémantique refusée explicitement."
+    },
+    {
+      "id": "VERSION/refuser_conversion_ambigue",
+      "family": "VERSIONS",
+      "kind": "workflow",
+      "contracts": [
+        "F01",
+        "F04"
+      ],
+      "quantity": 1,
+      "basis": "Deux versions canoniques ; incompatibilité sémantique refusée explicitement."
+    },
+    {
+      "id": "SERVICE/orchestrer_restauration_et_blocage_publication",
+      "family": "SERVICE",
+      "kind": "workflow",
+      "contracts": [
+        "S1"
+      ],
+      "quantity": 1,
+      "basis": "Assemblage des commandes fournies par l'hébergeur, CI et outil de migration ; scripts applicatifs livrés, pas construction des moteurs."
+    },
+    {
+      "id": "SERVICE/verifier_coherence_apres_restauration",
+      "family": "SERVICE",
+      "kind": "workflow",
+      "contracts": [
+        "S1"
+      ],
+      "quantity": 1,
+      "basis": "Assemblage des commandes fournies par l'hébergeur, CI et outil de migration ; scripts applicatifs livrés, pas construction des moteurs."
+    },
+    {
+      "id": "SERVICE/executer_bascule_et_rollback_deploiement",
+      "family": "SERVICE",
+      "kind": "workflow",
+      "contracts": [
+        "S1"
+      ],
+      "quantity": 1,
+      "basis": "Assemblage des commandes fournies par l'hébergeur, CI et outil de migration ; scripts applicatifs livrés, pas construction des moteurs."
+    },
+    {
+      "id": "SERVICE/valider_resultat_migration",
+      "family": "SERVICE",
+      "kind": "workflow",
+      "contracts": [
+        "S1"
+      ],
+      "quantity": 1,
+      "basis": "Assemblage des commandes fournies par l'hébergeur, CI et outil de migration ; scripts applicatifs livrés, pas construction des moteurs."
+    },
+    {
+      "id": "sources_autorites_contrats/changer_schema",
+      "family": "ADMISSION",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F02",
+        "F11",
+        "F01"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "sources_autorites_contrats/verifier_autorite",
+      "family": "ADMISSION",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F02",
+        "F11",
+        "F01"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "sources_autorites_contrats/enregistrer_autorite",
+      "family": "ADMISSION",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F02",
+        "F11",
+        "F01"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "import_rejets_publication/filtrer_rejets",
+      "family": "ADMISSION",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F03",
+        "F11",
+        "F01",
+        "F04"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "import_rejets_publication/soumettre_correction",
+      "family": "ADMISSION",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F03",
+        "F11",
+        "F01",
+        "F04"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "import_rejets_publication/relancer",
+      "family": "ADMISSION",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F03",
+        "F11",
+        "F01",
+        "F04"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "import_rejets_publication/publier",
+      "family": "ADMISSION",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F03",
+        "F11",
+        "F01",
+        "F04"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "import_rejets_publication/confirmer_retrait",
+      "family": "ADMISSION",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F03",
+        "F11",
+        "F01",
+        "F04"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "parties_accords_credit/consulter_accord",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F11",
+        "F05"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "parties_accords_credit/consulter_credit",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F11",
+        "F05"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "parties_accords_credit/suivre_assortiment_fige",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F11",
+        "F05"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "marchandise_catalogues_assortiments_contextes/choisir_contexte",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F11",
+        "F06"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "marchandise_catalogues_assortiments_contextes/filtrer_periode",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F11",
+        "F06"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "marchandise_catalogues_assortiments_contextes/parcourir_membres",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F11",
+        "F06"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "conditionnement/ouvrir_arbre",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F07",
+        "F11"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "conditionnement/selectionner_niveau",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F07",
+        "F11"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "conditionnement/consulter_compatibilites",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F07",
+        "F11"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "fournitures/filtrer_usage",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F11",
+        "F08"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "fournitures/consulter_restrictions",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F11",
+        "F08"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "services_tarifs/filtrer_eligibilite",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F09",
+        "F11"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "services_tarifs/consulter_tarif",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F09",
+        "F11"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "services_tarifs/consulter_metadata_acces",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F09",
+        "F11"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "services_tarifs/expliquer_ambiguite",
+      "family": "SEMANTIQUE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F09",
+        "F11"
+      ],
+      "basis": "Action FLOW spécialisée ; widgets, formulaires, tables, routage et transport déjà réutilisés."
+    },
+    {
+      "id": "ui_reprise/ouvrir_reprise",
+      "family": "REPRISE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F10",
+        "F11"
+      ],
+      "basis": "Parcours opérateur de reprise."
+    },
+    {
+      "id": "ui_reprise/suivre_rapprochement",
+      "family": "REPRISE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F10",
+        "F11"
+      ],
+      "basis": "Parcours opérateur de reprise."
+    },
+    {
+      "id": "ui_reprise/clore_rapprochement",
+      "family": "REPRISE",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F10",
+        "F11"
+      ],
+      "basis": "Parcours opérateur de reprise."
+    },
+    {
+      "id": "ui_protection/consulter_audit",
+      "family": "PROTECTION",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F10",
+        "F11"
+      ],
+      "basis": "Contrôle administrateur des protections."
+    },
+    {
+      "id": "ui_protection/exporter_audit",
+      "family": "PROTECTION",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F10",
+        "F11"
+      ],
+      "basis": "Contrôle administrateur des protections."
+    },
+    {
+      "id": "ui_protection/demander_purge",
+      "family": "PROTECTION",
+      "kind": "ui_action",
+      "quantity": 1,
+      "contracts": [
+        "F10",
+        "F11"
+      ],
+      "basis": "Contrôle administrateur des protections."
+    }
+  ],
+  "deduplication": [
+    {
+      "id": "C01",
+      "included_residual": [
+        "extraire_organisations_et_portees",
+        "construire_predicat_de_portee",
+        "masquer_diagnostics_sensibles",
+        "journaliser_action_sensible"
+      ],
+      "already_in_native_equivalent_reference": [
+        "normaliser_identite_oidc",
+        "valider_role_action",
+        "normaliser_erreur_API",
+        "valider_limites_requetes"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "C02",
+      "included_residual": [],
+      "already_in_native_equivalent_reference": [
+        "configurer_transaction_et_timeouts",
+        "migrer_schema_et_valider_version",
+        "demarrer_et_verifier_dependances",
+        "publier_etat_sante_et_metriques",
+        "rendre_configuration_fail_closed"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "IN01",
+      "included_residual": [
+        "valider_enveloppe_et_version",
+        "valider_manifeste_complet",
+        "empreinte_canonique",
+        "enregistrer_origine_et_resultat"
+      ],
+      "already_in_native_equivalent_reference": [
+        "valider_colonnes_csv",
+        "convertir_types_canoniques"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "IN02",
+      "included_residual": [
+        "recevoir_JSON_et_lot",
+        "creer_identite_lot_idempotent",
+        "persister_resultats_par_ligne"
+      ],
+      "already_in_native_equivalent_reference": [
+        "charger_flux_CSV_par_blocs",
+        "mettre_en_file_et_lancer_job",
+        "finaliser_lot_et_compteurs"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "IN03",
+      "included_residual": [
+        "resoudre_cle_externe",
+        "valider_correspondance_declaree",
+        "valider_groupe_autorite",
+        "valider_domaine_source",
+        "comparer_versions_sources"
+      ],
+      "already_in_native_equivalent_reference": [],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "IN04",
+      "included_residual": [
+        "attribuer_identite_stable",
+        "enregistrer_alias_sans_fusion",
+        "composer_champs_autorises",
+        "mettre_en_quarantaine_conflit_cle",
+        "mettre_en_quarantaine_conflit_version_autorite"
+      ],
+      "already_in_native_equivalent_reference": [],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "IN05",
+      "included_residual": [
+        "verifier_intervalles_dates",
+        "resoudre_liens_versions",
+        "detecter_cycle_graphe",
+        "verifier_limites_profondeur",
+        "classifier_absence_ambiguite"
+      ],
+      "already_in_native_equivalent_reference": [],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "IN06",
+      "included_residual": [
+        "figer_revision_immutable",
+        "mettre_en_attente_dependances",
+        "retester_dependances_resolues",
+        "assembler_candidat_publication",
+        "verifier_coherence_ensemble",
+        "commuter_pointeur_atomique",
+        "retirer_absents_apres_manifeste",
+        "preserver_liens_historiques"
+      ],
+      "already_in_native_equivalent_reference": [],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "IN07",
+      "included_residual": [
+        "normaliser_rejet_champ_lien",
+        "grouper_rejets_par_cause",
+        "verifier_filiation_correction",
+        "identifier_lignes_deja_acceptees"
+      ],
+      "already_in_native_equivalent_reference": [],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "IN08",
+      "included_residual": [
+        "persister_quarantaine",
+        "recevoir_correction_sourcee",
+        "publier_correction_tardive"
+      ],
+      "already_in_native_equivalent_reference": [
+        "relancer_lot_sur_checkpoint",
+        "exclure_lancement_concurrent",
+        "reprendre_apres_interruption"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "V05",
+      "included_residual": [
+        "verifier_parties_accord",
+        "valider_portee_accord",
+        "valider_engagement_quantite_valeur",
+        "verifier_assortiment_fige",
+        "valider_profil_credit_recu",
+        "selectionner_accords_applicables",
+        "restituer_absences_et_conflits"
+      ],
+      "already_in_native_equivalent_reference": [
+        "valider_partie_et_roles",
+        "verifier_liens_organisationnels"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "V06",
+      "included_residual": [
+        "verifier_correspondances_usages",
+        "valider_offre_catalogue",
+        "verifier_membres_catalogue",
+        "valider_assortiment",
+        "verifier_membres_assortiment",
+        "valider_contexte_planification",
+        "verifier_fenetres_produit_contexte",
+        "lier_offre_accord_tarif"
+      ],
+      "already_in_native_equivalent_reference": [
+        "valider_produit_variante",
+        "valider_livre_tarif_produit",
+        "restituer_references_marchandise"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "V07",
+      "included_residual": [
+        "valider_specification",
+        "verifier_quantites_niveaux",
+        "verifier_compatibilites",
+        "restituer_conditionnement"
+      ],
+      "already_in_native_equivalent_reference": [
+        "valider_matiere",
+        "valider_type_contenant",
+        "verifier_dimensions_capacite"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "V08",
+      "included_residual": [
+        "verifier_usage_restrictions",
+        "verifier_correspondances_usages"
+      ],
+      "already_in_native_equivalent_reference": [
+        "valider_type_fourniture_equipement",
+        "restituer_fourniture"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "V09",
+      "included_residual": [
+        "valider_relation_reseau",
+        "verifier_responsable_executant",
+        "valider_offre_prestataire",
+        "verifier_resultat_niveau_service",
+        "verifier_metadata_acces_sans_secret",
+        "valider_zone_periode",
+        "valider_livre_tarif_service",
+        "valider_bases_paliers",
+        "selectionner_candidats_service",
+        "restituer_ambiguite_et_connaissance"
+      ],
+      "already_in_native_equivalent_reference": [
+        "valider_site",
+        "valider_catalogue_prestation"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "VCOMMON",
+      "included_residual": [
+        "valider_arbre_condition_type",
+        "evaluer_egalite_ensemble",
+        "evaluer_intervalle_date",
+        "composer_ET_OU_et_inconnu",
+        "valider_limites_paliers",
+        "restituer_origine_validite_contexte"
+      ],
+      "already_in_native_equivalent_reference": [
+        "valider_unite_dimension",
+        "valider_ratio_conversion",
+        "convertir_quantite_avec_arrondi",
+        "valider_devise_base_recue"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "V10A",
+      "included_residual": [
+        "resoudre_revision_a_date",
+        "verifier_contexte_applicable",
+        "encoder_curseur_durable",
+        "verifier_droit_utilisation_version",
+        "verifier_eligibilite_purge"
+      ],
+      "already_in_native_equivalent_reference": [
+        "construire_filtres_types",
+        "valider_pagination_tri"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "V10B",
+      "included_residual": [
+        "rechercher_detail_version",
+        "exporter_canonique_par_flux",
+        "lire_changements_par_curseur",
+        "enregistrer_utilisation_consommateur",
+        "liberer_utilisation_consommateur",
+        "preparer_export_avant_purge",
+        "confirmer_export",
+        "purger_sans_liens_proteges"
+      ],
+      "already_in_native_equivalent_reference": [],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "API_F01",
+      "included_residual": [],
+      "already_in_native_equivalent_reference": [
+        "recevoirJSON",
+        "recevoirCSV",
+        "etatLot",
+        "resultatsLot"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "API_F02",
+      "included_residual": [
+        "declarerCorrespondance"
+      ],
+      "already_in_native_equivalent_reference": [
+        "lireSources",
+        "lireContrats",
+        "majContrat",
+        "lireAutorites",
+        "majAutorite"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "API_F03",
+      "included_residual": [
+        "etatPublication",
+        "publierCandidat",
+        "retirerReference"
+      ],
+      "already_in_native_equivalent_reference": [],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "API_F04",
+      "included_residual": [
+        "soumettreCorrection",
+        "relancerLot"
+      ],
+      "already_in_native_equivalent_reference": [
+        "listerRejets",
+        "detailRejet"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "API_F05-F09",
+      "included_residual": [
+        "versionsReference",
+        "validiteContexte",
+        "relationsReference",
+        "membresReference",
+        "candidatsAccords",
+        "candidatsServices"
+      ],
+      "already_in_native_equivalent_reference": [
+        "rechercheReferences",
+        "detailReference"
+      ],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "API_F10",
+      "included_residual": [
+        "exporter",
+        "lireChangements",
+        "declarerUtilisation",
+        "libererUtilisation",
+        "confirmerExport",
+        "demanderPurge"
+      ],
+      "already_in_native_equivalent_reference": [],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    },
+    {
+      "id": "PERSIST",
+      "included_residual": [
+        "chercher_contribution_par_empreinte",
+        "verrouiller_identite_source",
+        "chercher_versions_conflictuelles",
+        "chercher_dependances_en_attente",
+        "parcourir_liens_pour_cycle",
+        "charger_manifest_et_absents",
+        "chercher_revisions_a_date",
+        "verifier_liens_proteges_pour_purge",
+        "lire_evenements_ordonnes",
+        "chercher_rejets_par_cause"
+      ],
+      "already_in_native_equivalent_reference": [],
+      "reason": "Référence commune équipée pour CRUD, imports, droits et transactions ; seuls les comportements FLOW additionnels sont retenus. Ne prouve pas leur absence de tous les modules du produit."
+    }
+  ],
+  "schemas": [
+    {
+      "name": "OrganisationScope",
+      "fields": [],
+      "already_in_reference": [
+        "id",
+        "organisationId",
+        "scopeType",
+        "scopeKey"
+      ],
+      "new_model": false,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "Source",
+      "fields": [
+        "id",
+        "name",
+        "organisationId",
+        "enabled",
+        "authenticationRef"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "SourceContract",
+      "fields": [
+        "id",
+        "sourceId",
+        "schemaVersion",
+        "subjectType",
+        "mode",
+        "scope",
+        "manifestRequired",
+        "enabled"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "SchemaVersion",
+      "fields": [
+        "id",
+        "subjectType",
+        "version",
+        "previousVersion",
+        "effectiveFrom",
+        "schemaChecksum"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "AuthorityGrant",
+      "fields": [
+        "id",
+        "sourceId",
+        "subjectType",
+        "fieldGroup",
+        "scope",
+        "validFrom",
+        "validTo",
+        "priority"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "ExternalIdentity",
+      "fields": [
+        "id",
+        "sourceId",
+        "externalKey",
+        "subjectType",
+        "referenceId",
+        "validFrom",
+        "validTo"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "ReferenceIdentity",
+      "fields": [
+        "id",
+        "subjectType",
+        "organisationId",
+        "status",
+        "createdAt"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "ReferenceRevision",
+      "fields": [
+        "id",
+        "referenceId",
+        "revision",
+        "sourceVersion",
+        "validFrom",
+        "validTo",
+        "receivedAt",
+        "contributionId",
+        "payloadChecksum",
+        "status",
+        "previousId"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "Contribution",
+      "fields": [
+        "id",
+        "sourceId",
+        "contractId",
+        "mode",
+        "receivedAt",
+        "fingerprint",
+        "sourceVersion",
+        "status",
+        "recordCount",
+        "manifestHash",
+        "scope",
+        "correctionOf"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "ContributionLine",
+      "fields": [
+        "id",
+        "contributionId",
+        "lineNumber",
+        "externalKey",
+        "subjectType",
+        "inputHash",
+        "status",
+        "referenceRevisionId"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "Dependency",
+      "fields": [
+        "id",
+        "fromRevisionId",
+        "targetReferenceId",
+        "targetRevisionId",
+        "linkType",
+        "status"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "Publication",
+      "fields": [
+        "id",
+        "organisationId",
+        "scope",
+        "revision",
+        "status",
+        "createdAt",
+        "manifestHash",
+        "previousId"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "Rejection",
+      "fields": [
+        "id",
+        "contributionLineId",
+        "field",
+        "link",
+        "code",
+        "message",
+        "cause",
+        "status"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "Correction",
+      "fields": [
+        "id",
+        "sourceId",
+        "originalContributionId",
+        "newContributionId",
+        "reason",
+        "createdAt"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "ADMISSION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "ConsumerUse",
+      "fields": [
+        "id",
+        "consumerId",
+        "referenceRevisionId",
+        "createdAt",
+        "releasedAt",
+        "purpose"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "PROTECTION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "ExportReceipt",
+      "fields": [
+        "id",
+        "publicationId",
+        "scope",
+        "format",
+        "checksum",
+        "location",
+        "confirmedAt"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "PROTECTION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "ChangeEvent",
+      "fields": [
+        "cursor",
+        "publicationId",
+        "referenceRevisionId",
+        "kind",
+        "occurredAt",
+        "organisationId"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "PROTECTION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "RetentionRule",
+      "fields": [
+        "id",
+        "subjectType",
+        "versionsYears",
+        "rejectedDays",
+        "logsDays"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "PROTECTION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ]
+    },
+    {
+      "name": "Party",
+      "fields": [
+        "revisionId",
+        "intercompanyStatus"
+      ],
+      "already_in_reference": [
+        "kind",
+        "name",
+        "registrationId",
+        "carryingOrganisationId"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F05"
+      ]
+    },
+    {
+      "name": "PartyRole",
+      "fields": [
+        "validFrom",
+        "validTo"
+      ],
+      "already_in_reference": [
+        "id",
+        "partyRevisionId",
+        "role",
+        "scope"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F05"
+      ]
+    },
+    {
+      "name": "PartyLink",
+      "fields": [
+        "validFrom",
+        "validTo"
+      ],
+      "already_in_reference": [
+        "id",
+        "fromPartyRevisionId",
+        "toPartyRevisionId",
+        "linkType"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F05"
+      ]
+    },
+    {
+      "name": "Agreement",
+      "fields": [
+        "revisionId",
+        "code",
+        "kind",
+        "scope",
+        "validFrom",
+        "validTo",
+        "frozenAssortmentRevisionId",
+        "paymentConditions",
+        "ownershipConditions",
+        "guarantee"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F05"
+      ]
+    },
+    {
+      "name": "AgreementParty",
+      "fields": [
+        "id",
+        "agreementRevisionId",
+        "partyRevisionId",
+        "role"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F05"
+      ]
+    },
+    {
+      "name": "AgreementCommitment",
+      "fields": [
+        "id",
+        "agreementRevisionId",
+        "kind",
+        "quantity",
+        "unitId",
+        "value",
+        "currency",
+        "conditionId"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F05"
+      ]
+    },
+    {
+      "name": "CreditProfile",
+      "fields": [
+        "revisionId",
+        "partyRevisionId",
+        "payerRevisionId",
+        "riskClass",
+        "scope",
+        "limit",
+        "currency",
+        "restrictionConditionId"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F05"
+      ]
+    },
+    {
+      "name": "Product",
+      "fields": [
+        "revisionId"
+      ],
+      "already_in_reference": [
+        "code",
+        "designation",
+        "kind",
+        "unitRevisionId",
+        "operationalCharacteristics"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F06"
+      ]
+    },
+    {
+      "name": "Variant",
+      "fields": [
+        "revisionId",
+        "productRevisionId"
+      ],
+      "already_in_reference": [
+        "code",
+        "attributes"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F06"
+      ]
+    },
+    {
+      "name": "Unit",
+      "fields": [
+        "revisionId"
+      ],
+      "already_in_reference": [
+        "code",
+        "dimension",
+        "symbol",
+        "precision"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ]
+    },
+    {
+      "name": "UnitConversion",
+      "fields": [
+        "fromUnitRevisionId",
+        "toUnitRevisionId",
+        "validFrom",
+        "validTo"
+      ],
+      "already_in_reference": [
+        "id",
+        "numerator",
+        "denominator",
+        "rounding"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F06",
+        "F07",
+        "F08",
+        "F09"
+      ]
+    },
+    {
+      "name": "Catalog",
+      "fields": [
+        "revisionId",
+        "code",
+        "name",
+        "scope",
+        "conditionId",
+        "priceBookRevisionId"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F06"
+      ]
+    },
+    {
+      "name": "CatalogMember",
+      "fields": [
+        "id",
+        "catalogRevisionId",
+        "productRevisionId",
+        "variantRevisionId",
+        "offerCode",
+        "validFrom",
+        "validTo"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F06"
+      ]
+    },
+    {
+      "name": "Assortment",
+      "fields": [
+        "revisionId",
+        "code",
+        "scope",
+        "validFrom",
+        "validTo"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F06"
+      ]
+    },
+    {
+      "name": "AssortmentMember",
+      "fields": [
+        "id",
+        "assortmentRevisionId",
+        "productRevisionId",
+        "variantRevisionId",
+        "included",
+        "validFrom",
+        "validTo"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F06"
+      ]
+    },
+    {
+      "name": "PlanningContext",
+      "fields": [
+        "revisionId",
+        "kind",
+        "name",
+        "windowStart",
+        "windowEnd",
+        "attributes"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F06"
+      ]
+    },
+    {
+      "name": "ProductContext",
+      "fields": [
+        "id",
+        "productRevisionId",
+        "contextRevisionId",
+        "validFrom",
+        "validTo"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F06"
+      ]
+    },
+    {
+      "name": "PriceBook",
+      "fields": [
+        "revisionId",
+        "scope",
+        "validFrom",
+        "validTo"
+      ],
+      "already_in_reference": [
+        "code",
+        "kind",
+        "organisationId",
+        "currency"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F06",
+        "F09"
+      ]
+    },
+    {
+      "name": "PriceLine",
+      "fields": [
+        "subjectRevisionId",
+        "conditionId",
+        "agreementRevisionId",
+        "offerRevisionId"
+      ],
+      "already_in_reference": [
+        "id",
+        "priceBookRevisionId",
+        "unitRevisionId",
+        "currency",
+        "base",
+        "amount"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F06",
+        "F09"
+      ]
+    },
+    {
+      "name": "PriceTier",
+      "fields": [
+        "id",
+        "priceLineId",
+        "lowerInclusive",
+        "upperExclusive",
+        "amount",
+        "basis"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F06",
+        "F09"
+      ]
+    },
+    {
+      "name": "TypedCondition",
+      "fields": [
+        "id",
+        "ownerRevisionId",
+        "parentId",
+        "booleanOperator",
+        "attribute",
+        "predicate",
+        "valueType",
+        "scalarValue",
+        "setValues",
+        "intervalStart",
+        "intervalEnd"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F05",
+        "F06",
+        "F08",
+        "F09"
+      ]
+    },
+    {
+      "name": "PackagingMaterial",
+      "fields": [
+        "revisionId",
+        "attributes"
+      ],
+      "already_in_reference": [
+        "code",
+        "name",
+        "unitRevisionId",
+        "dimensions",
+        "mass",
+        "capacity"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F07"
+      ]
+    },
+    {
+      "name": "ContainerType",
+      "fields": [
+        "revisionId",
+        "reusable"
+      ],
+      "already_in_reference": [
+        "materialRevisionId",
+        "code",
+        "length",
+        "width",
+        "height",
+        "dimensionUnitId",
+        "tareMass",
+        "massUnitId",
+        "maximumCapacity"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F07"
+      ]
+    },
+    {
+      "name": "PackagingSpecification",
+      "fields": [
+        "revisionId",
+        "code",
+        "productRevisionId",
+        "instruction",
+        "maximumDepth"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F07"
+      ]
+    },
+    {
+      "name": "PackagingNode",
+      "fields": [
+        "id",
+        "specificationRevisionId",
+        "parentNodeId",
+        "materialRevisionId",
+        "containerRevisionId",
+        "quantity",
+        "unitRevisionId",
+        "level"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F07"
+      ]
+    },
+    {
+      "name": "Compatibility",
+      "fields": [
+        "id",
+        "fromRevisionId",
+        "toRevisionId",
+        "kind",
+        "conditionId"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F07"
+      ]
+    },
+    {
+      "name": "InternalSupply",
+      "fields": [
+        "revisionId",
+        "usage"
+      ],
+      "already_in_reference": [
+        "code",
+        "name",
+        "type",
+        "unitRevisionId",
+        "operationalAttributes"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F08"
+      ]
+    },
+    {
+      "name": "UsageRestriction",
+      "fields": [
+        "id",
+        "supplyRevisionId",
+        "usage",
+        "scope",
+        "conditionId"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F08"
+      ]
+    },
+    {
+      "name": "NetworkSite",
+      "fields": [
+        "revisionId",
+        "responsiblePartyRevisionId"
+      ],
+      "already_in_reference": [
+        "code",
+        "name",
+        "kind",
+        "address",
+        "attributes"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F09"
+      ]
+    },
+    {
+      "name": "NetworkLink",
+      "fields": [
+        "id",
+        "fromSiteRevisionId",
+        "toSiteRevisionId",
+        "kind",
+        "responsiblePartyRevisionId",
+        "validFrom",
+        "validTo"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F09"
+      ]
+    },
+    {
+      "name": "Service",
+      "fields": [
+        "revisionId",
+        "expectedOutcome",
+        "instructions"
+      ],
+      "already_in_reference": [
+        "code",
+        "name",
+        "unitRevisionId"
+      ],
+      "new_model": false,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F09"
+      ]
+    },
+    {
+      "name": "ServiceOffer",
+      "fields": [
+        "revisionId",
+        "serviceRevisionId",
+        "providerRevisionId",
+        "eligibilityConditionId",
+        "referenceLeadTime",
+        "levelRevisionId"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F09"
+      ]
+    },
+    {
+      "name": "ServiceAccess",
+      "fields": [
+        "id",
+        "offerRevisionId",
+        "use",
+        "contractVersion",
+        "address",
+        "protocol",
+        "authenticationReference"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F09"
+      ]
+    },
+    {
+      "name": "ServiceLevel",
+      "fields": [
+        "revisionId",
+        "name",
+        "indicators",
+        "conditions"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F09"
+      ]
+    },
+    {
+      "name": "ServiceArea",
+      "fields": [
+        "id",
+        "offerRevisionId",
+        "originSiteRevisionId",
+        "destinationSiteRevisionId",
+        "zone",
+        "conditionId"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "SEMANTIQUE",
+      "contracts": [
+        "F09"
+      ]
+    },
+    {
+      "name": "RecoveryEpoch",
+      "fields": [
+        "id",
+        "openedAt",
+        "oldEpoch",
+        "status"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "REPRISE",
+      "contracts": [
+        "F10"
+      ]
+    },
+    {
+      "name": "ConsumerManifest",
+      "fields": [
+        "consumerId",
+        "scope",
+        "manifestChecksum",
+        "confirmedAt"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "REPRISE",
+      "contracts": [
+        "F10"
+      ]
+    },
+    {
+      "name": "Reconciliation",
+      "fields": [
+        "id",
+        "epochId",
+        "consumerId",
+        "expectedUses",
+        "receivedUses",
+        "status",
+        "closedAt"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "REPRISE",
+      "contracts": [
+        "F10"
+      ]
+    },
+    {
+      "name": "CanonicalTransform",
+      "fields": [
+        "subject",
+        "fromVersion",
+        "toVersion",
+        "field",
+        "operation",
+        "argument",
+        "onConflict"
+      ],
+      "already_in_reference": [],
+      "new_model": true,
+      "family": "VERSIONS",
+      "contracts": [
+        "F01"
+      ]
+    }
+  ],
+  "schema_units": {
+    "program_per_field": [
+      1,
+      2,
+      3
+    ],
+    "declarative_per_field": [
+      2,
+      3,
+      4
+    ],
+    "declarative_per_new_model": [
+      3,
+      5,
+      8
+    ],
+    "ui_declarative_per_field": [
+      1,
+      2,
+      3
+    ],
+    "ui_declarative_per_new_model": [
+      1,
+      2,
+      3
+    ]
+  },
+  "configuration": [
+    {
+      "id": "versions",
+      "family": "VERSIONS",
+      "contracts": [
+        "F01"
+      ],
+      "quantity": 26,
+      "unit_range": [
+        1,
+        2,
+        3
+      ],
+      "basis": "Treize sujets × deux règles de transformation déclarées dans le scénario (renommage, ajout, enum ou unité). Le moteur est compté une fois. Ni migration future illimitée ni code Beaumanoir."
+    },
+    {
+      "id": "ddl",
+      "family": "PROTECTION",
+      "contracts": [
+        "F03",
+        "F10"
+      ],
+      "quantity": 42,
+      "unit_range": [
+        1,
+        2,
+        3
+      ],
+      "basis": "Un changeset par nouvelle table ; annotations de champs déjà comptées, pas une seconde copie du schéma."
+    },
+    {
+      "id": "indexes",
+      "family": "PROTECTION",
+      "contracts": [
+        "F01",
+        "F02",
+        "F03",
+        "F04",
+        "F10"
+      ],
+      "quantity": 16,
+      "unit_range": [
+        1,
+        2,
+        3
+      ],
+      "basis": "Seize contraintes/index : 4 identité/origine, 4 versions/liens, 3 lots/rejets, 3 usages/export, 2 curseurs/époques ; proposition à vérifier par plans SQL."
+    },
+    {
+      "id": "delivery",
+      "family": "SERVICE",
+      "contracts": [
+        "S1"
+      ],
+      "quantity": 14,
+      "unit_range": [
+        4,
+        8,
+        16
+      ],
+      "basis": "14 ressources déclaratives paramétrées : application, worker, ingress, secretRefs, DB, backup, restore, migration, monitor, alerts, logs, CI-build, CI-test, CI-deploy ; trois jeux de variables, pas trois copies de moteurs."
+    },
+    {
+      "id": "environments",
+      "family": "SERVICE",
+      "contracts": [
+        "S1"
+      ],
+      "quantity": 3,
+      "unit_range": [
+        6,
+        10,
+        16
+      ],
+      "basis": "Trois environnements logiques sur un fournisseur géré, variables de capacité/connexion/rétention ; code fournisseur non reconstruit."
+    },
+    {
+      "id": "metrics",
+      "family": "SERVICE",
+      "contracts": [
+        "S1"
+      ],
+      "quantity": 8,
+      "unit_range": [
+        1,
+        2,
+        4
+      ],
+      "basis": "Huit règles métier de supervision : latence, rejets, attente dépendances, publication, retard curseur, usage non rapproché, sauvegarde, restauration."
+    }
+  ],
+  "families": {
+    "ADMISSION": "Contributions, autorité, versions et publication",
+    "SEMANTIQUE": "Accords, assortiments, conditionnements et services",
+    "PROTECTION": "Accès contextualisés, usages protégés, audit et purge",
+    "REPRISE": "Rejeu sémantique et rapprochement après restauration",
+    "VERSIONS": "Compatibilité des versions canoniques",
+    "SERVICE": "Mise en service et garanties S1"
+  },
+  "uncertainty": {
+    "class": "C",
+    "meaning": "Estimation conditionnelle d'ingénierie, sans charge projet observée ni productivité Spring calibrée.",
+    "percentile": null,
+    "envelope": "Bornes de scénarios dépendants, non intervalle de confiance ; analogue, densité déclarative, compétence et expérience varient ensemble.",
+    "framework_gap_effort": null,
+    "framework_gap_treatment": "Aucun supplément démontré. Inconnu résiduel sur la productivité d'assemblage ; facteur1 conventionnel ne signifie pas égalité prouvée."
+  },
+  "provenance": {
+    "author": "Codex, assistance IA",
+    "human_review": null,
+    "observed_flow_code": null,
+    "observed_project_jh": null
+  },
+  "input_hashes": {
+    "audits\\2026-10-29-experimentation-estimation\\iteration-08-taille.json": "cd4f17fca69b1caa5235218f9a417dd03e0f757f6919c9a362c8259b9675f64f",
+    "audits\\2026-10-29-experimentation-estimation\\iteration-07-contrat-v1.1.json": "4ff47d15b241859eea6bcc50c5c882478338ae31d8c44bb1192901066d81dbb3",
+    "audits\\2026-10-30-master-data-comparable-reuse\\results.json": "a05568e7ec50533d1f2684a26da343698dab7e519524c88a07d78d92d31a5be3",
+    "audits\\2026-10-30-master-data-comparable-reuse\\inputs.json": "79c8b8b38df94659ac0248b3e502a46f24aca7913584a15618a1a8f787cc9a11"
+  }
+}

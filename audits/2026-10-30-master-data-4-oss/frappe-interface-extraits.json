@@ -1,0 +1,23 @@
+{
+  "url": "https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/public/js/frappe/form/form.js",
+  "git_blob_sha": "10eca7e01061ef87bc07c479af8653af9a5c21da",
+  "scope": "Extraits de lecture uniquement, non ajoutés aux SLOC ni au coût de reconstruction.",
+  "excerpts": [
+    {
+      "line": 115,
+      "text": "\tsetup() {\n\t\tthis.fields = [];\n\t\tthis.fields_dict = {};\n\t\tthis.state_fieldname = frappe.workflow.get_state_fieldname(this.doctype);\n\n\t\t// wrapper\n\t\tthis.wrapper = this.parent;\n\t\tthis.$wrapper = $(this.wrapper);\n\n\t\tlet is_single_column = this.doctype === \"DocType\" ? true : this.meta.hide_toolbar;\n\n\t\tfrappe.ui.make_app_page({\n\t\t\tparent: this.wrapper,\n\t\t\tsingle_column: is_single_column,\n\t\t\tsidebar_position: \"Right\",\n\t\t});\n\t\tthis.page = this.wrapper.page;\n\t\tthis.layout_main = this.page.main.get(0);\n\n\t\t// A form in a dialog must not change the underlying page's title or breadcrumbs.\n\t\tif (this.in_dialog) {\n\t\t\tthis.page.set_document_title = false;\n\t\t\tthis.page.show_breadcrumbs = false;"
+    },
+    {
+      "line": 444,
+      "text": "\trefresh(docname) {\n\t\tvar switched = docname ? true : false;\n\n\t\tremoveEventListener(\"beforeunload\", this.beforeUnloadListener, { capture: true });\n\n\t\tif (docname) {\n\t\t\tthis.switch_doc(docname);\n\t\t}\n\n\t\tcur_frm = this;\n\n\t\tthis.undo_manager.erase_history();\n\n\t\tif (this.docname) {\n\t\t\t// document to show\n\t\t\tthis.save_disabled = false;\n\t\t\t// set the doc\n\t\t\tthis.doc = frappe.get_doc(this.doctype, this.docname);\n\n\t\t\t// check permissions\n\t\t\tthis.fetch_permissions();\n\t\t\tif (!this.has_read_permission()) {\n\t\t\t\tfrappe.show_not_permitted(__(this.doctype) + \" \" + __(cstr(this.docname)));"
+    },
+    {
+      "line": 645,
+      "text": "\trender_form(switched) {\n\t\tif (!this.meta.istable) {\n\t\t\tthis.layout.doc = this.doc;\n\t\t\tthis.layout.attach_doc_and_docfields();\n\n\t\t\tif (frappe.boot.desk_settings.form_sidebar) {\n\t\t\t\tthis.sidebar = new frappe.ui.form.Sidebar({\n\t\t\t\t\tfrm: this,\n\t\t\t\t\tpage: this.page,\n\t\t\t\t\ttoolbar: this.toolbar,\n\t\t\t\t});\n\t\t\t\tthis.sidebar.make();\n\t\t\t} else {\n\t\t\t\tthis.page.sidebar.hide();\n\t\t\t}\n\n\t\t\t// clear layout message\n\t\t\tthis.layout.show_message();\n\n\t\t\tfrappe.run_serially([\n\t\t\t\t// header must be refreshed before client methods\n\t\t\t\t// because add_custom_button\n\t\t\t\t() => this.refresh_header(switched),"
+    },
+    {
+      "line": 831,
+      "text": "\tsave(save_action, callback, btn, on_error) {\n\t\tlet me = this;\n\t\treturn new Promise((resolve, reject) => {\n\t\t\t// aria-busy mirrors the disabled handling here and in save.js —\n\t\t\t// see the note in frappe.ui.form.save (this promise doesn't settle\n\t\t\t// on every validation-error path)\n\t\t\tbtn && $(btn).prop(\"disabled\", true).attr(\"aria-busy\", \"true\");\n\t\t\tfrappe.ui.form.close_grid_form();\n\t\t\tme.validate_and_save(save_action, callback, btn, on_error, resolve, reject);\n\t\t})\n\t\t\t.then(() => {\n\t\t\t\tme.show_success_action();\n\t\t\t})\n\t\t\t.catch((e) => {\n\t\t\t\tconsole.error(e);\n\t\t\t});\n\t}\n\n\tvalidate_and_save(save_action, callback, btn, on_error, resolve, reject) {\n\t\tvar me = this;\n\t\tif (!save_action) save_action = \"Save\";\n\t\tthis.validate_form_action(save_action, resolve);\n"
+    }
+  ]
+}

@@ -1,0 +1,259 @@
+{
+  "findings": [
+    {
+      "id": "F01",
+      "priority": "Haute",
+      "title": "Séparer l’entrant fidèle des analyses produites par l’étude",
+      "evidence": [
+        "source/grille-complexite.yaml:10",
+        "source/grille-complexite.yaml:31",
+        "tools/study_app.py:475",
+        "tools/delivery_readiness.py:217"
+      ],
+      "fact": "Le fichier utilisé comme référentiel rassemble 88 identifiants natifs, 258 fonctions proposées, des frontières d’analyse, 264 notes ordinales et des liens de calibration. Les notes ne calculent pas les JH, mais les validateurs exigent leur présence.",
+      "target": "Construire une projection en lecture seule des nœuds et relations de la source choisie, sans réécrire leurs champs. Conserver identifiants, hiérarchie, libellés, définitions, périmètres, comportements, références et statut de la capture. Placer les fonctions interprétées, les exclusions FLOW et les regroupements de chiffrage dans le dossier économique, avec références vers l’entrant.",
+      "action": "Extraire le référentiel neutre avant de retirer les notes et la méthode de notation. Si la source comporte elle-même une appréciation, la préserver comme donnée reçue, avec sa provenance ; ne pas la transformer en paramètre de calcul."
+    },
+    {
+      "id": "F02",
+      "priority": "Haute",
+      "title": "Retirer le circuit historique Make sans supprimer ses autres usages",
+      "evidence": [
+        "tools/business_calibration.py:14",
+        "tools/business_calibration.py:63",
+        "source/recalibration-metier.yaml"
+      ],
+      "fact": "36 modèles de lots et 267 affectations historiques Make restent chargés, avec toutes leurs charges à zéro, à côté d’un financement Master Data retenu. Le même fichier fournit encore des unités de maintenance et des structures utilisées pour Buy.",
+      "target": "Un seul circuit de charge Make : unités métier estimées et financements partagés, avec rôles et hypothèses. Une capacité non estimée a un état explicite et un effort inconnu, distinct de zéro. Les agrégats portent un total partiel et un indicateur de complétude.",
+      "action": "Migrer d’abord les paramètres de maintenance vers leur propriétaire et les adaptateurs Buy vers le leur. Retirer ensuite les lots/natures Make obsolètes du moteur et des vues. Conserver leurs historiques comme audits."
+    },
+    {
+      "id": "F03",
+      "priority": "Haute",
+      "title": "Corriger la provenance du financement actif",
+      "evidence": [
+        "tools/composable_costs.py:100",
+        "source/statut-evaluation.yaml",
+        "source/estimations-core-retenues.yaml"
+      ],
+      "fact": "Le journal valorise bien 944 000 € pour la construction Java, mais sa ligne construction_core référence encore source/recalibration-metier.yaml.",
+      "target": "La ligne économique doit référencer les unités retenues et leur décision. Un agrégat doit exposer ses financements constitutifs.",
+      "action": "Corriger la provenance sans changer le montant, les annuités ou les responsabilités. Ajouter un contrôle de concordance entre référence affichée et source calculante."
+    },
+    {
+      "id": "F04",
+      "priority": "Haute",
+      "title": "Aligner le skill sur le contrat réellement utilisé",
+      "evidence": [
+        "C:/Users/laure/.codex/skills/flow-evaluer-core-system/SKILL.md",
+        "source/schema-evaluation-core.yaml",
+        "source/evaluation-core.yaml",
+        "source/schema-estimations-core-retenues.yaml"
+      ],
+      "fact": "Le skill déclare encore schema-evaluation-core.yaml comme contrat de sortie. Le dossier correspondant est un pilote historique sur trois capacités. La charge adoptée utilise estimations-core-retenues.yaml, six capacités et neuf rôles.",
+      "target": "Le skill suit la chaîne entrant immuable → périmètre d’analyse → quatre références → deux voies de calcul → alignement → décision → valorisation par rôle. Il distingue les JH projet des seuls JH de développement.",
+      "action": "Référencer la méthode canonique et les nouveaux contrats, conserver la qualification de preuve utile, retirer le pilote historique du chemin courant. Ne pas recopier les coefficients ni figer Master Data comme gabarit universel."
+    },
+    {
+      "id": "F05",
+      "priority": "Haute",
+      "title": "Conserver une chaîne de calcul vérifiable, pas seulement un résultat lié à un audit",
+      "evidence": [
+        "tools/retained_core.py:20",
+        "source/estimations-core-retenues.yaml:22",
+        "audits/2026-10-30-master-data-consolidation/calculate.py"
+      ],
+      "fact": "L’effort, le délai et les rôles retenus sont traçables aux audits. Le moteur valorise les JH adoptés ; il ne rejoue pas COCOMO. Le validateur contrôle le hash du résultat, la somme des rôles et les doublons, mais accepte en mémoire un délai de 99 mois conservant la formule et sa valeur 16,73, ainsi qu’un nom de méthode inventé.",
+      "target": "Distinguer résultat calculé, proposition arrondie et décision retenue. Une décision différente du calcul reste possible avec motif, date et référence ; aucune divergence silencieuse. Les entrées et formules sont structurées, versionnées, exécutables hors de scripts propres à une itération.",
+      "action": "Extraire des modules de calcul réutilisables, référencer leur version et leurs entrées, contrôler la concordance avec les résultats adoptés et documenter les écarts autorisés. Les simulations peuvent continuer à consommer les valeurs approuvées figées."
+    },
+    {
+      "id": "F06",
+      "priority": "Haute",
+      "title": "Remplacer les classes par des mesures d’alignement explicites",
+      "evidence": [
+        "audits/2026-10-29-experimentation-estimation/iteration-04-incertitude.json:20",
+        "source/methode-evaluation-core.yaml:283",
+        "source/estimations-core-retenues.yaml:114"
+      ],
+      "fact": "La politique historique retrouvée définit A, B, C et D, sans E, comme une convention locale de solidité. Le modèle retenu n’applique pas ces lettres. Les notes A–D des données ISBSG sont d’une autre nature.",
+      "target": "Aucun score global de confiance ni lettre automatiquement liée aux écarts. Afficher les écarts signés et absolus, en JH et en %, la référence et le périmètre comparé. Séparer comparaison entre OSS et comparaison entre méthodes.",
+      "action": "Introduire un contrat d’alignement dérivé des calculs non arrondis ; conserver les classes de qualité ISBSG lorsqu’elles appartiennent aux données reçues et les qualifier comme telles."
+    },
+    {
+      "id": "F07",
+      "priority": "Moyenne",
+      "title": "Garder l’incertitude comme information distincte et justifiée",
+      "evidence": [
+        "source/schema-estimations-core-retenues.yaml:140",
+        "source/estimations-core-retenues.yaml:114"
+      ],
+      "fact": "Les champs d’intervalle et de confiance valent null ; le schéma impose actuellement null. Cela décrit correctement Master Data aujourd’hui, mais ne permet pas d’accueillir une future incertitude étayée.",
+      "target": "Séparer incertitude de taille, hypothèses de réutilisation/compléments, variabilité de productivité et erreur prédictive documentée du modèle. Une borne ou un percentile conserve sa source, ses hypothèses, son niveau et son domaine de validité. Inconnu reste inconnu.",
+      "action": "Prévoir un contrat optionnel pour ces données, sans produire de plage ou de P80 à ce stade. Ne jamais prendre le minimum et le maximum des quatre calculs pour un intervalle de risque."
+    },
+    {
+      "id": "F08",
+      "priority": "Haute",
+      "title": "Aligner les pages de méthode, hypothèses et résultats",
+      "evidence": [
+        "source/methode-complexite.yaml",
+        "source/calibration-couts.yaml:32",
+        "tools/study_app.py:296",
+        "app/src/DeliveryReadinessPage.tsx",
+        "app/src/CoreEvaluationPage.tsx"
+      ],
+      "fact": "Le résultat adopté est correctement présenté. Des écrans et textes voisins continuent cependant à exposer les notes sur 5, l’ancienne décomposition par nature, les gains IA et le pilotage proportionnel, alors que ces derniers ne s’appliquent pas à la famille adoptée.",
+      "target": "Entrants : source native seule. Framework : comparaison, calcul, alignement et adoption. Dossier économique : références, résultats, neuf rôles, hypothèses, coûts, délai et couverture. Hypothèses retenues : assiette réelle de chaque paramètre.",
+      "action": "Retirer les notes de l’entrée et les anciennes pages de notation du parcours courant. Afficher l’alignement dans le dossier économique. Marquer les gains/provisions qui restent applicables à d’autres postes ; ne pas les supprimer globalement."
+    },
+    {
+      "id": "F09",
+      "priority": "Moyenne",
+      "title": "Préserver la différence entre délai de famille et calendrier du programme",
+      "evidence": [
+        "source/estimations-core-retenues.yaml:103",
+        "source/deploiement-groupe.yaml",
+        "tools/composable_costs.py:100"
+      ],
+      "fact": "17 mois sont retenus pour Master Data ; la construction globale conserve 48 mois provisoires. Les 944 000 € sont encore répartis sur ces 48 mois dans les annuités. Cette limite est déjà visible dans la page économique.",
+      "target": "Délai calculé de l’unité, délai adopté et calendrier des dépenses restent trois informations distinctes. Un calendrier de famille nécessite une date de départ et des dépendances.",
+      "action": "Conserver cette séparation lors du nettoyage. Ne pas remplacer 48 par 17 ni déplacer les dépenses implicitement."
+    },
+    {
+      "id": "F10",
+      "priority": "Moyenne",
+      "title": "Préparer la consolidation de plusieurs familles",
+      "evidence": [
+        "tools/retained_core.py:27",
+        "source/methode-evaluation-core.yaml:50",
+        "audits/2026-10-30-master-data-consolidation/results.json"
+      ],
+      "fact": "Le financement unique est contrôlé dans la famille actuelle. Les autres capacités restent non estimées ; l’addition future de familles doit traiter les mécanismes partagés et la cohérence des hypothèses de taille.",
+      "target": "Un mécanisme partagé a un propriétaire de financement, des consommateurs et une règle de raccordement. La taille du projet auquel s’applique l’exposant COCOMO doit être explicite : des calculs par famille ne sont pas automatiquement équivalents à un calcul monolithique.",
+      "action": "Définir cette règle avant la seconde adoption, sans recalibrer les 1 500 JH ni prétendre estimer aujourd’hui tout le Core. Les tarifs par rôle gardent leurs références et les analogies restent visibles."
+    }
+  ],
+  "target": {
+    "decision_basis": {
+      "jh": 1500,
+      "months": 17,
+      "scope": "Master Data Java/Spring seulement",
+      "source": "source/estimations-core-retenues.yaml",
+      "changes_in_audit": "Aucune modification du modèle, du skill, des écrans ni des données sources."
+    },
+    "input_contract": {
+      "rule": "Le référentiel des capacités est un entrant construit fidèlement à partir des sources, sans modification de contenu.",
+      "preserve": [
+        "identifiant natif",
+        "libellé",
+        "type et hiérarchie",
+        "définition et périmètre source",
+        "relations et comportements source",
+        "liens et preuves d’origine",
+        "version, date, empreinte et statut de source"
+      ],
+      "separate": [
+        "sélection de périmètre étudié",
+        "alias BC et regroupements de familles",
+        "fonctions interprétées",
+        "comparaisons OSS",
+        "compléments FLOW",
+        "notes ou appréciations de l’étude",
+        "JH, rôles, tarifs, délai et décision"
+      ],
+      "missing_data": "Une valeur absente reste absente. Une divergence entre sources est signalée, pas arbitrée silencieusement. Un changement de source est une mise à jour tracée, jamais un effet du chiffrage."
+    },
+    "alignment_contract": {
+      "name": "Alignement des calculs",
+      "unit": "JH et pourcentage d’écart",
+      "reference": "Calcul COCOMO II Axelor non arrondi choisi comme ancrage ; identifiant explicite, distinct de la décision arrondie.",
+      "formula_signed": "delta_jh = resultat_jh - reference_jh ; delta_pct = 100 × delta_jh / reference_jh",
+      "formula_spread": "etendue_jh = max(resultats_jh) - min(resultats_jh) ; etendue_pct = 100 × etendue_jh / reference_jh",
+      "zero_reference": "Si la référence est nulle, le pourcentage est non calculable ; ne pas diviser par zéro.",
+      "comparability": [
+        "mêmes fonctions et compléments",
+        "mêmes activités projet et exclusions",
+        "même traitement de réutilisation",
+        "même convention horaire",
+        "même version du périmètre"
+      ],
+      "if_not_comparable": "Afficher non comparable ou comparaison partielle, avec le motif ; ne pas inclure silencieusement dans un indicateur consolidé.",
+      "views": [
+        "entre les quatre références COCOMO du périmètre Flow",
+        "entre COCOMO et COSMIC × ISBSG",
+        "périmètre commun et compléments séparément lorsque les calculs le permettent"
+      ],
+      "shared_hypotheses": "Conserver l’identification des entrées et hypothèses communes. Elles n’ajoutent pas des observations indépendantes.",
+      "no_inference": [
+        "pas de score de confiance",
+        "pas de seuil vert/orange/rouge arbitraire",
+        "pas de percentile",
+        "pas de moyenne forcée entre méthodes",
+        "pas de conversion automatique de l’écart en provision"
+      ],
+      "decision_gap": "Afficher séparément le passage de 1496,947499 JH calculés à 1500 JH retenus. L’arrondi ne modifie pas l’alignement des calculs."
+    },
+    "uncertainty_contract": {
+      "status_now": "Non calibrée pour Flow ; aucune borne probabiliste retenue.",
+      "keep": "Information distincte, qualifiée par composant ou résultat, lorsque disponible.",
+      "inputs": [
+        "incertitude de taille",
+        "hypothèses de compléments et réutilisation",
+        "variabilité de productivité documentée",
+        "erreur du modèle mesurée sur son domaine de validation"
+      ],
+      "output": "Un intervalle prédictif exige des hypothèses de distributions et dépendances justifiées, ainsi qu’une méthode de propagation documentée. Une dispersion de cohorte n’est pas automatiquement l’incertitude Flow.",
+      "not_required": "L’absence de bilan de projet ne bloque pas l’étude d’opportunité : les hypothèses et leurs sensibilités restent explicites, sans fabriquer une probabilité.",
+      "letters": "Retirer la grille locale A–D du dispositif cible courant. Préserver les classes de qualité reçues dans les références ISBSG en tant que métadonnées d’entrée."
+    },
+    "skill_target": [
+      "Lire la méthode canonique et le statut actif.",
+      "Consommer le référentiel source sans réécrire les capacités.",
+      "Définir l’unité d’évaluation et les frontières d’analyse hors des entrants.",
+      "Inspecter les quatre OSS et leurs frameworks sur versions figées ; distinguer mesure et hypothèse.",
+      "Documenter réutilisation, mécanismes communs et propriétaire de financement.",
+      "Produire les calculs COCOMO et COSMIC × ISBSG sur une assiette explicite, avec activités, rôles et délai.",
+      "Produire les écarts d’alignement sans interprétation de confiance.",
+      "Conserver les incertitudes disponibles et les hypothèses non calibrées séparément.",
+      "Préparer un résultat révisable et une décision d’adoption distincte ; ne pas inventer de validation humaine.",
+      "Valoriser uniquement la base adoptée, sans doublon de pilotage/QA ou gain IA non autorisé ; mesurer les impacts puis vérifier les écrans."
+    ],
+    "migration": [
+      {
+        "order": 1,
+        "work": "Extraire l’entrant fidèle et détacher les analyses",
+        "done_when": "88 identifiants et champs source vérifiés, aucune note d’étude dans l’entrant ; aucune modification de la source originale."
+      },
+      {
+        "order": 2,
+        "work": "Isoler maintenance/Buy puis retirer le circuit Make historique",
+        "done_when": "36 lots à zéro et 267 affectations inutiles sortis du flux actif, maintenance et Buy strictement inchangés, inconnues distinctes de zéro."
+      },
+      {
+        "order": 3,
+        "work": "Unifier les contrats de calcul, adoption et alignement",
+        "done_when": "Quatre références, deux voies, périmètres comparables, coefficients tracés, arrondis distincts ; modèle compatible avec les futurs mécanismes partagés."
+      },
+      {
+        "order": 4,
+        "work": "Aligner le skill, les méthodes et les écrans",
+        "done_when": "Une explication par notion, aucune note sur 5 ou classe de confiance de l’étude dans le parcours courant, paramètres effectivement applicables visibles."
+      },
+      {
+        "order": 5,
+        "work": "Valider à économie constante et retirer les dépendances mortes",
+        "done_when": "1 500 JH, neuf rôles, 17 mois et 944 000 € conservés ; cinq options et horizons 3/5/7/10, annuités, simulations sauvegardées, navigateur local et statique réconciliés."
+      }
+    ],
+    "acceptance": [
+      "Une nouvelle capacité reçue ne reçoit pas automatiquement un coût ou une complexité.",
+      "Les JH d’une famille ne sont pas répartis arbitrairement entre capacités.",
+      "Les hypothèses de compléments partagées ne sont pas comptées comme quatre preuves indépendantes.",
+      "Le changement d’un calcul invalide l’alignement et signale la décision à réexaminer.",
+      "L’alignement conserve son dénominateur, ses unités et ses exclusions.",
+      "Le calendrier global n’est pas déduit du seul délai Master Data.",
+      "Une erreur de source ou de simulation ne supprime pas une sauvegarde personnelle."
+    ]
+  }
+}

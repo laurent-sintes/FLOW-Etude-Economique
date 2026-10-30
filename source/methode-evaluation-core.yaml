@@ -1,177 +1,372 @@
 schema_version: 1
 id: core-evaluation-opportunity
 principle:
-  title: Des capacités métier aux journées de développement
-  text: >-
-    Pour les **trois options Make**, le skill estime les **JH développeur bruts** nécessaires à la {{notion.core_system}} :
-    réalisation, assemblage et tests développeur, **après la réutilisation retenue et
-    avant les gains de productivité**. Pilotage, QA indépendante, architecture transverse,
-    conduite du changement et adaptations Beaumanoir restent hors de cette base.
+  title: Estimer un investissement à partir de logiciels comparables
+  text: La cartographie délimite le périmètre de la {{notion.core_system}}. L’estimation rapproche ce besoin de
+    fonctions et de mécanismes observables dans les produits du marché, réutilisation comprise. **[COCOMO II](#glossaire?term=cocomo_ii)
+    et COSMIC associé à ISBSG constituent deux voies de calcul à confronter.** Il s’agit d’une étude d’opportunité,
+    sans engagement de réalisation au forfait.
 notice:
-  title: Une sortie à qualifier avant utilisation
-  text: >-
-    Le skill prépare un dossier de charges avec ses preuves, hypothèses et inconnues.
-    **Définir cette procédure ne démontre pas qu’une base de charges l’a déjà suivie.**
-    L’évaluation économique doit préciser la provenance effectivement utilisée
-    et les contrôles réalisés avant de reprendre ses résultats.
+  status_ref: core
 tooling:
   label: Automatisation
-  title: Une méthode outillée par un skill
+  title: Une analyse traçable, assistée par un skill
   skill: flow-evaluer-core-system
-  text: >-
-    Un skill est une **procédure exécutée à la demande par un assistant IA** pour préparer
-    un dossier d’estimation traçable. Celui-ci suit les cinq étapes ci-dessous et conserve
-    preuves et hypothèses : chaque charge est reliée aux travaux qui la justifient, puis
-    aux capacités métier qu’ils servent. Les simulations utilisent la base enregistrée ;
-    elles n’exécutent pas le skill.
+  text: Le skill prépare les mesures, références, hypothèses et calculs reproductibles. L’assistance IA ne constitue
+    ni une mesure de charge historique ni une revue humaine. Les simulations consomment uniquement la base retenue
+    dans le modèle.
 navigation_label: Les cinq étapes de l’estimation
 sections:
-  - id: delimiter-perimetre
-    title: Fixer un périmètre commun
-    lead: >-
-      **Comparer les écosystèmes exige de leur demander le même résultat métier.**
-      La cartographie délimite ce que la {{notion.core_system}} doit couvrir et évite
-      que les choix techniques changent le besoin en cours d’estimation.
-    blocks:
-      - kind: bullets
+- id: delimiter-perimetre
+  title: Définir le périmètre et le niveau d’évaluation
+  lead: '**La cartographie décrit le besoin ; elle ne calcule pas la charge.** Le bon niveau d’évaluation dépend
+    de la qualité des références disponibles.'
+  blocks:
+  - kind: bullets
+    items:
+    - Conserver la hiérarchie Domaine / Sous-domaine / Business Area / Business Capacity et les identifiants natifs.
+      Choisir une unité métier assez large pour observer un ensemble cohérent de mécanismes.
+    - Définir fonctions communes, exigences de service, exclusions et compléments FLOW. Les règles propres au Groupe
+      relèvent essentiellement de l’intégration ; seuls les mécanismes génériques nécessaires appartiennent au produit.
+    - La carte d’entrée décrit le périmètre. La qualification économique des difficultés et des références appartient
+      au dossier d’estimation. Aucun niveau ordinal de complexité ne se convertit en JH.
+  - kind: paragraphs
+    items:
+    - '**Résultat : un périmètre comparable, sans exiger une spécification exhaustive des cas d’usage.** L’essai
+      compare plusieurs niveaux de regroupement et documente ce qui devient plus ou moins certain.'
+  - kind: paragraphs
+    items:
+    - Chaque calcul est lié à une unité métier, une stack, une version de la capture native et un périmètre d’activités.
+      Une modification de ces éléments exige une nouvelle qualification du calcul ; elle ne réaffecte pas automatiquement
+      une estimation existante.
+- id: observer-fonctions
+  title: Construire quatre références natives, réutilisation comprise
+  lead: '**Pour Master Data : ERPNext avec Frappe, Odoo, Tryton, Axelor avec Open Platform.** Chaque référence conserve
+    son propre résultat.'
+  blocks:
+  - kind: bullets
+    items:
+    - Figer versions ou commits, fichiers, empreintes, fonctions incluses et exclusions. Inspecter le code métier
+      avec les mécanismes génériques effectivement utilisés.
+    - Mesurer séparément le code à réaliser, à adapter et les services utilisés en l’état. Ne pas imputer la reconstruction
+      de tout le framework à une famille métier.
+    - Un mécanisme partagé a un propriétaire unique. Ses consommateurs financent seulement leurs raccordements et
+      adaptations. La taille de code mesurée n’est pas une charge historique observée.
+    - Comparer les services des frameworks à ceux de Spring avant toute transposition. Une équivalence documentée
+      évite une surcharge technique ; aucune prime de langage n’est appliquée automatiquement.
+  - kind: paragraphs
+    items:
+    - '**Résultat : quatre assiettes natives traçables sur un périmètre commun.** Une fonction non observée reste
+      inconnue ; son absence ne peut pas être déduite d’une exclusion du relevé.'
+  - kind: reference_cards
+    cards:
+    - title: ERPNext / Frappe
+      subtitle: Un ERP métier porté par un framework de documents
+      fields:
+      - label: Technologies
         items:
-          - Le skill identifie les capacités retenues et conserve leur rattachement **Domaine / Sous-domaine / Business Area**.
-          - Il décrit leurs résultats attendus, leurs frontières et leurs exclusions.
-          - Il distingue le **produit générique** des adaptations propres au Groupe, qui relèvent de la {{notion.plateforme_beaumanoir}} et de son intégration.
-      - kind: paragraphs
+        - Python et JavaScript, métadonnées DocType en JSON, base MariaDB et services Redis/Valkey.
+        - Frappe fournit le socle applicatif. ERPNext porte les modules métier ; Insights est une application analytique
+          distincte.
+      - label: Périmètre
         items:
-          - >-
-            Les niveaux de complexité orientent l’analyse des sujets difficiles.
-            **Ils ne sont pas convertis en JH** : ils ne décrivent pas encore les travaux à réaliser.
-          - >-
-            **Résultat : un périmètre métier explicite**, commun aux trois options Make
-            Java / Spring Boot, .NET et Rust. Il sert de base à la recherche des fonctions nécessaires.
-  - id: observer-fonctions
-    title: Préciser les fonctions à réaliser
-    lead: >-
-      **Une capacité métier est trop générale pour chiffrer du développement.**
-      Les produits comparables aident à identifier les comportements, règles et cas
-      à traiter pour atteindre le résultat attendu.
-    blocks:
-      - kind: bullets
+        - Référentiels, achats, ventes, stocks, fabrication et support. La sélection FLOW inclut aussi les mécanismes
+          transverses utilisés.
+      - label: Points forts pour la comparaison
         items:
-          - Le skill examine les fonctions documentées, démontrées ou observables dans le code des produits étudiés, en conservant **produit, version ou édition et preuve**.
-          - Il rapproche chaque fonction des capacités retenues et explicite **les différences avec le besoin FLOW**. Une fonction commune à plusieurs produits n’est recensée qu’une fois pour ce besoin.
-          - Il distingue **l’observation étayée**, **l’analogie proposée** et **l’inconnu**. Une absence de preuve ne démontre pas une absence produit.
-      - kind: paragraphs
+        - Modèle de documents partagé, permissions, formulaires, API, événements et tâches de fond rendent le socle
+          réutilisable observable.
+        - Le découpage framework / ERP / analytique permet de distinguer mécanismes communs et fonctions métier.
+      - label: Clients et usages publiés
         items:
-          - >-
-            Une preuve établit ce que fait le produit observé ; la pertinence de sa
-            transposition à FLOW reste à justifier. Ces correspondances enrichissent
-            la base de connaissance commune avec l’étude de marché.
-          - >-
-            **Résultat : des fonctions reliées aux capacités, avec leurs preuves et leurs
-            écarts.** Elles précisent le contenu du travail ; elles ne prouvent ni sa
-            durée ni la possibilité de réutiliser le produit.
-  - id: former-lots
-    title: Identifier les travaux restants par écosystème
-    lead: >-
-      **Les mêmes fonctions peuvent demander des travaux différents selon les composants
-      disponibles.** Examiner leur réutilisation permet d’estimer ce qu’il faut réellement
-      construire, adapter et raccorder dans chaque écosystème.
-    blocks:
-      - kind: paragraphs
+        - '**Chewy** : portail personnalisé de contrats de remises fournisseurs, approbations, révisions et audit.'
+        - '**Vodafone UK** : webshop et gestion des commandes SIM, validations et suivi logistique, selon l’intégrateur
+          Korecent.'
+      note: '**Portée des références :** éditions et versions déployées inconnues. Ces cas décrivent des applications
+        ciblées, sans démontrer le remplacement du cœur de {{notion.supply_chain_management}} de ces groupes ni
+        la parité FLOW.'
+      sources:
+      - label: Architecture Frappe
+        href: https://docs.frappe.io/framework/user/en/basics/architecture
+      - label: Cas Chewy publié par Frappe
+        href: https://frappe.io/stories/Chewy
+      - label: Cas Vodafone UK publié par Korecent
+        href: https://korecent.com/case-study/success-story-of-vodafone-global
+    - title: Odoo Community
+      subtitle: Un ERP modulaire avec un socle et une interface intégrés
+      fields:
+      - label: Technologies
         items:
-          - >-
-            **{{notion.reutilisation_logicielle}}** : utiliser et adapter des éléments
-            existants — frameworks, bibliothèques, composants, programmes, automatisations
-            ou skills internes ou tiers. Le skill vérifie **licence, version, interfaces,
-            compatibilité et limites connues** avant de les retenir.
-      - kind: table
-        caption: Le traitement de l’existant détermine les travaux
-        columns: [État de la réutilisation, Travaux à estimer]
-        rows:
-          - [Utilisable en l’état, Raccordement et tests dans le contexte retenu.]
-          - [À adapter, Adaptations identifiées puis raccordement et tests.]
-          - [À développer, Réalisation de la fonction et tests développeur.]
-          - [Réutilisation non démontrée, Hypothèse à qualifier ou inconnue à conserver.]
-      - kind: paragraphs
+        - Python et PostgreSQL, modèles et ORM côté serveur, vues XML, interface JavaScript/Owl.
+      - label: Périmètre
         items:
-          - >-
-            Un pourcentage de couverture produit ne donne pas un pourcentage de JH économisés.
-            Les raccordements, les exigences de qualité et les contraintes du projet restent à examiner.
-          - >-
-            Chaque mécanisme partagé a **un seul lot propriétaire qui finance sa réalisation**.
-            Les capacités utilisatrices financent leurs raccordements et règles propres.
-            Cette règle évite de compter plusieurs fois le même développement.
-          - >-
-            **Résultat : des lots de travaux par écosystème**, chacun avec un résultat
-            attendu, des exclusions, des dépendances et des capacités utilisatrices.
-            Ces lots sont les unités que l’étape suivante estime en JH.
-  - id: etablir-charge
-    title: Justifier la charge de chaque lot
-    lead: >-
-      **Une liste de travaux ne donne pas l’effort nécessaire.** Relier chaque charge à une mesure
-      ou à une hypothèse explicite permet au relecteur d’en apprécier la pertinence
-      et de la réviser quand de meilleures références deviennent disponibles.
-    blocks:
-      - kind: table
-        caption: Identifier l’origine de chaque estimation
-        columns: [Origine, Justification attendue]
-        rows:
-          - [Charge observée, Temps de développement réellement mesuré sur un lot comparable dont les activités sont connues.]
-          - [Charge extrapolée, Référence observée transposée à un volume comparable ; unités homogènes et différences justifiées.]
-          - [Estimation d’ingénierie, Décomposition argumentée des actions et tests à réaliser ; volumes et temps unitaires proposés comme hypothèses.]
-      - kind: paragraphs
+        - Produits, achats, ventes, stocks, fabrication, réparation et automatisations dans les modules publics
+          retenus.
+        - Les modules Enterprise et les extensions OCA sont qualifiés séparément du code Community.
+      - label: Points forts pour la comparaison
         items:
-          - >-
-            Le skill conserve **la provenance, la date, l’équipe de référence,
-            l’environnement et le niveau de qualité**. Le JH désigne l’effort d’une
-            personne pendant une journée selon la convention du modèle ; une durée
-            calendaire ou un montant de projet ne mesure pas cet effort.
-          - >-
-            Pour extrapoler, il distingue **la mise en place commune et le travail
-            répétable** : seul ce dernier peut être proportionnel au volume.
-            Les écarts deviennent des travaux explicites. Une analogie trop éloignée
-            exige une autre référence ou une décomposition plus fine.
-          - >-
-            Sans mesure comparable, la charge reste une **estimation d’ingénierie non calibrée**.
-            Une assistance par IA est signalée ; une revue humaine n’est mentionnée que
-            si elle a eu lieu. Lignes de code, contributeurs et âge d’un produit ne
-            constituent pas une mesure de JH.
-          - >-
-            **Résultat : une charge centrale en JH développeur bruts pour chaque lot**,
-            accompagnée de son origine, de ses conditions de réalisation et de ses limites.
-  - id: qualifier-incertitude
-    title: Consolider une estimation vérifiable
-    lead: >-
-      **Un total n’est utile que si l’on sait ce qu’il couvre et ce qui peut le faire varier.**
-      La consolidation vérifie la couverture du besoin, les doubles comptes et les
-      hypothèses qui nécessitent encore une validation.
-    blocks:
-      - kind: bullets
+        - Chaînes transactionnelles entre commandes, mouvements de stock et fabrication, sur un modèle de données
+          commun.
+        - Extensions par modules et héritage des modèles et vues, utiles pour examiner la réutilisation et ses dépendances.
+      - label: Clients et usages publiés
         items:
-          - Le skill vérifie que **chaque fonction retenue est reliée à des travaux financés ou à une inconnue explicite**, puis additionne les lots une seule fois par écosystème. Toute ventilation conserve la charge unique du lot.
-          - 'Il associe à chaque charge centrale une **incertitude justifiée**, éventuellement différente à la baisse et à la hausse : contenu ouvert, analogie fragile, réutilisation à confirmer ou temps unitaire incertain.'
-          - Il dérive les bornes et conserve la chaîne **capacité → fonction → lot → charge → preuve ou hypothèse**, ainsi que les points à instruire en priorité.
-      - kind: formula
-        text: Charge centrale du périmètre (JH développeur bruts) = somme des charges centrales des lots retenus, comptés une seule fois
-      - kind: formula
-        text: Borne basse ou haute du périmètre (JH développeur bruts) = somme des bornes correspondantes des mêmes lots
-      - kind: paragraphs
+        - '**Aurora Multimarket** : Odoo Community pour la planification du personnel et les absences en magasins,
+          selon UBM Soft.'
+        - '**Toyota Material Handling France** : CRM, commandes, achats, fabrication, stocks et comptabilité dans
+          un cas publié par Odoo en 2017 ; édition non précisée.'
+      note: '**Portée des références :** Aurora atteste Community sur la gestion du personnel, hors du cœur opérationnel
+        FLOW. Le cas Toyota ne prouve ni Community ni l’usage actuel. Aucun des deux ne valide directement la sélection
+        de code mesurée.'
+      sources:
+      - label: Code public et composition Odoo Community
+        href: https://github.com/odoo/odoo
+      - label: Cas Aurora publié par UBM Soft
+        href: https://ubmsoft.com.ua/en/blog/our-blog-2/wfm-system-in-odoo-how-to-automate-personnel-management-23
+      - label: Cas Toyota Material Handling publié par Odoo
+        href: https://www.odoo.com/blog/customer-reviews-6/how-toyota-uses-odoo-after-just-6-months-of-integration-312
+    - title: Tryton
+      subtitle: Un socle métier modulaire et un code ouvert inspectable
+      fields:
+      - label: Technologies
         items:
-          - >-
-            **Inconnu, inclus, sans objet et zéro restent distincts.** Un travail inclus
-            référence son lot payeur ; zéro exige une justification. Si une charge manque,
-            le total est annoncé comme partiel avec son périmètre non chiffré.
-          - >-
-            La somme des bornes forme une **enveloppe de sensibilité**, pas un intervalle
-            de confiance statistique. Les hypothèses communes à plusieurs lots restent
-            visibles : leurs incertitudes ne sont pas supposées indépendantes.
-          - >-
-            **Résultat : une estimation centrale et une plage justifiée par écosystème**,
-            dont le relecteur peut remonter les charges en JH jusqu’au besoin métier,
-            distinguer les mesures des hypothèses et cibler les validations à mener.
-      - kind: links
+        - Serveur Python avec ORM, base PostgreSQL, client web Sao en JavaScript et vues XML.
+      - label: Périmètre
         items:
-          - href: '#evaluation-core'
-            label: Consulter l’application dans les {{vue.evaluations_economiques}}
+        - Tiers, produits, achats, ventes, stocks, approvisionnement, production, lots et qualité, selon les modules
+          sélectionnés.
+      - label: Points forts pour la comparaison
+        items:
+        - Modules métier et dépendances explicites, permettant d’isoler les mécanismes et leurs extensions.
+        - Mouvements de stock et opérations liées aux achats et ventes inspectables dans un même dépôt.
+      - label: Clients et usages publiés
+        items:
+        - '**Mifarma** : intégration du webshop, approvisionnement, préparation en entrepôt et échanges avec les
+          logisticiens.'
+        - '**Coppernic** : achats, ventes, stocks et production avec sous-traitance ; des fonctions complémentaires
+          ont été développées pour les besoins spécifiques.'
+      note: '**Portée des références :** cas publiés par le projet Tryton, sans version ni date de déploiement précisée.
+        Les adaptations décrites ne sont pas toutes du standard. Les dépendances Finance de certains modules restent
+        à traiter dans une reconstruction limitée à FLOW.'
+      sources:
+      - label: Documentation des modules Tryton
+        href: https://docs.tryton.org/
+      - label: Cas Mifarma publié par Tryton
+        href: https://www.tryton.org/success-stories/mifarma
+      - label: Cas Coppernic publié par Tryton
+        href: https://www.tryton.org/success-stories/coppernic
+    - title: Axelor / Open Platform
+      subtitle: Un socle Java et des applications métier configurables
+      fields:
+      - label: Technologies
+        items:
+        - Java, persistance Hibernate, modèles et vues XML, scripts Groovy et API REST ; client React/TypeScript
+          pour la version de plateforme étudiée.
+        - Open Platform fournit le framework ; Open Suite fournit les applications métier.
+      - label: Périmètre
+        items:
+        - Référentiels, achats, ventes, stocks, production, interventions et helpdesk dans les modules retenus.
+      - label: Points forts pour la comparaison
+        items:
+        - Proximité avec l’écosystème Java envisagé pour FLOW et mécanismes génériques explicites dans la plateforme.
+        - Articulation entre code et déclarations XML, utile pour examiner ce qu’un framework évite de développer.
+      - label: Clients et usages publiés
+        items:
+        - '**Octopia, filiale de Cdiscount** : service de facturation automatisée des vendeurs tiers, raccordé aux
+          API de la marketplace.'
+        - '**Enercoop** : solution de gestion interne adaptée à ses besoins, selon les cas clients Axelor.'
+      note: '**Portée des références :** versions et éditions non précisées. Le cas Octopia porte sur la facturation,
+        hors reconstruction FLOW. Ces références ne démontrent pas un cœur de {{notion.supply_chain_management}}
+        équivalent à FLOW ; les composants commerciaux restent à distinguer du code ouvert étudié.'
+      sources:
+      - label: Code et architecture Axelor Open Platform
+        href: https://github.com/axelor/axelor-open-platform
+      - label: Cas Octopia publié par Axelor
+        href: https://axelor.com/fr/cas-client-cdiscount/
+      - label: Cas clients Axelor, dont Enercoop
+        href: https://axelor.com/our-case-studies/
+  - kind: paragraphs
+    items:
+    - Sources des encarts consultées le 30 octobre 2026. Les technologies et périmètres synthétisent les fiches
+      de marché de l’étude ; les cas clients sont attribués à leur éditeur, au projet ou à l’intégrateur qui les
+      publie. **Les points forts décrivent leur intérêt comme références de comparaison ; ils ne constituent pas
+      un classement ni un choix de solution.**
+  - kind: paragraphs
+    items:
+    - Le moteur recompose les tailles depuis les mesures de fichiers enregistrées et vérifie leurs empreintes documentaires.
+      Il applique la réutilisation, compte les compléments distincts puis recalcule les mouvements COSMIC. Les mesures
+      de code et les analogies restent distinctes des charges réellement observées.
+    - Le registre des mécanismes désigne l’unité qui finance chaque travail partagé. Une unité consommatrice référence
+      ce financement et dimensionne séparément ses adaptations. Le cumul des décisions adoptées ne constitue pas
+      une estimation COCOMO intégrée de l’ensemble du Core System.
+    - Pour Master Data, les références natives incluent encore la création et l’édition directe de fiches, alors
+      que le contrat FLOW privilégie admission, consultation et administration. Cet écart n’est pas isolé en taille.
+      Les activités sont rapprochées par convention et les garanties de service ne sont pas appariées à la population
+      ISBSG ; la comparaison reste partielle.
+- id: former-lots
+  title: Calculer les charges et aligner les activités
+  lead: '**COCOMO calcule un effort à partir d’une taille. COSMIC mesure une taille fonctionnelle ; ISBSG fournit
+    une référence de productivité.** Ce ne sont pas trois estimations indépendantes.'
+  blocks:
+  - kind: reference_cards
+    cards:
+    - title: COCOMO II
+      subtitle: Modéliser un effort et un délai de développement
+      fields:
+      - label: Nature du référentiel
+        items:
+        - Constructive Cost Model II, issu des travaux de Barry Boehm et de l’USC. Le modèle adapte le niveau de
+          détail aux informations disponibles sur le projet.
+      - label: Entrées et sorties
+        items:
+        - Taille logique équivalente, réutilisation, facteurs d’échelle et multiplicateurs liés au produit, à l’équipe
+          et à l’environnement.
+        - Effort en mois-personnes et délai modélisé, avec leurs conventions de phase ; l’effort est ensuite converti
+          en JH.
+      - label: Apport pour FLOW
+        items:
+        - Expliciter l’effet de la taille, de la réutilisation et des conditions de réalisation sur une hypothèse
+          de reconstruction.
+      note: '**Limite :** un comptage physique de lignes OSS ne suffit pas à produire une estimation COCOMO II calibrée.
+        Le total modélisé ne correspond pas automatiquement aux seuls JH développeur et ne mesure pas le coût historique
+        du logiciel.'
+      sources:
+      - label: Présentation et référence COCOMO II — Boehm CSSE
+        href: https://boehmcsse.org/tools/cocomo-ii/
+    - title: COSMIC
+      subtitle: Mesurer la taille fonctionnelle indépendamment du langage
+      fields:
+      - label: Nature du référentiel
+        items:
+        - Méthode de mesure de taille fonctionnelle normalisée par ISO/IEC 19761 ; manuel COSMIC version 5 comme
+          référence de lecture.
+      - label: Entrées et sorties
+        items:
+        - Exigences fonctionnelles, frontière du logiciel, utilisateurs fonctionnels, processus et groupes de données.
+        - Entrées, sorties, lectures et écritures sont les quatre types de mouvements. Chaque mouvement compté vaut
+          un point de fonction COSMIC, ou CFP.
+      - label: Apport pour FLOW
+        items:
+        - Comparer les fonctions sur une assiette indépendante du code et confronter leur taille à une productivité
+          documentée.
+      note: '**Limite :** COSMIC mesure une taille, sans produire seul des JH. La difficulté d’un algorithme ou
+        une exigence non fonctionnelle ne se traduit pas automatiquement par des CFP supplémentaires.'
+      sources:
+      - label: Manuel de mesure COSMIC — version 5
+        href: https://cosmic-sizing.org/measurement-manual/
+      - label: Processus de mesure et unité CFP
+        href: https://cosmic-sizing.org/cosmic-sizing/intro/measurement-process/
+    - title: ISBSG
+      subtitle: Confronter l’estimation à des projets observés
+      fields:
+      - label: Nature du référentiel
+        items:
+        - International Software Benchmarking Standards Group, organisme qui collecte et qualifie des données de
+          projets logiciels. Sa base Development & Enhancement documente notamment tailles, efforts, durées et activités.
+      - label: Entrées et sorties
+        items:
+        - Une cohorte sélectionnée selon la méthode de mesure, le type de développement, la technologie, la taille,
+          les activités couvertes et la qualité des données.
+        - Des repères de productivité, par exemple des heures par CFP pour une cohorte COSMIC, ainsi que leur dispersion
+          lorsqu’elle est disponible.
+      - label: Apport pour FLOW
+        items:
+        - Transformer une taille fonctionnelle en effort de comparaison et vérifier sa plausibilité sur une population
+          de projets explicitement décrite.
+      note: '**Limite :** une moyenne de base n’est pas une productivité universelle. Les points IFPUG et COSMIC
+        ne sont pas interchangeables sans justification ; la cohorte et les activités doivent correspondre à l’assiette
+        FLOW. ISBSG n’est pas une troisième voie de calcul indépendante de COSMIC.'
+      sources:
+      - label: Base Development & Enhancement — ISBSG
+        href: https://www.isbsg.org/development-and-enhancement-data/
+      - label: Questionnaires et collecte par méthode de mesure
+        href: https://www.isbsg.org/submit-data/
+  - kind: paragraphs
+    items:
+    - 'Sources méthodologiques consultées le 30 octobre 2026. **Dans cette étude : COCOMO II fournit un effort modélisé
+      ; COSMIC mesure les fonctions ; ISBSG apporte les observations de productivité à rapprocher de cette mesure.**
+      Les formules ci-dessous décrivent la méthode ; leur présence ne signifie pas qu’une nouvelle estimation a
+      été retenue.'
+  - kind: table
+    caption: Deux voies de calcul, des hypothèses visibles
+    columns:
+    - Voie
+    - Entrées et limites
+    rows:
+    - - COCOMO II
+      - Taille logique équivalente, traitement de la réutilisation, facteurs d’échelle et multiplicateurs d’effort
+        documentés. Le résultat est modélisé, sans observation du temps réellement passé sur l’OSS.
+    - - COSMIC × ISBSG
+      - Mouvements de données fonctionnels comptés en CFP, puis heures par CFP issues d’un échantillon dont le périmètre
+        et les activités sont explicités. Les règles complexes ne créent pas automatiquement des CFP supplémentaires.
+  - kind: formula
+    rule_ref: cocomo_effort
+  - kind: formula
+    rule_ref: cosmic_effort
+  - kind: paragraphs
+    items:
+    - Les coefficients COCOMO, conventions horaires et traitements de phase doivent être enregistrés avec leur référence
+      et leur version dans chaque calcul. La réutilisation ne reçoit pas une seconde remise après son intégration
+      à la taille équivalente.
+    - 'Pour le pilote Master Data, le facteur de taille ISBSG de 0,8 est retiré : facteur 1 retenu par décision
+      d’étude, car ce composant appartient à un projet plus grand. La référence de 20 h/CFP reste une hypothèse
+      de comparaison, sans calibration FLOW et sans généralisation automatique aux autres familles.'
+    - '**Avant comparaison, aligner les fonctions et les activités : analyse, conception, développement, tests développeur,
+      QA et activités transverses.** Conserver les répartitions d’effort des publications avec leur page et leur
+      assiette. Ne pas ajouter une activité déjà couverte, ni assimiler le total COCOMO à des JH développeur.'
+- id: etablir-charge
+  title: Chiffrer les compléments FLOW et expliquer les écarts
+  lead: '**Présenter quatre chiffres et leur décomposition : périmètre commun, compléments FLOW, total.** Le total
+    de référence n’est pas choisi automatiquement.'
+  blocks:
+  - kind: bullets
+    items:
+    - 'Pour chaque complément : exigence FLOW, fonction analogue inspectée, volume proposé, formule et financement
+      du mécanisme commun. Séparer les mesures de code des hypothèses de volume.'
+    - Vérifier les différences fonctionnelles, les comptages de taille, les opérations génériques déjà couvertes,
+      les activités projet et la pertinence de la productivité ISBSG avant d’expliquer l’écart entre les méthodes.
+    - Un même complément hypothétique appliqué aux quatre OSS ne donne pas quatre confirmations indépendantes. Ne
+      pas forcer la convergence par un coefficient sans preuve.
+    - Présenter les JH par rôle à partir d’une correspondance explicite entre activités et rôles. Conserver les
+      répartitions publiées ; qualifier séparément toute clé de répartition proposée.
+  - kind: formula
+    rule_ref: economic_total
+  - kind: paragraphs
+    items:
+    - '**Une somme d’efforts n’est pas un délai.** Conserver séparément le délai produit par COCOMO, avec sa formule
+      TDEV, ses coefficients et phases couvertes. L’organisation, la disponibilité des rôles et les dépendances
+      déterminent ensuite un calendrier de réalisation. Une durée proposée par l’IA ne sert pas de base au calcul
+      des JH.'
+    - La ventilation des charges doit préserver le total, les activités incluses et les mécanismes partagés. Les
+      gains de productivité et provisions du modèle économique ne s’appliquent qu’après cette correspondance, sans
+      réduction globale de toutes les activités ni doublon de QA.
+- id: qualifier-incertitude
+  title: Qualifier le résultat et décider de l’itération suivante
+  lead: '**La convergence des chiffres ne suffit pas à prouver leur exactitude.** Les hypothèses communes et les
+    lacunes doivent rester visibles.'
+  blocks:
+  - kind: bullets
+    items:
+    - Décrire l’alignement par les écarts en JH et en pourcentage (estimation plus basse ou plus haute) à une référence
+      non arrondie, puis la dispersion des références comparables. Nommer le dénominateur. Ces indicateurs ne constituent
+      pas un score de confiance. L’incertitude probabiliste reste inconnue sans méthode et preuves adaptées.
+    - Donner le cumul des capacités étudiées, sans doublon, rapporté au périmètre total. Distinguer couverture documentaire,
+      périmètre chiffré et périmètre assez étayé pour une décision d’opportunité.
+    - 'À chaque itération : dire ce qui a progressé, ce qui reste incertain et quelle investigation pourrait réellement
+      améliorer la décision. Si aucune nouvelle preuve exploitable n’est attendue, proposer l’arrêt ou un changement
+      d’approche.'
+    - Adopter une estimation dans la base active seulement après décision explicite. Un total incomplet est signalé
+      comme tel ; un montant à réestimer n’est pas un coût nul. Les simulations et calendriers sont ensuite réconciliés.
+  - kind: paragraphs
+    items:
+    - '**Résultat attendu : des charges par unité métier et par rôle, une provenance calculable et un délai distinct.**
+      COCOMO II est la référence principale retenue ; COSMIC × ISBSG reste une comparaison indépendante, sans moyenne
+      forcée entre les méthodes. Les estimations adoptées et leur périmètre sont enregistrés dans estimations-core-retenues.yaml.
+      Les autres capacités restent à réestimer ; consulter le statut courant.'
+  - kind: links
+    items:
+    - href: '#evaluation-core'
+      label: Consulter les évaluations économiques et leur statut
 examples: []
 next:
   href: '#calcul-net'
-  label: Passer des charges estimées aux gains et à leur valorisation — {{vue.calcul_net}}
+  label: Vérifier les activités, les gains et la valorisation des JH

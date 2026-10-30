@@ -18,6 +18,7 @@ from market_reading import build_market_reading
 from study_app import Study
 from study_snapshot import candidate, encode, ENGINE_FILES
 from validate_stacks import ROOT
+from export_business_model import export as export_business_model, ASSET as MODEL_DOWNLOAD_ASSET
 
 
 PYODIDE_VERSION = '314.0.7'
@@ -78,6 +79,7 @@ def build_pages(output, base='/', study=None):
     base = normalize_base(base)
     study = study or Study()
     bundle = candidate(study)
+    export_business_model(output / MODEL_DOWNLOAD_ASSET, study=study)
     archive_raw = engine_archive()
     model_raw = gzip.compress(encode(bundle), compresslevel=9, mtime=0)
 

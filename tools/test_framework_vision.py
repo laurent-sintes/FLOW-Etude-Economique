@@ -79,7 +79,7 @@ class FrameworkVisionTests(unittest.TestCase):
         def unknown_document(d): d['evidence']['items'][0]['href'] = 'source/missing.md'
         def unknown_glossary(d): d['opening']['text'] = '{{notion.absent}}'
         def copied_glossary(d): d['opening']['text'] = self.glossary['notions']['core_system']['libelle']
-        def wrong_next(d): d['next']['href'] = '#comparer'
+        def wrong_next(d): d['next']['links'][0]['href'] = '#absent'
         for change in (unknown_root, unknown_nested, wrong_version, blank_text, missing_limits_title,
                        missing_proof_levels, incomplete_proof_levels, reordered_proof_levels, copied_proof_level,
                        unknown_proof_level_field, invalid_proof_level_route, missing_confidence_links,

@@ -1,3 +1,4 @@
+import {RetainedCoreFamilies} from './CoreEvaluationPage';
 import {useEffect,useRef,useState,type ReactNode} from 'react';
 import {ArrowLeft,ArrowUpRight} from 'lucide-react';
 import {useStudy,useFormat,type Data} from './context';
@@ -68,12 +69,11 @@ export function ScopeComparison(){
 
 function BuildProof({stack,onClose}:{stack:string;onClose:()=>void}){
  const {data}=useStudy();const {amount,n}=useFormat(),B=data.content.journey.build,L=data.content.journey.labels,T=data.content.journey.metrics.work_totals[stack];
- const composition=T.composition.central,maximum=Math.max(...composition,1),option=data.baseline.options.find(o=>o.stack===stack)!;
+ const option=data.baseline.options.find(o=>o.stack===stack)!;
  return <Drawer title={B.charges_title} onClose={onClose} wide>
   <p className="eyebrow">{option.name}</p><p>{B.charges_note}</p>
-  <div className="journey-natures">{data.content.business.method.natures.map((key:string,i:number)=><div key={key}>
-   <span>{data.ui.natures[key]||data.ui.labels[key]}</span><span className="journey-bar" aria-hidden="true"><i style={{width:composition[i]/maximum*100+'%'}}/></span><strong>{n(composition[i],0)+' '+L.jh_short}</strong>
-  </div>)}</div>
+  <RetainedCoreFamilies units={T.units}/>
+  {!T.units.length&&<p>{data.ui.essential.core_results.pending}</p>}
   <div className="journey-calculation"><div><span>{L.before_gains}</span><strong>{n(T.raw_jh.central,0)+' '+L.jh_short}</strong></div><div><span>{L.after_gains}</span><strong>{n(T.net_jh)+' '+L.jh_short}</strong></div><div><span>{B.prestations}</span><strong>{amount(T.prestations_eur_ht)}</strong></div><div><span>{B.pilotage}</span><strong>{amount(T.pilotage_eur_ht)}</strong></div><div className="journey-total"><span>{B.total}</span><strong>{amount(T.build_eur_ht)}</strong></div></div>
   <p className="journey-note">{B.raw_note}</p><p className="journey-note">{B.range_note}</p><Evidence items={[B.source_work,B.source_prices,{...B.source_costs,path:B.source_costs.path+'#options/'+stack+'/detail_build'}]}/>
   <a className="source-link" href={'#market?detail=references&section=rates&stack='+encodeURIComponent(stack)}>{B.rates_link}<ArrowUpRight size={14}/></a>
@@ -88,8 +88,8 @@ export function CoreBuild(){
  if(detail==='method')return <JourneyDetail><Estimations focusOnly/><div className="journey-links"><a href={'#build?detail=work&section=build&focus=work&stack='+encodeURIComponent(stack)}>{B.work_detail}<ArrowUpRight size={15}/></a></div></JourneyDetail>;
  if(detail==='architecture')return <JourneyDetail><p className="eyebrow">{options.find(o=>o.stack===stack)!.name}</p><Architecture stack={stack} title={B.architecture_detail}/></JourneyDetail>;
  return <div className="sponsor-journey">
-  <p className="journey-note">{B.selection_note}</p><div className="journey-three journey-stack-cards">{options.map(o=>{const totals=data.content.journey.metrics.work_totals[o.stack];return <button key={o.stack} className={stack===o.stack?'active':''} aria-pressed={stack===o.stack} onClick={()=>state.set({stack:o.stack},true)}>
-   <span className="journey-stack-name">{o.name}</span><strong>{n(totals.raw_jh.central,0)} <small>{L.jh}</small></strong><span className="journey-stack-range">{n(totals.raw_jh.bas,0)+'–'+n(totals.raw_jh.haut,0)+' '+L.jh_short}</span><b>{amount(totals.build_eur_ht)}</b><span className="journey-stack-caption">{B.budget_note}</span>
+  <p className="journey-note">{data.ui.essential.core_results.make_note}</p><div className="journey-three journey-stack-cards">{options.map(o=>{const totals=data.content.journey.metrics.work_totals[o.stack];return <button key={o.stack} className={stack===o.stack?'active':''} aria-pressed={stack===o.stack} onClick={()=>state.set({stack:o.stack},true)}>
+   <span className="journey-stack-name">{o.name}</span><strong>{n(totals.raw_jh.central,0)} <small>{L.jh}</small></strong><span className="journey-stack-range">{totals.units.length?data.ui.essential.core_results.unknown_uncertainty:data.ui.essential.core_results.pending}</span><b>{amount(totals.build_eur_ht)}</b><span className="journey-stack-caption">{B.budget_note}</span>
   </button>;})}</div>
   <p className="journey-note">{B.raw_note}</p><div className="journey-build-actions"><button className="text-button" onClick={()=>setProof(true)}>{B.decomposition}<ArrowUpRight size={14}/></button><a href={'#build?detail=method&section=build&focus=method&stack='+encodeURIComponent(stack)}>{B.method_detail}<ArrowUpRight size={14}/></a></div>
   <div className="journey-platform"><div><strong>{data.ui.composable.hosting_label}</strong><p>{data.ui.composable.hosting_note}</p></div><strong>{amount(options.find(o=>o.stack===stack)!.hosting_build)}</strong><SourceLink path="source/modele-composable.yaml#hebergement_build"/></div>

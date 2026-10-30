@@ -65,7 +65,6 @@ export function FrameworkPage(){
  const activityAllocations=data.ui.essential.model_rows.filter((row:Data)=>row.activity_allocation);
  const programme=F.pilotage.programme;
  const pilotage=[
-  {key:'build_pct',label:T.pilotage_build,base:T.pilotage_build_base},
   {key:'integration_make_pct',label:T.pilotage_integration,base:T.pilotage_integration_base},
   {key:'deployment_pct',label:T.pilotage_deployment,base:T.pilotage_deployment_base},
   {key:'maintenance_pct',label:T.pilotage_maintenance,base:T.pilotage_maintenance_base},
@@ -124,9 +123,9 @@ export function FrameworkPage(){
     <ApplicationHypothesis id="productivity"/>
     <div className="framework-group">
      <ParameterTable caption={T.ia_detail}><thead>{optionHeaders(true)}</thead><tbody>
-      {natures.map(key=><tr key={key}><th scope="row">{data.ui.natures[key]}</th>{F.tariffs.map((option:Data)=><td key={option.key}>{percent(F.workload.ia.taux_pct[option.key][key])}</td>)}</tr>)}
+      {natures.map(key=><tr key={key}><th scope="row">{data.ui.natures[key]}</th>{F.tariffs.map((option:Data)=><td key={option.key}>{option.mode==='Make'?T.core_family_rule:percent(F.workload.ia.taux_pct[option.key][key])}</td>)}</tr>)}
      </tbody></ParameterTable>
-     <p><strong>{T.ia_frontend} : {percent(F.workload.ia.frontend_pct)}</strong></p>
+     <p><strong>{T.ia_frontend} : {percent(F.workload.ia.frontend_pct)}</strong> · {T.core_family_rule}</p>
      <SourceLink path={F.sources.gains}>{T.gains_source}</SourceLink>
     </div>
     <div className="framework-group">

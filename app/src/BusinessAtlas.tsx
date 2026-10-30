@@ -7,11 +7,11 @@ import {CapabilityDetail} from './BusinessMap';
 import {capabilityReadingHref,matchesReadingText,useReadingState} from './readerNavigation';
 import './businessAtlas.css';
 
-const cases=['bas','central','haut'];
+
 
 function WorkProof({row,metrics,onClose}:{row:Data;metrics:Data;onClose:()=>void}){
- const {data}=useStudy(),{n,amount}=useFormat();
- const U=data.content.journey.atlas,T=data.content.business.labels.colonnes;
+ const {data}=useStudy();
+ const U=data.content.journey.atlas,R=data.ui.essential.core_results;
  return <Drawer title={row.name} onClose={onClose} wide>
   <p className="eyebrow">{row.path.join(' / ')}</p>
   <p><GlossaryText>{row.scenario}</GlossaryText></p>
@@ -20,13 +20,9 @@ function WorkProof({row,metrics,onClose}:{row:Data;metrics:Data;onClose:()=>void
    const work=row.stacks[option.stack],metric=metrics[option.stack];
    return <section key={option.stack}>
     <h3>{option.name}</h3>
-    <p className="atlas-work-total"><strong>{n(metric.raw_jh.central,0)}</strong>{U.jh}</p>
-    <p className="small-prose">{n(metric.raw_jh.bas,0)+'–'+n(metric.raw_jh.haut,0)+' '+U.jh_range}</p>
+    <p>{metric.retained_units?.length?R.no_allocation:R.pending}</p>
+    {metric.retained_units?.length>0&&<a href="#evaluation-core">{R.family_link}</a>}
     <p><GlossaryText>{work.work.travail}</GlossaryText></p>
-    <div className="table-scroll"><table><thead><tr><th>{data.ui.labels.role}</th>{cases.map(c=><th key={c}>{T[c]}<small>{T.jh}</small></th>)}</tr></thead><tbody>{data.content.business.method.natures.map((nature:string,index:number)=><tr key={nature}><th scope="row">{data.ui.natures[nature]||data.ui.labels[nature]}</th>{cases.map(c=><td key={c}>{n(work.work[c][index],0)}</td>)}</tr>)}</tbody></table></div>
-    <p><strong>{amount(metric.prestations_eur_ht)}</strong><br/><span className="small-prose">{U.detail.costs}</span></p>
-    <p className="small-prose">{T.bas+' : '+work.work.hypothese_basse}</p>
-    <p className="small-prose">{T.haut+' : '+work.work.hypothese_haute}</p>
     <div className="source-row"><SourceLink path={'source/recalibration-metier.yaml#lots/'+work.travaux_ref}>{U.detail.work_source}</SourceLink>{(work.proofs||[]).map((proof:Data)=><SourceLink key={proof.id} path={proof.reference}>{proof.titre}</SourceLink>)}</div>
    </section>;
   })}</div>
@@ -72,7 +68,7 @@ export function BusinessAtlas({mode,compact=false,architecture}:{mode:'scope'|'b
  const label=(node:Data)=>{
   if(compact)return '';
   if(metric==='complexity')return node.complexity[axis].high+' / '+node.capabilities.length+' '+U.high_complexity;
-  if(mode==='build')return metric==='cost'?amount(nodeValue(node)):n(nodeValue(node),0)+' '+U.jh;
+  if(mode==='build')return node.stacks[stack].retained_units?.length?data.ui.essential.core_results.no_allocation:data.ui.essential.core_results.pending;
   if(offer==='make')return '';
   const count=rows.filter(row=>node.capabilities.includes(row.capacite_id)&&row.buy[offer].exceptions.length>0).length;
   return count?count+' / '+node.capabilities.length+' '+U.open_points:U.reviews;
@@ -107,7 +103,7 @@ export function BusinessAtlas({mode,compact=false,architecture}:{mode:'scope'|'b
    </div>
    {domain&&<div className="atlas-breadcrumb"><p><GlossaryText>{domain.definition}</GlossaryText></p>{area&&<button className="text-button" onClick={()=>reader.set({area:'',capability:''},true)}><ArrowLeft size={14}/>{U.all_business_areas}</button>}</div>}
    {mode==='scope'&&!compact&&<div className="atlas-neighbors" aria-label={U.neighbors_title}>{U.neighbors.map((neighbor:Data)=><button key={neighbor.id} className={neighbor.id==='finance'&&offer==='sap'?'has-scope-difference':''} onClick={()=>openProof(neighbor.proof)}><strong>{neighbor.title}</strong><span>{neighbor.notes?.[offer]||neighbor.note}</span><ArrowUpRight size={15}/></button>)}</div>}
-   {mode==='build'&&<div className="atlas-transverse"><div><strong>{U.transverse}</strong><span>{U.transverse_note}</span></div><button className="text-button" onClick={()=>openProof('transverse')}>{metric==='cost'?amount(metrics.transverse[stack].prestations_eur_ht):n(metrics.transverse[stack].raw_jh.central,0)+' '+U.jh}<ArrowUpRight size={15}/></button></div>}
+   {mode==='build'&&<div className="atlas-transverse"><div><strong>{U.transverse}</strong><span>{U.transverse_note}</span></div><button className="text-button" onClick={()=>openProof('transverse')}>{data.ui.essential.core_results.pending}<ArrowUpRight size={15}/></button></div>}
    {!compact&&<p className="atlas-note">{metric==='complexity'||mode==='build'?U.notes[metric]:U.scope_note}</p>}
    {query&&<p className="atlas-note">{U.filter_note}</p>}
 
@@ -115,7 +111,7 @@ export function BusinessAtlas({mode,compact=false,architecture}:{mode:'scope'|'b
    {selected&&<section ref={detailRef} tabIndex={-1} className="atlas-capability-detail" id="atlas-capability">
     <header><div><p className="eyebrow">{selected.hierarchie.map((h:Data)=>h.nom).join(' / ')+' · '+selected.id}</p><h3>{selected.capacite.nom}</h3></div><button className="icon-button" aria-label={U.detail.close} onClick={()=>reader.set({capability:'',atlas_proof:''},true)}><X size={18}/></button></header>
     <p><GlossaryText>{selected.capacite.definition}</GlossaryText></p>
-    {mode==='build'?<div className="atlas-capability-stacks">{make.map(option=>{const value=model.capabilities[selected.capacite_id].stacks[option.stack];return <article key={option.stack}><h4>{option.name}</h4><strong>{n(value.raw_jh.central,0)+' '+U.jh}</strong><span>{n(value.raw_jh.bas,0)+'–'+n(value.raw_jh.haut,0)+' '+U.jh_range}</span></article>;})}</div>:<div className="atlas-capability-stacks"><article><h4>{U.offers.make}</h4><strong>{data.ui.business_map.make_state}</strong></article>{['microsoft','sap'].map(slug=><article key={slug}><h4>{U.offers[slug]}</h4><strong>{data.ui.business_map.buy_statuses[selected.buy[slug].statut]}</strong></article>)}</div>}
+    {mode==='build'?<div className="atlas-capability-stacks">{make.map(option=>{const value=model.capabilities[selected.capacite_id].stacks[option.stack];return <article key={option.stack}><h4>{option.name}</h4><strong>{value.retained_units?.length?data.ui.essential.core_results.no_allocation:data.ui.essential.core_results.pending}</strong>{value.retained_units?.length>0&&<a href="#evaluation-core">{data.ui.essential.core_results.family_link}</a>}</article>;})}</div>:<div className="atlas-capability-stacks"><article><h4>{U.offers.make}</h4><strong>{data.ui.business_map.make_state}</strong></article>{['microsoft','sap'].map(slug=><article key={slug}><h4>{U.offers[slug]}</h4><strong>{data.ui.business_map.buy_statuses[selected.buy[slug].statut]}</strong></article>)}</div>}
     {metric==='complexity'&&<><h4>{U.detail.complexities}</h4><div className="atlas-complexity-facts">{axes.map(key=><article key={key}><strong>{U.axes[key]+' · '+selected.complexite[key].niveau+'/5'}</strong><span className="atlas-level" aria-hidden="true">{[1,2,3,4,5].map(level=><i key={level} className={level<=selected.complexite[key].niveau?'on':''}/>)}</span><p>{selected.complexite[key].justification}</p></article>)}</div></>}
     <p className="small-prose"><strong>{U.detail.boundaries+' · '}</strong><GlossaryText>{selected.frontiere}</GlossaryText></p>
     <div className="atlas-detail-actions"><button className="source-link" onClick={()=>openProof('capability')}>{U.detail.functions}<ArrowUpRight size={13}/></button>{mode==='build'?<><button className="source-link" onClick={()=>openProof('work')}>{U.detail.work}<ArrowUpRight size={13}/></button><a href={capabilityReadingHref('map',selected.capacite_id,location.hash)}>{data.ui.business_map.back_to_map}<ArrowUpRight size={13}/></a></>:<a href={capabilityReadingHref('work',selected.capacite_id,location.hash)}>{data.ui.business_map.work_link}<ArrowUpRight size={13}/></a>}</div>
