@@ -17,16 +17,19 @@ properties:
       properties:
         id:
           enum:
-          - business-runtime
-          - it-complement
+          - core-domain
+          - support
         label: &id001
           type: string
           minLength: 1
-        definition: *id001
+        definition_ref:
+          enum:
+          - core_domain
+          - product_support
       required:
       - id
       - label
-      - definition
+      - definition_ref
   functions:
     type: array
     minItems: 1
@@ -40,8 +43,8 @@ properties:
         label: *id001
         purpose:
           enum:
-          - business-runtime
-          - it-complement
+          - core-domain
+          - support
         boundary: *id001
         capability_refs: &id002
           type: array
@@ -59,6 +62,9 @@ properties:
           - number
           - 'null'
           minimum: 0
+        purpose_basis:
+          type: string
+          minLength: 1
       required:
       - id
       - label
@@ -71,6 +77,7 @@ properties:
       - qualification
       - note
       - additional_jh
+      - purpose_basis
   evidence:
     type: object
     additionalProperties: false
@@ -103,8 +110,8 @@ properties:
             properties:
               purpose_id:
                 enum:
-                - business-runtime
-                - it-complement
+                - core-domain
+                - support
               jh_by_role:
                 type: object
                 additionalProperties:
@@ -158,6 +165,24 @@ properties:
       finance_detail:
         type: string
         minLength: 1
+      classification_title:
+        type: string
+        minLength: 1
+      operating_review_title:
+        type: string
+        minLength: 1
+      assurance_title:
+        type: string
+        minLength: 1
+      assurance_note:
+        type: string
+        minLength: 1
+      assurance_review:
+        type: string
+        minLength: 1
+      classification_basis:
+        type: string
+        minLength: 1
     required:
     - title
     - intro
@@ -186,6 +211,56 @@ properties:
     - finance_title
     - finance_note
     - finance_detail
+    - classification_title
+    - operating_review_title
+    - assurance_title
+    - assurance_note
+    - assurance_review
+    - classification_basis
+  classification:
+    type: object
+    additionalProperties: false
+    properties:
+      perspective:
+        type: string
+        minLength: 1
+      status:
+        const: study_hypothesis
+      criterion:
+        type: string
+        minLength: 1
+      reference:
+        type: string
+        minLength: 1
+      boundary:
+        type: string
+        minLength: 1
+    required:
+    - perspective
+    - status
+    - criterion
+    - reference
+    - boundary
+  operating_scope_review:
+    type: object
+    additionalProperties: false
+    properties:
+      status:
+        const: pending_scope_review
+      reason:
+        type: string
+        minLength: 1
+      targets:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: string
+          minLength: 1
+    required:
+    - status
+    - reason
+    - targets
 required:
 - version
 - id
@@ -195,4 +270,6 @@ required:
 - evidence
 - allocations
 - reading
+- classification
+- operating_scope_review
 $schema: https://json-schema.org/draft/2020-12/schema

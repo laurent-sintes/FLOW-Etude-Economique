@@ -8,7 +8,7 @@ from validate_stacks import ROOT, read
 
 SOURCE = 'source/fondamentaux.yaml'
 SCHEMA = 'source/schema-fondamentaux.yaml'
-READING_CHAPTERS = ('scope', 'strategies', 'activities', 'workload', 'costs', 'calendar')
+READING_CHAPTERS = ('scope', 'strategies', 'activities', 'purposes', 'workload', 'costs', 'calendar')
 
 
 def fail(path, message):
@@ -40,7 +40,7 @@ def compile_fundamentals(document, glossary, architecture, options, native):
     activities = index(architecture['activity_types'], 'id', 'activity_types')
     chapters = index(document['reading']['chapters'], 'id', 'reading/chapters')
     if tuple(chapters) != READING_CHAPTERS:
-        fail('reading/chapters', 'expected the six concepts in their reading order')
+        fail('reading/chapters', 'expected the model concepts in their reading order')
     links = index(document['reading']['strategy_links'], 'href', 'reading/strategy_links')
     if set(links) != {'source/offres-synvance.md', '#etude-marche'}:
         fail('reading/strategy_links', 'missing strategy evidence route')
@@ -52,6 +52,20 @@ def compile_fundamentals(document, glossary, architecture, options, native):
     activity_summaries = index(document['activity_reading']['summaries'], 'type_ref', 'activity_reading/summaries')
     if set(activity_summaries) != set(activities):
         fail('activity_reading/summaries', 'missing or unknown activity summary')
+    purpose_reading = document['purpose_reading']
+    purpose_object = next(o for o in document['estimation_model']['objects'] if o['id'] == purpose_reading['model_object_ref'])
+    purpose_owner = read(ROOT / purpose_object['owner'])
+    purposes = index(purpose_owner['purposes'], 'id', 'product_purposes')
+    if set(purpose_reading['purpose_refs']) != set(purposes):
+        fail('purpose_reading/purpose_refs', 'missing or unknown product purpose')
+    if purpose_reading['scope_entity_ref'] not in entities:
+        fail('purpose_reading/scope_entity_ref', 'unknown product entity')
+    for purpose in purposes.values():
+        if purpose['definition_ref'] not in glossary['notions']:
+            fail('purpose_reading', 'unknown canonical definition')
+    for example in purpose_reading['examples']:
+        if example['purpose_ref'] not in purposes:
+            fail('purpose_reading/examples', 'unknown product purpose')
     stages = index(document['estimation']['stages'], 'id', 'estimation/stages')
     if {stage['notion'] for stage in stages.values()} != {'charge_brute','charge_nette','charge_totale_projet'}:
         fail('estimation/stages', 'expected gross, net and total project notions')
@@ -188,6 +202,11 @@ def compile_fundamentals(document, glossary, architecture, options, native):
          'text': activity_summaries[ref]['text'],
          'definition': glossary['notions'][activities[ref]['notion']]['definition']}
         for ref in document['activity_reading']['type_refs']]
+    result['purpose_reading']['types'] = [
+        dict(id=ref, notion=purposes[ref]['definition_ref'],
+             label='{{notion.' + purposes[ref]['definition_ref'] + '}}',
+             definition=glossary['notions'][purposes[ref]['definition_ref']]['definition'])
+        for ref in purpose_reading['purpose_refs']]
     # Preserve native identity and evidence references without duplicating the full atlas in the bootstrap.
     result['native_map'] = {
         'nodes': [{'id': n['id'], 'kind': n['kind'], 'label': n['fields']['name'],
@@ -211,7 +230,7 @@ def hydrate_fundamentals(ui, document):
     e = ui['essential']
     if e.get('fundamentals') != {'source': SOURCE}:
         fail('view', 'expected canonical fundamentals source')
-    if any(key in e for key in ('calendar_text', 'model_limit', 'model_workload', 'model_activities', 'model_reading', 'core_status_summary',
+    if any(key in e for key in ('calendar_text', 'model_limit', 'model_workload', 'model_activities', 'model_purposes', 'model_reading', 'core_status_summary',
                               'model_concepts', 'model_choice', 'model_calendar', 'model_complexity_link')):
         fail('view', 'domain explanations cannot be overridden locally')
     if 'intro' in e['pages']['modele']:
@@ -235,6 +254,9 @@ def hydrate_fundamentals(ui, document):
     target['model_complexity_link'] = document['reading']['next_label']
     target['model_workload'] = deepcopy(document['estimation'])
     target['estimation_model'] = deepcopy(document['estimation_model'])
+    target['model_purposes'] = deepcopy(document['purpose_reading'])
+    # The UI keeps a glossary reference, never a copied canonical definition.
+    for purpose in target['model_purposes']['types']:purpose.pop('definition')
     target['model_activities'] = {key: deepcopy(document['activity_reading'][key])
                                 for key in ('title', 'intro', 'note', 'types')}
     index(e['concepts'], 'entity_ref', 'view/concepts')

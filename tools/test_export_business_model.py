@@ -14,7 +14,7 @@ class ExportBusinessModelTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         with model_session() as snapshot:
-            Study()
+            cls.study = Study()
             cls.documents = deepcopy(snapshot.documents)
             cls.digests = dict(snapshot.digests)
         cls.bundle = compose(cls.documents, cls.digests)
@@ -25,12 +25,28 @@ class ExportBusinessModelTests(unittest.TestCase):
         for path, value in result['model'].items():
             self.assertEqual(value, self.documents[ROOT / path])
         self.assertIn('source/estimations-core-retenues.yaml', result['model'])
+        self.assertIn('source/telechargements.yaml', result['model'])
+        self.assertIn('source/fonctions-produit-core.yaml', result['model'])
+        self.assertEqual(result['model']['source/fonctions-produit-core.yaml']['purposes'][0]['id'], 'core-domain')
         self.assertIn('sources/cartographie-scm-2026-10-24.yaml', result['model'])
         self.assertTrue(any(p.startswith('audits/') and p.endswith('.json') for p in result['evidence']))
         self.assertNotIn('source/complexite-metier.yaml', result['model'])
         self.assertNotIn('source/recalibration-metier.yaml', result['model'])
         self.assertNotIn('source/couts-15-ans.yaml', result['model'])
         self.assertNotIn('config/application.yaml', result['model'])
+
+    def test_export_from_loaded_study_accepts_registered_markdown_documents(self):
+        from export_business_model import export, public_metadata
+        import hashlib
+        with tempfile.TemporaryDirectory(dir=ROOT/'tmp') as folder:
+            path=Path(folder)/'model.yaml'
+            result=export(path,study=self.study)
+            raw=path.read_bytes();metadata=public_metadata(result)
+            self.assertEqual(metadata['sha256'],hashlib.sha256(raw).hexdigest())
+            self.assertEqual(metadata['bytes'],len(raw))
+            value=yaml.load(raw,Loader=getattr(yaml,'CSafeLoader',yaml.SafeLoader))
+            self.assertEqual(metadata['source_fingerprint'],value['source_fingerprint'])
+            self.assertNotIn('source/glossaire.md',value['model'])
 
     def test_model_and_metamodel_changes_invalidate_content(self):
         for relative in (METAMODEL, 'source/estimations-core-retenues.yaml'):

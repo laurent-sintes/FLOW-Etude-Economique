@@ -1,5 +1,5 @@
 import {createContext,useContext,useState,type CSSProperties,type ReactNode} from 'react';
-import {ArrowLeft,ArrowRight,CalendarDays,Download,FileSpreadsheet,FileText} from 'lucide-react';
+import {ArrowLeft,ArrowRight,CalendarDays,Download,FileText} from 'lucide-react';
 import {DossierNavigation,DossierSheet} from './Dossier';
 import {useStudy,useFormat,type Data} from './context';
 import {SourceLink} from './components';
@@ -7,6 +7,7 @@ import {MethodText} from './MethodDocument';
 import {ReadingNote} from './ReadingNote';
 import {HorizonFacts} from './EssentialViews';
 import {fileHref} from './transport';
+import {FileFormatMark} from './FileFormatMark';
 import './synvanceReference.css';
 
 const sectionId=(id:string)=>'synvance-reference-'+id;
@@ -190,10 +191,6 @@ function CostComparison({reference:R}:{reference:Data}){
   <aside className="core-method-callout"><p><MethodText>{C.model_limit}</MethodText></p></aside>
   <ul className="synvance-product-links">{C.model_links.map((link:Data)=><li key={link.href}><a href={link.href}>{link.label}</a></li>)}</ul>
  </Chapter>;
-}
-function FileFormatMark({format}:{format:string}){
- const Icon=format==='xlsx'?FileSpreadsheet:FileText;
- return <span className={'synvance-file-type synvance-file-type--'+format}><Icon size={19} aria-hidden="true"/><span>{format.toUpperCase()}</span></span>;
 }
 function Documents({reference:R}:{reference:Data}){
  const {data}=useStudy(),L=R.labels;

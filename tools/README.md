@@ -67,7 +67,7 @@ La grille est validée une fois par chargement ; un nouveau processus ou chargem
 
 ## Contrôler dans un vrai navigateur
 
-`check_model --auto` est réservé au jalon de validation et inclut le vrai navigateur pour les modifications de présentation. En Dev, utiliser `check_dev` et le parcours touché. `--full --browser` l’ajoute explicitement au contrôle complet. La CI utilise Playwright avec Chromium sur la livraison Pages. Le contrôle échoue si une requête HTTP vers une API est émise. Il vérifie les 23 vues en mobile et en bureau, les huit scénarios du témoin, la reprise des sauvegardes, les originaux téléchargeables et le clavier.
+`check_model --auto` est réservé au jalon de validation et inclut le vrai navigateur pour les modifications de présentation. En Dev, utiliser `check_dev` et le parcours touché. `--full --browser` l’ajoute explicitement au contrôle complet. La CI utilise Playwright avec Chromium sur la livraison Pages. Le contrôle échoue si une requête HTTP vers une API est émise. Il vérifie les 24 vues en mobile et en bureau, les huit scénarios du témoin, la reprise des sauvegardes, les originaux téléchargeables et le clavier.
 
 ```powershell
 node app/scripts/verify-pages.mjs --url http://127.0.0.1:8766/ --allow-root true --cases tmp/validation-optimization-parity.json --output tmp/local-browser-report.json

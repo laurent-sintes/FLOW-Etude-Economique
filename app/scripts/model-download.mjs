@@ -15,18 +15,21 @@ function compose(){
  const deps=resolve(root,'tmp/model-deps');
  const env={...process.env,PYTHONPATH:[existsSync(deps)?deps:'',resolve(root,'tools'),process.env.PYTHONPATH||''].filter(Boolean).join(delimiter)};
  execFileSync(python,['-B','-m','tools.export_business_model'],{cwd:root,env,stdio:'inherit'});
- return readFileSync(output);
+ const record=JSON.parse(readFileSync(output+'.cache.json','utf8'));
+ const metadata=Object.fromEntries(['sha256','bytes','sources','source_fingerprint'].map(key=>[key,record[key]]));
+ return {raw:readFileSync(output),metadata:JSON.stringify({...metadata,format_version:2,asset})};
 }
 export function modelDownload(){
  let building=false;
  return {name:'business-model-download',
   configResolved(config){building=config.command==='build';},
-  buildStart(){if(!building)return;this.emitFile({type:'asset',fileName:asset,source:compose()});},
+  buildStart(){if(!building)return;const result=compose();this.emitFile({type:'asset',fileName:asset,source:result.raw});this.emitFile({type:'asset',fileName:asset.replace('.yaml','.json'),source:result.metadata});},
   configureServer(server){
    // Compose on demand in Vite development, too. Errors must not serve an old file.
    server.middlewares.use((req,res,next)=>{
-    if((req.url||'').split('?')[0]!==server.config.base+asset)return next();
-    try{const raw=compose();res.setHeader('Content-Type','application/yaml; charset=utf-8');res.setHeader('Content-Disposition','attachment; filename="flow-modele-metier.yaml"');res.setHeader('Cache-Control','no-store');res.end(raw);}
+    const path=(req.url||'').split('?')[0],metadata=path===server.config.base+asset.replace('.yaml','.json');
+    if(path!==server.config.base+asset&&!metadata)return next();
+    try{const result=compose();res.setHeader('Content-Type',metadata?'application/json':'application/yaml; charset=utf-8');if(!metadata)res.setHeader('Content-Disposition','attachment; filename="flow-modele-metier.yaml"');res.setHeader('Cache-Control','no-store');res.end(metadata?result.metadata:result.raw);}
     catch(error){next(error);}
    });
   }

@@ -17,6 +17,7 @@ required:
 - activity_reading
 - reading
 - estimation_model
+- purpose_reading
 properties:
   version:
     const: 1
@@ -50,8 +51,8 @@ properties:
       toc_label: *id001
       chapters:
         type: array
-        minItems: 6
-        maxItems: 6
+        minItems: 7
+        maxItems: 7
         items:
           type: object
           additionalProperties: false
@@ -65,6 +66,7 @@ properties:
               - scope
               - strategies
               - activities
+              - purposes
               - workload
               - costs
               - calendar
@@ -78,7 +80,9 @@ properties:
         items:
           type: object
           additionalProperties: false
-          required: [title, text]
+          required:
+          - title
+          - text
           properties:
             title: *id001
             text: *id001
@@ -633,3 +637,60 @@ properties:
     - invariants
     - implementations
     - labels
+  purpose_reading:
+    type: object
+    additionalProperties: false
+    properties:
+      model_object_ref:
+        const: product_purpose
+      scope_entity_ref:
+        const: core_system
+      purpose_refs:
+        type: array
+        minItems: 2
+        maxItems: 2
+        uniqueItems: true
+        items:
+          type: string
+          minLength: 1
+      intro: &id007
+        type: string
+        minLength: 1
+      axes:
+        type: array
+        minItems: 3
+        maxItems: 3
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            label: *id007
+            text: *id007
+          required:
+          - label
+          - text
+      examples:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            title: *id007
+            purpose_ref: *id007
+            text: *id007
+          required:
+          - title
+          - purpose_ref
+          - text
+      note: *id007
+      positioning_note: *id007
+    required:
+    - model_object_ref
+    - scope_entity_ref
+    - purpose_refs
+    - intro
+    - axes
+    - examples
+    - note
+    - positioning_note

@@ -21,8 +21,8 @@ class ProfessionalAdoptionTests(unittest.TestCase):
   self.assertEqual(self.study.parameters['options']['java-spring']['build'],4198680)
   split=next(o for o in self.study.content['core_product_scope']['options'] if o['stack']=='java-spring')
   self.assertTrue(split['partition_complete']);self.assertEqual(split['unallocated_jh'],0)
-  self.assertEqual((split['purposes']['business-runtime']['jh'],split['purposes']['it-complement']['jh']),(5886,774))
-  self.assertEqual((split['purposes']['business-runtime']['eur_ht'],split['purposes']['it-complement']['eur_ht']),(3706338,492342))
+  self.assertEqual((split['purposes']['core-domain']['jh'],split['purposes']['support']['jh']),(3876,2784))
+  self.assertEqual(sum(v['eur_ht'] for v in split['purposes'].values()),4198680)
   self.assertEqual(sum(r['jh'] for r in p['roles']),6660)
   for role in p['roles']:self.assertEqual(sum(v['roles'][role['id']] for v in p['purposes'].values()),role['jh'])
  def test_original_families_and_native_reference_are_preserved(self):

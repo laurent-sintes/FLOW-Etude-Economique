@@ -1,3 +1,4 @@
+import {FileFormatMark} from './FileFormatMark';
 import type {ReactNode} from 'react';
 import {Hammer,ShoppingCart,Boxes,Cloud,Layers3,CalendarClock,ChartNoAxesCombined,type LucideIcon} from 'lucide-react';
 import {useStudy,type Data} from './context';
@@ -33,6 +34,14 @@ export function ModelPage({view}:{view?:string}){
    <dl className="model-reading-activities">{E.model_activities.types.map((type:Data)=><div key={type.id} className={'model-reading-activity-'+type.id}><dt><GlossaryText>{type.label}</GlossaryText></dt><dd><MethodText>{type.text}</MethodText></dd></div>)}</dl>
    <Text className="model-reading-callout">{R.activity_note}</Text>
   </>,
+  purposes:<>
+   <Text>{E.model_purposes.intro}</Text>
+   <dl className="model-reading-activities">{E.model_purposes.types.map((purpose:Data)=><div key={purpose.id}><dt><a href={'#glossaire?term='+purpose.notion}>{purpose.label}</a></dt><dd><MethodText>{data.glossary.notions[purpose.notion].definition}</MethodText></dd></div>)}</dl>
+   <dl className="model-reading-axis-list">{E.model_purposes.axes.map((axis:Data)=><div key={axis.label}><dt>{axis.label}</dt><dd><MethodText>{axis.text}</MethodText></dd></div>)}</dl>
+   <div className="model-reading-strategies">{E.model_purposes.examples.map((example:Data)=><article key={example.title}><h3>{example.title}</h3><p className="model-reading-purpose-label">{E.model_purposes.types.find((purpose:Data)=>purpose.id===example.purpose_ref).label}</p><Text>{example.text}</Text></article>)}</div>
+   <Text className="model-reading-callout">{E.model_purposes.note}</Text>
+   <Text className="model-reading-limit">{E.model_purposes.positioning_note}</Text>
+  </>,
   workload:<>
    <div className="model-reading-workloads model-reading-workload-paths">{R.workload_paths.map((path:Data)=><article key={path.title}><h3>{path.title}</h3><Text>{path.text}</Text></article>)}</div>
    <Text className="model-reading-callout">{R.workload_note}</Text>
@@ -53,7 +62,7 @@ export function ModelPage({view}:{view?:string}){
   </>
  };
  return <div className="essential-page essential-model model-reading">
-  <section className="model-download dossier-download"><a className="text-button" href={import.meta.env.BASE_URL+'exports/flow-modele-metier.yaml'} download="flow-modele-metier.yaml" title={data.ui.model_download.description}>{data.ui.model_download.label}</a><Text>{data.ui.model_download.description}</Text></section>
+  <section className="model-download dossier-download"><a className="text-button" href={import.meta.env.BASE_URL+'exports/flow-modele-metier.yaml'} download="flow-modele-metier.yaml" title={data.ui.model_download.description}><FileFormatMark format={data.content.downloads.reading.model_format}/>{data.ui.model_download.label}</a><Text>{data.ui.model_download.description}</Text></section>
   <aside className="model-reading-callout model-reading-status" role="status"><Text>{E.core_status_summary}</Text></aside>
   <DossierNavigation pages={pages} current={current.id} label={N.navigation}/>
   <DossierSheet view={current.id}>

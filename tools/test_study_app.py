@@ -301,10 +301,10 @@ class StudyTests(unittest.TestCase):
     def test_essential_reader_groups_framework_before_economic_pages(self):
         from document_excerpt import document_excerpt
         essential=self.study.ui['essential']
-        self.assertEqual([item['id'] for item in essential['nav']],['synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire'])
-        self.assertEqual(set(essential['pages']),{'cartographie','synvance','synvance-business','synvance-oms','synvance-costs','synvance-microsoft','synvance-sap','vision','modele','conditions-realisation','complexite','calcul-net','calcul-run','marche','leviers','capacite-realisation','etude-marche','parametres','comparer','evaluation-core','se-projeter','simuler','glossaire'})
+        self.assertEqual([item['id'] for item in essential['nav']],['synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire','telechargements'])
+        self.assertEqual(set(essential['pages']),{'cartographie','synvance','synvance-business','synvance-oms','synvance-costs','synvance-microsoft','synvance-sap','vision','modele','conditions-realisation','complexite','calcul-net','calcul-run','marche','leviers','capacite-realisation','etude-marche','parametres','comparer','evaluation-core','se-projeter','simuler','glossaire','telechargements'})
         self.assertEqual([group['items'] for group in essential['nav_groups']],
-                         [['synvance','cartographie'],['vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers'],['capacite-realisation'],['etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler'],['glossaire']])
+                         [['synvance','cartographie'],['vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers'],['capacite-realisation'],['etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler'],['glossaire','telechargements']])
         self.assertEqual([phase['key'] for phase in essential['structure']['phases']],['obtention','integration','services'])
         for concept in essential['concepts']:
             self.assertIn(concept['notion'],self.study.glossary['notions'])
@@ -487,7 +487,9 @@ class StudyTests(unittest.TestCase):
             elif isinstance(value,list):
                 for item in value: yield from strings(item)
         public_text=list(strings(self.study.ui['essential']))+list(strings(self.study.ui['composable']))
-        stale=re.compile(r'\bCore\b(?! System)|\bcycle (?:de vie|du Core)\b|Offres Microsoft/K3 et SAP|offres Microsoft/K3 et SAP|offre Microsoft/K3 ou SAP')
+        stale=re.compile(r'\bCore\b(?! (?:System|Domain)\b)|\bcycle (?:de vie|du Core)\b|Offres Microsoft/K3 et SAP|offres Microsoft/K3 et SAP|offre Microsoft/K3 ou SAP')
+        self.assertIsNone(stale.search(notions['core_domain']['libelle']))
+        self.assertIsNotNone(stale.search('Core'))
         self.assertEqual([text for text in public_text if stale.search(text)],[])
 
     def test_shared_caption_change_flows_to_public_views_without_economic_change(self):

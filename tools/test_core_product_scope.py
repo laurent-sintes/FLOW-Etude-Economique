@@ -17,14 +17,14 @@ class ProductScopeTests(unittest.TestCase):
  def test_both_purposes_conserve_each_role_and_cost(self):
   r=self.proposal;self.assertEqual(sum(v['jh'] for v in r['purposes'].values()),r['total_jh']);self.assertEqual(sum(v['eur_ht'] for v in r['purposes'].values()),r['eur_ht'])
   for role in r['roles']:self.assertEqual(sum(v['roles'][role['id']] for v in r['purposes'].values()),role['jh'])
-  self.assertEqual(r['existing_it_partition_jh'],104);self.assertEqual(r['purposes']['it-complement']['jh'],104+670)
+  self.assertEqual(r['existing_it_partition_jh'],104);self.assertEqual(r['purposes']['support']['jh'],104+2010+670)
  def test_alignment_uses_unrounded_reference_and_grouping_is_not_added(self):
   r=self.proposal;c=r['cosmic_process'];self.assertNotEqual(c['reference_unrounded_jh'],r['rows'][0]['jh']);self.assertAlmostEqual(c['alignment']['gap_pct'],100*(c['jh']/c['reference_unrounded_jh']-1));self.assertAlmostEqual(r['grouping_sensitivity']['single_project_jh'],8066.294275404798);self.assertEqual(r['total_jh'],6660)
  def test_unknown_is_not_zero_and_partial_partitions_stay_unknown(self):
-  r=partition(self.units,[]);self.assertIsNone(r['purposes']['it-complement']['jh']);self.assertEqual(r['unallocated_jh'],6660);self.assertIsNone(r['additional_required_jh'])
+  r=partition(self.units,[]);self.assertIsNone(r['purposes']['support']['jh']);self.assertEqual(r['unallocated_jh'],6660);self.assertIsNone(r['additional_required_jh'])
  def test_declared_partition_cannot_create_or_lose_a_role_day(self):
-  u=self.units[0];roles={r['id']:r['jh'] for r in u['roles']};a=dict(unit_id=u['id'],basis='Work attribution',evidence_refs=['proof'],shares=[dict(purpose_id='business-runtime',jh_by_role=roles),dict(purpose_id='it-complement',jh_by_role={})])
-  r=partition([u],[a]);self.assertTrue(r['partition_complete']);self.assertEqual(r['purposes']['business-runtime']['jh'],1500)
+  u=self.units[0];roles={r['id']:r['jh'] for r in u['roles']};a=dict(unit_id=u['id'],basis='Work attribution',evidence_refs=['proof'],shares=[dict(purpose_id='core-domain',jh_by_role=roles),dict(purpose_id='support',jh_by_role={})])
+  r=partition([u],[a]);self.assertTrue(r['partition_complete']);self.assertEqual(r['purposes']['core-domain']['jh'],1500)
   a['shares'][1]['jh_by_role']['qa']=1
   with self.assertRaisesRegex(ValueError,'conservation'):partition([u],[a])
  def test_file_reuse_credit_and_module_domains(self):
@@ -67,4 +67,20 @@ class ProductScopeTests(unittest.TestCase):
   consumed=[p for rows in self.inputs['cosmic']['processes'].values() for p in rows if p['scope']=='existing_function_consumed'];self.assertEqual(len(consumed),10)
  def test_sensitivities_are_one_at_a_time_and_reference_unchanged(self):
   r=self.proposal;self.assertEqual(len(r['sensitivities']),16);self.assertTrue(any(s['delta_jh']>0 for s in r['sensitivities']));self.assertTrue(any(s['delta_jh']<0 for s in r['sensitivities']));self.assertEqual(self.study.baseline['options'][0]['build'],4198680)
+
+ def test_strategic_classification_is_independent_of_user_and_role(self):
+  s=self.study.content['core_product_scope'];split=next(o for o in s['options'] if o['stack']=='java-spring')
+  self.assertEqual(s['classification']['status'],'study_hypothesis')
+  self.assertEqual((split['purposes']['core-domain']['jh'],split['purposes']['support']['jh']),(3876,2784))
+  allocations={a['unit_id']:a for a in split['allocations']};process=allocations['process-management-java-spring']
+  self.assertEqual(sum(process['shares'][0]['jh_by_role'].values()),0)
+  self.assertEqual(sum(process['shares'][1]['jh_by_role'].values()),2010)
+  self.assertGreater(split['purposes']['core-domain']['roles']['qa'],0)
+  self.assertGreater(split['purposes']['core-domain']['roles']['plateforme'],0)
+  functions={f['id']:f for f in s['functions']}
+  for id in ('forms','process-studio','analytics'):
+   self.assertEqual(functions[id]['purpose'],'support');self.assertTrue(functions[id]['purpose_basis'])
+  self.assertEqual(s['operating_scope_review']['status'],'pending_scope_review')
+  self.assertEqual(s['assurance']['coverage_to_review'],20)
+
 if __name__=='__main__':unittest.main()

@@ -1,0 +1,118 @@
+{
+  "date": "2026-10-31T07:28:13.252464+00:00",
+  "status": "audit_completed",
+  "implementation": "none",
+  "adopted_jh_unchanged": 6660,
+  "verdict": "Calculs et financements contrôlés cohérents. Clarifications sémantiques, rapprochement des méthodes et accès aux livrables à améliorer.",
+  "findings": [
+    {
+      "id": "A01",
+      "priority": "Importante",
+      "category": "Sens métier",
+      "title": "Core Domain / Support exige un classement justifié",
+      "evidence": [
+        "source/fonctions-produit-core.yaml#purposes",
+        "source/fondamentaux.yaml#estimation_model.objects.product_purpose",
+        "tools/core_product_scope.py#PURPOSES"
+      ],
+      "finding": "La ventilation actuelle distingue 5 886 JH de runtime et outils métier et 774 JH de fonctions IT. Elle conserve chaque JH, rôle et montant, mais ne constitue pas une classification DDD. Les fonctions visibles des utilisateurs métier ne sont pas toutes différenciantes.",
+      "target": "Définir Core Domain du point de vue du produit Flow, puis classer les travaux selon leur contribution à cette valeur. Support regroupe les fonctions de soutien et génériques nécessaires au produit. Un studio de formulaires ou un portail peut relever du Support. Les rôles, couches techniques et modes de réalisation restent des axes séparés. Documenter le motif et les travaux mixtes.",
+      "economic_effect": "Aucun changement du total de 6 660 JH. Ne pas rebaptiser automatiquement les montants actuels Core Domain et Support. La nouvelle ventilation sera calculée après le classement."
+    },
+    {
+      "id": "A02",
+      "priority": "Importante",
+      "category": "Estimation",
+      "title": "Les méthodes restent désalignées et les quatre références partagent des hypothèses",
+      "evidence": [
+        "checks.json#proposal.cosmic_process",
+        "checks.json#proposal.it_cosmic",
+        "checks.json#proposal.comparability",
+        "source/proposition-produit-core.yaml"
+      ],
+      "finding": "Process Management : COSMIC × ISBSG donne 617,14 JH pour 216 CFP contre 2 010 JH retenus, soit 69,29 % plus bas que le calcul COCOMO non arrondi de 2 009,61 JH. Fonctions IT : 194,29 JH contre 670 JH retenus. Le rendement de 20 h/CFP reste général et non calibré pour ces outils. Les lectures OSS réutilisent des analogues Axelor communs, sans constituer quatre bilans de projets indépendants.",
+      "target": "Conserver COCOMO comme référence adoptée et les indicateurs d’alignement avec leurs dénominateurs. Ne pas présenter COSMIC comme une validation de la charge. Garder visibles les hypothèses communes et le caractère non quantifié de l’incertitude.",
+      "economic_effect": "Aucune moyenne automatique ni révision des JH. Le calcul unique sur les tailles regroupées donne 8 066 JH, soit 21,12 % de plus que la somme des décisions. Cette sensibilité est une limite à conserver, pas un complément de travaux."
+    },
+    {
+      "id": "A03",
+      "priority": "À instruire",
+      "category": "Périmètre et économie",
+      "title": "Couverture chiffrée, garanties vérifiées et coût de fonctionnement sont des états distincts",
+      "evidence": [
+        "source/fonctions-produit-core.yaml#functions",
+        "source/fonctions-produit-core.yaml#reading.progress_note",
+        "source/unites-maintenance.yaml",
+        "audits/2026-10-31-adoption-produit-professionnel/financial-impact.json"
+      ],
+      "finding": "Les 88 capacités sont rattachées une fois aux décisions. Les 20 familles professionnelles sont inventoriées et financées, mais portent encore le statut coverage_to_review. Les 75 capacités hors Process Management n’ont pas été réauditées fonctionnellement dans cet examen professionnel. L’adoption des compléments a modifié le build sans modifier les autres budgets. Cela ne démontre pas à lui seul que les hypothèses de maintenance et de fonctionnement couvrent tous les composants ajoutés.",
+      "target": "Afficher séparément périmètre chiffré, couverture fonctionnelle vérifiée, garanties supposées et contraintes exclues. Vérifier l’adéquation des hypothèses de MCO, cloud, exploitation et support au périmètre élargi, sans pourcentage de majoration automatique.",
+      "economic_effect": "Aucun surcoût déduit de cet audit. Adéquation des budgets annuels à vérifier. Les inconnues ne valent pas zéro."
+    },
+    {
+      "id": "A04",
+      "priority": "Correction utile",
+      "category": "Téléchargements",
+      "title": "Le fichier existe mais aucune page ne centralise les téléchargements",
+      "evidence": [
+        "browser.json",
+        "app/src/ModelPage.tsx:56",
+        "app/src/App.tsx:25",
+        "config/application.yaml#essential.nav"
+      ],
+      "finding": "Le lien du modèle est visible dans Fondamentaux du modèle, sur ordinateur et mobile. Il répond HTTP 200 en local et sur le site publié. Il est isolé en haut à droite, sans icône de format ni mention YAML visible. La description est masquée visuellement par le style du dossier. La navigation se termine par Glossaire et ne propose aucune page Téléchargements.",
+      "target": "Ajouter une page Téléchargements juste après Glossaire. Conserver aussi le lien contextuel dans les fondamentaux. Présenter chaque fichier avec nom accessible, icône, format, utilité et origine. Ne pas recréer les générateurs.",
+      "economic_effect": "Aucun effet sur les estimations ni les sauvegardes."
+    },
+    {
+      "id": "A05",
+      "priority": "Correction utile",
+      "category": "Versions et catalogue",
+      "title": "Le lecteur ne voit pas clairement la version et la nature des fichiers",
+      "evidence": [
+        "download-content.json",
+        "inventory.json",
+        "tools/export_business_model.py#compose",
+        "app/src/Simulations.tsx"
+      ],
+      "finding": "Le YAML servi contient le métamodèle, 70 fichiers de données actives, 16 schémas et 87 preuves. Les dépôts OSS complets, PDF externes et scénarios personnels ne sont pas inclus. Son empreinte est disponible dans le contenu, sans repère de version lisible auprès du lien. Des modifications de travail postérieures au build existent : le fichier servi correspond au build chargé, pas à ces modifications non reconstruites.",
+      "target": "Un catalogue unique référence les actifs existants, sans copie des données. Distinguer livrable du modèle, pièces originales datées, documents de lecture et exports personnels. Afficher taille et identification du build ou de l’empreinte quand disponibles. La construction doit produire le fichier et ses métadonnées ensemble. Ne pas confondre version économique et empreinte documentaire complète.",
+      "economic_effect": "Aucun changement de moteur, de contrat de simulation ou d’origine des sauvegardes."
+    },
+    {
+      "id": "A06",
+      "priority": "Éditoriale",
+      "category": "Cohérence du vocabulaire",
+      "title": "Quelques textes conservent un état ancien du modèle",
+      "evidence": [
+        "source/fonctions-produit-core.yaml:8",
+        "source/proposition-produit-core.yaml#reading.grouping_note",
+        "source/proposition-produit-core.yaml#reading.code_size",
+        "config/application.yaml:596"
+      ],
+      "finding": "La définition du runtime dit encore que des fonctions IT restent à ventiler alors que la partition active est complète. Certains textes disent total proposé malgré le statut retained. Le registre documentaire conserve le titre Référentiel et grille de complexité alors que la capture est un entrant immuable sans score de complexité. Le lien YAML correspondant est actuellement masqué.",
+      "target": "Aligner les textes actifs sur les décisions adoptées et la cible Core Domain / Support. Conserver les anciennes preuves telles quelles. Les identifiants internes historiques peuvent rester pour compatibilité, sans imposer leurs anciens libellés au lecteur.",
+      "economic_effect": "Aucun changement de calcul ni de référentiel."
+    }
+  ],
+  "ddd_reference": "https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf",
+  "downloads_target": {
+    "route": "#telechargements",
+    "placement": "après #glossaire",
+    "catalog_owner": "configuration applicative unique, avec références vers les actifs et documents déjà propriétaires",
+    "categories": [
+      "Modèle métier et métamodèle, YAML unique généré",
+      "Sept pièces originales Synvance, cinq PDF et deux XLSX",
+      "Documents de lecture explicitement déclarés, dont le glossaire",
+      "Scénarios personnels JSON et accès à leur gestion dans Simuler"
+    ],
+    "rules": [
+      "Ne pas exposer les YAML sources individuellement",
+      "Ne pas créer de nouveaux exports Excel",
+      "Ne pas modifier les originaux ni leurs empreintes",
+      "Ne pas publier les scénarios personnels comme fichiers partagés",
+      "Les sauvegardes de récupération restent accessibles uniquement dans leur contexte",
+      "Reprendre les téléchargements existants plutôt que dupliquer leur logique"
+    ]
+  }
+}

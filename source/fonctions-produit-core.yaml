@@ -2,18 +2,16 @@ version: 1
 id: core-product-functions
 scope: construction_core
 purposes:
-- id: business-runtime
-  label: Runtime et outils métier
-  definition: 'Services d’exécution des capacités et outils destinés aux utilisateurs métier : studios, tâches,
-    formulaires, analyse et pilotage métier. Les fonctions IT déjà mêlées aux unités retenues restent à ventiler.'
-- id: it-complement
-  label: Fonctions IT complémentaires
-  definition: 'Administration et robustesse du produit : habilitations, configuration, traitements techniques, sécurité,
-    journaux, purges, sauvegarde et exploitabilité. Elles n’ajoutent aucune capacité à la cartographie métier reçue.'
+- id: core-domain
+  label: '{{notion.core_domain}}'
+  definition_ref: core_domain
+- id: support
+  label: '{{notion.product_support}}'
+  definition_ref: product_support
 functions:
 - id: backoffice
   label: Backoffice et navigation
-  purpose: it-complement
+  purpose: support
   boundary: Cadre de navigation et écrans d’administration génériques ; ne remplace pas les écrans métier de chaque
     capacité.
   capability_refs: []
@@ -30,9 +28,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Navigation et espace de travail réutilisables entre domaines. Les écrans propres aux décisions
+    logistiques restent financés dans leurs lots métier.
 - id: forms
   label: Formulaires et studio de formulaires
-  purpose: business-runtime
+  purpose: support
   boundary: Saisie et résultat métier contextualisés ; studio et rendu à comparer séparément, pas simple moteur
     de persistance.
   capability_refs:
@@ -51,9 +51,10 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Studio et rendu génériques de formulaires, indépendants des règles propres à la chaîne logistique.
 - id: process-studio
   label: Éditeur de processus métier
-  purpose: business-runtime
+  purpose: support
   boundary: Édition, validation, publication et versions de parcours utilisables par le métier ; adaptation à Temporal
     à dimensionner.
   capability_refs:
@@ -72,9 +73,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Éditeur et publication de processus génériques. Leur usage par le métier ne les rend pas propres
+    au domaine logistique.
 - id: analytics
   label: Tableaux de bord et rapports métier
-  purpose: business-runtime
+  purpose: support
   boundary: Mesures, populations, filtres, partage et retour aux dossiers ; composants Superset à intégrer.
   capability_refs:
   - BC-088
@@ -93,9 +96,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Moteur de rapports et tableaux de bord réutilisable. Les vues de planification et de décision propres
+    à Flow relèvent des ateliers du Core Domain.
 - id: process-mining
   label: Process Mining
-  purpose: business-runtime
+  purpose: support
   boundary: Traces corrélées, variantes, durées et conformité. PM4JS/PM4Py candidats ; pas assimilé à des requêtes
     CRM.
   capability_refs:
@@ -110,9 +115,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Analyse générique des traces de processus. Les règles et politiques logistiques ne sont pas portées
+    par le moteur de mining.
 - id: identities
   label: Administration des identités et sessions
-  purpose: it-complement
+  purpose: support
   boundary: Comptes, groupes, authentification et sessions ; Keycloak réutilisable, intégration produit à financer
     une fois.
   capability_refs: []
@@ -130,9 +137,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: permissions
   label: Habilitations sur objets, champs et données
-  purpose: it-complement
+  purpose: support
   boundary: Administration des droits et contrôles d’accès contextualisés. Les décisions métier conservent leur
     autorité propre.
   capability_refs: []
@@ -150,9 +159,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: settings
   label: Paramètres et administration de configuration
-  purpose: it-complement
+  purpose: support
   boundary: Configuration produit, valeurs de référence et contrôles ; les règles Beaumanoir restent de l’intégration.
   capability_refs: []
   depends_on: []
@@ -169,9 +180,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: audit-technical
   label: Journal d’audit et consultation des changements
-  purpose: it-complement
+  purpose: support
   boundary: Traçabilité technique et consultation ; à distinguer des registres métier aux deux dates.
   capability_refs: []
   depends_on: []
@@ -187,9 +200,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: jobs
   label: Traitements de fond et planification technique
-  purpose: it-complement
+  purpose: support
   boundary: Files, exécutions différées, concurrence et reprise des traitements administratifs ; ne remplace pas
     la planification Supply.
   capability_refs: []
@@ -207,9 +222,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: job-console
   label: Console des traitements et erreurs
-  purpose: it-complement
+  purpose: support
   boundary: Consulter erreurs, exécutions et preuves ; autoriser relance ou résolution sans doubler les effets métier.
   capability_refs: []
   depends_on:
@@ -229,9 +246,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: retention
   label: Purges et durées de conservation
-  purpose: it-complement
+  purpose: support
   boundary: Rétention, dépendances, autorisations et preuve de purge. Le nettoyage de logs natif ne démontre pas
     une purge complète du patrimoine Flow.
   capability_refs: []
@@ -251,9 +270,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: backup
   label: Sauvegardes, restauration et contrôles de reprise
-  purpose: it-complement
+  purpose: support
   boundary: Moyens techniques de sauvegarde/restauration et contrôles applicatifs de reprise. Leur exploitation
     annuelle ne se confond pas avec leur construction.
   capability_refs: []
@@ -272,9 +293,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: upgrades
   label: Migrations de schéma et mises à jour
-  purpose: it-complement
+  purpose: support
   boundary: Outillage de livraison et migration du produit ; les migrations des SI Beaumanoir relèvent de l’intégration.
   capability_refs: []
   depends_on:
@@ -293,9 +316,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: bulk-data
   label: Outils d’import, export et opérations en masse
-  purpose: it-complement
+  purpose: support
   boundary: Outillage générique d’administration des données. Les contrats sémantiques Master Data et les interfaces
     Beaumanoir gardent leurs financements.
   capability_refs: []
@@ -315,9 +340,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: notifications
   label: Notifications et acheminement technique
-  purpose: it-complement
+  purpose: support
   boundary: Files d’envoi, modèles et état de livraison. Les décisions et escalades métier restent dans leurs capacités.
   capability_refs: []
   depends_on: []
@@ -334,9 +361,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: documents
   label: Pièces jointes, stockage et accès aux fichiers
-  purpose: it-complement
+  purpose: support
   boundary: Stockage, limites et droits des pièces ; les documents métier gardent leur sens chez leurs producteurs.
   capability_refs: []
   depends_on:
@@ -354,9 +383,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: internationalization
   label: Langues et qualité d’usage transverse
-  purpose: it-complement
+  purpose: support
   boundary: Langues, formats et textes. L’accessibilité est une exigence à vérifier séparément ; sa conformité n’est
     pas déduite de ces fichiers.
   capability_refs: []
@@ -373,9 +404,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: application-security
   label: Sécurité applicative et protections des accès
-  purpose: it-complement
+  purpose: support
   boundary: Protections des sessions, mots de passe et requêtes ; les mécanismes existent mais leur configuration
     et vérification Flow restent à expliciter.
   capability_refs: []
@@ -393,9 +426,11 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 - id: diagnostics
   label: Diagnostic technique et exploitabilité
-  purpose: it-complement
+  purpose: support
   boundary: Santé, journaux, métriques et diagnostic ; compléter avec l’exploitation, sans assimiler logs techniques
     et dashboard métier.
   capability_refs: []
@@ -413,6 +448,8 @@ functions:
   note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
     explicites.
   additional_jh: null
+  purpose_basis: Service transverse nécessaire au fonctionnement professionnel du produit, réutilisable entre domaines.
+    La finalité ne se déduit pas des rôles qui le réalisent.
 evidence:
   path: audits/2026-10-30-audit-fonctions-transverses/evidence.json
   sha256: a51e0c2f5dd8b8693088b14ff510e475922531c8f9dc79fd83c3f340f9aeb933
@@ -420,10 +457,11 @@ allocations:
 - unit_id: master-data-java-spring
   evidence_refs:
   - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
-  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
-    ne déterminent pas la finalité.
+  basis: 'Hypothèse de positionnement Flow : les modèles de référence et services de données du produit relèvent
+    du Core Domain. Les 104 JH de services transverses déjà identifiés restent en Support dans les 1 500 JH. La
+    ventilation repose sur les lots de travail, indépendamment des rôles.'
   shares:
-  - purpose_id: business-runtime
+  - purpose_id: core-domain
     jh_by_role:
       coordination: 158
       analyse_produit: 140
@@ -434,7 +472,7 @@ allocations:
       plateforme: 121
       ux: 28
       securite: 28
-  - purpose_id: it-complement
+  - purpose_id: support
     jh_by_role:
       coordination: 12
       analyse_produit: 10
@@ -448,10 +486,11 @@ allocations:
 - unit_id: stock-java-spring
   evidence_refs:
   - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
-  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
-    ne déterminent pas la finalité.
+  basis: 'Hypothèse de positionnement Flow : réalisation des comportements et outils propres à la gestion de la
+    chaîne logistique, donc Core Domain. Les services génériques réutilisés sont financés dans leurs lots propriétaires.
+    Les charges et rôles adoptés restent identiques.'
   shares:
-  - purpose_id: business-runtime
+  - purpose_id: core-domain
     jh_by_role:
       coordination: 40
       analyse_produit: 35
@@ -462,7 +501,7 @@ allocations:
       plateforme: 30
       ux: 5
       securite: 5
-  - purpose_id: it-complement
+  - purpose_id: support
     jh_by_role:
       coordination: 0
       analyse_produit: 0
@@ -476,10 +515,11 @@ allocations:
 - unit_id: inventory-ownership-java-spring
   evidence_refs:
   - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
-  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
-    ne déterminent pas la finalité.
+  basis: 'Hypothèse de positionnement Flow : réalisation des comportements et outils propres à la gestion de la
+    chaîne logistique, donc Core Domain. Les services génériques réutilisés sont financés dans leurs lots propriétaires.
+    Les charges et rôles adoptés restent identiques.'
   shares:
-  - purpose_id: business-runtime
+  - purpose_id: core-domain
     jh_by_role:
       coordination: 11
       analyse_produit: 10
@@ -490,7 +530,7 @@ allocations:
       plateforme: 9
       ux: 2
       securite: 2
-  - purpose_id: it-complement
+  - purpose_id: support
     jh_by_role:
       coordination: 0
       analyse_produit: 0
@@ -504,10 +544,11 @@ allocations:
 - unit_id: supply-controls-java-spring
   evidence_refs:
   - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
-  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
-    ne déterminent pas la finalité.
+  basis: 'Hypothèse de positionnement Flow : réalisation des comportements et outils propres à la gestion de la
+    chaîne logistique, donc Core Domain. Les services génériques réutilisés sont financés dans leurs lots propriétaires.
+    Les charges et rôles adoptés restent identiques.'
   shares:
-  - purpose_id: business-runtime
+  - purpose_id: core-domain
     jh_by_role:
       coordination: 5
       analyse_produit: 4
@@ -518,7 +559,7 @@ allocations:
       plateforme: 3
       ux: 1
       securite: 1
-  - purpose_id: it-complement
+  - purpose_id: support
     jh_by_role:
       coordination: 0
       analyse_produit: 0
@@ -532,10 +573,11 @@ allocations:
 - unit_id: orders-java-spring
   evidence_refs:
   - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
-  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
-    ne déterminent pas la finalité.
+  basis: 'Hypothèse de positionnement Flow : réalisation des comportements et outils propres à la gestion de la
+    chaîne logistique, donc Core Domain. Les services génériques réutilisés sont financés dans leurs lots propriétaires.
+    Les charges et rôles adoptés restent identiques.'
   shares:
-  - purpose_id: business-runtime
+  - purpose_id: core-domain
     jh_by_role:
       coordination: 20
       analyse_produit: 17
@@ -546,7 +588,7 @@ allocations:
       plateforme: 15
       ux: 3
       securite: 3
-  - purpose_id: it-complement
+  - purpose_id: support
     jh_by_role:
       coordination: 0
       analyse_produit: 0
@@ -560,10 +602,11 @@ allocations:
 - unit_id: master-plan-java-spring
   evidence_refs:
   - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
-  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
-    ne déterminent pas la finalité.
+  basis: 'Hypothèse de positionnement Flow : réalisation des comportements et outils propres à la gestion de la
+    chaîne logistique, donc Core Domain. Les services génériques réutilisés sont financés dans leurs lots propriétaires.
+    Les charges et rôles adoptés restent identiques.'
   shares:
-  - purpose_id: business-runtime
+  - purpose_id: core-domain
     jh_by_role:
       coordination: 41
       analyse_produit: 35
@@ -574,7 +617,7 @@ allocations:
       plateforme: 30
       ux: 7
       securite: 7
-  - purpose_id: it-complement
+  - purpose_id: support
     jh_by_role:
       coordination: 0
       analyse_produit: 0
@@ -588,10 +631,11 @@ allocations:
 - unit_id: supply-decisions-java-spring
   evidence_refs:
   - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
-  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
-    ne déterminent pas la finalité.
+  basis: 'Hypothèse de positionnement Flow : réalisation des comportements et outils propres à la gestion de la
+    chaîne logistique, donc Core Domain. Les services génériques réutilisés sont financés dans leurs lots propriétaires.
+    Les charges et rôles adoptés restent identiques.'
   shares:
-  - purpose_id: business-runtime
+  - purpose_id: core-domain
     jh_by_role:
       coordination: 73
       analyse_produit: 63
@@ -602,7 +646,7 @@ allocations:
       plateforme: 55
       ux: 12
       securite: 12
-  - purpose_id: it-complement
+  - purpose_id: support
     jh_by_role:
       coordination: 0
       analyse_produit: 0
@@ -616,10 +660,11 @@ allocations:
 - unit_id: service-fulfilment-java-spring
   evidence_refs:
   - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
-  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
-    ne déterminent pas la finalité.
+  basis: 'Hypothèse de positionnement Flow : réalisation des comportements et outils propres à la gestion de la
+    chaîne logistique, donc Core Domain. Les services génériques réutilisés sont financés dans leurs lots propriétaires.
+    Les charges et rôles adoptés restent identiques.'
   shares:
-  - purpose_id: business-runtime
+  - purpose_id: core-domain
     jh_by_role:
       coordination: 80
       analyse_produit: 69
@@ -630,7 +675,7 @@ allocations:
       plateforme: 60
       ux: 13
       securite: 14
-  - purpose_id: it-complement
+  - purpose_id: support
     jh_by_role:
       coordination: 0
       analyse_produit: 0
@@ -644,38 +689,40 @@ allocations:
 - unit_id: process-management-java-spring
   evidence_refs:
   - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
-  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
-    ne déterminent pas la finalité.
+  basis: 'Hypothèse de positionnement Flow : orchestration, studios, portail, formulaires et pilotage de processus
+    forment un service de soutien réutilisable entre domaines. Les 2 010 JH sont reclassés en Support, avec les
+    mêmes rôles et le même délai.'
   shares:
-  - purpose_id: business-runtime
+  - purpose_id: core-domain
     jh_by_role:
-      coordination: 222
-      analyse_produit: 219
-      architecture: 181
-      dev_java: 454
-      dev_frontend: 464
-      qa: 282
-      plateforme: 90
-      ux: 58
-      securite: 40
-  - purpose_id: it-complement
-    jh_by_role:
-      coordination: 0
-      analyse_produit: 0
-      architecture: 0
-      dev_java: 0
-      dev_frontend: 0
-      qa: 0
-      plateforme: 0
-      ux: 0
       securite: 0
+      dev_frontend: 0
+      plateforme: 0
+      qa: 0
+      ux: 0
+      analyse_produit: 0
+      dev_java: 0
+      coordination: 0
+      architecture: 0
+  - purpose_id: support
+    jh_by_role:
+      securite: 40
+      dev_frontend: 464
+      plateforme: 90
+      qa: 282
+      ux: 58
+      analyse_produit: 219
+      dev_java: 454
+      coordination: 222
+      architecture: 181
 - unit_id: supply-workbenches-java-spring
   evidence_refs:
   - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
-  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
-    ne déterminent pas la finalité.
+  basis: 'Hypothèse de positionnement Flow : réalisation des comportements et outils propres à la gestion de la
+    chaîne logistique, donc Core Domain. Les services génériques réutilisés sont financés dans leurs lots propriétaires.
+    Les charges et rôles adoptés restent identiques.'
   shares:
-  - purpose_id: business-runtime
+  - purpose_id: core-domain
     jh_by_role:
       coordination: 18
       analyse_produit: 18
@@ -686,7 +733,7 @@ allocations:
       plateforme: 6
       ux: 5
       securite: 3
-  - purpose_id: it-complement
+  - purpose_id: support
     jh_by_role:
       coordination: 0
       analyse_produit: 0
@@ -700,10 +747,10 @@ allocations:
 - unit_id: professional-it-java-spring
   evidence_refs:
   - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
-  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
-    ne déterminent pas la finalité.
+  basis: 'Administration, sécurité et services transverses réutilisables entre domaines : Support. Les charges,
+    rôles et tarifs adoptés restent identiques.'
   shares:
-  - purpose_id: business-runtime
+  - purpose_id: core-domain
     jh_by_role:
       coordination: 0
       analyse_produit: 0
@@ -714,7 +761,7 @@ allocations:
       plateforme: 0
       ux: 0
       securite: 0
-  - purpose_id: it-complement
+  - purpose_id: support
     jh_by_role:
       coordination: 67
       analyse_produit: 40
@@ -726,23 +773,24 @@ allocations:
       ux: 14
       securite: 27
 reading:
-  title: Distinguer les fonctions métier et les fonctions IT du produit
-  intro: La cartographie décrit le périmètre métier ; elle ne constitue pas l’inventaire complet d’un produit professionnel.
-    Cette lecture complète le périmètre, sans créer de nouvelles capacités métier ni budget automatique.
+  title: Distinguer Core Domain et Support
+  intro: La classification porte sur la contribution des fonctions à la valeur du produit Flow. Des outils utilisés
+    par le métier peuvent relever du Support. Le référentiel reçu reste intact.
   adopted: Charge adoptée
-  business: Runtime et outils métier
-  it: Fonctions IT complémentaires
+  business: '{{notion.core_domain}}'
+  it: '{{notion.product_support}}'
   unallocated: Charge adoptée restant à ventiler
   unknown: Non déterminé
   no_estimate: Pas d’estimation adoptée
   jh_unit: JH
-  allocation_note: La ventilation adoptée rattache les JH aux lots de travail. Les 104 JH IT déjà financés dans
-    Master Data sont conservés dans les 1 500 JH ; chaque rôle et chaque montant sont répartis une seule fois.
+  allocation_note: Le classement est une hypothèse de positionnement du produit. Process Management relève du Support
+    comme service générique de processus. Les ateliers de planification et de décision restent dans le Core Domain.
+    Chaque JH, rôle et montant est compté une seule fois.
   missing_note: Le chiffrage professionnel est adopté et intégré aux calculs financiers. Les limites de périmètre
     et les hypothèses restent consultables ci-dessous.
   inventory_title: Fonctions professionnelles financées dans les lots retenus
   function_label: Fonction du produit
-  purpose_label: Finalité
+  purpose_label: Contribution au produit
   funding_label: Financement retenu
   proof_label: Références OSS observées
   scope_label: Travail et limite de couverture
@@ -755,7 +803,31 @@ reading:
   unknown_additional: Financé dans les lots retenus ; pas de répartition d’effort par fonction élémentaire.
   process_reservation: Process Management comprend le runtime, les studios, le portail de tâches, le Process Mining
     et les tableaux de bord. L’écart avec COSMIC reste visible et non réconcilié.
-  finance_title: 'Construction retenue : métier et IT'
+  finance_title: 'Construction retenue : Core Domain et Support'
   finance_note: Répartition du coût total de construction de référence, avant son étalement par horizon. Les hypothèses
     personnelles de budget ne modifient pas les JH retenus.
   finance_detail: Rôles, délais et hypothèses
+  classification_title: Critère de classement
+  operating_review_title: 'Fonctionnement : adéquation du périmètre à vérifier'
+  assurance_title: Périmètre chiffré et garanties vérifiées
+  assurance_note: Les capacités rattachées à un chiffrage ne constituent pas une preuve de toutes les garanties
+    de production. L’inventaire des fonctions et leur vérification fonctionnelle sont suivis séparément.
+  assurance_review: Familles de fonctions dont la couverture reste à vérifier
+  classification_basis: Motif du classement
+classification:
+  perspective: Produit Flow, et non organisation complète de Beaumanoir
+  status: study_hypothesis
+  criterion: Contribution à la valeur propre de Flow, indépendamment des rôles, des couches et des utilisateurs
+    métier ou techniques.
+  reference: https://www.domainlanguage.com/wp-content/uploads/2016/05/DDD_Reference_2015-03.pdf
+  boundary: Le classement stratégique ne redéfinit ni les capacités reçues, ni les frontières d’intégration, ni
+    les estimations adoptées. Il ne constitue pas encore un découpage de contextes DDD.
+operating_scope_review:
+  status: pending_scope_review
+  reason: Les budgets d’intégration et de fonctionnement sont conservés. Leur adéquation au périmètre professionnel
+    élargi reste à vérifier, notamment pour Temporal, le mining et les tableaux de bord. Ce point ouvert ne crée
+    aucun budget supplémentaire.
+  targets:
+  - source/unites-maintenance.yaml
+  - source/maintenance/maintenance-java-spring.yaml
+  - source/calibration-couts.yaml

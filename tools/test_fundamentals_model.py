@@ -231,5 +231,30 @@ class FundamentalsTests(unittest.TestCase):
                     candidate(study)
 
 
+
+    def test_product_contribution_is_a_fundamental_axis_with_canonical_definitions(self):
+        glossary = deepcopy(self.glossary)
+        glossary['notions']['core_domain']['definition'] = 'Canonical product value definition.'
+        model = self.compile(glossary=glossary)
+        self.assertEqual([c['id'] for c in model['reading']['chapters']], ['scope','strategies','activities','purposes','workload','costs','calendar'])
+        reading = model['purpose_reading']
+        self.assertEqual(reading['model_object_ref'], 'product_purpose')
+        self.assertEqual(reading['scope_entity_ref'], 'core_system')
+        self.assertEqual([p['id'] for p in reading['types']], ['core-domain','support'])
+        self.assertEqual(reading['types'][0]['definition'], 'Canonical product value definition.')
+        self.assertNotIn('types', self.document['purpose_reading'])
+        view = hydrate_fundamentals(self.ui, model)['essential']
+        self.assertEqual(view['model_purposes']['purpose_refs'], reading['purpose_refs'])
+        self.assertNotIn('definition', view['model_purposes']['types'][0])
+        self.assertEqual(view['model_purposes']['types'][0]['notion'], 'core_domain')
+        modes = next(p for p in view['dossiers']['model']['pages'] if p['id']=='modes')
+        self.assertEqual(modes['sections'], ['strategies','activities','purposes'])
+        for field in ('purpose_refs','examples'):
+            document=deepcopy(self.document)
+            if field=='purpose_refs': document['purpose_reading'][field][0]='missing'
+            else: document['purpose_reading'][field][0]['purpose_ref']='missing'
+            with self.assertRaisesRegex(ValueError,'ERR_FUNDAMENTALS'):
+                self.compile(document=document)
+
 if __name__ == '__main__':
     unittest.main()

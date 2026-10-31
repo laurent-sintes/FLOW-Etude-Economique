@@ -21,7 +21,7 @@ const output=path.resolve(flags.get('--output')||'tmp/pages-validation-report.js
 await fs.mkdir(path.dirname(output),{recursive:true});
 const oracle=JSON.parse((await fs.readFile(casesPath,'utf8')).replace(/^\uFEFF/,''));
 assert.equal(Object.keys(oracle.cases).length,6,'Six current model scenarios are required.');
-const navRoutes=['synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire'];
+const navRoutes=['synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire','telechargements'];
 const synvanceProviders=['microsoft','sap'];
 const routes=[navRoutes[0],...['business','oms','costs',...synvanceProviders].map(page=>'synvance-'+page),...navRoutes.slice(1)];
 const report={url:site.href,status:'running',routes:{},worker:{},proofs:{},storage:{},errors:[],warnings:[]};
@@ -124,7 +124,7 @@ try{
  const data=await bootstrapResponse.json();
  equalProjection(data.baseline,oracle.cases.reference.result,'The static reference differs from the Python reference.');
  assert.deepEqual(data.ui.essential.nav.map(item=>item.id),navRoutes);
- assert.equal(navRoutes.length,18);assert.equal(routes.length,23);
+ assert.equal(navRoutes.length,19);assert.equal(routes.length,24);
  await page.waitForFunction(()=>location.hash==='#vision');
  assert.equal(await page.locator('.brand-home').getAttribute('href'),'#vision','The home link must open the Vision.');
  await route('modele');await page.locator('.brand-home').click();await route('vision');
@@ -139,7 +139,11 @@ try{
    assert.doesNotMatch(state.text,/\{\{(?:notion|vue)\.|\bundefined\b|\bNaN\b/,`Unresolved content: ${id}`);
    assert.ok(state.overflow<=1,`Viewport overflow on ${width}/${id}: ${state.overflow}`);
    assert.equal(await page.locator('main a[href]').evaluateAll((links,allowed)=>links.filter(link=>/\.ya?ml(?:[?#]|$)/i.test(decodeURIComponent(link.getAttribute('href')||''))&&link.getAttribute('href')!==allowed).length,site.pathname+'exports/flow-modele-metier.yaml'),0,`Model data link on ${id}`);
-   assert.equal(await page.locator('main details:visible').count(),0,`Disclosure on ${id}`);
+   assert.equal(await page.locator('main details:not(.download-details):visible').count(),0,`Disclosure on ${id}`);
+   if(id==='telechargements'){
+    assert.equal(await page.locator('.download-card').count(),data.content.downloads.originals.length+data.content.downloads.documents.length);
+    assert.equal(await page.locator('.download-personal a').getAttribute('href'),'#simuler');
+   }
    report.routes[width].push(id);
   }
  }
@@ -218,12 +222,17 @@ try{
  assert.equal(await page.locator('.document-code:visible').count(),0);
  report.proofs.yamlHidden=true;
  await route('modele');
- const modelDownload=page.getByRole('link',{name:data.ui.model_download.label,exact:true});
+ const modelDownload=page.locator('.model-download a[download]');
  const downloadHref=await modelDownload.getAttribute('href');
  assert.equal(new URL(downloadHref,site).pathname,site.pathname+'exports/flow-modele-metier.yaml');
  const downloadResponse=await context.request.get(new URL(downloadHref,site).href);
  assert.ok(downloadResponse.ok());
  const downloadBytes=await downloadResponse.body();
+ const packageMetadata=await context.request.get(new URL(data.content.downloads.model_package.metadata_asset,site).href);
+ assert.ok(packageMetadata.ok());const packageInfo=await packageMetadata.json();
+ assert.equal(packageInfo.bytes,downloadBytes.length);
+ assert.equal(packageInfo.sha256,createHash('sha256').update(downloadBytes).digest('hex'));
+ assert.match(packageInfo.source_fingerprint,/^[a-f0-9]{64}$/);
  assert.match(downloadBytes.toString('utf8'),/^format: flow-business-model/m);
  assert.match(downloadBytes.toString('utf8'),/^metamodel:/m);
  assert.match(downloadBytes.toString('utf8'),/^model:/m);

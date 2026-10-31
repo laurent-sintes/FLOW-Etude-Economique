@@ -6,6 +6,7 @@ from jsonschema import Draft202012Validator
 from validate_stacks import ROOT,read
 from model_context import scoped_model,model_memo
 from estimation_calculation import formula
+from content_model import resolve_text_tree
 from estimation_inputs import registry
 from capability_catalog import analysis
 from core_product_estimate import build_product_proposal,dependencies as proposal_dependencies
@@ -13,7 +14,7 @@ from core_product_estimate import build_product_proposal,dependencies as proposa
 SOURCE='source/fonctions-produit-core.yaml'
 SCHEMA='source/schema-fonctions-produit-core.yaml'
 ERROR='ERR_CORE_PRODUCT_SCOPE:'
-PURPOSES=('business-runtime','it-complement')
+PURPOSES=('core-domain','support')
 def require(value,message):
  if not value:raise ValueError(ERROR+message)
 def dependencies():
@@ -24,6 +25,9 @@ def dependencies():
 @model_memo
 def load_scope():
  doc=read(ROOT/SOURCE);Draft202012Validator(read(ROOT/SCHEMA)).validate(doc)
+ glossary=read(ROOT/'source/glossaire.yaml')
+ for purpose in doc['purposes']:purpose['definition']=glossary['notions'][purpose['definition_ref']]['definition']
+ doc=resolve_text_tree(doc,glossary,path=SOURCE)
  ref=doc['evidence'];path=(ROOT/ref['path']).resolve();require(path.is_relative_to(ROOT.resolve()),'evidence path')
  require(hashlib.sha256(path.read_bytes()).hexdigest()==ref['sha256'],'evidence changed')
  evidence=read(path);proofs=evidence['evidence'];known={m['id']:m for m in registry()['mechanisms']};caps={r['id'] for r in analysis()['blocs']}
@@ -36,8 +40,7 @@ def load_scope():
   require(set(f['existing_funding_refs'])<=set(known),'funding reference')
   require(set(f['evidence_refs'])<=set(proofs),'code proof reference')
   require(f['additional_jh'] is None,'unadopted additional effort must stay unknown')
-  # IT functions never invent native business capabilities.
-  if f['purpose']=='it-complement':require(not f['capability_refs'],'IT function is not a native capability')
+  require(bool(f['purpose_basis'].strip()),'strategic classification requires a basis')
  result=deepcopy(doc)
  for f in result['functions']:
   f['market_evidence']=[{k:deepcopy(proofs[id][k]) for k in ('product','repository','commit','path','url','start_line','end_line','observation') if k in proofs[id]} for id in f['evidence_refs']]
@@ -50,7 +53,7 @@ def partition(units,allocations):
  index={u['id']:u for u in units};require(len(index)==len(units),'duplicate retained unit')
  ids=[a['unit_id'] for a in allocations];require(len(ids)==len(set(ids)),'duplicate allocation')
  require(set(ids)<=set(index),'allocation references unknown retained unit')
- totals={p:dict(known_jh=0.,known_eur_ht=0.) for p in PURPOSES};allocated=set();details=[]
+ totals={p:dict(known_jh=0.,known_eur_ht=0.,roles={r['id']:0 for u in units for r in u['roles']}) for p in PURPOSES};allocated=set();details=[]
  for a in allocations:
   require(bool(a['evidence_refs']) and bool(a.get('basis','')),'allocation requires evidence and basis')
   unit=index[a['unit_id']];roles={r['id']:r for r in unit['roles']};shares=a['shares']
@@ -62,6 +65,7 @@ def partition(units,allocations):
   for share in shares:
    jh=sum(share['jh_by_role'].values());labour=sum(formula('role_price',JH=v,rate=roles[id]['rate_eur_jh']) for id,v in share['jh_by_role'].items());cost=round(labour+jh*unit['tooling_eur_jh'],2)
    target=totals[share['purpose_id']];target['known_jh']+=jh;target['known_eur_ht']+=cost
+   for role,jh in share['jh_by_role'].items():target['roles'][role]+=jh
   allocated.add(unit['id']);details.append(deepcopy(a))
  adopted_jh=sum(u['total_jh'] for u in units);adopted_cost=round(sum(u['cost_eur_ht'] for u in units),2)
  unallocated_jh=formula('purpose_unallocated_jh',total=adopted_jh,business=totals[PURPOSES[0]]['known_jh'],it=totals[PURPOSES[1]]['known_jh'])
@@ -69,7 +73,7 @@ def partition(units,allocations):
  expected_jh=sum(u['total_jh'] for id,u in index.items() if id not in allocated);expected_cost=round(sum(u['cost_eur_ht'] for id,u in index.items() if id not in allocated),2)
  require(math.isclose(unallocated_jh,expected_jh,abs_tol=1e-9) and abs(unallocated_cost-expected_cost)<0.005,'partition conservation')
  complete=bool(units) and len(allocated)==len(units)
- for value in totals.values():value.update(jh=value['known_jh'] if complete else None,eur_ht=round(value['known_eur_ht'],2) if complete else None)
+ for value in totals.values():value.update(jh=value['known_jh'] if complete else None,eur_ht=round(value['known_eur_ht'],2) if complete else None,roles=value['roles'] if complete else None)
  return dict(adopted_jh=adopted_jh,adopted_eur_ht=adopted_cost,purposes=totals,unallocated_jh=unallocated_jh,unallocated_eur_ht=unallocated_cost,partition_complete=complete,additional_required_jh=None,total_complete_product_jh=None,unit_count=len(units),allocated_units=len(allocated),allocations=details,status='partition_complete' if complete else 'partition_pending' if units else 'no_estimate')
 
 def build_core_product_scope(economic):
@@ -78,6 +82,20 @@ def build_core_product_scope(economic):
  for o in economic['options']:
   if o['strategie']!='make':continue
   units=o['core_units'];ids={u['id'] for u in units};allocations=[a for a in doc['allocations'] if a['unit_id'] in ids];result['options'].append(dict(stack=o['stack'],name=o['nom'] if 'nom' in o else o['stack'],**partition(units,allocations)))
+ # The frozen COCOMO replay retains its original sizing categories. Current DDD
+ # allocation is owned here, independently of those historical categories.
+ result['classification']=deepcopy(doc['classification'])
+ result['operating_scope_review']=deepcopy(doc['operating_scope_review'])
+ result['assurance']=dict(function_families=len(doc['functions']),coverage_to_review=sum(f['qualification']=='coverage_to_review' for f in doc['functions']))
+ for target in doc['operating_scope_review']['targets']:require((ROOT/target).is_file(),'unknown operating scope review target')
  result['proposal']=build_product_proposal(economic)
+ active=next(o for o in result['options'] if o['stack']=='java-spring')
+ require(active['partition_complete'],'adopted strategic partition incomplete')
+ result['proposal']['purposes']=deepcopy(active['purposes'])
+ for row in result['proposal']['rows']:row.pop('purpose',None)
+ for purpose in doc['purposes']:result['proposal']['purposes'][purpose['id']]['label']=purpose['label']
+ for row in result['proposal']['rows']:row['purpose']='core-domain' if row['id']=='supply-workbenches' else 'support'
+ result['proposal']['rows'][2]['label']='Administration, robustesse et services transverses'
+ require(active['adopted_jh']==result['proposal']['total_jh'],'strategic allocation total mismatch')
  require(result['proposal']['scope_functions']==len(result['functions']),'professional function coverage mismatch')
  return result

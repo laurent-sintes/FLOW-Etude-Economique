@@ -16,6 +16,7 @@ from validate_stacks import ROOT, read
 
 METAMODEL = 'source/fondamentaux.yaml'
 ASSET = 'exports/flow-modele-metier.yaml'
+METADATA_ASSET = 'exports/flow-modele-metier.json'
 DEFAULT_OUTPUT = ROOT / 'tmp/model-download' / Path(ASSET).name
 
 
@@ -111,7 +112,7 @@ def cached_export(output, signature, study=None):
         if hashes(dependencies) != dependencies:
             return None
         return dict(path=str(output), changed=False, cache_hit=True,
-                    sha256=record['sha256'], bytes=len(raw), sources=record['sources'])
+                    sha256=record['sha256'], bytes=len(raw), sources=record['sources'], source_fingerprint=record['source_fingerprint'])
     except (OSError, KeyError, TypeError, json.JSONDecodeError):
         return None
 
@@ -130,7 +131,7 @@ def export(output=DEFAULT_OUTPUT, study=None):
             loaded = study
             for name, expected in study.source_digests.items():
                 path = Path(name)
-                if path.suffix == '.py':
+                if path.suffix in ('.py', '.md'):
                     snapshot.read(path, lambda text: text)
                 else:
                     read(path)
@@ -146,13 +147,17 @@ def export(output=DEFAULT_OUTPUT, study=None):
                 raise ValueError('Source changed during export: ' + str(path))
     changed = write_if_changed(output, raw)
     result = dict(path=str(output), changed=changed, cache_hit=False,
-                  sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw), sources=len(document['sources']))
+                  sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw), sources=len(document['sources']), source_fingerprint=document['source_fingerprint'])
     if hashes(dependencies) != dependencies or generator_signature() != signature:
         raise ValueError('Dependencies changed during export')
     record = dict(version=1, generator=signature, dependencies=dependencies,
-                  **{key: result[key] for key in ('sha256','bytes','sources')})
+                  **{key: result[key] for key in ('sha256','bytes','sources','source_fingerprint')})
     write_if_changed(Path(str(output)+'.cache.json'), json.dumps(record,sort_keys=True).encode())
     return result
+
+
+def public_metadata(result):
+    return {key: result[key] for key in ('sha256', 'bytes', 'sources', 'source_fingerprint')} | dict(format_version=2, asset=ASSET)
 
 
 def main():

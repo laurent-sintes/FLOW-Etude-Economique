@@ -32,6 +32,7 @@ from application_framework import hydrate_application_framework
 from economic_reading import build_economic_evaluations
 from synvance_reference import build_synvance_reference
 from delivery_readiness import build_delivery_readiness
+from download_catalog import build_download_catalog
 from core_product_scope import build_core_product_scope, dependencies as core_product_dependencies
 
 
@@ -241,6 +242,7 @@ class Study:
             content['guide'], self.glossary, self.document_path, self.baseline, self.architecture, content['economic_evaluations'])
         content['delivery_method'], content['delivery_readiness'] = build_delivery_readiness(
             content['complexity'], self.glossary, self.document_path)
+        content['downloads'] = build_download_catalog(self.ui, content['synvance_reference']['documents'], self.files)
         return content
 
     def _framework_content(self, stacks, calibration):
@@ -536,6 +538,7 @@ class Study:
                  'synvance_reference':self.content['synvance_reference'],
                  'delivery_method':self.content['delivery_method'],
                  'delivery_readiness':self.content['delivery_readiness'],
+                 'downloads':self.content['downloads'],
                  'core_evaluation':self._essential_core_evaluation(unit_details=False),
                  'core_product_scope':deepcopy(self.content['core_product_scope'])} if essential else pack_content(self.content) if compact else self.content
         return dict(ui=self.ui,glossary=self.glossary,baseline=self.baseline,content=content,
