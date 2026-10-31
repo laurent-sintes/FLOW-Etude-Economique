@@ -159,6 +159,54 @@ Le reçu `audits/2026-10-27-refonte-modele-retraits.json` décrit les chemins re
 
 Les tests HTTP utilisent uniquement la boucle locale. Dans un environnement isolé interdisant ces ports, utiliser `--quick` pendant le développement puis autoriser l’exécution locale de `--release` pour la vérification finale. Une erreur réseau ne valide pas un test.
 
+## Préparer et créer un commit local
+
+Le script `tools/git_commit.py` automatise les vérifications du dépôt, de l’identité et du périmètre, la réutilisation des contrôles, les tests nécessaires et la création du commit. Il cible exclusivement `laurent-sintes/FLOW-Etude-Economique` sur `main`.
+
+```powershell
+python -m tools.git_commit prepare --paths app/src/SynvanceReferencePage.tsx app/src/synvanceReference.css --message "Clarifier la lecture du dossier Synvance"
+python -m tools.git_commit commit
+```
+
+`prepare` produit `tmp/git-commit/plan.json` et ne modifie ni les fichiers ni les entrées de l’index. Les chemins sont des fichiers explicites, sans balayage automatique du dossier. Le plan contient leurs empreintes, le message, HEAD, l’état de l’index, le périmètre et les preuves des contrôles. `--message-file chemin.txt` accepte un message UTF-8 multiligne.
+
+Une preuve de validation est réutilisée si les sources, l’environnement et les rapports correspondants sont identiques. Un contrôle complet déjà réussi peut être réutilisé. Sinon, le script appelle `check_model --auto --browser`. Il construit et vérifie également la version Pages avec son vrai préfixe. Les reçus restent dans `tmp/git-commit/`.
+
+`commit` relit le plan, vérifie les empreintes, puis enregistre uniquement les fichiers sélectionnés avec `git commit --only`. Les fichiers hors périmètre déjà indexés restent indexés. Un fichier partiellement indexé dans le périmètre bloque la préparation, pour préserver ce choix. Une modification des sources, de HEAD, de l’index, du message ou des preuves impose une nouvelle préparation.
+
+Pour examiner le périmètre sans lancer les contrôles :
+
+```powershell
+python -m tools.git_commit prepare --paths tools/git_commit.py tools/test_git_commit.py --message "Automatiser les commits locaux" --plan-only
+```
+
+Cette prévisualisation ne peut pas créer de commit. Le résultat d’un commit réussi est enregistré dans `tmp/git-commit/result.json`. En cas d’échec d’un hook ou du commit, les fichiers sélectionnés peuvent rester indexés pour examen. Les hooks existants sont respectés. Le script ne pousse aucun commit, ne publie aucun instantané et ne modifie pas les remotes.
+
+## Préparer, envoyer et suivre un push
+
+```powershell
+python -m tools.git_push prepare
+python -m tools.git_push push
+```
+
+`prepare` vérifie `main`, les URL de lecture et d’envoi d’`origin`, le dépôt GitHub public et la relation avec `origin/main` après un fetch sans tags. Le plan `tmp/git-push/plan.json` contient le SHA exact, la référence distante observée, les commits à envoyer et les modifications locales qui resteront hors envoi. Un retard ou une divergence bloque la préparation et demande une intégration préalable. Aucun commit n’est créé.
+
+Les preuves de validation doivent correspondre aux fichiers du commit. Elles ne sont pas déduites de l’état courant du dossier. Le témoin des simulations est généré par le moteur de ce commit, extrait dans un dossier temporaire isolé. Les modifications et l’index en cours sont préservés.
+
+`push` envoie le SHA préparé vers `refs/heads/main`, sans force ni tags. Il relit la référence distante après l’envoi, y compris après une erreur réseau. Si le SHA est déjà présent, il ne renvoie pas les commits. Une avancée distante non prévue bloque l’opération.
+
+Le suivi attend le workflow `pages.yml` du bon SHA sur `main`, puis la réussite du job `deploy`. Il contrôle l’URL Pages autorisée, le champ `deployment_commit` du manifeste publié et les parcours réels dans Chrome/Chromium contre les simulations du commit. La CI renseigne `FLOW_DEPLOYMENT_COMMIT` avec `github.sha`. Cette provenance est une métadonnée technique, sans effet économique.
+
+```powershell
+python -m tools.git_push prepare --plan-only
+python -m tools.git_push push --no-wait
+python -m tools.git_push watch
+```
+
+La prévisualisation ne peut pas envoyer de commits. `--no-wait` confirme seulement l’envoi, sans prétendre que le site est déployé. `watch` reprend le suivi après une interruption ou un dépassement de délai, sans refaire de push. GitHub CLI doit être connecté à `github.com`. Les lectures API utilisent explicitement cet hôte. Le délai de suivi est réglable par `--timeout` en secondes, avec 30 minutes par défaut.
+
+Le dernier résultat est écrit dans `tmp/git-push/result.json`. Il distingue l’envoi confirmé, le déploiement vérifié et les échecs. Un ancien commit sans provenance Pages doit être complété par un commit contenant le workflow et le générateur mis à jour pour utiliser cette vérification stricte.
+
 ## GitHub Pages
 
 Le workflow `.github/workflows/pages.yml` contrôle les sources courantes, construit le site puis le publie après succès. Il ne remplace pas `release/current.json`. Le site complet et le dépôt sont publics, selon le choix de l’utilisateur.

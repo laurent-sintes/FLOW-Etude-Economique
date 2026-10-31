@@ -25,6 +25,16 @@ Plusieurs hôtes GitHub sont configurés sur ce poste. Pour `gh api` et `gh auth
 
 ## Valider et committer
 
+Utiliser le script du projet pour le chemin courant, après examen des fichiers concernés :
+
+```powershell
+python -m tools.git_commit prepare --paths <fichiers-examinés> --message-file tmp/commit-message.txt
+python -m tools.git_commit commit
+```
+
+Le plan conserve le périmètre explicite, les empreintes, HEAD, l’index et les preuves de validation. Une prévisualisation `--plan-only` reste non exécutable pour un commit. Le script réutilise les contrôles strictement valables, conserve l’index hors périmètre et ne pousse rien. Ne pas utiliser un appel ad hoc à `git add -A` pour contourner son contrôle de périmètre. La procédure détaillée ci-dessous reste le repli de diagnostic.
+
+
 Examiner l’index, les différences et les nouveaux fichiers du périmètre. Préserver les changements étrangers et l’index existant ; ne pas les inclure ou les désindexer silencieusement. Respecter `.gitignore` et `.gitattributes` : sources et preuves utiles sont conservées, dépendances et caches restent locaux, les originaux fournisseur ne sont pas réencodés.
 
 Appliquer les contrôles proportionnés de `tools/README.md`, ou réutiliser leurs résultats si les fichiers concernés sont inchangés :
@@ -40,6 +50,18 @@ Sous Codex Windows, utiliser le runtime et les dépendances isolées décrits da
 Vérifier `git var GIT_AUTHOR_IDENT`. Indexer les chemins examinés, puis contrôler `git diff --cached --stat` et `git diff --cached --check`. Créer un message français décrivant le résultat ; un fichier UTF-8 sous `tmp/` et `git commit -F` évitent les erreurs PowerShell. Ne pas réécrire un historique ni créer un commit vide. Si rien n’a changé, le signaler et poursuivre l’envoi des commits existants si demandé.
 
 ## Pousser et vérifier Pages
+
+Utiliser le script pour l’envoi des commits déjà validés :
+
+```powershell
+python -m tools.git_push prepare
+python -m tools.git_push push
+```
+
+Le plan fixe le SHA et la référence distante. Le script conserve les modifications et l’index en attente, vérifie les preuves contre l’arbre du commit, produit son témoin isolé et envoie uniquement ce SHA. Il ne crée pas de commit et ne force jamais. Un retard ou une divergence se résout avant de refaire la préparation, selon les règles ci-dessous.
+
+`push --no-wait` confirme uniquement l’envoi. `python -m tools.git_push watch` suit ensuite le workflow exact, le job de déploiement, le SHA publié dans le manifeste et les simulations réelles du site. Après une interruption, reprendre `watch` au lieu de renvoyer les commits. Une demande de scripting seule n’exécute pas le push.
+
 
 Faire `git fetch origin`, examiner les commits à envoyer et la relation avec `origin/main`. Si le dépôt est seulement en retard et propre, avancer en fast-forward. En cas de divergence, intégrer en préservant les commits et les règles du projet ; résoudre les conflits techniques dans le périmètre autorisé et revalider les parties touchées. Une décision métier inconnue nécessite un arbitrage. Ne pas forcer, supprimer une branche distante, envoyer tous les tags ou contourner une protection.
 

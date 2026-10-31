@@ -120,6 +120,8 @@ Contexte communiqué par l’utilisateur le 29 octobre 2026. Il décrit la postu
 ## Git, localisation et GitHub Pages
 
 - Projet actif : `C:/Dev/FLOW-Etude-Economique`, dépôt `https://github.com/laurent-sintes/FLOW-Etude-Economique`, branche courante `main`. Le dépôt complet et l’application Pages sont publics par décision explicite de l’utilisateur. Ne pas appliquer les workflows d’un autre projet FLOW.
+- Pour une demande de push, utiliser `python -m tools.git_push prepare`, puis `python -m tools.git_push push`. Le suivi doit confirmer le SHA distant, la CI, le job de déploiement et le SHA servi par Pages. Reprendre avec `watch` après interruption. Une demande de scripting n’exécute pas de push.
+- Pour une demande de commit, utiliser `python -m tools.git_commit prepare --paths <fichiers-examinés> --message-file <message-UTF-8>`, puis `python -m tools.git_commit commit`. Le plan doit rester vérifié et inchangé. La préparation ne vaut pas demande implicite de créer un commit ou de pousser.
 - Le skill `skills/flow-economie-git/SKILL.md` distingue commit local, push des commits existants et leur enchaînement. Un push sur `main` déploie le site après contrôles ; aucune release métier ni modification économique implicite.
 - GitHub personnel est `github.com` / `laurent-sintes`. Les commandes `gh api` ciblent explicitement `--hostname github.com` ; ne pas utiliser le compte professionnel `beaumanoir.ghe.com` par défaut ni modifier l’identité Git globale.
 - Pages livre un ensemble technique figé depuis les sources courantes. Les calculs restent dans le même moteur Python, exécuté via Pyodide ; aucune formule économique parallèle en JavaScript. Préserver erreurs, contrats, stockage et import/export des simulations.

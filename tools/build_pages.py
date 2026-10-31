@@ -6,6 +6,7 @@ import hashlib
 import html
 import io
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -28,6 +29,13 @@ GENERATED = ('data', 'documents', 'site-manifest.json', '.nojekyll')
 
 def sha(raw):
     return hashlib.sha256(raw).hexdigest()
+
+
+def deployment_commit():
+    value = os.environ.get('FLOW_DEPLOYMENT_COMMIT', '')
+    if value and not re.fullmatch(r'[0-9a-fA-F]{40}|[0-9a-fA-F]{64}', value):
+        raise ValueError('Invalid deployment commit')
+    return value.lower() or None
 
 
 def normalize_base(value):
@@ -68,6 +76,7 @@ def _clean_generated(output):
 
 
 def build_pages(output, base='/', study=None):
+    deployed_commit = deployment_commit()
     output = Path(output).resolve()
     allowed = {(ROOT / 'app' / name).resolve() for name in ('dist', 'dist-pages')}
     scratch = (ROOT / 'tmp').resolve()
@@ -158,6 +167,8 @@ def build_pages(output, base='/', study=None):
                     }, documents=documents,
                     python=dict(archive=data_path + '/engine.zip', model=data_path + '/model.json.gz',
                                 pyodide=PYODIDE_BASE, archive_sha256=sha(archive_raw), model_sha256=sha(model_raw)))
+    if deployed_commit:
+        manifest['deployment_commit'] = deployed_commit
     (output / 'site-manifest.json').write_bytes(encode(manifest))
     (output / '.nojekyll').write_bytes(b'')
     initial = dict(id=ui['id'], reload_storage_key=ui['reload_storage_key'],

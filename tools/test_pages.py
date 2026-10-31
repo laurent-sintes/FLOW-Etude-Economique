@@ -11,7 +11,7 @@ from urllib.parse import quote, unquote
 import unittest
 from zipfile import ZipFile
 
-from build_pages import build_pages, normalize_base
+from build_pages import build_pages, normalize_base, deployment_commit
 from document_excerpt import document_excerpt
 from pages_runtime import load_runtime
 from study_snapshot import candidate, encode, ENGINE_FILES
@@ -78,7 +78,9 @@ class PagesTests(unittest.TestCase):
             (output / 'index.html').write_text('<html><head><title></title></head><body><div id="root"></div></body></html>', encoding='utf-8')
             (output / 'assets').mkdir()
             (output / 'assets' / 'app.js').write_text('export const compiled=true;', encoding='utf-8')
-            manifest = build_pages(output, '/FLOW-Etude-Economique/', self.study)
+            with patch.dict('os.environ',{'FLOW_DEPLOYMENT_COMMIT':'a'*40}):
+                manifest = build_pages(output, '/FLOW-Etude-Economique/', self.study)
+            self.assertEqual(manifest['deployment_commit'],'a'*40)
             self.assertEqual(manifest, json.loads((output / 'site-manifest.json').read_text(encoding='utf-8')))
             self.assertEqual(manifest['simulation_contract'], self.study.simulation_contract())
             self.assertEqual(manifest['model_version'], self.study.version)
@@ -109,6 +111,11 @@ class PagesTests(unittest.TestCase):
             self.assertEqual(capabilities[row['id']], capabilities[row['capacite_id']])
             self.assertIn('static_site', (output / 'index.html').read_text(encoding='utf-8'))
             self.assertTrue((output / '.nojekyll').is_file())
+
+    def test_deployment_provenance_is_optional_and_validated(self):
+        for value,expected in [('',None),('A'*40,'a'*40),('b'*64,'b'*64)]:
+            with patch.dict('os.environ',{'FLOW_DEPLOYMENT_COMMIT':value}):self.assertEqual(deployment_commit(),expected)
+        with patch.dict('os.environ',{'FLOW_DEPLOYMENT_COMMIT':'not-a-commit'}),self.assertRaises(ValueError):deployment_commit()
 
     def test_builder_rejects_unsafe_output_and_bases(self):
         for base in ('https://example.test/', '//example.test/', '/a/../b', '/a?x=1', '/a\\b'):
