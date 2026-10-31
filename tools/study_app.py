@@ -541,6 +541,11 @@ class Study:
                  'downloads':self.content['downloads'],
                  'core_evaluation':self._essential_core_evaluation(unit_details=False),
                  'core_product_scope':deepcopy(self.content['core_product_scope'])} if essential else pack_content(self.content) if compact else self.content
+        if essential:
+            # Synvance input analysis no longer displays economic model projections.
+            # Keep them in the full compatibility payload, not the initial delivery.
+            content['synvance_reference'] = deepcopy(content['synvance_reference'])
+            content['synvance_reference']['costs'].pop('model')
         return dict(ui=self.ui,glossary=self.glossary,baseline=self.baseline,content=content,
                     edition=self.edition,
                     model_version=self.version,simulation_contract=self.simulation_contract(),date=self.data['scenario']['date'])

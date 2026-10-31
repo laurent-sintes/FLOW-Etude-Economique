@@ -1,11 +1,10 @@
-import {createContext,useContext,useState,type CSSProperties,type ReactNode} from 'react';
+import {createContext,useContext,type CSSProperties,type ReactNode} from 'react';
 import {ArrowLeft,ArrowRight,CalendarDays,Download,FileText} from 'lucide-react';
 import {DossierNavigation,DossierSheet} from './Dossier';
 import {useStudy,useFormat,type Data} from './context';
 import {SourceLink} from './components';
 import {MethodText} from './MethodDocument';
 import {ReadingNote} from './ReadingNote';
-import {HorizonFacts} from './EssentialViews';
 import {fileHref} from './transport';
 import {FileFormatMark} from './FileFormatMark';
 import './synvanceReference.css';
@@ -92,6 +91,11 @@ function Brief({reference:R}:{reference:Data}){
 function BusinessScope({reference:R}:{reference:Data}){
  const B=R.business,L=B.labels,axes=B.axes.filter((row:Data)=>!['oms-b2c','architecture'].includes(row.id));
  return <Chapter id="business" title={B.title} lead={B.introduction}>
+  <section aria-labelledby="synvance-pattern-definitions"><h3 id="synvance-pattern-definitions">{R.reading.architecture_status}</h3>
+   <div className="synvance-pattern-definitions">{B.architectures.map((item:Data)=><section key={item.id}><h4>{item.title}</h4><div className="synvance-architecture-diagram"><p>{item.systems[0]}</p><div className="synvance-architecture-branches">{item.systems.slice(1).map((system:string,position:number)=><p key={position}>{system}</p>)}</div></div><p><MethodText>{item.text}</MethodText></p></section>)}</div>
+  </section>
+  <aside className="core-method-callout"><p><MethodText>{B.architecture_note}</MethodText></p></aside>
+  <Proofs items={B.architecture_proofs}/>
   <section className="synvance-pattern-reading" aria-labelledby="synvance-pattern-reading-title">
    <h3 id="synvance-pattern-reading-title">{B.pattern_reading.title}</h3>
    <div className="synvance-pattern-proposals">{B.pattern_reading.providers.map((provider:Data)=><article key={provider.id} data-publisher={provider.id}>
@@ -102,11 +106,6 @@ function BusinessScope({reference:R}:{reference:Data}){
    </article>)}</div>
    <p className="synvance-source-note"><MethodText>{B.pattern_reading.note}</MethodText></p>
   </section>
-  <section aria-labelledby="synvance-pattern-definitions"><h3 id="synvance-pattern-definitions">{R.reading.architecture_status}</h3>
-   <div className="synvance-pattern-definitions">{B.architectures.map((item:Data)=><section key={item.id}><h4>{item.title}</h4><div className="synvance-architecture-diagram"><p>{item.systems[0]}</p><div className="synvance-architecture-branches">{item.systems.slice(1).map((system:string,position:number)=><p key={position}>{system}</p>)}</div></div><p><MethodText>{item.text}</MethodText></p></section>)}</div>
-  </section>
-  <aside className="core-method-callout"><p><MethodText>{B.architecture_note}</MethodText></p></aside>
-  <Proofs items={B.architecture_proofs}/>
   <section aria-labelledby="synvance-business-comparison"><h3 id="synvance-business-comparison">{B.comparison_title}</h3><p><MethodText>{B.comparison_note}</MethodText></p></section>
   <div className="core-method-table-scroll" tabIndex={0} role="region" aria-label={B.comparison_title}>
    <table className="core-method-table synvance-business-table"><caption>{B.comparison_title}</caption><thead><tr>{['topic','request','microsoft','sap'].map(key=><th scope="col" key={key}>{['microsoft','sap'].includes(key)?<ProviderMark id={key} detail/>:L[key]}</th>)}</tr></thead><tbody>
@@ -115,7 +114,8 @@ function BusinessScope({reference:R}:{reference:Data}){
   </div>
   <a className="synvance-topic-link" href="#synvance-oms">{R.reading.business_oms_link}<ArrowRight size={17} aria-hidden="true"/></a>
   <section aria-labelledby="synvance-business-others"><h3 id="synvance-business-others">{B.others_title}</h3><p><MethodText>{B.others_introduction}</MethodText></p></section>
-  <div className="synvance-business-others">{B.others.map((item:Data)=><section key={item.id}><h4>{item.title}</h4><p><MethodText>{item.text}</MethodText></p><Proofs items={item.proofs}/></section>)}</div>
+  <div className="synvance-business-others">{B.others.map((item:Data)=><section key={item.id} data-candidate={item.id}><h4>{item.title}</h4><p><MethodText>{item.profile}</MethodText></p><p><MethodText>{item.comparison}</MethodText></p><p><MethodText>{item.text}</MethodText></p><Proofs items={item.proofs}/><a className="text-button" href={item.profile_source.href} target="_blank" rel="noopener">{item.profile_source.label}</a></section>)}</div>
+  <ReadingNote>{B.others_note}</ReadingNote>
  </Chapter>;
 }
 function OmsComparison({reference:R}:{reference:Data}){
@@ -153,11 +153,21 @@ function SourceCostCell({cell,labels:L}:{cell:Data;labels:Data}){
  </>;
 }
 function CostComparison({reference:R}:{reference:Data}){
- const {data}=useStudy(),{amount,annualAmount}=useFormat(),C=R.costs,L=C.labels;
- const [years,setYears]=useState(data.ui.default_horizon);
- const H=C.model.horizons.find((item:Data)=>item.years===years)||C.model.horizons[0];
- const bridgeRows=[['selection_eur',L.selection],['source_integration_eur',L.source_amount+' · '+L.integration],['integration_additions_eur',L.integration_additions],['integration_eur',L.model_amount+' · '+L.integration]];
+ const {amount}=useFormat(),C=R.costs,L=C.labels,T=C.source_horizon;
  return <Chapter id="costs" title={C.title} lead={C.introduction}>
+  <section aria-labelledby="synvance-source-horizon-title">
+   <h3 id="synvance-source-horizon-title">{T.title}</h3><p><MethodText>{T.introduction}</MethodText></p>
+   <div className="synvance-pattern-proposals synvance-source-horizons">{R.synthesis.providers.map((provider:Data)=>{
+    const licences=provider.annual.rows.find((row:Data)=>row.id==='licences'),years=licences.amounts.map((item:Data)=>item.year);
+    return <article key={provider.id} data-publisher={provider.id}>
+     <ProviderMark id={provider.id} detail/>
+     <p className="synvance-pattern-assignment">{T.range_label.replace('{first}',String(years[0])).replace('{last}',String(years[years.length-1]))}</p>
+     <p><MethodText>{T.provider_notes[provider.id]}</MethodText></p>
+     <Proofs items={uniqueProofs(provider.annual)}/>
+    </article>;
+   })}</div>
+   <ReadingNote>{T.note}</ReadingNote>
+  </section>
   <section aria-labelledby={sectionId('synvance-source-costs')}><h3 id={sectionId('synvance-source-costs')} tabIndex={-1}>{C.sources_title}</h3><p className="synvance-reading-label">{L.source_note}</p><p><MethodText>{C.sources_note}</MethodText></p></section>
   <div className="core-method-table-scroll" tabIndex={0} role="region" aria-label={C.sources_title}>
    <table className="core-method-table synvance-cost-table synvance-source-costs"><caption>{C.sources_title}</caption><thead><tr>{['structure','microsoft','sap','scope'].map(key=><th scope="col" key={key}>{['microsoft','sap'].includes(key)?<ProviderMark id={key} detail/>:L[key]}</th>)}</tr></thead><tbody>
@@ -166,30 +176,6 @@ function CostComparison({reference:R}:{reference:Data}){
   </div>
   <aside className="core-method-callout">{R.synthesis.providers.find((provider:Data)=>provider.id==='sap').integration.rows.filter((row:Data)=>['published','difference'].includes(row.reading_role)).map((row:Data)=><p key={row.id}><strong>{L.sap+' · '+row.label+' : '+amount(row.amount_eur)}</strong><br/><MethodText>{row.scope}</MethodText></p>)}</aside>
   <SupplierLinks reference={R}/>
-  <section aria-labelledby={sectionId('synvance-cost-bridge')}><h3 id={sectionId('synvance-cost-bridge')} tabIndex={-1}>{C.bridge_title}</h3><p><MethodText>{C.bridge_note}</MethodText></p></section>
-  <div className="core-method-table-scroll" tabIndex={0} role="region" aria-label={C.bridge_title}>
-   <table className="core-method-table synvance-bridge-table"><caption>{L.initial}</caption><thead><tr><th scope="col">{L.structure}</th>{C.model.bridge.map((option:Data)=><th scope="col" key={option.id}><ProviderMark id={option.id} detail/></th>)}</tr></thead><tbody>
-    {bridgeRows.map(([id,label])=><tr key={id} data-total={id==='integration_eur'||undefined}><th scope="row">{label}</th>{C.model.bridge.map((option:Data)=><td className="core-method-number" key={option.id} data-label={L[option.id]} data-provider={option.id}><MobileProvider id={option.id}/>{amount(option[id])}</td>)}</tr>)}
-   </tbody></table>
-  </div>
-  <div className="core-method-table-scroll" tabIndex={0} role="region" aria-label={L.annual}>
-   <table className="core-method-table synvance-bridge-table"><caption>{L.annual}</caption><thead><tr><th scope="col">{L.structure}</th>{C.model.bridge.map((option:Data)=><th scope="col" key={option.id}><ProviderMark id={option.id} detail/></th>)}</tr></thead><tbody>
-    {C.annual_rows.map((row:Data)=><tr key={row.id}><th scope="row">{row.label}</th>{C.model.bridge.map((option:Data)=><td className="core-method-number" key={option.id} data-label={L[option.id]} data-provider={option.id}><MobileProvider id={option.id}/>{annualAmount(option.annual.items[row.id])}</td>)}</tr>)}
-    <tr data-total="true"><th scope="row">{L.annual_total}</th>{C.model.bridge.map((option:Data)=><td className="core-method-number" key={option.id} data-label={L[option.id]} data-provider={option.id}><MobileProvider id={option.id}/>{annualAmount(option.annual.total_eur_ht)}</td>)}</tr>
-    <tr><th scope="row">{L.service_start}</th>{C.model.bridge.map((option:Data)=><td key={option.id} data-label={L[option.id]} data-provider={option.id}><MobileProvider id={option.id}/>{L.month+' '+option.service_start_month}</td>)}</tr>
-   </tbody></table>
-  </div>
-  <section aria-labelledby={sectionId('synvance-model-costs')}><h3 id={sectionId('synvance-model-costs')} tabIndex={-1}>{C.model_title}</h3><p className="synvance-reading-label">{L.model_note}</p><p><MethodText>{C.model_note}</MethodText></p></section>
-  <div className="synvance-horizons" role="group" aria-label={L.horizon}>{C.model.horizons.map((h:Data)=><button type="button" key={h.years} aria-pressed={H.years===h.years} onClick={()=>setYears(h.years)}>{h.years+' '+L.years}</button>)}</div>
-  <div className="core-method-table-scroll" tabIndex={0} role="region" aria-label={C.model_title}>
-   <table className="core-method-table synvance-cost-table synvance-model-costs"><caption>{C.model_title+' · '+H.years+' '+L.years}</caption><thead><tr>{['structure','microsoft','sap','scope'].map(key=><th scope="col" key={key}>{['microsoft','sap'].includes(key)?<ProviderMark id={key} detail/>:L[key]}</th>)}</tr></thead><tbody>
-    {H.rows.map((row:Data)=><tr key={row.id}><th scope="row">{row.title}</th>{['microsoft','sap'].map(slug=><td className="synvance-model-amount" key={slug} data-label={L[slug]} data-provider={slug}><MobileProvider id={slug}/>{row.display==='bundled'&&row.amounts[slug]<=0.01?<span>{L.bundled}</span>:<><strong>{amount(row.amounts[slug])}</strong>{row.display==='bundled'&&<span>{L.bundled}</span>}</>}</td>)}<td data-label={L.scope}><MethodText>{row.scope}</MethodText></td></tr>)}
-    <tr data-total="true"><th scope="row">{L.total}</th>{['microsoft','sap'].map(slug=><td className="core-method-number" key={slug} data-label={L[slug]} data-provider={slug}><MobileProvider id={slug}/>{amount(H.totals[slug])}</td>)}<td data-label={L.horizon}>{H.years+' '+L.years}</td></tr>
-   </tbody></table>
-  </div>
-  <div className="synvance-cost-horizon-facts">{data.baseline.options.filter(option=>C.model.bridge.some((item:Data)=>item.id===option.stack)).map(option=><section key={option.stack}><h4><ProviderMark id={option.stack} detail/></h4><HorizonFacts option={option} horizon={H.years}/></section>)}</div>
-  <aside className="core-method-callout"><p><MethodText>{C.model_limit}</MethodText></p></aside>
-  <ul className="synvance-product-links">{C.model_links.map((link:Data)=><li key={link.href}><a href={link.href}>{link.label}</a></li>)}</ul>
  </Chapter>;
 }
 function Documents({reference:R}:{reference:Data}){

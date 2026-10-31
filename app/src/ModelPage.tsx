@@ -36,16 +36,12 @@ export function ModelPage({view}:{view?:string}){
   </>,
   purposes:<>
    <Text>{E.model_purposes.intro}</Text>
-   <dl className="model-reading-activities">{E.model_purposes.types.map((purpose:Data)=><div key={purpose.id}><dt><a href={'#glossaire?term='+purpose.notion}>{purpose.label}</a></dt><dd><MethodText>{data.glossary.notions[purpose.notion].definition}</MethodText></dd></div>)}</dl>
-   <dl className="model-reading-axis-list">{E.model_purposes.axes.map((axis:Data)=><div key={axis.label}><dt>{axis.label}</dt><dd><MethodText>{axis.text}</MethodText></dd></div>)}</dl>
-   <div className="model-reading-strategies">{E.model_purposes.examples.map((example:Data)=><article key={example.title}><h3>{example.title}</h3><p className="model-reading-purpose-label">{E.model_purposes.types.find((purpose:Data)=>purpose.id===example.purpose_ref).label}</p><Text>{example.text}</Text></article>)}</div>
+   <dl className="model-reading-activities model-reading-purposes">{E.model_purposes.types.map((purpose:Data)=><div key={purpose.id} data-purpose={purpose.id}><dt><a href={'#glossaire?term='+purpose.notion}>{purpose.label}</a></dt><dd><p><MethodText>{data.glossary.notions[purpose.notion].definition}</MethodText></p><ul className="model-reading-examples">{E.model_purposes.examples.filter((example:Data)=>example.purpose_ref===purpose.id).map((example:Data)=><li key={example.title}><strong>{example.title}</strong><span><MethodText>{example.text}</MethodText></span></li>)}</ul></dd></div>)}</dl>
    <Text className="model-reading-callout">{E.model_purposes.note}</Text>
    <Text className="model-reading-limit">{E.model_purposes.positioning_note}</Text>
   </>,
   workload:<>
    <div className="model-reading-workloads model-reading-workload-paths">{R.workload_paths.map((path:Data)=><article key={path.title}><h3>{path.title}</h3><Text>{path.text}</Text></article>)}</div>
-   <Text className="model-reading-callout">{R.workload_note}</Text>
-   {links(E.model_workload.links)}
   </>,
   costs:<>
    <Text>{R.costs_intro}</Text>
@@ -56,7 +52,10 @@ export function ModelPage({view}:{view?:string}){
    <Text className="model-reading-callout">{R.costs_note}</Text>
   </>,
   calendar:<>
-   <div className="model-reading-calendar">{E.calendar.map((step:Data)=>{const Icon=icons[step.icon];return <article key={step.title}><Icon aria-hidden="true" size={22}/><h3>{step.title}</h3>{step.text&&<Text>{step.text}</Text>}{step.bullets&&<ul>{step.bullets.map((item:string)=><li key={item}><MethodText>{item}</MethodText></li>)}</ul>}</article>;})}</div>
+   <ol className="model-reading-roadmap" role="list">{E.calendar.map((step:Data,index:number)=>{const Icon=icons[step.icon];return <li className="model-reading-phase" key={step.title}>
+    <div className="model-reading-phase-marker"><span className="model-reading-phase-icon"><Icon aria-hidden="true" size={22}/></span><span className="model-reading-phase-label">{R.phase_label} {index+1}</span></div>
+    <article><h3>{step.title}</h3>{step.text&&<Text>{step.text}</Text>}{step.bullets&&<ul>{step.bullets.map((item:string)=><li key={item}><MethodText>{item}</MethodText></li>)}</ul>}</article>
+   </li>;})}</ol>
    <Text className="model-reading-callout">{E.calendar_text}</Text>
    <Text className="model-reading-limit">{E.model_limit}</Text>
   </>
@@ -66,6 +65,7 @@ export function ModelPage({view}:{view?:string}){
   <aside className="model-reading-callout model-reading-status" role="status"><Text>{E.core_status_summary}</Text></aside>
   <DossierNavigation pages={pages} current={current.id} label={N.navigation}/>
   <DossierSheet view={current.id}>
+  {current.id==='modes'&&<section className="model-reading-summary" aria-labelledby="model-modes-summary"><h2 id="model-modes-summary">{current.label}</h2><dl className="model-reading-axis-list">{E.model_purposes.axes.map((axis:Data)=><div key={axis.label}><dt><MethodText>{axis.label}</MethodText></dt><dd><MethodText>{axis.text}</MethodText></dd></div>)}</dl></section>}
   {chapters.map((chapter:Data,index:number)=><section className="model-reading-chapter" key={chapter.id} data-chapter={chapter.id} aria-labelledby={sectionId(chapter.id)}><h2 id={sectionId(chapter.id)} tabIndex={-1}><span aria-hidden="true">{index+1}</span>{chapter.title}</h2>{chapter.id!=='scope'&&<Text className="model-reading-lead">{chapter.lead}</Text>}{content[chapter.id]}</section>)}
   <a className="text-button essential-structure-next" href={R.next_href}>{R.next_label} <span aria-hidden="true">→</span></a>
   </DossierSheet>

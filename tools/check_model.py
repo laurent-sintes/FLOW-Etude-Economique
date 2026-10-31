@@ -10,7 +10,7 @@ import traceback
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
-from validation_reporting import TimedResult, run_directory, save_report, test_ids
+from validation_reporting import Progress, TimedResult, run_directory, save_report, test_ids
 try: import yaml
 except ImportError: sys.path.insert(0,str(ROOT/'tmp/yaml-stacks/deps'));import yaml
 from test_support import reference_study
@@ -51,11 +51,15 @@ def main():
     if args.browser and (args.quick or (args.content and not requested_auto)):parser.error('--browser requires --full or --auto')
     if args.publish and (not args.release or requested_auto):parser.error('--publish requires --full')
     directory=run_directory(ROOT)
+    progress=Progress(directory, ROOT/'tmp/check-model-progress.json')
     started=time.perf_counter();report=dict(mode='full' if args.release else 'presentation' if requested_auto else 'content' if args.content else 'quick',stages={})
     def stage(name,fn):
         start=time.perf_counter()
+        progress.phase(name)
         try:return fn()
-        finally:report['stages'][name]=round(time.perf_counter()-start,3)
+        finally:
+            report['stages'][name]=round(time.perf_counter()-start,3)
+            progress.end_phase()
     report['directory']=str(directory)
     if requested_auto:report['selection']=selection
     report['status']='failed'
@@ -80,13 +84,14 @@ def main():
             from business_contract import coverage_report
             report['business_contract']=stage('business_contract',lambda:coverage_report())
             report['scheduled_test_ids']=list(test_ids(suite))
+            progress.schedule(suite.countTestCases())
             if args.release and args.compare:
                 previous=comparison_baseline
                 expected=set(previous.get('test_ids',previous.get('scheduled_test_ids',[])))
                 missing=expected-set(report['scheduled_test_ids'])
                 if missing:raise AssertionError('Removed tests: '+str(sorted(missing)))
                 report['coverage_preserved']=len(expected)
-            result=stage('python_tests',lambda:unittest.TextTestRunner(verbosity=1,resultclass=TimedResult).run(suite))
+            result=stage('python_tests',lambda:unittest.TextTestRunner(verbosity=1,resultclass=lambda *a, **k: TimedResult(*a, progress=progress, **k)).run(suite))
             report['test_results']=result.records
             report['failures']=len(result.failures)
             report['errors']=len(result.errors)
@@ -181,6 +186,7 @@ def main():
                 report['comparison']=dict(before_seconds=previous['seconds'],after_seconds=report['seconds'],
                     saved_seconds=round(previous['seconds']-report['seconds'],3),
                     faster_pct=round(100*(1-report['seconds']/previous['seconds']),2))
+        progress.close(report['status'])
         save_report(report,directory,ROOT/'tmp/check-model-last.json')
         summary={k:v for k,v in report.items() if k not in ('test_results','scheduled_test_ids','business_contract')}
         print(json.dumps(summary,ensure_ascii=False,indent=2))

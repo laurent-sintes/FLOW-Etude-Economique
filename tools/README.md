@@ -53,6 +53,13 @@ Sur ce poste, lancer l'installation isolée depuis PyPI directement avec `exec_c
 
 La suite `--full` doit pouvoir ouvrir son serveur HTTP sur `127.0.0.1` et écrire dans le dossier temporaire Windows. Dans le bac à sable Codex de ce poste, lancer **cette commande de contrôle** avec `exec_command` et `sandbox_permissions="require_escalated"` (justification : tests HTTP locaux et dossiers temporaires). Les erreurs `WinError 10013` pour le socket ou `WinError 5` dans `Temp` viennent de cette restriction ; relancer la même suite sous ces permissions, sans changer le code. `--quick` fonctionne dans le bac à sable ordinaire. Les contrôles courants restent utilisables après modification du moteur, sans actualiser l’ancien instantané.
 
+Les commandes Dev et modèle affichent en direct la phase, le temps écoulé, les tests terminés sur le total planifié et le nombre de tests en échec. Une ligne revient toutes les 15 secondes même si un test est long. Les compteurs concernent la suite Python, pas l'ensemble du processus. Aucun pourcentage global ni délai restant n'est extrapolé de tests de durées inégales. Les états lisibles pendant l'exécution sont `tmp/check-dev-progress.json`, `tmp/check-model-progress.json` et `progress.json` dans le dossier de la session. Après une interruption brutale, un état `running` peut rester présent, vérifier aussi le processus. Pour suivre sans attendre le rapport final :
+
+```powershell
+Get-Content tmp/check-model-progress.json
+Get-Content tmp/check-dev-progress.json
+```
+
 Chaque exécution conserve `tmp/validation/<identifiant>/report.json`, `junit.xml` et les journaux des contrôles de l’interface. `tmp/check-model-last.json` pointe sur le dernier résultat, même en échec. Les rapports incluent les durées par phase et par test, les erreurs immédiates, les tests planifiés et la traçabilité des règles vers les tests effectivement réussis. La CI conserve ces rapports comme artefacts.
 
 `business_contract.py` relie chaque règle du métamodèle canonique à un test réel. Une règle nouvelle ou un test supprimé sans mise à jour de ce contrat fait échouer le contrôle. Les 18 règles arithmétiques ont des exemples indépendants avec résultats littéraux et rejets des entrées invalides. Cette traçabilité ne constitue pas une mesure de couverture des lignes ou branches du code. Les tests existants continuent de vérifier financements uniques, capacités natives, rôles, finalités, annuités au centime, horizons, inconnus, exports et calcul sans lecture disque.

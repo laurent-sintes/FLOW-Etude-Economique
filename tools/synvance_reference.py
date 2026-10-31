@@ -58,8 +58,12 @@ SCHEMA = _object(dict(
         comparison_title=TEXT, comparison_note=TEXT,
         labels=_object({key: TEXT for key in ('topic', 'request', 'microsoft', 'sap')}),
         axes=_array(_object(dict(id=ID, topic=TEXT, request=TEXT, microsoft=TEXT, sap=TEXT, proof_refs=PROOFS))),
-        others_title=TEXT, others_introduction=TEXT,
-        others=_array(_object(dict(id=ID, title=TEXT, text=TEXT, proof_refs=PROOFS))))),
+        others_title=TEXT, others_introduction=TEXT, others_note=TEXT,
+        others=_array(_object(dict(id=ID, title=TEXT, text=TEXT, profile=TEXT, comparison=TEXT, proof_refs=PROOFS,
+            profile_source=_object(dict(label=TEXT, href=dict(type='string', enum=[
+                'https://www.odoo.com/fr_FR/page/all-apps', 'https://www.orisha.com/fr/commerce',
+                'https://www.seilks.com/wp-content/uploads/2025/04/Communique-de-presse-Haddad-Brand-Europe.pdf',
+                'https://www.infor.com/nordics/resources/infor-cloudsuite-fashion'])))))))),
     overview=_object(dict(title=TEXT, introduction=TEXT, warning=TEXT,
         inputs=_array(_object(dict(piece_ref=TEXT, label=TEXT, text=TEXT))),
         proposals_title=TEXT, proposals_introduction=TEXT, cards=_array(_object(dict(
@@ -77,6 +81,8 @@ SCHEMA = _object(dict(
                 post_ref=TEXT, period=TEXT, scope=TEXT, proof_refs=PROOFS)))))
         ))))),
     costs=_object(dict(title=TEXT, introduction=TEXT,
+        source_horizon=_object(dict(title=TEXT, introduction=TEXT, range_label=TEXT, note=TEXT,
+            provider_notes=_object({key:TEXT for key in PROVIDERS}))),
         labels=_object({key:TEXT for key in ('structure', 'microsoft', 'sap', 'scope', 'year', 'price_year', 'amount', 'total', 'years', 'horizon', 'bundled', 'model_amount', 'source_amount', 'initial', 'annual', 'annual_total', 'selection', 'integration', 'integration_additions', 'service_start', 'month', 'source_detail', 'source_note', 'model_note')}),
         sources_title=TEXT, sources_note=TEXT,
         rows=_array(_object(dict(structure_ref=TEXT, model_scope=TEXT,

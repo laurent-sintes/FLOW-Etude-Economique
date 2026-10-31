@@ -83,16 +83,19 @@ def main():
     if args.plan_only:
         print(json.dumps(selection, indent=2))
         return 2 if selection['unresolved'] else 0
-    from validation_reporting import TimedResult, run_directory, save_report, test_ids
+    from validation_reporting import Progress, TimedResult, run_directory, save_report, test_ids
     directory = run_directory(ROOT)
+    progress = Progress(directory, ROOT / 'tmp/check-dev-progress.json')
     started = time.perf_counter()
     report = dict(mode='dev', status='failed', selection=selection, stages={}, certification=False)
     def stage(name, fn):
         start = time.perf_counter()
+        progress.phase(name)
         try:
             return fn()
         finally:
             report['stages'][name] = round(time.perf_counter() - start, 3)
+            progress.end_phase()
     def node(arguments):
         result = subprocess.run([shutil.which('node') or 'node', *arguments], cwd=ROOT / 'app',
                                 capture_output=True, text=True, encoding='utf-8', errors='replace')
@@ -108,7 +111,8 @@ def main():
         if selection['python_tests']:
             suite = unittest.defaultTestLoader.loadTestsFromNames(selection['python_tests'])
             report['scheduled_test_ids'] = list(test_ids(suite))
-            result = stage('python_tests', lambda: unittest.TextTestRunner(verbosity=1, resultclass=TimedResult).run(suite))
+            progress.schedule(suite.countTestCases())
+            result = stage('python_tests', lambda: unittest.TextTestRunner(verbosity=1, resultclass=lambda *a, **k: TimedResult(*a, progress=progress, **k)).run(suite))
             report.update(tests=result.testsRun, test_results=result.records)
             if not result.wasSuccessful():
                 return 1
@@ -130,6 +134,7 @@ def main():
         return 1
     finally:
         report['seconds'] = round(time.perf_counter() - started, 3)
+        progress.close(report['status'])
         save_report(report, directory, ROOT / 'tmp/check-dev-last.json')
         print(json.dumps({k: v for k, v in report.items() if k not in {'test_results', 'scheduled_test_ids'}}, indent=2))
 

@@ -88,6 +88,8 @@ class ApiTests(unittest.TestCase):
                          [row['capacite_id'] for row in small['content']['complexity']['rows']])
         for key in small:
             if key!='content':self.assertEqual(small[key],full[key])
+        self.assertNotIn('model',small['content']['synvance_reference']['costs'])
+        self.assertIn('model',full['content']['synvance_reference']['costs'])
         self.assertLess(len(light),1_100_000)
         self.assertLess(len(light),len(get('/api/bootstrap')[0])/8)
         self.assertIn('business_map',full['content'])

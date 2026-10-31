@@ -1,6 +1,8 @@
 """Durations and machine-readable outcomes, including failed runs."""
 from datetime import datetime, timezone
 import json
+import sys
+from threading import Event, Lock, Thread
 from pathlib import Path
 import time
 import unittest
@@ -23,13 +25,95 @@ def test_ids(suite):
             yield item.id()
 
 
+class Progress:
+    """Live phase/test state, flushed output and a heartbeat during slow checks."""
+    def __init__(self, directory, last, stream=None, interval=15):
+        self.directory, self.last = Path(directory), Path(last)
+        self.stream = stream if stream is not None else sys.stdout
+        self.started = time.perf_counter()
+        self.lock, self.stop = Lock(), Event()
+        self.state = dict(status='running', phase='initialization', completed=0, total=0,
+                          failures=0, current_test=None, directory=str(directory))
+        self.phases = []
+        self.issues = set()
+        self.interval = interval
+        self.thread = Thread(target=self.heartbeat, daemon=True)
+        self.emit()
+        self.thread.start()
+
+    def emit(self, console=True):
+        self.state['elapsed_seconds'] = round(time.perf_counter() - self.started, 1)
+        text = json.dumps(self.state, ensure_ascii=False)
+        for path in (self.directory / 'progress.json', self.last):
+            pending = path.with_suffix('.pending-' + self.directory.name)
+            pending.write_text(text, encoding='utf-8')
+            pending.replace(path)
+        if console:
+            state = self.state
+            print(f"[validation {state['elapsed_seconds']:.1f}s] {state['status']} | "
+                  f"{state['phase']} | tests {state['completed']}/{state['total']} | "
+                  f"failures {state['failures']}" +
+                  (f" | {state['current_test']}" if state['current_test'] else ''),
+                  file=self.stream, flush=True)
+
+    def heartbeat(self):
+        while not self.stop.wait(self.interval):
+            with self.lock:
+                self.emit()
+
+    def phase(self, name):
+        with self.lock:
+            self.phases.append(name)
+            self.state.update(phase=name, current_test=None)
+            self.emit()
+
+    def end_phase(self):
+        with self.lock:
+            if self.phases:
+                self.phases.pop()
+            self.state.update(phase=self.phases[-1] if self.phases else 'between_phases', current_test=None)
+            self.emit()
+
+    def schedule(self, total):
+        with self.lock:
+            self.state['total'] = total
+            self.emit()
+
+    def test_started(self, name):
+        with self.lock:
+            self.state['current_test'] = name
+            self.emit(console=False)
+
+    def issue(self, name):
+        with self.lock:
+            self.issues.add(name)
+            self.state['failures'] = len(self.issues)
+            self.emit()
+
+    def test_finished(self):
+        with self.lock:
+            self.state['completed'] += 1
+            self.state['current_test'] = None
+            self.emit(console=self.state['completed'] % 10 == 0 or self.state['completed'] == self.state['total'])
+
+    def close(self, status):
+        self.stop.set()
+        self.thread.join()
+        with self.lock:
+            self.state.update(status=status, current_test=None)
+            self.emit()
+
+
 class TimedResult(unittest.TextTestResult):
     def __init__(self, *args, **kwargs):
+        self.progress = kwargs.pop('progress', None)
         super().__init__(*args, **kwargs)
         self.records = []
         self.running = {}
 
     def startTest(self, test):
+        if self.progress:
+            self.progress.test_started(test.id())
         self.running[test.id()] = dict(id=test.id(), status='passed', started=time.perf_counter())
         super().startTest(test)
 
@@ -37,6 +121,8 @@ class TimedResult(unittest.TextTestResult):
         record = self.running.setdefault(test.id(), dict(id=test.id(), started=time.perf_counter()))
         record.update(status=status, message=message)
         if status in ('failure', 'error'):
+            if self.progress:
+                self.progress.issue(test.id())
             self.stream.writeln('\n' + test.id() + '\n' + message)
 
     def addFailure(self, test, err):
@@ -68,6 +154,8 @@ class TimedResult(unittest.TextTestResult):
         record = self.running.pop(test.id())
         record['seconds'] = round(time.perf_counter() - record.pop('started'), 6)
         self.records.append(record)
+        if self.progress:
+            self.progress.test_finished()
         super().stopTest(test)
 
     def stopTestRun(self):

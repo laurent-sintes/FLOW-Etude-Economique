@@ -287,7 +287,7 @@ def hydrate_fundamentals(ui, document):
     target['model_limit'] = document['limitations']
     view = e['model_map']
     allowed = {'title', 'caption', 'note_title', 'program_scope', 'outside_scope', 'systems'}
-    if set(view) != allowed:
+    if set(view) - {'flow'} != allowed:
         fail('view/model_map', 'only headings, status labels and layout are allowed')
     mapping = document['business_map']
     systems = {s['node_ref']: s for s in mapping['systems']}
@@ -301,7 +301,7 @@ def hydrate_fundamentals(ui, document):
     notion = entities[mapping['positioning']['entity_ref']].get('notion')
     if not notion:
         fail('positioning', 'platform badge requires a glossary notion')
-    compiled['flow'] = '{{notion.' + notion + '.court}}'
+    compiled['flow'] = view.get('flow', '{{notion.' + notion + '.court}}')
     compiled['systems'] = []
     for setting in view['systems']:
         if set(setting) != {'system_ref', 'position'} or setting['position'] not in {'left', 'center', 'right', 'bottom'}:
