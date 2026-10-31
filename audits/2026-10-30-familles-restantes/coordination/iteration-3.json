@@ -1,0 +1,744 @@
+{
+  "family": "ba-execution-coordination",
+  "slug": "coordination",
+  "iteration": 3,
+  "status": "ordre_de_grandeur_non_consolidable",
+  "scope": [
+    {
+      "id": "BC-053",
+      "native_id": "D06.d",
+      "source": {
+        "name": "Fulfilment Coordination",
+        "definition": "Coordonner le déclenchement, les dépendances et la progression des prestations jusqu’aux résultats attendus, en tenant compte des faits d’exécution et des adaptations autorisées.",
+        "finality": "Coordonner la réalisation du plan retenu entre les exécutants.",
+        "nature": "orchestration",
+        "scope": "Coordonner le déclenchement et l’enchaînement des prestations du plan retenu, en tenant compte de leurs dépendances, des prises en charge et des faits d’exécution. Mobiliser les familles de [Service Orders](glossary:TER066) pour tenir les demandes et leurs évolutions.\n\nExemple : coordonner la préparation, la disponibilité du document et la collecte. Si la décision d’adaptation retient un autre transporteur, coordonner la modification des prestations concernées et leur nouvel enchaînement.\n\nLa détermination de la variation du plan appartient à [Fulfilment Adaptation Decision](glossary:TER177). L’orchestration peut lui transmettre un aléa, mais ne porte plus cette décision dans sa propre définition. Les exécutants conservent l’organisation de leurs opérations internes. Aucun produit logiciel particulier, contrôle humain systématique ou rollback physique universel n’est présumé.\n\nFrontière : Décision [Fulfilment Adaptation Decision](model:D06.f) séparée ; pas de rollback physique ni seconde promesse.\n\nConvention U409 : le Process orchestre des Services. Les [Tasks](glossary:TER089) expriment les contributions au processus ; les services réalisent les prestations sollicitées, humaines, physiques ou numériques. Un appel informatique est un moyen de sollicitation ou de feedback, pas le service métier lui-même. [Fulfilment Coordination](glossary:TER176) coordonne la progression ; [Fulfilment Adaptation Decision](glossary:TER177) choisit les adaptations ; [Operations Tracking](glossary:TER179) intègre les faits d’exécution ; [Operations Visibility](glossary:TER178) restitue leur avancement et [Process, Tasks & Order Visibility](glossary:TER175) en expose la contribution à la progression du processus. Les exécutants gardent leurs opérations internes. Le périmètre Supply et les responsabilités des sous-domaines restent inchangés ; aucun produit logiciel particulier ou nouveau niveau descriptif imposé.\n\nDistinguer le plan d’exécution coordonné du [Matching Master Plan](glossary:TER100) arbitré dans [Master Plan](glossary:TER111), dont les [affectations](glossary:TER017) sont décidées par [Supply Assignment](model:D03.o).\n\n[Service Management](model:subdomain-service-orders) tient le cycle et les engagements des ordres de prestation. L’orchestration utilise leurs réponses et coordonne les conditions d’activation et dépendances ; elle ne recrée pas leur cycle.\n\nU706/U709 : Coordonner aussi les prestations exécutées à distance : solliciter le service, attendre son résultat métier et poursuivre le flux selon ce résultat. Une acceptation du déclenchement ne vaut pas réalisation.\n\nAppliquer les attentes et libérations retenues par [Service Order Release Decision](model:service-order-release-decision), puis suivre la prise en charge des ordres. Un lot ne fusionne pas leurs identités. Distinguer une information anticipée de l’autorisation de lancement ; ne pas considérer la transmission comme preuve de réalisation.\n\nCoordonner les prestations dans le mandat reçu d’[Process Orchestration](glossary:TER129), qui conduit le parcours de la commande. Une dépendance entre préparation et collecte ne se confond pas avec une attente de confirmation client dans ce parcours. Retourner les résultats et aléas utiles à [Process Sentry](glossary:TER127) ; ne pas modifier seul les engagements de la commande.\n\nExécuter les tâches de coordination confiées par le moteur de [Reactive Workflow Management](glossary:TER125). Les [Service Orders](glossary:TER066) restent des commandes passives ; leurs états et résultats alimentent le suivi conduit par les tâches du workflow. La coordination locale ne choisit pas un nouveau parcours de commande hors du mandat reçu.",
+        "market_comparisons": [
+          {
+            "vendor": "Camunda",
+            "product": "Fulfilment Coordination",
+            "source_title": "The Process Orchestration Handbook",
+            "source_url": "https://camunda.com/process-orchestration/",
+            "source_version": "Guide web évolutif",
+            "source_locator": "What is process orchestration? ; Processes with diverse endpoints ; Complexity",
+            "consulted_on": "2026-09-19",
+            "evidence_limits": "Document primaire consulté ; rapprochement de concepts, sans preuve de réalisation Beaumanoir.",
+            "element_name": "Process orchestration",
+            "element_type": "Concept documenté par la source primaire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Activités et intervenants d’un processus.",
+            "differences": "FLOW sépare explicitement orchestration, adaptation et exécution physique.",
+            "flow_position": "Coordonner le déclenchement, les dépendances et la progression des prestations jusqu’aux résultats attendus, en tenant compte des faits d’exécution et des adaptations autorisées. Commandes passives, pilotage par les tâches du workflow et réalisation du prestataire restent distincts dans FLOW.",
+            "status": "proposed",
+            "source_refs": [
+              "U407",
+              "U408",
+              "U409",
+              "ELM244",
+              "CMP155",
+              "U477",
+              "ELM330",
+              "CMP193",
+              "U843"
+            ],
+            "concept_name": "Process orchestration",
+            "scope_summary": "Activités et intervenants d’un processus.",
+            "approach_summary": "Coordonner les étapes et leurs dépendances.",
+            "definition_choice": "Appui de Process orchestration : Activités et intervenants d’un processus. Limite de reprise dans FLOW : FLOW sépare explicitement orchestration, adaptation et exécution physique.",
+            "term_choice": "Le repère natif « Process orchestration » étaye le rapprochement décrit ci-dessous. « Fulfilment Coordination » nomme la responsabilité FLOW à cette maille ; la proximité des termes ne prouve pas une nomenclature commune."
+          },
+          {
+            "vendor": "TM Forum",
+            "product": "Service Ordering Management",
+            "source_title": "TMF641 Service Ordering Management API REST Specification",
+            "source_url": "https://tmf-open-api-table-documents.s3.eu-west-1.amazonaws.com/Historic/TMF641_Service_Ordering/3.0.0/user_guides/TMF641_Service_Ordering_Management_API_user_guides_18.5.1.pdf",
+            "source_version": "Version 3.0.0, Release 18.5.0, janvier 2019",
+            "source_locator": "Pages 5, 8–15 : Service Order ; dates ; dépendances ; états",
+            "consulted_on": "2026-09-19",
+            "evidence_limits": "PDF primaire consulté ; référence télécom historique. Les états et cardinalités TMF ne sont pas adoptés par FLOW.",
+            "element_name": "Service order dependency",
+            "element_type": "Concept documenté par la source primaire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Relations de prérequis entre demandes de service.",
+            "differences": "TMF décrit les liens de demandes ; il ne définit pas tout le pilotage du processus.",
+            "flow_position": "Coordonner le déclenchement, les dépendances et la progression des prestations jusqu’aux résultats attendus, en tenant compte des faits d’exécution et des adaptations autorisées. Commandes passives, pilotage par les tâches du workflow et réalisation du prestataire restent distincts dans FLOW.",
+            "status": "proposed",
+            "source_refs": [
+              "U477",
+              "ELM464",
+              "CMP193",
+              "U843"
+            ],
+            "concept_name": "Service order dependency",
+            "scope_summary": "Relations de prérequis entre demandes de service.",
+            "approach_summary": "Attendre le résultat requis avant la suite.",
+            "definition_choice": "Appui de Service order dependency : Relations de prérequis entre demandes de service. Limite de reprise dans FLOW : TMF décrit les liens de demandes ; il ne définit pas tout le pilotage du processus.",
+            "term_choice": "Le repère natif « Service order dependency » étaye le rapprochement décrit ci-dessous. « Fulfilment Coordination » nomme la responsabilité FLOW à cette maille ; la proximité des termes ne prouve pas une nomenclature commune."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Microsoft Dynamics 365 — application indiquée par la source",
+            "element_name": "Create orchestration flows | Microsoft Learn",
+            "concept_name": "Create orchestration flows | Microsoft Learn",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Les flows relient événements reçus, règles et actions d’orchestration.",
+            "approach_summary": "Rapprochement avec Fulfilment Coordination : Les flows relient événements reçus, règles et actions d’orchestration.",
+            "similarities": "Les flows relient événements reçus, règles et actions d’orchestration.",
+            "differences": "Les étapes techniques ne sont pas automatiquement des capacités ou comportements ; FLOW exprime les responsabilités et résultats métier.",
+            "flow_position": "Coordonner le déclenchement, les dépendances et la progression des prestations jusqu’aux résultats attendus, en tenant compte des faits d’exécution et des adaptations autorisées. Commandes passives, pilotage par les tâches du workflow et réalisation du prestataire restent distincts dans FLOW.",
+            "source_title": "Create orchestration flows | Microsoft Learn",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/intelligent-order-management/orchestration-flows",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Create orchestration flows | Microsoft Learn — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Les étapes techniques ne sont pas automatiquement des capacités ou comportements ; FLOW exprime les responsabilités et résultats métier.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM801",
+              "U843"
+            ],
+            "term_choice": "Le nom Fulfilment Coordination reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Les flows relient événements reçus, règles et actions d’orchestration. Frontière conservée : Les étapes techniques ne sont pas automatiquement des capacités ou comportements ; FLOW exprime les responsabilités et résultats métier."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Executing the Advanced Intercompany Sales and Stock Transfer Proc",
+            "concept_name": "Executing the Advanced Intercompany Sales and Stock Transfer Proc",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Les dates de transfert de contrôle déclenchent des mouvements valorisés en transit ; VCM orchestre et suit les échanges intercompany.",
+            "approach_summary": "Rapprochement avec Fulfilment Coordination : Les dates de transfert de contrôle déclenchent des mouvements valorisés en transit ; VCM orchestre et suit les échanges intercompany.",
+            "similarities": "Les dates de transfert de contrôle déclenchent des mouvements valorisés en transit ; VCM orchestre et suit les échanges intercompany.",
+            "differences": "Appui à la propriété contractuelle et à un parcours orchestré ; VCM ne démontre pas une orchestration universelle ni toutes les adaptations locales de FLOW.",
+            "flow_position": "Coordonner le déclenchement, les dépendances et la progression des prestations jusqu’aux résultats attendus, en tenant compte des faits d’exécution et des adaptations autorisées. Commandes passives, pilotage par les tâches du workflow et réalisation du prestataire restent distincts dans FLOW.",
+            "source_title": "Executing the Advanced Intercompany Sales and Stock Transfer Proc",
+            "source_url": "https://learning.sap.com/courses/functions-innovations-in-sap-s-4hana-sales/executing-the-advanced-intercompany-sales-and-stock-transfer-process_c5f8e409-c8e3-4e0a-b736-6d1d93d0f2bc",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Executing the Advanced Intercompany Sales and Stock Transfer Proc — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Appui à la propriété contractuelle et à un parcours orchestré ; VCM ne démontre pas une orchestration universelle ni toutes les adaptations locales de FLOW.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM322",
+              "U843"
+            ],
+            "term_choice": "Le nom Fulfilment Coordination reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Les dates de transfert de contrôle déclenchent des mouvements valorisés en transit ; VCM orchestre et suit les échanges intercompany. Frontière conservée : Appui à la propriété contractuelle et à un parcours orchestré ; VCM ne démontre pas une orchestration universelle ni toutes les adaptations locales de FLOW."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Fulfilment Coordination porte la responsabilité décrite ; les produits apportent des correspondances partielles, sans taxonomie commune.",
+          "flow_scope": "Coordonner le déclenchement, les dépendances et la progression des prestations jusqu’aux résultats attendus, en tenant compte des faits d’exécution et des adaptations autorisées.",
+          "flow_approach": "Coordonner le déclenchement et l’enchaînement des prestations du plan retenu, en tenant compte de leurs dépendances, des prises en charge et des faits d’exécution. Mobiliser les familles de [Service Orders](glossary:TER066) pour tenir les demandes et leurs évolutions.\n\nExemple : coordonner la préparation, la disponibilité du document et la collecte. Si la décision d’adaptation retient un autre transporteur, coordonner la modification des prestations concernées et leur nouvel enchaînement.\n\nLa détermination de la variation du plan appartient à [Fulfilment Adaptation Decision](glossary:TER177). L’orchestration peut lui transmettre un aléa, mais ne porte plus cette décision dans sa propre définition. Les exécutants conservent l’organisation de leurs opérations internes. Aucun produit logiciel particulier, contrôle humain systématique ou rollback physique universel n’est présumé.\n\nFrontière : Décision [Fulfilment Adaptation Decision](model:D06.f) séparée ; pas de rollback physique ni seconde promesse.\n\nConvention U409 : le Process orchestre des Services. Les [Tasks](glossary:TER089) expriment les contributions au processus ; les services réalisent les prestations sollicitées, humaines, physiques ou numériques. Un appel informatique est un moyen de sollicitation ou de feedback, pas le service métier lui-même. [Fulfilment Coordination](glossary:TER176) coordonne la progression ; [Fulfilment Adaptation Decision](glossary:TER177) choisit les adaptations ; [Operations Tracking](glossary:TER179) intègre les faits d’exécution ; [Operations Visibility](glossary:TER178) restitue leur avancement et [Process, Tasks & Order Visibility](glossary:TER175) en expose la contribution à la progression du processus. Les exécutants gardent leurs opérations internes. Le périmètre Supply et les responsabilités des sous-domaines restent inchangés ; aucun produit logiciel particulier ou nouveau niveau descriptif imposé.\n\nDistinguer le plan d’exécution coordonné du [master plan de matching](glossary:TER100) arbitré dans [Availability](glossary:TER112).\n\n[Service Management](model:subdomain-service-orders) tient le cycle et les engagements des ordres de prestation. L’orchestration utilise leurs réponses et coordonne les conditions d’activation et dépendances ; elle ne recrée pas leur cycle.\n\nU706/U709 : Coordonner aussi les prestations exécutées à distance : solliciter le service, attendre son résultat métier et poursuivre le flux selon ce résultat. Une acceptation du déclenchement ne vaut pas réalisation.\n\nAppliquer les attentes et libérations retenues par [Service Order Release Decision](model:service-order-release-decision), puis suivre la prise en charge des ordres. Un lot ne fusionne pas leurs identités. Distinguer une information anticipée de l’autorisation de lancement ; ne pas considérer la transmission comme preuve de réalisation.\n\nCoordonner les prestations dans le mandat reçu d’[Process Orchestration](glossary:TER129), qui conduit le parcours de la commande. Une dépendance entre préparation et collecte ne se confond pas avec une attente de confirmation client dans ce parcours. Retourner les résultats et aléas utiles à [Process Sentry](glossary:TER127) ; ne pas modifier seul les engagements de la commande.\n\nExécuter les tâches de coordination confiées par le moteur de [Reactive Workflow Management](glossary:TER125). Les [Service Orders](glossary:TER066) restent des commandes passives ; leurs états et résultats alimentent le suivi conduit par les tâches du workflow. La coordination locale ne choisit pas un nouveau parcours de commande hors du mandat reçu.",
+          "synthesis": [
+            "Camunda place la coordination entre personnes et systèmes au cœur de Fulfilment Coordination. TM Forum décrit des dépendances entre commandes ou lignes de service. Le premier porte le déroulement global, le second un moyen de rendre les prérequis explicites.",
+            "FLOW retient la coordination de prestations Supply et la sépare de la décision d’adaptation. Une prestation physique déjà réalisée ne peut pas être annulée comme une simple étape informatique."
+          ],
+          "examples": [
+            {
+              "title": "Illustration FLOW — attendre les deux prérequis",
+              "situation": "La collecte dépend de la préparation des colis et de la disponibilité du document.",
+              "outcome": "La suite tient compte des deux résultats connus.",
+              "lesson": "L’orchestration coordonne les prestations sans réaliser elle-même la préparation ou le transport.",
+              "source_title": "TMF641 Service Ordering Management API REST Specification",
+              "source_url": "https://tmf-open-api-table-documents.s3.eu-west-1.amazonaws.com/Historic/TMF641_Service_Ordering/3.0.0/user_guides/TMF641_Service_Ordering_Management_API_user_guides_18.5.1.pdf",
+              "source_refs": [
+                "U477",
+                "ELM464",
+                "CMP193"
+              ]
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "id": "BC-053.01",
+          "resultat": "Tenir les dépendances entre prestations"
+        },
+        {
+          "id": "BC-053.02",
+          "resultat": "Déclencher les prestations autorisées"
+        },
+        {
+          "id": "BC-053.03",
+          "resultat": "Suivre leur progression vers les résultats attendus"
+        }
+      ],
+      "boundary": "Réutilise l’exécution durable de Process Orchestration."
+    },
+    {
+      "id": "BC-054",
+      "native_id": "D06.f",
+      "source": {
+        "name": "Fulfilment Adaptation Decision",
+        "definition": "Déterminer les adaptations du plan d’exécution permettant de préserver la promesse de l’[Order](glossary:TER012) et les grands équilibres du [Matching Master Plan](glossary:TER100) face aux aléas.",
+        "finality": "Retenir une variation de réalisation adaptée à l’aléa et aux contraintes Supply.",
+        "nature": "decision",
+        "scope": "Déterminer la variation à retenir lorsqu’un fait, un retard ou un échec remet en cause le plan d’exécution. Mobiliser les décisions de service, les capacités communiquées et les informations sur les demandes et réalisations.\n\nExemple : un [SLA](glossary:TER076) était compatible avec la collecte, mais une panne retarde la préparation. Déterminer une autre collecte, un autre transporteur ou une réalisation partielle selon les possibilités ; Orchestration coordonne ensuite les prestations du plan retenu.\n\nSi la variation remet la promesse Supply en cause, fournir à [Order Management](model:D04) les faits et variantes utiles à son réexamen. Cette capacité ne décide pas seule d’une nouvelle promesse. La latitude d’adaptation relève des règles de fonctionnement et ne conditionne pas le catalogue.\n\nDecision détermine une réponse métier ; Planning conserve le sens reconfigurer, simuler et valider en mobilisant des décisions. La séparation demandée n’ajoute pas automatiquement une capacité Planning ou un contrôle humain obligatoire.\n\nFrontière : Remonter effet promesse à [Order Management](model:D04) ; [Availability](glossary:TER112) peut réexaminer les possibilités de promesse sans décider le transporteur.\n\nConvention U409 : le Process orchestre des Services. Les [Tasks](glossary:TER089) expriment les contributions au processus ; les services réalisent les prestations sollicitées, humaines, physiques ou numériques. Un appel informatique est un moyen de sollicitation ou de feedback, pas le service métier lui-même. [Fulfilment Coordination](glossary:TER176) coordonne la progression ; [Fulfilment Adaptation Decision](glossary:TER177) choisit les adaptations ; [Operations Tracking](model:D07.d) recueille les faits de réalisation ; [Operations Visibility](model:operations-visibility) restitue leur progression et leurs écarts. Les exécutants gardent leurs opérations internes. Le périmètre Supply et les responsabilités des sous-domaines restent inchangés ; aucun moteur de workflow ou nouveau niveau descriptif imposé.\n\nLe plan concerné est le plan d’exécution. Préserver la promesse et les équilibres du [Matching Master Plan](glossary:TER100). Transmettre les impacts non absorbables aux responsables concernés : [Master Plan](glossary:TER111) pour les arbitrages collectifs, [Availability](glossary:TER112) pour les possibilités de promesse et [Order Management](model:D04) pour les engagements, sans définir de nouveaux seuils ici.\n\nLa rétention anticipée et le regroupement en fonctionnement normal relèvent de [Service Order Release Decision](model:service-order-release-decision). Une adaptation peut modifier les conditions de libération, qui sont alors réévaluées ; ne pas dupliquer la décision de choix des lots.\n\n[Transport Plan Decision](model:transport-plan-decision) construit ou révise les chargements et parcours confiés, en préservant les engagements et les affectations. Cette décision ne se confond ni avec le choix de prestation ou prestataire, ni avec le moment de libération des ordres, ni avec les engagements portés par [Transport Order](model:service-order-transport).\n\nAdapter localement les prestations dans le mandat confié, en préservant les engagements et les autorisations. Si la réponse nécessite de réorganiser le parcours de la commande, transmettre le contexte à [Process Sentry](glossary:TER127), qui peut solliciter [Process Planning](glossary:TER128). Une adaptation locale autorisée ne nécessite pas systématiquement cette réorganisation.",
+        "market_comparisons": [
+          {
+            "vendor": "Camunda",
+            "product": "Fulfilment Coordination",
+            "source_title": "The Process Orchestration Handbook",
+            "source_url": "https://camunda.com/process-orchestration/",
+            "source_version": "Guide web évolutif",
+            "source_locator": "What is process orchestration? ; Processes with diverse endpoints ; Complexity",
+            "consulted_on": "2026-09-19",
+            "evidence_limits": "Document primaire consulté ; rapprochement de concepts, sans preuve de réalisation Beaumanoir.",
+            "element_name": "Exception handling",
+            "element_type": "Concept documenté par la source primaire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Situations qui empêchent le déroulement prévu.",
+            "differences": "La plateforme mêle décision et coordination ; FLOW les distingue.",
+            "flow_position": "Choisir comment faire évoluer le plan quand l’exécution rencontre un aléa. Fulfilment Adaptation Decision détermine la variation à retenir et signale à la promesse Supply les effets qui la concernent.\n\nAdapter localement les prestations dans le mandat confié, en préservant les engagements et les autorisations. Si la réponse nécessite de réorganiser le parcours de la commande, transmettre le contexte à [Process Sentry](glossary:TER127), qui peut solliciter [Process Planning](glossary:TER128). Une adaptation locale autorisée ne nécessite pas systématiquement cette réorganisation.",
+            "status": "proposed",
+            "source_refs": [
+              "U407",
+              "U408",
+              "U409",
+              "ELM244",
+              "CMP155",
+              "U477",
+              "ELM330",
+              "CMP193",
+              "U843"
+            ],
+            "concept_name": "Exception handling",
+            "scope_summary": "Situations qui empêchent le déroulement prévu.",
+            "approach_summary": "Prévoir une suite adaptée aux circonstances.",
+            "definition_choice": "Appui de Exception handling : Situations qui empêchent le déroulement prévu. Limite de reprise dans FLOW : La plateforme mêle décision et coordination ; FLOW les distingue.",
+            "term_choice": "Le repère natif « Exception handling » étaye le rapprochement décrit ci-dessous. « Fulfilment Adaptation Decision » nomme la responsabilité FLOW à cette maille ; la proximité des termes ne prouve pas une nomenclature commune."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Intelligent Order Management",
+            "source_title": "Intelligent Order Management overview",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/intelligent-order-management/overview",
+            "source_version": "Mise à jour du 30 janvier 2026",
+            "source_locator": "Orchestration ; Providers ; Fulfillment optimization",
+            "consulted_on": "2026-09-19",
+            "evidence_limits": "Document primaire consulté ; rapprochement de concepts, sans preuve de réalisation Beaumanoir.",
+            "element_name": "Orchestration",
+            "element_type": "Concept documenté par la source primaire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Parcours de commande soumis à des contraintes.",
+            "differences": "Le produit ne définit pas une capacité FLOW autonome portant ce nom.",
+            "flow_position": "Choisir comment faire évoluer le plan quand l’exécution rencontre un aléa. Fulfilment Adaptation Decision détermine la variation à retenir et signale à la promesse Supply les effets qui la concernent.\n\nAdapter localement les prestations dans le mandat confié, en préservant les engagements et les autorisations. Si la réponse nécessite de réorganiser le parcours de la commande, transmettre le contexte à [Process Sentry](glossary:TER127), qui peut solliciter [Process Planning](glossary:TER128). Une adaptation locale autorisée ne nécessite pas systématiquement cette réorganisation.",
+            "status": "proposed",
+            "source_refs": [
+              "U407",
+              "U408",
+              "U409",
+              "ELM244",
+              "CMP155",
+              "U477",
+              "ELM405",
+              "CMP193",
+              "U843"
+            ],
+            "concept_name": "Orchestration",
+            "scope_summary": "Parcours de commande soumis à des contraintes.",
+            "approach_summary": "Orienter les actions selon les conditions rencontrées.",
+            "definition_choice": "Appui de Orchestration : Parcours de commande soumis à des contraintes. Limite de reprise dans FLOW : Le produit ne définit pas une capacité FLOW autonome portant ce nom.",
+            "term_choice": "Le repère natif « Orchestration » étaye le rapprochement décrit ci-dessous. « Fulfilment Adaptation Decision » nomme la responsabilité FLOW à cette maille ; la proximité des termes ne prouve pas une nomenclature commune."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Executing the Advanced Intercompany Sales and Stock Transfer Proc",
+            "concept_name": "Executing the Advanced Intercompany Sales and Stock Transfer Proc",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Les dates de transfert de contrôle déclenchent des mouvements valorisés en transit ; VCM orchestre et suit les échanges intercompany.",
+            "approach_summary": "Rapprochement avec Fulfilment Adaptation Decision : Les dates de transfert de contrôle déclenchent des mouvements valorisés en transit ; VCM orchestre et suit les échanges intercompany.",
+            "similarities": "Les dates de transfert de contrôle déclenchent des mouvements valorisés en transit ; VCM orchestre et suit les échanges intercompany.",
+            "differences": "Appui à la propriété contractuelle et à un parcours orchestré ; VCM ne démontre pas une orchestration universelle ni toutes les adaptations locales de FLOW.",
+            "flow_position": "FLOW conserve le périmètre métier de Fulfilment Adaptation Decision. Appui à la propriété contractuelle et à un parcours orchestré ; VCM ne démontre pas une orchestration universelle ni toutes les adaptations locales de FLOW.\n\nAdapter localement les prestations dans le mandat confié, en préservant les engagements et les autorisations. Si la réponse nécessite de réorganiser le parcours de la commande, transmettre le contexte à [Process Sentry](glossary:TER127), qui peut solliciter [Process Planning](glossary:TER128). Une adaptation locale autorisée ne nécessite pas systématiquement cette réorganisation.",
+            "source_title": "Executing the Advanced Intercompany Sales and Stock Transfer Proc",
+            "source_url": "https://learning.sap.com/courses/functions-innovations-in-sap-s-4hana-sales/executing-the-advanced-intercompany-sales-and-stock-transfer-process_c5f8e409-c8e3-4e0a-b736-6d1d93d0f2bc",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Executing the Advanced Intercompany Sales and Stock Transfer Proc — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Appui à la propriété contractuelle et à un parcours orchestré ; VCM ne démontre pas une orchestration universelle ni toutes les adaptations locales de FLOW.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM322",
+              "U843"
+            ],
+            "term_choice": "Le nom Fulfilment Adaptation Decision reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Les dates de transfert de contrôle déclenchent des mouvements valorisés en transit ; VCM orchestre et suit les échanges intercompany. Frontière conservée : Appui à la propriété contractuelle et à un parcours orchestré ; VCM ne démontre pas une orchestration universelle ni toutes les adaptations locales de FLOW."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Fulfilment Adaptation Decision porte la responsabilité décrite ; les produits apportent des correspondances partielles, sans taxonomie commune.",
+          "flow_scope": "Déterminer les adaptations du plan d’exécution permettant de préserver la promesse de l’[Order](glossary:TER012) et les grands équilibres du [Matching Master Plan](glossary:TER100) face aux aléas.",
+          "flow_approach": "Déterminer la variation à retenir lorsqu’un fait, un retard ou un échec remet en cause le plan d’exécution. Mobiliser les décisions de service, les capacités communiquées et les informations sur les demandes et réalisations.\n\nExemple : un [SLA](glossary:TER076) était compatible avec la collecte, mais une panne retarde la préparation. Déterminer une autre collecte, un autre transporteur ou une réalisation partielle selon les possibilités ; Orchestration coordonne ensuite les prestations du plan retenu.\n\nSi la variation remet la promesse Supply en cause, fournir à [Order Management](model:D04) les faits et variantes utiles à son réexamen. Cette capacité ne décide pas seule d’une nouvelle promesse. La latitude d’adaptation relève des règles de fonctionnement et ne conditionne pas le catalogue.\n\nDecision détermine une réponse métier ; Planning conserve le sens reconfigurer, simuler et valider en mobilisant des décisions. La séparation demandée n’ajoute pas automatiquement une capacité Planning ou un contrôle humain obligatoire.\n\nFrontière : Remonter effet promesse à [Order Management](model:D04) ; [Availability](glossary:TER112) peut réexaminer les possibilités de promesse sans décider le transporteur.\n\nConvention U409 : le Process orchestre des Services. Les [Tasks](glossary:TER089) expriment les contributions au processus ; les services réalisent les prestations sollicitées, humaines, physiques ou numériques. Un appel informatique est un moyen de sollicitation ou de feedback, pas le service métier lui-même. [Fulfilment Coordination](glossary:TER176) coordonne la progression ; [Fulfilment Adaptation Decision](glossary:TER177) choisit les adaptations ; [Operations Tracking](model:D07.d) recueille les faits de réalisation ; [Operations Visibility](model:operations-visibility) restitue leur progression et leurs écarts. Les exécutants gardent leurs opérations internes. Le périmètre Supply et les responsabilités des sous-domaines restent inchangés ; aucun moteur de workflow ou nouveau niveau descriptif imposé.\n\nLe plan concerné est le plan d’exécution. Préserver la promesse et les équilibres du [Matching Master Plan](glossary:TER100). Transmettre les impacts non absorbables aux responsables concernés : [Master Plan](glossary:TER111) pour les arbitrages collectifs, [Availability](glossary:TER112) pour les possibilités de promesse et [Order Management](model:D04) pour les engagements, sans définir de nouveaux seuils ici.\n\nLa rétention anticipée et le regroupement en fonctionnement normal relèvent de [Service Order Release Decision](model:service-order-release-decision). Une adaptation peut modifier les conditions de libération, qui sont alors réévaluées ; ne pas dupliquer la décision de choix des lots.\n\n[Transport Plan Decision](model:transport-plan-decision) construit ou révise les chargements et parcours confiés, en préservant les engagements et les affectations. Cette décision ne se confond ni avec le choix de prestation ou prestataire, ni avec le moment de libération des ordres, ni avec les engagements portés par [Transport Order](model:service-order-transport).\n\nAdapter localement les prestations dans le mandat confié, en préservant les engagements et les autorisations. Si la réponse nécessite de réorganiser le parcours de la commande, transmettre le contexte à [Process Sentry](glossary:TER127), qui peut solliciter [Process Planning](glossary:TER128). Une adaptation locale autorisée ne nécessite pas systématiquement cette réorganisation.",
+          "synthesis": [
+            "Camunda traite les exceptions dans des processus impliquant plusieurs intervenants. Microsoft IOM adapte les parcours de satisfaction aux politiques et contraintes. Les deux associent réaction à l’aléa et progression du parcours.",
+            "FLOW rend visible la décision d’adaptation comme responsabilité distincte. Orchestration met en œuvre le nouvel enchaînement ; un changement de date promise nécessite le réexamen de la promesse, pas une conclusion implicite du suivi."
+          ],
+          "examples": [
+            {
+              "title": "Illustration FLOW — changer la collecte",
+              "situation": "Une panne retarde la préparation au-delà de la collecte prévue.",
+              "outcome": "La décision examine une autre collecte ou une réalisation partielle selon les contraintes.",
+              "lesson": "Si aucune variante ne respecte l’engagement client, la promesse doit être réexaminée.",
+              "source_title": "The Process Orchestration Handbook",
+              "source_url": "https://camunda.com/process-orchestration/",
+              "source_refs": [
+                "U477",
+                "ELM330",
+                "CMP193"
+              ]
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "id": "BC-054.01",
+          "resultat": "Qualifier l’impact d’un aléa"
+        },
+        {
+          "id": "BC-054.02",
+          "resultat": "Comparer les adaptations compatibles avec la promesse"
+        },
+        {
+          "id": "BC-054.03",
+          "resultat": "Faire autoriser et appliquer l’adaptation retenue"
+        }
+      ],
+      "boundary": "Ne suppose pas que tout acte physique est réversible."
+    },
+    {
+      "id": "BC-055",
+      "native_id": "service-order-release-decision",
+      "source": {
+        "name": "Service Order Release Decision",
+        "nature": "decision",
+        "definition": "Déterminer quels ordres de prestation retenir ou libérer ensemble, et à quel moment, pour organiser leur traitement et favoriser les regroupements utiles tout en respectant les engagements.",
+        "finality": "Améliorer l’organisation du traitement et les regroupements logistiques sans compromettre les engagements.",
+        "scope": "Déterminer les ordres et quantités éligibles à libérer ensemble, leur moment ou condition de libération et les éléments à maintenir en attente, avec leur justification. Mobiliser exigences de livraison, dates de préparation et d’expédition, complétude attendue, compatibilité des regroupements et capacités communiquées par les exécutants. Comparer les bénéfices du regroupement aux conséquences de l’attente ; aucune optimisation mathématique universelle n’est promise.\n\n[Fulfilment Coordination](model:D06.d) matérialise l’attente et la libération décidées, puis suit la prise en charge. Les familles de [Service Orders](glossary:TER066) conservent leur identité, leurs exigences et engagements. Une transmission anticipée pour visibilité peut être distincte de l’autorisation de lancement ; aucun protocole ou fichier unique n’est imposé.\n\nLa décision intervient aussi en fonctionnement normal. [Fulfilment Adaptation Decision](model:D06.f) traite les aléas remettant le plan d’exécution en cause ; la libération peut ensuite être réévaluée. Les fenêtres, délais maximaux, seuils et exceptions sont des règles ; ne pas créer une capacité par paramètre.\n\nRespecter la promesse portée par [Order Management](model:D04) et les affectations d’[Order Backlog Management](glossary:TER269). Si la rétention compromet ces engagements, transmettre les impacts à leurs responsables ; ne pas modifier silencieusement dates, quantités ou affectations. Les ordres attendus et capacités communiquées sont des informations datées, sans certitude d’arrivée inventée.\n\nLibérer ensemble ne garantit pas préparer ensemble ni obtenir une seule palette. Les [Picking Order](model:service-order-picking) et [Packing Order](model:service-order-packing) portent les exigences de traitement commun ; les exécutants conservent vagues, parcours, tâches et palettisation détaillée.\n\nExemple fictif : une commande B2B de 300 pièces devient éligible en trois ensembles. Retenir les premiers pour une libération commune compatible avec la promesse, puis demander un packing commun. Le nombre réel de palettes dépend des biens, des exigences et des capacités physiques.\n\n[Transport Plan Decision](model:transport-plan-decision) construit ou révise les chargements et parcours confiés, en préservant les engagements et les affectations. Cette décision ne se confond ni avec le choix de prestation ou prestataire, ni avec le moment de libération des ordres, ni avec les engagements portés par [Transport Order](model:service-order-transport).\n\nDécider du moment et du regroupement des prestations dans l’autorisation reçue d’[Process Orchestration](glossary:TER129). Cette décision ne remplace pas l’autorisation de poursuivre le parcours de la commande. Si une confirmation client reste requise, l’éligibilité logistique ne permet pas à elle seule de la contourner.",
+        "decomposition_rationale": "Deux bénéfices et mécanismes distincts : organiser la réception de charge et éviter la fragmentation du traitement d’un ensemble client. Fenêtres, volumes et délais restent des paramètres de règles.",
+        "market_comparisons": [
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Supply Chain Management",
+            "element_name": "Release to warehouse",
+            "concept_name": "Release to warehouse",
+            "element_type": "Fonction produit documentée",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Libération de plusieurs ordres, traitement récurrent, sélection des quantités et regroupement par client. La création de vagues et de travail dépend du paramétrage.",
+            "differences": "Page primaire ouverte ; mécanisme produit, pas taxonomie FLOW ni garantie d’optimisation.",
+            "flow_position": "Déterminer quels ordres de prestation retenir ou libérer ensemble, et à quel moment, pour organiser leur traitement et favoriser les regroupements utiles tout en respectant les engagements.\n\nDécider du moment et du regroupement des prestations dans l’autorisation reçue d’[Process Orchestration](glossary:TER129). Cette décision ne remplace pas l’autorisation de poursuivre le parcours de la commande. Si une confirmation client reste requise, l’éligibilité logistique ne permet pas à elle seule de la contourner.",
+            "term_choice": "Nom de capacité ou de comportement FLOW ; vocabulaire inspiré de release et consolidation, sans consensus de taxonomie revendiqué.",
+            "definition_choice": "Appui de Release to warehouse : Libération de plusieurs ordres, traitement récurrent, sélection des quantités et regroupement par client. La création de vagues et de travail dépend du paramétrage. Limite de reprise dans FLOW : Page primaire ouverte ; mécanisme produit, pas taxonomie FLOW ni garantie d’optimisation.",
+            "scope_summary": "Libération de plusieurs ordres, traitement récurrent, sélection des quantités et regroupement par client. La création de vagues et de travail dépend du paramétrage.",
+            "approach_summary": "Déterminer les ensembles et moments de libération ; distinguer leur application et les opérations internes de l’exécutant.",
+            "source_title": "Release to warehouse",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/release-to-warehouse-process",
+            "source_version": "Documentation évolutive, édition précise non indiquée",
+            "source_locator": "Automatic release to the warehouse",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Page primaire ouverte ; mécanisme produit, pas taxonomie FLOW ni garantie d’optimisation.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM767",
+              "CMP300",
+              "U759",
+              "U843"
+            ]
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Supply Chain Management",
+            "element_name": "Configure shipment consolidation policies",
+            "concept_name": "Configure shipment consolidation policies",
+            "element_type": "Fonction produit documentée",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Regrouper des lignes de plusieurs commandes pour un même compte, entrepôt et mode de livraison selon un pool ; la documentation distingue explicitement le besoin piloté par le client.",
+            "differences": "Page primaire ouverte ; consolidation d’expéditions, pas garantie d’une seule palette.",
+            "flow_position": "Déterminer quels ordres de prestation retenir ou libérer ensemble, et à quel moment, pour organiser leur traitement et favoriser les regroupements utiles tout en respectant les engagements.\n\nDécider du moment et du regroupement des prestations dans l’autorisation reçue d’[Process Orchestration](glossary:TER129). Cette décision ne remplace pas l’autorisation de poursuivre le parcours de la commande. Si une confirmation client reste requise, l’éligibilité logistique ne permet pas à elle seule de la contourner.",
+            "term_choice": "Nom de capacité ou de comportement FLOW ; vocabulaire inspiré de release et consolidation, sans consensus de taxonomie revendiqué.",
+            "definition_choice": "Appui de Configure shipment consolidation policies : Regrouper des lignes de plusieurs commandes pour un même compte, entrepôt et mode de livraison selon un pool ; la documentation distingue explicitement le besoin piloté par le client. Limite de reprise dans FLOW : Page primaire ouverte ; consolidation d’expéditions, pas garantie d’une seule palette.",
+            "scope_summary": "Regrouper des lignes de plusieurs commandes pour un même compte, entrepôt et mode de livraison selon un pool ; la documentation distingue explicitement le besoin piloté par le client.",
+            "approach_summary": "Déterminer les ensembles et moments de libération ; distinguer leur application et les opérations internes de l’exécutant.",
+            "source_title": "Configure shipment consolidation policies",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/configure-shipment-consolidation-policies",
+            "source_version": "Documentation évolutive, édition précise non indiquée",
+            "source_locator": "Scenario 3, Order pool, client-driven consolidation",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Page primaire ouverte ; consolidation d’expéditions, pas garantie d’une seule palette.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM768",
+              "CMP300",
+              "U759",
+              "U843"
+            ]
+          },
+          {
+            "vendor": "IBM",
+            "product": "Sterling Order Management",
+            "element_name": "Using economic shipping parameters",
+            "concept_name": "Using economic shipping parameters",
+            "element_type": "Fonction produit documentée",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Un ordre ou une expédition peut être retenu en anticipation d’un autre pour consolidation ; délai autorisé et fenêtre d’expédition limitent les regroupements.",
+            "differences": "Passages primaires indexés consultés ; ouverture directe refusée HTTP 403. Rétention économique documentée, pas preuve d’optimisation de toutes les charges WMS.",
+            "flow_position": "Déterminer quels ordres de prestation retenir ou libérer ensemble, et à quel moment, pour organiser leur traitement et favoriser les regroupements utiles tout en respectant les engagements.\n\nDécider du moment et du regroupement des prestations dans l’autorisation reçue d’[Process Orchestration](glossary:TER129). Cette décision ne remplace pas l’autorisation de poursuivre le parcours de la commande. Si une confirmation client reste requise, l’éligibilité logistique ne permet pas à elle seule de la contourner.",
+            "term_choice": "Nom de capacité ou de comportement FLOW ; vocabulaire inspiré de release et consolidation, sans consensus de taxonomie revendiqué.",
+            "definition_choice": "Appui de Using economic shipping parameters : Un ordre ou une expédition peut être retenu en anticipation d’un autre pour consolidation ; délai autorisé et fenêtre d’expédition limitent les regroupements. Limite de reprise dans FLOW : Passages primaires indexés consultés ; ouverture directe refusée HTTP 403. Rétention économique documentée, pas preuve d’optimisation de toutes les charges WMS.",
+            "scope_summary": "Un ordre ou une expédition peut être retenu en anticipation d’un autre pour consolidation ; délai autorisé et fenêtre d’expédition limitent les regroupements.",
+            "approach_summary": "Déterminer les ensembles et moments de libération ; distinguer leur application et les opérations internes de l’exécutant.",
+            "source_title": "Using economic shipping parameters",
+            "source_url": "https://www.ibm.com/docs/en/order-management?topic=features-using-economic-shipping-parameters",
+            "source_version": "Documentation évolutive, édition précise non indiquée",
+            "source_locator": "Scenarios ; Allow shipment delay ; shipping window",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires indexés consultés ; ouverture directe refusée HTTP 403. Rétention économique documentée, pas preuve d’optimisation de toutes les charges WMS.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM770",
+              "CMP300",
+              "U759",
+              "U843"
+            ]
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Using Wave Management in Warehousing",
+            "concept_name": "Using Wave Management in Warehousing",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Les vagues regroupent des besoins d’entrepôt pour une libération et un traitement coordonnés.",
+            "approach_summary": "Rapprochement avec Service Order Release Decision : Les vagues regroupent des besoins d’entrepôt pour une libération et un traitement coordonnés.",
+            "similarities": "Les vagues regroupent des besoins d’entrepôt pour une libération et un traitement coordonnés.",
+            "differences": "Mécanisme aval WMS : ne démontre pas à lui seul la rétention amont orchestrée par FLOW ni l’optimisation économique d’une palette client complète.",
+            "flow_position": "FLOW conserve le périmètre métier de Service Order Release Decision. Mécanisme aval WMS : ne démontre pas à lui seul la rétention amont orchestrée par FLOW ni l’optimisation économique d’une palette client complète.\n\nDécider du moment et du regroupement des prestations dans l’autorisation reçue d’[Process Orchestration](glossary:TER129). Cette décision ne remplace pas l’autorisation de poursuivre le parcours de la commande. Si une confirmation client reste requise, l’éligibilité logistique ne permet pas à elle seule de la contourner.",
+            "source_title": "Using Wave Management in Warehousing",
+            "source_url": "https://learning.sap.com/courses/implementing-sap-s-4hana-cloud-public-edition-warehouse-management/using-wave-management-in-warehousing_f5d66de1-603e-40a0-b6f8-a671760c84ce",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Using Wave Management in Warehousing — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Mécanisme aval WMS : ne démontre pas à lui seul la rétention amont orchestrée par FLOW ni l’optimisation économique d’une palette client complète.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM785",
+              "U843"
+            ],
+            "term_choice": "Le nom Service Order Release Decision reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Les vagues regroupent des besoins d’entrepôt pour une libération et un traitement coordonnés. Frontière conservée : Mécanisme aval WMS : ne démontre pas à lui seul la rétention amont orchestrée par FLOW ni l’optimisation économique d’une palette client complète."
+          }
+        ],
+        "market_inspiration": {
+          "flow_scope": "Déterminer quels ordres de prestation retenir ou libérer ensemble, et à quel moment, pour organiser leur traitement et favoriser les regroupements utiles tout en respectant les engagements.",
+          "flow_approach": "Déterminer les ordres et quantités éligibles à libérer ensemble, leur moment ou condition de libération et les éléments à maintenir en attente, avec leur justification. Mobiliser exigences de livraison, dates de préparation et d’expédition, complétude attendue, compatibilité des regroupements et capacités communiquées par les exécutants. Comparer les bénéfices du regroupement aux conséquences de l’attente ; aucune optimisation mathématique universelle n’est promise.\n\n[Fulfilment Coordination](model:D06.d) matérialise l’attente et la libération décidées, puis suit la prise en charge. Les familles de [Service Orders](glossary:TER066) conservent leur identité, leurs exigences et engagements. Une transmission anticipée pour visibilité peut être distincte de l’autorisation de lancement ; aucun protocole ou fichier unique n’est imposé.\n\nLa décision intervient aussi en fonctionnement normal. [Fulfilment Adaptation Decision](model:D06.f) traite les aléas remettant le plan d’exécution en cause ; la libération peut ensuite être réévaluée. Les fenêtres, délais maximaux, seuils et exceptions sont des règles ; ne pas créer une capacité par paramètre.\n\nRespecter la promesse portée par [Order Management](model:D04) et les affectations d’[Order Backlog Management](glossary:TER269). Si la rétention compromet ces engagements, transmettre les impacts à leurs responsables ; ne pas modifier silencieusement dates, quantités ou affectations. Les ordres attendus et capacités communiquées sont des informations datées, sans certitude d’arrivée inventée.\n\nLibérer ensemble ne garantit pas préparer ensemble ni obtenir une seule palette. Les [Picking Order](model:service-order-picking) et [Packing Order](model:service-order-packing) portent les exigences de traitement commun ; les exécutants conservent vagues, parcours, tâches et palettisation détaillée.\n\nExemple fictif : une commande B2B de 300 pièces devient éligible en trois ensembles. Retenir les premiers pour une libération commune compatible avec la promesse, puis demander un packing commun. Le nombre réel de palettes dépend des biens, des exigences et des capacités physiques.\n\n[Transport Plan Decision](model:transport-plan-decision) construit ou révise les chargements et parcours confiés, en préservant les engagements et les affectations. Cette décision ne se confond ni avec le choix de prestation ou prestataire, ni avec le moment de libération des ordres, ni avec les engagements portés par [Transport Order](model:service-order-transport).\n\nDécider du moment et du regroupement des prestations dans l’autorisation reçue d’[Process Orchestration](glossary:TER129). Cette décision ne remplace pas l’autorisation de poursuivre le parcours de la commande. Si une confirmation client reste requise, l’éligibilité logistique ne permet pas à elle seule de la contourner.",
+          "choice": "Service Order Release Decision porte la responsabilité décrite ; les produits apportent des correspondances partielles, sans taxonomie commune.",
+          "synthesis": [
+            "Les mécanismes de libération et de regroupement des éditeurs étayent le périmètre ; ils ne transfèrent pas l’autorisation du parcours de commande à la décision logistique."
+          ],
+          "examples": [
+            {
+              "title": "Illustration FLOW — attendre la confirmation",
+              "situation": "La préparation est logistiquement possible mais la confirmation client manque.",
+              "outcome": "Conserver l’attente ; l’éligibilité ne vaut pas autorisation de poursuivre la commande.",
+              "lesson": "Exemple fictif de la frontière FLOW.",
+              "source_refs": [
+                "U843"
+              ],
+              "source_title": "Release to warehouse",
+              "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/release-to-warehouse-process"
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "id": "BC-055.01",
+          "resultat": "Sélectionner les ordres à libérer ensemble"
+        },
+        {
+          "id": "BC-055.02",
+          "resultat": "Déterminer leur moment de libération"
+        },
+        {
+          "id": "BC-055.03",
+          "resultat": "Expliquer attentes et regroupements retenus"
+        }
+      ],
+      "boundary": "Distinct de Delivery Release Decision qui porte les commandes à satisfaire."
+    }
+  ],
+  "native_estimates": [
+    {
+      "id": "erpnext",
+      "native_analogue_units": 849,
+      "base_equivalent_units": 424.5,
+      "complement_equivalent_units": 582.85,
+      "equivalent_units": 1007.35,
+      "common_analogy_jh": 29.35972520052258,
+      "complement_marginal_jh": 46.58058405035008,
+      "jh": 75.94030925087266,
+      "rounded_jh": 80,
+      "not_observed_effort": true
+    },
+    {
+      "id": "odoo",
+      "native_analogue_units": 1040,
+      "base_equivalent_units": 520.0,
+      "complement_equivalent_units": 764.0,
+      "equivalent_units": 1284.0,
+      "common_analogy_jh": 36.699805503415206,
+      "complement_marginal_jh": 62.46643346176347,
+      "jh": 99.16623896517868,
+      "rounded_jh": 100,
+      "not_observed_effort": true
+    },
+    {
+      "id": "tryton",
+      "native_analogue_units": 1195,
+      "base_equivalent_units": 597.5,
+      "complement_equivalent_units": 857.75,
+      "equivalent_units": 1455.25,
+      "common_analogy_jh": 42.75763591056741,
+      "complement_marginal_jh": 71.04632377258181,
+      "jh": 113.80395968314923,
+      "rounded_jh": 110,
+      "not_observed_effort": true
+    },
+    {
+      "id": "axelor",
+      "native_analogue_units": 830,
+      "base_equivalent_units": 415.0,
+      "complement_equivalent_units": 616.5,
+      "equivalent_units": 1031.5,
+      "common_analogy_jh": 28.637979746307312,
+      "complement_marginal_jh": 49.306793942312396,
+      "jh": 77.9447736886197,
+      "rounded_jh": 80,
+      "not_observed_effort": true
+    }
+  ],
+  "proposed_java_jh": null,
+  "diagnostic_java_jh": 77.9447736886197,
+  "diagnostic_rounded_jh": 80,
+  "roles": [
+    {
+      "id": "coordination",
+      "label": "Pilotage de l’équipe produit",
+      "jh": 9
+    },
+    {
+      "id": "analyse_produit",
+      "label": "Analyse métier et fonctionnelle",
+      "jh": 8
+    },
+    {
+      "id": "architecture",
+      "label": "Architecture et conception technique",
+      "jh": 7
+    },
+    {
+      "id": "dev_java",
+      "label": "Développement Java et tests développeur",
+      "jh": 29
+    },
+    {
+      "id": "dev_frontend",
+      "label": "Développement interface et tests développeur",
+      "jh": 5
+    },
+    {
+      "id": "qa",
+      "label": "QA et qualification indépendante",
+      "jh": 11
+    },
+    {
+      "id": "plateforme",
+      "label": "Plateforme / DevOps et mise en service",
+      "jh": 7
+    },
+    {
+      "id": "ux",
+      "label": "UX et ergonomie",
+      "jh": 2
+    },
+    {
+      "id": "securite",
+      "label": "Expertise et revue de sécurité",
+      "jh": 2
+    }
+  ],
+  "roles_status": "Répartition du diagnostic total par activités publiées COCOMO et clés d’organisation Stock proposées ; pas charge observée ni adoption.",
+  "activities": [
+    {
+      "id": "management",
+      "label": "Gestion du projet logiciel",
+      "jh": 8.8135593220339,
+      "percent_by_phase": [
+        14,
+        12,
+        10,
+        14
+      ],
+      "weights": {
+        "coordination": 1
+      }
+    },
+    {
+      "id": "environment",
+      "label": "Environnement et gestion de configuration",
+      "jh": 4.691525423728814,
+      "percent_by_phase": [
+        10,
+        8,
+        5,
+        5
+      ],
+      "weights": {
+        "plateforme": 0.8,
+        "dev_java": 0.2
+      }
+    },
+    {
+      "id": "requirements",
+      "label": "Analyse et exigences",
+      "jh": 8.922033898305084,
+      "percent_by_phase": [
+        38,
+        18,
+        8,
+        4
+      ],
+      "weights": {
+        "analyse_produit": 0.9,
+        "architecture": 0.1
+      }
+    },
+    {
+      "id": "design",
+      "label": "Conception et architecture",
+      "jh": 15.2,
+      "percent_by_phase": [
+        19,
+        36,
+        16,
+        4
+      ],
+      "weights": {
+        "architecture": 0.4,
+        "dev_java": 0.4,
+        "dev_frontend": 0.05,
+        "ux": 0.1,
+        "securite": 0.05
+      }
+    },
+    {
+      "id": "implementation",
+      "label": "Réalisation et tests unitaires",
+      "jh": 21.505084745762716,
+      "percent_by_phase": [
+        8,
+        13,
+        34,
+        19
+      ],
+      "weights": {
+        "dev_java": 0.85,
+        "dev_frontend": 0.15
+      }
+    },
+    {
+      "id": "assessment",
+      "label": "Évaluation, vérification et validation",
+      "jh": 16.271186440677965,
+      "percent_by_phase": [
+        8,
+        10,
+        24,
+        24
+      ],
+      "weights": {
+        "qa": 0.7,
+        "dev_java": 0.2,
+        "dev_frontend": 0.05,
+        "securite": 0.05
+      }
+    },
+    {
+      "id": "deployment",
+      "label": "Préparation du déploiement",
+      "jh": 4.596610169491525,
+      "percent_by_phase": [
+        3,
+        3,
+        3,
+        30
+      ],
+      "weights": {
+        "plateforme": 0.7,
+        "dev_java": 0.2,
+        "coordination": 0.1
+      }
+    }
+  ],
+  "activity_source_ref": "audits/2026-10-30-master-data-calcul/repartitions-sources.json#cocomo",
+  "delay": {
+    "calculated_months": 6.58848350260742,
+    "rounded_months": 7,
+    "status": "Délai local nominal du diagnostic ; pas engagement ni calendrier global. Dépend des mécanismes des autres familles."
+  },
+  "functional_control": {
+    "CFP": 30,
+    "jh": 85.71428571428571,
+    "gap_jh": 7.769512025666003,
+    "gap_pct": 9.967970471893729,
+    "denominator": 77.9447736886197,
+    "not_confidence": true
+  },
+  "measured_change": {
+    "java_units_iteration_2": 195,
+    "java_units_iteration_3": 830,
+    "jh_iteration_2": 20.134969156404345,
+    "jh_iteration_3": 77.9447736886197,
+    "additional_source_files": 1,
+    "resolved_direct_calls": 1,
+    "remaining_delegations": 0
+  },
+  "limits": [
+    "Réutiliser les ordres et le moteur de processus ; chiffrer les dépendances métier, la replanification autorisée et les regroupements de libération.",
+    "Les parts de pertinence et de nouveau code sont des hypothèses non calibrées.",
+    "Le composant natif peut rester plus large que le périmètre Flow ; les quatre chiffres ne sont ni des charges historiques ni des validations indépendantes.",
+    "Un même code peut servir d’analogue à plusieurs familles ; cela ne prouve pas à lui seul un mécanisme Flow commun ni un financement distinct.",
+    "Le comptage COSMIC est proposé, sans revue humaine ni preuve d’exhaustivité."
+  ],
+  "cumulative": {
+    "adopted_jh": 1940,
+    "newly_adopted_jh": 0,
+    "capabilities_reviewed": 55,
+    "total_capabilities": 88,
+    "reviewed_pct": 62.5
+  },
+  "next_iteration_worthwhile": true,
+  "next_iteration_reason": "Audit transversal demandé : vérifier les mécanismes communs, l’exhaustivité fonctionnelle et les analogues non appariés avant une nouvelle adoption.",
+  "lineage": {
+    "iteration_1_sha256": "78db131cfb98eac0cdb137aa905d360cc81c12bd0ce2b9fd36fedaf4609b0ecc",
+    "analysis_1_sha256": "2ee3d7b027089c3585cb1b3553f8ce089a973e3debd8a216462780cce7bb928a",
+    "iteration_2_sha256": "e2db4dd5b79017f7b01e0f4dcef134e922bc33d1eb3e2b20831556e1ddf198c2",
+    "analysis_2_sha256": "a041e3ddc421ee6e8e2cf99a690ba4b2784147b1309b485759eeddf25f531cb5",
+    "inputs_3_sha256": "046d8c39d340cd8b530f41a0230df9647614aa06c770932bb17d5da24b43669f"
+  }
+}

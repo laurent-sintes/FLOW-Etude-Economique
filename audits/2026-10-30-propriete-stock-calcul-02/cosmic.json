@@ -1,0 +1,692 @@
+{
+  "id": "propriete-stock-cosmic-02",
+  "status": "comptage_amont_propose_non_certifie",
+  "groups": [
+    {
+      "id": "COND",
+      "object": "Conditions applicables à la propriété",
+      "attributes": "Référence et version d’accord, portée, critères transmis, validité et type de déclencheur."
+    },
+    {
+      "id": "TRIGGER",
+      "object": "Demande d’évaluation d’une conséquence de propriété",
+      "attributes": "Référence du fait de consommation/vente, échéance ou jalon reçu, périmètre et date."
+    },
+    {
+      "id": "AGREEMENT",
+      "object": "Accord métier reçu",
+      "attributes": "Accord, parties, version et conditions établies ; contenu patrimonial Master Data."
+    },
+    {
+      "id": "FACT",
+      "object": "Fait de stock reconnu",
+      "attributes": "Bien, quantité, unité, dates et source ; registre Stock réutilisé."
+    },
+    {
+      "id": "ENTRY",
+      "object": "Passage de propriété reconnu",
+      "attributes": "Ancien/nouveau propriétaire, biens, quantité, effet, connaissance, fondement et correction."
+    },
+    {
+      "id": "EVIDENCE",
+      "object": "Justificatif d’un passage reconnu",
+      "attributes": "Référence du passage, pièce ou fait, origine et autorité."
+    },
+    {
+      "id": "DETERMINATION",
+      "object": "Détermination de propriété et passages proposés",
+      "attributes": "Résultat, parties, lignes de passage, quantités, dates et acte éventuellement requis. Les lignes proposées restent ici dans le même groupe métier ; pas un CFP par ligne."
+    },
+    {
+      "id": "ACT_LINK",
+      "object": "Acte attendu pour une détermination",
+      "attributes": "Demande, référence externe, état, résultat et lien à la détermination."
+    },
+    {
+      "id": "ACT_REQUEST",
+      "object": "Demande d’acte adressée à son responsable",
+      "attributes": "Action requise, parties, quantités, échéance et références ; pas exécution de l’acte."
+    },
+    {
+      "id": "ACT_RESULT",
+      "object": "Résultat d’un acte reçu",
+      "attributes": "Demande concernée, réalisation/refus, date, preuves et limites."
+    },
+    {
+      "id": "PARTY",
+      "object": "Partie et société",
+      "attributes": "Identité et contexte de partie/société disponibles en Master Data."
+    },
+    {
+      "id": "GOODS",
+      "object": "Bien référencé",
+      "attributes": "Article, lot ou autre identification métier reçue, sans création d’un nouveau référentiel."
+    },
+    {
+      "id": "UNIT",
+      "object": "Unité de quantité",
+      "attributes": "Unité/conversion compatible utilisée depuis Master Data."
+    },
+    {
+      "id": "CORRECTION",
+      "object": "Demande justifiée de correction de propriété",
+      "attributes": "Passage concerné, motif, nouvelle information et références."
+    },
+    {
+      "id": "QUERY",
+      "object": "Demande de consultation ou rapprochement",
+      "attributes": "Portée, dates d’effet/connaissance et filtres de lecture ; occurrences non multipliées."
+    },
+    {
+      "id": "STOCK_POSITION",
+      "object": "Position physique de stock connue",
+      "attributes": "Quantités et périmètre dans le Stock ; ne déduit pas leur propriété légale."
+    },
+    {
+      "id": "OWN_POSITION",
+      "object": "Position de propriété expliquée",
+      "attributes": "Quantités par propriétaire, dates et limites de connaissance issues du registre de propriété."
+    },
+    {
+      "id": "RECONCILIATION",
+      "object": "Rapprochement stock/propriété",
+      "attributes": "Dates, périmètre, références de coupes, écart et explication."
+    },
+    {
+      "id": "SUPPLY",
+      "object": "Fourniture de données de propriété",
+      "attributes": "Position/coupe, consommateur, version et limites ; le transport et la publication Finance restent réutilisés."
+    },
+    {
+      "id": "OUTCOME",
+      "object": "Résultat d’une demande ou message d’erreur",
+      "attributes": "Accusé, rejet et condition à lever. Un seul groupe de réponse pour l’interface, sans multiplier les messages techniques."
+    }
+  ],
+  "processes": [
+    {
+      "id": "P01",
+      "label": "Qualifier et enregistrer des conditions de propriété applicables",
+      "capabilities": [
+        "BC-014"
+      ],
+      "functional_user": "Producteur autorisé des conditions d’accord",
+      "trigger": "Une version de conditions applicables est reçue.",
+      "movements": [
+        {
+          "id": "P01-E-COND",
+          "type": "E",
+          "group": "COND",
+          "cfp": 1
+        },
+        {
+          "id": "P01-R-AGREEMENT",
+          "type": "R",
+          "group": "AGREEMENT",
+          "cfp": 1
+        },
+        {
+          "id": "P01-R-COND",
+          "type": "R",
+          "group": "COND",
+          "cfp": 1
+        },
+        {
+          "id": "P01-R-PARTY",
+          "type": "R",
+          "group": "PARTY",
+          "cfp": 1
+        },
+        {
+          "id": "P01-W-COND",
+          "type": "W",
+          "group": "COND",
+          "cfp": 1
+        },
+        {
+          "id": "P01-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ]
+    },
+    {
+      "id": "P02",
+      "label": "Déterminer la conséquence et reconnaître ou demander le transfert",
+      "capabilities": [
+        "BC-014",
+        "BC-015"
+      ],
+      "functional_user": "Source ou composant Stock autorisé, opérateur ou échéancier métier",
+      "trigger": "Une consommation/vente, une échéance ou un jalon appelle une détermination.",
+      "movements": [
+        {
+          "id": "P02-E-TRIGGER",
+          "type": "E",
+          "group": "TRIGGER",
+          "cfp": 1
+        },
+        {
+          "id": "P02-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "P02-R-COND",
+          "type": "R",
+          "group": "COND",
+          "cfp": 1
+        },
+        {
+          "id": "P02-R-AGREEMENT",
+          "type": "R",
+          "group": "AGREEMENT",
+          "cfp": 1
+        },
+        {
+          "id": "P02-R-ENTRY",
+          "type": "R",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P02-R-PARTY",
+          "type": "R",
+          "group": "PARTY",
+          "cfp": 1
+        },
+        {
+          "id": "P02-R-GOODS",
+          "type": "R",
+          "group": "GOODS",
+          "cfp": 1
+        },
+        {
+          "id": "P02-R-UNIT",
+          "type": "R",
+          "group": "UNIT",
+          "cfp": 1
+        },
+        {
+          "id": "P02-W-DETERMINATION",
+          "type": "W",
+          "group": "DETERMINATION",
+          "cfp": 1
+        },
+        {
+          "id": "P02-W-ENTRY",
+          "type": "W",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P02-W-EVIDENCE",
+          "type": "W",
+          "group": "EVIDENCE",
+          "cfp": 1
+        },
+        {
+          "id": "P02-W-ACT_LINK",
+          "type": "W",
+          "group": "ACT_LINK",
+          "cfp": 1
+        },
+        {
+          "id": "P02-X-DETERMINATION",
+          "type": "X",
+          "group": "DETERMINATION",
+          "cfp": 1
+        },
+        {
+          "id": "P02-X-ENTRY",
+          "type": "X",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P02-X-ACT_REQUEST",
+          "type": "X",
+          "group": "ACT_REQUEST",
+          "cfp": 1
+        },
+        {
+          "id": "P02-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ]
+    },
+    {
+      "id": "P03",
+      "label": "Recevoir le résultat d’un acte nécessaire",
+      "capabilities": [
+        "BC-014",
+        "BC-015"
+      ],
+      "functional_user": "Responsable externe ou composant Orders de l’acte",
+      "trigger": "Une réalisation ou un refus d’acte attendu est reçu.",
+      "movements": [
+        {
+          "id": "P03-E-ACT_RESULT",
+          "type": "E",
+          "group": "ACT_RESULT",
+          "cfp": 1
+        },
+        {
+          "id": "P03-R-ACT_LINK",
+          "type": "R",
+          "group": "ACT_LINK",
+          "cfp": 1
+        },
+        {
+          "id": "P03-R-DETERMINATION",
+          "type": "R",
+          "group": "DETERMINATION",
+          "cfp": 1
+        },
+        {
+          "id": "P03-R-ENTRY",
+          "type": "R",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P03-W-ACT_LINK",
+          "type": "W",
+          "group": "ACT_LINK",
+          "cfp": 1
+        },
+        {
+          "id": "P03-W-ENTRY",
+          "type": "W",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P03-W-EVIDENCE",
+          "type": "W",
+          "group": "EVIDENCE",
+          "cfp": 1
+        },
+        {
+          "id": "P03-X-ENTRY",
+          "type": "X",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P03-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ]
+    },
+    {
+      "id": "P04",
+      "label": "Intégrer un transfert déjà reconnu par une source autorisée",
+      "capabilities": [
+        "BC-015"
+      ],
+      "functional_user": "Source ou composant Stock autorisé",
+      "trigger": "Un passage de propriété établi ailleurs est transmis, sans nouvelle décision.",
+      "movements": [
+        {
+          "id": "P04-E-ENTRY",
+          "type": "E",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P04-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "P04-R-AGREEMENT",
+          "type": "R",
+          "group": "AGREEMENT",
+          "cfp": 1
+        },
+        {
+          "id": "P04-R-ENTRY",
+          "type": "R",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P04-W-ENTRY",
+          "type": "W",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P04-W-EVIDENCE",
+          "type": "W",
+          "group": "EVIDENCE",
+          "cfp": 1
+        },
+        {
+          "id": "P04-X-ENTRY",
+          "type": "X",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P04-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ]
+    },
+    {
+      "id": "P05",
+      "label": "Corriger ou annuler un passage de propriété reconnu",
+      "capabilities": [
+        "BC-015"
+      ],
+      "functional_user": "Source ou opérateur autorisé",
+      "trigger": "Une correction justifiée d’un passage reconnu est reçue.",
+      "movements": [
+        {
+          "id": "P05-E-CORRECTION",
+          "type": "E",
+          "group": "CORRECTION",
+          "cfp": 1
+        },
+        {
+          "id": "P05-R-ENTRY",
+          "type": "R",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P05-R-EVIDENCE",
+          "type": "R",
+          "group": "EVIDENCE",
+          "cfp": 1
+        },
+        {
+          "id": "P05-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "P05-W-ENTRY",
+          "type": "W",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P05-W-EVIDENCE",
+          "type": "W",
+          "group": "EVIDENCE",
+          "cfp": 1
+        },
+        {
+          "id": "P05-X-ENTRY",
+          "type": "X",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P05-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ]
+    },
+    {
+      "id": "P06",
+      "label": "Consulter les quantités par propriétaire aux dates demandées",
+      "capabilities": [
+        "BC-015"
+      ],
+      "functional_user": "Opérateur ou composant consommateur",
+      "trigger": "Une consultation de propriété est demandée avec date d’effet et de connaissance.",
+      "movements": [
+        {
+          "id": "P06-E-QUERY",
+          "type": "E",
+          "group": "QUERY",
+          "cfp": 1
+        },
+        {
+          "id": "P06-R-ENTRY",
+          "type": "R",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P06-R-PARTY",
+          "type": "R",
+          "group": "PARTY",
+          "cfp": 1
+        },
+        {
+          "id": "P06-R-GOODS",
+          "type": "R",
+          "group": "GOODS",
+          "cfp": 1
+        },
+        {
+          "id": "P06-R-UNIT",
+          "type": "R",
+          "group": "UNIT",
+          "cfp": 1
+        },
+        {
+          "id": "P06-X-OWN_POSITION",
+          "type": "X",
+          "group": "OWN_POSITION",
+          "cfp": 1
+        },
+        {
+          "id": "P06-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ]
+    },
+    {
+      "id": "P07",
+      "label": "Expliquer un passage et son historique",
+      "capabilities": [
+        "BC-014",
+        "BC-015"
+      ],
+      "functional_user": "Opérateur ou composant consommateur",
+      "trigger": "Une explication des fondements et corrections est demandée.",
+      "movements": [
+        {
+          "id": "P07-E-QUERY",
+          "type": "E",
+          "group": "QUERY",
+          "cfp": 1
+        },
+        {
+          "id": "P07-R-ENTRY",
+          "type": "R",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P07-R-EVIDENCE",
+          "type": "R",
+          "group": "EVIDENCE",
+          "cfp": 1
+        },
+        {
+          "id": "P07-R-DETERMINATION",
+          "type": "R",
+          "group": "DETERMINATION",
+          "cfp": 1
+        },
+        {
+          "id": "P07-R-ACT_LINK",
+          "type": "R",
+          "group": "ACT_LINK",
+          "cfp": 1
+        },
+        {
+          "id": "P07-R-COND",
+          "type": "R",
+          "group": "COND",
+          "cfp": 1
+        },
+        {
+          "id": "P07-X-ENTRY",
+          "type": "X",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P07-X-EVIDENCE",
+          "type": "X",
+          "group": "EVIDENCE",
+          "cfp": 1
+        },
+        {
+          "id": "P07-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ]
+    },
+    {
+      "id": "P08",
+      "label": "Rapprocher le registre de propriété avec le stock connu",
+      "capabilities": [
+        "BC-015"
+      ],
+      "functional_user": "Opérateur ou composant de rapprochement",
+      "trigger": "Un rapprochement de positions est demandé sur une coupe définie.",
+      "movements": [
+        {
+          "id": "P08-E-QUERY",
+          "type": "E",
+          "group": "QUERY",
+          "cfp": 1
+        },
+        {
+          "id": "P08-R-ENTRY",
+          "type": "R",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P08-R-STOCK_POSITION",
+          "type": "R",
+          "group": "STOCK_POSITION",
+          "cfp": 1
+        },
+        {
+          "id": "P08-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "P08-W-RECONCILIATION",
+          "type": "W",
+          "group": "RECONCILIATION",
+          "cfp": 1
+        },
+        {
+          "id": "P08-X-RECONCILIATION",
+          "type": "X",
+          "group": "RECONCILIATION",
+          "cfp": 1
+        },
+        {
+          "id": "P08-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ]
+    },
+    {
+      "id": "P09",
+      "label": "Fournir les positions de propriété et leurs limites",
+      "capabilities": [
+        "BC-015"
+      ],
+      "functional_user": "Composant Stock ou consommateur autorisé",
+      "trigger": "Une fourniture de données de propriété est demandée.",
+      "movements": [
+        {
+          "id": "P09-E-QUERY",
+          "type": "E",
+          "group": "QUERY",
+          "cfp": 1
+        },
+        {
+          "id": "P09-R-ENTRY",
+          "type": "R",
+          "group": "ENTRY",
+          "cfp": 1
+        },
+        {
+          "id": "P09-R-RECONCILIATION",
+          "type": "R",
+          "group": "RECONCILIATION",
+          "cfp": 1
+        },
+        {
+          "id": "P09-W-SUPPLY",
+          "type": "W",
+          "group": "SUPPLY",
+          "cfp": 1
+        },
+        {
+          "id": "P09-X-SUPPLY",
+          "type": "X",
+          "group": "SUPPLY",
+          "cfp": 1
+        },
+        {
+          "id": "P09-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ]
+    }
+  ],
+  "source_method": "https://cosmic-sizing.org/wp-content/uploads/2022/11/Combination-of-Parts-v5.0-Sep-2024.pdf",
+  "rules": [
+    "Un seul mouvement E/R/W/X par groupe et processus, sauf besoin fonctionnel distinct justifié.",
+    "Aucune multiplication par occurrence, nombre de sociétés, lignes ou retries.",
+    "La détermination, la demande d’acte et l’écriture directe sont les branches d’un même processus P02 ; pas trois processus internes facturés.",
+    "Les trois familles de déclencheurs passent par P02, sans imposer trois implémentations ni trois comptages.",
+    "Les dates d’effet et de connaissance sont des attributs ; leur traitement peut modifier l’effort sans multiplier les CFP.",
+    "Les modèles techniques ne créent pas automatiquement des groupes COSMIC. Les passages proposés sont regroupés avec la détermination par hypothèse amont."
+  ],
+  "scope_note": "Composant fonctionnel Propriété du stock. Les interfaces propres aux autres composants sont visibles ; ne pas sommer ce comptage local avec les anciens CFP de tout le Core sans dédupliquer leurs frontières.",
+  "persistence_assumption": "Références Master Data et faits/positions Stock lus dans la persistance logique disponible au Core (R). Externaliser ces lectures en interfaces fonctionnelles distinctes peut modifier le comptage.",
+  "nonfunctional_not_counted": [
+    "Débit, latence, concurrence SQL, rétention, disponibilité et reprise.",
+    "Journal, transport, retries techniques, règles d’accès génériques et publication Finance déjà financés."
+  ],
+  "inclusions": "Analyse, conception, réalisation, tests et mise en service logicielle sous réserve de comparaison des activités.",
+  "productivity": {
+    "hours_per_CFP": 20,
+    "factor": 1,
+    "day_hours": 7,
+    "source": "audits/2026-10-30-master-data-calcul/entrees.json",
+    "policy_ref": "hypotheses.json#COSMIC_policy"
+  },
+  "human_review": null,
+  "certified": false,
+  "observed_effort": null
+}

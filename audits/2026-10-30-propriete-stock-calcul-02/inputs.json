@@ -1,0 +1,1557 @@
+{
+  "id": "propriete-stock-calcul-02",
+  "hypotheses": {
+    "id": "propriete-stock-calcul-02",
+    "date": "2026-10-30",
+    "status": "hypotheses_avant_calcul_non_adoptees",
+    "capabilities": [
+      "BC-014",
+      "BC-015"
+    ],
+    "native_references": [
+      "erpnext",
+      "odoo",
+      "tryton",
+      "axelor"
+    ],
+    "modules": [
+      {
+        "id": "OWN-F01",
+        "name": "Conditions de propriété et contexte applicables",
+        "analogue": "reservation_chain",
+        "lower": 0.35,
+        "central": 0.75,
+        "upper": 1.25,
+        "basis": "Un module compagnon de contrôle des références, contexte, conditions applicables et justification manquante, estimé à trois quarts d’une chaîne native de décision sur une quantité. Les accords et leur version sont référencés ; aucune édition d’accord ni langage contractuel général."
+      },
+      {
+        "id": "OWN-F02",
+        "name": "Détermination des transferts et quantités",
+        "analogue": "reservation_chain",
+        "lower": 0.75,
+        "central": 1.5,
+        "upper": 2.5,
+        "basis": "Un module traitant consommation/vente, échéance ou jalon reçu, avec quantités partielles et plusieurs passages entre parties. Taille proposée à une chaîne et demie de réservation ; les trois déclencheurs sont des variantes, pas trois copies du module."
+      },
+      {
+        "id": "OWN-F03",
+        "name": "Actes requis et transferts reconnus ailleurs",
+        "analogue": "reservation_chain",
+        "lower": 0.35,
+        "central": 0.75,
+        "upper": 1.25,
+        "basis": "Branchement métier sur les protocoles existants, état en attente, références d’actes, admission du résultat et absence de double décision. Trois quarts d’une chaîne de réservation ; aucun moteur Orders ou orchestration construit ici."
+      },
+      {
+        "id": "OWN-F04",
+        "name": "Registre autonome de propriété",
+        "analogue": "correction_chain",
+        "lower": 0.5,
+        "central": 1,
+        "upper": 1.75,
+        "basis": "Un nouveau module d’écriture et de justification des passages de propriété, équivalent en taille de comportement à une chaîne native de correction. Les tables et contrats sont propres à la propriété ; persistance et transactions sont réutilisées."
+      },
+      {
+        "id": "OWN-F05",
+        "name": "Corrections et lectures aux deux dates",
+        "analogue": "correction_chain",
+        "lower": 0.35,
+        "central": 0.75,
+        "upper": 1.5,
+        "basis": "Un module additionnel de corrections expliquées et de lecture selon date d’effet et date de connaissance. Trois quarts de chaîne de correction ; l’écriture courante de OWN-F04 et les primitives de journal existantes ne sont pas réimplémentées."
+      },
+      {
+        "id": "OWN-F06",
+        "name": "Rapprochement et fourniture des positions",
+        "analogue": "correction_chain",
+        "lower": 0.2,
+        "central": 0.5,
+        "upper": 0.9,
+        "basis": "Comparer les états du registre de propriété aux faits et positions existants, puis fournir résultat et limites. Une demi-chaîne de correction ; pas de nouveau moteur de stock, de publication Finance ou de sauvegarde."
+      }
+    ],
+    "schemas": [
+      {
+        "package": "OWN-F01",
+        "name": "OwnershipConditionBinding",
+        "fields": [
+          "agreementRef",
+          "agreementVersion",
+          "conditionRef",
+          "scopeRef",
+          "triggerKind",
+          "effectiveFrom",
+          "effectiveUntil",
+          "conditionPayloadRef"
+        ],
+        "view": true
+      },
+      {
+        "package": "OWN-F02",
+        "name": "OwnershipDetermination",
+        "fields": [
+          "triggerFactRef",
+          "triggerKind",
+          "agreementBindingRef",
+          "goodsRef",
+          "quantity",
+          "unitRef",
+          "fromOwnerRef",
+          "toOwnerRef",
+          "effectiveAt",
+          "outcome",
+          "missingJustification",
+          "requiredActKind",
+          "scopeRef"
+        ],
+        "view": true
+      },
+      {
+        "package": "OWN-F02",
+        "name": "OwnershipTransferLeg",
+        "fields": [
+          "determinationRef",
+          "sequenceRef",
+          "fromOwnerRef",
+          "toOwnerRef",
+          "goodsRef",
+          "quantity",
+          "unitRef",
+          "effectiveAt",
+          "factRef"
+        ],
+        "view": true
+      },
+      {
+        "package": "OWN-F03",
+        "name": "OwnershipActLink",
+        "fields": [
+          "determinationRef",
+          "legRef",
+          "requestRef",
+          "requiredActKind",
+          "state",
+          "requestedAt",
+          "resultRef",
+          "resultAt",
+          "refusalReason"
+        ],
+        "view": true
+      },
+      {
+        "package": "OWN-F03",
+        "name": "OwnershipRecognitionReceipt",
+        "fields": [
+          "externalTransferRef",
+          "sourceRef",
+          "admissionRef",
+          "legRef",
+          "recognizedAt",
+          "outcome"
+        ],
+        "view": false
+      },
+      {
+        "package": "OWN-F04",
+        "name": "OwnershipEntry",
+        "fields": [
+          "legRef",
+          "sourceEntryRef",
+          "goodsRef",
+          "quantity",
+          "unitRef",
+          "fromOwnerRef",
+          "toOwnerRef",
+          "effectiveAt",
+          "knownAt",
+          "basisRef",
+          "factRef",
+          "actResultRef",
+          "stockFactRef",
+          "correctionOf"
+        ],
+        "view": true
+      },
+      {
+        "package": "OWN-F04",
+        "name": "OwnershipEntryEvidence",
+        "fields": [
+          "entryRef",
+          "evidenceRef",
+          "evidenceKind",
+          "authorityScope",
+          "authorityOutcome"
+        ],
+        "view": false
+      },
+      {
+        "package": "OWN-F05",
+        "name": "OwnershipReadCut",
+        "fields": [
+          "effectiveAt",
+          "knownAt",
+          "scopeRef",
+          "agreementCutRef",
+          "stockCutRef",
+          "consistencyState"
+        ],
+        "view": true
+      },
+      {
+        "package": "OWN-F06",
+        "name": "OwnershipReconciliation",
+        "fields": [
+          "scopeRef",
+          "effectiveAt",
+          "knownAt",
+          "stockCutRef",
+          "ownershipCutRef",
+          "discrepancyKind",
+          "quantityDelta",
+          "unitRef",
+          "explanationRef"
+        ],
+        "view": true
+      },
+      {
+        "package": "OWN-F06",
+        "name": "OwnershipSupply",
+        "fields": [
+          "cutRef",
+          "consumerRef",
+          "scopeRef",
+          "payloadVersion",
+          "payloadHash",
+          "limitation",
+          "resultRef"
+        ],
+        "view": true
+      }
+    ],
+    "configuration": {
+      "model_registrations": 10,
+      "service_bindings": 6,
+      "ownership_indexes": 6,
+      "canonical_mappings": 6
+    },
+    "schema_status": "Dix structures et champs spécifiques proposés, pas spécification validée. Les identifiants, rôles/organisation, horodatage ORM, versions techniques et journaux génériques ne sont pas recomptés. Les structures de décision et leurs lignes ne définissent pas à elles seules les groupes COSMIC.",
+    "reuse_policy": "Master Data et Stock sont supposés disponibles dans chaque écosystème natif. Aucune reconstruction historique du framework ni nouvelle construction du registre physique de stock. Les analogues donnent une échelle au code propre à la propriété ; ils ne constituent pas des instructions de Stock facturées une seconde fois.",
+    "boundary": "Deux capacités BC-014 et BC-015 ; nouveau travail générique à ajouter au patrimoine disponible, intégration des règles Beaumanoir exclue.",
+    "base_policy": "La base technique et métier Stock/Master Data est déjà financée. Toute la nouvelle taille est répartie dans les six compléments de propriété ; aucune base autonome de reconstruction des produits natifs n’est ajoutée.",
+    "architecture": "Une base transactionnelle, registre de propriété local, contrôle de cohérence des quantités et branchements aux protocoles existants. Pas de réservation distribuée ni d’engagement chiffré nouveau de débit, latence, RPO/RTO.",
+    "rule_policy": "Conditions déjà établies fournies par les accords et l’intégration ; trois familles de déclencheurs consommées par un mécanisme générique. Pas formalisation exhaustive des clauses, décision juridique ou moteur de règles universel.",
+    "sizing_policy": "Même proxy logique et conventions natives de schéma que Stock ; fractions d’analogues choisies par jugement d’ingénierie, pas productivités observées. Paramètres gelés avant premier calcul des efforts, sans objectif d’accord des quatre chiffres ou de COSMIC.",
+    "schedule_policy": "Conserver le délai local COCOMO pour information ; aucune somme des délais locaux et pas de planning global proposé.",
+    "rounding_jh": 10,
+    "selected_java_reference": "axelor",
+    "framework_equivalence_factor": 1,
+    "COSMIC_policy": {
+      "boundary": "Composant fonctionnel Propriété du stock, de l’entrée métier aux écritures/consultations propres à la propriété. Les autres composants et opérateurs peuvent le déclencher. Données Master Data/Stock considérées comme persistances logiques déjà disponibles.",
+      "scope_caveat": "Comptage local du composant ; les frontières diffèrent d’un comptage de tout le Core. Ne pas additionner les CFP de cette mesure aux anciennes mesures sans rapprochement des interfaces.",
+      "functional_reuse": "Ne pas compter les imports génériques, transports, retries techniques ou publications Finance déjà financés ; les opérations propres à la propriété gardent leurs mouvements fonctionnels même si le code générique est réutilisé.",
+      "productivity_hours_per_CFP": 20,
+      "factor": 1,
+      "day_hours": 7,
+      "factor_note": "Convention de comparaison par famille composante d’un projet plus vaste, dans la continuité de la décision Master Data. Le tableau ISBSG de correction par taille donnerait 1,1 pour un projet autonome de 50–100 CFP ; ce facteur n’est pas appliqué automatiquement au composant.",
+      "activity_note": "Même intention de couvrir le projet logiciel (analyse, conception, réalisation, tests et préparation de mise en service) ; composition des cohortes, experts et mise en œuvre non parfaitement appariés. Le benchmark ne calibre pas le patrimoine Master Data/Stock réutilisé."
+    },
+    "human_review": null,
+    "observed_project_effort": null,
+    "adoption": false
+  },
+  "cocomo": {
+    "A": 2.94,
+    "B": 0.91,
+    "SF_sum": 18.97,
+    "C": 3.67,
+    "D": 0.28,
+    "month_hours": 152,
+    "day_hours": 7,
+    "effort_phase_factor": 1.18,
+    "schedule_phase_factor": 1.25,
+    "other_EM": 1,
+    "SCED": 1,
+    "REVL": 0,
+    "source": "https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf",
+    "source_locations": "Équation 4 et tables 6, 36, 57, 63 ; autres paramètres conservés nominaux.",
+    "activity_distribution_ref": "../2026-10-30-master-data-calcul/repartitions-sources.json#cocomo"
+  },
+  "banks": {
+    "erpnext": {
+      "lower": {
+        "reservation_chain": {
+          "program_units": 156.2,
+          "source_slices": [
+            {
+              "path": "erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+              "source_sha256": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+              "raw_behavior_units": 149,
+              "direct_stock_floor": 77,
+              "attribution": 0.35,
+              "equivalent_program_units": 77
+            },
+            {
+              "path": "erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+              "source_sha256": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+              "raw_behavior_units": 40,
+              "direct_stock_floor": 0,
+              "attribution": 0.35,
+              "equivalent_program_units": 14.0
+            },
+            {
+              "path": "erpnext/stock/utils.py",
+              "source_sha256": "707a86ac487a9b428c3da1321f59fab6df395fa30647b6dd3cdb2b19b82955b8",
+              "raw_behavior_units": 42,
+              "direct_stock_floor": 0,
+              "attribution": 0.6,
+              "equivalent_program_units": 25.2
+            },
+            {
+              "path": "erpnext/stock/stock_ledger.py",
+              "source_sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+              "raw_behavior_units": 36,
+              "direct_stock_floor": 36,
+              "attribution": 0.2,
+              "equivalent_program_units": 36
+            },
+            {
+              "path": "erpnext/stock/doctype/bin/bin.py",
+              "source_sha256": "37b7749583c62a7c727de801a97b844eb70e70ce85d59ae85bc97dbe5dda3a30",
+              "raw_behavior_units": 6,
+              "direct_stock_floor": 4,
+              "attribution": 0.55,
+              "equivalent_program_units": 4
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        },
+        "correction_chain": {
+          "program_units": 455.0,
+          "source_slices": [
+            {
+              "path": "erpnext/stock/stock_ledger.py",
+              "source_sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+              "raw_behavior_units": 754,
+              "direct_stock_floor": 0,
+              "attribution": 0.2,
+              "equivalent_program_units": 150.8
+            },
+            {
+              "path": "erpnext/stock/stock_ledger.py",
+              "source_sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+              "raw_behavior_units": 174,
+              "direct_stock_floor": 165,
+              "attribution": 0.2,
+              "equivalent_program_units": 165
+            },
+            {
+              "path": "erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py",
+              "source_sha256": "13043450e72f96c39bfffc15ad2c0ffe738dd18de2bcead724a0defb38d04a7a",
+              "raw_behavior_units": 186,
+              "direct_stock_floor": 25,
+              "attribution": 0.5,
+              "equivalent_program_units": 93.0
+            },
+            {
+              "path": "erpnext/stock/doctype/bin/bin.py",
+              "source_sha256": "37b7749583c62a7c727de801a97b844eb70e70ce85d59ae85bc97dbe5dda3a30",
+              "raw_behavior_units": 27,
+              "direct_stock_floor": 27,
+              "attribution": 0.55,
+              "equivalent_program_units": 27
+            },
+            {
+              "path": "erpnext/stock/utils.py",
+              "source_sha256": "707a86ac487a9b428c3da1321f59fab6df395fa30647b6dd3cdb2b19b82955b8",
+              "raw_behavior_units": 32,
+              "direct_stock_floor": 0,
+              "attribution": 0.6,
+              "equivalent_program_units": 19.2
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        }
+      },
+      "central": {
+        "reservation_chain": {
+          "program_units": 178.05,
+          "source_slices": [
+            {
+              "path": "erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+              "source_sha256": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+              "raw_behavior_units": 149,
+              "direct_stock_floor": 77,
+              "attribution": 0.55,
+              "equivalent_program_units": 81.95
+            },
+            {
+              "path": "erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+              "source_sha256": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+              "raw_behavior_units": 40,
+              "direct_stock_floor": 0,
+              "attribution": 0.55,
+              "equivalent_program_units": 22.0
+            },
+            {
+              "path": "erpnext/stock/utils.py",
+              "source_sha256": "707a86ac487a9b428c3da1321f59fab6df395fa30647b6dd3cdb2b19b82955b8",
+              "raw_behavior_units": 42,
+              "direct_stock_floor": 0,
+              "attribution": 0.8,
+              "equivalent_program_units": 33.6
+            },
+            {
+              "path": "erpnext/stock/stock_ledger.py",
+              "source_sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+              "raw_behavior_units": 36,
+              "direct_stock_floor": 36,
+              "attribution": 0.35,
+              "equivalent_program_units": 36
+            },
+            {
+              "path": "erpnext/stock/doctype/bin/bin.py",
+              "source_sha256": "37b7749583c62a7c727de801a97b844eb70e70ce85d59ae85bc97dbe5dda3a30",
+              "raw_behavior_units": 6,
+              "direct_stock_floor": 4,
+              "attribution": 0.75,
+              "equivalent_program_units": 4.5
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        },
+        "correction_chain": {
+          "program_units": 611.6999999999999,
+          "source_slices": [
+            {
+              "path": "erpnext/stock/stock_ledger.py",
+              "source_sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+              "raw_behavior_units": 754,
+              "direct_stock_floor": 0,
+              "attribution": 0.35,
+              "equivalent_program_units": 263.9
+            },
+            {
+              "path": "erpnext/stock/stock_ledger.py",
+              "source_sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+              "raw_behavior_units": 174,
+              "direct_stock_floor": 165,
+              "attribution": 0.35,
+              "equivalent_program_units": 165
+            },
+            {
+              "path": "erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py",
+              "source_sha256": "13043450e72f96c39bfffc15ad2c0ffe738dd18de2bcead724a0defb38d04a7a",
+              "raw_behavior_units": 186,
+              "direct_stock_floor": 25,
+              "attribution": 0.7,
+              "equivalent_program_units": 130.2
+            },
+            {
+              "path": "erpnext/stock/doctype/bin/bin.py",
+              "source_sha256": "37b7749583c62a7c727de801a97b844eb70e70ce85d59ae85bc97dbe5dda3a30",
+              "raw_behavior_units": 27,
+              "direct_stock_floor": 27,
+              "attribution": 0.75,
+              "equivalent_program_units": 27
+            },
+            {
+              "path": "erpnext/stock/utils.py",
+              "source_sha256": "707a86ac487a9b428c3da1321f59fab6df395fa30647b6dd3cdb2b19b82955b8",
+              "raw_behavior_units": 32,
+              "direct_stock_floor": 0,
+              "attribution": 0.8,
+              "equivalent_program_units": 25.6
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        }
+      },
+      "upper": {
+        "reservation_chain": {
+          "program_units": 225.15,
+          "source_slices": [
+            {
+              "path": "erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+              "source_sha256": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+              "raw_behavior_units": 149,
+              "direct_stock_floor": 77,
+              "attribution": 0.75,
+              "equivalent_program_units": 111.75
+            },
+            {
+              "path": "erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+              "source_sha256": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+              "raw_behavior_units": 40,
+              "direct_stock_floor": 0,
+              "attribution": 0.75,
+              "equivalent_program_units": 30.0
+            },
+            {
+              "path": "erpnext/stock/utils.py",
+              "source_sha256": "707a86ac487a9b428c3da1321f59fab6df395fa30647b6dd3cdb2b19b82955b8",
+              "raw_behavior_units": 42,
+              "direct_stock_floor": 0,
+              "attribution": 1,
+              "equivalent_program_units": 42
+            },
+            {
+              "path": "erpnext/stock/stock_ledger.py",
+              "source_sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+              "raw_behavior_units": 36,
+              "direct_stock_floor": 36,
+              "attribution": 0.5,
+              "equivalent_program_units": 36
+            },
+            {
+              "path": "erpnext/stock/doctype/bin/bin.py",
+              "source_sha256": "37b7749583c62a7c727de801a97b844eb70e70ce85d59ae85bc97dbe5dda3a30",
+              "raw_behavior_units": 6,
+              "direct_stock_floor": 4,
+              "attribution": 0.9,
+              "equivalent_program_units": 5.4
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        },
+        "correction_chain": {
+          "program_units": 759.1,
+          "source_slices": [
+            {
+              "path": "erpnext/stock/stock_ledger.py",
+              "source_sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+              "raw_behavior_units": 754,
+              "direct_stock_floor": 0,
+              "attribution": 0.5,
+              "equivalent_program_units": 377.0
+            },
+            {
+              "path": "erpnext/stock/stock_ledger.py",
+              "source_sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+              "raw_behavior_units": 174,
+              "direct_stock_floor": 165,
+              "attribution": 0.5,
+              "equivalent_program_units": 165
+            },
+            {
+              "path": "erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py",
+              "source_sha256": "13043450e72f96c39bfffc15ad2c0ffe738dd18de2bcead724a0defb38d04a7a",
+              "raw_behavior_units": 186,
+              "direct_stock_floor": 25,
+              "attribution": 0.85,
+              "equivalent_program_units": 158.1
+            },
+            {
+              "path": "erpnext/stock/doctype/bin/bin.py",
+              "source_sha256": "37b7749583c62a7c727de801a97b844eb70e70ce85d59ae85bc97dbe5dda3a30",
+              "raw_behavior_units": 27,
+              "direct_stock_floor": 27,
+              "attribution": 0.9,
+              "equivalent_program_units": 27
+            },
+            {
+              "path": "erpnext/stock/utils.py",
+              "source_sha256": "707a86ac487a9b428c3da1321f59fab6df395fa30647b6dd3cdb2b19b82955b8",
+              "raw_behavior_units": 32,
+              "direct_stock_floor": 0,
+              "attribution": 1,
+              "equivalent_program_units": 32
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        }
+      }
+    },
+    "odoo": {
+      "lower": {
+        "reservation_chain": {
+          "program_units": 241.15,
+          "source_slices": [
+            {
+              "path": "addons/stock/models/stock_move.py",
+              "source_sha256": "9d663d336cff509764e5c6b46dafd76646e73f02eb19d2e5d7d71771b17dec28",
+              "raw_behavior_units": 139,
+              "direct_stock_floor": 0,
+              "attribution": 0.25,
+              "equivalent_program_units": 34.75
+            },
+            {
+              "path": "addons/stock/models/stock_move_line.py",
+              "source_sha256": "98a746a2ef3d2ba456d68fa86afb76f3bb4e01da2d9abeca17949244353e1904",
+              "raw_behavior_units": 151,
+              "direct_stock_floor": 19,
+              "attribution": 0.45,
+              "equivalent_program_units": 67.95
+            },
+            {
+              "path": "addons/stock/models/stock_quant.py",
+              "source_sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+              "raw_behavior_units": 194,
+              "direct_stock_floor": 84,
+              "attribution": 0.65,
+              "equivalent_program_units": 126.10000000000001
+            },
+            {
+              "path": "addons/stock/models/stock_quant.py",
+              "source_sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+              "raw_behavior_units": 19,
+              "direct_stock_floor": 0,
+              "attribution": 0.65,
+              "equivalent_program_units": 12.35
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        },
+        "correction_chain": {
+          "program_units": 428.3,
+          "source_slices": [
+            {
+              "path": "addons/stock/models/stock_quant.py",
+              "source_sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+              "raw_behavior_units": 200,
+              "direct_stock_floor": 129,
+              "attribution": 0.65,
+              "equivalent_program_units": 130.0
+            },
+            {
+              "path": "addons/stock/models/stock_move.py",
+              "source_sha256": "9d663d336cff509764e5c6b46dafd76646e73f02eb19d2e5d7d71771b17dec28",
+              "raw_behavior_units": 128,
+              "direct_stock_floor": 0,
+              "attribution": 0.25,
+              "equivalent_program_units": 32.0
+            },
+            {
+              "path": "addons/stock/models/stock_move_line.py",
+              "source_sha256": "98a746a2ef3d2ba456d68fa86afb76f3bb4e01da2d9abeca17949244353e1904",
+              "raw_behavior_units": 254,
+              "direct_stock_floor": 19,
+              "attribution": 0.45,
+              "equivalent_program_units": 114.3
+            },
+            {
+              "path": "addons/stock/models/product.py",
+              "source_sha256": "8dd1b558936b11243268a48eaea5e141a02ce4be756b33878a7b3ead38c7e9cc",
+              "raw_behavior_units": 152,
+              "direct_stock_floor": 152,
+              "attribution": 0.5,
+              "equivalent_program_units": 152
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        }
+      },
+      "central": {
+        "reservation_chain": {
+          "program_units": 324.15000000000003,
+          "source_slices": [
+            {
+              "path": "addons/stock/models/stock_move.py",
+              "source_sha256": "9d663d336cff509764e5c6b46dafd76646e73f02eb19d2e5d7d71771b17dec28",
+              "raw_behavior_units": 139,
+              "direct_stock_floor": 0,
+              "attribution": 0.4,
+              "equivalent_program_units": 55.6
+            },
+            {
+              "path": "addons/stock/models/stock_move_line.py",
+              "source_sha256": "98a746a2ef3d2ba456d68fa86afb76f3bb4e01da2d9abeca17949244353e1904",
+              "raw_behavior_units": 151,
+              "direct_stock_floor": 19,
+              "attribution": 0.65,
+              "equivalent_program_units": 98.15
+            },
+            {
+              "path": "addons/stock/models/stock_quant.py",
+              "source_sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+              "raw_behavior_units": 194,
+              "direct_stock_floor": 84,
+              "attribution": 0.8,
+              "equivalent_program_units": 155.20000000000002
+            },
+            {
+              "path": "addons/stock/models/stock_quant.py",
+              "source_sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+              "raw_behavior_units": 19,
+              "direct_stock_floor": 0,
+              "attribution": 0.8,
+              "equivalent_program_units": 15.200000000000001
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        },
+        "correction_chain": {
+          "program_units": 528.3,
+          "source_slices": [
+            {
+              "path": "addons/stock/models/stock_quant.py",
+              "source_sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+              "raw_behavior_units": 200,
+              "direct_stock_floor": 129,
+              "attribution": 0.8,
+              "equivalent_program_units": 160.0
+            },
+            {
+              "path": "addons/stock/models/stock_move.py",
+              "source_sha256": "9d663d336cff509764e5c6b46dafd76646e73f02eb19d2e5d7d71771b17dec28",
+              "raw_behavior_units": 128,
+              "direct_stock_floor": 0,
+              "attribution": 0.4,
+              "equivalent_program_units": 51.2
+            },
+            {
+              "path": "addons/stock/models/stock_move_line.py",
+              "source_sha256": "98a746a2ef3d2ba456d68fa86afb76f3bb4e01da2d9abeca17949244353e1904",
+              "raw_behavior_units": 254,
+              "direct_stock_floor": 19,
+              "attribution": 0.65,
+              "equivalent_program_units": 165.1
+            },
+            {
+              "path": "addons/stock/models/product.py",
+              "source_sha256": "8dd1b558936b11243268a48eaea5e141a02ce4be756b33878a7b3ead38c7e9cc",
+              "raw_behavior_units": 152,
+              "direct_stock_floor": 152,
+              "attribution": 0.7,
+              "equivalent_program_units": 152
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        }
+      },
+      "upper": {
+        "reservation_chain": {
+          "program_units": 399.6,
+          "source_slices": [
+            {
+              "path": "addons/stock/models/stock_move.py",
+              "source_sha256": "9d663d336cff509764e5c6b46dafd76646e73f02eb19d2e5d7d71771b17dec28",
+              "raw_behavior_units": 139,
+              "direct_stock_floor": 0,
+              "attribution": 0.55,
+              "equivalent_program_units": 76.45
+            },
+            {
+              "path": "addons/stock/models/stock_move_line.py",
+              "source_sha256": "98a746a2ef3d2ba456d68fa86afb76f3bb4e01da2d9abeca17949244353e1904",
+              "raw_behavior_units": 151,
+              "direct_stock_floor": 19,
+              "attribution": 0.8,
+              "equivalent_program_units": 120.80000000000001
+            },
+            {
+              "path": "addons/stock/models/stock_quant.py",
+              "source_sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+              "raw_behavior_units": 194,
+              "direct_stock_floor": 84,
+              "attribution": 0.95,
+              "equivalent_program_units": 184.29999999999998
+            },
+            {
+              "path": "addons/stock/models/stock_quant.py",
+              "source_sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+              "raw_behavior_units": 19,
+              "direct_stock_floor": 0,
+              "attribution": 0.95,
+              "equivalent_program_units": 18.05
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        },
+        "correction_chain": {
+          "program_units": 615.6,
+          "source_slices": [
+            {
+              "path": "addons/stock/models/stock_quant.py",
+              "source_sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+              "raw_behavior_units": 200,
+              "direct_stock_floor": 129,
+              "attribution": 0.95,
+              "equivalent_program_units": 190.0
+            },
+            {
+              "path": "addons/stock/models/stock_move.py",
+              "source_sha256": "9d663d336cff509764e5c6b46dafd76646e73f02eb19d2e5d7d71771b17dec28",
+              "raw_behavior_units": 128,
+              "direct_stock_floor": 0,
+              "attribution": 0.55,
+              "equivalent_program_units": 70.4
+            },
+            {
+              "path": "addons/stock/models/stock_move_line.py",
+              "source_sha256": "98a746a2ef3d2ba456d68fa86afb76f3bb4e01da2d9abeca17949244353e1904",
+              "raw_behavior_units": 254,
+              "direct_stock_floor": 19,
+              "attribution": 0.8,
+              "equivalent_program_units": 203.20000000000002
+            },
+            {
+              "path": "addons/stock/models/product.py",
+              "source_sha256": "8dd1b558936b11243268a48eaea5e141a02ce4be756b33878a7b3ead38c7e9cc",
+              "raw_behavior_units": 152,
+              "direct_stock_floor": 152,
+              "attribution": 0.85,
+              "equivalent_program_units": 152
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        }
+      }
+    },
+    "tryton": {
+      "lower": {
+        "reservation_chain": {
+          "program_units": 283,
+          "source_slices": [
+            {
+              "path": "modules/stock/move.py",
+              "source_sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+              "raw_behavior_units": 424,
+              "direct_stock_floor": 255,
+              "attribution": 0.6,
+              "equivalent_program_units": 255
+            },
+            {
+              "path": "modules/stock/product.py",
+              "source_sha256": "c7e75d110acbe92fdaaf0da3449db19e3695c18cd6933e5687decd4c8c374d13",
+              "raw_behavior_units": 28,
+              "direct_stock_floor": 28,
+              "attribution": 0.45,
+              "equivalent_program_units": 28
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        },
+        "correction_chain": {
+          "program_units": 401.2,
+          "source_slices": [
+            {
+              "path": "modules/stock/inventory.py",
+              "source_sha256": "305d949d7165962450c6915c06692ca9322080d0778fe86be57c0452652f31bb",
+              "raw_behavior_units": 71,
+              "direct_stock_floor": 48,
+              "attribution": 0.6,
+              "equivalent_program_units": 48
+            },
+            {
+              "path": "modules/stock/move.py",
+              "source_sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+              "raw_behavior_units": 72,
+              "direct_stock_floor": 0,
+              "attribution": 0.6,
+              "equivalent_program_units": 43.199999999999996
+            },
+            {
+              "path": "modules/stock/move.py",
+              "source_sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+              "raw_behavior_units": 301,
+              "direct_stock_floor": 269,
+              "attribution": 0.6,
+              "equivalent_program_units": 269
+            },
+            {
+              "path": "modules/stock/product.py",
+              "source_sha256": "c7e75d110acbe92fdaaf0da3449db19e3695c18cd6933e5687decd4c8c374d13",
+              "raw_behavior_units": 41,
+              "direct_stock_floor": 41,
+              "attribution": 0.45,
+              "equivalent_program_units": 41
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        }
+      },
+      "central": {
+        "reservation_chain": {
+          "program_units": 346.0,
+          "source_slices": [
+            {
+              "path": "modules/stock/move.py",
+              "source_sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+              "raw_behavior_units": 424,
+              "direct_stock_floor": 255,
+              "attribution": 0.75,
+              "equivalent_program_units": 318.0
+            },
+            {
+              "path": "modules/stock/product.py",
+              "source_sha256": "c7e75d110acbe92fdaaf0da3449db19e3695c18cd6933e5687decd4c8c374d13",
+              "raw_behavior_units": 28,
+              "direct_stock_floor": 28,
+              "attribution": 0.65,
+              "equivalent_program_units": 28
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        },
+        "correction_chain": {
+          "program_units": 420.8,
+          "source_slices": [
+            {
+              "path": "modules/stock/inventory.py",
+              "source_sha256": "305d949d7165962450c6915c06692ca9322080d0778fe86be57c0452652f31bb",
+              "raw_behavior_units": 71,
+              "direct_stock_floor": 48,
+              "attribution": 0.8,
+              "equivalent_program_units": 56.800000000000004
+            },
+            {
+              "path": "modules/stock/move.py",
+              "source_sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+              "raw_behavior_units": 72,
+              "direct_stock_floor": 0,
+              "attribution": 0.75,
+              "equivalent_program_units": 54.0
+            },
+            {
+              "path": "modules/stock/move.py",
+              "source_sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+              "raw_behavior_units": 301,
+              "direct_stock_floor": 269,
+              "attribution": 0.75,
+              "equivalent_program_units": 269
+            },
+            {
+              "path": "modules/stock/product.py",
+              "source_sha256": "c7e75d110acbe92fdaaf0da3449db19e3695c18cd6933e5687decd4c8c374d13",
+              "raw_behavior_units": 41,
+              "direct_stock_floor": 41,
+              "attribution": 0.65,
+              "equivalent_program_units": 41
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        }
+      },
+      "upper": {
+        "reservation_chain": {
+          "program_units": 409.6,
+          "source_slices": [
+            {
+              "path": "modules/stock/move.py",
+              "source_sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+              "raw_behavior_units": 424,
+              "direct_stock_floor": 255,
+              "attribution": 0.9,
+              "equivalent_program_units": 381.6
+            },
+            {
+              "path": "modules/stock/product.py",
+              "source_sha256": "c7e75d110acbe92fdaaf0da3449db19e3695c18cd6933e5687decd4c8c374d13",
+              "raw_behavior_units": 28,
+              "direct_stock_floor": 28,
+              "attribution": 0.85,
+              "equivalent_program_units": 28
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        },
+        "correction_chain": {
+          "program_units": 444.15000000000003,
+          "source_slices": [
+            {
+              "path": "modules/stock/inventory.py",
+              "source_sha256": "305d949d7165962450c6915c06692ca9322080d0778fe86be57c0452652f31bb",
+              "raw_behavior_units": 71,
+              "direct_stock_floor": 48,
+              "attribution": 0.95,
+              "equivalent_program_units": 67.45
+            },
+            {
+              "path": "modules/stock/move.py",
+              "source_sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+              "raw_behavior_units": 72,
+              "direct_stock_floor": 0,
+              "attribution": 0.9,
+              "equivalent_program_units": 64.8
+            },
+            {
+              "path": "modules/stock/move.py",
+              "source_sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+              "raw_behavior_units": 301,
+              "direct_stock_floor": 269,
+              "attribution": 0.9,
+              "equivalent_program_units": 270.90000000000003
+            },
+            {
+              "path": "modules/stock/product.py",
+              "source_sha256": "c7e75d110acbe92fdaaf0da3449db19e3695c18cd6933e5687decd4c8c374d13",
+              "raw_behavior_units": 41,
+              "direct_stock_floor": 41,
+              "attribution": 0.85,
+              "equivalent_program_units": 41
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        }
+      }
+    },
+    "axelor": {
+      "lower": {
+        "reservation_chain": {
+          "program_units": 91,
+          "source_slices": [
+            {
+              "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java",
+              "source_sha256": "802af7215c841703ce10b9956101d1d10bc1cbd360cba2b7d72c40feeb8943d9",
+              "raw_behavior_units": 86,
+              "direct_stock_floor": 66,
+              "attribution": 0.4,
+              "equivalent_program_units": 66
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java",
+              "source_sha256": "1519a988598214c7456bb0da20a95c1e9b3bc8e0d54c00d837aa1336c4d5e341",
+              "raw_behavior_units": 17,
+              "direct_stock_floor": 17,
+              "attribution": 0.55,
+              "equivalent_program_units": 17
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java",
+              "source_sha256": "ed09c909ddd50fb847e1eb4f44d7a12ef4c474da264098f0d2ea35dea5c2d0dd",
+              "raw_behavior_units": 8,
+              "direct_stock_floor": 8,
+              "attribution": 0.85,
+              "equivalent_program_units": 8
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        },
+        "correction_chain": {
+          "program_units": 218.55,
+          "source_slices": [
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java",
+              "source_sha256": "2e7a5404cc4a641c89e30cd488bea400a5f136a8b4a193b9efa98f9169d62238",
+              "raw_behavior_units": 101,
+              "direct_stock_floor": 19,
+              "attribution": 0.4,
+              "equivalent_program_units": 40.400000000000006
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+              "source_sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+              "raw_behavior_units": 55,
+              "direct_stock_floor": 0,
+              "attribution": 0.15,
+              "equivalent_program_units": 8.25
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveLineServiceImpl.java",
+              "source_sha256": "9d9b07b31a1257daa517c661e37bc9e4f89e8ae483422b160dde4625bf3808a2",
+              "raw_behavior_units": 86,
+              "direct_stock_floor": 0,
+              "attribution": 0.25,
+              "equivalent_program_units": 21.5
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java",
+              "source_sha256": "1519a988598214c7456bb0da20a95c1e9b3bc8e0d54c00d837aa1336c4d5e341",
+              "raw_behavior_units": 101,
+              "direct_stock_floor": 94,
+              "attribution": 0.55,
+              "equivalent_program_units": 94
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineHistoryServiceImpl.java",
+              "source_sha256": "134db77209cc87ba780164437a9ad86971113e6822306f9b51c937cdb112c7f0",
+              "raw_behavior_units": 6,
+              "direct_stock_floor": 6,
+              "attribution": 0.5,
+              "equivalent_program_units": 6
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/batch/BatchRecomputeStockLocationLines.java",
+              "source_sha256": "f03ebd63f380f571626ef16c27a07da91101e2476f0f72725d78813aac84dcb2",
+              "raw_behavior_units": 88,
+              "direct_stock_floor": 0,
+              "attribution": 0.55,
+              "equivalent_program_units": 48.400000000000006
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        }
+      },
+      "central": {
+        "reservation_chain": {
+          "program_units": 91,
+          "source_slices": [
+            {
+              "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java",
+              "source_sha256": "802af7215c841703ce10b9956101d1d10bc1cbd360cba2b7d72c40feeb8943d9",
+              "raw_behavior_units": 86,
+              "direct_stock_floor": 66,
+              "attribution": 0.6,
+              "equivalent_program_units": 66
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java",
+              "source_sha256": "1519a988598214c7456bb0da20a95c1e9b3bc8e0d54c00d837aa1336c4d5e341",
+              "raw_behavior_units": 17,
+              "direct_stock_floor": 17,
+              "attribution": 0.75,
+              "equivalent_program_units": 17
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java",
+              "source_sha256": "ed09c909ddd50fb847e1eb4f44d7a12ef4c474da264098f0d2ea35dea5c2d0dd",
+              "raw_behavior_units": 8,
+              "direct_stock_floor": 8,
+              "attribution": 0.95,
+              "equivalent_program_units": 8
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        },
+        "correction_chain": {
+          "program_units": 281.8,
+          "source_slices": [
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java",
+              "source_sha256": "2e7a5404cc4a641c89e30cd488bea400a5f136a8b4a193b9efa98f9169d62238",
+              "raw_behavior_units": 101,
+              "direct_stock_floor": 19,
+              "attribution": 0.6,
+              "equivalent_program_units": 60.599999999999994
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+              "source_sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+              "raw_behavior_units": 55,
+              "direct_stock_floor": 0,
+              "attribution": 0.3,
+              "equivalent_program_units": 16.5
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveLineServiceImpl.java",
+              "source_sha256": "9d9b07b31a1257daa517c661e37bc9e4f89e8ae483422b160dde4625bf3808a2",
+              "raw_behavior_units": 86,
+              "direct_stock_floor": 0,
+              "attribution": 0.45,
+              "equivalent_program_units": 38.7
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java",
+              "source_sha256": "1519a988598214c7456bb0da20a95c1e9b3bc8e0d54c00d837aa1336c4d5e341",
+              "raw_behavior_units": 101,
+              "direct_stock_floor": 94,
+              "attribution": 0.75,
+              "equivalent_program_units": 94
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineHistoryServiceImpl.java",
+              "source_sha256": "134db77209cc87ba780164437a9ad86971113e6822306f9b51c937cdb112c7f0",
+              "raw_behavior_units": 6,
+              "direct_stock_floor": 6,
+              "attribution": 0.75,
+              "equivalent_program_units": 6
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/batch/BatchRecomputeStockLocationLines.java",
+              "source_sha256": "f03ebd63f380f571626ef16c27a07da91101e2476f0f72725d78813aac84dcb2",
+              "raw_behavior_units": 88,
+              "direct_stock_floor": 0,
+              "attribution": 0.75,
+              "equivalent_program_units": 66.0
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        }
+      },
+      "upper": {
+        "reservation_chain": {
+          "program_units": 93.8,
+          "source_slices": [
+            {
+              "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java",
+              "source_sha256": "802af7215c841703ce10b9956101d1d10bc1cbd360cba2b7d72c40feeb8943d9",
+              "raw_behavior_units": 86,
+              "direct_stock_floor": 66,
+              "attribution": 0.8,
+              "equivalent_program_units": 68.8
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java",
+              "source_sha256": "1519a988598214c7456bb0da20a95c1e9b3bc8e0d54c00d837aa1336c4d5e341",
+              "raw_behavior_units": 17,
+              "direct_stock_floor": 17,
+              "attribution": 0.9,
+              "equivalent_program_units": 17
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java",
+              "source_sha256": "ed09c909ddd50fb847e1eb4f44d7a12ef4c474da264098f0d2ea35dea5c2d0dd",
+              "raw_behavior_units": 8,
+              "direct_stock_floor": 8,
+              "attribution": 1,
+              "equivalent_program_units": 8
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        },
+        "correction_chain": {
+          "program_units": 345.05,
+          "source_slices": [
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java",
+              "source_sha256": "2e7a5404cc4a641c89e30cd488bea400a5f136a8b4a193b9efa98f9169d62238",
+              "raw_behavior_units": 101,
+              "direct_stock_floor": 19,
+              "attribution": 0.8,
+              "equivalent_program_units": 80.80000000000001
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+              "source_sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+              "raw_behavior_units": 55,
+              "direct_stock_floor": 0,
+              "attribution": 0.45,
+              "equivalent_program_units": 24.75
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveLineServiceImpl.java",
+              "source_sha256": "9d9b07b31a1257daa517c661e37bc9e4f89e8ae483422b160dde4625bf3808a2",
+              "raw_behavior_units": 86,
+              "direct_stock_floor": 0,
+              "attribution": 0.65,
+              "equivalent_program_units": 55.9
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java",
+              "source_sha256": "1519a988598214c7456bb0da20a95c1e9b3bc8e0d54c00d837aa1336c4d5e341",
+              "raw_behavior_units": 101,
+              "direct_stock_floor": 94,
+              "attribution": 0.9,
+              "equivalent_program_units": 94
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineHistoryServiceImpl.java",
+              "source_sha256": "134db77209cc87ba780164437a9ad86971113e6822306f9b51c937cdb112c7f0",
+              "raw_behavior_units": 6,
+              "direct_stock_floor": 6,
+              "attribution": 0.9,
+              "equivalent_program_units": 6
+            },
+            {
+              "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/batch/BatchRecomputeStockLocationLines.java",
+              "source_sha256": "f03ebd63f380f571626ef16c27a07da91101e2476f0f72725d78813aac84dcb2",
+              "raw_behavior_units": 88,
+              "direct_stock_floor": 0,
+              "attribution": 0.95,
+              "equivalent_program_units": 83.6
+            }
+          ],
+          "meaning": "Taille estimée de comportement Stock dans une chaîne native complète ; utilisée comme analogue d’un nouveau module, pas comme seconde implémentation du noyau."
+        }
+      }
+    }
+  },
+  "schema_templates": {
+    "erpnext": {
+      "program_per_field": 0,
+      "declarations_per_field": 1,
+      "per_new_model": 1,
+      "view_field": 0,
+      "view_model": 0,
+      "rationale": "Métadonnées DocType : un champ et un modèle selon compteur natif ; formulaires générés."
+    },
+    "odoo": {
+      "program_per_field": 1,
+      "declarations_per_field": 0,
+      "view_field": 2,
+      "view_model": 4,
+      "rationale": "Champ ORM Python ; classe/_name/_description ; champ de liste et formulaire, quatre conteneurs par paire de vues.",
+      "program_per_new_model": 3,
+      "per_new_model": 0
+    },
+    "tryton": {
+      "program_per_field": 1,
+      "declarations_per_field": 0,
+      "view_field": 2,
+      "view_model": 2,
+      "rationale": "Champ ORM Python ; classe/__name__ ; liste/formulaire, deux conteneurs. Enregistrement supplémentaire du module ci-dessous.",
+      "program_per_new_model": 2,
+      "per_new_model": 0
+    },
+    "axelor": {
+      "program_per_field": 0,
+      "declarations_per_field": 1,
+      "per_new_model": 1,
+      "view_field": 2,
+      "view_model": 2,
+      "rationale": "Champs/entity du modèle XML et paires grid/form. Aucun getter généré ajouté."
+    }
+  },
+  "new_module_scaffolding": {
+    "erpnext": {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+      "sha256": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+      "program_units_per_new_service_module": 10,
+      "modules": 7,
+      "note": "Imports du module de référence et une classe de service ; métadonnées des modèles comptées séparément."
+    },
+    "odoo": {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_quant.py",
+      "sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+      "program_units_per_new_service_module": 13,
+      "modules": 7,
+      "note": "Imports du module de référence et une classe de service ; métadonnées des modèles comptées séparément."
+    },
+    "tryton": {
+      "repo": "tryton",
+      "path": "modules/stock/inventory.py",
+      "sha256": "305d949d7165962450c6915c06692ca9322080d0778fe86be57c0452652f31bb",
+      "program_units_per_new_service_module": 15,
+      "modules": 7,
+      "note": "Imports du module de référence et une classe de service ; métadonnées des modèles comptées séparément."
+    },
+    "axelor": {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java",
+      "sha256": "ed09c909ddd50fb847e1eb4f44d7a12ef4c474da264098f0d2ea35dea5c2d0dd",
+      "program_units_per_new_service_module": 14,
+      "modules": 7,
+      "note": "Structure Java hors méthodes : imports, classe, champs/injection et constructeur."
+    }
+  },
+  "activities": {
+    "source": "https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf",
+    "table": 57,
+    "printed_pages": [
+      64,
+      65
+    ],
+    "pdf_pages": [
+      68,
+      69
+    ],
+    "type": "Répartition par défaut MBASE/RUP, pas observation de l'équipe FLOW",
+    "phase_order": [
+      "Inception",
+      "Elaboration",
+      "Construction",
+      "Transition"
+    ],
+    "phase_effort_percent_of_base": [
+      6,
+      24,
+      76,
+      12
+    ],
+    "phase_schedule_percent_of_base": [
+      12.5,
+      37.5,
+      62.5,
+      12.5
+    ],
+    "base": "Elaboration + Construction =100% de l'effort COCOMO calculé. La colonne totale incluant Inception/Transition utilise118%, pas100%.",
+    "activities": [
+      {
+        "id": "management",
+        "label": "Gestion du projet logiciel",
+        "percent_by_phase": [
+          14,
+          12,
+          10,
+          14
+        ],
+        "possible_flow_roles": [
+          "coordination"
+        ],
+        "mapping": "Activité de pilotage logiciel ; pas tout le pilotage du programme."
+      },
+      {
+        "id": "environment",
+        "label": "Environnement et gestion de configuration",
+        "percent_by_phase": [
+          10,
+          8,
+          5,
+          5
+        ],
+        "possible_flow_roles": [
+          "plateforme",
+          "dev_java",
+          "dev_frontend"
+        ],
+        "mapping": "Outillage, configuration et environnement de réalisation ; pas exploitation annuelle."
+      },
+      {
+        "id": "requirements",
+        "label": "Analyse et exigences",
+        "percent_by_phase": [
+          38,
+          18,
+          8,
+          4
+        ],
+        "possible_flow_roles": [
+          "analyse_produit",
+          "architecture"
+        ],
+        "mapping": "À répartir selon les responsabilités réelles ; pas une équivalence à100% avec un rôle."
+      },
+      {
+        "id": "design",
+        "label": "Conception et architecture",
+        "percent_by_phase": [
+          19,
+          36,
+          16,
+          4
+        ],
+        "possible_flow_roles": [
+          "architecture",
+          "dev_java",
+          "dev_frontend",
+          "ux",
+          "securite",
+          "expert_optimisation"
+        ],
+        "mapping": "Plusieurs rôles interviennent ; aucune clé de ventilation n'est démontrée."
+      },
+      {
+        "id": "implementation",
+        "label": "Réalisation et tests unitaires",
+        "percent_by_phase": [
+          8,
+          13,
+          34,
+          19
+        ],
+        "possible_flow_roles": [
+          "dev_java",
+          "dev_frontend"
+        ],
+        "mapping": "Pas de ratio Java/interface fourni ; ne pas ajouter les tests unitaires à nouveau."
+      },
+      {
+        "id": "assessment",
+        "label": "Évaluation, vérification et validation",
+        "percent_by_phase": [
+          8,
+          10,
+          24,
+          24
+        ],
+        "possible_flow_roles": [
+          "qa",
+          "dev_java",
+          "dev_frontend",
+          "architecture",
+          "securite"
+        ],
+        "mapping": "Comprend des revues et validations ; ne pas assimiler toute la ligne à une QA indépendante."
+      },
+      {
+        "id": "deployment",
+        "label": "Préparation du déploiement",
+        "percent_by_phase": [
+          3,
+          3,
+          3,
+          30
+        ],
+        "possible_flow_roles": [
+          "plateforme",
+          "coordination",
+          "dev_java",
+          "dev_frontend"
+        ],
+        "mapping": "Dans la base E+C, préparation ; la transition opérationnelle complète reste une phase distincte."
+      }
+    ],
+    "apply_to_current_calculation": true,
+    "application_status": "Scénario d'allocation calculé par activités sur le résultat nominal COCOMO ; ni budget retenu ni JH par rôle."
+  },
+  "native_reference_labels": {
+    "erpnext": "ERPNext avec Frappe",
+    "odoo": "Odoo",
+    "tryton": "Tryton",
+    "axelor": "Axelor avec Open Platform"
+  },
+  "rules_ref": "source/fondamentaux.yaml#estimation_model",
+  "input_hashes": {
+    "audits/2026-10-30-propriete-stock-cadrage-01/cadrage.yaml": "11d9e695ff83b353b1803ed58dcccd04c6522551fd9528e810773f3a1679001d",
+    "audits/2026-10-30-propriete-stock-cadrage-01/preuves-code.json": "f7c264f31899cebe4a1e8b0d8141ce76cfe628d91b6764ba705d8472d8896b75",
+    "audits/2026-10-30-stock-opportunite-08/inputs.json": "b23b9d9769e744a7fa60519757cd86ca26fe20bdcb7ad415926ac049d6c6efbc",
+    "audits/2026-10-30-stock-opportunite-08/results.json": "a25babe7b8acd69827d247b6c27d5d9a576f8e6ae8f573df394d1926fdc0fb42",
+    "audits/2026-10-30-stock-opportunite-08/calculate.py": "25d554d53b21d14ae35243902819b5543b9c6b05e2452ff0772bf2f4e0d9e563",
+    "audits/2026-10-30-master-data-calcul/repartitions-sources.json": "d3ccb56e067f1861047c564480cf83afb42e7a63b137b57f4bcc434f57283fec",
+    "audits/2026-10-30-master-data-calcul/entrees.json": "e63c19ba17d742637a9608570d880dd605a7a003d525b042a641ef2fe2f73065",
+    "audits/2026-10-30-master-data-comparable-reuse/measurements.json": "acafd4c831765b92a97449d8c2a99646eaf558e750dfff8a9574403a60d59705",
+    "audits/2026-10-30-stock-adoption-10/measurements.json": "616bcf105a3ca28b8523cb456d7d4af438a087f64b7dc39e7ef24dc033ea8cbe",
+    "audits/2026-10-30-stock-mesures-03/erpnext-mesures.json": "3bfa13f4a267ab3aedf8b0bc4a73ddb0954d4c1ef536531e05bdb863cb99f2b1",
+    "audits/2026-10-30-stock-chaines-06/erpnext-correction.json": "bae750e32570c79a2b4edb474881623962505150ef70fe151c7a8052980207ab",
+    "audits/2026-10-30-stock-chaines-06/erpnext-reservation.json": "ccab3c21e8a2383b43fd7cd58e64e222d83fcec54cd7f5e9d2f6a12420068f36",
+    "audits/2026-10-30-stock-mesures-03/odoo-mesures.json": "8083ec5aeb0ec69118183eca55d1b7f759d71aaa80b794300673fb64a4f03ba6",
+    "audits/2026-10-30-stock-chaines-06/odoo-correction.json": "66ad7706a0b051bd69cf9f6cb95c70b4163e4da54a66bcf1e544849d69ac1274",
+    "audits/2026-10-30-stock-chaines-06/odoo-reservation.json": "1a1f1646efdd5ad14c34ea7aa81920d9fd8464cd3088950383cbc442158123d8",
+    "audits/2026-10-30-stock-mesures-03/tryton-mesures.json": "7c53e86718d1e21e65880e9c22ec1549885789be044ad996cec7c5a863b9366c",
+    "audits/2026-10-30-stock-chaines-06/tryton-correction.json": "3e7d321dd7f62fb81ea1e7c2e7f0fb642862e86d8f933661a4e40e0cd63bec07",
+    "audits/2026-10-30-stock-chaines-06/tryton-reservation.json": "68db7a19aba823ee32ad8f0b73250ea912ce02a6069bc342a6520ed4f5003b83",
+    "audits/2026-10-30-stock-mesures-03/axelor-mesures.json": "425606b74dc01f161200e7ba41db6349586bdb141ca56adca38a9a5ec0697dbf",
+    "audits/2026-10-30-stock-chaines-06/axelor-correction.json": "b20fc3d2ee82099ecec7cd8d6b0bf9fa271564762c7f744070e371abb8171978",
+    "audits/2026-10-30-stock-chaines-06/axelor-reservation.json": "2b82abd993f9f9fc3b4fb37561caab9546743f14c31afb7eb4863351cf432004"
+  },
+  "raw_source_hashes": {
+    "tmp/master-data-native-23/erpnext/erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+    "tmp/master-data-native-23/erpnext/erpnext/stock/utils.py": "707a86ac487a9b428c3da1321f59fab6df395fa30647b6dd3cdb2b19b82955b8",
+    "tmp/master-data-native-23/erpnext/erpnext/stock/stock_ledger.py": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+    "tmp/master-data-native-23/erpnext/erpnext/stock/doctype/bin/bin.py": "37b7749583c62a7c727de801a97b844eb70e70ce85d59ae85bc97dbe5dda3a30",
+    "tmp/master-data-native-23/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py": "13043450e72f96c39bfffc15ad2c0ffe738dd18de2bcead724a0defb38d04a7a",
+    "tmp/odoo20-audit/addons/stock/models/stock_move.py": "9d663d336cff509764e5c6b46dafd76646e73f02eb19d2e5d7d71771b17dec28",
+    "tmp/odoo20-audit/addons/stock/models/stock_move_line.py": "98a746a2ef3d2ba456d68fa86afb76f3bb4e01da2d9abeca17949244353e1904",
+    "tmp/odoo20-audit/addons/stock/models/stock_quant.py": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+    "tmp/odoo20-audit/addons/stock/models/product.py": "8dd1b558936b11243268a48eaea5e141a02ce4be756b33878a7b3ead38c7e9cc",
+    "tmp/tryton-code-audit-2026-10-28/modules/stock/move.py": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+    "tmp/tryton-code-audit-2026-10-28/modules/stock/product.py": "c7e75d110acbe92fdaaf0da3449db19e3695c18cd6933e5687decd4c8c374d13",
+    "tmp/tryton-code-audit-2026-10-28/modules/stock/inventory.py": "305d949d7165962450c6915c06692ca9322080d0778fe86be57c0452652f31bb",
+    "tmp/oss-audit-axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java": "802af7215c841703ce10b9956101d1d10bc1cbd360cba2b7d72c40feeb8943d9",
+    "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java": "1519a988598214c7456bb0da20a95c1e9b3bc8e0d54c00d837aa1336c4d5e341",
+    "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java": "ed09c909ddd50fb847e1eb4f44d7a12ef4c474da264098f0d2ea35dea5c2d0dd",
+    "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java": "2e7a5404cc4a641c89e30cd488bea400a5f136a8b4a193b9efa98f9169d62238",
+    "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+    "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveLineServiceImpl.java": "9d9b07b31a1257daa517c661e37bc9e4f89e8ae483422b160dde4625bf3808a2",
+    "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineHistoryServiceImpl.java": "134db77209cc87ba780164437a9ad86971113e6822306f9b51c937cdb112c7f0",
+    "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/batch/BatchRecomputeStockLocationLines.java": "f03ebd63f380f571626ef16c27a07da91101e2476f0f72725d78813aac84dcb2",
+    "tmp/master-data-native-23/erpnext/erpnext/controllers/stock_controller.py": "aa5c060cb0c0813e6375ebd9bbfa6ae4f50524d08db147229a15b4ea6358554e",
+    "tmp/master-data-native-23/erpnext/erpnext/controllers/subcontracting_inward_controller.py": "755f04a669cc98cc1acfddf76f2361ac55c838d6e64beac7ae04b360e35cea2c",
+    "tmp/master-data-native-23/erpnext/erpnext/stock/doctype/inventory_dimension/inventory_dimension.py": "12dd792f22ed08567beeb1d43b8832ece2eead2189750c65e0b17fa1b6e7bbd7",
+    "tmp/master-data-native-23/erpnext/erpnext/stock/doctype/inventory_dimension/inventory_dimension.json": "159d1fed0801d561fe5e07fdd1032fce3ed0769943224b0804f319701b1e285d",
+    "tmp/master-data-native-23/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py": "3e1a7fcb1b83dcd3f1f2e8ef9ad2c3325db92fc0ae9e82904482c8515922b66e",
+    "tmp/master-data-native-23/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json": "d3ed2375c9b83650f4af54d8d10f2e59d1e4d316ea7202d72c7bfe629aa9951e",
+    "tmp/master-data-native-23/erpnext/erpnext/stock/doctype/item/item.json": "5935b58aaee526870c74c1bb1e9ea4bd9e7d8ee55cd9ab23f93b146181c90c23",
+    "tmp/odoo20-audit/addons/stock/models/stock_picking.py": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+    "tmp/odoo20-audit/addons/stock/views/stock_quant_views.xml": "ae847ebd250f50138f1bb56249d6218792aec7402ce1df2bdff219a928f7afe5",
+    "tmp/odoo20-audit/addons/stock/views/stock_move_line_views.xml": "d0c73cd86793f617b207489b42ca85779dea79c98aca4aa92227b410aad60f10",
+    "tmp/tryton-code-audit-2026-10-28/modules/stock_consignment/stock.py": "d185cace6b5dd9fd9d9d80a6e411873a899c45ffbef355ec1f7c96c8c4ef0d9a",
+    "tmp/tryton-code-audit-2026-10-28/modules/stock_consignment/account.py": "aa4bb206e17f8d4209f093c7d1d0ab585cbf12dcb2fc061e86f88958756b5950",
+    "tmp/tryton-code-audit-2026-10-28/modules/stock_consignment/view/location_form.xml": "0e1f5b08f1ca42ed45d0482b21823a4c5b5244eef36702e07b7981f73118fb37",
+    "tmp/tryton-code-audit-2026-10-28/modules/stock_consignment/view/stock_move_form.xml": "07361678ffc7ad1fb8221253ebffc4c7022a09b61279208a3220a2b0fa3b9a80",
+    "tmp/tryton-code-audit-2026-10-28/modules/stock/location.py": "e07927ea40178925fa97f2632d9cdf9633c4b02e470238ac2208a8d0cff419e5",
+    "tmp/oss-audit-axelor/axelor-production/src/main/resources/domains/StockLocation.xml": "ce9c876632e4004bf1784c03ac05c3dbaa97f03efecd98a9c26fc4f4116f70fb",
+    "tmp/oss-audit-axelor/axelor-production/src/main/java/com/axelor/apps/production/service/manuforder/ManufOrderStockMoveServiceImpl.java": "756afcd384d6bfebbbc2d61e03efea15d87a3d4e871b12c774161c31718d583e",
+    "tmp/oss-audit-axelor/axelor-stock/src/main/resources/domains/StockLocation.xml": "f19dcdbb127909b2669fbf2ef854ce5b53b95814b24b84471e48e2a9be0a5306",
+    "tmp/oss-audit-axelor/axelor-stock/src/main/resources/views/StockLocation.xml": "1db27a6b8aa5ca285e5b8762f453fe5bdbc759cc9b03febf4ee488c9edf0a858",
+    "tmp/oss-audit-axelor/axelor-stock/src/main/resources/domains/StockMove.xml": "13592a5d3bc17f56d0a9bc07cb6631a391a2380e55cc1d8b613f67f4d77e5821",
+    "tmp/oss-audit-axelor/axelor-stock/src/main/resources/domains/StockLocationLine.xml": "b16f379d3dccba14d8f9eec8ee36167d4a07e188acf924dd7e8674c0750ac749"
+  },
+  "protected_active_inputs": {
+    "source/estimations-core-retenues.yaml": "0dfd0555aaa9f64b235bcae127e968b55d306e9c533f3c88c6a9ce7eb383d0c5",
+    "source/calculs-estimation-core.yaml": "2578acda07658f1573b8a0601b806d71233b4887ab762586f88d8152ad26ec18",
+    "source/fondamentaux.yaml": "d7038f4508b341d23e5c0ee7b6ae19a7744e9607a4eaa5ebdcdf9b4b569caeab",
+    "source/schema-fondamentaux.yaml": "69e8ca38411cc33d20e6d9a91d3b33b4e1eacb241d096c15584d29bf641b6551",
+    "source/referentiel-capacites.yaml": "ae8126902ea5fbe938260deb69784489a927397c363c2310f25e4cd5d737ea7c",
+    "sources/cartographie-scm-2026-10-24.yaml": "a1fc16bac87e206124485aee8fa51b49b774a4352e36721731662e868dbe6976"
+  },
+  "rule_basis": "Les instructions des chaînes natives servent à dimensionner du nouveau comportement de propriété. Les analogues ne sont pas ajoutés comme nouveau code Stock livré.",
+  "existing_foundation": {
+    "additional_framework_construction_jh": 0,
+    "additional_physical_stock_construction_jh": 0,
+    "no_free_work_claim": "Déjà financé dans le contexte comparé. Les adaptations nouvelles sont intégralement portées par OWN-F01 à OWN-F06.",
+    "native_context": "Patrimoine Master Data et Stock disponible dans chaque technologie native ; contexte de comparaison, pas quatre budgets actifs."
+  }
+}

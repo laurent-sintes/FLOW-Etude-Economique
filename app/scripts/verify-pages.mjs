@@ -21,9 +21,9 @@ const output=path.resolve(flags.get('--output')||'tmp/pages-validation-report.js
 await fs.mkdir(path.dirname(output),{recursive:true});
 const oracle=JSON.parse((await fs.readFile(casesPath,'utf8')).replace(/^\uFEFF/,''));
 assert.equal(Object.keys(oracle.cases).length,6,'Six current model scenarios are required.');
-const navRoutes=['synvance','perimetre-retenu','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire'];
+const navRoutes=['synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire'];
 const synvanceProviders=['microsoft','sap'];
-const routes=[navRoutes[0],...synvanceProviders.map(provider=>'synvance-'+provider),...navRoutes.slice(1)];
+const routes=[navRoutes[0],...['business','oms','costs',...synvanceProviders].map(page=>'synvance-'+page),...navRoutes.slice(1)];
 const report={url:site.href,status:'running',routes:{},worker:{},proofs:{},storage:{},errors:[],warnings:[]};
 const started=performance.now();
 const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE}:{})});
@@ -122,7 +122,7 @@ try{
  const data=await bootstrapResponse.json();
  equalProjection(data.baseline,oracle.cases.reference.result,'The static reference differs from the Python reference.');
  assert.deepEqual(data.ui.essential.nav.map(item=>item.id),navRoutes);
- assert.equal(navRoutes.length,18);assert.equal(routes.length,20);
+ assert.equal(navRoutes.length,18);assert.equal(routes.length,23);
  await page.waitForFunction(()=>location.hash==='#vision');
  assert.equal(await page.locator('.brand-home').getAttribute('href'),'#vision','The home link must open the Vision.');
  await route('modele');await page.locator('.brand-home').click();await route('vision');
@@ -141,12 +141,74 @@ try{
    report.routes[width].push(id);
   }
  }
+ for(const width of [1440,390]){
+  await page.setViewportSize({width,height:900});
+  for(const [base,key] of [['modele','model'],['etude-marche','market'],['capacite-realisation','delivery']]){
+   await route(base);
+   for(const entry of data.ui.essential.dossiers[key].pages){
+    const href='#'+base+(entry===data.ui.essential.dossiers[key].pages[0]?'':'?view='+entry.id);
+    await page.locator(`.dossier-navigation a[href="${href}"]`).click();
+    assert.equal(await page.locator('.dossier-navigation a[aria-current="page"]').getAttribute('href'),href);
+    assert.ok(await page.locator('.dossier-sheet').isVisible());
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth<=1));
+   }
+  }
+ }
  await checkFrameworkNavigation();
  await page.setViewportSize({width:1440,height:1000});
  const assets=await page.locator('img').evaluateAll(images=>images.map(image=>({src:image.src,loaded:image.complete&&image.naturalWidth>0})));
  assert.ok(assets.length>0);
  for(const asset of assets){assert.ok(asset.loaded,`Image did not load: ${asset.src}`);assert.ok(new URL(asset.src).pathname.startsWith(site.pathname),'Asset escaped the project base.');}
  report.assets=assets.length;
+
+ // Professional product proposal stays distinct from adopted financial reference.
+ const productProposal=data.content.core_product_scope?.proposal;
+ if(productProposal){
+  await route('evaluation-core');
+  const panel=page.locator('.product-estimate-proposal');await panel.waitFor();
+  const displayed=clean(await panel.innerText());
+  const number=new Intl.NumberFormat(data.ui.locale,{maximumFractionDigits:0});
+  assert.ok(displayed.includes(clean(number.format(productProposal.total_jh))),'Complete proposal effort is missing.');
+  assert.equal(productProposal.status,'retained');
+  assert.equal(productProposal.adopted_jh,productProposal.total_jh);
+  if(productProposal.technical_trials){
+   const trials=productProposal.technical_trials,section=panel.locator('.product-technical-trials');await section.waitFor();
+   assert.ok(clean(await section.innerText()).includes(clean(trials.reading.conclusion)),'Technical trial conclusion is missing.');
+   assert.ok(clean(await section.innerText()).includes(number.format(trials.checks_passed)),'Technical trial count is missing.');
+   assert.equal(trials.effort_effect,'unchanged');
+  }
+  assert.equal(productProposal.total_jh,Object.values(productProposal.purposes).reduce((n,p)=>n+p.jh,0));
+  assert.equal(data.baseline.options.find(o=>o.stack==='java-spring').build,oracle.cases.reference.result.options.find(o=>o.stack==='java-spring').build,'Proposal changed reference budget.');
+  await panel.locator('h3').scrollIntoViewIfNeeded();await page.screenshot({path:output+'.professional.png'});
+  await route('se-projeter');
+  assert.equal(await page.locator('.economic-projection-option .economic-budget-parts').count(),data.baseline.options.length,'Projection must explain build/integration/functioning.');
+  assert.ok(await page.locator('.economic-projection-option .core-build-partition').count()>0,'Retained business/IT split is missing from financial projection.');
+  await page.locator('.essential-projection-panel').first().scrollIntoViewIfNeeded();await page.screenshot({path:output+'.projection.png'});
+  report.proofs.completeProductProposal={proposal_jh:productProposal.total_jh,adopted_jh:productProposal.adopted_jh,purposes:productProposal.purposes,referencePreserved:true,projectionBreakdownVisible:true};
+ }
+
+ // Economic detail pages retain the full evidence behind their compact summaries.
+ await route('evaluation-core');
+ const familyLinks=await page.locator('[data-family-summary] a').evaluateAll(links=>links.map(link=>link.getAttribute('href')));
+ assert.ok(familyLinks.length>0);
+ assert.equal(await page.locator('[data-family]').count(),0,'Family demonstrations belong to detail pages.');
+ for(const href of familyLinks){
+  await page.locator(`a[href="${href}"]`).click();
+  await page.locator('.economic-family-detail').waitFor();
+  assert.equal(await page.locator('[data-family]').count(),1);
+  assert.ok(await page.locator('.calculation-alignment').isVisible());
+  await page.locator('.economic-family-detail a[href="#evaluation-core"]').first().click();
+  await page.locator('[data-family-summary]').first().waitFor();
+ }
+ await route('parametres');
+ for(const detail of ['tarifs','diagnostics']){
+  await page.locator(`.dossier-navigation a[href="#parametres?detail=${detail}"]`).click();
+  await page.locator('.framework-detail').waitFor();
+  assert.equal(await page.locator('.framework-detail .core-method-section').count(),1);
+  await page.locator('.framework-detail a.text-button[href="#parametres"]').click();
+  await page.locator('.dossier-navigation a[href="#parametres?detail=tarifs"]').waitFor();
+ }
+ report.proofs.economicDetailPages=true;
 
  // Model YAML is hidden; a readable market note still initializes the real Python worker.
  await route('evaluation-core');
@@ -220,7 +282,7 @@ try{
  await page.evaluate(()=>{location.hash='#glossaire?term=cocomo_ii';});
  await page.waitForFunction(()=>document.activeElement?.id==='glossary-term-cocomo_ii');
  assert.equal(await page.evaluate(()=>location.hash),'#glossaire?term=cocomo_ii');
- await route('complexite');
+ await route('calcul-run');
  const glossaryLink=page.locator('.method-glossary-link').first();
  const glossaryTarget=await glossaryLink.getAttribute('href');
  await glossaryLink.click();
@@ -228,29 +290,48 @@ try{
  report.proofs.glossary={canonicalEntries:Object.keys(data.glossary.notions).length,search:true,directTerm:true,methodLink:true};
  await route('vision');
  assert.deepEqual(await page.locator('.vision-reading-paths a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),['#modele','#comparer','#capacite-realisation']);
+ assert.deepEqual(await page.locator('.vision-adaptation a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),['#parametres','#simuler']);
+ assert.deepEqual(await page.locator('.vision-evidence a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),['#cartographie','#synvance']);
  assert.equal(await page.locator('.vision-matrix tbody tr').count(),2);
  assert.equal(await page.locator('.vision-matrix tbody td').count(),4);
  assert.equal(await page.locator('.vision-proof-levels>li').count(),4,'The Vision should distinguish four levels of evidence.');
  await page.locator('.vision-confidence-links a[href="#conditions-realisation"]').click();await route('conditions-realisation');
  assert.equal(await page.locator('.delivery-conditions-page').count(),1);
  await route('capacite-realisation');assert.equal(await page.locator('.delivery-readiness-page').count(),1);
- await page.locator('main a[href="#perimetre-retenu"]').first().click();await route('perimetre-retenu');
+ const delivery=data.content.delivery_readiness;
+ assert.equal(await page.locator('.delivery-review-date time').getAttribute('datetime'),delivery.date);
+ await page.locator('[data-proof-ref]').first().click();
+ await page.waitForFunction(()=>document.activeElement?.id.startsWith('delivery-readiness-proof-'));
+ assert.equal(await page.locator('[data-delivery-proof]').count(),delivery.proofs.length);
+ await page.locator('a[href="#capacite-realisation?view=hotspots"]').click();
+ assert.equal(await page.locator('[data-hotspot]').count(),delivery.hotspots.length);
+ await page.locator('a[href="#capacite-realisation?view=gates"]').click();
+ assert.equal(await page.locator('[data-delivery-gate]').count(),delivery.gates.length);
+ await route('capacite-realisation');
+ await page.locator('main a[href="#conditions-realisation"]:visible').click();await route('conditions-realisation');
+ await page.locator('main a[href="#capacite-realisation"]:visible').click();await route('capacite-realisation');
+ await page.locator('.sidebar a[href="#cartographie"]').click();await route('cartographie');
+ assert.equal(await page.locator('.cartography-page .model-map-systems').count(),1);
+ assert.equal(await page.locator('.cartography-page .model-map a').getAttribute('href'),data.content.delivery_readiness.scope.link.href);
+ const inputScope=await page.locator('.cartography-page').innerText();
+ assert.ok(inputScope.includes(data.content.delivery_readiness.scope.source.version));
+ await page.locator('main a[href="#modele?section=scope"]:visible').click();
+ await page.waitForFunction(()=>document.activeElement?.id==='model-chapter-scope');
  const scope=data.content.delivery_readiness.scope;
- assert.equal(await page.locator('.delivery-scope-capability').count(),scope.rows.length,'The full retained scope must be accessible.');
- assert.equal(await page.locator('.delivery-scope-source a').getAttribute('href'),scope.link.href);
- assert.ok((await page.locator('.delivery-scope-provenance').innerText()).includes(scope.source.version),'The retained cartography must identify its captured version.');
- assert.equal(await page.locator('.delivery-scope-scale-axes li').count(),0);
- assert.equal(await page.locator('.delivery-scope-area').count(),scope.hierarchy.flatMap(domain=>domain.subdomains.flatMap(subdomain=>subdomain.areas)).length);
- const areaLink=page.locator('.delivery-scope-area-links button').last();
- const areaTarget=await areaLink.getAttribute('aria-controls');await areaLink.click();
- await page.waitForFunction(target=>document.activeElement?.id===target,areaTarget);
- const sample=scope.rows[0];await page.locator('#delivery-scope-search').fill(sample.capability_id);
- assert.equal(await page.locator('.delivery-scope-capability').count(),1,'The scope search must find the exact native capability.');
- assert.equal(await page.locator('.delivery-scope-axes>div').count(),0);
- assert.equal(await page.locator('.delivery-scope-capability>.source-link').getAttribute('href'),sample.href);
- await page.locator('#delivery-scope-search').fill('');
- await route('modele');assert.equal(await page.locator('.model-map a[href="#perimetre-retenu"]').count(),1);
- assert.equal(await page.locator('.model-map a').filter({hasText:scope.link.label}).getAttribute('href'),scope.link.href);
+ assert.equal(await page.locator('.delivery-scope-capability').count(),0);
+ assert.equal(await page.locator('.sidebar a[href="#perimetre-retenu"]').count(),0);
+ assert.equal(await page.locator('.model-map-systems').count(),1);
+ assert.equal(await page.locator('.model-scope-areas').count(),0,'The fundamentals keep a short scope reminder.');
+ assert.equal(await page.locator('.model-scope-provenance').count(),0);
+ assert.equal(await page.locator('.model-map a[href="#cartographie"]').count(),1);
+ await page.goto(new URL('#perimetre-retenu',site).href);
+ await page.waitForFunction(()=>location.hash==='#cartographie');
+ await page.locator('.cartography-page').waitFor();
+ assert.equal(await page.locator('.model-scope-areas li').count(),scope.hierarchy.flatMap(domain=>domain.subdomains.flatMap(subdomain=>subdomain.areas)).length);
+ assert.equal(await page.locator('.model-scope-areas>div').count(),scope.hierarchy.flatMap(domain=>domain.subdomains).length);
+ for(const area of scope.hierarchy.flatMap(domain=>domain.subdomains.flatMap(subdomain=>subdomain.areas)))assert.equal(await page.locator(`[data-area="${area.id}"]`).innerText(),area.label);
+ assert.equal(await page.locator('.cartography-provenance time').getAttribute('datetime'),scope.source.date);
+ assert.equal(await page.locator('.cartography-page .model-map a').getAttribute('href'),scope.link.href);
  report.proofs.sponsorJourney={visionLanding:true,evidenceLevels:true,realizationCriteria:true,readinessDossier:true,retainedScope:true,nativeCartography:true};
  await route('vision');await page.locator('.vision-evidence a[href="#synvance"]').click();await route('synvance');
  assert.equal(data.ui.essential.nav_groups[0].items[0],'synvance');
@@ -343,7 +424,9 @@ try{
  const guideHasMissingLink=!manifest.documents['AGENTS.md'];
  readerData.ui.essential.market_study.offers.sources[0]={...readerData.ui.essential.market_study.offers.sources[0],path:guideHasMissingLink?'source/README.md':'source/__pages_missing_proof__.md',label:'Ouvrir le guide de validation'};
  await reader.route(bootstrapUrl,request=>request.fulfill({json:readerData}));
- await reader.goto(site.href+'#etude-marche');
+ const offersPage=readerData.ui.essential.dossiers.market.pages.find(entry=>entry.sections?.includes('offres'));
+ assert.ok(offersPage,'Market dossier must expose supplier evidence.');
+ await reader.goto(site.href+'#etude-marche?view='+encodeURIComponent(offersPage.id));
  await reader.getByRole('button',{name:'Ouvrir le guide de validation',exact:true}).click();
  if(guideHasMissingLink){
   await reader.locator('dialog[open] .markdown').waitFor({timeout:180000});

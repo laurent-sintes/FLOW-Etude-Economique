@@ -1,0 +1,259 @@
+{
+  "id": "propriete-stock-calcul-02",
+  "date": "2026-10-30",
+  "status": "hypotheses_avant_calcul_non_adoptees",
+  "capabilities": [
+    "BC-014",
+    "BC-015"
+  ],
+  "native_references": [
+    "erpnext",
+    "odoo",
+    "tryton",
+    "axelor"
+  ],
+  "modules": [
+    {
+      "id": "OWN-F01",
+      "name": "Conditions de propriété et contexte applicables",
+      "analogue": "reservation_chain",
+      "lower": 0.35,
+      "central": 0.75,
+      "upper": 1.25,
+      "basis": "Un module compagnon de contrôle des références, contexte, conditions applicables et justification manquante, estimé à trois quarts d’une chaîne native de décision sur une quantité. Les accords et leur version sont référencés ; aucune édition d’accord ni langage contractuel général."
+    },
+    {
+      "id": "OWN-F02",
+      "name": "Détermination des transferts et quantités",
+      "analogue": "reservation_chain",
+      "lower": 0.75,
+      "central": 1.5,
+      "upper": 2.5,
+      "basis": "Un module traitant consommation/vente, échéance ou jalon reçu, avec quantités partielles et plusieurs passages entre parties. Taille proposée à une chaîne et demie de réservation ; les trois déclencheurs sont des variantes, pas trois copies du module."
+    },
+    {
+      "id": "OWN-F03",
+      "name": "Actes requis et transferts reconnus ailleurs",
+      "analogue": "reservation_chain",
+      "lower": 0.35,
+      "central": 0.75,
+      "upper": 1.25,
+      "basis": "Branchement métier sur les protocoles existants, état en attente, références d’actes, admission du résultat et absence de double décision. Trois quarts d’une chaîne de réservation ; aucun moteur Orders ou orchestration construit ici."
+    },
+    {
+      "id": "OWN-F04",
+      "name": "Registre autonome de propriété",
+      "analogue": "correction_chain",
+      "lower": 0.5,
+      "central": 1,
+      "upper": 1.75,
+      "basis": "Un nouveau module d’écriture et de justification des passages de propriété, équivalent en taille de comportement à une chaîne native de correction. Les tables et contrats sont propres à la propriété ; persistance et transactions sont réutilisées."
+    },
+    {
+      "id": "OWN-F05",
+      "name": "Corrections et lectures aux deux dates",
+      "analogue": "correction_chain",
+      "lower": 0.35,
+      "central": 0.75,
+      "upper": 1.5,
+      "basis": "Un module additionnel de corrections expliquées et de lecture selon date d’effet et date de connaissance. Trois quarts de chaîne de correction ; l’écriture courante de OWN-F04 et les primitives de journal existantes ne sont pas réimplémentées."
+    },
+    {
+      "id": "OWN-F06",
+      "name": "Rapprochement et fourniture des positions",
+      "analogue": "correction_chain",
+      "lower": 0.2,
+      "central": 0.5,
+      "upper": 0.9,
+      "basis": "Comparer les états du registre de propriété aux faits et positions existants, puis fournir résultat et limites. Une demi-chaîne de correction ; pas de nouveau moteur de stock, de publication Finance ou de sauvegarde."
+    }
+  ],
+  "schemas": [
+    {
+      "package": "OWN-F01",
+      "name": "OwnershipConditionBinding",
+      "fields": [
+        "agreementRef",
+        "agreementVersion",
+        "conditionRef",
+        "scopeRef",
+        "triggerKind",
+        "effectiveFrom",
+        "effectiveUntil",
+        "conditionPayloadRef"
+      ],
+      "view": true
+    },
+    {
+      "package": "OWN-F02",
+      "name": "OwnershipDetermination",
+      "fields": [
+        "triggerFactRef",
+        "triggerKind",
+        "agreementBindingRef",
+        "goodsRef",
+        "quantity",
+        "unitRef",
+        "fromOwnerRef",
+        "toOwnerRef",
+        "effectiveAt",
+        "outcome",
+        "missingJustification",
+        "requiredActKind",
+        "scopeRef"
+      ],
+      "view": true
+    },
+    {
+      "package": "OWN-F02",
+      "name": "OwnershipTransferLeg",
+      "fields": [
+        "determinationRef",
+        "sequenceRef",
+        "fromOwnerRef",
+        "toOwnerRef",
+        "goodsRef",
+        "quantity",
+        "unitRef",
+        "effectiveAt",
+        "factRef"
+      ],
+      "view": true
+    },
+    {
+      "package": "OWN-F03",
+      "name": "OwnershipActLink",
+      "fields": [
+        "determinationRef",
+        "legRef",
+        "requestRef",
+        "requiredActKind",
+        "state",
+        "requestedAt",
+        "resultRef",
+        "resultAt",
+        "refusalReason"
+      ],
+      "view": true
+    },
+    {
+      "package": "OWN-F03",
+      "name": "OwnershipRecognitionReceipt",
+      "fields": [
+        "externalTransferRef",
+        "sourceRef",
+        "admissionRef",
+        "legRef",
+        "recognizedAt",
+        "outcome"
+      ],
+      "view": false
+    },
+    {
+      "package": "OWN-F04",
+      "name": "OwnershipEntry",
+      "fields": [
+        "legRef",
+        "sourceEntryRef",
+        "goodsRef",
+        "quantity",
+        "unitRef",
+        "fromOwnerRef",
+        "toOwnerRef",
+        "effectiveAt",
+        "knownAt",
+        "basisRef",
+        "factRef",
+        "actResultRef",
+        "stockFactRef",
+        "correctionOf"
+      ],
+      "view": true
+    },
+    {
+      "package": "OWN-F04",
+      "name": "OwnershipEntryEvidence",
+      "fields": [
+        "entryRef",
+        "evidenceRef",
+        "evidenceKind",
+        "authorityScope",
+        "authorityOutcome"
+      ],
+      "view": false
+    },
+    {
+      "package": "OWN-F05",
+      "name": "OwnershipReadCut",
+      "fields": [
+        "effectiveAt",
+        "knownAt",
+        "scopeRef",
+        "agreementCutRef",
+        "stockCutRef",
+        "consistencyState"
+      ],
+      "view": true
+    },
+    {
+      "package": "OWN-F06",
+      "name": "OwnershipReconciliation",
+      "fields": [
+        "scopeRef",
+        "effectiveAt",
+        "knownAt",
+        "stockCutRef",
+        "ownershipCutRef",
+        "discrepancyKind",
+        "quantityDelta",
+        "unitRef",
+        "explanationRef"
+      ],
+      "view": true
+    },
+    {
+      "package": "OWN-F06",
+      "name": "OwnershipSupply",
+      "fields": [
+        "cutRef",
+        "consumerRef",
+        "scopeRef",
+        "payloadVersion",
+        "payloadHash",
+        "limitation",
+        "resultRef"
+      ],
+      "view": true
+    }
+  ],
+  "configuration": {
+    "model_registrations": 10,
+    "service_bindings": 6,
+    "ownership_indexes": 6,
+    "canonical_mappings": 6
+  },
+  "schema_status": "Dix structures et champs spécifiques proposés, pas spécification validée. Les identifiants, rôles/organisation, horodatage ORM, versions techniques et journaux génériques ne sont pas recomptés. Les structures de décision et leurs lignes ne définissent pas à elles seules les groupes COSMIC.",
+  "reuse_policy": "Master Data et Stock sont supposés disponibles dans chaque écosystème natif. Aucune reconstruction historique du framework ni nouvelle construction du registre physique de stock. Les analogues donnent une échelle au code propre à la propriété ; ils ne constituent pas des instructions de Stock facturées une seconde fois.",
+  "boundary": "Deux capacités BC-014 et BC-015 ; nouveau travail générique à ajouter au patrimoine disponible, intégration des règles Beaumanoir exclue.",
+  "base_policy": "La base technique et métier Stock/Master Data est déjà financée. Toute la nouvelle taille est répartie dans les six compléments de propriété ; aucune base autonome de reconstruction des produits natifs n’est ajoutée.",
+  "architecture": "Une base transactionnelle, registre de propriété local, contrôle de cohérence des quantités et branchements aux protocoles existants. Pas de réservation distribuée ni d’engagement chiffré nouveau de débit, latence, RPO/RTO.",
+  "rule_policy": "Conditions déjà établies fournies par les accords et l’intégration ; trois familles de déclencheurs consommées par un mécanisme générique. Pas formalisation exhaustive des clauses, décision juridique ou moteur de règles universel.",
+  "sizing_policy": "Même proxy logique et conventions natives de schéma que Stock ; fractions d’analogues choisies par jugement d’ingénierie, pas productivités observées. Paramètres gelés avant premier calcul des efforts, sans objectif d’accord des quatre chiffres ou de COSMIC.",
+  "schedule_policy": "Conserver le délai local COCOMO pour information ; aucune somme des délais locaux et pas de planning global proposé.",
+  "rounding_jh": 10,
+  "selected_java_reference": "axelor",
+  "framework_equivalence_factor": 1,
+  "COSMIC_policy": {
+    "boundary": "Composant fonctionnel Propriété du stock, de l’entrée métier aux écritures/consultations propres à la propriété. Les autres composants et opérateurs peuvent le déclencher. Données Master Data/Stock considérées comme persistances logiques déjà disponibles.",
+    "scope_caveat": "Comptage local du composant ; les frontières diffèrent d’un comptage de tout le Core. Ne pas additionner les CFP de cette mesure aux anciennes mesures sans rapprochement des interfaces.",
+    "functional_reuse": "Ne pas compter les imports génériques, transports, retries techniques ou publications Finance déjà financés ; les opérations propres à la propriété gardent leurs mouvements fonctionnels même si le code générique est réutilisé.",
+    "productivity_hours_per_CFP": 20,
+    "factor": 1,
+    "day_hours": 7,
+    "factor_note": "Convention de comparaison par famille composante d’un projet plus vaste, dans la continuité de la décision Master Data. Le tableau ISBSG de correction par taille donnerait 1,1 pour un projet autonome de 50–100 CFP ; ce facteur n’est pas appliqué automatiquement au composant.",
+    "activity_note": "Même intention de couvrir le projet logiciel (analyse, conception, réalisation, tests et préparation de mise en service) ; composition des cohortes, experts et mise en œuvre non parfaitement appariés. Le benchmark ne calibre pas le patrimoine Master Data/Stock réutilisé."
+  },
+  "human_review": null,
+  "observed_project_effort": null,
+  "adoption": false
+}

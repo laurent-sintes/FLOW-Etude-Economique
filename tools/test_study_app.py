@@ -301,10 +301,10 @@ class StudyTests(unittest.TestCase):
     def test_essential_reader_groups_framework_before_economic_pages(self):
         from document_excerpt import document_excerpt
         essential=self.study.ui['essential']
-        self.assertEqual([item['id'] for item in essential['nav']],['synvance','perimetre-retenu','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire'])
-        self.assertEqual(set(essential['pages']),{'synvance','synvance-microsoft','synvance-sap','perimetre-retenu','vision','modele','conditions-realisation','complexite','calcul-net','calcul-run','marche','leviers','capacite-realisation','etude-marche','parametres','comparer','evaluation-core','se-projeter','simuler','glossaire'})
+        self.assertEqual([item['id'] for item in essential['nav']],['synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire'])
+        self.assertEqual(set(essential['pages']),{'cartographie','synvance','synvance-business','synvance-oms','synvance-costs','synvance-microsoft','synvance-sap','vision','modele','conditions-realisation','complexite','calcul-net','calcul-run','marche','leviers','capacite-realisation','etude-marche','parametres','comparer','evaluation-core','se-projeter','simuler','glossaire'})
         self.assertEqual([group['items'] for group in essential['nav_groups']],
-                         [['synvance','perimetre-retenu'],['vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers'],['capacite-realisation'],['etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler'],['glossaire']])
+                         [['synvance','cartographie'],['vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers'],['capacite-realisation'],['etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler'],['glossaire']])
         self.assertEqual([phase['key'] for phase in essential['structure']['phases']],['obtention','integration','services'])
         for concept in essential['concepts']:
             self.assertIn(concept['notion'],self.study.glossary['notions'])
@@ -349,7 +349,7 @@ class StudyTests(unittest.TestCase):
                 if row['units']:
                     self.assertEqual(central, sum(u['total_jh'] for u in row['units']))
                     self.assertIsNone(row['uncertainty_pct'])
-                    self.assertEqual(row['estimation_status'], 'partially_estimated')
+                    self.assertEqual(row['estimation_status'], 'fully_estimated' if not row['coverage']['remaining'] else 'partially_estimated')
                 elif central:
                     self.assertEqual(row['uncertainty_pct']['down'],round(100*(central-row['ranges_jh']['bas'])/central,1))
                     self.assertEqual(row['uncertainty_pct']['up'],round(100*(row['ranges_jh']['haut']-central)/central,1))

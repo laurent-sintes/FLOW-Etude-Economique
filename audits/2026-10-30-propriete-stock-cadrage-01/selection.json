@@ -1,0 +1,191 @@
+{
+  "erpnext": [
+    [
+      "erpnext/controllers/stock_controller.py",
+      [
+        "StockController.validate_customer_provided_item"
+      ],
+      "Biens client ; garde et valeur ne prouvent pas un transfert de propriété."
+    ],
+    [
+      "erpnext/controllers/subcontracting_inward_controller.py",
+      [
+        "SubcontractingInwardController.validate_material_receipt",
+        "SubcontractingInwardController.validate_material_transfer",
+        "SubcontractingInwardController.validate_delivery"
+      ],
+      "Réception, transfert et livraison de biens client ; frontière fabrication et prestations."
+    ],
+    [
+      "erpnext/stock/doctype/inventory_dimension/inventory_dimension.py",
+      [
+        "get_evaluated_inventory_dimension",
+        "get_inventory_dimensions"
+      ],
+      "Dimension transactionnelle configurable ; analogue possible, pas propriétaire natif présumé."
+    ],
+    [
+      "erpnext/stock/doctype/inventory_dimension/inventory_dimension.json",
+      [],
+      "Schéma de dimension ; mécanisme générique à réutiliser, pas moteur métier de propriété."
+    ],
+    [
+      "erpnext/stock/doctype/stock_entry/stock_entry.py",
+      [],
+      "Point d’appel et documents de stock existants ; réalisation physique hors nouveau financement."
+    ],
+    [
+      "erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py",
+      [],
+      "Registre de stock existant à réutiliser."
+    ],
+    [
+      "erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.json",
+      [],
+      "Références, quantité et dates du registre existant."
+    ],
+    [
+      "erpnext/stock/doctype/item/item.json",
+      [],
+      "Indicateur is_customer_provided_item ; référence Master Data existante."
+    ]
+  ],
+  "odoo": [
+    [
+      "addons/stock/models/stock_quant.py",
+      [
+        "StockQuant._get_available_quantity",
+        "StockQuant._update_available_quantity"
+      ],
+      "Quantités différenciées par propriétaire ; invariant de position déjà financé en Stock."
+    ],
+    [
+      "addons/stock/models/stock_move_line.py",
+      [
+        "StockMoveLine.write",
+        "StockMoveLine._synchronize_quant"
+      ],
+      "Correction d’un propriétaire de ligne : annulation/rejeu des quantités ; pas journal autonome de transfert contractuel."
+    ],
+    [
+      "addons/stock/models/stock_picking.py",
+      [
+        "StockPicking._action_done"
+      ],
+      "Affectation de owner_id vers les mouvements et lignes à la réalisation."
+    ],
+    [
+      "addons/stock/models/stock_move.py",
+      [],
+      "Propagation de restrict_partner_id ; mouvements et réservations réutilisés."
+    ],
+    [
+      "addons/stock/models/product.py",
+      [
+        "ProductProduct._compute_quantities_dict"
+      ],
+      "Positions présentes et passées filtrées par propriétaire ; réutilisation Stock."
+    ],
+    [
+      "addons/stock/views/stock_quant_views.xml",
+      [],
+      "Vues des quantités et propriétaire."
+    ],
+    [
+      "addons/stock/views/stock_move_line_views.xml",
+      [],
+      "Vues des mouvements et propriétaire."
+    ]
+  ],
+  "tryton": [
+    [
+      "modules/stock_consignment/stock.py",
+      [
+        "set_origin_consignment",
+        "unset_origin_consignment",
+        "Move.is_supplier_consignment",
+        "Move.is_customer_consignment",
+        "Move.get_invoice_lines_consignment",
+        "Move.do",
+        "Move.cancel"
+      ],
+      "Consignation fournisseur/client, transitions et facturation liées aux mouvements."
+    ],
+    [
+      "modules/stock_consignment/account.py",
+      [
+        "InvoiceLine.origin_name",
+        "InvoiceLine._get_origin"
+      ],
+      "Lien de facture vers le mouvement ; Finance hors nouveau périmètre."
+    ],
+    [
+      "modules/stock_consignment/view/location_form.xml",
+      [],
+      "Configuration du tiers de consignation."
+    ],
+    [
+      "modules/stock_consignment/view/stock_move_form.xml",
+      [],
+      "Traçabilité vers lignes de facture de consignation."
+    ],
+    [
+      "modules/stock/location.py",
+      [],
+      "Arbre des lieux et quantités du patrimoine existant."
+    ],
+    [
+      "modules/stock/move.py",
+      [],
+      "Mouvements, dates et requêtes de stock à réutiliser."
+    ]
+  ],
+  "axelor": [
+    [
+      "axelor-production/src/main/resources/domains/StockLocation.xml",
+      [],
+      "Extension du lieu : sous-traitance et indicateur de consignation."
+    ],
+    [
+      "axelor-production/src/main/java/com/axelor/apps/production/service/manuforder/ManufOrderStockMoveServiceImpl.java",
+      [
+        "_getDefaultInOutsourcingStockLocation",
+        "_getVirtualOutsourcingStockLocation"
+      ],
+      "Choix de lieux en sous-traitance ; pas preuve d’un propriétaire indépendant du lieu."
+    ],
+    [
+      "axelor-stock/src/main/resources/domains/StockLocation.xml",
+      [],
+      "Société et partenaire du lieu ; distinguer leur sens du propriétaire des biens."
+    ],
+    [
+      "axelor-stock/src/main/resources/views/StockLocation.xml",
+      [],
+      "Configuration du lieu de consignation."
+    ],
+    [
+      "axelor-stock/src/main/resources/domains/StockMove.xml",
+      [],
+      "Société, partenaire et mouvement existants."
+    ],
+    [
+      "axelor-stock/src/main/resources/domains/StockLocationLine.xml",
+      [],
+      "Position physique déjà financée en Stock."
+    ],
+    [
+      "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java",
+      [
+        "getTrackingNumberAvailableQty@37",
+        "getAvailableStockForAProduct"
+      ],
+      "Consultation des positions réutilisée ; aucun transfert de propriété déduit de cette requête."
+    ],
+    [
+      "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineHistoryServiceImpl.java",
+      [],
+      "Historique physique existant ; distinct d’un historique autonome de propriété."
+    ]
+  ]
+}

@@ -1,0 +1,3684 @@
+{
+  "id": "axelor-correction",
+  "product": "axelor",
+  "kind": "correction",
+  "status": "dossier natif bout en bout aux frontières déclarées, pas équivalence Flow démontrée",
+  "pattern": "Inventaire → mouvements réalisés → mutation quantité/historique. Un batch distinct reconstruit stock et historique par groupes de date réelle.",
+  "native_stages": [
+    "InventoryValidateService.validate et génération du delta",
+    "StockMoveService.realizeStockMove impose realDate = date du jour dans cette voie",
+    "StockMoveLine.updateLocations → StockLocationLine.updateLocation → JPA ; historique lié au prix",
+    "BatchRecomputeStockLocationLines : effacer historique/remettre à zéro → groupes réalisés → recalcul → quantités prévues et anomalies"
+  ],
+  "result": "La reconstruction complète est un vrai analogue de reprise. Elle utilise plusieurs transactions et trace les anomalies ; elle ne prouve pas une correction rétroactive en ligne atomique.",
+  "gap": "Aucune équivalence complète à l’admission d’une correction rétroactive Flow trouvée dans ces voies. Le batch reconstruit l’état à partir du patrimoine natif ; il ne conserve pas automatiquement toutes les connaissances historiques.",
+  "unresolved": [
+    "Passage de la reconstruction globale native à un recalcul ciblé de la portion corrigée.",
+    "Cohérence visible pendant reconstruction, arrêt/reprise, et liens de correction.",
+    "Prix moyen, réapprovisionnement et exécution des mouvements mêlés aux méthodes."
+  ],
+  "files": [
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "2e7a5404cc4a641c89e30cd488bea400a5f136a8b4a193b9efa98f9169d62238",
+      "git_object_sha256": "b6aefcbb7d557557f31aa603b86b01c928f4451557326cf5fb95f361db4750cb",
+      "source_url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java",
+      "role": "native_integration",
+      "classification_basis": "Chaîne d’inventaire complète par composants, avec génération des mouvements ; valeur et quantités de lignes couplées.",
+      "methods": [
+        {
+          "name": "validate",
+          "start": 113,
+          "end": 134,
+          "calls": [
+            "AuthUtils.getUser",
+            "I18n.get",
+            "appBaseService.getTodayDateTime",
+            "appBaseService.getTodayDateTime(inventory.getCompany()).toLocalDateTime",
+            "checkMissingStockLocation",
+            "generateStockMoves",
+            "inventory.getCompany",
+            "inventory.getStatusSelect",
+            "inventory.setIsStockMoveBlocked",
+            "inventory.setStatusSelect",
+            "inventory.setValidatedBy",
+            "inventory.setValidatedOn",
+            "inventoryStockLocationUpdateService.storeLastInventoryData"
+          ],
+          "source_fragment": "  @Override\n  @Transactional(rollbackOn = {Exception.class})\n  public void validate(Inventory inventory) throws AxelorException {\n    if (inventory.getStatusSelect() == null\n        || inventory.getStatusSelect() != InventoryRepository.STATUS_COMPLETED) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(StockExceptionMessage.INVENTORY_VALIDATE_WRONG_STATUS));\n    }\n\n    checkMissingStockLocation(inventory);\n    inventory.setValidatedOn(\n        appBaseService.getTodayDateTime(inventory.getCompany()).toLocalDateTime());\n    inventory.setStatusSelect(InventoryRepository.STATUS_VALIDATED);\n    inventory.setIsStockMoveBlocked(false);\n    inventory.setValidatedBy(AuthUtils.getUser());\n\n    generateStockMoves(inventory, true);\n    generateStockMoves(inventory, false);\n\n    inventoryStockLocationUpdateService.storeLastInventoryData(inventory);\n  }",
+          "program_units": 11
+        },
+        {
+          "name": "generateStockMoves",
+          "start": 136,
+          "end": 207,
+          "calls": [
+            "BatchProcessorHelper.builder",
+            "BatchProcessorHelper.builder()\r\n        .build().forEachByQuery",
+            "BatchProcessorHelper.builder().build",
+            "List.of",
+            "Optional.ofNullable",
+            "Optional.ofNullable(virtualInventoryLocation)\r\n                      .map(StockLocation::getId)\r\n                      .map(stockLocationRepository::find).orElse",
+            "Optional.ofNullable(virtualInventoryLocation)\r\n                      .map(StockLocation::getId).map",
+            "Optional.ofNullable(virtualInventoryLocation).map",
+            "computeDiff",
+            "computeDiff(inventoryLine, isEnteringStock).signum",
+            "fromStockLocation.getId",
+            "generateStockMove",
+            "generateStockMoveLines",
+            "getStockMove",
+            "inventory.getCompany",
+            "inventory.getId",
+            "inventoryLine.getStockLocation",
+            "inventoryLineRepository\r\n            .all()\r\n            .filter(\r\n                \"self.inventory.id = :inventoryId and self.stockLocation is not null and self.id > :lastSeenId\")\r\n            .bind(\"inventoryId\", inventoryId).order",
+            "inventoryLineRepository\r\n            .all()\r\n            .filter(\r\n                \"self.inventory.id = :inventoryId and self.stockLocation is not null and self.id > :lastSeenId\").bind",
+            "inventoryLineRepository\r\n            .all().filter",
+            "inventoryLineRepository.all",
+            "inventoryRepo.find",
+            "realizeGeneratedStockMoves",
+            "stockConfigService.getInventoryVirtualStockLocation",
+            "stockConfigService.getStockConfig",
+            "stockLocationRepository.find",
+            "stockMove.getId",
+            "stockMoveIdMap.get",
+            "stockMoveIdMap.put",
+            "toStockLocation.getId",
+            "virtualInventoryLocation.getId"
+          ],
+          "source_fragment": "  public void generateStockMoves(Inventory inventory, boolean isEnteringStock)\n      throws AxelorException {\n\n    final Long inventoryId = inventory.getId();\n\n    Company company = inventory.getCompany();\n    StockConfig stockConfig = stockConfigService.getStockConfig(company);\n    StockLocation virtualInventoryLocation =\n        stockConfigService.getInventoryVirtualStockLocation(stockConfig);\n\n    Map<StockMoveLocationKey, Long> stockMoveIdMap = new HashMap<>();\n\n    final Inventory[] inventoryHolder = {inventoryRepo.find(inventoryId)};\n    final StockLocation[] virtualInvLocHolder = {\n      virtualInventoryLocation != null\n          ? stockLocationRepository.find(virtualInventoryLocation.getId())\n          : null\n    };\n\n    Query<InventoryLine> query =\n        inventoryLineRepository\n            .all()\n            .filter(\n                \"self.inventory.id = :inventoryId and self.stockLocation is not null and self.id > :lastSeenId\")\n            .bind(\"inventoryId\", inventoryId)\n            .order(\"id\");\n\n    BatchProcessorHelper.builder()\n        .build()\n        .<InventoryLine, AxelorException>forEachByQuery(\n            query,\n            inventoryLine -> {\n              if (computeDiff(inventoryLine, isEnteringStock).signum() <= 0) {\n                return;\n              }\n              StockLocation realStockLocation = inventoryLine.getStockLocation();\n              StockLocation fromStockLocation =\n                  isEnteringStock ? virtualInvLocHolder[0] : realStockLocation;\n              StockLocation toStockLocation =\n                  isEnteringStock ? realStockLocation : virtualInvLocHolder[0];\n\n              StockMoveLocationKey key =\n                  new StockMoveLocationKey(fromStockLocation.getId(), toStockLocation.getId());\n              Long stockMoveId = stockMoveIdMap.get(key);\n              StockMove stockMove;\n              if (stockMoveId == null) {\n                stockMove =\n                    generateStockMove(\n                        inventoryHolder[0], isEnteringStock, fromStockLocation, toStockLocation);\n                stockMoveIdMap.put(key, stockMove.getId());\n              } else {\n                stockMove = getStockMove(stockMoveId);\n              }\n\n              generateStockMoveLines(\n                  stockMove,\n                  fromStockLocation,\n                  toStockLocation,\n                  List.of(inventoryLine),\n                  isEnteringStock);\n            },\n            () -> {\n              inventoryHolder[0] = inventoryRepo.find(inventoryId);\n              virtualInvLocHolder[0] =\n                  Optional.ofNullable(virtualInventoryLocation)\n                      .map(StockLocation::getId)\n                      .map(stockLocationRepository::find)\n                      .orElse(null);\n            });\n\n    realizeGeneratedStockMoves(stockMoveIdMap);\n  }",
+          "program_units": 26
+        },
+        {
+          "name": "generateStockMove",
+          "start": 219,
+          "end": 249,
+          "calls": [
+            "inventory.getCompany",
+            "inventory.getInventorySeq",
+            "inventory.getPlannedStartDateT",
+            "inventory.getPlannedStartDateT().toLocalDate",
+            "inventory.getValidatedOn",
+            "inventory.getValidatedOn().toLocalDate",
+            "stockMove.setInventory",
+            "stockMove.setName",
+            "stockMove.setOrigin",
+            "stockMoveRepo.save",
+            "stockMoveService.createStockMove"
+          ],
+          "source_fragment": "  public StockMove generateStockMove(\n      Inventory inventory,\n      boolean isEnteringStock,\n      StockLocation fromStockLocation,\n      StockLocation toStockLocation)\n      throws AxelorException {\n\n    Company company = inventory.getCompany();\n    String inventorySeq = inventory.getInventorySeq();\n\n    LocalDate inventoryDate = inventory.getPlannedStartDateT().toLocalDate();\n    LocalDate realDate = inventory.getValidatedOn().toLocalDate();\n    StockMove stockMove =\n        stockMoveService.createStockMove(\n            null,\n            null,\n            company,\n            fromStockLocation,\n            toStockLocation,\n            realDate,\n            inventoryDate,\n            null,\n            StockMoveRepository.TYPE_INTERNAL);\n\n    stockMove.setName(inventorySeq);\n\n    stockMove.setInventory(inventory);\n    stockMove.setOrigin(inventorySeq);\n\n    return stockMoveRepo.save(stockMove);\n  }",
+          "program_units": 10
+        },
+        {
+          "name": "realizeGeneratedStockMoves",
+          "start": 251,
+          "end": 268,
+          "calls": [
+            "CollectionUtils.isEmpty",
+            "Collectors.toList",
+            "ObjectUtils.isEmpty",
+            "getStockMove",
+            "stockMoveIdMap.values",
+            "stockMoveIdMap.values().stream",
+            "stockMoveIdMap.values().stream()\r\n            .filter(Objects::nonNull)\r\n            .distinct().collect",
+            "stockMoveIdMap.values().stream()\r\n            .filter(Objects::nonNull).distinct",
+            "stockMoveIdMap.values().stream().filter",
+            "stockMoveRealize"
+          ],
+          "source_fragment": "  protected void realizeGeneratedStockMoves(Map<StockMoveLocationKey, Long> stockMoveIdMap)\n      throws AxelorException {\n    if (ObjectUtils.isEmpty(stockMoveIdMap)) {\n      return;\n    }\n    List<Long> ids =\n        stockMoveIdMap.values().stream()\n            .filter(Objects::nonNull)\n            .distinct()\n            .collect(Collectors.toList());\n    if (CollectionUtils.isEmpty(ids)) {\n      return;\n    }\n    for (Long id : ids) {\n      StockMove stockMove = getStockMove(id);\n      stockMoveRealize(stockMove);\n    }\n  }",
+          "program_units": 9
+        },
+        {
+          "name": "stockMoveRealize",
+          "start": 270,
+          "end": 278,
+          "calls": [
+            "getStockMove",
+            "getStockMoveLinesCount",
+            "stockMoveService.copyQtyToRealQty",
+            "stockMoveService.plan",
+            "stockMoveService.realize"
+          ],
+          "source_fragment": "  protected void stockMoveRealize(StockMove stockMove) throws AxelorException {\n    long stockMoveLinesCount = getStockMoveLinesCount(stockMove);\n    if (stockMoveLinesCount == 0l) {\n      return;\n    }\n    stockMoveService.plan(getStockMove(stockMove));\n    stockMoveService.copyQtyToRealQty(getStockMove(stockMove));\n    stockMoveService.realize(getStockMove(stockMove), false);\n  }",
+          "program_units": 7
+        },
+        {
+          "name": "generateStockMoveLines",
+          "start": 280,
+          "end": 291,
+          "calls": [
+            "generateStockMoveLines"
+          ],
+          "source_fragment": "  protected void generateStockMoveLines(\n      StockMove stockMove,\n      StockLocation fromStockLocation,\n      StockLocation toStockLocation,\n      List<InventoryLine> inventoryLineList,\n      boolean isEnteringStock)\n      throws AxelorException {\n    for (InventoryLine inventoryLine : inventoryLineList) {\n      generateStockMoveLines(\n          inventoryLine, stockMove, isEnteringStock, fromStockLocation, toStockLocation);\n    }\n  }",
+          "program_units": 3
+        },
+        {
+          "name": "generateStockMoveLines",
+          "start": 302,
+          "end": 350,
+          "calls": [
+            "I18n.get",
+            "computeDiff",
+            "diff.signum",
+            "getAvgPrice",
+            "inventoryLine.getInventory",
+            "inventoryLine.getInventory().getInventorySeq",
+            "inventoryLine.getPrice",
+            "inventoryLine.getProduct",
+            "inventoryLine.getTrackingNumber",
+            "inventoryLineService.isPresentInStockLocation",
+            "product.getDescription",
+            "product.getName",
+            "product.getUnit",
+            "stockLocationLineFetchService.getStockLocationLine",
+            "stockMoveLine.getTrackingNumber",
+            "stockMoveLine.setTrackingNumber",
+            "stockMoveLineRepo.save",
+            "stockMoveLineService.createStockMoveLine"
+          ],
+          "source_fragment": "  protected void generateStockMoveLines(\n      InventoryLine inventoryLine,\n      StockMove stockMove,\n      boolean isEnteringStock,\n      StockLocation fromStockLocation,\n      StockLocation toStockLocation)\n      throws AxelorException {\n    Product product = inventoryLine.getProduct();\n    TrackingNumber trackingNumber = inventoryLine.getTrackingNumber();\n    BigDecimal diff = computeDiff(inventoryLine, isEnteringStock);\n    if (diff.signum() <= 0) {\n      return;\n    }\n\n    StockLocationLine stockLocationLine =\n        stockLocationLineFetchService.getStockLocationLine(toStockLocation, product);\n    BigDecimal unitPrice = getAvgPrice(stockLocationLine);\n    if (!inventoryLineService.isPresentInStockLocation(inventoryLine)) {\n      unitPrice = inventoryLine.getPrice();\n    }\n\n    StockMoveLine stockMoveLine =\n        stockMoveLineService.createStockMoveLine(\n            product,\n            product.getName(),\n            product.getDescription(),\n            diff,\n            unitPrice,\n            unitPrice,\n            product.getUnit(),\n            stockMove,\n            StockMoveLineService.TYPE_NULL,\n            false,\n            BigDecimal.ZERO,\n            fromStockLocation,\n            toStockLocation);\n    if (stockMoveLine == null) {\n      throw new AxelorException(\n          inventoryLine.getInventory(),\n          TraceBackRepository.CATEGORY_CONFIGURATION_ERROR,\n          I18n.get(StockExceptionMessage.INVENTORY_7)\n              + \" \"\n              + inventoryLine.getInventory().getInventorySeq());\n    }\n    if (trackingNumber != null && stockMoveLine.getTrackingNumber() == null) {\n      stockMoveLine.setTrackingNumber(trackingNumber);\n    }\n    stockMoveLineRepo.save(stockMoveLine);\n  }",
+          "program_units": 16
+        },
+        {
+          "name": "computeDiff",
+          "start": 368,
+          "end": 374,
+          "calls": [
+            "diff.negate",
+            "inventoryLine.getCurrentQty",
+            "inventoryLine.getRealQty",
+            "inventoryLine.getRealQty().subtract"
+          ],
+          "source_fragment": "  protected BigDecimal computeDiff(InventoryLine inventoryLine, boolean isEnteringStock) {\n    BigDecimal diff = inventoryLine.getRealQty().subtract(inventoryLine.getCurrentQty());\n    if (!isEnteringStock) {\n      diff = diff.negate();\n    }\n    return diff;\n  }",
+          "program_units": 5
+        },
+        {
+          "name": "checkMissingStockLocation",
+          "start": 376,
+          "end": 416,
+          "calls": [
+            "CollectionUtils.isEmpty",
+            "I18n.get",
+            "String.format",
+            "inventoryLine.getProduct",
+            "inventoryLine.getProduct().getFullName",
+            "inventoryLine.getTrackingNumber",
+            "inventoryLine.getTrackingNumber().getTrackingNumberSeq",
+            "inventoryLineRepository\r\n            .all()\r\n            .filter(\"self.inventory = :inventory and self.stockLocation is null\")\r\n            .bind(\"inventory\", inventory).fetch",
+            "inventoryLineRepository\r\n            .all()\r\n            .filter(\"self.inventory = :inventory and self.stockLocation is null\").bind",
+            "inventoryLineRepository\r\n            .all().filter",
+            "inventoryLineRepository.all",
+            "inventoryLinesWithMissingStockLocation.size",
+            "inventoryLinesWithMissingStockLocation.stream",
+            "inventoryLinesWithMissingStockLocation.stream().forEach",
+            "stringHTMLListInventoryLine.append"
+          ],
+          "source_fragment": "  protected void checkMissingStockLocation(Inventory inventory) throws AxelorException {\n\n    List<InventoryLine> inventoryLinesWithMissingStockLocation =\n        inventoryLineRepository\n            .all()\n            .filter(\"self.inventory = :inventory and self.stockLocation is null\")\n            .bind(\"inventory\", inventory)\n            .fetch(\n                INVENTORY_LINE_WITHOUT_STOCK_LOCATION_DISPLAY_LIMIT\n                    + 1); // Fetch limit + 1 to check for excess items\n\n    if (CollectionUtils.isEmpty(inventoryLinesWithMissingStockLocation)) {\n      return;\n    }\n\n    StringHtmlListBuilder stringHTMLListInventoryLine = new StringHtmlListBuilder();\n    inventoryLinesWithMissingStockLocation.stream()\n        .forEach(\n            inventoryLine -> {\n              if (inventoryLine.getTrackingNumber() == null) {\n                stringHTMLListInventoryLine.append(inventoryLine.getProduct().getFullName());\n              } else {\n                stringHTMLListInventoryLine.append(\n                    String.format(\n                        \"%s : %s\",\n                        inventoryLine.getProduct().getFullName(),\n                        inventoryLine.getTrackingNumber().getTrackingNumberSeq()));\n              }\n            });\n\n    if (inventoryLinesWithMissingStockLocation.size()\n        > INVENTORY_LINE_WITHOUT_STOCK_LOCATION_DISPLAY_LIMIT) {\n      stringHTMLListInventoryLine.append(\"...\");\n    }\n\n    throw new AxelorException(\n        TraceBackRepository.CATEGORY_NO_VALUE,\n        String.format(\n            I18n.get(StockExceptionMessage.INVENTORY_LINE_STOCK_LOCATION_MISSING),\n            stringHTMLListInventoryLine));\n  }",
+          "program_units": 12
+        },
+        {
+          "name": "getStockMoveLinesCount",
+          "start": 418,
+          "end": 424,
+          "calls": [
+            "stockMove.getId",
+            "stockMoveLineRepo\r\n        .all()\r\n        .filter(\"self.stockMove.id = :stockMoveId\")\r\n        .bind(\"stockMoveId\", stockMove.getId()).count",
+            "stockMoveLineRepo\r\n        .all()\r\n        .filter(\"self.stockMove.id = :stockMoveId\").bind",
+            "stockMoveLineRepo\r\n        .all().filter",
+            "stockMoveLineRepo.all"
+          ],
+          "source_fragment": "  protected long getStockMoveLinesCount(StockMove stockMove) {\n    return stockMoveLineRepo\n        .all()\n        .filter(\"self.stockMove.id = :stockMoveId\")\n        .bind(\"stockMoveId\", stockMove.getId())\n        .count();\n  }",
+          "program_units": 2
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "method_declaration",
+          "start": 418,
+          "end": 424
+        },
+        {
+          "kind": "return_statement",
+          "start": 419,
+          "end": 423
+        },
+        {
+          "kind": "method_declaration",
+          "start": 376,
+          "end": 416
+        },
+        {
+          "kind": "throw_statement",
+          "start": 411,
+          "end": 415
+        },
+        {
+          "kind": "if_statement",
+          "start": 406,
+          "end": 409
+        },
+        {
+          "kind": "expression_statement",
+          "start": 408,
+          "end": 408
+        },
+        {
+          "kind": "expression_statement",
+          "start": 392,
+          "end": 404
+        },
+        {
+          "kind": "if_statement",
+          "start": 395,
+          "end": 403
+        },
+        {
+          "kind": "expression_statement",
+          "start": 398,
+          "end": 402
+        },
+        {
+          "kind": "expression_statement",
+          "start": 396,
+          "end": 396
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 391,
+          "end": 391
+        },
+        {
+          "kind": "if_statement",
+          "start": 387,
+          "end": 389
+        },
+        {
+          "kind": "return_statement",
+          "start": 388,
+          "end": 388
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 378,
+          "end": 385
+        },
+        {
+          "kind": "method_declaration",
+          "start": 368,
+          "end": 374
+        },
+        {
+          "kind": "return_statement",
+          "start": 373,
+          "end": 373
+        },
+        {
+          "kind": "if_statement",
+          "start": 370,
+          "end": 372
+        },
+        {
+          "kind": "expression_statement",
+          "start": 371,
+          "end": 371
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 369,
+          "end": 369
+        },
+        {
+          "kind": "method_declaration",
+          "start": 302,
+          "end": 350
+        },
+        {
+          "kind": "expression_statement",
+          "start": 349,
+          "end": 349
+        },
+        {
+          "kind": "if_statement",
+          "start": 346,
+          "end": 348
+        },
+        {
+          "kind": "expression_statement",
+          "start": 347,
+          "end": 347
+        },
+        {
+          "kind": "if_statement",
+          "start": 338,
+          "end": 345
+        },
+        {
+          "kind": "throw_statement",
+          "start": 339,
+          "end": 344
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 323,
+          "end": 337
+        },
+        {
+          "kind": "if_statement",
+          "start": 319,
+          "end": 321
+        },
+        {
+          "kind": "expression_statement",
+          "start": 320,
+          "end": 320
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 318,
+          "end": 318
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 316,
+          "end": 317
+        },
+        {
+          "kind": "if_statement",
+          "start": 312,
+          "end": 314
+        },
+        {
+          "kind": "return_statement",
+          "start": 313,
+          "end": 313
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 311,
+          "end": 311
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 310,
+          "end": 310
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 309,
+          "end": 309
+        },
+        {
+          "kind": "method_declaration",
+          "start": 280,
+          "end": 291
+        },
+        {
+          "kind": "enhanced_for_statement",
+          "start": 287,
+          "end": 290
+        },
+        {
+          "kind": "expression_statement",
+          "start": 288,
+          "end": 289
+        },
+        {
+          "kind": "method_declaration",
+          "start": 270,
+          "end": 278
+        },
+        {
+          "kind": "expression_statement",
+          "start": 277,
+          "end": 277
+        },
+        {
+          "kind": "expression_statement",
+          "start": 276,
+          "end": 276
+        },
+        {
+          "kind": "expression_statement",
+          "start": 275,
+          "end": 275
+        },
+        {
+          "kind": "if_statement",
+          "start": 272,
+          "end": 274
+        },
+        {
+          "kind": "return_statement",
+          "start": 273,
+          "end": 273
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 271,
+          "end": 271
+        },
+        {
+          "kind": "method_declaration",
+          "start": 251,
+          "end": 268
+        },
+        {
+          "kind": "enhanced_for_statement",
+          "start": 264,
+          "end": 267
+        },
+        {
+          "kind": "expression_statement",
+          "start": 266,
+          "end": 266
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 265,
+          "end": 265
+        },
+        {
+          "kind": "if_statement",
+          "start": 261,
+          "end": 263
+        },
+        {
+          "kind": "return_statement",
+          "start": 262,
+          "end": 262
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 256,
+          "end": 260
+        },
+        {
+          "kind": "if_statement",
+          "start": 253,
+          "end": 255
+        },
+        {
+          "kind": "return_statement",
+          "start": 254,
+          "end": 254
+        },
+        {
+          "kind": "method_declaration",
+          "start": 219,
+          "end": 249
+        },
+        {
+          "kind": "return_statement",
+          "start": 248,
+          "end": 248
+        },
+        {
+          "kind": "expression_statement",
+          "start": 246,
+          "end": 246
+        },
+        {
+          "kind": "expression_statement",
+          "start": 245,
+          "end": 245
+        },
+        {
+          "kind": "expression_statement",
+          "start": 243,
+          "end": 243
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 231,
+          "end": 241
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 230,
+          "end": 230
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 229,
+          "end": 229
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 227,
+          "end": 227
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 226,
+          "end": 226
+        },
+        {
+          "kind": "method_declaration",
+          "start": 136,
+          "end": 207
+        },
+        {
+          "kind": "expression_statement",
+          "start": 206,
+          "end": 206
+        },
+        {
+          "kind": "expression_statement",
+          "start": 163,
+          "end": 204
+        },
+        {
+          "kind": "expression_statement",
+          "start": 199,
+          "end": 203
+        },
+        {
+          "kind": "expression_statement",
+          "start": 198,
+          "end": 198
+        },
+        {
+          "kind": "expression_statement",
+          "start": 190,
+          "end": 195
+        },
+        {
+          "kind": "if_statement",
+          "start": 181,
+          "end": 188
+        },
+        {
+          "kind": "expression_statement",
+          "start": 187,
+          "end": 187
+        },
+        {
+          "kind": "expression_statement",
+          "start": 185,
+          "end": 185
+        },
+        {
+          "kind": "expression_statement",
+          "start": 182,
+          "end": 184
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 180,
+          "end": 180
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 179,
+          "end": 179
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 177,
+          "end": 178
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 174,
+          "end": 175
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 172,
+          "end": 173
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 171,
+          "end": 171
+        },
+        {
+          "kind": "if_statement",
+          "start": 168,
+          "end": 170
+        },
+        {
+          "kind": "return_statement",
+          "start": 169,
+          "end": 169
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 155,
+          "end": 161
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 149,
+          "end": 153
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 148,
+          "end": 148
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 146,
+          "end": 146
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 143,
+          "end": 144
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 142,
+          "end": 142
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 141,
+          "end": 141
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 139,
+          "end": 139
+        },
+        {
+          "kind": "method_declaration",
+          "start": 113,
+          "end": 134
+        },
+        {
+          "kind": "expression_statement",
+          "start": 133,
+          "end": 133
+        },
+        {
+          "kind": "expression_statement",
+          "start": 131,
+          "end": 131
+        },
+        {
+          "kind": "expression_statement",
+          "start": 130,
+          "end": 130
+        },
+        {
+          "kind": "expression_statement",
+          "start": 128,
+          "end": 128
+        },
+        {
+          "kind": "expression_statement",
+          "start": 127,
+          "end": 127
+        },
+        {
+          "kind": "expression_statement",
+          "start": 126,
+          "end": 126
+        },
+        {
+          "kind": "expression_statement",
+          "start": 124,
+          "end": 125
+        },
+        {
+          "kind": "expression_statement",
+          "start": 123,
+          "end": 123
+        },
+        {
+          "kind": "if_statement",
+          "start": 116,
+          "end": 121
+        },
+        {
+          "kind": "throw_statement",
+          "start": 118,
+          "end": 120
+        }
+      ],
+      "program_units": 101,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "git_object_sha256": "a341cce7cf8e191a2f3862820ba85519458347850a8caf1e703d868065ce1bf4",
+      "source_url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "role": "native_integration",
+      "classification_basis": "Réalisation native et effets de service ; realDate prend la date du jour dans la méthode inspectée.",
+      "methods": [
+        {
+          "name": "realize",
+          "start": 525,
+          "end": 528,
+          "calls": [
+            "realize"
+          ],
+          "source_fragment": "  @Override\n  public String realize(StockMove stockMove) throws AxelorException {\n    return realize(stockMove, true);\n  }",
+          "program_units": 2
+        },
+        {
+          "name": "realize",
+          "start": 530,
+          "end": 542,
+          "calls": [
+            "realizeStockMove",
+            "sendMailForStockMove",
+            "stockMove.getRealStockMoveAutomaticMail",
+            "stockMove.getRealStockMoveMessageTemplate",
+            "stockMove.getTypeSelect"
+          ],
+          "source_fragment": "  @Override\n  public String realize(StockMove stockMove, boolean checkOngoingInventoryFlag)\n      throws AxelorException {\n    String newStockSeq = realizeStockMove(stockMove, checkOngoingInventoryFlag);\n\n    if (stockMove.getTypeSelect() == StockMoveRepository.TYPE_OUTGOING\n        && stockMove.getRealStockMoveAutomaticMail() != null\n        && stockMove.getRealStockMoveAutomaticMail()) {\n      sendMailForStockMove(stockMove, stockMove.getRealStockMoveMessageTemplate());\n    }\n\n    return newStockSeq;\n  }",
+          "program_units": 5
+        },
+        {
+          "name": "realizeStockMove",
+          "start": 544,
+          "end": 640,
+          "calls": [
+            "I18n.get",
+            "JpaModelHelper.ensureManaged",
+            "LOG.debug",
+            "Strings.isNullOrEmpty",
+            "appBaseService.getTodayDate",
+            "appStockService.getAppStock",
+            "appStockService.getAppStock().getIsRequiredShipmentSupplierDetails",
+            "checkOngoingInventory",
+            "clearPlannedStockMoveLine",
+            "computeMasses",
+            "copyAndSplitStockMove",
+            "copyAndSplitStockMoveReverse",
+            "fillRealizeWapPriceForStockMove",
+            "getPlannedStockMoveLineIds",
+            "getStockMoveLineIds",
+            "mustBeSplit",
+            "newStockMove.get",
+            "newStockMove.get().getStockMoveSeq",
+            "newStockMove.isPresent",
+            "partnerProductQualityRatingService.calculate",
+            "resetMasses",
+            "setRealizedStatus",
+            "stockMove.getCompany",
+            "stockMove.getEstimatedDate",
+            "stockMove.getId",
+            "stockMove.getIsReversion",
+            "stockMove.getIsWithBackorder",
+            "stockMove.getIsWithReturnSurplus",
+            "stockMove.getStatusSelect",
+            "stockMove.getStockMoveSeq",
+            "stockMove.getSupplierShipmentDate",
+            "stockMove.getSupplierShipmentRef",
+            "stockMove.getTypeSelect",
+            "stockMove.setExTaxTotal",
+            "stockMove.setRealDate",
+            "stockMoveLineService.checkConformitySelection",
+            "stockMoveLineService.checkExpirationDates",
+            "stockMoveLineService.checkTrackingNumber",
+            "stockMoveLineService.updateLocations",
+            "stockMoveRepo.find",
+            "stockMoveRepo.save",
+            "stockMoveToolService.compute",
+            "storeCustomsCodesForStockMove"
+          ],
+          "source_fragment": "  @Transactional(rollbackOn = {Exception.class})\n  protected String realizeStockMove(StockMove stockMove, boolean checkOngoingInventoryFlag)\n      throws AxelorException {\n    if (stockMove.getStatusSelect() == null\n        || stockMove.getStatusSelect() != StockMoveRepository.STATUS_PLANNED) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(StockExceptionMessage.STOCK_MOVE_REALIZATION_WRONG_STATUS));\n    }\n\n    LOG.debug(\"Stock realization : {} \", stockMove.getStockMoveSeq());\n\n    if (stockMove.getTypeSelect() == StockMoveRepository.TYPE_INCOMING\n        && !stockMove.getIsReversion()\n        && appStockService.getAppStock().getIsRequiredShipmentSupplierDetails()\n        && (stockMove.getSupplierShipmentDate() == null\n            || Strings.isNullOrEmpty(stockMove.getSupplierShipmentRef()))) {\n      throw new AxelorException(\n          stockMove,\n          TraceBackRepository.CATEGORY_MISSING_FIELD,\n          I18n.get(StockExceptionMessage.STOCK_MOVE_MISSING_SUPPLIER_SHIPMENT_DETAILS));\n    }\n\n    if (checkOngoingInventoryFlag) {\n      checkOngoingInventory(stockMove);\n    }\n\n    int initialStatus = stockMove.getStatusSelect();\n\n    String newStockSeq = null;\n    stockMoveLineService.checkTrackingNumber(stockMove);\n    stockMoveLineService.checkConformitySelection(stockMove);\n    fillRealizeWapPriceForStockMove(stockMove);\n\n    stockMoveLineService.checkExpirationDates(stockMove);\n\n    BigDecimal exTaxTotal = stockMoveToolService.compute(stockMove);\n    stockMove = JpaModelHelper.ensureManaged(stockMove);\n    setRealizedStatus(stockMove);\n    stockMove.setRealDate(appBaseService.getTodayDate(stockMove.getCompany()));\n    stockMove.setExTaxTotal(exTaxTotal);\n\n    stockMove = stockMoveRepo.save(stockMove);\n\n    stockMoveLineService.updateLocations(\n        initialStatus,\n        StockMoveRepository.STATUS_CANCELED,\n        getPlannedStockMoveLineIds(stockMove, true),\n        stockMove.getEstimatedDate(),\n        false,\n        false,\n        true);\n\n    stockMoveLineService.updateLocations(\n        StockMoveRepository.STATUS_DRAFT,\n        StockMoveRepository.STATUS_REALIZED,\n        getStockMoveLineIds(stockMove),\n        stockMove.getEstimatedDate(),\n        true,\n        true,\n        true);\n\n    stockMove = JpaModelHelper.ensureManaged(stockMove);\n    clearPlannedStockMoveLine(stockMove, true);\n    storeCustomsCodesForStockMove(stockMove);\n    resetMasses(stockMove);\n\n    boolean mustBeSplit = mustBeSplit(stockMove);\n    if (stockMove.getIsWithBackorder() && mustBeSplit) {\n      Optional<StockMove> newStockMove =\n          copyAndSplitStockMove(JpaModelHelper.ensureManaged(stockMove));\n      if (newStockMove.isPresent()) {\n        newStockSeq = newStockMove.get().getStockMoveSeq();\n      }\n    }\n\n    if (stockMove.getIsWithReturnSurplus() && mustBeSplit) {\n      Optional<StockMove> newStockMove =\n          copyAndSplitStockMoveReverse(JpaModelHelper.ensureManaged(stockMove), true);\n      if (newStockMove.isPresent()) {\n        if (newStockSeq != null) {\n          newStockSeq = newStockSeq + \" \" + newStockMove.get().getStockMoveSeq();\n        } else {\n          newStockSeq = newStockMove.get().getStockMoveSeq();\n        }\n      }\n    }\n    computeMasses(stockMove);\n\n    stockMove = stockMoveRepo.find(stockMove.getId());\n    if (stockMove.getTypeSelect() == StockMoveRepository.TYPE_INCOMING\n        && !stockMove.getIsReversion()) {\n      partnerProductQualityRatingService.calculate(stockMove);\n    }\n\n    return newStockSeq;\n  }",
+          "program_units": 42
+        },
+        {
+          "name": "copyQtyToRealQty",
+          "start": 1337,
+          "end": 1351,
+          "calls": [
+            "BatchProcessorHelper.of",
+            "BatchProcessorHelper.of().forEachByQuery",
+            "getStockMoveLineQuery",
+            "line.getQty",
+            "stockMove.getId",
+            "stockMoveLineService.fillRealQuantities"
+          ],
+          "source_fragment": "  @Override\n  @Transactional\n  public void copyQtyToRealQty(StockMove stockMove) {\n    if (stockMove == null) {\n      return;\n    }\n\n    if (stockMove.getId() != null) {\n      Query<StockMoveLine> query = getStockMoveLineQuery(stockMove.getId());\n      BatchProcessorHelper.of()\n          .<StockMoveLine>forEachByQuery(\n              query,\n              line -> stockMoveLineService.fillRealQuantities(line, stockMove, line.getQty()));\n    }\n  }",
+          "program_units": 6
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "method_declaration",
+          "start": 1337,
+          "end": 1351
+        },
+        {
+          "kind": "if_statement",
+          "start": 1344,
+          "end": 1350
+        },
+        {
+          "kind": "expression_statement",
+          "start": 1346,
+          "end": 1349
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 1345,
+          "end": 1345
+        },
+        {
+          "kind": "if_statement",
+          "start": 1340,
+          "end": 1342
+        },
+        {
+          "kind": "return_statement",
+          "start": 1341,
+          "end": 1341
+        },
+        {
+          "kind": "method_declaration",
+          "start": 544,
+          "end": 640
+        },
+        {
+          "kind": "return_statement",
+          "start": 639,
+          "end": 639
+        },
+        {
+          "kind": "if_statement",
+          "start": 634,
+          "end": 637
+        },
+        {
+          "kind": "expression_statement",
+          "start": 636,
+          "end": 636
+        },
+        {
+          "kind": "expression_statement",
+          "start": 633,
+          "end": 633
+        },
+        {
+          "kind": "expression_statement",
+          "start": 631,
+          "end": 631
+        },
+        {
+          "kind": "if_statement",
+          "start": 620,
+          "end": 630
+        },
+        {
+          "kind": "if_statement",
+          "start": 623,
+          "end": 629
+        },
+        {
+          "kind": "if_statement",
+          "start": 624,
+          "end": 628
+        },
+        {
+          "kind": "expression_statement",
+          "start": 627,
+          "end": 627
+        },
+        {
+          "kind": "expression_statement",
+          "start": 625,
+          "end": 625
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 621,
+          "end": 622
+        },
+        {
+          "kind": "if_statement",
+          "start": 612,
+          "end": 618
+        },
+        {
+          "kind": "if_statement",
+          "start": 615,
+          "end": 617
+        },
+        {
+          "kind": "expression_statement",
+          "start": 616,
+          "end": 616
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 613,
+          "end": 614
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 611,
+          "end": 611
+        },
+        {
+          "kind": "expression_statement",
+          "start": 609,
+          "end": 609
+        },
+        {
+          "kind": "expression_statement",
+          "start": 608,
+          "end": 608
+        },
+        {
+          "kind": "expression_statement",
+          "start": 607,
+          "end": 607
+        },
+        {
+          "kind": "expression_statement",
+          "start": 606,
+          "end": 606
+        },
+        {
+          "kind": "expression_statement",
+          "start": 597,
+          "end": 604
+        },
+        {
+          "kind": "expression_statement",
+          "start": 588,
+          "end": 595
+        },
+        {
+          "kind": "expression_statement",
+          "start": 586,
+          "end": 586
+        },
+        {
+          "kind": "expression_statement",
+          "start": 584,
+          "end": 584
+        },
+        {
+          "kind": "expression_statement",
+          "start": 583,
+          "end": 583
+        },
+        {
+          "kind": "expression_statement",
+          "start": 582,
+          "end": 582
+        },
+        {
+          "kind": "expression_statement",
+          "start": 581,
+          "end": 581
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 580,
+          "end": 580
+        },
+        {
+          "kind": "expression_statement",
+          "start": 578,
+          "end": 578
+        },
+        {
+          "kind": "expression_statement",
+          "start": 576,
+          "end": 576
+        },
+        {
+          "kind": "expression_statement",
+          "start": 575,
+          "end": 575
+        },
+        {
+          "kind": "expression_statement",
+          "start": 574,
+          "end": 574
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 573,
+          "end": 573
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 571,
+          "end": 571
+        },
+        {
+          "kind": "if_statement",
+          "start": 567,
+          "end": 569
+        },
+        {
+          "kind": "expression_statement",
+          "start": 568,
+          "end": 568
+        },
+        {
+          "kind": "if_statement",
+          "start": 556,
+          "end": 565
+        },
+        {
+          "kind": "throw_statement",
+          "start": 561,
+          "end": 564
+        },
+        {
+          "kind": "expression_statement",
+          "start": 554,
+          "end": 554
+        },
+        {
+          "kind": "if_statement",
+          "start": 547,
+          "end": 552
+        },
+        {
+          "kind": "throw_statement",
+          "start": 549,
+          "end": 551
+        },
+        {
+          "kind": "method_declaration",
+          "start": 530,
+          "end": 542
+        },
+        {
+          "kind": "return_statement",
+          "start": 541,
+          "end": 541
+        },
+        {
+          "kind": "if_statement",
+          "start": 535,
+          "end": 539
+        },
+        {
+          "kind": "expression_statement",
+          "start": 538,
+          "end": 538
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 533,
+          "end": 533
+        },
+        {
+          "kind": "method_declaration",
+          "start": 525,
+          "end": 528
+        },
+        {
+          "kind": "return_statement",
+          "start": 527,
+          "end": 527
+        }
+      ],
+      "program_units": 55,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveLineServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "9d9b07b31a1257daa517c661e37bc9e4f89e8ae483422b160dde4625bf3808a2",
+      "git_object_sha256": "fd053682d4bcc3ca73c1894b6963bb6388b3a0f8d1cbf9fd6848ed55fc881f5b",
+      "source_url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveLineServiceImpl.java",
+      "role": "coupled_native",
+      "classification_basis": "Toutes les surcharges et mutation des emplacements ; prix moyen/historique mêlés, aucune quote-part improvisée.",
+      "methods": [
+        {
+          "name": "updateLocations",
+          "start": 670,
+          "end": 689,
+          "calls": [
+            "updateLocations"
+          ],
+          "source_fragment": "  @Override\n  public void updateLocations(\n      int fromStatus,\n      int toStatus,\n      List<StockMoveLine> stockMoveLineList,\n      LocalDate lastFutureStockMoveDate,\n      boolean realQty,\n      boolean generateOrder)\n      throws AxelorException {\n\n    updateLocations(\n        fromStatus,\n        toStatus,\n        stockMoveLineList,\n        lastFutureStockMoveDate,\n        realQty,\n        null,\n        null,\n        generateOrder);\n  }",
+          "program_units": 2
+        },
+        {
+          "name": "updateLocations",
+          "start": 691,
+          "end": 719,
+          "calls": [
+            "Collections.emptySet",
+            "Collectors.toCollection",
+            "stockMoveLineList.stream",
+            "stockMoveLineList.stream()\r\n                .filter(Objects::nonNull)\r\n                .map(Model::getId).collect",
+            "stockMoveLineList.stream()\r\n                .filter(Objects::nonNull).map",
+            "stockMoveLineList.stream().filter",
+            "updateLocations"
+          ],
+          "source_fragment": "  @Override\n  public void updateLocations(\n      int fromStatus,\n      int toStatus,\n      List<StockMoveLine> stockMoveLineList,\n      LocalDate lastFutureStockMoveDate,\n      boolean realQty,\n      LocalDate date,\n      String origin,\n      boolean generateOrder)\n      throws AxelorException {\n\n    final Set<Long> stockMoveLineIds =\n        stockMoveLineList == null\n            ? Collections.emptySet()\n            : stockMoveLineList.stream()\n                .filter(Objects::nonNull)\n                .map(Model::getId)\n                .collect(Collectors.toCollection(LinkedHashSet::new));\n    updateLocations(\n        fromStatus,\n        toStatus,\n        stockMoveLineIds,\n        lastFutureStockMoveDate,\n        realQty,\n        date,\n        origin,\n        generateOrder);\n  }",
+          "program_units": 3
+        },
+        {
+          "name": "updateLocations",
+          "start": 721,
+          "end": 739,
+          "calls": [
+            "updateLocations"
+          ],
+          "source_fragment": "  @Override\n  public void updateLocations(\n      int fromStatus,\n      int toStatus,\n      Set<Long> stockMoveLineIds,\n      LocalDate lastFutureStockMoveDate,\n      boolean realQty,\n      boolean generateOrder)\n      throws AxelorException {\n\n    updateLocations(\n        fromStatus,\n        toStatus,\n        stockMoveLineIds,\n        lastFutureStockMoveDate,\n        realQty,\n        generateOrder,\n        false);\n  }",
+          "program_units": 2
+        },
+        {
+          "name": "updateLocations",
+          "start": 741,
+          "end": 762,
+          "calls": [
+            "updateLocations"
+          ],
+          "source_fragment": "  @Override\n  public void updateLocations(\n      int fromStatus,\n      int toStatus,\n      Set<Long> stockMoveLineIds,\n      LocalDate lastFutureStockMoveDate,\n      boolean realQty,\n      boolean generateOrder,\n      boolean clearBatch)\n      throws AxelorException {\n\n    updateLocations(\n        fromStatus,\n        toStatus,\n        stockMoveLineIds,\n        lastFutureStockMoveDate,\n        realQty,\n        null,\n        null,\n        generateOrder,\n        clearBatch);\n  }",
+          "program_units": 2
+        },
+        {
+          "name": "updateLocations",
+          "start": 764,
+          "end": 785,
+          "calls": [
+            "updateLocations"
+          ],
+          "source_fragment": "  @Override\n  public void updateLocations(\n      int fromStatus,\n      int toStatus,\n      Set<Long> stockMoveLineIds,\n      LocalDate lastFutureStockMoveDate,\n      boolean realQty,\n      LocalDate date,\n      String origin,\n      boolean generateOrder)\n      throws AxelorException {\n    updateLocations(\n        fromStatus,\n        toStatus,\n        stockMoveLineIds,\n        lastFutureStockMoveDate,\n        realQty,\n        date,\n        origin,\n        generateOrder,\n        false);\n  }",
+          "program_units": 2
+        },
+        {
+          "name": "updateLocations",
+          "start": 787,
+          "end": 825,
+          "calls": [
+            "BatchProcessorHelper.builder",
+            "BatchProcessorHelper.builder()\r\n        .clearEveryNBatch(clearBatch ? 1 : 0)\r\n        .build().forEachByIds",
+            "BatchProcessorHelper.builder()\r\n        .clearEveryNBatch(clearBatch ? 1 : 0).build",
+            "BatchProcessorHelper.builder().clearEveryNBatch",
+            "CollectionUtils.isEmpty",
+            "recomputeAvgPricesForProducts",
+            "updateLocationForStockMoveLine"
+          ],
+          "source_fragment": "  @Override\n  public void updateLocations(\n      int fromStatus,\n      int toStatus,\n      Set<Long> stockMoveLineIds,\n      LocalDate lastFutureStockMoveDate,\n      boolean realQty,\n      LocalDate date,\n      String origin,\n      boolean generateOrder,\n      boolean clearBatch)\n      throws AxelorException {\n\n    if (CollectionUtils.isEmpty(stockMoveLineIds)) {\n      return;\n    }\n\n    Set<Long> productIdsForWapUpdate = new HashSet<>();\n\n    BatchProcessorHelper.builder()\n        .clearEveryNBatch(clearBatch ? 1 : 0)\n        .build()\n        .<StockMoveLine, AxelorException>forEachByIds(\n            StockMoveLine.class,\n            stockMoveLineIds,\n            line ->\n                updateLocationForStockMoveLine(\n                    line,\n                    realQty,\n                    fromStatus,\n                    toStatus,\n                    lastFutureStockMoveDate,\n                    date,\n                    origin,\n                    generateOrder,\n                    productIdsForWapUpdate));\n\n    recomputeAvgPricesForProducts(productIdsForWapUpdate);\n  }",
+          "program_units": 6
+        },
+        {
+          "name": "updateLocations",
+          "start": 1264,
+          "end": 1386,
+          "calls": [
+            "stockLocationLineService.updateLocation",
+            "stockMoveLine.getFromStockLocation",
+            "stockMoveLine.getToStockLocation",
+            "stockMoveLine.getUnit"
+          ],
+          "source_fragment": "  @Override\n  public void updateLocations(\n      StockMoveLine stockMoveLine,\n      Product product,\n      BigDecimal qty,\n      int fromStatus,\n      int toStatus,\n      LocalDate lastFutureStockMoveDate,\n      TrackingNumber trackingNumber,\n      boolean generateOrder)\n      throws AxelorException {\n    Unit stockMoveLineUnit = stockMoveLine.getUnit();\n\n    switch (fromStatus) {\n      case StockMoveRepository.STATUS_PLANNED:\n        stockLocationLineService.updateLocation(\n            stockMoveLine.getFromStockLocation(),\n            product,\n            stockMoveLineUnit,\n            qty,\n            false,\n            true,\n            true,\n            null,\n            trackingNumber,\n            generateOrder);\n        stockLocationLineService.updateLocation(\n            stockMoveLine.getToStockLocation(),\n            product,\n            stockMoveLineUnit,\n            qty,\n            false,\n            true,\n            false,\n            null,\n            trackingNumber,\n            generateOrder);\n        break;\n\n      case StockMoveRepository.STATUS_REALIZED:\n        stockLocationLineService.updateLocation(\n            stockMoveLine.getFromStockLocation(),\n            product,\n            stockMoveLineUnit,\n            qty,\n            true,\n            true,\n            true,\n            null,\n            trackingNumber,\n            generateOrder);\n        stockLocationLineService.updateLocation(\n            stockMoveLine.getToStockLocation(),\n            product,\n            stockMoveLineUnit,\n            qty,\n            true,\n            true,\n            false,\n            null,\n            trackingNumber,\n            generateOrder);\n        break;\n\n      default:\n        break;\n    }\n\n    switch (toStatus) {\n      case StockMoveRepository.STATUS_PLANNED:\n        stockLocationLineService.updateLocation(\n            stockMoveLine.getFromStockLocation(),\n            product,\n            stockMoveLineUnit,\n            qty,\n            false,\n            true,\n            false,\n            lastFutureStockMoveDate,\n            trackingNumber,\n            generateOrder);\n        stockLocationLineService.updateLocation(\n            stockMoveLine.getToStockLocation(),\n            product,\n            stockMoveLineUnit,\n            qty,\n            false,\n            true,\n            true,\n            lastFutureStockMoveDate,\n            trackingNumber,\n            generateOrder);\n        break;\n\n      case StockMoveRepository.STATUS_REALIZED:\n        stockLocationLineService.updateLocation(\n            stockMoveLine.getFromStockLocation(),\n            product,\n            stockMoveLineUnit,\n            qty,\n            true,\n            true,\n            false,\n            null,\n            trackingNumber,\n            generateOrder);\n        stockLocationLineService.updateLocation(\n            stockMoveLine.getToStockLocation(),\n            product,\n            stockMoveLineUnit,\n            qty,\n            true,\n            true,\n            true,\n            null,\n            trackingNumber,\n            generateOrder);\n        break;\n\n      default:\n        break;\n    }\n  }",
+          "program_units": 22
+        },
+        {
+          "name": "updateLocationForStockMoveLine",
+          "start": 836,
+          "end": 895,
+          "calls": [
+            "fromStockLocation.getTypeSelect",
+            "product.getId",
+            "product.getProductTypeSelect",
+            "product.getProductTypeSelect().equals",
+            "productIdsForWapUpdate.add",
+            "stockMoveLine.getFromStockLocation",
+            "stockMoveLine.getProduct",
+            "stockMoveLine.getQty",
+            "stockMoveLine.getRealQty",
+            "stockMoveLine.getToStockLocation",
+            "stockMoveLine.getTrackingNumber",
+            "this.updateAveragePriceAndLocationLineHistory",
+            "this.updateLocations",
+            "this.updateStockLocationLineHistory",
+            "toStockLocation.getTypeSelect"
+          ],
+          "source_fragment": "  protected void updateLocationForStockMoveLine(\n      StockMoveLine stockMoveLine,\n      boolean realQty,\n      int fromStatus,\n      int toStatus,\n      LocalDate lastFutureStockMoveDate,\n      LocalDate date,\n      String origin,\n      boolean generateOrder,\n      Set<Long> productIdsForWapUpdate)\n      throws AxelorException {\n    StockLocation fromStockLocation = stockMoveLine.getFromStockLocation();\n    StockLocation toStockLocation = stockMoveLine.getToStockLocation();\n    Product product = stockMoveLine.getProduct();\n    if (product == null\n        || !product.getProductTypeSelect().equals(ProductRepository.PRODUCT_TYPE_STORABLE)) {\n      return;\n    }\n\n    BigDecimal qty;\n    if (realQty) {\n      qty = stockMoveLine.getRealQty();\n    } else {\n      qty = stockMoveLine.getQty();\n    }\n\n    this.updateLocations(\n        stockMoveLine,\n        product,\n        qty,\n        fromStatus,\n        toStatus,\n        lastFutureStockMoveDate,\n        stockMoveLine.getTrackingNumber(),\n        generateOrder);\n    if (toStatus == StockMoveRepository.STATUS_REALIZED) {\n\n      if (fromStockLocation.getTypeSelect() != StockLocationRepository.TYPE_VIRTUAL) {\n        // We dont recompute average price for outgoing lines\n        this.updateStockLocationLineHistory(\n            fromStockLocation, stockMoveLine, date, origin, toStatus);\n      }\n      if (toStockLocation.getTypeSelect() != StockLocationRepository.TYPE_VIRTUAL) {\n        this.updateAveragePriceAndLocationLineHistory(\n            toStockLocation, stockMoveLine, fromStatus, toStatus, date, origin);\n      }\n      productIdsForWapUpdate.add(product.getId());\n    }\n    if (fromStatus == StockMoveRepository.STATUS_REALIZED\n        && toStatus == StockMoveRepository.STATUS_CANCELED) {\n      // We dont recompute on cancel\n      if (fromStockLocation.getTypeSelect() != StockLocationRepository.TYPE_VIRTUAL) {\n        this.updateStockLocationLineHistory(\n            fromStockLocation, stockMoveLine, date, origin, toStatus);\n      }\n      if (toStockLocation.getTypeSelect() != StockLocationRepository.TYPE_VIRTUAL) {\n        this.updateStockLocationLineHistory(toStockLocation, stockMoveLine, date, origin, toStatus);\n      }\n    }\n  }",
+          "program_units": 22
+        },
+        {
+          "name": "updateStockLocationLineHistory",
+          "start": 944,
+          "end": 980,
+          "calls": [
+            "Optional.ofNullable",
+            "Optional.ofNullable(stockLocationLine.getAvgPrice()).orElse",
+            "Optional.ofNullable(stockMoveLine)\r\n              .map(StockMoveLine::getStockMove)\r\n              .map(StockMove::getStockMoveSeq).orElse",
+            "Optional.ofNullable(stockMoveLine)\r\n              .map(StockMoveLine::getStockMove).map",
+            "Optional.ofNullable(stockMoveLine).map",
+            "date.atStartOfDay",
+            "getStockLocationLineHistoryTypeSelect",
+            "resetAvgPrice",
+            "setAvgPriceAndComputeForProduct",
+            "stockLocationLine.getAvgPrice",
+            "stockLocationLineService.getOrCreateStockLocationLine",
+            "stockLocationLineService.updateHistory",
+            "stockMoveLine.getProduct"
+          ],
+          "source_fragment": "  protected void updateStockLocationLineHistory(\n      StockLocation stockLocation,\n      StockMoveLine stockMoveLine,\n      LocalDate date,\n      String origin,\n      int toStatus)\n      throws AxelorException {\n    StockLocationLine stockLocationLine =\n        stockLocationLineService.getOrCreateStockLocationLine(\n            stockLocation, stockMoveLine.getProduct());\n    if (stockLocationLine == null) {\n      return;\n    }\n\n    if (origin == null) {\n      origin =\n          Optional.ofNullable(stockMoveLine)\n              .map(StockMoveLine::getStockMove)\n              .map(StockMove::getStockMoveSeq)\n              .orElse(\"\");\n    }\n\n    if (toStatus == StockMoveRepository.STATUS_CANCELED) {\n      resetAvgPrice(stockLocationLine, origin);\n    } else {\n      setAvgPriceAndComputeForProduct(\n          stockLocationLine,\n          Optional.ofNullable(stockLocationLine.getAvgPrice()).orElse(BigDecimal.ZERO));\n    }\n\n    stockLocationLineService.updateHistory(\n        stockLocationLine,\n        stockMoveLine,\n        date != null ? date.atStartOfDay() : null,\n        origin,\n        getStockLocationLineHistoryTypeSelect(toStatus));\n  }",
+          "program_units": 10
+        },
+        {
+          "name": "updateAveragePriceAndLocationLineHistory",
+          "start": 897,
+          "end": 925,
+          "calls": [
+            "date.atStartOfDay",
+            "getStockLocationLineHistoryTypeSelect",
+            "setAvgPriceAndComputeForProduct",
+            "stockLocationLineService.getOrCreateStockLocationLine",
+            "stockLocationLineService.updateHistory",
+            "stockMoveLine.getProduct",
+            "this.computeNewAveragePriceLocationLine"
+          ],
+          "source_fragment": "  @Override\n  public void updateAveragePriceAndLocationLineHistory(\n      StockLocation stockLocation,\n      StockMoveLine stockMoveLine,\n      int fromStatus,\n      int toStatus,\n      LocalDate date,\n      String origin)\n      throws AxelorException {\n    StockLocationLine stockLocationLine =\n        stockLocationLineService.getOrCreateStockLocationLine(\n            stockLocation, stockMoveLine.getProduct());\n    if (stockLocationLine == null) {\n      return;\n    }\n\n    if (toStatus == StockMoveRepository.STATUS_REALIZED) {\n      BigDecimal avgPrice =\n          this.computeNewAveragePriceLocationLine(stockLocationLine, stockMoveLine);\n      setAvgPriceAndComputeForProduct(stockLocationLine, avgPrice);\n\n      stockLocationLineService.updateHistory(\n          stockLocationLine,\n          stockMoveLine,\n          date != null ? date.atStartOfDay() : null,\n          origin,\n          getStockLocationLineHistoryTypeSelect(toStatus));\n    }\n  }",
+          "program_units": 8
+        },
+        {
+          "name": "getStockLocationLineHistoryTypeSelect",
+          "start": 933,
+          "end": 942,
+          "calls": [],
+          "source_fragment": "  protected String getStockLocationLineHistoryTypeSelect(int statusStockMove) {\n    switch (statusStockMove) {\n      case StockMoveRepository.STATUS_CANCELED:\n        return StockLocationLineHistoryRepository.TYPE_SELECT_CANCELATION;\n      case StockMoveRepository.STATUS_REALIZED:\n        return StockLocationLineHistoryRepository.TYPE_SELECT_STOCK_MOVE;\n      default:\n        return null;\n    }\n  }",
+          "program_units": 7
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "method_declaration",
+          "start": 1264,
+          "end": 1386
+        },
+        {
+          "kind": "break_statement",
+          "start": 1384,
+          "end": 1384
+        },
+        {
+          "kind": "switch_label",
+          "start": 1383,
+          "end": 1383
+        },
+        {
+          "kind": "break_statement",
+          "start": 1381,
+          "end": 1381
+        },
+        {
+          "kind": "expression_statement",
+          "start": 1370,
+          "end": 1380
+        },
+        {
+          "kind": "expression_statement",
+          "start": 1359,
+          "end": 1369
+        },
+        {
+          "kind": "switch_label",
+          "start": 1358,
+          "end": 1358
+        },
+        {
+          "kind": "break_statement",
+          "start": 1356,
+          "end": 1356
+        },
+        {
+          "kind": "expression_statement",
+          "start": 1345,
+          "end": 1355
+        },
+        {
+          "kind": "expression_statement",
+          "start": 1334,
+          "end": 1344
+        },
+        {
+          "kind": "switch_label",
+          "start": 1333,
+          "end": 1333
+        },
+        {
+          "kind": "break_statement",
+          "start": 1329,
+          "end": 1329
+        },
+        {
+          "kind": "switch_label",
+          "start": 1328,
+          "end": 1328
+        },
+        {
+          "kind": "break_statement",
+          "start": 1326,
+          "end": 1326
+        },
+        {
+          "kind": "expression_statement",
+          "start": 1315,
+          "end": 1325
+        },
+        {
+          "kind": "expression_statement",
+          "start": 1304,
+          "end": 1314
+        },
+        {
+          "kind": "switch_label",
+          "start": 1303,
+          "end": 1303
+        },
+        {
+          "kind": "break_statement",
+          "start": 1301,
+          "end": 1301
+        },
+        {
+          "kind": "expression_statement",
+          "start": 1290,
+          "end": 1300
+        },
+        {
+          "kind": "expression_statement",
+          "start": 1279,
+          "end": 1289
+        },
+        {
+          "kind": "switch_label",
+          "start": 1278,
+          "end": 1278
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 1275,
+          "end": 1275
+        },
+        {
+          "kind": "method_declaration",
+          "start": 944,
+          "end": 980
+        },
+        {
+          "kind": "expression_statement",
+          "start": 974,
+          "end": 979
+        },
+        {
+          "kind": "if_statement",
+          "start": 966,
+          "end": 972
+        },
+        {
+          "kind": "expression_statement",
+          "start": 969,
+          "end": 971
+        },
+        {
+          "kind": "expression_statement",
+          "start": 967,
+          "end": 967
+        },
+        {
+          "kind": "if_statement",
+          "start": 958,
+          "end": 964
+        },
+        {
+          "kind": "expression_statement",
+          "start": 959,
+          "end": 963
+        },
+        {
+          "kind": "if_statement",
+          "start": 954,
+          "end": 956
+        },
+        {
+          "kind": "return_statement",
+          "start": 955,
+          "end": 955
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 951,
+          "end": 953
+        },
+        {
+          "kind": "method_declaration",
+          "start": 933,
+          "end": 942
+        },
+        {
+          "kind": "return_statement",
+          "start": 940,
+          "end": 940
+        },
+        {
+          "kind": "switch_label",
+          "start": 939,
+          "end": 939
+        },
+        {
+          "kind": "return_statement",
+          "start": 938,
+          "end": 938
+        },
+        {
+          "kind": "switch_label",
+          "start": 937,
+          "end": 937
+        },
+        {
+          "kind": "return_statement",
+          "start": 936,
+          "end": 936
+        },
+        {
+          "kind": "switch_label",
+          "start": 935,
+          "end": 935
+        },
+        {
+          "kind": "method_declaration",
+          "start": 897,
+          "end": 925
+        },
+        {
+          "kind": "if_statement",
+          "start": 913,
+          "end": 924
+        },
+        {
+          "kind": "expression_statement",
+          "start": 918,
+          "end": 923
+        },
+        {
+          "kind": "expression_statement",
+          "start": 916,
+          "end": 916
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 914,
+          "end": 915
+        },
+        {
+          "kind": "if_statement",
+          "start": 909,
+          "end": 911
+        },
+        {
+          "kind": "return_statement",
+          "start": 910,
+          "end": 910
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 906,
+          "end": 908
+        },
+        {
+          "kind": "method_declaration",
+          "start": 836,
+          "end": 895
+        },
+        {
+          "kind": "if_statement",
+          "start": 884,
+          "end": 894
+        },
+        {
+          "kind": "if_statement",
+          "start": 891,
+          "end": 893
+        },
+        {
+          "kind": "expression_statement",
+          "start": 892,
+          "end": 892
+        },
+        {
+          "kind": "if_statement",
+          "start": 887,
+          "end": 890
+        },
+        {
+          "kind": "expression_statement",
+          "start": 888,
+          "end": 889
+        },
+        {
+          "kind": "if_statement",
+          "start": 871,
+          "end": 883
+        },
+        {
+          "kind": "expression_statement",
+          "start": 882,
+          "end": 882
+        },
+        {
+          "kind": "if_statement",
+          "start": 878,
+          "end": 881
+        },
+        {
+          "kind": "expression_statement",
+          "start": 879,
+          "end": 880
+        },
+        {
+          "kind": "if_statement",
+          "start": 873,
+          "end": 877
+        },
+        {
+          "kind": "expression_statement",
+          "start": 875,
+          "end": 876
+        },
+        {
+          "kind": "expression_statement",
+          "start": 862,
+          "end": 870
+        },
+        {
+          "kind": "if_statement",
+          "start": 856,
+          "end": 860
+        },
+        {
+          "kind": "expression_statement",
+          "start": 859,
+          "end": 859
+        },
+        {
+          "kind": "expression_statement",
+          "start": 857,
+          "end": 857
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 855,
+          "end": 855
+        },
+        {
+          "kind": "if_statement",
+          "start": 850,
+          "end": 853
+        },
+        {
+          "kind": "return_statement",
+          "start": 852,
+          "end": 852
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 849,
+          "end": 849
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 848,
+          "end": 848
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 847,
+          "end": 847
+        },
+        {
+          "kind": "method_declaration",
+          "start": 787,
+          "end": 825
+        },
+        {
+          "kind": "expression_statement",
+          "start": 824,
+          "end": 824
+        },
+        {
+          "kind": "expression_statement",
+          "start": 806,
+          "end": 822
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 804,
+          "end": 804
+        },
+        {
+          "kind": "if_statement",
+          "start": 800,
+          "end": 802
+        },
+        {
+          "kind": "return_statement",
+          "start": 801,
+          "end": 801
+        },
+        {
+          "kind": "method_declaration",
+          "start": 764,
+          "end": 785
+        },
+        {
+          "kind": "expression_statement",
+          "start": 775,
+          "end": 784
+        },
+        {
+          "kind": "method_declaration",
+          "start": 741,
+          "end": 762
+        },
+        {
+          "kind": "expression_statement",
+          "start": 752,
+          "end": 761
+        },
+        {
+          "kind": "method_declaration",
+          "start": 721,
+          "end": 739
+        },
+        {
+          "kind": "expression_statement",
+          "start": 731,
+          "end": 738
+        },
+        {
+          "kind": "method_declaration",
+          "start": 691,
+          "end": 719
+        },
+        {
+          "kind": "expression_statement",
+          "start": 710,
+          "end": 718
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 703,
+          "end": 709
+        },
+        {
+          "kind": "method_declaration",
+          "start": 670,
+          "end": 689
+        },
+        {
+          "kind": "expression_statement",
+          "start": 680,
+          "end": 688
+        }
+      ],
+      "program_units": 86,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "1519a988598214c7456bb0da20a95c1e9b3bc8e0d54c00d837aa1336c4d5e341",
+      "git_object_sha256": "ac834775a2e57a9e49eae5fdacd86b852d698dadb2fc7a4492ccea9610a5c4f8",
+      "source_url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java",
+      "role": "coupled_native",
+      "classification_basis": "Quantités actuelles/futures, détails, et réapprovisionnement déclenché par le même composant.",
+      "methods": [
+        {
+          "name": "updateLocation",
+          "start": 97,
+          "end": 135,
+          "calls": [
+            "this.updateDetailLocation",
+            "this.updateLocation"
+          ],
+          "source_fragment": "  @Override\n  @Transactional(rollbackOn = {Exception.class})\n  public void updateLocation(\n      StockLocation stockLocation,\n      Product product,\n      Unit stockMoveLineUnit,\n      BigDecimal qty,\n      boolean current,\n      boolean future,\n      boolean isIncrement,\n      LocalDate lastFutureStockMoveDate,\n      TrackingNumber trackingNumber,\n      boolean generateOrder)\n      throws AxelorException {\n\n    this.updateLocation(\n        stockLocation,\n        product,\n        stockMoveLineUnit,\n        qty,\n        current,\n        future,\n        isIncrement,\n        lastFutureStockMoveDate,\n        generateOrder);\n\n    if (trackingNumber != null) {\n      this.updateDetailLocation(\n          stockLocation,\n          product,\n          stockMoveLineUnit,\n          qty,\n          current,\n          future,\n          isIncrement,\n          lastFutureStockMoveDate,\n          trackingNumber);\n    }\n  }",
+          "program_units": 4
+        },
+        {
+          "name": "updateLocation",
+          "start": 137,
+          "end": 199,
+          "calls": [
+            "I18n.get",
+            "LOG.debug",
+            "maxStockRules",
+            "product.getCode",
+            "product.getFullName",
+            "qty.scale",
+            "stockLocation.getName",
+            "stockLocationLine.getUnit",
+            "stockLocationLineRepo.save",
+            "stockLocationLineUnit.equals",
+            "this.checkStockMin",
+            "this.getOrCreateStockLocationLine",
+            "this.updateLocation",
+            "unitConversionService.convert"
+          ],
+          "source_fragment": "  @Override\n  @Transactional(rollbackOn = {Exception.class})\n  public void updateLocation(\n      StockLocation stockLocation,\n      Product product,\n      Unit stockMoveLineUnit,\n      BigDecimal qty,\n      boolean current,\n      boolean future,\n      boolean isIncrement,\n      LocalDate lastFutureStockMoveDate,\n      boolean generateOrder)\n      throws AxelorException {\n\n    StockLocationLine stockLocationLine = this.getOrCreateStockLocationLine(stockLocation, product);\n\n    if (stockLocationLine == null) {\n      return;\n    }\n\n    Unit stockLocationLineUnit = stockLocationLine.getUnit();\n    if (stockLocationLineUnit == null) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_CONFIGURATION_ERROR,\n          I18n.get(StockExceptionMessage.LOCATION_LINE_MISSING_UNIT),\n          stockLocation.getName(),\n          product.getFullName());\n    }\n    if (!stockLocationLineUnit.equals(stockMoveLineUnit)) {\n      qty =\n          unitConversionService.convert(\n              stockMoveLineUnit, stockLocationLineUnit, qty, qty.scale(), product);\n    }\n\n    LOG.debug(\n        \"Stock update : Stock location? {}, Product? {}, Quantity? {}, Current quantity? {}, Future quantity? {}, Is increment? {}, Date? {} \",\n        stockLocation.getName(),\n        product.getCode(),\n        qty,\n        current,\n        future,\n        isIncrement,\n        lastFutureStockMoveDate);\n\n    if (generateOrder && isIncrement) {\n      maxStockRules(product, qty, stockLocationLine, current, future);\n    }\n\n    stockLocationLine =\n        this.updateLocation(\n            stockLocationLine,\n            stockMoveLineUnit,\n            product,\n            qty,\n            current,\n            future,\n            isIncrement,\n            lastFutureStockMoveDate);\n\n    this.checkStockMin(stockLocationLine, false);\n\n    stockLocationLineRepo.save(stockLocationLine);\n  }",
+          "program_units": 15
+        },
+        {
+          "name": "updateLocation",
+          "start": 392,
+          "end": 417,
+          "calls": [
+            "computeFutureQty",
+            "stockLocationLine.getCurrentQty",
+            "stockLocationLine.getCurrentQty().add",
+            "stockLocationLine.getCurrentQty().subtract",
+            "stockLocationLine.setCurrentQty",
+            "stockLocationLine.setFutureQty",
+            "stockLocationLine.setLastFutureStockMoveDate"
+          ],
+          "source_fragment": "  @Override\n  public StockLocationLine updateLocation(\n      StockLocationLine stockLocationLine,\n      Unit stockMoveLineUnit,\n      Product product,\n      BigDecimal qty,\n      boolean current,\n      boolean future,\n      boolean isIncrement,\n      LocalDate lastFutureStockMoveDate)\n      throws AxelorException {\n\n    if (current) {\n      if (isIncrement) {\n        stockLocationLine.setCurrentQty(stockLocationLine.getCurrentQty().add(qty));\n      } else {\n        stockLocationLine.setCurrentQty(stockLocationLine.getCurrentQty().subtract(qty));\n      }\n    }\n    if (future) {\n      stockLocationLine.setFutureQty(computeFutureQty(stockLocationLine));\n      stockLocationLine.setLastFutureStockMoveDate(lastFutureStockMoveDate);\n    }\n\n    return stockLocationLine;\n  }",
+          "program_units": 9
+        },
+        {
+          "name": "updateDetailLocation",
+          "start": 255,
+          "end": 317,
+          "calls": [
+            "I18n.get",
+            "LOG.debug",
+            "detailLocationLine.getUnit",
+            "product.getCode",
+            "product.getFullName",
+            "qty.scale",
+            "stockLocation.getName",
+            "stockLocationLineRepo.save",
+            "stockLocationLineUnit.equals",
+            "this.checkStockMin",
+            "this.getOrCreateDetailLocationLine",
+            "this.updateLocation",
+            "trackingNumber.getTrackingNumberSeq",
+            "unitConversionService.convert"
+          ],
+          "source_fragment": "  @Override\n  @Transactional(rollbackOn = {Exception.class})\n  public void updateDetailLocation(\n      StockLocation stockLocation,\n      Product product,\n      Unit stockMoveLineUnit,\n      BigDecimal qty,\n      boolean current,\n      boolean future,\n      boolean isIncrement,\n      LocalDate lastFutureStockMoveDate,\n      TrackingNumber trackingNumber)\n      throws AxelorException {\n\n    StockLocationLine detailLocationLine =\n        this.getOrCreateDetailLocationLine(stockLocation, product, trackingNumber);\n\n    if (detailLocationLine == null) {\n      return;\n    }\n\n    Unit stockLocationLineUnit = detailLocationLine.getUnit();\n\n    if (stockLocationLineUnit == null) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_CONFIGURATION_ERROR,\n          I18n.get(StockExceptionMessage.DETAIL_LOCATION_LINE_MISSING_UNIT),\n          trackingNumber.getTrackingNumberSeq(),\n          stockLocation.getName(),\n          product.getFullName());\n    }\n    if (!stockLocationLineUnit.equals(stockMoveLineUnit)) {\n      qty =\n          unitConversionService.convert(\n              stockMoveLineUnit, stockLocationLineUnit, qty, qty.scale(), product);\n    }\n\n    LOG.debug(\n        \"Stock detail update : Stock location? {}, Product? {}, Quantity? {}, Current quantity? {}, Future quantity? {}, Is increment? {}, Date? {}, Tracking number? {} \",\n        stockLocation.getName(),\n        product.getCode(),\n        qty,\n        current,\n        future,\n        isIncrement,\n        lastFutureStockMoveDate,\n        trackingNumber);\n\n    detailLocationLine =\n        this.updateLocation(\n            detailLocationLine,\n            stockMoveLineUnit,\n            product,\n            qty,\n            current,\n            future,\n            isIncrement,\n            lastFutureStockMoveDate);\n\n    this.checkStockMin(detailLocationLine, true);\n\n    stockLocationLineRepo.save(detailLocationLine);\n  }",
+          "program_units": 13
+        },
+        {
+          "name": "updateHistory",
+          "start": 669,
+          "end": 691,
+          "calls": [
+            "Optional.ofNullable",
+            "Optional.ofNullable(stockMoveLine)\r\n              .map(StockMoveLine::getStockMove)\r\n              .map(StockMove::getStockMoveSeq).orElse",
+            "Optional.ofNullable(stockMoveLine)\r\n              .map(StockMoveLine::getStockMove).map",
+            "Optional.ofNullable(stockMoveLine).map",
+            "appBaseService.getTodayDateTime",
+            "appBaseService.getTodayDateTime(company).toLocalDateTime",
+            "getCompany",
+            "stockLocationLineHistoryService.saveHistory"
+          ],
+          "source_fragment": "  @Override\n  public void updateHistory(\n      StockLocationLine stockLocationLine,\n      StockMoveLine stockMoveLine,\n      LocalDateTime dateT,\n      String origin,\n      String typeSelect)\n      throws AxelorException {\n\n    if (origin == null) {\n      origin =\n          Optional.ofNullable(stockMoveLine)\n              .map(StockMoveLine::getStockMove)\n              .map(StockMove::getStockMoveSeq)\n              .orElse(\"\");\n    }\n\n    if (dateT == null) {\n      Company company = getCompany(stockLocationLine);\n      dateT = appBaseService.getTodayDateTime(company).toLocalDateTime();\n    }\n    stockLocationLineHistoryService.saveHistory(stockLocationLine, dateT, origin, typeSelect);\n  }",
+          "program_units": 7
+        },
+        {
+          "name": "getOrCreateStockLocationLine",
+          "start": 419,
+          "end": 443,
+          "calls": [
+            "LOG.debug",
+            "product.getCode",
+            "product.getStockManaged",
+            "stockLocationLine.getCurrentQty",
+            "stockLocationLine.getFutureQty",
+            "stockLocationLine.getLastFutureStockMoveDate",
+            "stockLocationLine.getStockLocation",
+            "stockLocationLine.getStockLocation().getName",
+            "stockLocationLineFetchService.getStockLocationLine",
+            "this.createLocationLine"
+          ],
+          "source_fragment": "  @Override\n  public StockLocationLine getOrCreateStockLocationLine(\n      StockLocation stockLocation, Product product) {\n\n    if (!product.getStockManaged()) {\n      return null;\n    }\n\n    StockLocationLine stockLocationLine =\n        stockLocationLineFetchService.getStockLocationLine(stockLocation, product);\n\n    if (stockLocationLine == null) {\n      stockLocationLine = this.createLocationLine(stockLocation, product);\n    }\n\n    LOG.debug(\n        \"Get stock line: Stock location? {}, Product? {}, Current quantity? {}, Future quantity? {}, Date? {} \",\n        stockLocationLine.getStockLocation().getName(),\n        product.getCode(),\n        stockLocationLine.getCurrentQty(),\n        stockLocationLine.getFutureQty(),\n        stockLocationLine.getLastFutureStockMoveDate());\n\n    return stockLocationLine;\n  }",
+          "program_units": 8
+        },
+        {
+          "name": "getOrCreateDetailLocationLine",
+          "start": 445,
+          "end": 467,
+          "calls": [
+            "LOG.debug",
+            "detailLocationLine.getCurrentQty",
+            "detailLocationLine.getDetailsStockLocation",
+            "detailLocationLine.getDetailsStockLocation().getName",
+            "detailLocationLine.getFutureQty",
+            "detailLocationLine.getLastFutureStockMoveDate",
+            "detailLocationLine.getTrackingNumber",
+            "product.getCode",
+            "stockLocationLineFetchService.getDetailLocationLine",
+            "this.createDetailLocationLine"
+          ],
+          "source_fragment": "  @Override\n  public StockLocationLine getOrCreateDetailLocationLine(\n      StockLocation detailLocation, Product product, TrackingNumber trackingNumber) {\n\n    StockLocationLine detailLocationLine =\n        stockLocationLineFetchService.getDetailLocationLine(\n            detailLocation, product, trackingNumber);\n\n    if (detailLocationLine == null) {\n      detailLocationLine = this.createDetailLocationLine(detailLocation, product, trackingNumber);\n    }\n\n    LOG.debug(\n        \"Get stock line detail: Stock location? {}, Product? {}, Current quantity? {}, Future quantity? {}, Date? {}, Num de suivi? {} \",\n        detailLocationLine.getDetailsStockLocation().getName(),\n        product.getCode(),\n        detailLocationLine.getCurrentQty(),\n        detailLocationLine.getFutureQty(),\n        detailLocationLine.getLastFutureStockMoveDate(),\n        detailLocationLine.getTrackingNumber());\n\n    return detailLocationLine;\n  }",
+          "program_units": 6
+        },
+        {
+          "name": "createLocationLine",
+          "start": 469,
+          "end": 486,
+          "calls": [
+            "LOG.debug",
+            "product.getCode",
+            "product.getUnit",
+            "stockLocation.getName",
+            "stockLocationLine.setCurrentQty",
+            "stockLocationLine.setFutureQty",
+            "stockLocationLine.setProduct",
+            "stockLocationLine.setStockLocation",
+            "stockLocationLine.setUnit"
+          ],
+          "source_fragment": "  @Override\n  public StockLocationLine createLocationLine(StockLocation stockLocation, Product product) {\n\n    LOG.debug(\n        \"Stock line creation : Stock location? {}, Product? {} \",\n        stockLocation.getName(),\n        product.getCode());\n\n    StockLocationLine stockLocationLine = new StockLocationLine();\n\n    stockLocationLine.setStockLocation(stockLocation);\n    stockLocationLine.setProduct(product);\n    stockLocationLine.setUnit(product.getUnit());\n    stockLocationLine.setCurrentQty(BigDecimal.ZERO);\n    stockLocationLine.setFutureQty(BigDecimal.ZERO);\n\n    return stockLocationLine;\n  }",
+          "program_units": 9
+        },
+        {
+          "name": "createDetailLocationLine",
+          "start": 488,
+          "end": 508,
+          "calls": [
+            "LOG.debug",
+            "detailLocationLine.setCurrentQty",
+            "detailLocationLine.setDetailsStockLocation",
+            "detailLocationLine.setFutureQty",
+            "detailLocationLine.setProduct",
+            "detailLocationLine.setTrackingNumber",
+            "detailLocationLine.setUnit",
+            "product.getCode",
+            "product.getUnit",
+            "stockLocation.getName",
+            "trackingNumber.getTrackingNumberSeq"
+          ],
+          "source_fragment": "  @Override\n  public StockLocationLine createDetailLocationLine(\n      StockLocation stockLocation, Product product, TrackingNumber trackingNumber) {\n\n    LOG.debug(\n        \"Stock line detail creation : Stock location? {}, Product? {}, Tracking number? {} \",\n        stockLocation.getName(),\n        product.getCode(),\n        trackingNumber.getTrackingNumberSeq());\n\n    StockLocationLine detailLocationLine = new StockLocationLine();\n\n    detailLocationLine.setDetailsStockLocation(stockLocation);\n    detailLocationLine.setProduct(product);\n    detailLocationLine.setUnit(product.getUnit());\n    detailLocationLine.setCurrentQty(BigDecimal.ZERO);\n    detailLocationLine.setFutureQty(BigDecimal.ZERO);\n    detailLocationLine.setTrackingNumber(trackingNumber);\n\n    return detailLocationLine;\n  }",
+          "program_units": 10
+        },
+        {
+          "name": "convertToProductUnit",
+          "start": 557,
+          "end": 562,
+          "calls": [
+            "convert",
+            "productUnit",
+            "stockLocationLine.getProduct",
+            "stockLocationLine.getUnit"
+          ],
+          "source_fragment": "  @Override\n  public BigDecimal convertToProductUnit(StockLocationLine stockLocationLine, BigDecimal value)\n      throws AxelorException {\n    Product product = stockLocationLine.getProduct();\n    return convert(stockLocationLine.getUnit(), productUnit(product), value, product);\n  }",
+          "program_units": 3
+        },
+        {
+          "name": "convertFromProductUnit",
+          "start": 564,
+          "end": 569,
+          "calls": [
+            "convert",
+            "productUnit",
+            "stockLocationLine.getProduct",
+            "stockLocationLine.getUnit"
+          ],
+          "source_fragment": "  @Override\n  public BigDecimal convertFromProductUnit(StockLocationLine stockLocationLine, BigDecimal value)\n      throws AxelorException {\n    Product product = stockLocationLine.getProduct();\n    return convert(productUnit(product), stockLocationLine.getUnit(), value, product);\n  }",
+          "program_units": 3
+        },
+        {
+          "name": "productUnit",
+          "start": 571,
+          "end": 573,
+          "calls": [
+            "product.getUnit"
+          ],
+          "source_fragment": "  protected Unit productUnit(Product product) {\n    return product == null ? null : product.getUnit();\n  }",
+          "program_units": 2
+        },
+        {
+          "name": "convert",
+          "start": 575,
+          "end": 582,
+          "calls": [
+            "startUnit.equals",
+            "unitConversionService.convertWithAutoFlushFalse",
+            "value.scale"
+          ],
+          "source_fragment": "  protected BigDecimal convert(Unit startUnit, Unit endUnit, BigDecimal value, Product product)\n      throws AxelorException {\n    if (value == null || startUnit == null || endUnit == null || startUnit.equals(endUnit)) {\n      return value;\n    }\n    return unitConversionService.convertWithAutoFlushFalse(\n        startUnit, endUnit, value, value.scale(), product);\n  }",
+          "program_units": 4
+        },
+        {
+          "name": "getCompany",
+          "start": 693,
+          "end": 705,
+          "calls": [
+            "AuthUtils.getUser",
+            "Optional.ofNullable",
+            "Optional.ofNullable(AuthUtils.getUser()).map",
+            "Optional.ofNullable(AuthUtils.getUser()).map(User::getActiveCompany).orElse",
+            "detailsStockLocation.getCompany",
+            "stockLocation.getCompany",
+            "stockLocationLine.getDetailsStockLocation",
+            "stockLocationLine.getStockLocation"
+          ],
+          "source_fragment": "  protected Company getCompany(StockLocationLine stockLocationLine) {\n    StockLocation stockLocation = stockLocationLine.getStockLocation();\n    StockLocation detailsStockLocation = stockLocationLine.getDetailsStockLocation();\n\n    if (stockLocation != null) {\n      return stockLocation.getCompany();\n    }\n\n    if (detailsStockLocation != null) {\n      return detailsStockLocation.getCompany();\n    }\n    return Optional.ofNullable(AuthUtils.getUser()).map(User::getActiveCompany).orElse(null);\n  }",
+          "program_units": 8
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "method_declaration",
+          "start": 693,
+          "end": 705
+        },
+        {
+          "kind": "return_statement",
+          "start": 704,
+          "end": 704
+        },
+        {
+          "kind": "if_statement",
+          "start": 701,
+          "end": 703
+        },
+        {
+          "kind": "return_statement",
+          "start": 702,
+          "end": 702
+        },
+        {
+          "kind": "if_statement",
+          "start": 697,
+          "end": 699
+        },
+        {
+          "kind": "return_statement",
+          "start": 698,
+          "end": 698
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 695,
+          "end": 695
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 694,
+          "end": 694
+        },
+        {
+          "kind": "method_declaration",
+          "start": 669,
+          "end": 691
+        },
+        {
+          "kind": "expression_statement",
+          "start": 690,
+          "end": 690
+        },
+        {
+          "kind": "if_statement",
+          "start": 686,
+          "end": 689
+        },
+        {
+          "kind": "expression_statement",
+          "start": 688,
+          "end": 688
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 687,
+          "end": 687
+        },
+        {
+          "kind": "if_statement",
+          "start": 678,
+          "end": 684
+        },
+        {
+          "kind": "expression_statement",
+          "start": 679,
+          "end": 683
+        },
+        {
+          "kind": "method_declaration",
+          "start": 575,
+          "end": 582
+        },
+        {
+          "kind": "return_statement",
+          "start": 580,
+          "end": 581
+        },
+        {
+          "kind": "if_statement",
+          "start": 577,
+          "end": 579
+        },
+        {
+          "kind": "return_statement",
+          "start": 578,
+          "end": 578
+        },
+        {
+          "kind": "method_declaration",
+          "start": 571,
+          "end": 573
+        },
+        {
+          "kind": "return_statement",
+          "start": 572,
+          "end": 572
+        },
+        {
+          "kind": "method_declaration",
+          "start": 564,
+          "end": 569
+        },
+        {
+          "kind": "return_statement",
+          "start": 568,
+          "end": 568
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 567,
+          "end": 567
+        },
+        {
+          "kind": "method_declaration",
+          "start": 557,
+          "end": 562
+        },
+        {
+          "kind": "return_statement",
+          "start": 561,
+          "end": 561
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 560,
+          "end": 560
+        },
+        {
+          "kind": "method_declaration",
+          "start": 488,
+          "end": 508
+        },
+        {
+          "kind": "return_statement",
+          "start": 507,
+          "end": 507
+        },
+        {
+          "kind": "expression_statement",
+          "start": 505,
+          "end": 505
+        },
+        {
+          "kind": "expression_statement",
+          "start": 504,
+          "end": 504
+        },
+        {
+          "kind": "expression_statement",
+          "start": 503,
+          "end": 503
+        },
+        {
+          "kind": "expression_statement",
+          "start": 502,
+          "end": 502
+        },
+        {
+          "kind": "expression_statement",
+          "start": 501,
+          "end": 501
+        },
+        {
+          "kind": "expression_statement",
+          "start": 500,
+          "end": 500
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 498,
+          "end": 498
+        },
+        {
+          "kind": "expression_statement",
+          "start": 492,
+          "end": 496
+        },
+        {
+          "kind": "method_declaration",
+          "start": 469,
+          "end": 486
+        },
+        {
+          "kind": "return_statement",
+          "start": 485,
+          "end": 485
+        },
+        {
+          "kind": "expression_statement",
+          "start": 483,
+          "end": 483
+        },
+        {
+          "kind": "expression_statement",
+          "start": 482,
+          "end": 482
+        },
+        {
+          "kind": "expression_statement",
+          "start": 481,
+          "end": 481
+        },
+        {
+          "kind": "expression_statement",
+          "start": 480,
+          "end": 480
+        },
+        {
+          "kind": "expression_statement",
+          "start": 479,
+          "end": 479
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 477,
+          "end": 477
+        },
+        {
+          "kind": "expression_statement",
+          "start": 472,
+          "end": 475
+        },
+        {
+          "kind": "method_declaration",
+          "start": 445,
+          "end": 467
+        },
+        {
+          "kind": "return_statement",
+          "start": 466,
+          "end": 466
+        },
+        {
+          "kind": "expression_statement",
+          "start": 457,
+          "end": 464
+        },
+        {
+          "kind": "if_statement",
+          "start": 453,
+          "end": 455
+        },
+        {
+          "kind": "expression_statement",
+          "start": 454,
+          "end": 454
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 449,
+          "end": 451
+        },
+        {
+          "kind": "method_declaration",
+          "start": 419,
+          "end": 443
+        },
+        {
+          "kind": "return_statement",
+          "start": 442,
+          "end": 442
+        },
+        {
+          "kind": "expression_statement",
+          "start": 434,
+          "end": 440
+        },
+        {
+          "kind": "if_statement",
+          "start": 430,
+          "end": 432
+        },
+        {
+          "kind": "expression_statement",
+          "start": 431,
+          "end": 431
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 427,
+          "end": 428
+        },
+        {
+          "kind": "if_statement",
+          "start": 423,
+          "end": 425
+        },
+        {
+          "kind": "return_statement",
+          "start": 424,
+          "end": 424
+        },
+        {
+          "kind": "method_declaration",
+          "start": 392,
+          "end": 417
+        },
+        {
+          "kind": "return_statement",
+          "start": 416,
+          "end": 416
+        },
+        {
+          "kind": "if_statement",
+          "start": 411,
+          "end": 414
+        },
+        {
+          "kind": "expression_statement",
+          "start": 413,
+          "end": 413
+        },
+        {
+          "kind": "expression_statement",
+          "start": 412,
+          "end": 412
+        },
+        {
+          "kind": "if_statement",
+          "start": 404,
+          "end": 410
+        },
+        {
+          "kind": "if_statement",
+          "start": 405,
+          "end": 409
+        },
+        {
+          "kind": "expression_statement",
+          "start": 408,
+          "end": 408
+        },
+        {
+          "kind": "expression_statement",
+          "start": 406,
+          "end": 406
+        },
+        {
+          "kind": "method_declaration",
+          "start": 255,
+          "end": 317
+        },
+        {
+          "kind": "expression_statement",
+          "start": 316,
+          "end": 316
+        },
+        {
+          "kind": "expression_statement",
+          "start": 314,
+          "end": 314
+        },
+        {
+          "kind": "expression_statement",
+          "start": 303,
+          "end": 312
+        },
+        {
+          "kind": "expression_statement",
+          "start": 292,
+          "end": 301
+        },
+        {
+          "kind": "if_statement",
+          "start": 286,
+          "end": 290
+        },
+        {
+          "kind": "expression_statement",
+          "start": 287,
+          "end": 289
+        },
+        {
+          "kind": "if_statement",
+          "start": 278,
+          "end": 285
+        },
+        {
+          "kind": "throw_statement",
+          "start": 279,
+          "end": 284
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 276,
+          "end": 276
+        },
+        {
+          "kind": "if_statement",
+          "start": 272,
+          "end": 274
+        },
+        {
+          "kind": "return_statement",
+          "start": 273,
+          "end": 273
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 269,
+          "end": 270
+        },
+        {
+          "kind": "method_declaration",
+          "start": 137,
+          "end": 199
+        },
+        {
+          "kind": "expression_statement",
+          "start": 198,
+          "end": 198
+        },
+        {
+          "kind": "expression_statement",
+          "start": 196,
+          "end": 196
+        },
+        {
+          "kind": "expression_statement",
+          "start": 185,
+          "end": 194
+        },
+        {
+          "kind": "if_statement",
+          "start": 181,
+          "end": 183
+        },
+        {
+          "kind": "expression_statement",
+          "start": 182,
+          "end": 182
+        },
+        {
+          "kind": "expression_statement",
+          "start": 171,
+          "end": 179
+        },
+        {
+          "kind": "if_statement",
+          "start": 165,
+          "end": 169
+        },
+        {
+          "kind": "expression_statement",
+          "start": 166,
+          "end": 168
+        },
+        {
+          "kind": "if_statement",
+          "start": 158,
+          "end": 164
+        },
+        {
+          "kind": "throw_statement",
+          "start": 159,
+          "end": 163
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 157,
+          "end": 157
+        },
+        {
+          "kind": "if_statement",
+          "start": 153,
+          "end": 155
+        },
+        {
+          "kind": "return_statement",
+          "start": 154,
+          "end": 154
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 151,
+          "end": 151
+        },
+        {
+          "kind": "method_declaration",
+          "start": 97,
+          "end": 135
+        },
+        {
+          "kind": "if_statement",
+          "start": 123,
+          "end": 134
+        },
+        {
+          "kind": "expression_statement",
+          "start": 124,
+          "end": 133
+        },
+        {
+          "kind": "expression_statement",
+          "start": 112,
+          "end": 121
+        }
+      ],
+      "program_units": 101,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineHistoryServiceImpl.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "134db77209cc87ba780164437a9ad86971113e6822306f9b51c937cdb112c7f0",
+      "git_object_sha256": "f8c7c72dbe2fcd9882f6a712a142fac6ff67094b1eea7d086490915a3bfe7c11",
+      "source_url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineHistoryServiceImpl.java",
+      "role": "coupled_native",
+      "classification_basis": "Snapshot quantité et prix du même objet.",
+      "methods": [
+        {
+          "name": "saveHistory",
+          "start": 47,
+          "end": 66,
+          "calls": [
+            "productCompanyService.get",
+            "stockLocationLine.getAvgPrice",
+            "stockLocationLine.getCurrentQty",
+            "stockLocationLine.getProduct",
+            "stockLocationLine.getStockLocation",
+            "stockLocationLine.getStockLocation().getCompany",
+            "stockLocationLine.getUnit",
+            "stockLocationLineHistoryRepo.save"
+          ],
+          "source_fragment": "  @Override\n  @Transactional\n  public StockLocationLineHistory saveHistory(\n      StockLocationLine stockLocationLine, LocalDateTime dateTime, String origin, String typeSelect)\n      throws AxelorException {\n    Product product = stockLocationLine.getProduct();\n    Company company = stockLocationLine.getStockLocation().getCompany();\n    return stockLocationLineHistoryRepo.save(\n        new StockLocationLineHistory(\n            stockLocationLine,\n            typeSelect,\n            dateTime,\n            origin,\n            stockLocationLine.getAvgPrice(),\n            stockLocationLine.getCurrentQty(),\n            stockLocationLine.getUnit(),\n            (BigDecimal) productCompanyService.get(product, \"salePrice\", company),\n            (BigDecimal) productCompanyService.get(product, \"purchasePrice\", company),\n            (BigDecimal) productCompanyService.get(product, \"costPrice\", company)));\n  }",
+          "program_units": 4
+        },
+        {
+          "name": "getStockLineHistoryLines",
+          "start": 68,
+          "end": 77,
+          "calls": [
+            "stockLocationLineHistoryRepo\r\n        .all()\r\n        .filter(\"self.stockLocationLine = :stockLocationLine\")\r\n        .bind(\"stockLocationLine\", stockLocationLine).fetch",
+            "stockLocationLineHistoryRepo\r\n        .all()\r\n        .filter(\"self.stockLocationLine = :stockLocationLine\").bind",
+            "stockLocationLineHistoryRepo\r\n        .all().filter",
+            "stockLocationLineHistoryRepo.all"
+          ],
+          "source_fragment": "  @Override\n  public List<StockLocationLineHistory> getStockLineHistoryLines(\n      StockLocationLine stockLocationLine) {\n\n    return stockLocationLineHistoryRepo\n        .all()\n        .filter(\"self.stockLocationLine = :stockLocationLine\")\n        .bind(\"stockLocationLine\", stockLocationLine)\n        .fetch();\n  }",
+          "program_units": 2
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "method_declaration",
+          "start": 68,
+          "end": 77
+        },
+        {
+          "kind": "return_statement",
+          "start": 72,
+          "end": 76
+        },
+        {
+          "kind": "method_declaration",
+          "start": 47,
+          "end": 66
+        },
+        {
+          "kind": "return_statement",
+          "start": 54,
+          "end": 65
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 53,
+          "end": 53
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 52,
+          "end": 52
+        }
+      ],
+      "program_units": 6,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/batch/BatchRecomputeStockLocationLines.java",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "f03ebd63f380f571626ef16c27a07da91101e2476f0f72725d78813aac84dcb2",
+      "git_object_sha256": "21b7c1401f282142b91e78689d05acf529dac69db142407843ee8e9602e15524",
+      "source_url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/batch/BatchRecomputeStockLocationLines.java",
+      "role": "coupled_native",
+      "classification_basis": "Composant complet : effacement, remise à zéro, tri des mouvements réalisés, reconstitution et quantités prévues ; pas reprise atomique démontrée.",
+      "methods": [
+        {
+          "name": "BatchRecomputeStockLocationLines",
+          "start": 55,
+          "end": 68,
+          "calls": [],
+          "source_fragment": "  @Inject\n  public BatchRecomputeStockLocationLines(\n      StockMoveRepository stockMoveRepository,\n      StockMoveService stockMoveService,\n      StockMoveLineService stockMoveLineService,\n      StockMoveLineRepository stockMoveLineRepository,\n      StockLocationRepository stockLocationRepository) {\n\n    this.stockMoveLineRepository = stockMoveLineRepository;\n    this.stockMoveRepository = stockMoveRepository;\n    this.stockMoveService = stockMoveService;\n    this.stockMoveLineService = stockMoveLineService;\n    this.stockLocationRepository = stockLocationRepository;\n  }",
+          "program_units": 6
+        },
+        {
+          "name": "process",
+          "start": 70,
+          "end": 111,
+          "calls": [
+            "JPA.clear",
+            "TraceBackService.trace",
+            "batch.getId",
+            "clearWapHistoryLines",
+            "fetchStockMoveGroup",
+            "groups.stream",
+            "groups.stream()\r\n        .filter(\r\n            stockMoveGroup ->\r\n                stockMoveGroup.getStatusSelect() == StockMoveRepository.STATUS_PLANNED).forEachOrdered",
+            "groups.stream()\r\n        .filter(\r\n            stockMoveGroup ->\r\n                stockMoveGroup.getStatusSelect() == StockMoveRepository.STATUS_REALIZED).forEachOrdered",
+            "groups.stream().filter",
+            "incrementAnomaly",
+            "incrementDone",
+            "recomputeStockMoves",
+            "resetStockLocations",
+            "stockMoveGroup.getStatusSelect",
+            "updatePlannedQty"
+          ],
+          "source_fragment": "  @Override\n  protected void process() {\n    clearWapHistoryLines();\n    resetStockLocations();\n    List<StockMoveGroup> groups = fetchStockMoveGroup();\n\n    // Recomputing stockLocationLine with realized stock move\n    groups.stream()\n        .filter(\n            stockMoveGroup ->\n                stockMoveGroup.getStatusSelect() == StockMoveRepository.STATUS_REALIZED)\n        .forEachOrdered(\n            stockMoveGroup -> {\n              try {\n                recomputeStockMoves(stockMoveGroup);\n                incrementDone();\n              } catch (Exception e) {\n                incrementAnomaly();\n                TraceBackService.trace(\n                    e, ExceptionOriginRepository.RECOMPUTE_STOCK_MOVE_LINES, batch.getId());\n              } finally {\n                JPA.clear();\n              }\n            });\n\n    // Updating planned quantities\n    groups.stream()\n        .filter(\n            stockMoveGroup ->\n                stockMoveGroup.getStatusSelect() == StockMoveRepository.STATUS_PLANNED)\n        .forEachOrdered(\n            stockMoveGroup -> {\n              try {\n                updatePlannedQty(stockMoveGroup);\n                incrementDone();\n              } catch (Exception e) {\n                incrementAnomaly();\n                TraceBackService.trace(\n                    e, ExceptionOriginRepository.RECOMPUTE_STOCK_MOVE_LINES, batch.getId());\n              }\n            });\n  }",
+          "program_units": 19
+        },
+        {
+          "name": "resetStockLocations",
+          "start": 113,
+          "end": 124,
+          "calls": [
+            "JPA.em",
+            "JPA.em().createNativeQuery",
+            "JPA.runInTransaction"
+          ],
+          "source_fragment": "  protected void resetStockLocations() {\n\n    jakarta.persistence.Query clearWapHistoryLinesQuery =\n        JPA.em()\n            .createNativeQuery(\n                \"UPDATE stock_stock_location_line SET \"\n                    + \" avg_price = 0, \"\n                    + \" current_qty = 0, \"\n                    + \" future_qty = 0 \");\n\n    JPA.runInTransaction(clearWapHistoryLinesQuery::executeUpdate);\n  }",
+          "program_units": 3
+        },
+        {
+          "name": "updatePlannedQty",
+          "start": 126,
+          "end": 146,
+          "calls": [
+            "(stockMoveLineList = query.fetch(FETCH_LIMIT, offSet)).isEmpty",
+            "JPA.clear",
+            "buildQueryFetchStockMoveLineFromGroup",
+            "buildQueryFetchStockMoveLineFromGroup(stockMoveGroup).order",
+            "query.fetch",
+            "stockMoveLine.getStockMove",
+            "stockMoveLine.getStockMove().getEstimatedDate",
+            "stockMoveLine.getStockMove().getPlannedStockMoveLineList",
+            "stockMoveLineService.updateLocations"
+          ],
+          "source_fragment": "  protected void updatePlannedQty(StockMoveGroup stockMoveGroup) throws AxelorException {\n\n    List<StockMoveLine> stockMoveLineList;\n    Query<StockMoveLine> query = buildQueryFetchStockMoveLineFromGroup(stockMoveGroup).order(\"id\");\n    int offSet = 0;\n    while (!(stockMoveLineList = query.fetch(FETCH_LIMIT, offSet)).isEmpty()) {\n\n      for (StockMoveLine stockMoveLine : stockMoveLineList) {\n        stockMoveLineService.updateLocations(\n            StockMoveRepository.STATUS_DRAFT,\n            StockMoveRepository.STATUS_PLANNED,\n            stockMoveLine.getStockMove().getPlannedStockMoveLineList(),\n            stockMoveLine.getStockMove().getEstimatedDate(),\n            false,\n            true);\n      }\n\n      offSet += FETCH_LIMIT;\n      JPA.clear();\n    }\n  }",
+          "program_units": 9
+        },
+        {
+          "name": "getOrigin",
+          "start": 148,
+          "end": 150,
+          "calls": [
+            "Optional.ofNullable",
+            "Optional.ofNullable(stockMove).map",
+            "Optional.ofNullable(stockMove).map(StockMove::getStockMoveSeq).orElse"
+          ],
+          "source_fragment": "  protected String getOrigin(StockMove stockMove) {\n    return Optional.ofNullable(stockMove).map(StockMove::getStockMoveSeq).orElse(\"\");\n  }",
+          "program_units": 2
+        },
+        {
+          "name": "recomputeStockMoves",
+          "start": 152,
+          "end": 198,
+          "calls": [
+            "(stockMoves = query.fetch(FETCH_LIMIT, offSet)).isEmpty",
+            "Collections.singletonList",
+            "buildQueryFetchStockMoveFromGroup",
+            "buildQueryFetchStockMoveFromGroup(group).order",
+            "entry.getValue",
+            "entry.getValue().getOrigin",
+            "entry.getValue().getStockMoveLine",
+            "getOrigin",
+            "group.getRealDate",
+            "query.fetch",
+            "stockMove.getStockMoveLineList",
+            "stockMove.getStockMoveLineList().stream",
+            "stockMove.getStockMoveLineList().stream().forEach",
+            "stockMoveLine.getProduct",
+            "stockMoveLine.getTrackingNumber",
+            "stockMoveLineRepository.copy",
+            "stockMoveLineService.updateLocations",
+            "stockMoveLinesMap.containsKey",
+            "stockMoveLinesMap.entrySet",
+            "stockMoveLinesMap.merge",
+            "stockMoveLinesMap.put",
+            "stockMoves.stream",
+            "stockMoves.stream().forEach"
+          ],
+          "source_fragment": "  protected void recomputeStockMoves(StockMoveGroup group) throws AxelorException {\n    List<StockMove> stockMoves;\n    Query<StockMove> query = buildQueryFetchStockMoveFromGroup(group).order(\"id\");\n    HashMap<TrackProduct, StockMoveLineOrigin> stockMoveLinesMap = new HashMap<>();\n    int offSet = 0;\n\n    while (!(stockMoves = query.fetch(FETCH_LIMIT, offSet)).isEmpty()) {\n\n      stockMoves.stream()\n          .forEach(\n              stockMove -> {\n                stockMove.getStockMoveLineList().stream()\n                    .forEach(\n                        stockMoveLine -> {\n                          TrackProduct trackProduct =\n                              new TrackProduct(\n                                  stockMoveLine.getProduct(), stockMoveLine.getTrackingNumber());\n                          if (!stockMoveLinesMap.containsKey(trackProduct)) {\n                            stockMoveLinesMap.put(\n                                trackProduct,\n                                new StockMoveLineOrigin(\n                                    stockMoveLineRepository.copy(stockMoveLine, false),\n                                    getOrigin(stockMove)));\n                          } else {\n                            stockMoveLinesMap.merge(\n                                trackProduct,\n                                new StockMoveLineOrigin(stockMoveLine, getOrigin(stockMove)),\n                                this::merge);\n                          }\n                        });\n              });\n\n      offSet += FETCH_LIMIT;\n    }\n\n    for (Entry<TrackProduct, StockMoveLineOrigin> entry : stockMoveLinesMap.entrySet()) {\n      stockMoveLineService.updateLocations(\n          StockMoveRepository.STATUS_PLANNED,\n          StockMoveRepository.STATUS_REALIZED,\n          Collections.singletonList(entry.getValue().getStockMoveLine()),\n          null,\n          false,\n          group.getRealDate(),\n          entry.getValue().getOrigin(),\n          true);\n    }\n  }",
+          "program_units": 15
+        },
+        {
+          "name": "merge",
+          "start": 200,
+          "end": 203,
+          "calls": [
+            "sml1.merge"
+          ],
+          "source_fragment": "  protected StockMoveLineOrigin merge(StockMoveLineOrigin sml1, StockMoveLineOrigin sml2) {\n\n    return sml1.merge(sml2);\n  }",
+          "program_units": 2
+        },
+        {
+          "name": "clearWapHistoryLines",
+          "start": 205,
+          "end": 211,
+          "calls": [
+            "JPA.em",
+            "JPA.em().createNativeQuery",
+            "JPA.runInTransaction"
+          ],
+          "source_fragment": "  protected void clearWapHistoryLines() {\n\n    jakarta.persistence.Query clearStockLocationsHistoryLinesQuery =\n        JPA.em().createNativeQuery(\"Delete FROM stock_stock_location_line_history\");\n\n    JPA.runInTransaction(clearStockLocationsHistoryLinesQuery::executeUpdate);\n  }",
+          "program_units": 3
+        },
+        {
+          "name": "buildQueryFetchStockMoveFromGroup",
+          "start": 213,
+          "end": 234,
+          "calls": [
+            "query.append",
+            "query.toString",
+            "stockMoveGroup.getFromStockLocation",
+            "stockMoveGroup.getRealDate",
+            "stockMoveGroup.getStatusSelect",
+            "stockMoveGroup.getToStockLocation",
+            "stockMoveRepository\r\n        .all()\r\n        .filter(query.toString())\r\n        .bind(\"realDate\", stockMoveGroup.getRealDate())\r\n        .bind(\"fromStockLocation\", stockMoveGroup.getFromStockLocation())\r\n        .bind(\"toStockLocation\", stockMoveGroup.getToStockLocation()).bind",
+            "stockMoveRepository\r\n        .all()\r\n        .filter(query.toString())\r\n        .bind(\"realDate\", stockMoveGroup.getRealDate())\r\n        .bind(\"fromStockLocation\", stockMoveGroup.getFromStockLocation()).bind",
+            "stockMoveRepository\r\n        .all()\r\n        .filter(query.toString())\r\n        .bind(\"realDate\", stockMoveGroup.getRealDate()).bind",
+            "stockMoveRepository\r\n        .all()\r\n        .filter(query.toString()).bind",
+            "stockMoveRepository\r\n        .all().filter",
+            "stockMoveRepository.all"
+          ],
+          "source_fragment": "  protected Query<StockMove> buildQueryFetchStockMoveFromGroup(StockMoveGroup stockMoveGroup) {\n\n    StringBuilder query =\n        new StringBuilder(\n            \"self.fromStockLocation = :fromStockLocation\"\n                + \" AND self.toStockLocation = :toStockLocation\"\n                + \" AND self.statusSelect = :status\");\n\n    if (stockMoveGroup.getRealDate() == null) {\n      query.append(\" AND self.realDate is NULL\");\n    } else {\n      query.append(\" AND self.realDate = :realDate\");\n    }\n\n    return stockMoveRepository\n        .all()\n        .filter(query.toString())\n        .bind(\"realDate\", stockMoveGroup.getRealDate())\n        .bind(\"fromStockLocation\", stockMoveGroup.getFromStockLocation())\n        .bind(\"toStockLocation\", stockMoveGroup.getToStockLocation())\n        .bind(\"status\", stockMoveGroup.getStatusSelect());\n  }",
+          "program_units": 6
+        },
+        {
+          "name": "buildQueryFetchStockMoveLineFromGroup",
+          "start": 236,
+          "end": 258,
+          "calls": [
+            "query.append",
+            "query.toString",
+            "stockMoveGroup.getFromStockLocation",
+            "stockMoveGroup.getRealDate",
+            "stockMoveGroup.getStatusSelect",
+            "stockMoveGroup.getToStockLocation",
+            "stockMoveLineRepository\r\n        .all()\r\n        .filter(query.toString())\r\n        .bind(\"realDate\", stockMoveGroup.getRealDate())\r\n        .bind(\"fromStockLocation\", stockMoveGroup.getFromStockLocation())\r\n        .bind(\"toStockLocation\", stockMoveGroup.getToStockLocation()).bind",
+            "stockMoveLineRepository\r\n        .all()\r\n        .filter(query.toString())\r\n        .bind(\"realDate\", stockMoveGroup.getRealDate())\r\n        .bind(\"fromStockLocation\", stockMoveGroup.getFromStockLocation()).bind",
+            "stockMoveLineRepository\r\n        .all()\r\n        .filter(query.toString())\r\n        .bind(\"realDate\", stockMoveGroup.getRealDate()).bind",
+            "stockMoveLineRepository\r\n        .all()\r\n        .filter(query.toString()).bind",
+            "stockMoveLineRepository\r\n        .all().filter",
+            "stockMoveLineRepository.all"
+          ],
+          "source_fragment": "  protected Query<StockMoveLine> buildQueryFetchStockMoveLineFromGroup(\n      StockMoveGroup stockMoveGroup) {\n\n    StringBuilder query =\n        new StringBuilder(\n            \"self.fromStockLocation = :fromStockLocation\"\n                + \" AND self.toStockLocation = :toStockLocation\"\n                + \" AND self.stockMove.statusSelect = :status\");\n\n    if (stockMoveGroup.getRealDate() == null) {\n      query.append(\" AND self.stockMove.realDate is NULL\");\n    } else {\n      query.append(\" AND self.stockMove.realDate = :realDate\");\n    }\n\n    return stockMoveLineRepository\n        .all()\n        .filter(query.toString())\n        .bind(\"realDate\", stockMoveGroup.getRealDate())\n        .bind(\"fromStockLocation\", stockMoveGroup.getFromStockLocation())\n        .bind(\"toStockLocation\", stockMoveGroup.getToStockLocation())\n        .bind(\"status\", stockMoveGroup.getStatusSelect());\n  }",
+          "program_units": 6
+        },
+        {
+          "name": "fetchStockMoveGroup",
+          "start": 260,
+          "end": 282,
+          "calls": [
+            "JPA.em",
+            "JPA.em().createQuery",
+            "createStockMoveGroup",
+            "query.getResultList",
+            "stockMoveGroups.add"
+          ],
+          "source_fragment": "  protected List<StockMoveGroup> fetchStockMoveGroup() {\n    List<StockMoveGroup> stockMoveGroups = new ArrayList<>();\n    jakarta.persistence.Query query =\n        JPA.em()\n            .createQuery(\n                \"SELECT \"\n                    + \"self.realDate,\"\n                    + \" self.fromStockLocation.id,\"\n                    + \" self.toStockLocation.id,\"\n                    + \" self.statusSelect,\"\n                    + \" self.toStockLocation.typeSelect\"\n                    + \" FROM StockMove self \"\n                    + \" GROUP BY\"\n                    + \" self.realDate, self.fromStockLocation.id, self.toStockLocation.id, self.statusSelect, self.toStockLocation.typeSelect\"\n                    + \" ORDER BY self.realDate, self.toStockLocation.typeSelect\");\n\n    List<Object[]> resultList = query.getResultList();\n    for (Object[] result : resultList) {\n      stockMoveGroups.add(createStockMoveGroup(result));\n    }\n\n    return stockMoveGroups;\n  }",
+          "program_units": 7
+        },
+        {
+          "name": "createStockMoveGroup",
+          "start": 284,
+          "end": 307,
+          "calls": [],
+          "source_fragment": "  protected StockMoveGroup createStockMoveGroup(Object[] result) {\n    LocalDate realDate = null;\n    Long fromStockLocation = null;\n    Long toStockLocation = null;\n    Integer status = null;\n\n    if (result[0] != null) {\n      realDate = (LocalDate) result[0];\n    }\n\n    if (result[1] != null) {\n      fromStockLocation = (Long) result[1];\n    }\n\n    if (result[2] != null) {\n      toStockLocation = (Long) result[2];\n    }\n\n    if (result[3] != null) {\n      status = (Integer) result[3];\n    }\n\n    return new StockMoveGroup(realDate, fromStockLocation, toStockLocation, status);\n  }",
+          "program_units": 14
+        },
+        {
+          "name": "setBatchTypeSelect",
+          "start": 309,
+          "end": 312,
+          "calls": [
+            "this.batch.setBatchTypeSelect"
+          ],
+          "source_fragment": "  @Override\n  protected void setBatchTypeSelect() {\n    this.batch.setBatchTypeSelect(BatchRepository.BATCH_TYPE_STOCK_BATCH);\n  }",
+          "program_units": 2
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "method_declaration",
+          "start": 309,
+          "end": 312
+        },
+        {
+          "kind": "expression_statement",
+          "start": 311,
+          "end": 311
+        },
+        {
+          "kind": "method_declaration",
+          "start": 284,
+          "end": 307
+        },
+        {
+          "kind": "return_statement",
+          "start": 306,
+          "end": 306
+        },
+        {
+          "kind": "if_statement",
+          "start": 302,
+          "end": 304
+        },
+        {
+          "kind": "expression_statement",
+          "start": 303,
+          "end": 303
+        },
+        {
+          "kind": "if_statement",
+          "start": 298,
+          "end": 300
+        },
+        {
+          "kind": "expression_statement",
+          "start": 299,
+          "end": 299
+        },
+        {
+          "kind": "if_statement",
+          "start": 294,
+          "end": 296
+        },
+        {
+          "kind": "expression_statement",
+          "start": 295,
+          "end": 295
+        },
+        {
+          "kind": "if_statement",
+          "start": 290,
+          "end": 292
+        },
+        {
+          "kind": "expression_statement",
+          "start": 291,
+          "end": 291
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 288,
+          "end": 288
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 287,
+          "end": 287
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 286,
+          "end": 286
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 285,
+          "end": 285
+        },
+        {
+          "kind": "method_declaration",
+          "start": 260,
+          "end": 282
+        },
+        {
+          "kind": "return_statement",
+          "start": 281,
+          "end": 281
+        },
+        {
+          "kind": "enhanced_for_statement",
+          "start": 277,
+          "end": 279
+        },
+        {
+          "kind": "expression_statement",
+          "start": 278,
+          "end": 278
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 276,
+          "end": 276
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 262,
+          "end": 274
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 261,
+          "end": 261
+        },
+        {
+          "kind": "method_declaration",
+          "start": 236,
+          "end": 258
+        },
+        {
+          "kind": "return_statement",
+          "start": 251,
+          "end": 257
+        },
+        {
+          "kind": "if_statement",
+          "start": 245,
+          "end": 249
+        },
+        {
+          "kind": "expression_statement",
+          "start": 248,
+          "end": 248
+        },
+        {
+          "kind": "expression_statement",
+          "start": 246,
+          "end": 246
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 239,
+          "end": 243
+        },
+        {
+          "kind": "method_declaration",
+          "start": 213,
+          "end": 234
+        },
+        {
+          "kind": "return_statement",
+          "start": 227,
+          "end": 233
+        },
+        {
+          "kind": "if_statement",
+          "start": 221,
+          "end": 225
+        },
+        {
+          "kind": "expression_statement",
+          "start": 224,
+          "end": 224
+        },
+        {
+          "kind": "expression_statement",
+          "start": 222,
+          "end": 222
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 215,
+          "end": 219
+        },
+        {
+          "kind": "method_declaration",
+          "start": 205,
+          "end": 211
+        },
+        {
+          "kind": "expression_statement",
+          "start": 210,
+          "end": 210
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 207,
+          "end": 208
+        },
+        {
+          "kind": "method_declaration",
+          "start": 200,
+          "end": 203
+        },
+        {
+          "kind": "return_statement",
+          "start": 202,
+          "end": 202
+        },
+        {
+          "kind": "method_declaration",
+          "start": 152,
+          "end": 198
+        },
+        {
+          "kind": "enhanced_for_statement",
+          "start": 187,
+          "end": 197
+        },
+        {
+          "kind": "expression_statement",
+          "start": 188,
+          "end": 196
+        },
+        {
+          "kind": "while_statement",
+          "start": 158,
+          "end": 185
+        },
+        {
+          "kind": "expression_statement",
+          "start": 184,
+          "end": 184
+        },
+        {
+          "kind": "expression_statement",
+          "start": 160,
+          "end": 182
+        },
+        {
+          "kind": "expression_statement",
+          "start": 163,
+          "end": 181
+        },
+        {
+          "kind": "if_statement",
+          "start": 169,
+          "end": 180
+        },
+        {
+          "kind": "expression_statement",
+          "start": 176,
+          "end": 179
+        },
+        {
+          "kind": "expression_statement",
+          "start": 170,
+          "end": 174
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 166,
+          "end": 168
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 156,
+          "end": 156
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 155,
+          "end": 155
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 154,
+          "end": 154
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 153,
+          "end": 153
+        },
+        {
+          "kind": "method_declaration",
+          "start": 148,
+          "end": 150
+        },
+        {
+          "kind": "return_statement",
+          "start": 149,
+          "end": 149
+        },
+        {
+          "kind": "method_declaration",
+          "start": 126,
+          "end": 146
+        },
+        {
+          "kind": "while_statement",
+          "start": 131,
+          "end": 145
+        },
+        {
+          "kind": "expression_statement",
+          "start": 144,
+          "end": 144
+        },
+        {
+          "kind": "expression_statement",
+          "start": 143,
+          "end": 143
+        },
+        {
+          "kind": "enhanced_for_statement",
+          "start": 133,
+          "end": 141
+        },
+        {
+          "kind": "expression_statement",
+          "start": 134,
+          "end": 140
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 130,
+          "end": 130
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 129,
+          "end": 129
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 128,
+          "end": 128
+        },
+        {
+          "kind": "method_declaration",
+          "start": 113,
+          "end": 124
+        },
+        {
+          "kind": "expression_statement",
+          "start": 123,
+          "end": 123
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 115,
+          "end": 121
+        },
+        {
+          "kind": "method_declaration",
+          "start": 70,
+          "end": 111
+        },
+        {
+          "kind": "expression_statement",
+          "start": 96,
+          "end": 110
+        },
+        {
+          "kind": "try_statement",
+          "start": 102,
+          "end": 109
+        },
+        {
+          "kind": "catch_clause",
+          "start": 105,
+          "end": 109
+        },
+        {
+          "kind": "expression_statement",
+          "start": 107,
+          "end": 108
+        },
+        {
+          "kind": "expression_statement",
+          "start": 106,
+          "end": 106
+        },
+        {
+          "kind": "expression_statement",
+          "start": 104,
+          "end": 104
+        },
+        {
+          "kind": "expression_statement",
+          "start": 103,
+          "end": 103
+        },
+        {
+          "kind": "expression_statement",
+          "start": 77,
+          "end": 93
+        },
+        {
+          "kind": "try_statement",
+          "start": 83,
+          "end": 92
+        },
+        {
+          "kind": "expression_statement",
+          "start": 91,
+          "end": 91
+        },
+        {
+          "kind": "catch_clause",
+          "start": 86,
+          "end": 90
+        },
+        {
+          "kind": "expression_statement",
+          "start": 88,
+          "end": 89
+        },
+        {
+          "kind": "expression_statement",
+          "start": 87,
+          "end": 87
+        },
+        {
+          "kind": "expression_statement",
+          "start": 85,
+          "end": 85
+        },
+        {
+          "kind": "expression_statement",
+          "start": 84,
+          "end": 84
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 74,
+          "end": 74
+        },
+        {
+          "kind": "expression_statement",
+          "start": 73,
+          "end": 73
+        },
+        {
+          "kind": "expression_statement",
+          "start": 72,
+          "end": 72
+        },
+        {
+          "kind": "constructor_declaration",
+          "start": 55,
+          "end": 68
+        },
+        {
+          "kind": "expression_statement",
+          "start": 67,
+          "end": 67
+        },
+        {
+          "kind": "expression_statement",
+          "start": 66,
+          "end": 66
+        },
+        {
+          "kind": "expression_statement",
+          "start": 65,
+          "end": 65
+        },
+        {
+          "kind": "expression_statement",
+          "start": 64,
+          "end": 64
+        },
+        {
+          "kind": "expression_statement",
+          "start": 63,
+          "end": 63
+        }
+      ],
+      "program_units": 94,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "platform",
+      "path": "axelor-core/src/main/java/com/axelor/db/JpaRepository.java",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "sha256": "647ee80715d6e641693998e17b96171d3ca03ffa995fa20f20d08c301c9467cd",
+      "git_object_sha256": "3a694d8c70f69e350939c75b98e18bbac6b80c402e762e099ed475948206326a",
+      "source_url": "https://github.com/axelor/axelor-open-platform/blob/96caf51eb97fbab7750b7dadf10a371a55a490a3/axelor-core/src/main/java/com/axelor/db/JpaRepository.java",
+      "role": "framework_reused",
+      "classification_basis": "Repository et flush JPA.",
+      "methods": [
+        {
+          "name": "save",
+          "start": 98,
+          "end": 109,
+          "calls": [
+            "JPA.save",
+            "jsonManager.afterSave",
+            "jsonManager.clearSaveState",
+            "jsonUpdater.afterSave"
+          ],
+          "source_fragment": "  @Override\n  public T save(T entity) {\n    try {\n      T saved = JPA.save(entity);\n      jsonManager.afterSave(saved);\n      jsonUpdater.afterSave(saved);\n      return saved;\n    } finally {\n      // Between-save JSON state cleanup for the current entity\n      jsonManager.clearSaveState(entity);\n    }\n  }",
+          "program_units": 7
+        },
+        {
+          "name": "flush",
+          "start": 202,
+          "end": 205,
+          "calls": [
+            "JPA.flush"
+          ],
+          "source_fragment": "  @Override\n  public void flush() {\n    JPA.flush();\n  }",
+          "program_units": 2
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "method_declaration",
+          "start": 202,
+          "end": 205
+        },
+        {
+          "kind": "expression_statement",
+          "start": 204,
+          "end": 204
+        },
+        {
+          "kind": "method_declaration",
+          "start": 98,
+          "end": 109
+        },
+        {
+          "kind": "try_statement",
+          "start": 100,
+          "end": 108
+        },
+        {
+          "kind": "expression_statement",
+          "start": 107,
+          "end": 107
+        },
+        {
+          "kind": "return_statement",
+          "start": 104,
+          "end": 104
+        },
+        {
+          "kind": "expression_statement",
+          "start": 103,
+          "end": 103
+        },
+        {
+          "kind": "expression_statement",
+          "start": 102,
+          "end": 102
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 101,
+          "end": 101
+        }
+      ],
+      "program_units": 9,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": "java-spring-framework-services",
+      "funding_owner": "master-data-java-spring",
+      "stock_additional_generic_framework_units": 0
+    },
+    {
+      "repo": "platform",
+      "path": "axelor-core/src/main/java/com/axelor/db/JPA.java",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "sha256": "bd57774d8e7addbea8af34f29eb1d02eb1c54599b97500ca8347939f06c687ae",
+      "git_object_sha256": "20026d0d2d50146b70e844dfb04f21aabd9f726cae0603a91a2d04fc961dfa60",
+      "source_url": "https://github.com/axelor/axelor-open-platform/blob/96caf51eb97fbab7750b7dadf10a371a55a490a3/axelor-core/src/main/java/com/axelor/db/JPA.java",
+      "role": "framework_reused",
+      "classification_basis": "Persistance, vérification de version et transaction génériques.",
+      "methods": [
+        {
+          "name": "save",
+          "start": 237,
+          "end": 242,
+          "calls": [
+            "em",
+            "em().contains",
+            "entity.getId",
+            "merge",
+            "persist"
+          ],
+          "source_fragment": "  public static <T extends Model> T save(T entity) {\n    if (em().contains(entity) || entity.getId() == null) {\n      return persist(entity);\n    }\n    return merge(entity);\n  }",
+          "program_units": 4
+        },
+        {
+          "name": "persist",
+          "start": 203,
+          "end": 211,
+          "calls": [
+            "checkVersion",
+            "em",
+            "em().flush",
+            "em().persist",
+            "entity.getVersion",
+            "isAutoFlushEnabled"
+          ],
+          "source_fragment": "  public static <T extends Model> T persist(T entity) {\n    // optimistic concurrency check\n    checkVersion(entity, entity.getVersion());\n    em().persist(entity);\n    if (isAutoFlushEnabled()) {\n      em().flush();\n    }\n    return entity;\n  }",
+          "program_units": 6
+        },
+        {
+          "name": "merge",
+          "start": 218,
+          "end": 226,
+          "calls": [
+            "checkVersion",
+            "em",
+            "em().flush",
+            "em().merge",
+            "entity.getVersion",
+            "isAutoFlushEnabled"
+          ],
+          "source_fragment": "  public static <T extends Model> T merge(T entity) {\n    // optimistic concurrency check\n    checkVersion(entity, entity.getVersion());\n    T result = em().merge(entity);\n    if (isAutoFlushEnabled()) {\n      em().flush();\n    }\n    return result;\n  }",
+          "program_units": 6
+        },
+        {
+          "name": "flush",
+          "start": 276,
+          "end": 278,
+          "calls": [
+            "em",
+            "em().flush"
+          ],
+          "source_fragment": "  public static void flush() {\n    em().flush();\n  }",
+          "program_units": 2
+        },
+        {
+          "name": "checkVersion",
+          "start": 289,
+          "end": 299,
+          "calls": [
+            "EntityHelper.getEntityClass",
+            "JPA.em",
+            "JPA.em().find",
+            "Objects.equals",
+            "bean.getId",
+            "cause.getMessage",
+            "entity.getVersion",
+            "klass.getName"
+          ],
+          "source_fragment": "  private static <T extends Model> void checkVersion(T bean, Object version) {\n    if (bean == null || version == null) {\n      return;\n    }\n    final Class<T> klass = EntityHelper.getEntityClass(bean);\n    final Model entity = JPA.em().find(klass, bean.getId());\n    if (entity == null || !Objects.equals(version, entity.getVersion())) {\n      Exception cause = new StaleObjectStateException(klass.getName(), bean.getId());\n      throw new OptimisticLockException(cause.getMessage(), cause, bean);\n    }\n  }",
+          "program_units": 8
+        },
+        {
+          "name": "runInTransaction",
+          "start": 701,
+          "end": 719,
+          "calls": [
+            "Objects.requireNonNull",
+            "em",
+            "em().getTransaction",
+            "task.run",
+            "txn.begin",
+            "txn.commit",
+            "txn.getRollbackOnly",
+            "txn.isActive",
+            "txn.rollback"
+          ],
+          "source_fragment": "  public static void runInTransaction(Runnable task) {\n    Objects.requireNonNull(task);\n    EntityTransaction txn = em().getTransaction();\n    boolean txnStarted = false;\n    try {\n      if (!txn.isActive()) {\n        txn.begin();\n        txnStarted = true;\n      }\n      task.run();\n      if (txnStarted && txn.isActive() && !txn.getRollbackOnly()) {\n        txn.commit();\n      }\n    } finally {\n      if (txnStarted && txn.isActive()) {\n        txn.rollback();\n      }\n    }\n  }",
+          "program_units": 13
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "method_declaration",
+          "start": 701,
+          "end": 719
+        },
+        {
+          "kind": "try_statement",
+          "start": 705,
+          "end": 718
+        },
+        {
+          "kind": "if_statement",
+          "start": 715,
+          "end": 717
+        },
+        {
+          "kind": "expression_statement",
+          "start": 716,
+          "end": 716
+        },
+        {
+          "kind": "if_statement",
+          "start": 711,
+          "end": 713
+        },
+        {
+          "kind": "expression_statement",
+          "start": 712,
+          "end": 712
+        },
+        {
+          "kind": "expression_statement",
+          "start": 710,
+          "end": 710
+        },
+        {
+          "kind": "if_statement",
+          "start": 706,
+          "end": 709
+        },
+        {
+          "kind": "expression_statement",
+          "start": 708,
+          "end": 708
+        },
+        {
+          "kind": "expression_statement",
+          "start": 707,
+          "end": 707
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 704,
+          "end": 704
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 703,
+          "end": 703
+        },
+        {
+          "kind": "expression_statement",
+          "start": 702,
+          "end": 702
+        },
+        {
+          "kind": "method_declaration",
+          "start": 289,
+          "end": 299
+        },
+        {
+          "kind": "if_statement",
+          "start": 295,
+          "end": 298
+        },
+        {
+          "kind": "throw_statement",
+          "start": 297,
+          "end": 297
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 296,
+          "end": 296
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 294,
+          "end": 294
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 293,
+          "end": 293
+        },
+        {
+          "kind": "if_statement",
+          "start": 290,
+          "end": 292
+        },
+        {
+          "kind": "return_statement",
+          "start": 291,
+          "end": 291
+        },
+        {
+          "kind": "method_declaration",
+          "start": 276,
+          "end": 278
+        },
+        {
+          "kind": "expression_statement",
+          "start": 277,
+          "end": 277
+        },
+        {
+          "kind": "method_declaration",
+          "start": 237,
+          "end": 242
+        },
+        {
+          "kind": "return_statement",
+          "start": 241,
+          "end": 241
+        },
+        {
+          "kind": "if_statement",
+          "start": 238,
+          "end": 240
+        },
+        {
+          "kind": "return_statement",
+          "start": 239,
+          "end": 239
+        },
+        {
+          "kind": "method_declaration",
+          "start": 218,
+          "end": 226
+        },
+        {
+          "kind": "return_statement",
+          "start": 225,
+          "end": 225
+        },
+        {
+          "kind": "if_statement",
+          "start": 222,
+          "end": 224
+        },
+        {
+          "kind": "expression_statement",
+          "start": 223,
+          "end": 223
+        },
+        {
+          "kind": "local_variable_declaration",
+          "start": 221,
+          "end": 221
+        },
+        {
+          "kind": "expression_statement",
+          "start": 220,
+          "end": 220
+        },
+        {
+          "kind": "method_declaration",
+          "start": 203,
+          "end": 211
+        },
+        {
+          "kind": "return_statement",
+          "start": 210,
+          "end": 210
+        },
+        {
+          "kind": "if_statement",
+          "start": 207,
+          "end": 209
+        },
+        {
+          "kind": "expression_statement",
+          "start": 208,
+          "end": 208
+        },
+        {
+          "kind": "expression_statement",
+          "start": 206,
+          "end": 206
+        },
+        {
+          "kind": "expression_statement",
+          "start": 205,
+          "end": 205
+        }
+      ],
+      "program_units": 39,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": "java-spring-framework-services",
+      "funding_owner": "master-data-java-spring",
+      "stock_additional_generic_framework_units": 0
+    }
+  ],
+  "units_by_role": {
+    "stock_quantity": 0,
+    "coupled_native": 287,
+    "native_integration": 156,
+    "framework_reused": 48
+  },
+  "method_count": 62,
+  "runtime_executed": false,
+  "closure": {
+    "main_stages_traced": true,
+    "critical_transaction_boundary_identified": true,
+    "all_dynamic_hooks_and_installed_extensions_closed": false,
+    "mixed_native_responsibilities_present": true,
+    "complete_Flow_retroactivity_and_command_replay_equivalence": false
+  },
+  "effort": {
+    "receivable_jh": null,
+    "COCOMO_executed": false,
+    "reason": "Le dossier mesure les composants natifs et leurs dépendances, pas une assiette homogène neuve/réutilisée du mécanisme Flow complet. Un total de famille ou de projet autonome tiré de ces seules méthodes serait trompeur."
+  },
+  "standard_ports_not_counted_as_new_stock": [
+    "ORM/repositories et transactions natifs",
+    "lecture des identités produit/lieu/unité/partenaire existantes",
+    "injection et services de date/configuration/logs"
+  ],
+  "native_domain_ports_requiring_scope_resolution": [
+    "Passage de la reconstruction globale native à un recalcul ciblé de la portion corrigée.",
+    "Cohérence visible pendant reconstruction, arrêt/reprise, et liens de correction.",
+    "Prix moyen, réapprovisionnement et exécution des mouvements mêlés aux méthodes."
+  ]
+}

@@ -113,10 +113,11 @@ class FundamentalsTests(unittest.TestCase):
         def unknown_concept(e): e['concepts'][0]['entity_ref'] = 'missing'
         def local_activities(e): e['model_activities'] = {'types': []}
         def local_reading(e): e['model_reading'] = {'chapters': []}
+        def local_status(e): e['core_status_summary'] = 'Local status'
         def local_page_intro(e): e['pages']['modele']['intro'] = 'Local introduction'
         def local_chapter_title(e): e['model_choice'] = 'Local title'
         for change in (caption, unknown_system, local_phase, unknown_phase, local_choice, local_limit,
-                       unknown_concept, local_activities, local_reading, local_page_intro, local_chapter_title):
+                       unknown_concept, local_activities, local_reading, local_status, local_page_intro, local_chapter_title):
             with self.subTest(change=change.__name__):
                 ui = deepcopy(self.ui)
                 change(ui['essential'])
@@ -153,6 +154,8 @@ class FundamentalsTests(unittest.TestCase):
         self.assertEqual(reading['scope'], model['business_map']['scope_summary'])
         self.assertEqual(reading['activity_note'], model['activity_reading']['note'])
         self.assertEqual(reading['workload_note'], model['estimation']['note'])
+        from evaluation_status import load_status
+        self.assertEqual(view['core_status_summary'], load_status()['summary'])
         self.assertNotIn('status_summary', reading)
         self.assertNotIn('status_source', reading)
         self.assertNotIn('status', view['model_workload'])

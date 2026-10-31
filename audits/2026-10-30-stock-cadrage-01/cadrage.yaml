@@ -1,0 +1,391 @@
+id: stock-java-spring-cadrage-01
+status: cadrage_non_chiffre_non_adopte
+date: '2026-10-30'
+stack: java-spring
+evaluation_unit:
+  native_id: ba-inventory-position-management
+  native_name: Inventory State Management
+  level: Business Area
+  presentation: Gestion des états de stock
+source:
+  version: 1
+  source: sources/cartographie-scm-2026-10-24.yaml
+  sha256: a1fc16bac87e206124485aee8fa51b49b774a4352e36721731662e868dbe6976
+  domain_id: supply-chain-orchestration
+capabilities:
+- id: BC-009
+  native_id: D01.f
+  name: Inventory Tracking
+  definition: Capter et intégrer les faits et états de stock transmis par les sources, ainsi que les origines et
+    liens de filiation des biens, avec leurs dates et corrections.
+  native_scope: 'Intégrer événements, états transmis et corrections avec origine, portée, date du fait et date de
+    connaissance. Rapprocher produits, lieux, propriétaires et détenteurs et reconnaître les doublons sans appliquer
+    deux fois un effet. Un solde externe peut être reçu comme référence datée sans inventer les mouvements inconnus.
+    Une estimation ou une demande ne vaut pas un fait réalisé.
+
+
+    Fournir les faits intégrés à [Inventory Ledger](model:D01.g), qui tient leur historique métier ; [Inventory
+    Visibility](model:D01.c) compose les positions. Operations Tracking peut fournir les effets de prestations,
+    mais ne constitue pas un passage obligatoire pour toutes les sources. Un même fait commun aux deux Tracking
+    ne produit qu’un effet de stock. Une correction documentaire n’est pas une sortie physique.
+
+
+    Intégrer également les faits de processus utiles à la propriété et les transferts déjà établis par des sources
+    autorisées. Operations Tracking fournit les résultats des prestations ; les échéances convenues peuvent déclencher
+    un examen distinct. Inventory Ownership Transfer Decision applique les conditions de l’accord ; [Inventory Ownership
+    Ledger](model:inventory-ownership-ledger) conserve les changements reconnus. Ne pas déduire automatiquement
+    un transfert de tout événement reçu.
+
+
+    La traçabilité exige aussi des faits reliant les biens : lot d’origine, composants consommés, coffrets produits,
+    fractionnements et destinations. L’origine technique du message ne remplace pas l’origine métier du produit.
+    Intégrer les liens communiqués sans inventer ceux que les sources ne fournissent pas ; transmettre corrections
+    et identifiants à [Inventory Ledger](model:D01.g). Reconstituer un parcours pour répondre à une question relève
+    de [Inventory Visibility](model:D01.c), pas d’un nouveau comportement isolé de Tracking. Exemple fictif : intégrer
+    que les accessoires du lot A17 ont été incorporés aux coffrets K1 et K2.
+
+
+    Intégrer les [Handling Units](glossary:TER189) annoncées ou constatées, leurs identifiants, contenu, niveaux
+    et unités, lorsque les sources les fournissent. Distinguer annonce et réception reconnue, relier les corrections
+    sans créer deux effets de stock et sans déduire un contenu manquant de la seule [Packaging Specification](model:packaging-specification).
+    La consigne décrit le modèle ; le fait décrit les biens réellement connus.'
+  analysis_functions:
+  - id: BC-009.01
+    resultat: Intégrer faits et états de stock avec leur provenance
+  - id: BC-009.02
+    resultat: Reconnaître doublons et corrections
+  - id: BC-009.03
+    resultat: Conserver la filiation des biens
+  analysis_boundary: Ne reconstitue pas des mouvements inconnus et ne produit pas un second effet depuis Operations
+    Tracking.
+- id: BC-010
+  native_id: D01.g
+  name: Inventory Ledger
+  definition: Tenir le registre fiable des mouvements et états de stock reconnus, avec leurs dates, origines, justifications
+    et corrections.
+  native_scope: 'Conserver les réceptions, sorties, déplacements, changements de statut et ajustements reconnus,
+    avec quantités, dimensions, date du fait, date de connaissance et preuves. Le registre constitue une référence
+    métier durable ; [Ledger](glossary:TER056) qualifie sa tenue, indépendamment des outils.
+
+
+    [Inventory Tracking](model:D01.f) fournit les faits intégrés et [Stocktaking](model:D01.d) les corrections de
+    comptage justifiées. [Inventory Ownership Ledger](model:inventory-ownership-ledger) tient les changements de
+    propriétaire ; les écritures correspondantes sont reliées aux positions de stock sans constituer un second registre
+    de propriété. Un transfert de propriété seul ne crée ni réception physique ni sortie physique supplémentaire.
+
+
+    [Inventory Visibility](model:D01.c) compose les positions à partir des deux registres et des engagements de
+    quantité. Un solde initial ou externe conserve sa portée sans fabriquer son historique. Une réception corrigée
+    de 100 à 80 garde la justification de la correction ; elle ne devient pas 180 pièces. Valorisation et comptabilité
+    générale restent sous leur responsabilité propre.
+
+
+    Conserver les filiations reconnues entre entrées, transformations et sorties : origines, lots, composants consommés,
+    produits obtenus, fractionnements et destinations. Une [traçabilité](glossary:TER101) utile ne se réduit pas
+    au fournisseur initial ni à l’origine technique d’un message. Conserver références, quantités, dates et corrections
+    permettant de relier ces faits, avec leurs limites de connaissance ; ne pas fabriquer une généalogie complète
+    à partir d’un simple solde. Inventory Visibility exploite ces liens ; le registre ne prend ni décision de rappel
+    ni décision d’usage. Exemple fictif : conserver le lien entre un lot d’accessoires et les coffrets assemblés,
+    puis leurs sorties vers les magasins.
+
+
+    Conserver les structures et contenus des [Handling Units](glossary:TER189) reconnus, avec leurs liens aux biens,
+    dates et corrections. Une [Packaging Specification](model:packaging-specification) peut qualifier une attente
+    ; elle ne remplace pas une preuve du contenu reçu. Exemple fictif : conserver une réception reconnue de 118
+    pièces, puis sa correction éventuelle, sans comptabiliser les 120 annoncées comme une réception supplémentaire.
+
+
+    [Pourquoi une correction doit conserver l’histoire du fait](principle:PRINCIPLE-TRACEABLE-FACTS).'
+  analysis_functions:
+  - id: BC-010.01
+    resultat: Enregistrer les mouvements et états reconnus
+  - id: BC-010.02
+    resultat: Historiser corrections et justifications
+  - id: BC-010.03
+    resultat: Reconstituer une situation à date
+  analysis_boundary: Ne confond pas correction documentaire et sortie physique.
+- id: BC-011
+  native_id: D01.c
+  name: Inventory Visibility
+  definition: Restituer les positions actuelles et projetées du stock et le détail des apports attendus, avec quantités,
+    échéances, engagements, provenance et incertitudes.
+  native_scope: 'Composer les positions par article, lieu, état, propriétaire et détenteur, à partir des faits intégrés
+    par Inventory Tracking, des mouvements reconnus dans [Inventory Ledger](glossary:TER056) et des changements
+    de propriété dans [Inventory Ownership Ledger](model:inventory-ownership-ledger). Une correction tardive actualise
+    la représentation à la date pertinente ; un changement de propriétaire seul ne change pas la quantité physique
+    totale.
+
+
+    Rapprocher achats, transferts entrants, retours, consignation et prévisions de mouvements de stock. Pour chaque
+    apport attendu, conserver origine, confirmation, échéance, avancement, reliquat, engagements, incertitude et
+    fraîcheur. Distinguer proposition, apport engagé, expédition et réception. Les [Orders](glossary:TER012) et
+    Plans restent maîtres de leurs données ; la planification externe demeure externe.
+
+
+    Un apport reconnu comme reçu devient un fait de stock et cesse d’être compté comme attente pour la même quantité.
+    Éviter le double compte entre [Orders](glossary:TER012), plans et réalisations. Une donnée absente ou périmée
+    ne vaut ni zéro ni certitude. Propriété, détention, statut douanier, état logique et disponibilité physique
+    restent distincts.
+
+
+    La projection ne prouve pas qu’une quantité est promettable : les décisions de promesse d’[Availability](glossary:TER112)
+    appliquent les évaluations contextuelles. Cette capacité ne corrige pas les mouvements, ne réserve pas et ne
+    confirme aucun engagement. La visibilité des capacités de production, transport ou prestation reste chez ses
+    responsables.
+
+
+    Illustration FLOW : un achat de 100 pièces est expédié pour 80 ; la vue expose 80 en transit et un reliquat
+    de 20 à confirmer, avec leurs échéances. Après réception de 60, elle distingue ces 60 présentes des 20 encore
+    en transit et des 20 non expédiées.
+
+
+    Exploiter la [traçabilité](glossary:TER101) conservée dans [Inventory Ledger](glossary:TER056) pour reconstituer
+    l’origine amont d’un bien ou les destinations aval des biens issus d’un lot, y compris après assemblage ou fractionnement.
+    Signaler les liens manquants et le périmètre réellement documenté ; absence de lien ne prouve pas absence d’impact.
+    La restitution peut éclairer une décision sur un lot défectueux sans décider elle-même de bloquer le stock ou
+    d’organiser un rappel. Exemple fictif : retrouver les coffrets contenant un accessoire défectueux et les magasins
+    qui les ont reçus.
+
+
+    Restituer le conditionnement attendu, annoncé et reçu lorsque documenté, avec les [Handling Units](glossary:TER189),
+    leur contenu et les limites de connaissance. Rapprocher les quantités dans leurs unités connues, sans convertir
+    un nombre de cartons en pièces par hypothèse silencieuse. Exemple fictif : afficher 120 pièces annoncées, 118
+    reçues et un écart de deux à clarifier ; la spécification de douze pièces par carton demeure distincte du contenu
+    réel.
+
+
+    En [intercompany](glossary:TER122), relier les positions des sociétés et les branches de [commande](glossary:TER012)
+    au même flux de biens. Un [stock](glossary:TER005) visible chez B n’est pas automatiquement utilisable pour
+    une [promesse](glossary:TER014) de A : les droits d’usage, engagements et autorisations restent à vérifier.
+    Distinguer les quantités en transit de leurs propriétaires et détenteurs ; un changement de propriétaire ne
+    crée pas de quantité physique supplémentaire. Les vues par société et la vue groupe ne s’additionnent pas. La
+    [valorisation](glossary:TER229) et la reconnaissance comptable du transit restent financières.'
+  analysis_functions:
+  - id: BC-011.01
+    resultat: Composer les positions présentes et projetées
+  - id: BC-011.02
+    resultat: Détailler les apports attendus et engagements
+  - id: BC-011.03
+    resultat: Expliquer provenance et incertitudes
+  analysis_boundary: Une position projetée n’est pas une promesse ni une réservation.
+- id: BC-013
+  native_id: D01.d
+  name: Stocktaking
+  definition: Organiser les vérifications de stock, rapprocher les quantités constatées et enregistrées et établir
+    les corrections justifiées.
+  native_scope: 'Stocktaking couvre aussi la politique de vérification et les demandes de contrôle, en complément
+    du traitement des constats. Les opérations physiques restent réalisées par les exécutants ; cette responsabilité
+    métier ne présume pas du logiciel qui la porte.
+
+
+    Trois politiques combinables : campagne d’inventaire complète sur un périmètre, inventaire tournant et vérification
+    ponctuelle. Le rapprochement, l’analyse des écarts et l’établissement des corrections justifiées restent communs.
+    Une différence constatée ne devient pas automatiquement une correction ; les ajustements retenus sont tracés
+    par [Inventory Ledger](model:D01.g).
+
+
+    Exemples : inventorier un magasin, contrôler régulièrement les articles sensibles, demander un contrôle lorsqu’un
+    article annoncé disponible reste introuvable. Les règles détaillées d’acceptation, de recomptage et d’application
+    restent à préciser ; aucune obligation de contrôle manuel ou de logiciel distinct n’est introduite.
+
+
+    Le protocole de comptage reste partie de la capacité. Si une règle devient partagée, Supply Policy Management
+    la gouverne ; aucune scission systématique par règle.'
+  analysis_functions:
+  - id: BC-013.01
+    resultat: Préparer les vérifications de stock
+  - id: BC-013.02
+    resultat: Rapprocher comptages et mouvements concomitants
+  - id: BC-013.03
+    resultat: Proposer les corrections justifiées
+  analysis_boundary: Le comptage physique et ses terminaux restent du côté des exécutants.
+- id: BC-018
+  native_id: D02.c
+  name: Reservation
+  definition: Établir et tenir un engagement de quantité pour un besoin identifié, dont les usages concurrents doivent
+    tenir compte.
+  native_scope: 'Exemple fictif : Un droit exclusif sur 40 peut précéder l’affectation du lot précis.
+
+
+    U436 : seule la réservation bloque les usages concurrents ; l’affectation seule ne les bloque pas. Créer, conserver
+    ou réviser un lien d’affectation ne crée donc pas implicitement une réservation. Les protections de groupe conservent
+    leurs règles d’admissibilité, et un gel d’affectation sa restriction de modification. Création, révision, consommation,
+    libération et expiration sont couvertes selon les conditions applicables ; aucun déclenchement automatique ni
+    mécanisme technique de concurrence n’est déduit de cette frontière.
+
+
+    Appliquer les conditions de réservation rendues applicables par [Supply Protection Policy](model:D02.b). [Reservation
+    Rule Optimization](model:D05.h) peut être mobilisée pour déterminer ou réexaminer les conditions utiles ; son
+    résultat n’active pas à lui seul une nouvelle politique. La gestion de chaque réservation conserve sa portée
+    propre et les engagements déjà constitués sont réexaminés selon leurs conditions, sans libération implicite
+    au changement de politique.
+
+
+    [Availability](glossary:TER112) demande une réservation mais ne la possède pas. Une affectation du plan ne réserve
+    pas implicitement la ressource (U436).
+
+
+    U733 : tenir création, révision, consommation, libération et expiration selon les conditions applicables ; ce
+    sont des responsabilités communes, pas des Behaviors supplémentaires. Réservation et sortie physique ne sont
+    pas décomptées deux fois. Les parcours rapides d’[Order Management](model:D04) peuvent solliciter cette capacité
+    sans reconstruction systématique du plan collectif.
+
+
+    Une réservation peut protéger une proposition pendant son attente de confirmation si les règles l’autorisent.
+    Sa disparition ou son expiration impose de réexaminer la disponibilité avant confirmation ; elle ne valide ni
+    ne refuse la commande à elle seule.
+
+
+    [Pourquoi distinguer le blocage d’une quantité du calcul de son affectation](principle:PRINCIPLE-DECISION-EFFECTS).'
+  analysis_functions:
+  - id: BC-018.01
+    resultat: Établir et réviser un engagement de quantité
+  - id: BC-018.02
+    resultat: Consommer ou libérer la réservation
+  - id: BC-018.03
+    resultat: Traiter expiration et conflits d’usage
+  analysis_boundary: N’affecte pas la demande à une ressource et ne calcule pas ATP.
+- id: BC-016
+  native_id: accounting-data-provision
+  name: Accounting Data Provision
+  definition: Sélectionner, préparer et transmettre les [faits de gestion](glossary:TER120) nécessaires à la comptabilité,
+    avec leurs justificatifs et corrections.
+  native_scope: 'Sélectionner les [faits de gestion](glossary:TER120) selon le contrat convenu avec [Finance](glossary:TER117),
+    vérifier les informations attendues et transmettre références, dates, justificatifs et corrections. [Inventory
+    Ledger](model:D01.g) et [Inventory Ownership Ledger](model:inventory-ownership-ledger) produisent les faits
+    de ce périmètre : mouvements, états et changements de propriétaire reconnus. La capacité est placée dans [Inventory
+    State Management](model:ba-inventory-position-management), près de ces producteurs ; chaque registre conserve
+    l’autorité sur ses faits. Les factures, paiements et autres faits produits ailleurs restent à leurs producteurs,
+    sans collecte centrale déduite.
+
+
+    Suivre transmission, acceptation ou rejet ; une réception technique ne prouve pas la comptabilisation. Une correction
+    garde son lien au fait initial et une reprise ne crée pas un second fait. [Financial Accounting](model:subdomain-financial-accounting)
+    applique les règles comptables ; les [écritures](glossary:TER121) et leur enregistrement restent sous Finance.
+    Exemple fictif : transmettre la correction de 100 à 80 pièces sans déclarer une réception supplémentaire de
+    80.
+
+
+    Fournir aux responsables de [Commercial Settlement Management](model:subdomain-commercial-settlement-management)
+    les faits justifiés utiles à l’[assiette éligible](glossary:TER262), avec origine, période, liens et corrections,
+    sans calculer le droit à [ristourne](glossary:TER259), [prime commerciale](glossary:TER264) ou [commission](glossary:TER260).
+    Les ventes emportées, factures et paiements provenant d’autres producteurs restent sous leur responsabilité
+    ; leur exhaustivité ne se déduit pas des seuls faits Supply.
+
+
+    [Financial Accounting](model:subdomain-financial-accounting) retourne l’acceptation métier, le rejet motivé
+    ou la référence de prise en compte comptable lorsqu’elle est connue. Distinguer réception technique, acceptation
+    et enregistrement ; un rejet ne corrige pas silencieusement le fait source.
+
+
+    Pour l’[intercompany](glossary:TER122), fournir les sociétés, contreparties, références des engagements et jalons
+    connus avec les faits des registres de [stock](glossary:TER005) et de propriété. Ne pas reconstruire les factures
+    ou paiements à partir d’un mouvement : leurs producteurs fournissent leurs propres faits et suivent leurs retours
+    financiers. La préparation des faits de [stock](glossary:TER005) ne centralise donc pas toute la chaîne financière.
+    Les rejets et corrections restent rattachés au fait et à la société concernés.'
+  analysis_functions:
+  - id: BC-016.01
+    resultat: Sélectionner les faits des registres utiles à Finance
+  - id: BC-016.02
+    resultat: Transmettre justificatifs et corrections
+  - id: BC-016.03
+    resultat: Suivre acceptation et rejet des faits transmis
+  analysis_boundary: Ne centralise pas tous les faits financiers et ne comptabilise pas les écritures.
+- id: BC-012
+  native_id: planning-data-provision
+  name: Planning Data Provision
+  definition: Fournir à la planification les positions de stock documentées, avec leurs dates, leur provenance,
+    leurs corrections et leurs limites de connaissance.
+  native_scope: 'Préparer les positions de stock connues fournies par [Inventory Visibility](model:D01.c) pour [Master
+    Plan](model:domain-plan), avec produits, lieux, population, granularité, dates, fraîcheur et corrections. La
+    capacité appartient à [Inventory State Management](model:ba-inventory-position-management). Distinguer faits,
+    positions projetées, prévisions et engagements ; préserver les liens qui évitent de compter deux fois la même
+    ressource.
+
+
+    Le périmètre documenté est le stock. Les autres producteurs d’entrées du plan restent à qualifier et gardent
+    leur responsabilité de fourniture. [Plan Ingestion](model:plans-ingestion) reçoit les contributions de plans
+    provenant d’une source externe identifiée. Exemple fictif : une position corrigée de 100 à 80 pièces est fournie
+    pour un nouveau calcul ; cette fourniture ne révise pas à elle seule le plan.'
+  analysis_functions:
+  - id: BC-012.01
+    resultat: Publier les positions de stock utiles à un calcul
+  - id: BC-012.02
+    resultat: Associer date et version et limites de connaissance
+  analysis_boundary: Réutilise les projections de stock ; ne recalcule pas le Master Plan.
+- id: BC-017
+  native_id: product-feedback
+  name: Product Feedback
+  definition: Fournir des constats terrain documentés sur les produits pour instruire leur amélioration.
+  native_scope: 'Préparer et fournir les constats opérationnels utiles aux responsables de conception et développement
+    produit, avec produit concerné, contexte, dates et preuves. [Design & Development](model:system-design-development)
+    conserve l’instruction et les décisions de modification.
+
+
+    Un signalement ne modifie pas automatiquement la définition du produit. Cette capacité ne représente pas tous
+    les échanges de données de conception. Les familles de constats et leur contrat restent à qualifier. Exemple
+    fictif : transmettre un défaut récurrent d’emballage constaté à la réception, avec les quantités et circonstances
+    connues, sans affirmer une cause non établie.
+
+
+    Les constats fournis proviennent des faits reconnus conservés dans [Inventory Ledger](model:D01.g) et [Inventory
+    Ownership Ledger](model:inventory-ownership-ledger), selon leur pertinence pour le produit. La capacité appartient
+    à [Inventory State Management](model:ba-inventory-position-management). Fournir le fait et sa preuve connus
+    ; ne pas inventer sa cause ni transformer un écart de propriété en défaut physique. Les corrections gardent
+    le lien au constat initial.'
+  analysis_functions:
+  - id: BC-017.01
+    resultat: Recueillir un constat terrain documenté
+  - id: BC-017.02
+    resultat: Le rattacher au produit et à son contexte
+  - id: BC-017.03
+    resultat: Transmettre le constat au responsable produit
+  analysis_boundary: Ne reconstruit pas le processus de conception ou le PLM.
+exclusions:
+- 'BC-014/015 : décisions et registre de propriété ; conserver les interfaces.'
+- 'BC-019 : décision de disposition. Opérations physiques, terminaux et ordres de prestation.'
+- ATP/CTP/PTP, affectation du carnet, réapprovisionnement et optimisation du Master Plan.
+- Valorisation financière, coûts FIFO/LIFO, comptabilité générale et calculs de ristournes.
+- Connecteurs, mappings, migrations et règles propres à Beaumanoir.
+initial_code_findings:
+- 'ERPNext mêle registre, corrections et valorisation dans stock_ledger.py : ne pas compter tout le fichier.'
+- 'Odoo regroupe quantités disponibles, réservées et corrections d’inventaire dans stock_quant.py : isoler les traitements
+  utiles.'
+- Tryton mêle quantités, cycle des mouvements et prix dans stock/move.py.
+- 'Axelor mêle états à date, réalisation, annulation et communications dans StockMoveServiceImpl : fermeture des
+  dépendances à établir.'
+reuse_candidates:
+- id: java-spring-framework-services
+  funding_owner: master-data-java-spring
+  status: À confirmer ; ne pas recopier la taille déjà financée. Dimensionner séparément adaptations et raccordements.
+- id: master-data-admission
+  funding_owner: master-data-java-spring
+  status: À confirmer ; ne pas recopier la taille déjà financée. Dimensionner séparément adaptations et raccordements.
+- id: master-data-protection
+  funding_owner: master-data-java-spring
+  status: À confirmer ; ne pas recopier la taille déjà financée. Dimensionner séparément adaptations et raccordements.
+- id: master-data-reprise
+  funding_owner: master-data-java-spring
+  status: À confirmer ; ne pas recopier la taille déjà financée. Dimensionner séparément adaptations et raccordements.
+- id: master-data-versions
+  funding_owner: master-data-java-spring
+  status: À confirmer ; ne pas recopier la taille déjà financée. Dimensionner séparément adaptations et raccordements.
+- id: master-data-service
+  funding_owner: master-data-java-spring
+  status: À confirmer ; ne pas recopier la taille déjà financée. Dimensionner séparément adaptations et raccordements.
+open_assumptions:
+- Volumes, dimensions, rétention et objectifs de service.
+- Corrections tardives, ordre des faits reçus, concurrence des réservations et arbitrages.
+- 'Filiation et Handling Units : faits reçus, granularité et limites de connaissance.'
+- Contrats de fourniture Finance, planification et retours produit.
+- 'Applicabilité des mécanismes Master Data aux registres de faits : ne pas présumer leur équivalence.'
+calculation_plan:
+- Définir les résultats fonctionnels comparables dans les quatre OSS.
+- Mesurer les méthodes, schémas, vues et dépendances utiles après exclusions.
+- Calculer quatre références COCOMO natives avec réutilisation.
+- Dimensionner les compléments Flow sans refinancer Master Data.
+- Compter les processus et groupes COSMIC puis appliquer ISBSG avec les limites connues.
+- Comparer activités, unités et périmètres ; proposer JH par rôle et délai avant adoption.
+jh: null
+roles_jh: null
+months: null

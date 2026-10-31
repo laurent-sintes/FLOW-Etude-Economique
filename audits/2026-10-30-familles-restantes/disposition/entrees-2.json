@@ -1,0 +1,6741 @@
+{
+  "family": "ba-inventory-disposition",
+  "iteration": 2,
+  "analysis_ref": "analyse-1.json",
+  "capabilities": [
+    "BC-019"
+  ],
+  "cocomo": {
+    "A": 2.94,
+    "B": 0.91,
+    "SF_sum": 18.97,
+    "C": 3.67,
+    "D": 0.28,
+    "month_hours": 152,
+    "day_hours": 7,
+    "effort_phase_factor": 1.18,
+    "schedule_phase_factor": 1.25,
+    "other_EM": 1,
+    "SCED": 1,
+    "REVL": 0,
+    "source": "https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf",
+    "source_locations": "Équation 4 et tables 6, 36, 57, 63 ; autres paramètres conservés nominaux.",
+    "activity_distribution_ref": "../2026-10-30-master-data-calcul/repartitions-sources.json#cocomo"
+  },
+  "native_reference_banks": {
+    "erpnext": 232,
+    "odoo": 347,
+    "tryton": 120,
+    "axelor": 39
+  },
+  "source_selection": [
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_picking_type_visible",
+      "start": 211,
+      "end": 217,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          212,
+          215,
+          8,
+          63
+        ],
+        [
+          "Assign",
+          217,
+          217,
+          12,
+          86
+        ],
+        [
+          "For",
+          216,
+          217,
+          8,
+          86
+        ],
+        [
+          "FunctionDef",
+          211,
+          217,
+          4,
+          86
+        ]
+      ],
+      "source": "    def _compute_picking_type_visible(self):\n        repair_type_by_company = dict(self.env['stock.picking.type']._read_group([\n                ('code', '=', 'repair_operation'),\n                ('company_id', 'in', self.company_id.ids)\n            ], groupby=['company_id'], aggregates=['__count']))\n        for ro in self:\n            ro.picking_type_visible = repair_type_by_company.get(ro.company_id, 0) > 1"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_product_qty",
+      "start": 220,
+      "end": 230,
+      "program_units": 9,
+      "nodes": [
+        [
+          "Assign",
+          224,
+          224,
+          20,
+          152
+        ],
+        [
+          "Assign",
+          225,
+          225,
+          20,
+          79
+        ],
+        [
+          "Assign",
+          227,
+          227,
+          20,
+          116
+        ],
+        [
+          "Assign",
+          228,
+          228,
+          20,
+          78
+        ],
+        [
+          "Assign",
+          230,
+          230,
+          16,
+          40
+        ],
+        [
+          "For",
+          221,
+          230,
+          8,
+          40
+        ],
+        [
+          "FunctionDef",
+          220,
+          230,
+          4,
+          40
+        ],
+        [
+          "If",
+          222,
+          230,
+          12,
+          40
+        ],
+        [
+          "If",
+          223,
+          228,
+          16,
+          78
+        ]
+      ],
+      "source": "    def _compute_product_qty(self):\n        for repair in self:\n            if repair.picking_id:\n                if repair.tracking in ['serial', 'lot'] and repair.lot_id:\n                    lot_move_lines = repair.picking_id.move_line_ids.filtered(lambda m: m.product_id == repair.product_id and m.lot_id == repair.lot_id)\n                    repair.product_qty = sum(lot_move_lines.mapped('quantity'))\n                else:\n                    product_moves = repair.picking_id.move_ids.filtered(lambda m: m.product_id == repair.product_id)\n                    repair.product_qty = sum(product_moves.mapped('quantity'))\n            else:\n                repair.product_qty = 1.0"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_allowed_uom_ids",
+      "start": 233,
+      "end": 235,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          235,
+          235,
+          12,
+          114
+        ],
+        [
+          "For",
+          234,
+          235,
+          8,
+          114
+        ],
+        [
+          "FunctionDef",
+          233,
+          235,
+          4,
+          114
+        ]
+      ],
+      "source": "    def _compute_allowed_uom_ids(self):\n        for repair in self:\n            repair.allowed_uom_ids = repair.product_id._get_available_uoms() | repair.product_id.seller_ids.uom_id"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_partner_id",
+      "start": 238,
+      "end": 240,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          240,
+          240,
+          12,
+          60
+        ],
+        [
+          "For",
+          239,
+          240,
+          8,
+          60
+        ],
+        [
+          "FunctionDef",
+          238,
+          240,
+          4,
+          60
+        ]
+      ],
+      "source": "    def _compute_partner_id(self):\n        for repair in self:\n            repair.partner_id = repair.picking_id.partner_id"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_picking_product_ids",
+      "start": 243,
+      "end": 245,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          245,
+          245,
+          12,
+          78
+        ],
+        [
+          "For",
+          244,
+          245,
+          8,
+          78
+        ],
+        [
+          "FunctionDef",
+          243,
+          245,
+          4,
+          78
+        ]
+      ],
+      "source": "    def _compute_picking_product_ids(self):\n        for repair in self:\n            repair.picking_product_ids = repair.picking_id.move_ids.product_id"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_allowed_lot_ids",
+      "start": 248,
+      "end": 253,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          250,
+          250,
+          12,
+          68
+        ],
+        [
+          "Assign",
+          253,
+          253,
+          12,
+          73
+        ],
+        [
+          "AugAssign",
+          252,
+          252,
+          16,
+          84
+        ],
+        [
+          "For",
+          249,
+          253,
+          8,
+          73
+        ],
+        [
+          "FunctionDef",
+          248,
+          253,
+          4,
+          73
+        ],
+        [
+          "If",
+          251,
+          252,
+          12,
+          84
+        ]
+      ],
+      "source": "    def _compute_allowed_lot_ids(self):\n        for repair in self:\n            domain = Domain('product_id', '=', repair.product_id.id)\n            if repair.picking_id:\n                domain &= Domain('id', 'in', repair.picking_id.move_ids.lot_ids.ids)\n            repair.allowed_lot_ids = self.env['stock.lot'].search(domain)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_invoice_count",
+      "start": 256,
+      "end": 258,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          258,
+          258,
+          12,
+          65
+        ],
+        [
+          "For",
+          257,
+          258,
+          8,
+          65
+        ],
+        [
+          "FunctionDef",
+          256,
+          258,
+          4,
+          65
+        ]
+      ],
+      "source": "    def _compute_invoice_count(self):\n        for repair in self:\n            repair.invoice_count = len(repair.sudo().invoice_ids)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_can_create_sale_or_invoice",
+      "start": 261,
+      "end": 278,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          263,
+          268,
+          12,
+          13
+        ],
+        [
+          "Assign",
+          269,
+          278,
+          12,
+          17
+        ],
+        [
+          "For",
+          262,
+          278,
+          8,
+          17
+        ],
+        [
+          "FunctionDef",
+          261,
+          278,
+          4,
+          17
+        ]
+      ],
+      "source": "    def _compute_can_create_sale_or_invoice(self):\n        for repair in self:\n            repair.can_create_sale_or_invoice = (\n                repair.partner_id\n                and not repair.sudo().invoice_ids\n                and not repair.sale_order_id\n                and repair.state != \"cancel\"\n            )\n            repair.can_create_extra_invoice = (\n                    repair.partner_id\n                    and all(invoice.state == \"posted\" for invoice in repair.invoice_ids)\n                    and not repair.sale_order_id\n                    and (\n                        any(not move.invoice_line_ids for move in repair.move_ids)\n                        or any(not repair_service_line.invoice_line_ids for repair_service_line in repair.repair_service_line_ids\n                        )\n                    )\n                )"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_uom_id",
+      "start": 281,
+      "end": 286,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          284,
+          284,
+          16,
+          37
+        ],
+        [
+          "Assign",
+          286,
+          286,
+          16,
+          56
+        ],
+        [
+          "For",
+          282,
+          286,
+          8,
+          56
+        ],
+        [
+          "FunctionDef",
+          281,
+          286,
+          4,
+          56
+        ],
+        [
+          "If",
+          283,
+          286,
+          12,
+          56
+        ],
+        [
+          "If",
+          285,
+          286,
+          12,
+          56
+        ]
+      ],
+      "source": "    def _compute_uom_id(self):\n        for repair in self:\n            if not repair.product_id:\n                repair.uom_id = False\n            elif not repair.uom_id:\n                repair.uom_id = repair.product_id.uom_id"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_lot_id",
+      "start": 289,
+      "end": 294,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          292,
+          292,
+          16,
+          37
+        ],
+        [
+          "Assign",
+          294,
+          294,
+          16,
+          66
+        ],
+        [
+          "For",
+          290,
+          294,
+          8,
+          66
+        ],
+        [
+          "FunctionDef",
+          289,
+          294,
+          4,
+          66
+        ],
+        [
+          "If",
+          291,
+          294,
+          12,
+          66
+        ],
+        [
+          "If",
+          293,
+          294,
+          12,
+          66
+        ]
+      ],
+      "source": "    def _compute_lot_id(self):\n        for repair in self:\n            if (repair.product_id and repair.lot_id and repair.lot_id.product_id != repair.product_id) or not repair.product_id:\n                repair.lot_id = False\n            elif len(repair.picking_id.move_ids.lot_ids) == 1:\n                repair.lot_id = repair.picking_id.move_ids.lot_ids"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_picking_type_id",
+      "start": 297,
+      "end": 301,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          298,
+          298,
+          8,
+          58
+        ],
+        [
+          "Assign",
+          300,
+          301,
+          12,
+          67
+        ],
+        [
+          "For",
+          299,
+          301,
+          8,
+          67
+        ],
+        [
+          "FunctionDef",
+          297,
+          301,
+          4,
+          67
+        ]
+      ],
+      "source": "    def _compute_picking_type_id(self):\n        picking_type_by_company = self._get_picking_type()\n        for ro in self:\n            ro.picking_type_id = picking_type_by_company.get((ro.company_id, ro.user_id)) or\\\n                picking_type_by_company.get((ro.company_id, False))"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_location_id",
+      "start": 304,
+      "end": 306,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          306,
+          306,
+          12,
+          79
+        ],
+        [
+          "For",
+          305,
+          306,
+          8,
+          79
+        ],
+        [
+          "FunctionDef",
+          304,
+          306,
+          4,
+          79
+        ]
+      ],
+      "source": "    def _compute_location_id(self):\n        for repair in self:\n            repair.location_id = repair.picking_type_id.default_location_src_id"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_product_location_src_id",
+      "start": 309,
+      "end": 311,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          311,
+          311,
+          12,
+          99
+        ],
+        [
+          "For",
+          310,
+          311,
+          8,
+          99
+        ],
+        [
+          "FunctionDef",
+          309,
+          311,
+          4,
+          99
+        ]
+      ],
+      "source": "    def _compute_product_location_src_id(self):\n        for record in self:\n            record.product_location_src_id = record.picking_type_id.default_product_location_src_id"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_product_location_dest_id",
+      "start": 314,
+      "end": 316,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          316,
+          316,
+          12,
+          101
+        ],
+        [
+          "For",
+          315,
+          316,
+          8,
+          101
+        ],
+        [
+          "FunctionDef",
+          314,
+          316,
+          4,
+          101
+        ]
+      ],
+      "source": "    def _compute_product_location_dest_id(self):\n        for record in self:\n            record.product_location_dest_id = record.picking_type_id.default_product_location_dest_id"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_recycle_location_id",
+      "start": 319,
+      "end": 321,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          321,
+          321,
+          12,
+          96
+        ],
+        [
+          "For",
+          320,
+          321,
+          8,
+          96
+        ],
+        [
+          "FunctionDef",
+          319,
+          321,
+          4,
+          96
+        ]
+      ],
+      "source": "    def _compute_recycle_location_id(self):\n        for repair in self:\n            repair.recycle_location_id = repair.picking_type_id.default_recycle_location_dest_id"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_parts_availability",
+      "start": 324,
+      "end": 352,
+      "program_units": 20,
+      "nodes": [
+        [
+          "Assign",
+          325,
+          325,
+          8,
+          67
+        ],
+        [
+          "Assign",
+          326,
+          326,
+          8,
+          54
+        ],
+        [
+          "Assign",
+          327,
+          327,
+          8,
+          51
+        ],
+        [
+          "Assign",
+          329,
+          329,
+          8,
+          38
+        ],
+        [
+          "Assign",
+          330,
+          330,
+          8,
+          48
+        ],
+        [
+          "Assign",
+          331,
+          331,
+          8,
+          54
+        ],
+        [
+          "Assign",
+          333,
+          333,
+          8,
+          36
+        ],
+        [
+          "Assign",
+          344,
+          344,
+          16,
+          62
+        ],
+        [
+          "Assign",
+          345,
+          345,
+          16,
+          56
+        ],
+        [
+          "Assign",
+          347,
+          347,
+          12,
+          131
+        ],
+        [
+          "Assign",
+          350,
+          350,
+          12,
+          89
+        ],
+        [
+          "Assign",
+          352,
+          352,
+          16,
+          112
+        ],
+        [
+          "Continue",
+          346,
+          346,
+          16,
+          24
+        ],
+        [
+          "Continue",
+          349,
+          349,
+          16,
+          24
+        ],
+        [
+          "Expr",
+          335,
+          335,
+          8,
+          75
+        ],
+        [
+          "For",
+          336,
+          352,
+          8,
+          112
+        ],
+        [
+          "FunctionDef",
+          324,
+          352,
+          4,
+          112
+        ],
+        [
+          "If",
+          337,
+          346,
+          12,
+          24
+        ],
+        [
+          "If",
+          348,
+          349,
+          12,
+          24
+        ],
+        [
+          "If",
+          351,
+          352,
+          12,
+          112
+        ]
+      ],
+      "source": "    def _compute_parts_availability(self):\n        repairs = self.filtered(lambda ro: ro.state == 'confirmed')\n        repairs.parts_availability_state = 'available'\n        repairs.parts_availability = _('Available')\n\n        other_repairs = self - repairs\n        other_repairs.parts_availability = False\n        other_repairs.parts_availability_state = False\n\n        all_moves = repairs.move_ids\n        # Force to prefetch more than 1000 by 1000\n        all_moves._fields['forecast_availability'].compute_value(all_moves)\n        for repair in repairs:\n            if any(\n                move.product_id\n                and move.product_id.uom_id.compare(\n                    move.forecast_availability, move.product_qty\n                ) < 0\n                for move in repair.move_ids\n            ):\n                repair.parts_availability = _('Not Available')\n                repair.parts_availability_state = 'late'\n                continue\n            forecast_date = max(repair.move_ids.filtered('forecast_expected_date').mapped('forecast_expected_date'), default=False)\n            if not forecast_date:\n                continue\n            repair.parts_availability = _('Exp %s', format_date(self.env, forecast_date))\n            if repair.schedule_date:\n                repair.parts_availability_state = 'late' if forecast_date > repair.schedule_date else 'expected'"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_availability_boolean",
+      "start": 355,
+      "end": 363,
+      "program_units": 9,
+      "nodes": [
+        [
+          "Assign",
+          356,
+          356,
+          8,
+          66
+        ],
+        [
+          "Assign",
+          361,
+          361,
+          16,
+          48
+        ],
+        [
+          "Assign",
+          363,
+          363,
+          16,
+          43
+        ],
+        [
+          "Continue",
+          359,
+          359,
+          16,
+          24
+        ],
+        [
+          "For",
+          357,
+          363,
+          8,
+          43
+        ],
+        [
+          "FunctionDef",
+          355,
+          363,
+          4,
+          43
+        ],
+        [
+          "If",
+          358,
+          359,
+          12,
+          24
+        ],
+        [
+          "If",
+          360,
+          363,
+          12,
+          43
+        ],
+        [
+          "If",
+          362,
+          363,
+          12,
+          43
+        ]
+      ],
+      "source": "    def _compute_availability_boolean(self):\n        self.is_parts_available, self.is_parts_late = False, False\n        for repair in self:\n            if not repair.parts_availability_state:\n                continue\n            if repair.parts_availability_state == 'available':\n                repair.is_parts_available = True\n            elif repair.parts_availability_state == 'late':\n                repair.is_parts_late = True"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_has_uncomplete_moves",
+      "start": 366,
+      "end": 368,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          368,
+          368,
+          12,
+          151
+        ],
+        [
+          "For",
+          367,
+          368,
+          8,
+          151
+        ],
+        [
+          "FunctionDef",
+          366,
+          368,
+          4,
+          151
+        ]
+      ],
+      "source": "    def _compute_has_uncomplete_moves(self):\n        for repair in self:\n            repair.has_uncomplete_moves = any(move.uom_id and move.uom_id.compare(move.quantity, move.product_uom_qty) < 0 for move in repair.move_ids)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_unreserve_visible",
+      "start": 371,
+      "end": 380,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          373,
+          376,
+          12,
+          13
+        ],
+        [
+          "Assign",
+          377,
+          380,
+          12,
+          13
+        ],
+        [
+          "For",
+          372,
+          380,
+          8,
+          13
+        ],
+        [
+          "FunctionDef",
+          371,
+          380,
+          4,
+          13
+        ]
+      ],
+      "source": "    def _compute_unreserve_visible(self):\n        for repair in self:\n            repair.unreserve_visible = (\n                repair.state == 'confirmed' and\n                any(repair.move_ids.move_line_ids.mapped('quantity_product_uom'))\n            )\n            repair.reserve_visible = (\n                repair.state == 'confirmed' and\n                any(not move.picked and move.product_uom_qty and move.state in ['confirmed', 'partially_available'] for move in repair.move_ids)\n            )"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_invoice_ids",
+      "start": 383,
+      "end": 384,
+      "program_units": 2,
+      "nodes": [
+        [
+          "AugAssign",
+          384,
+          384,
+          8,
+          58
+        ],
+        [
+          "FunctionDef",
+          383,
+          384,
+          4,
+          58
+        ]
+      ],
+      "source": "    def _compute_invoice_ids(self):\n        self.invoice_ids |= self.sale_order_id.invoice_ids"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._compute_validate_button_style",
+      "start": 387,
+      "end": 394,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Assign",
+          390,
+          390,
+          16,
+          58
+        ],
+        [
+          "Assign",
+          392,
+          392,
+          16,
+          56
+        ],
+        [
+          "Assign",
+          394,
+          394,
+          16,
+          58
+        ],
+        [
+          "For",
+          388,
+          394,
+          8,
+          58
+        ],
+        [
+          "FunctionDef",
+          387,
+          394,
+          4,
+          58
+        ],
+        [
+          "If",
+          389,
+          394,
+          12,
+          58
+        ],
+        [
+          "If",
+          391,
+          394,
+          12,
+          58
+        ]
+      ],
+      "source": "    def _compute_validate_button_style(self):\n        for repair in self:\n            if repair.state in ('cancel', 'done', 'draft'):\n                repair.validate_button_style = 'invisible'\n            elif repair.state == 'confirmed':\n                repair.validate_button_style = 'primary'\n            else:\n                repair.validate_button_style = 'secondary'"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._search_date_category",
+      "start": 396,
+      "end": 402,
+      "program_units": 4,
+      "nodes": [
+        [
+          "FunctionDef",
+          396,
+          402,
+          4,
+          9
+        ],
+        [
+          "If",
+          397,
+          398,
+          8,
+          33
+        ],
+        [
+          "Return",
+          398,
+          398,
+          12,
+          33
+        ],
+        [
+          "Return",
+          399,
+          402,
+          8,
+          9
+        ]
+      ],
+      "source": "    def _search_date_category(self, operator, value):\n        if operator != 'in':\n            return NotImplemented\n        return Domain.OR(\n            self.env['stock.picking'].date_category_to_domain('schedule_date', item)\n            for item in value\n        )"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.onchange_uom_id",
+      "start": 405,
+      "end": 409,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          406,
+          406,
+          8,
+          16
+        ],
+        [
+          "FunctionDef",
+          405,
+          409,
+          4,
+          18
+        ],
+        [
+          "If",
+          407,
+          408,
+          8,
+          22
+        ],
+        [
+          "Return",
+          408,
+          408,
+          12,
+          22
+        ],
+        [
+          "Return",
+          409,
+          409,
+          8,
+          18
+        ]
+      ],
+      "source": "    def onchange_uom_id(self):\n        res = {}\n        if not self.product_id or not self.uom_id:\n            return res\n        return res"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._onchange_location_picking",
+      "start": 412,
+      "end": 418,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          413,
+          413,
+          8,
+          58
+        ],
+        [
+          "Assign",
+          414,
+          414,
+          8,
+          73
+        ],
+        [
+          "FunctionDef",
+          412,
+          418,
+          4,
+          13
+        ],
+        [
+          "If",
+          415,
+          418,
+          8,
+          13
+        ],
+        [
+          "Return",
+          416,
+          418,
+          12,
+          13
+        ]
+      ],
+      "source": "    def _onchange_location_picking(self):\n        location_warehouse = self.location_id.warehouse_id\n        picking_warehouse = self.picking_id.location_dest_id.warehouse_id\n        if location_warehouse and picking_warehouse and location_warehouse != picking_warehouse:\n            return {\n                'warning': {'title': _(\"Warning\"), 'message': _(\"Note that the warehouses of the return and repair locations don't match!\")},\n            }"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.create",
+      "start": 431,
+      "end": 443,
+      "program_units": 10,
+      "nodes": [
+        [
+          "Assign",
+          434,
+          436,
+          12,
+          13
+        ],
+        [
+          "Assign",
+          438,
+          438,
+          16,
+          57
+        ],
+        [
+          "Assign",
+          440,
+          440,
+          16,
+          68
+        ],
+        [
+          "Assign",
+          442,
+          442,
+          16,
+          117
+        ],
+        [
+          "For",
+          433,
+          442,
+          8,
+          117
+        ],
+        [
+          "FunctionDef",
+          431,
+          443,
+          4,
+          40
+        ],
+        [
+          "If",
+          437,
+          438,
+          12,
+          57
+        ],
+        [
+          "If",
+          439,
+          440,
+          12,
+          68
+        ],
+        [
+          "If",
+          441,
+          442,
+          12,
+          117
+        ],
+        [
+          "Return",
+          443,
+          443,
+          8,
+          40
+        ]
+      ],
+      "source": "    def create(self, vals_list):\n        # We generate a standard reference\n        for vals in vals_list:\n            picking_type = self.env['stock.picking.type'].browse(\n                vals.get('picking_type_id', self.default_get(['picking_type_id'])['picking_type_id'])\n            )\n            if 'picking_type_id' not in vals:\n                vals['picking_type_id'] = picking_type.id\n            if not vals.get('name', False) or vals['name'] == _('New'):\n                vals['name'] = picking_type.sequence_id.next_by_id()\n            if not vals.get('reference_ids'):\n                vals['reference_ids'] = [Command.link(self.env[\"stock.reference\"].create({'name': vals['name']}).id)]\n        return super().create(vals_list)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.write",
+      "start": 445,
+      "end": 472,
+      "program_units": 27,
+      "nodes": [
+        [
+          "Assign",
+          446,
+          446,
+          8,
+          50
+        ],
+        [
+          "Assign",
+          448,
+          448,
+          12,
+          93
+        ],
+        [
+          "Assign",
+          453,
+          453,
+          20,
+          71
+        ],
+        [
+          "Assign",
+          455,
+          455,
+          8,
+          33
+        ],
+        [
+          "Assign",
+          460,
+          460,
+          12,
+          95
+        ],
+        [
+          "Assign",
+          470,
+          470,
+          12,
+          72
+        ],
+        [
+          "AugAssign",
+          454,
+          454,
+          20,
+          56
+        ],
+        [
+          "Continue",
+          451,
+          451,
+          20,
+          28
+        ],
+        [
+          "Expr",
+          457,
+          457,
+          12,
+          44
+        ],
+        [
+          "Expr",
+          462,
+          462,
+          16,
+          55
+        ],
+        [
+          "Expr",
+          464,
+          464,
+          16,
+          142
+        ],
+        [
+          "Expr",
+          466,
+          466,
+          16,
+          54
+        ],
+        [
+          "Expr",
+          467,
+          467,
+          16,
+          51
+        ],
+        [
+          "Expr",
+          469,
+          469,
+          12,
+          45
+        ],
+        [
+          "Expr",
+          471,
+          471,
+          12,
+          46
+        ],
+        [
+          "For",
+          449,
+          454,
+          12,
+          56
+        ],
+        [
+          "For",
+          459,
+          467,
+          8,
+          51
+        ],
+        [
+          "FunctionDef",
+          445,
+          472,
+          4,
+          18
+        ],
+        [
+          "If",
+          447,
+          454,
+          8,
+          56
+        ],
+        [
+          "If",
+          450,
+          451,
+          16,
+          28
+        ],
+        [
+          "If",
+          452,
+          454,
+          16,
+          56
+        ],
+        [
+          "If",
+          456,
+          457,
+          8,
+          44
+        ],
+        [
+          "If",
+          461,
+          462,
+          12,
+          55
+        ],
+        [
+          "If",
+          463,
+          464,
+          12,
+          142
+        ],
+        [
+          "If",
+          465,
+          467,
+          12,
+          51
+        ],
+        [
+          "If",
+          468,
+          471,
+          8,
+          46
+        ],
+        [
+          "Return",
+          472,
+          472,
+          8,
+          18
+        ]
+      ],
+      "source": "    def write(self, vals):\n        moves_to_reassign = self.env['stock.move']\n        if vals.get('picking_type_id'):\n            picking_type = self.env['stock.picking.type'].browse(vals.get('picking_type_id'))\n            for repair in self:\n                if repair.state in ('cancel', 'done'):\n                    continue\n                if picking_type != repair.picking_type_id:\n                    repair.name = picking_type.sequence_id.next_by_id()\n                    moves_to_reassign |= repair.move_ids\n        res = super().write(vals)\n        if 'product_id' in vals and self.tracking == 'serial':\n            self.write({'product_qty': 1.0})\n\n        for repair in self:\n            has_modified_location = any(key in vals for key in MAP_REPAIR_TO_PICKING_LOCATIONS)\n            if has_modified_location:\n                repair.move_ids._set_repair_locations()\n            if 'schedule_date' in vals:\n                (repair.move_id + repair.move_ids).filtered(lambda m: m.state not in ('done', 'cancel')).write({'date': repair.schedule_date})\n            if 'under_warranty' in vals:\n                repair._update_sale_order_line_price()\n                repair._update_invoice_line_price()\n        if moves_to_reassign:\n            moves_to_reassign._do_unreserve()\n            moves_to_reassign = moves_to_reassign._filtered_for_assign()\n            moves_to_reassign._action_assign()\n        return res"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._unlink_except_confirmed",
+      "start": 475,
+      "end": 477,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          476,
+          476,
+          8,
+          74
+        ],
+        [
+          "Expr",
+          477,
+          477,
+          8,
+          48
+        ],
+        [
+          "FunctionDef",
+          475,
+          477,
+          4,
+          48
+        ]
+      ],
+      "source": "    def _unlink_except_confirmed(self):\n        repairs_to_cancel = self.filtered(lambda ro: ro.state != 'cancel')\n        repairs_to_cancel.action_repair_cancel()"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.action_generate_serial",
+      "start": 479,
+      "end": 491,
+      "program_units": 9,
+      "nodes": [
+        [
+          "Assign",
+          481,
+          481,
+          8,
+          59
+        ],
+        [
+          "Assign",
+          482,
+          486,
+          8,
+          19
+        ],
+        [
+          "Assign",
+          488,
+          488,
+          12,
+          91
+        ],
+        [
+          "Assign",
+          491,
+          491,
+          8,
+          100
+        ],
+        [
+          "Expr",
+          480,
+          480,
+          8,
+          25
+        ],
+        [
+          "FunctionDef",
+          479,
+          491,
+          4,
+          100
+        ],
+        [
+          "If",
+          487,
+          488,
+          8,
+          91
+        ],
+        [
+          "If",
+          489,
+          490,
+          8,
+          90
+        ],
+        [
+          "Raise",
+          490,
+          490,
+          12,
+          90
+        ]
+      ],
+      "source": "    def action_generate_serial(self):\n        self.ensure_one()\n        name = self.product_id.lot_sequence_id.next_by_id()\n        exist_lot = not name or self.env['stock.lot'].search([\n            ('product_id', '=', self.product_id.id),\n            '|', ('company_id', '=', False), ('company_id', '=', self.company_id.id),\n            ('name', '=', name),\n        ], limit=1)\n        if exist_lot:\n            name = self.env['stock.lot']._get_next_serial(self.company_id, self.product_id)\n        if not name:\n            raise UserError(_(\"Please set the first Serial Number or a default sequence\"))\n        self.lot_id = self.env['stock.lot'].create({'product_id': self.product_id.id, 'name': name})"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.action_assign",
+      "start": 493,
+      "end": 494,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          493,
+          494,
+          4,
+          45
+        ],
+        [
+          "Return",
+          494,
+          494,
+          8,
+          45
+        ]
+      ],
+      "source": "    def action_assign(self):\n        return self.move_ids._action_assign()"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.action_create_sale_order",
+      "start": 496,
+      "end": 498,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          497,
+          497,
+          8,
+          33
+        ],
+        [
+          "FunctionDef",
+          496,
+          498,
+          4,
+          44
+        ],
+        [
+          "Return",
+          498,
+          498,
+          8,
+          44
+        ]
+      ],
+      "source": "    def action_create_sale_order(self):\n        self._create_sale_order()\n        return self.action_view_sale_order()"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.action_repair_cancel",
+      "start": 500,
+      "end": 507,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Expr",
+          505,
+          505,
+          16,
+          73
+        ],
+        [
+          "Expr",
+          506,
+          506,
+          8,
+          38
+        ],
+        [
+          "For",
+          503,
+          505,
+          8,
+          73
+        ],
+        [
+          "FunctionDef",
+          500,
+          507,
+          4,
+          46
+        ],
+        [
+          "If",
+          501,
+          502,
+          8,
+          96
+        ],
+        [
+          "If",
+          504,
+          505,
+          12,
+          73
+        ],
+        [
+          "Raise",
+          502,
+          502,
+          12,
+          96
+        ],
+        [
+          "Return",
+          507,
+          507,
+          8,
+          46
+        ]
+      ],
+      "source": "    def action_repair_cancel(self):\n        if any(repair.state == 'done' for repair in self):\n            raise UserError(_(\"You cannot cancel a Repair Order that's already been completed\"))\n        for repair in self:\n            if repair.sale_order_id:\n                repair.sale_order_line_id.write({'product_uom_qty': 0.0})  # Quantity of the product that generated the RO is set to 0\n        self.move_ids._action_cancel()  # Quantity of parts added from the RO to the SO is set to 0\n        return self.write({'state': 'cancel'})"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.action_create_invoice",
+      "start": 509,
+      "end": 518,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          511,
+          515,
+          8,
+          14
+        ],
+        [
+          "Expr",
+          510,
+          510,
+          8,
+          25
+        ],
+        [
+          "Expr",
+          516,
+          516,
+          8,
+          51
+        ],
+        [
+          "Expr",
+          517,
+          517,
+          8,
+          66
+        ],
+        [
+          "FunctionDef",
+          509,
+          518,
+          4,
+          48
+        ],
+        [
+          "Return",
+          518,
+          518,
+          8,
+          48
+        ]
+      ],
+      "source": "    def action_create_invoice(self):\n        self.ensure_one()\n        invoice = self.env['account.move'].create({\n                'move_type': 'out_invoice',\n                'partner_id': self.partner_id.id,\n                'repair_order_id': self.id,\n            })\n        self.move_ids._create_repair_invoice_line()\n        self.repair_service_line_ids._create_repair_invoice_line()\n        return self.action_view_invoice(invoice)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.action_view_invoice",
+      "start": 520,
+      "end": 531,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Assign",
+          522,
+          522,
+          8,
+          99
+        ],
+        [
+          "Assign",
+          524,
+          524,
+          12,
+          41
+        ],
+        [
+          "Expr",
+          521,
+          521,
+          8,
+          25
+        ],
+        [
+          "Expr",
+          525,
+          530,
+          8,
+          10
+        ],
+        [
+          "FunctionDef",
+          520,
+          531,
+          4,
+          21
+        ],
+        [
+          "If",
+          523,
+          524,
+          8,
+          41
+        ],
+        [
+          "Return",
+          531,
+          531,
+          8,
+          21
+        ]
+      ],
+      "source": "    def action_view_invoice(self, invoice=False):\n        self.ensure_one()\n        action = self.env['ir.actions.actions']._for_xml_id('account.action_move_out_invoice_type')\n        if not invoice and len(self.invoice_ids) == 1:\n            invoice = self.invoice_ids[0]\n        action.update({\n            'views': [[False, 'form']] if invoice else [[False, 'list'], [False, 'form']],\n            'domain': [('id', 'in', self.invoice_ids.ids)],\n            'res_id': invoice.id if invoice else False,\n            'context': {'create': False},\n        })\n        return action"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.action_repair_cancel_draft",
+      "start": 533,
+      "end": 540,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Assign",
+          536,
+          536,
+          8,
+          153
+        ],
+        [
+          "Assign",
+          538,
+          538,
+          8,
+          37
+        ],
+        [
+          "Assign",
+          539,
+          539,
+          8,
+          28
+        ],
+        [
+          "Expr",
+          535,
+          535,
+          12,
+          39
+        ],
+        [
+          "Expr",
+          537,
+          537,
+          8,
+          69
+        ],
+        [
+          "FunctionDef",
+          533,
+          540,
+          4,
+          19
+        ],
+        [
+          "If",
+          534,
+          535,
+          8,
+          39
+        ],
+        [
+          "Return",
+          540,
+          540,
+          8,
+          19
+        ]
+      ],
+      "source": "    def action_repair_cancel_draft(self):\n        if self.filtered(lambda repair: repair.state != 'cancel'):\n            self.action_repair_cancel()\n        sale_line_to_update = self.move_ids.sale_line_id.filtered(lambda l: l.order_id.state != 'cancel' and l.product_uom_id.is_zero(l.product_uom_qty))\n        sale_line_to_update.move_ids._update_repair_sale_order_line()\n        self.move_ids.state = 'draft'\n        self.state = 'draft'\n        return True"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.action_repair_done",
+      "start": 542,
+      "end": 619,
+      "program_units": 34,
+      "nodes": [
+        [
+          "Assign",
+          549,
+          549,
+          8,
+          79
+        ],
+        [
+          "Assign",
+          550,
+          550,
+          8,
+          30
+        ],
+        [
+          "Assign",
+          555,
+          555,
+          8,
+          80
+        ],
+        [
+          "Assign",
+          559,
+          559,
+          16,
+          45
+        ],
+        [
+          "Assign",
+          561,
+          561,
+          16,
+          81
+        ],
+        [
+          "Assign",
+          564,
+          564,
+          20,
+          103
+        ],
+        [
+          "Assign",
+          575,
+          575,
+          12,
+          28
+        ],
+        [
+          "Assign",
+          576,
+          576,
+          12,
+          176
+        ],
+        [
+          "Assign",
+          578,
+          578,
+          16,
+          47
+        ],
+        [
+          "Assign",
+          607,
+          607,
+          8,
+          72
+        ],
+        [
+          "Assign",
+          608,
+          608,
+          8,
+          64
+        ],
+        [
+          "Assign",
+          610,
+          610,
+          12,
+          55
+        ],
+        [
+          "Assign",
+          612,
+          612,
+          16,
+          40
+        ],
+        [
+          "Assign",
+          613,
+          613,
+          8,
+          49
+        ],
+        [
+          "Assign",
+          616,
+          616,
+          8,
+          27
+        ],
+        [
+          "Continue",
+          566,
+          566,
+          16,
+          24
+        ],
+        [
+          "Expr",
+          553,
+          553,
+          8,
+          87
+        ],
+        [
+          "Expr",
+          580,
+          605,
+          12,
+          14
+        ],
+        [
+          "Expr",
+          614,
+          614,
+          8,
+          53
+        ],
+        [
+          "Expr",
+          615,
+          615,
+          8,
+          65
+        ],
+        [
+          "Expr",
+          617,
+          617,
+          8,
+          50
+        ],
+        [
+          "Expr",
+          618,
+          618,
+          8,
+          65
+        ],
+        [
+          "For",
+          557,
+          605,
+          8,
+          14
+        ],
+        [
+          "For",
+          609,
+          612,
+          8,
+          40
+        ],
+        [
+          "FunctionDef",
+          542,
+          619,
+          4,
+          19
+        ],
+        [
+          "If",
+          558,
+          559,
+          12,
+          45
+        ],
+        [
+          "If",
+          560,
+          564,
+          12,
+          103
+        ],
+        [
+          "If",
+          563,
+          564,
+          16,
+          103
+        ],
+        [
+          "If",
+          565,
+          566,
+          12,
+          24
+        ],
+        [
+          "If",
+          568,
+          572,
+          12,
+          18
+        ],
+        [
+          "If",
+          577,
+          578,
+          12,
+          47
+        ],
+        [
+          "If",
+          611,
+          612,
+          12,
+          40
+        ],
+        [
+          "Raise",
+          569,
+          572,
+          16,
+          18
+        ],
+        [
+          "Return",
+          619,
+          619,
+          8,
+          19
+        ]
+      ],
+      "source": "    def action_repair_done(self):\n        \"\"\" Creates stock move for final product of repair order.\n        Writes move_id and move_ids state to 'done'.\n        Writes repair order state to 'Done'.\n        @return: True\n        \"\"\"\n\n        precision = self.env['decimal.precision'].precision_get('Product Unit')\n        product_move_vals = []\n\n        # Cancel moves with 0 quantity\n        self.move_ids.filtered(lambda m: m.uom_id.is_zero(m.quantity))._action_cancel()\n\n        no_service_policy = 'service_policy' not in self.env['product.template']\n        #SOL qty delivered = repair.move_ids.quantity\n        for repair in self:\n            if all(not move.picked for move in repair.move_ids):\n                repair.move_ids.picked = True\n            if repair.sale_order_line_id:\n                ro_origin_product = repair.sale_order_line_id.product_template_id\n                # TODO: As 'service_policy' only appears with 'sale_project' module, isolate conditions related to this field in a 'sale_project_repair' module if it's worth\n                if ro_origin_product.type == 'service' and (no_service_policy or ro_origin_product.service_policy == 'ordered_prepaid'):\n                    repair.sale_order_line_id.qty_delivered = repair.sale_order_line_id.product_uom_qty\n            if not repair.product_id:\n                continue\n\n            if repair.product_id.tracking in ['lot', 'serial'] and not repair.lot_id:\n                raise ValidationError(_(\n                    \"Serial number is required for product to repair : %s\",\n                    repair.product_id.display_name\n                ))\n\n            # Try to create move with the appropriate owner\n            owner_id = False\n            available_qty_owner = self.env['stock.quant']._get_available_quantity(repair.product_id, repair.location_id, repair.lot_id, owner_id=repair.partner_id, strict=True)\n            if float_compare(available_qty_owner, repair.product_qty, precision_digits=precision) >= 0:\n                owner_id = repair.partner_id.id\n\n            product_move_vals.append({\n                'product_id': repair.product_id.id,\n                'uom_id': repair.uom_id.id or repair.product_id.uom_id.id,\n                'product_uom_qty': repair.product_qty,\n                'partner_id': repair.partner_id.id,\n                'location_id': repair.product_location_src_id.id,\n                'location_dest_id': repair.product_location_dest_id.id,\n                'picked': True,\n                'picking_id': False,\n                'move_line_ids': [(0, 0, {\n                    'product_id': repair.product_id.id,\n                    'lot_id': repair.lot_id.id,\n                    'uom_id': repair.uom_id.id or repair.product_id.uom_id.id,\n                    'quantity': repair.product_qty,\n                    'package_id': False,\n                    'result_package_id': False,\n                    'owner_id': owner_id,\n                    'location_id': repair.product_location_src_id.id,\n                    'company_id': repair.company_id.id,\n                    'location_dest_id': repair.product_location_dest_id.id,\n                    'consume_line_ids': [(6, 0, repair.move_ids.move_line_ids.ids)]\n                })],\n                'repair_id': repair.id,\n                'origin': repair.name,\n                'company_id': repair.company_id.id,\n            })\n\n        product_moves = self.env['stock.move'].create(product_move_vals)\n        repair_move = {m.repair_id.id: m for m in product_moves}\n        for repair in self:\n            move_id = repair_move.get(repair.id, False)\n            if move_id:\n                repair.move_id = move_id\n        all_moves = self.move_ids + product_moves\n        all_moves._action_done(cancel_backorder=True)\n        self.repair_service_line_ids._set_service_qty_delivered()\n        self.state = 'done'\n        self.move_ids._update_repair_linked_line()\n        self.repair_service_line_ids._update_repair_linked_line()\n        return True"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.action_repair_end",
+      "start": 621,
+      "end": 642,
+      "program_units": 13,
+      "nodes": [
+        [
+          "Assign",
+          628,
+          628,
+          12,
+          41
+        ],
+        [
+          "Assign",
+          629,
+          629,
+          12,
+          22
+        ],
+        [
+          "Assign",
+          639,
+          639,
+          12,
+          107
+        ],
+        [
+          "Assign",
+          640,
+          640,
+          12,
+          35
+        ],
+        [
+          "Expr",
+          631,
+          637,
+          16,
+          19
+        ],
+        [
+          "Expr",
+          638,
+          638,
+          12,
+          108
+        ],
+        [
+          "For",
+          630,
+          637,
+          12,
+          19
+        ],
+        [
+          "FunctionDef",
+          621,
+          642,
+          4,
+          40
+        ],
+        [
+          "If",
+          625,
+          626,
+          8,
+          86
+        ],
+        [
+          "If",
+          627,
+          641,
+          8,
+          25
+        ],
+        [
+          "Raise",
+          626,
+          626,
+          12,
+          86
+        ],
+        [
+          "Return",
+          641,
+          641,
+          12,
+          25
+        ],
+        [
+          "Return",
+          642,
+          642,
+          8,
+          40
+        ]
+      ],
+      "source": "    def action_repair_end(self):\n        \"\"\" Checks before action_repair_done.\n        @return: True\n        \"\"\"\n        if self.filtered(lambda repair: repair.state != 'confirmed'):\n            raise UserError(_(\"Repair must be confirmed in order to end reparation.\"))\n        if moves := self.move_ids.filtered(lambda move: move.quantity != move.product_uom_qty):\n            ctx = self.env.context.copy()\n            lines = []\n            for move in moves:\n                lines.append(Command.create({\n                    'move_id': move.id,\n                    'product_id': move.product_id.id,\n                    'uom_id': move.uom_id.id,\n                    'product_consumed_qty_uom': move.quantity,\n                    'product_expected_qty_uom': move.product_uom_qty,\n                }))\n            ctx.update({'default_repair_id': self.id, 'default_repair_consumption_warning_line_ids': lines})\n            action = self.env[\"ir.actions.actions\"]._for_xml_id(\"repair.action_repair_consumption_warning\")\n            action['context'] = ctx\n            return action\n        return self.action_repair_done()"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.action_unreserve",
+      "start": 644,
+      "end": 645,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          644,
+          645,
+          4,
+          111
+        ],
+        [
+          "Return",
+          645,
+          645,
+          8,
+          111
+        ]
+      ],
+      "source": "    def action_unreserve(self):\n        return self.move_ids.filtered(lambda m: m.state in ('assigned', 'partially_available'))._do_unreserve()"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.action_validate",
+      "start": 647,
+      "end": 651,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Expr",
+          648,
+          648,
+          8,
+          25
+        ],
+        [
+          "FunctionDef",
+          647,
+          651,
+          4,
+          44
+        ],
+        [
+          "If",
+          649,
+          650,
+          8,
+          72
+        ],
+        [
+          "Raise",
+          650,
+          650,
+          12,
+          72
+        ],
+        [
+          "Return",
+          651,
+          651,
+          8,
+          44
+        ]
+      ],
+      "source": "    def action_validate(self):\n        self.ensure_one()\n        if self.filtered(lambda repair: any(m.product_uom_qty < 0 for m in repair.move_ids)):\n            raise UserError(_(\"You can not enter negative quantities.\"))\n        return self._action_repair_confirm()"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.action_view_sale_order",
+      "start": 653,
+      "end": 659,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          653,
+          659,
+          4,
+          9
+        ],
+        [
+          "Return",
+          654,
+          659,
+          8,
+          9
+        ]
+      ],
+      "source": "    def action_view_sale_order(self):\n        return {\n            \"type\": \"ir.actions.act_window\",\n            \"res_model\": \"sale.order\",\n            \"views\": [[False, \"form\"]],\n            \"res_id\": self.sale_order_id.id,\n        }"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.print_repair_order",
+      "start": 661,
+      "end": 662,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          661,
+          662,
+          4,
+          84
+        ],
+        [
+          "Return",
+          662,
+          662,
+          8,
+          84
+        ]
+      ],
+      "source": "    def print_repair_order(self):\n        return self.env.ref('repair.action_report_repair_order').report_action(self)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._action_repair_confirm",
+      "start": 664,
+      "end": 676,
+      "program_units": 9,
+      "nodes": [
+        [
+          "Assign",
+          669,
+          669,
+          8,
+          82
+        ],
+        [
+          "Expr",
+          670,
+          670,
+          8,
+          43
+        ],
+        [
+          "Expr",
+          671,
+          671,
+          8,
+          52
+        ],
+        [
+          "Expr",
+          672,
+          672,
+          8,
+          96
+        ],
+        [
+          "Expr",
+          673,
+          673,
+          8,
+          53
+        ],
+        [
+          "Expr",
+          674,
+          674,
+          8,
+          56
+        ],
+        [
+          "Expr",
+          675,
+          675,
+          8,
+          56
+        ],
+        [
+          "FunctionDef",
+          664,
+          676,
+          4,
+          19
+        ],
+        [
+          "Return",
+          676,
+          676,
+          8,
+          19
+        ]
+      ],
+      "source": "    def _action_repair_confirm(self):\n        \"\"\" Repair order state is set to 'Confirmed'.\n        @param *arg: Arguments\n        @return: True\n        \"\"\"\n        repairs_to_confirm = self.filtered(lambda repair: repair.state == 'draft')\n        repairs_to_confirm._check_company()\n        repairs_to_confirm.move_ids._check_company()\n        repairs_to_confirm.move_ids._adjust_procure_method(picking_type_code='repair_operation')\n        repairs_to_confirm.move_ids._action_confirm()\n        repairs_to_confirm.move_ids._trigger_scheduler()\n        repairs_to_confirm.write({'state': 'confirmed'})\n        return True"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._get_location",
+      "start": 678,
+      "end": 679,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          678,
+          679,
+          4,
+          75
+        ],
+        [
+          "Return",
+          679,
+          679,
+          8,
+          75
+        ]
+      ],
+      "source": "    def _get_location(self, field):\n        return self.picking_type_id[MAP_REPAIR_TO_PICKING_LOCATIONS[field]]"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._get_picking_type",
+      "start": 681,
+      "end": 712,
+      "program_units": 23,
+      "nodes": [
+        [
+          "Assign",
+          682,
+          682,
+          8,
+          55
+        ],
+        [
+          "Assign",
+          685,
+          685,
+          12,
+          100
+        ],
+        [
+          "Assign",
+          691,
+          691,
+          8,
+          41
+        ],
+        [
+          "Assign",
+          692,
+          692,
+          8,
+          51
+        ],
+        [
+          "Assign",
+          694,
+          694,
+          12,
+          89
+        ],
+        [
+          "Assign",
+          696,
+          696,
+          16,
+          96
+        ],
+        [
+          "Assign",
+          703,
+          706,
+          8,
+          9
+        ],
+        [
+          "Assign",
+          708,
+          708,
+          8,
+          102
+        ],
+        [
+          "Assign",
+          711,
+          711,
+          16,
+          93
+        ],
+        [
+          "Expr",
+          687,
+          687,
+          16,
+          73
+        ],
+        [
+          "Expr",
+          698,
+          698,
+          16,
+          67
+        ],
+        [
+          "For",
+          693,
+          698,
+          8,
+          67
+        ],
+        [
+          "For",
+          709,
+          711,
+          8,
+          93
+        ],
+        [
+          "FunctionDef",
+          681,
+          712,
+          4,
+          43
+        ],
+        [
+          "If",
+          683,
+          689,
+          8,
+          85
+        ],
+        [
+          "If",
+          686,
+          687,
+          12,
+          73
+        ],
+        [
+          "If",
+          688,
+          689,
+          12,
+          85
+        ],
+        [
+          "If",
+          695,
+          698,
+          12,
+          67
+        ],
+        [
+          "If",
+          700,
+          701,
+          8,
+          47
+        ],
+        [
+          "If",
+          710,
+          711,
+          12,
+          93
+        ],
+        [
+          "Return",
+          689,
+          689,
+          16,
+          85
+        ],
+        [
+          "Return",
+          701,
+          701,
+          12,
+          47
+        ],
+        [
+          "Return",
+          712,
+          712,
+          8,
+          43
+        ]
+      ],
+      "source": "    def _get_picking_type(self):\n        companies = self.company_id or self.env.company\n        if not self:\n            # default case\n            default_warehouse = self.env.user.with_company(companies.id)._get_default_warehouse_id()\n            if not default_warehouse:\n                self.env['stock.warehouse']._warehouse_redirect_warning()\n            if default_warehouse.repair_type_id:\n                return {(companies, self.env.user): default_warehouse.repair_type_id}\n\n        picking_type_by_company_user = {}\n        without_default_warehouse_companies = set()\n        for company, user in unique((r.company_id, r.user_id) for r in self):\n            default_warehouse = user.with_company(company.id)._get_default_warehouse_id()\n            if default_warehouse and default_warehouse.repair_type_id:\n                picking_type_by_company_user[(company, user)] = default_warehouse.repair_type_id\n            else:\n                without_default_warehouse_companies.add(company.id)\n\n        if not without_default_warehouse_companies:\n            return picking_type_by_company_user\n\n        domain = [\n            ('code', '=', 'repair_operation'),\n            ('warehouse_id.company_id', 'in', list(without_default_warehouse_companies)),\n        ]\n\n        picking_types = self.env['stock.picking.type'].search_read(domain, ['company_id'], load=False)\n        for picking_type in picking_types:\n            if (picking_type.company_id, False) not in picking_type_by_company_user:\n                picking_type_by_company_user[(picking_type.company_id, False)] = picking_type\n        return picking_type_by_company_user"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._update_sale_order_line_price",
+      "start": 714,
+      "end": 721,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Assign",
+          716,
+          716,
+          12,
+          106
+        ],
+        [
+          "Assign",
+          717,
+          717,
+          12,
+          99
+        ],
+        [
+          "Expr",
+          719,
+          719,
+          16,
+          88
+        ],
+        [
+          "Expr",
+          721,
+          721,
+          16,
+          54
+        ],
+        [
+          "For",
+          715,
+          721,
+          8,
+          54
+        ],
+        [
+          "FunctionDef",
+          714,
+          721,
+          4,
+          54
+        ],
+        [
+          "If",
+          718,
+          721,
+          12,
+          54
+        ]
+      ],
+      "source": "    def _update_sale_order_line_price(self):\n        for repair in self:\n            add_moves = repair.move_ids.filtered(lambda m: m.repair_line_type == 'add' and m.sale_line_id)\n            sale_order_lines = add_moves.sale_line_id | repair.repair_service_line_ids.sale_line_id\n            if repair.under_warranty:\n                sale_order_lines.write({'price_unit': 0.0, 'technical_price_unit': 0.0})\n            else:\n                sale_order_lines._compute_price_unit()"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._update_invoice_line_price",
+      "start": 723,
+      "end": 728,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          724,
+          724,
+          8,
+          78
+        ],
+        [
+          "Expr",
+          726,
+          726,
+          12,
+          64
+        ],
+        [
+          "Expr",
+          728,
+          728,
+          12,
+          59
+        ],
+        [
+          "FunctionDef",
+          723,
+          728,
+          4,
+          59
+        ],
+        [
+          "If",
+          725,
+          728,
+          8,
+          59
+        ]
+      ],
+      "source": "    def _update_invoice_line_price(self):\n        invoices = self.invoice_ids.filtered(lambda inv: inv.state == 'draft')\n        if self.under_warranty:\n            invoices.invoice_line_ids.write({'price_unit': 0.0})\n        else:\n            invoices.invoice_line_ids._compute_price_unit()"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._get_sale_order_values",
+      "start": 730,
+      "end": 738,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          731,
+          731,
+          8,
+          25
+        ],
+        [
+          "FunctionDef",
+          730,
+          738,
+          4,
+          9
+        ],
+        [
+          "Return",
+          732,
+          738,
+          8,
+          9
+        ]
+      ],
+      "source": "    def _get_sale_order_values(self):\n        self.ensure_one()\n        return {\n            \"company_id\": self.company_id.id,\n            \"partner_id\": self.partner_id.id,\n            \"warehouse_id\": self.picking_type_id.warehouse_id.id,\n            \"repair_order_ids\": [Command.link(self.id)],\n            \"origin\": self.name,\n        }"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._create_sale_order",
+      "start": 740,
+      "end": 764,
+      "program_units": 14,
+      "nodes": [
+        [
+          "Assign",
+          742,
+          742,
+          12,
+          57
+        ],
+        [
+          "Assign",
+          743,
+          743,
+          12,
+          63
+        ],
+        [
+          "Assign",
+          751,
+          751,
+          12,
+          70
+        ],
+        [
+          "Assign",
+          752,
+          752,
+          12,
+          63
+        ],
+        [
+          "Assign",
+          759,
+          759,
+          8,
+          85
+        ],
+        [
+          "Assign",
+          760,
+          760,
+          8,
+          75
+        ],
+        [
+          "Expr",
+          762,
+          762,
+          8,
+          54
+        ],
+        [
+          "Expr",
+          763,
+          763,
+          8,
+          69
+        ],
+        [
+          "FunctionDef",
+          740,
+          764,
+          4,
+          26
+        ],
+        [
+          "If",
+          741,
+          749,
+          8,
+          13
+        ],
+        [
+          "If",
+          750,
+          758,
+          8,
+          13
+        ],
+        [
+          "Raise",
+          744,
+          749,
+          12,
+          13
+        ],
+        [
+          "Raise",
+          753,
+          758,
+          12,
+          13
+        ],
+        [
+          "Return",
+          764,
+          764,
+          8,
+          26
+        ]
+      ],
+      "source": "    def _create_sale_order(self):\n        if any(repair.sale_order_id for repair in self):\n            concerned_ro = self.filtered('sale_order_id')\n            ref_str = \"\\n\".join(ro.name for ro in concerned_ro)\n            raise UserError(\n                _(\n                    \"You cannot create a quotation for a repair order that is already linked to an existing sale order.\\nConcerned repair order(s):\\n%(ref_str)s\",\n                    ref_str=ref_str,\n                ),\n            )\n        if any(not repair.partner_id for repair in self):\n            concerned_ro = self.filtered(lambda ro: not ro.partner_id)\n            ref_str = \"\\n\".join(ro.name for ro in concerned_ro)\n            raise UserError(\n                _(\n                    \"You need to define a customer for a repair order in order to create an associated quotation.\\nConcerned repair order(s):\\n%(ref_str)s\",\n                    ref_str=ref_str,\n                ),\n            )\n        sale_order_values_list = [repair._get_sale_order_values() for repair in self]\n        sale_orders = self.env['sale.order'].create(sale_order_values_list)\n        # Add Sale Order Lines for 'add' move_ids and services\n        self.move_ids._create_repair_sale_order_line()\n        self.repair_service_line_ids._create_repair_sale_order_line()\n        return sale_orders"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.action_add_from_catalog",
+      "start": 770,
+      "end": 773,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          771,
+          771,
+          8,
+          47
+        ],
+        [
+          "Assign",
+          772,
+          772,
+          8,
+          97
+        ],
+        [
+          "FunctionDef",
+          770,
+          773,
+          4,
+          18
+        ],
+        [
+          "Return",
+          773,
+          773,
+          8,
+          18
+        ]
+      ],
+      "source": "    def action_add_from_catalog(self):\n        res = super().action_add_from_catalog()\n        res['search_view_id'] = [self.env.ref('repair.product_view_search_catalog').id, 'search']\n        return res"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._get_product_catalog_domain",
+      "start": 775,
+      "end": 779,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          776,
+          776,
+          8,
+          53
+        ],
+        [
+          "Assign",
+          778,
+          778,
+          12,
+          59
+        ],
+        [
+          "FunctionDef",
+          775,
+          779,
+          4,
+          69
+        ],
+        [
+          "If",
+          777,
+          778,
+          8,
+          59
+        ],
+        [
+          "Return",
+          779,
+          779,
+          8,
+          69
+        ]
+      ],
+      "source": "    def _get_product_catalog_domain(self):\n        catalog_domain = Domain('type', '=', 'consu')\n        if self.env.context.get('child_field') == 'repair_service_line_ids':\n            catalog_domain = Domain('type', '=', 'service')\n        return super()._get_product_catalog_domain() & catalog_domain"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._get_action_add_from_catalog_extra_context",
+      "start": 781,
+      "end": 786,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          781,
+          786,
+          4,
+          9
+        ],
+        [
+          "Return",
+          782,
+          786,
+          8,
+          9
+        ]
+      ],
+      "source": "    def _get_action_add_from_catalog_extra_context(self):\n        return {\n            **super()._get_action_add_from_catalog_extra_context(),\n            'display_stock': True,\n            'hide_product_type_filters': True,  # Only goods/services are displayed\n        }"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._catalog_prepare_new_line_vals",
+      "start": 788,
+      "end": 798,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          789,
+          789,
+          8,
+          82
+        ],
+        [
+          "FunctionDef",
+          788,
+          798,
+          4,
+          9
+        ],
+        [
+          "If",
+          790,
+          791,
+          8,
+          22
+        ],
+        [
+          "Return",
+          791,
+          791,
+          12,
+          22
+        ],
+        [
+          "Return",
+          793,
+          798,
+          8,
+          9
+        ]
+      ],
+      "source": "    def _catalog_prepare_new_line_vals(self, child_field, *args, **kwargs) -> dict:\n        res = super()._catalog_prepare_new_line_vals(child_field, *args, **kwargs)\n        if child_field != 'move_ids':\n            return res\n\n        return {\n            **res,\n            'location_id': self.location_id.id,\n            'location_dest_id': self.location_dest_id.id,\n            'repair_line_type': 'add',\n        }"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder._show_prices",
+      "start": 800,
+      "end": 801,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          800,
+          801,
+          4,
+          20
+        ],
+        [
+          "Return",
+          801,
+          801,
+          8,
+          20
+        ]
+      ],
+      "source": "    def _show_prices(self) -> bool:\n        return False"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "name": "RepairOrder.message_post",
+      "start": 807,
+      "end": 809,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          808,
+          808,
+          8,
+          83
+        ],
+        [
+          "FunctionDef",
+          807,
+          809,
+          4,
+          45
+        ],
+        [
+          "Return",
+          809,
+          809,
+          8,
+          45
+        ]
+      ],
+      "source": "    def message_post(self, **kwargs):\n        kwargs['notify_author_mention'] = kwargs.get('notify_author_mention', True)\n        return super().message_post(**kwargs)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "ControlledMixin.quality_inspections_pending",
+      "start": 135,
+      "end": 136,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          135,
+          136,
+          4,
+          76
+        ],
+        [
+          "Return",
+          136,
+          136,
+          8,
+          76
+        ]
+      ],
+      "source": "    def quality_inspections_pending(self):\n        return [i for i in self.quality_inspections if i.state == 'pending']"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "ControlledMixin.quality_inspections_failed",
+      "start": 138,
+      "end": 143,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          138,
+          143,
+          4,
+          33
+        ],
+        [
+          "Return",
+          139,
+          143,
+          8,
+          33
+        ]
+      ],
+      "source": "    def quality_inspections_failed(self):\n        return [\n            i for i in self.quality_inspections\n            if i.state == 'failed'\n            and (any(a.state in {'open', 'processing'} for a in i.alerts)\n                or not i.alerts)]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Control.get_inspections",
+      "start": 246,
+      "end": 266,
+      "program_units": 15,
+      "nodes": [
+        [
+          "Assert",
+          255,
+          255,
+          12,
+          58
+        ],
+        [
+          "Assign",
+          247,
+          247,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          248,
+          248,
+          8,
+          51
+        ],
+        [
+          "Assign",
+          250,
+          251,
+          8,
+          74
+        ],
+        [
+          "Assign",
+          252,
+          252,
+          8,
+          24
+        ],
+        [
+          "Assign",
+          254,
+          254,
+          12,
+          38
+        ],
+        [
+          "Assign",
+          257,
+          259,
+          12,
+          22
+        ],
+        [
+          "Assign",
+          262,
+          262,
+          20,
+          71
+        ],
+        [
+          "Expr",
+          264,
+          265,
+          24,
+          73
+        ],
+        [
+          "For",
+          260,
+          265,
+          12,
+          73
+        ],
+        [
+          "For",
+          261,
+          265,
+          16,
+          73
+        ],
+        [
+          "FunctionDef",
+          246,
+          266,
+          4,
+          26
+        ],
+        [
+          "If",
+          253,
+          265,
+          8,
+          73
+        ],
+        [
+          "If",
+          263,
+          265,
+          20,
+          73
+        ],
+        [
+          "Return",
+          266,
+          266,
+          8,
+          26
+        ]
+      ],
+      "source": "    def get_inspections(cls, records, operation):\n        pool = Pool()\n        Inspection = pool.get('quality.inspection')\n\n        records = [\n            r for r in records if not r.quality_controlled_for(operation)]\n        inspections = []\n        if records:\n            name = records[0].__name__\n            assert len({r.__name__ for r in records}) == 1\n\n            controls = cls.search([\n                    ('operations', 'in', f'{name}:{operation}'),\n                    ])\n            for control in controls:\n                for record in records:\n                    pattern = record.quality_control_pattern(operation)\n                    if control.match(pattern) and control.choose(record):\n                        inspections.append(\n                            Inspection.get_from_control(control, record))\n        return inspections"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.__setup__",
+      "start": 410,
+      "end": 447,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Assign",
+          411,
+          411,
+          8,
+          44
+        ],
+        [
+          "Assign",
+          412,
+          412,
+          8,
+          47
+        ],
+        [
+          "Assign",
+          414,
+          414,
+          8,
+          27
+        ],
+        [
+          "AugAssign",
+          418,
+          425,
+          8,
+          13
+        ],
+        [
+          "Expr",
+          413,
+          413,
+          8,
+          27
+        ],
+        [
+          "Expr",
+          415,
+          417,
+          8,
+          18
+        ],
+        [
+          "Expr",
+          426,
+          447,
+          8,
+          18
+        ],
+        [
+          "FunctionDef",
+          410,
+          447,
+          4,
+          18
+        ]
+      ],
+      "source": "    def __setup__(cls):\n        cls.number.search_unaccented = False\n        cls.reference.search_unaccented = False\n        super().__setup__()\n        t = cls.__table__()\n        cls._sql_indexes.update({\n                Index(t, (Coalesce(t.reference, ''), Index.Similarity())),\n                })\n        cls._transitions |= {\n            ('pending', 'passed'),\n            ('pending', 'failed'),\n            ('passed', 'failed'),\n            ('passed', 'pending'),\n            ('failed', 'passed'),\n            ('failed', 'pending'),\n            }\n        cls._buttons.update({\n                'pending': {\n                    'invisible': ~Eval('state').in_(['passed', 'failed']),\n                    'icon': 'tryton-back',\n                    'depends': ['state'],\n                    },\n                'process': {\n                    'invisible': Eval('state') != 'pending',\n                    'icon': 'tryton-forward',\n                    'depends': ['state'],\n                    },\n                'pass_': {\n                    'invisible': Eval('state') != 'failed',\n                    'icon': 'tryton-ok',\n                    'depends': ['state'],\n                    },\n                'fail': {\n                    'invisible': Eval('state') != 'passed',\n                    'icon': 'tryton-cancel',\n                    'depends': ['state'],\n                    },\n                })"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.order_number",
+      "start": 450,
+      "end": 452,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          451,
+          451,
+          8,
+          31
+        ],
+        [
+          "FunctionDef",
+          450,
+          452,
+          4,
+          55
+        ],
+        [
+          "Return",
+          452,
+          452,
+          8,
+          55
+        ]
+      ],
+      "source": "    def order_number(cls, tables):\n        table, _ = tables[None]\n        return [CharLength(table.number), table.number]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection._get_origins",
+      "start": 463,
+      "end": 470,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          463,
+          470,
+          4,
+          13
+        ],
+        [
+          "Return",
+          464,
+          470,
+          8,
+          13
+        ]
+      ],
+      "source": "    def _get_origins(cls):\n        return [\n            'stock.shipment.in',\n            'stock.shipment.out',\n            'stock.shipment.out.return',\n            'stock.shipment.internal',\n            'production',\n            ]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.get_origins",
+      "start": 473,
+      "end": 480,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          474,
+          474,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          475,
+          475,
+          8,
+          38
+        ],
+        [
+          "Assign",
+          476,
+          476,
+          8,
+          35
+        ],
+        [
+          "Assign",
+          477,
+          479,
+          8,
+          18
+        ],
+        [
+          "FunctionDef",
+          473,
+          480,
+          4,
+          66
+        ],
+        [
+          "Return",
+          480,
+          480,
+          8,
+          66
+        ]
+      ],
+      "source": "    def get_origins(cls):\n        pool = Pool()\n        IrModel = pool.get('ir.model')\n        models = cls._get_origins()\n        models = IrModel.search([\n                ('name', 'in', models),\n                ])\n        return [(None, '')] + [(m.name, m.string) for m in models]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.on_change_control",
+      "start": 483,
+      "end": 488,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          485,
+          485,
+          12,
+          73
+        ],
+        [
+          "Assign",
+          488,
+          488,
+          12,
+          32
+        ],
+        [
+          "Expr",
+          486,
+          487,
+          12,
+          60
+        ],
+        [
+          "FunctionDef",
+          483,
+          488,
+          4,
+          32
+        ],
+        [
+          "If",
+          484,
+          488,
+          8,
+          32
+        ]
+      ],
+      "source": "    def on_change_control(self):\n        if self.control:\n            points = dict(self.points) if self.points is not None else {}\n            points.update(\n                (p.name, None) for p in self.control.points)\n            self.points = points"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.validate_points",
+      "start": 490,
+      "end": 498,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          491,
+          491,
+          8,
+          64
+        ],
+        [
+          "Assign",
+          492,
+          492,
+          8,
+          60
+        ],
+        [
+          "FunctionDef",
+          490,
+          498,
+          4,
+          22
+        ],
+        [
+          "If",
+          493,
+          498,
+          8,
+          22
+        ],
+        [
+          "Raise",
+          494,
+          498,
+          12,
+          22
+        ]
+      ],
+      "source": "    def validate_points(self):\n        points = {p.name: p.string for p in self.control.points}\n        missing = points.keys() - (self.points or {}).keys()\n        if missing:\n            raise InspectionValidationError(\n                gettext('quality.msg_quality_inspection_missing_point',\n                    inspection=self.rec_name,\n                    points=', '.join(points[m] for m in missing),\n                    ))"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.check",
+      "start": 500,
+      "end": 504,
+      "program_units": 5,
+      "nodes": [
+        [
+          "For",
+          501,
+          503,
+          8,
+          28
+        ],
+        [
+          "FunctionDef",
+          500,
+          504,
+          4,
+          19
+        ],
+        [
+          "If",
+          502,
+          503,
+          12,
+          28
+        ],
+        [
+          "Return",
+          503,
+          503,
+          16,
+          28
+        ],
+        [
+          "Return",
+          504,
+          504,
+          8,
+          19
+        ]
+      ],
+      "source": "    def check(self):\n        for point in self.control.points:\n            if not point.check(self.points.get(point.name)):\n                return False\n        return True"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.view_attributes",
+      "start": 507,
+      "end": 520,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          508,
+          510,
+          8,
+          13
+        ],
+        [
+          "Expr",
+          512,
+          518,
+          12,
+          22
+        ],
+        [
+          "FunctionDef",
+          507,
+          520,
+          4,
+          25
+        ],
+        [
+          "If",
+          511,
+          518,
+          8,
+          22
+        ],
+        [
+          "Return",
+          520,
+          520,
+          8,
+          25
+        ]
+      ],
+      "source": "    def view_attributes(cls):\n        attributes = super().view_attributes() + [\n            ('/tree', 'visual', If(Eval('state') == 'failed', 'danger', '')),\n            ]\n        if Transaction().context.get('inspect'):\n            attributes.extend([\n                    ('//field[@name=\"control\"]', 'readonly', 1),\n                    ('//*[@name=\"origin\"]', 'invisible', 1),\n                    ('//page[@id=\"other\"]', 'invisible', 1),\n                    ('//*[@name=\"state\"]', 'invisible', 1),\n                    ('//group[@id=\"buttons\"]', 'states', {'invisible': True}),\n                    ])\n\n        return attributes"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.pending",
+      "start": 544,
+      "end": 547,
+      "program_units": 2,
+      "nodes": [
+        [
+          "Expr",
+          545,
+          547,
+          8,
+          18
+        ],
+        [
+          "FunctionDef",
+          544,
+          547,
+          4,
+          18
+        ]
+      ],
+      "source": "    def pending(cls, inspections):\n        cls.write(inspections, {\n                'processed_at': None,\n                })"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.process",
+      "start": 552,
+      "end": 564,
+      "program_units": 9,
+      "nodes": [
+        [
+          "Expr",
+          554,
+          554,
+          12,
+          40
+        ],
+        [
+          "Expr",
+          555,
+          557,
+          8,
+          18
+        ],
+        [
+          "Expr",
+          562,
+          562,
+          20,
+          42
+        ],
+        [
+          "Expr",
+          564,
+          564,
+          20,
+          41
+        ],
+        [
+          "For",
+          553,
+          554,
+          8,
+          40
+        ],
+        [
+          "For",
+          560,
+          564,
+          12,
+          41
+        ],
+        [
+          "FunctionDef",
+          552,
+          564,
+          4,
+          41
+        ],
+        [
+          "If",
+          561,
+          564,
+          16,
+          41
+        ],
+        [
+          "With",
+          558,
+          564,
+          8,
+          41
+        ]
+      ],
+      "source": "    def process(cls, inspections):\n        for inspection in inspections:\n            inspection.validate_points()\n        cls.write([i for i in inspections if not i.processed_at], {\n                'processed_at': dt.datetime.now(),\n                })\n        with cls.bulk_func('pass_') as pass_, \\\n                cls.bulk_func('fail') as fail:\n            for inspection in inspections:\n                if inspection.check():\n                    pass_.push(inspection)\n                else:\n                    fail.push(inspection)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.pass_",
+      "start": 571,
+      "end": 572,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          571,
+          572,
+          4,
+          12
+        ],
+        [
+          "Pass",
+          572,
+          572,
+          8,
+          12
+        ]
+      ],
+      "source": "    def pass_(cls, inspections):\n        pass"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.fail",
+      "start": 579,
+      "end": 586,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Assign",
+          580,
+          580,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          581,
+          581,
+          8,
+          41
+        ],
+        [
+          "Assign",
+          582,
+          582,
+          8,
+          19
+        ],
+        [
+          "Expr",
+          585,
+          585,
+          16,
+          53
+        ],
+        [
+          "Expr",
+          586,
+          586,
+          8,
+          26
+        ],
+        [
+          "For",
+          583,
+          585,
+          8,
+          53
+        ],
+        [
+          "FunctionDef",
+          579,
+          586,
+          4,
+          26
+        ],
+        [
+          "If",
+          584,
+          585,
+          12,
+          53
+        ]
+      ],
+      "source": "    def fail(cls, inspections):\n        pool = Pool()\n        Alert = pool.get('quality.alert')\n        alerts = []\n        for inspection in inspections:\n            if not inspection.alerts:\n                alerts.append(inspection.get_alert())\n        Alert.save(alerts)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.get_alert",
+      "start": 588,
+      "end": 593,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          589,
+          589,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          590,
+          590,
+          8,
+          41
+        ],
+        [
+          "FunctionDef",
+          588,
+          593,
+          4,
+          24
+        ],
+        [
+          "Return",
+          591,
+          593,
+          8,
+          24
+        ]
+      ],
+      "source": "    def get_alert(self):\n        pool = Pool()\n        Alert = pool.get('quality.alert')\n        return Alert(\n            company=self.company,\n            origin=self)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.preprocess_values",
+      "start": 596,
+      "end": 607,
+      "program_units": 11,
+      "nodes": [
+        [
+          "Assign",
+          597,
+          597,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          598,
+          598,
+          8,
+          57
+        ],
+        [
+          "Assign",
+          599,
+          599,
+          8,
+          56
+        ],
+        [
+          "Assign",
+          601,
+          601,
+          12,
+          69
+        ],
+        [
+          "Assign",
+          603,
+          603,
+          16,
+          48
+        ],
+        [
+          "Assign",
+          606,
+          606,
+          20,
+          53
+        ],
+        [
+          "FunctionDef",
+          596,
+          607,
+          4,
+          21
+        ],
+        [
+          "If",
+          600,
+          606,
+          8,
+          53
+        ],
+        [
+          "If",
+          602,
+          606,
+          12,
+          53
+        ],
+        [
+          "If",
+          604,
+          606,
+          16,
+          53
+        ],
+        [
+          "Return",
+          607,
+          607,
+          8,
+          21
+        ]
+      ],
+      "source": "    def preprocess_values(cls, mode, values):\n        pool = Pool()\n        Configuration = pool.get('quality.configuration')\n        values = super().preprocess_values(mode, values)\n        if mode == 'create' and not values.get('number'):\n            company_id = values.get('company', cls.default_company())\n            if company_id is not None:\n                configuration = Configuration(1)\n                if sequence := configuration.get_multivalue(\n                        'inspection_sequence', company=company_id):\n                    values['number'] = sequence.get()\n        return values"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.check_modification",
+      "start": 610,
+      "end": 619,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Expr",
+          612,
+          613,
+          8,
+          64
+        ],
+        [
+          "For",
+          615,
+          619,
+          12,
+          60
+        ],
+        [
+          "FunctionDef",
+          610,
+          619,
+          4,
+          60
+        ],
+        [
+          "If",
+          614,
+          619,
+          8,
+          60
+        ],
+        [
+          "If",
+          616,
+          619,
+          16,
+          60
+        ],
+        [
+          "Raise",
+          617,
+          619,
+          20,
+          60
+        ]
+      ],
+      "source": "    def check_modification(\n            cls, mode, inspections, values=None, external=False):\n        super().check_modification(\n            mode, inspections, values=values, external=external)\n        if mode == 'delete':\n            for inspection in inspections:\n                if inspection.state != 'pending':\n                    raise AccessError(gettext(\n                            'quality.msg_inspection_delete_non_pending',\n                            inspection=inspection.rec_name))"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.copy",
+      "start": 622,
+      "end": 629,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Assign",
+          623,
+          623,
+          8,
+          63
+        ],
+        [
+          "Expr",
+          624,
+          624,
+          8,
+          36
+        ],
+        [
+          "Expr",
+          625,
+          625,
+          8,
+          42
+        ],
+        [
+          "Expr",
+          626,
+          626,
+          8,
+          42
+        ],
+        [
+          "Expr",
+          627,
+          627,
+          8,
+          39
+        ],
+        [
+          "Expr",
+          628,
+          628,
+          8,
+          39
+        ],
+        [
+          "FunctionDef",
+          622,
+          629,
+          4,
+          57
+        ],
+        [
+          "Return",
+          629,
+          629,
+          8,
+          57
+        ]
+      ],
+      "source": "    def copy(cls, inspections, default=None):\n        default = default.copy() if default is not None else {}\n        default.setdefault('number')\n        default.setdefault('processed_by')\n        default.setdefault('processed_at')\n        default.setdefault('passed_by')\n        default.setdefault('failed_by')\n        return super().copy(inspections, default=default)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspection.get_from_control",
+      "start": 632,
+      "end": 633,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          632,
+          633,
+          4,
+          50
+        ],
+        [
+          "Return",
+          633,
+          633,
+          8,
+          50
+        ]
+      ],
+      "source": "    def get_from_control(cls, control, origin=None):\n        return cls(control=control, origin=origin)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "name": "Inspect.value_inspection",
+      "start": 850,
+      "end": 861,
+      "program_units": 10,
+      "nodes": [
+        [
+          "Assign",
+          851,
+          851,
+          8,
+          46
+        ],
+        [
+          "Assign",
+          852,
+          852,
+          8,
+          19
+        ],
+        [
+          "Assign",
+          854,
+          854,
+          12,
+          62
+        ],
+        [
+          "Assign",
+          858,
+          858,
+          12,
+          59
+        ],
+        [
+          "Expr",
+          860,
+          860,
+          16,
+          55
+        ],
+        [
+          "For",
+          853,
+          854,
+          8,
+          62
+        ],
+        [
+          "For",
+          859,
+          860,
+          12,
+          55
+        ],
+        [
+          "FunctionDef",
+          850,
+          861,
+          4,
+          21
+        ],
+        [
+          "If",
+          856,
+          860,
+          8,
+          55
+        ],
+        [
+          "Return",
+          861,
+          861,
+          8,
+          21
+        ]
+      ],
+      "source": "    def value_inspection(self, fields):\n        inspection = self.store.inspections[0]\n        values = {}\n        for fieldname in fields:\n            values[fieldname] = getattr(inspection, fieldname)\n\n        if 'points' in fields:\n            # Convert ImmutableDict to dict\n            values['points'] = dict(values['points'] or {})\n            for point in inspection.control.points:\n                values['points'].setdefault(point.name)\n        return values"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-quality/src/main/java/com/axelor/apps/quality/service/QualityControlServiceImpl.java",
+      "sha256": "177eb4ff9cbe652d3fa128ee8c9ffa23eabb502774fd8967a2b26e7f22ec4ebe",
+      "name": "preFillOperations",
+      "start": 51,
+      "end": 91,
+      "program_units": 21,
+      "nodes": [
+        [
+          "enhanced_for_statement",
+          65,
+          69,
+          6,
+          7
+        ],
+        [
+          "enhanced_for_statement",
+          75,
+          79,
+          6,
+          7
+        ],
+        [
+          "enhanced_for_statement",
+          85,
+          89,
+          6,
+          7
+        ],
+        [
+          "expression_statement",
+          63,
+          63,
+          6,
+          51
+        ],
+        [
+          "expression_statement",
+          67,
+          67,
+          8,
+          70
+        ],
+        [
+          "expression_statement",
+          68,
+          68,
+          8,
+          54
+        ],
+        [
+          "expression_statement",
+          73,
+          73,
+          6,
+          59
+        ],
+        [
+          "expression_statement",
+          77,
+          77,
+          8,
+          70
+        ],
+        [
+          "expression_statement",
+          78,
+          78,
+          8,
+          62
+        ],
+        [
+          "expression_statement",
+          83,
+          83,
+          6,
+          62
+        ],
+        [
+          "expression_statement",
+          86,
+          87,
+          8,
+          99
+        ],
+        [
+          "expression_statement",
+          88,
+          88,
+          8,
+          83
+        ],
+        [
+          "if_statement",
+          62,
+          70,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          72,
+          80,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          82,
+          90,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          56,
+          56,
+          4,
+          87
+        ],
+        [
+          "local_variable_declaration",
+          57,
+          58,
+          4,
+          51
+        ],
+        [
+          "local_variable_declaration",
+          59,
+          60,
+          4,
+          49
+        ],
+        [
+          "local_variable_declaration",
+          66,
+          66,
+          8,
+          48
+        ],
+        [
+          "local_variable_declaration",
+          76,
+          76,
+          8,
+          48
+        ],
+        [
+          "method_declaration",
+          51,
+          91,
+          2,
+          3
+        ]
+      ],
+      "source": "  @Override\n  @Transactional(rollbackOn = {Exception.class})\n  public void preFillOperations(QualityControl qualityControl, QualityProcess process)\n      throws AxelorException {\n\n    List<ControlPointModel> controlPointModelList = process.getControlPointModelList();\n    List<ControlPointModel> optionalControlPointModelList =\n        process.getOptionalControlPointModelList();\n    List<QualityCorrectiveAction> qualityCorrectiveActionList =\n        process.getQualityCorrectiveActionList();\n\n    if (controlPointModelList != null) {\n      qualityControl.getControlPointList().clear();\n\n      for (ControlPointModel model : controlPointModelList) {\n        ControlPoint point = new ControlPoint();\n        this.createControlPointListItem(model, point, qualityControl);\n        qualityControl.addControlPointListItem(point);\n      }\n    }\n\n    if (optionalControlPointModelList != null) {\n      qualityControl.getOptionalControlPointList().clear();\n\n      for (ControlPointModel model : optionalControlPointModelList) {\n        ControlPoint point = new ControlPoint();\n        this.createControlPointListItem(model, point, qualityControl);\n        qualityControl.addOptionalControlPointListItem(point);\n      }\n    }\n\n    if (qualityCorrectiveActionList != null) {\n      qualityControl.getQualityCorrectiveActionList().clear();\n\n      for (QualityCorrectiveAction qualityCorrectiveAction : qualityCorrectiveActionList) {\n        qualityCorrectiveAction =\n            Beans.get(QualityCorrectiveActionRepository.class).copy(qualityCorrectiveAction, true);\n        qualityControl.addQualityCorrectiveActionListItem(qualityCorrectiveAction);\n      }\n    }\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-quality/src/main/java/com/axelor/apps/quality/service/QualityControlServiceImpl.java",
+      "sha256": "177eb4ff9cbe652d3fa128ee8c9ffa23eabb502774fd8967a2b26e7f22ec4ebe",
+      "name": "createControlPointListItem",
+      "start": 93,
+      "end": 112,
+      "program_units": 12,
+      "nodes": [
+        [
+          "enhanced_for_statement",
+          104,
+          107,
+          4,
+          5
+        ],
+        [
+          "expression_statement",
+          97,
+          97,
+          4,
+          65
+        ],
+        [
+          "expression_statement",
+          98,
+          98,
+          4,
+          35
+        ],
+        [
+          "expression_statement",
+          99,
+          99,
+          4,
+          43
+        ],
+        [
+          "expression_statement",
+          100,
+          100,
+          4,
+          37
+        ],
+        [
+          "expression_statement",
+          101,
+          101,
+          4,
+          59
+        ],
+        [
+          "expression_statement",
+          102,
+          102,
+          4,
+          59
+        ],
+        [
+          "expression_statement",
+          105,
+          105,
+          6,
+          99
+        ],
+        [
+          "expression_statement",
+          106,
+          106,
+          6,
+          54
+        ],
+        [
+          "expression_statement",
+          109,
+          109,
+          4,
+          61
+        ],
+        [
+          "expression_statement",
+          111,
+          111,
+          4,
+          33
+        ],
+        [
+          "method_declaration",
+          93,
+          112,
+          2,
+          3
+        ]
+      ],
+      "source": "  @Transactional\n  public void createControlPointListItem(\n      ControlPointModel model, ControlPoint point, QualityControl qualityControl) {\n\n    point.setStatusSelect(ControlPointRepository.STATUS_ON_HOLD);\n    point.setName(model.getName());\n    point.setSequence(model.getSequence());\n    point.setNotes(model.getNotes());\n    point.setControlFrequency(model.getControlFrequency());\n    point.setControlPointType(model.getControlPointType());\n\n    for (QualityMeasuringPoint measuringPoint : model.getMeasuringPointList()) {\n      measuringPoint = Beans.get(QualityMeasuringPointRepository.class).copy(measuringPoint, true);\n      point.addMeasuringPointListItem(measuringPoint);\n    }\n\n    point.setControlPointDate(qualityControl.getStartDate());\n\n    controlPointRepo.save(point);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-quality/src/main/java/com/axelor/apps/quality/service/QualityControlServiceImpl.java",
+      "sha256": "177eb4ff9cbe652d3fa128ee8c9ffa23eabb502774fd8967a2b26e7f22ec4ebe",
+      "name": "preFillOperationsFromOptionals",
+      "start": 114,
+      "end": 126,
+      "program_units": 6,
+      "nodes": [
+        [
+          "enhanced_for_statement",
+          119,
+          123,
+          4,
+          5
+        ],
+        [
+          "expression_statement",
+          120,
+          120,
+          6,
+          79
+        ],
+        [
+          "expression_statement",
+          121,
+          121,
+          6,
+          59
+        ],
+        [
+          "expression_statement",
+          122,
+          122,
+          6,
+          67
+        ],
+        [
+          "expression_statement",
+          125,
+          125,
+          4,
+          67
+        ],
+        [
+          "method_declaration",
+          114,
+          126,
+          2,
+          3
+        ]
+      ],
+      "source": "  @Override\n  @Transactional\n  public void preFillOperationsFromOptionals(\n      QualityControl qualityControl, List<ControlPoint> optionalControlPointList) {\n\n    for (ControlPoint optionalControlPoint : optionalControlPointList) {\n      optionalControlPoint = controlPointRepo.copy(optionalControlPoint, true);\n      optionalControlPoint.setOptionalQualityControl(null);\n      qualityControl.addControlPointListItem(optionalControlPoint);\n    }\n\n    Beans.get(QualityControlRepository.class).save(qualityControl);\n  }"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.on_discard",
+      "start": 72,
+      "end": 74,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          73,
+          73,
+          2,
+          28
+        ],
+        [
+          "Expr",
+          74,
+          74,
+          2,
+          36
+        ],
+        [
+          "FunctionDef",
+          72,
+          74,
+          1,
+          36
+        ]
+      ],
+      "source": "\tdef on_discard(self):\n\t\tself.update_qc_reference()\n\t\tself.db_set(\"status\", \"Cancelled\")"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.validate",
+      "start": 76,
+      "end": 90,
+      "program_units": 12,
+      "nodes": [
+        [
+          "Expr",
+          78,
+          78,
+          3,
+          40
+        ],
+        [
+          "Expr",
+          81,
+          81,
+          3,
+          47
+        ],
+        [
+          "Expr",
+          84,
+          84,
+          3,
+          40
+        ],
+        [
+          "Expr",
+          85,
+          85,
+          3,
+          32
+        ],
+        [
+          "Expr",
+          87,
+          87,
+          2,
+          37
+        ],
+        [
+          "Expr",
+          88,
+          88,
+          2,
+          24
+        ],
+        [
+          "Expr",
+          89,
+          89,
+          2,
+          32
+        ],
+        [
+          "Expr",
+          90,
+          90,
+          2,
+          20
+        ],
+        [
+          "FunctionDef",
+          76,
+          90,
+          1,
+          20
+        ],
+        [
+          "If",
+          77,
+          78,
+          2,
+          40
+        ],
+        [
+          "If",
+          80,
+          81,
+          2,
+          47
+        ],
+        [
+          "If",
+          83,
+          85,
+          2,
+          32
+        ]
+      ],
+      "source": "\tdef validate(self):\n\t\tif not self.readings and self.item_code:\n\t\t\tself.get_item_specification_details()\n\n\t\tif self.inspection_type == \"In Process\" and self.reference_type == \"Job Card\":\n\t\t\tself.set_acceptance_criteria_from_template()\n\n\t\tif self.readings:\n\t\t\tself.validate_reading_number_format()\n\t\t\tself.inspect_and_set_status()\n\n\t\tself.validate_inspection_required()\n\t\tself.validate_status()\n\t\tself.set_child_row_reference()\n\t\tself.set_company()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.set_acceptance_criteria_from_template",
+      "start": 92,
+      "end": 99,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          93,
+          95,
+          2,
+          3
+        ],
+        [
+          "Assign",
+          96,
+          96,
+          2,
+          75
+        ],
+        [
+          "Expr",
+          99,
+          99,
+          4,
+          28
+        ],
+        [
+          "For",
+          97,
+          99,
+          2,
+          28
+        ],
+        [
+          "FunctionDef",
+          92,
+          99,
+          1,
+          28
+        ],
+        [
+          "If",
+          98,
+          99,
+          3,
+          28
+        ]
+      ],
+      "source": "\tdef set_acceptance_criteria_from_template(self):\n\t\ttemplate = self.quality_inspection_template or frappe.db.get_value(\n\t\t\t\"Item\", self.item_code, \"quality_inspection_template\"\n\t\t)\n\t\tparameters = {d.specification: d for d in get_template_details(template)}\n\t\tfor reading in self.readings:\n\t\t\tif criteria := parameters.get(reading.specification):\n\t\t\t\treading.update(criteria)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.validate_status",
+      "start": 101,
+      "end": 103,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          103,
+          103,
+          3,
+          91
+        ],
+        [
+          "FunctionDef",
+          101,
+          103,
+          1,
+          91
+        ],
+        [
+          "If",
+          102,
+          103,
+          2,
+          91
+        ]
+      ],
+      "source": "\tdef validate_status(self):\n\t\tif self.status == \"Cancelled\" and self.docstatus < 2:\n\t\t\tfrappe.throw(_(\"Status Cancelled can only be set by cancelling the Quality Inspection\"))"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.set_company",
+      "start": 105,
+      "end": 109,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          107,
+          107,
+          3,
+          89
+        ],
+        [
+          "Assign",
+          109,
+          109,
+          4,
+          26
+        ],
+        [
+          "FunctionDef",
+          105,
+          109,
+          1,
+          26
+        ],
+        [
+          "If",
+          106,
+          109,
+          2,
+          26
+        ],
+        [
+          "If",
+          108,
+          109,
+          3,
+          26
+        ]
+      ],
+      "source": "\tdef set_company(self):\n\t\tif self.reference_type and self.reference_name:\n\t\t\tcompany = frappe.get_cached_value(self.reference_type, self.reference_name, \"company\")\n\t\t\tif company != self.company:\n\t\t\t\tself.company = company"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.set_child_row_reference",
+      "start": 111,
+      "end": 152,
+      "program_units": 17,
+      "nodes": [
+        [
+          "Assign",
+          118,
+          118,
+          2,
+          41
+        ],
+        [
+          "Assign",
+          120,
+          120,
+          3,
+          33
+        ],
+        [
+          "Assign",
+          122,
+          122,
+          2,
+          40
+        ],
+        [
+          "Assign",
+          123,
+          123,
+          2,
+          50
+        ],
+        [
+          "Assign",
+          125,
+          141,
+          2,
+          3
+        ],
+        [
+          "Assign",
+          143,
+          143,
+          3,
+          59
+        ],
+        [
+          "Assign",
+          146,
+          146,
+          3,
+          53
+        ],
+        [
+          "Expr",
+          148,
+          152,
+          3,
+          4
+        ],
+        [
+          "FunctionDef",
+          111,
+          152,
+          1,
+          4
+        ],
+        [
+          "If",
+          112,
+          113,
+          2,
+          9
+        ],
+        [
+          "If",
+          115,
+          116,
+          2,
+          9
+        ],
+        [
+          "If",
+          119,
+          120,
+          2,
+          33
+        ],
+        [
+          "If",
+          142,
+          143,
+          2,
+          59
+        ],
+        [
+          "If",
+          145,
+          152,
+          2,
+          4
+        ],
+        [
+          "If",
+          147,
+          152,
+          2,
+          4
+        ],
+        [
+          "Return",
+          113,
+          113,
+          3,
+          9
+        ],
+        [
+          "Return",
+          116,
+          116,
+          3,
+          9
+        ]
+      ],
+      "source": "\tdef set_child_row_reference(self):\n\t\tif self.child_row_reference:\n\t\t\treturn\n\n\t\tif not (self.reference_type and self.reference_name):\n\t\t\treturn\n\n\t\tdoctype = self.reference_type + \" Item\"\n\t\tif self.reference_type == \"Stock Entry\":\n\t\t\tdoctype = \"Stock Entry Detail\"\n\n\t\tchild_doc = frappe.qb.DocType(doctype)\n\t\tqi_doc = frappe.qb.DocType(\"Quality Inspection\")\n\n\t\tquery = (\n\t\t\tfrappe.qb.from_(child_doc)\n\t\t\t.left_join(qi_doc)\n\t\t\t.on(\n\t\t\t\t(child_doc.name == qi_doc.child_row_reference)\n\t\t\t\t& (qi_doc.docstatus < 2)\n\t\t\t\t& (qi_doc.name != self.name)\n\t\t\t)\n\t\t\t.select(child_doc.name)\n\t\t\t.where(\n\t\t\t\t(child_doc.item_code == self.item_code)\n\t\t\t\t& (child_doc.parent == self.reference_name)\n\t\t\t\t& (child_doc.docstatus < 2)\n\t\t\t\t& (qi_doc.name.isnull())\n\t\t\t)\n\t\t\t.orderby(child_doc.idx)\n\t\t)\n\t\tif self.batch_no and frappe.get_meta(doctype).has_field(\"batch_no\"):\n\t\t\tquery = query.where(child_doc.batch_no == self.batch_no)\n\n\t\tif child_row_references := query.run(pluck=True):\n\t\t\tself.child_row_reference = child_row_references[0]\n\t\telif frappe.get_meta(doctype).has_field(\"quality_inspection\") and self.has_inspected_rows(doctype):\n\t\t\tfrappe.throw(\n\t\t\t\t_(\"Every row of Item {0} in {1} {2} already has a Quality Inspection\").format(\n\t\t\t\t\tfrappe.bold(self.item_code), _(self.reference_type), frappe.bold(self.reference_name)\n\t\t\t\t)\n\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.has_inspected_rows",
+      "start": 154,
+      "end": 162,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          154,
+          162,
+          1,
+          3
+        ],
+        [
+          "Return",
+          155,
+          162,
+          2,
+          3
+        ]
+      ],
+      "source": "\tdef has_inspected_rows(self, doctype):\n\t\treturn frappe.db.exists(\n\t\t\tdoctype,\n\t\t\t{\n\t\t\t\t\"parent\": self.reference_name,\n\t\t\t\t\"item_code\": self.item_code,\n\t\t\t\t\"quality_inspection\": (\"not in\", [\"\", self.name]),\n\t\t\t},\n\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.validate_inspection_required",
+      "start": 164,
+      "end": 186,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Expr",
+          173,
+          177,
+          3,
+          4
+        ],
+        [
+          "Expr",
+          182,
+          186,
+          3,
+          4
+        ],
+        [
+          "FunctionDef",
+          164,
+          186,
+          1,
+          4
+        ],
+        [
+          "If",
+          165,
+          168,
+          2,
+          9
+        ],
+        [
+          "If",
+          170,
+          177,
+          2,
+          4
+        ],
+        [
+          "If",
+          179,
+          186,
+          2,
+          4
+        ],
+        [
+          "Return",
+          168,
+          168,
+          3,
+          9
+        ]
+      ],
+      "source": "\tdef validate_inspection_required(self):\n\t\tif frappe.db.get_single_value(\n\t\t\t\"Stock Settings\", \"allow_to_make_quality_inspection_after_purchase_or_delivery\"\n\t\t):\n\t\t\treturn\n\n\t\tif self.reference_type in [\"Purchase Receipt\", \"Purchase Invoice\"] and not frappe.get_cached_value(\n\t\t\t\"Item\", self.item_code, \"inspection_required_before_purchase\"\n\t\t):\n\t\t\tfrappe.throw(\n\t\t\t\t_(\n\t\t\t\t\t\"'Inspection Required before Purchase' has disabled for the item {0}, no need to create the QI\"\n\t\t\t\t).format(get_link_to_form(\"Item\", self.item_code))\n\t\t\t)\n\n\t\tif self.reference_type in [\"Delivery Note\", \"Sales Invoice\"] and not frappe.get_cached_value(\n\t\t\t\"Item\", self.item_code, \"inspection_required_before_delivery\"\n\t\t):\n\t\t\tfrappe.throw(\n\t\t\t\t_(\n\t\t\t\t\t\"'Inspection Required before Delivery' has disabled for the item {0}, no need to create the QI\"\n\t\t\t\t).format(get_link_to_form(\"Item\", self.item_code))\n\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.before_submit",
+      "start": 188,
+      "end": 190,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          189,
+          189,
+          2,
+          29
+        ],
+        [
+          "Expr",
+          190,
+          190,
+          2,
+          43
+        ],
+        [
+          "FunctionDef",
+          188,
+          190,
+          1,
+          43
+        ]
+      ],
+      "source": "\tdef before_submit(self):\n\t\tself.validate_sample_size()\n\t\tself.validate_readings_status_mandatory()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.validate_sample_size",
+      "start": 192,
+      "end": 194,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          194,
+          194,
+          3,
+          91
+        ],
+        [
+          "FunctionDef",
+          192,
+          194,
+          1,
+          91
+        ],
+        [
+          "If",
+          193,
+          194,
+          2,
+          91
+        ]
+      ],
+      "source": "\tdef validate_sample_size(self):\n\t\tif flt(self.sample_size) <= 0:\n\t\t\tfrappe.throw(_(\"Sample Size must be greater than zero\"), title=_(\"Invalid Sample Size\"))"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.get_item_specification_details",
+      "start": 197,
+      "end": 214,
+      "program_units": 12,
+      "nodes": [
+        [
+          "Assign",
+          199,
+          201,
+          3,
+          4
+        ],
+        [
+          "Assign",
+          207,
+          207,
+          2,
+          69
+        ],
+        [
+          "Assign",
+          209,
+          209,
+          3,
+          38
+        ],
+        [
+          "Assign",
+          211,
+          211,
+          3,
+          28
+        ],
+        [
+          "Assign",
+          212,
+          214,
+          3,
+          4
+        ],
+        [
+          "Expr",
+          206,
+          206,
+          2,
+          26
+        ],
+        [
+          "Expr",
+          210,
+          210,
+          3,
+          18
+        ],
+        [
+          "For",
+          208,
+          214,
+          2,
+          4
+        ],
+        [
+          "FunctionDef",
+          197,
+          214,
+          1,
+          4
+        ],
+        [
+          "If",
+          198,
+          201,
+          2,
+          4
+        ],
+        [
+          "If",
+          203,
+          204,
+          2,
+          9
+        ],
+        [
+          "Return",
+          204,
+          204,
+          3,
+          9
+        ]
+      ],
+      "source": "\tdef get_item_specification_details(self):\n\t\tif not self.quality_inspection_template:\n\t\t\tself.quality_inspection_template = frappe.db.get_value(\n\t\t\t\t\"Item\", self.item_code, \"quality_inspection_template\"\n\t\t\t)\n\n\t\tif not self.quality_inspection_template:\n\t\t\treturn\n\n\t\tself.set(\"readings\", [])\n\t\tparameters = get_template_details(self.quality_inspection_template)\n\t\tfor d in parameters:\n\t\t\tchild = self.append(\"readings\", {})\n\t\t\tchild.update(d)\n\t\t\tchild.status = \"Accepted\"\n\t\t\tchild.parameter_group = frappe.get_value(\n\t\t\t\t\"Quality Inspection Parameter\", d.specification, \"parameter_group\"\n\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.get_quality_inspection_template",
+      "start": 217,
+      "end": 226,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Assign",
+          218,
+          218,
+          2,
+          15
+        ],
+        [
+          "Assign",
+          220,
+          220,
+          3,
+          84
+        ],
+        [
+          "Assign",
+          223,
+          223,
+          3,
+          87
+        ],
+        [
+          "Assign",
+          225,
+          225,
+          2,
+          45
+        ],
+        [
+          "Expr",
+          226,
+          226,
+          2,
+          39
+        ],
+        [
+          "FunctionDef",
+          217,
+          226,
+          1,
+          39
+        ],
+        [
+          "If",
+          219,
+          220,
+          2,
+          84
+        ],
+        [
+          "If",
+          222,
+          223,
+          2,
+          87
+        ]
+      ],
+      "source": "\tdef get_quality_inspection_template(self):\n\t\ttemplate = \"\"\n\t\tif self.bom_no:\n\t\t\ttemplate = frappe.db.get_value(\"BOM\", self.bom_no, \"quality_inspection_template\")\n\n\t\tif not template:\n\t\t\ttemplate = frappe.db.get_value(\"BOM\", self.item_code, \"quality_inspection_template\")\n\n\t\tself.quality_inspection_template = template\n\t\tself.get_item_specification_details()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.on_update",
+      "start": 228,
+      "end": 234,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          229,
+          231,
+          2,
+          3
+        ],
+        [
+          "Expr",
+          234,
+          234,
+          3,
+          29
+        ],
+        [
+          "FunctionDef",
+          228,
+          234,
+          1,
+          29
+        ],
+        [
+          "If",
+          233,
+          234,
+          2,
+          29
+        ]
+      ],
+      "source": "\tdef on_update(self):\n\t\taction_if_qi_in_draft = frappe.db.get_single_value(\n\t\t\t\"Stock Settings\", \"action_if_quality_inspection_is_not_submitted\"\n\t\t)\n\n\t\tif not action_if_qi_in_draft or action_if_qi_in_draft == \"Warn\":\n\t\t\tself.update_qc_reference()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.on_submit",
+      "start": 236,
+      "end": 241,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          241,
+          241,
+          3,
+          29
+        ],
+        [
+          "FunctionDef",
+          236,
+          241,
+          1,
+          29
+        ],
+        [
+          "If",
+          237,
+          241,
+          2,
+          29
+        ]
+      ],
+      "source": "\tdef on_submit(self):\n\t\tif (\n\t\t\tfrappe.db.get_single_value(\"Stock Settings\", \"action_if_quality_inspection_is_not_submitted\")\n\t\t\t== \"Stop\"\n\t\t):\n\t\t\tself.update_qc_reference()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.before_cancel",
+      "start": 243,
+      "end": 244,
+      "program_units": 2,
+      "nodes": [
+        [
+          "Expr",
+          244,
+          244,
+          2,
+          48
+        ],
+        [
+          "FunctionDef",
+          243,
+          244,
+          1,
+          48
+        ]
+      ],
+      "source": "\tdef before_cancel(self):\n\t\tself.validate_not_used_by_submitted_document()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.validate_not_used_by_submitted_document",
+      "start": 246,
+      "end": 262,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Expr",
+          256,
+          262,
+          3,
+          4
+        ],
+        [
+          "FunctionDef",
+          246,
+          262,
+          1,
+          4
+        ],
+        [
+          "If",
+          247,
+          250,
+          2,
+          9
+        ],
+        [
+          "If",
+          252,
+          253,
+          2,
+          9
+        ],
+        [
+          "If",
+          255,
+          262,
+          2,
+          4
+        ],
+        [
+          "Return",
+          250,
+          250,
+          3,
+          9
+        ],
+        [
+          "Return",
+          253,
+          253,
+          3,
+          9
+        ]
+      ],
+      "source": "\tdef validate_not_used_by_submitted_document(self):\n\t\tif not (self.reference_type and self.reference_name) or frappe.db.get_single_value(\n\t\t\t\"Stock Settings\", \"allow_to_make_quality_inspection_after_purchase_or_delivery\"\n\t\t):\n\t\t\treturn\n\n\t\tif frappe.db.get_value(self.reference_type, self.reference_name, \"docstatus\") != 1:\n\t\t\treturn\n\n\t\tif self.is_linked_on_reference():\n\t\t\tfrappe.throw(\n\t\t\t\t_(\"Quality Inspection {0} is used by {1} {2}. Cancel {2} first.\").format(\n\t\t\t\t\tfrappe.bold(self.name),\n\t\t\t\t\t_(self.reference_type),\n\t\t\t\t\tget_link_to_form(self.reference_type, self.reference_name),\n\t\t\t\t)\n\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.is_linked_on_reference",
+      "start": 264,
+      "end": 271,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          268,
+          270,
+          2,
+          3
+        ],
+        [
+          "FunctionDef",
+          264,
+          271,
+          1,
+          100
+        ],
+        [
+          "If",
+          265,
+          266,
+          2,
+          97
+        ],
+        [
+          "Return",
+          266,
+          266,
+          3,
+          97
+        ],
+        [
+          "Return",
+          271,
+          271,
+          2,
+          100
+        ]
+      ],
+      "source": "\tdef is_linked_on_reference(self):\n\t\tif self.reference_type == \"Job Card\":\n\t\t\treturn frappe.db.get_value(\"Job Card\", self.reference_name, \"quality_inspection\") == self.name\n\n\t\tdoctype = (\n\t\t\t\"Stock Entry Detail\" if self.reference_type == \"Stock Entry\" else self.reference_type + \" Item\"\n\t\t)\n\t\treturn frappe.db.exists(doctype, {\"parent\": self.reference_name, \"quality_inspection\": self.name})"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.on_cancel",
+      "start": 273,
+      "end": 277,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          274,
+          274,
+          2,
+          57
+        ],
+        [
+          "Expr",
+          276,
+          276,
+          2,
+          28
+        ],
+        [
+          "Expr",
+          277,
+          277,
+          2,
+          36
+        ],
+        [
+          "FunctionDef",
+          273,
+          277,
+          1,
+          36
+        ]
+      ],
+      "source": "\tdef on_cancel(self):\n\t\tself.ignore_linked_doctypes = \"Serial and Batch Bundle\"\n\n\t\tself.update_qc_reference()\n\t\tself.db_set(\"status\", \"Cancelled\")"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.on_trash",
+      "start": 279,
+      "end": 280,
+      "program_units": 2,
+      "nodes": [
+        [
+          "Expr",
+          280,
+          280,
+          2,
+          49
+        ],
+        [
+          "FunctionDef",
+          279,
+          280,
+          1,
+          49
+        ]
+      ],
+      "source": "\tdef on_trash(self):\n\t\tself.update_qc_reference(remove_reference=True)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.validate_readings_status_mandatory",
+      "start": 282,
+      "end": 285,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Expr",
+          285,
+          285,
+          4,
+          72
+        ],
+        [
+          "For",
+          283,
+          285,
+          2,
+          72
+        ],
+        [
+          "FunctionDef",
+          282,
+          285,
+          1,
+          72
+        ],
+        [
+          "If",
+          284,
+          285,
+          3,
+          72
+        ]
+      ],
+      "source": "\tdef validate_readings_status_mandatory(self):\n\t\tfor reading in self.readings:\n\t\t\tif not reading.status:\n\t\t\t\tfrappe.throw(_(\"Row #{0}: Status is mandatory\").format(reading.idx))"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.update_qc_reference",
+      "start": 287,
+      "end": 339,
+      "program_units": 22,
+      "nodes": [
+        [
+          "Assign",
+          288,
+          288,
+          2,
+          87
+        ],
+        [
+          "Assign",
+          302,
+          302,
+          3,
+          42
+        ],
+        [
+          "Assign",
+          305,
+          305,
+          4,
+          34
+        ],
+        [
+          "Assign",
+          308,
+          308,
+          4,
+          42
+        ],
+        [
+          "Assign",
+          310,
+          316,
+          4,
+          5
+        ],
+        [
+          "Assign",
+          319,
+          319,
+          5,
+          61
+        ],
+        [
+          "Assign",
+          322,
+          322,
+          5,
+          67
+        ],
+        [
+          "Assign",
+          324,
+          324,
+          5,
+          88
+        ],
+        [
+          "Assign",
+          327,
+          327,
+          5,
+          68
+        ],
+        [
+          "Expr",
+          292,
+          299,
+          4,
+          5
+        ],
+        [
+          "Expr",
+          329,
+          329,
+          4,
+          15
+        ],
+        [
+          "Expr",
+          331,
+          336,
+          4,
+          5
+        ],
+        [
+          "Expr",
+          339,
+          339,
+          3,
+          80
+        ],
+        [
+          "FunctionDef",
+          287,
+          339,
+          1,
+          80
+        ],
+        [
+          "If",
+          290,
+          336,
+          2,
+          5
+        ],
+        [
+          "If",
+          291,
+          299,
+          3,
+          5
+        ],
+        [
+          "If",
+          304,
+          305,
+          3,
+          34
+        ],
+        [
+          "If",
+          307,
+          336,
+          3,
+          5
+        ],
+        [
+          "If",
+          318,
+          319,
+          4,
+          61
+        ],
+        [
+          "If",
+          321,
+          324,
+          4,
+          88
+        ],
+        [
+          "If",
+          326,
+          327,
+          4,
+          68
+        ],
+        [
+          "If",
+          338,
+          339,
+          2,
+          80
+        ]
+      ],
+      "source": "\tdef update_qc_reference(self, remove_reference=False):\n\t\tquality_inspection = self.name if self.docstatus < 2 and not remove_reference else \"\"\n\n\t\tif self.reference_type == \"Job Card\":\n\t\t\tif self.reference_name:\n\t\t\t\tfrappe.db.sql(\n\t\t\t\t\tf\"\"\"\n\t\t\t\t\tUPDATE `tab{self.reference_type}`\n\t\t\t\t\tSET quality_inspection = %s, modified = %s\n\t\t\t\t\tWHERE name = %s and production_item = %s\n\t\t\t\t\"\"\",\n\t\t\t\t\t(quality_inspection, self.modified, self.reference_name, self.item_code),\n\t\t\t\t)\n\n\t\telse:\n\t\t\tdoctype = self.reference_type + \" Item\"\n\n\t\t\tif self.reference_type == \"Stock Entry\":\n\t\t\t\tdoctype = \"Stock Entry Detail\"\n\n\t\t\tif doctype and self.reference_name:\n\t\t\t\tchild_doc = frappe.qb.DocType(doctype)\n\n\t\t\t\tquery = (\n\t\t\t\t\tfrappe.qb.update(child_doc)\n\t\t\t\t\t.set(child_doc.quality_inspection, quality_inspection)\n\t\t\t\t\t.where(\n\t\t\t\t\t\t(child_doc.parent == self.reference_name) & (child_doc.item_code == self.item_code)\n\t\t\t\t\t)\n\t\t\t\t)\n\n\t\t\t\tif self.batch_no and self.docstatus < 2:\n\t\t\t\t\tquery = query.where(child_doc.batch_no == self.batch_no)\n\n\t\t\t\tif self.docstatus == 2 or remove_reference:\n\t\t\t\t\tquery = query.where(child_doc.quality_inspection == self.name)\n\t\t\t\telse:\n\t\t\t\t\tquery = query.where(IfNull(child_doc.quality_inspection, \"\").isin([\"\", self.name]))\n\n\t\t\t\tif self.child_row_reference:\n\t\t\t\t\tquery = query.where(child_doc.name == self.child_row_reference)\n\n\t\t\t\tquery.run()\n\n\t\t\t\tfrappe.db.set_value(\n\t\t\t\t\tself.reference_type,\n\t\t\t\t\tself.reference_name,\n\t\t\t\t\t\"modified\",\n\t\t\t\t\tself.modified,\n\t\t\t\t)\n\n\t\tif self.reference_type and self.reference_name:\n\t\t\tfrappe.get_lazy_doc(self.reference_type, self.reference_name).notify_update()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.inspect_and_set_status",
+      "start": 341,
+      "end": 358,
+      "program_units": 13,
+      "nodes": [
+        [
+          "Assign",
+          351,
+          351,
+          3,
+          27
+        ],
+        [
+          "Assign",
+          354,
+          354,
+          5,
+          29
+        ],
+        [
+          "Break",
+          358,
+          358,
+          5,
+          10
+        ],
+        [
+          "Expr",
+          345,
+          345,
+          5,
+          57
+        ],
+        [
+          "Expr",
+          348,
+          348,
+          5,
+          56
+        ],
+        [
+          "Expr",
+          355,
+          357,
+          5,
+          6
+        ],
+        [
+          "For",
+          342,
+          348,
+          2,
+          56
+        ],
+        [
+          "For",
+          352,
+          358,
+          3,
+          10
+        ],
+        [
+          "FunctionDef",
+          341,
+          358,
+          1,
+          10
+        ],
+        [
+          "If",
+          343,
+          348,
+          3,
+          56
+        ],
+        [
+          "If",
+          344,
+          348,
+          4,
+          56
+        ],
+        [
+          "If",
+          350,
+          358,
+          2,
+          10
+        ],
+        [
+          "If",
+          353,
+          358,
+          4,
+          10
+        ]
+      ],
+      "source": "\tdef inspect_and_set_status(self):\n\t\tfor reading in self.readings:\n\t\t\tif not reading.manual_inspection:  # dont auto set status if manual\n\t\t\t\tif reading.formula_based_criteria:\n\t\t\t\t\tself.set_status_based_on_acceptance_formula(reading)\n\t\t\t\telse:\n\t\t\t\t\t# if not formula based check acceptance values set\n\t\t\t\t\tself.set_status_based_on_acceptance_values(reading)\n\n\t\tif not self.manual_inspection:\n\t\t\tself.status = \"Accepted\"\n\t\t\tfor reading in self.readings:\n\t\t\t\tif reading.status == \"Rejected\":\n\t\t\t\t\tself.status = \"Rejected\"\n\t\t\t\t\tfrappe.msgprint(\n\t\t\t\t\t\t_(\"Status set to rejected as there are one or more rejected readings.\"), alert=True\n\t\t\t\t\t)\n\t\t\t\t\tbreak"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.validate_reading_number_format",
+      "start": 360,
+      "end": 399,
+      "program_units": 18,
+      "nodes": [
+        [
+          "Assign",
+          367,
+          367,
+          2,
+          45
+        ],
+        [
+          "Assign",
+          368,
+          368,
+          2,
+          64
+        ],
+        [
+          "Assign",
+          369,
+          369,
+          2,
+          42
+        ],
+        [
+          "Assign",
+          375,
+          375,
+          3,
+          79
+        ],
+        [
+          "Assign",
+          376,
+          376,
+          3,
+          41
+        ],
+        [
+          "Assign",
+          379,
+          379,
+          4,
+          31
+        ],
+        [
+          "Assign",
+          380,
+          380,
+          4,
+          30
+        ],
+        [
+          "Continue",
+          373,
+          373,
+          4,
+          12
+        ],
+        [
+          "Continue",
+          382,
+          382,
+          5,
+          13
+        ],
+        [
+          "Continue",
+          385,
+          385,
+          5,
+          13
+        ],
+        [
+          "Expr",
+          388,
+          399,
+          5,
+          6
+        ],
+        [
+          "For",
+          371,
+          399,
+          2,
+          6
+        ],
+        [
+          "For",
+          378,
+          399,
+          3,
+          6
+        ],
+        [
+          "FunctionDef",
+          360,
+          399,
+          1,
+          6
+        ],
+        [
+          "If",
+          372,
+          373,
+          3,
+          12
+        ],
+        [
+          "If",
+          381,
+          382,
+          4,
+          13
+        ],
+        [
+          "If",
+          384,
+          385,
+          4,
+          13
+        ],
+        [
+          "If",
+          387,
+          399,
+          4,
+          6
+        ]
+      ],
+      "source": "\tdef validate_reading_number_format(self):\n\t\t\"\"\"Reject newly entered readings that are not numbers in the user's format.\n\n\t\tThey would otherwise be misread rather than refused, silently rejecting an\n\t\tinspection whose readings are in fact within the acceptance range. Readings\n\t\talready stored are left alone, so a document entered by a user in one locale\n\t\tstays saveable and submittable by a user in another.\"\"\"\n\t\tnumber_format = get_reading_number_format()\n\t\tdecimal_str, comma_str = get_reading_separators(number_format)\n\t\tbefore_save = self.get_doc_before_save()\n\n\t\tfor reading in self.readings:\n\t\t\tif not cint(reading.numeric) or cint(reading.manual_inspection):\n\t\t\t\tcontinue\n\n\t\t\tstored = before_save and before_save.get(\"readings\", {\"name\": reading.name})\n\t\t\tstored = stored[0] if stored else None\n\n\t\t\tfor i in range(1, 11):\n\t\t\t\tfield = \"reading_\" + str(i)\n\t\t\t\tvalue = reading.get(field)\n\t\t\t\tif value is None or not value.strip():\n\t\t\t\t\tcontinue\n\n\t\t\t\tif stored and stored.get(field) == value:\n\t\t\t\t\tcontinue\n\n\t\t\t\tif parse_reading(value, decimal_str, comma_str) is None:\n\t\t\t\t\tfrappe.throw(\n\t\t\t\t\t\t_(\n\t\t\t\t\t\t\t\"Row #{0}: Reading {1} {2} is not a valid number in the {3} number format. Use {4} as the decimal separator.\"\n\t\t\t\t\t\t).format(\n\t\t\t\t\t\t\treading.idx,\n\t\t\t\t\t\t\ti,\n\t\t\t\t\t\t\tfrappe.bold(value),\n\t\t\t\t\t\t\tfrappe.bold(number_format.string),\n\t\t\t\t\t\t\tfrappe.bold(decimal_str),\n\t\t\t\t\t\t),\n\t\t\t\t\t\ttitle=_(\"Invalid Reading\"),\n\t\t\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.set_status_based_on_acceptance_values",
+      "start": 401,
+      "end": 410,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Assign",
+          403,
+          403,
+          3,
+          53
+        ],
+        [
+          "Assign",
+          404,
+          404,
+          3,
+          37
+        ],
+        [
+          "Assign",
+          405,
+          405,
+          3,
+          34
+        ],
+        [
+          "Assign",
+          408,
+          408,
+          3,
+          49
+        ],
+        [
+          "Assign",
+          410,
+          410,
+          2,
+          55
+        ],
+        [
+          "FunctionDef",
+          401,
+          410,
+          1,
+          55
+        ],
+        [
+          "If",
+          402,
+          408,
+          2,
+          49
+        ]
+      ],
+      "source": "\tdef set_status_based_on_acceptance_values(self, reading):\n\t\tif not cint(reading.numeric):\n\t\t\treading_value = reading.get(\"reading_value\") or \"\"\n\t\t\tvalue = reading.get(\"value\") or \"\"\n\t\t\tresult = reading_value == value\n\t\telse:\n\t\t\t# numeric readings\n\t\t\tresult = self.min_max_criteria_passed(reading)\n\n\t\treading.status = \"Accepted\" if result else \"Rejected\""
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.min_max_criteria_passed",
+      "start": 412,
+      "end": 426,
+      "program_units": 10,
+      "nodes": [
+        [
+          "Assign",
+          414,
+          414,
+          2,
+          21
+        ],
+        [
+          "Assign",
+          416,
+          416,
+          3,
+          51
+        ],
+        [
+          "Assign",
+          418,
+          418,
+          4,
+          22
+        ],
+        [
+          "Assign",
+          419,
+          423,
+          4,
+          5
+        ],
+        [
+          "For",
+          415,
+          425,
+          2,
+          17
+        ],
+        [
+          "FunctionDef",
+          412,
+          426,
+          1,
+          20
+        ],
+        [
+          "If",
+          417,
+          425,
+          3,
+          17
+        ],
+        [
+          "If",
+          424,
+          425,
+          4,
+          17
+        ],
+        [
+          "Return",
+          425,
+          425,
+          5,
+          17
+        ],
+        [
+          "Return",
+          426,
+          426,
+          2,
+          20
+        ]
+      ],
+      "source": "\tdef min_max_criteria_passed(self, reading):\n\t\t\"\"\"Determine whether all readings fall in the acceptable range.\"\"\"\n\t\thas_reading = False\n\t\tfor i in range(1, 11):\n\t\t\treading_value = reading.get(\"reading_\" + str(i))\n\t\t\tif reading_value is not None and reading_value.strip():\n\t\t\t\thas_reading = True\n\t\t\t\tresult = (\n\t\t\t\t\tflt(reading.get(\"min_value\"))\n\t\t\t\t\t<= parse_float(reading_value)\n\t\t\t\t\t<= flt(reading.get(\"max_value\"))\n\t\t\t\t)\n\t\t\t\tif not result:\n\t\t\t\t\treturn False\n\t\treturn has_reading"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.set_status_based_on_acceptance_formula",
+      "start": 428,
+      "end": 453,
+      "program_units": 11,
+      "nodes": [
+        [
+          "Assign",
+          435,
+          435,
+          2,
+          40
+        ],
+        [
+          "Assign",
+          436,
+          436,
+          2,
+          50
+        ],
+        [
+          "Assign",
+          439,
+          439,
+          3,
+          51
+        ],
+        [
+          "Assign",
+          440,
+          440,
+          3,
+          56
+        ],
+        [
+          "Assign",
+          442,
+          442,
+          3,
+          44
+        ],
+        [
+          "Expr",
+          430,
+          433,
+          3,
+          4
+        ],
+        [
+          "Expr",
+          443,
+          448,
+          3,
+          4
+        ],
+        [
+          "Expr",
+          450,
+          453,
+          3,
+          4
+        ],
+        [
+          "FunctionDef",
+          428,
+          453,
+          1,
+          4
+        ],
+        [
+          "If",
+          429,
+          433,
+          2,
+          4
+        ],
+        [
+          "Try",
+          438,
+          453,
+          2,
+          4
+        ]
+      ],
+      "source": "\tdef set_status_based_on_acceptance_formula(self, reading):\n\t\tif not reading.acceptance_formula:\n\t\t\tfrappe.throw(\n\t\t\t\t_(\"Row #{0}: Acceptance Criteria Formula is required.\").format(reading.idx),\n\t\t\t\ttitle=_(\"Missing Formula\"),\n\t\t\t)\n\n\t\tcondition = reading.acceptance_formula\n\t\tdata = self.get_formula_evaluation_data(reading)\n\n\t\ttry:\n\t\t\tresult = frappe.safe_eval(condition, None, data)\n\t\t\treading.status = \"Accepted\" if result else \"Rejected\"\n\t\texcept NameError as e:\n\t\t\tfield = frappe.bold(e.args[0].split()[1])\n\t\t\tfrappe.throw(\n\t\t\t\t_(\n\t\t\t\t\t\"Row #{0}: {1} is not a valid reading field. Please refer to the field description.\"\n\t\t\t\t).format(reading.idx, field),\n\t\t\t\ttitle=_(\"Invalid Formula\"),\n\t\t\t)\n\t\texcept Exception:\n\t\t\tfrappe.throw(\n\t\t\t\t_(\"Row #{0}: Acceptance Criteria Formula is incorrect.\").format(reading.idx),\n\t\t\t\ttitle=_(\"Invalid Formula\"),\n\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.get_formula_evaluation_data",
+      "start": 455,
+      "end": 470,
+      "program_units": 12,
+      "nodes": [
+        [
+          "Assign",
+          456,
+          456,
+          2,
+          11
+        ],
+        [
+          "Assign",
+          458,
+          458,
+          3,
+          57
+        ],
+        [
+          "Assign",
+          462,
+          462,
+          4,
+          31
+        ],
+        [
+          "Assign",
+          464,
+          464,
+          5,
+          22
+        ],
+        [
+          "Assign",
+          467,
+          467,
+          4,
+          49
+        ],
+        [
+          "Assign",
+          468,
+          468,
+          3,
+          46
+        ],
+        [
+          "Continue",
+          465,
+          465,
+          5,
+          13
+        ],
+        [
+          "For",
+          461,
+          467,
+          3,
+          49
+        ],
+        [
+          "FunctionDef",
+          455,
+          470,
+          1,
+          13
+        ],
+        [
+          "If",
+          457,
+          468,
+          2,
+          46
+        ],
+        [
+          "If",
+          463,
+          465,
+          4,
+          13
+        ],
+        [
+          "Return",
+          470,
+          470,
+          2,
+          13
+        ]
+      ],
+      "source": "\tdef get_formula_evaluation_data(self, reading):\n\t\tdata = {}\n\t\tif not cint(reading.numeric):\n\t\t\tdata = {\"reading_value\": reading.get(\"reading_value\")}\n\t\telse:\n\t\t\t# numeric readings\n\t\t\tfor i in range(1, 11):\n\t\t\t\tfield = \"reading_\" + str(i)\n\t\t\t\tif reading.get(field) is None:\n\t\t\t\t\tdata[field] = 0.0\n\t\t\t\t\tcontinue\n\n\t\t\t\tdata[field] = parse_float(reading.get(field))\n\t\t\tdata[\"mean\"] = self.calculate_mean(reading)\n\n\t\treturn data"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "QualityInspection.calculate_mean",
+      "start": 472,
+      "end": 484,
+      "program_units": 9,
+      "nodes": [
+        [
+          "Assign",
+          476,
+          476,
+          2,
+          20
+        ],
+        [
+          "Assign",
+          479,
+          479,
+          3,
+          51
+        ],
+        [
+          "Assign",
+          483,
+          483,
+          2,
+          59
+        ],
+        [
+          "Expr",
+          481,
+          481,
+          4,
+          52
+        ],
+        [
+          "For",
+          478,
+          481,
+          2,
+          52
+        ],
+        [
+          "FunctionDef",
+          472,
+          484,
+          1,
+          20
+        ],
+        [
+          "If",
+          480,
+          481,
+          3,
+          52
+        ],
+        [
+          "ImportFrom",
+          474,
+          474,
+          2,
+          29
+        ],
+        [
+          "Return",
+          484,
+          484,
+          2,
+          20
+        ]
+      ],
+      "source": "\tdef calculate_mean(self, reading):\n\t\t\"\"\"Calculate mean of all non-empty readings.\"\"\"\n\t\tfrom statistics import mean\n\n\t\treadings_list = []\n\n\t\tfor i in range(1, 11):\n\t\t\treading_value = reading.get(\"reading_\" + str(i))\n\t\t\tif reading_value is not None and reading_value.strip():\n\t\t\t\treadings_list.append(parse_float(reading_value))\n\n\t\tactual_mean = mean(readings_list) if readings_list else 0\n\t\treturn actual_mean"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "quality_inspection_query",
+      "start": 591,
+      "end": 604,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          591,
+          604,
+          0,
+          2
+        ],
+        [
+          "Return",
+          592,
+          604,
+          1,
+          2
+        ]
+      ],
+      "source": "def quality_inspection_query(doctype, txt, searchfield, start, page_len, filters):\n\treturn frappe.get_list(\n\t\t\"Quality Inspection\",\n\t\tlimit_start=start,\n\t\tlimit_page_length=page_len,\n\t\tfilters={\n\t\t\t\"docstatus\": (\"<\", 2),\n\t\t\t\"name\": (\"like\", \"%%%s%%\" % txt),\n\t\t\t\"item_code\": filters.get(\"item_code\"),\n\t\t\t\"reference_name\": (\"in\", [filters.get(\"reference_name\", \"\"), \"\"]),\n\t\t\t\"child_row_reference\": (\"in\", [filters.get(\"child_row_reference\", \"\"), \"\"]),\n\t\t},\n\t\tas_list=1,\n\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "make_quality_inspection",
+      "start": 608,
+      "end": 627,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          610,
+          610,
+          2,
+          40
+        ],
+        [
+          "Assign",
+          613,
+          625,
+          1,
+          2
+        ],
+        [
+          "Expr",
+          611,
+          611,
+          2,
+          39
+        ],
+        [
+          "FunctionDef",
+          608,
+          627,
+          0,
+          11
+        ],
+        [
+          "FunctionDef",
+          609,
+          611,
+          1,
+          39
+        ],
+        [
+          "Return",
+          627,
+          627,
+          1,
+          11
+        ]
+      ],
+      "source": "def make_quality_inspection(source_name, target_doc=None):\n\tdef postprocess(source, doc):\n\t\tdoc.inspected_by = frappe.session.user\n\t\tdoc.get_quality_inspection_template()\n\n\tdoc = get_mapped_doc(\n\t\t\"BOM\",\n\t\tsource_name,\n\t\t{\n\t\t\t\"BOM\": {\n\t\t\t\t\"doctype\": \"Quality Inspection\",\n\t\t\t\t\"validation\": {\"docstatus\": [\"=\", 1]},\n\t\t\t\t\"field_map\": {\"name\": \"bom_no\", \"item\": \"item_code\", \"stock_uom\": \"uom\", \"stock_qty\": \"qty\"},\n\t\t\t}\n\t\t},\n\t\ttarget_doc,\n\t\tpostprocess,\n\t)\n\n\treturn doc"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "name": "validate_qi_reference",
+      "start": 690,
+      "end": 715,
+      "program_units": 10,
+      "nodes": [
+        [
+          "Assign",
+          694,
+          699,
+          1,
+          2
+        ],
+        [
+          "Expr",
+          704,
+          708,
+          2,
+          3
+        ],
+        [
+          "Expr",
+          711,
+          715,
+          2,
+          3
+        ],
+        [
+          "FunctionDef",
+          690,
+          715,
+          0,
+          3
+        ],
+        [
+          "If",
+          691,
+          692,
+          1,
+          8
+        ],
+        [
+          "If",
+          700,
+          701,
+          1,
+          8
+        ],
+        [
+          "If",
+          703,
+          708,
+          1,
+          3
+        ],
+        [
+          "If",
+          710,
+          715,
+          1,
+          3
+        ],
+        [
+          "Return",
+          692,
+          692,
+          2,
+          8
+        ],
+        [
+          "Return",
+          701,
+          701,
+          2,
+          8
+        ]
+      ],
+      "source": "def validate_qi_reference(doc, row, item_code=None):\n\tif not row.get(\"quality_inspection\"):\n\t\treturn\n\n\tqi = frappe.db.get_value(\n\t\t\"Quality Inspection\",\n\t\trow.quality_inspection,\n\t\t[\"reference_type\", \"reference_name\", \"item_code\"],\n\t\tas_dict=True,\n\t)\n\tif not qi:\n\t\treturn\n\n\tif qi.reference_type != doc.doctype or qi.reference_name != doc.name:\n\t\tfrappe.throw(\n\t\t\t_(\n\t\t\t\t\"Row #{0}: Please select a valid Quality Inspection with Reference Type {1} and Reference Name {2}.\"\n\t\t\t).format(row.idx, frappe.bold(doc.doctype), frappe.bold(doc.name))\n\t\t)\n\n\tif qi.item_code != (item_code or row.item_code):\n\t\tfrappe.throw(\n\t\t\t_(\"Row #{0}: Please select a valid Quality Inspection with Item Code {1}.\").format(\n\t\t\t\trow.idx, frappe.bold(item_code or row.item_code)\n\t\t\t)\n\t\t)"
+    }
+  ],
+  "source_files": [
+    {
+      "repo": "odoo",
+      "path": "addons/repair/models/repair.py",
+      "root_path": "tmp/odoo20-audit/addons/repair/models/repair.py",
+      "sha256": "bdf487dee1a7dc27b30ae941bffbdf45a2be8b9e6656a2fa7bda082547e31bd8",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/repair/models/repair.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 427,
+        "declarative_units": 0,
+        "physical_lines": 826,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-18-preuves.json",
+      "prior_observed": "Ordre de réparation lié au bien, au lot/série et au propriétaire.",
+      "prior_limit": "Preuve de mécanismes de filiation ; les gestes et diagnostics de réparation restent externes."
+    },
+    {
+      "repo": "tryton",
+      "path": "modules/quality/quality.py",
+      "root_path": "tmp/tryton-code-audit-2026-10-28/modules/quality/quality.py",
+      "sha256": "eda41d6b31488cd2a3cd21dcc527dcc3deeda572ef1458fe3a55f2cdebe8d9b8",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/quality/quality.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 401,
+        "declarative_units": 0,
+        "physical_lines": 876,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-18-preuves.json",
+      "prior_observed": "Points de contrôle obligatoires, résultat accepté/refusé et alerte.",
+      "prior_limit": "Analogie de résultat qualité configurable. Ne prouve pas des prestations de finition/nettoyage/personnalisation complètes."
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-quality/src/main/java/com/axelor/apps/quality/service/QualityControlServiceImpl.java",
+      "root_path": "tmp/oss-audit-axelor/axelor-quality/src/main/java/com/axelor/apps/quality/service/QualityControlServiceImpl.java",
+      "sha256": "177eb4ff9cbe652d3fa128ee8c9ffa23eabb502774fd8967a2b26e7f22ec4ebe",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-quality/src/main/java/com/axelor/apps/quality/service/QualityControlServiceImpl.java",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 65,
+        "declarative_units": 0,
+        "physical_lines": 137,
+        "details": {
+          "convention": "Arbre syntaxique : instructions et déclarations ; JSX compté séparément"
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-18-preuves.json",
+      "prior_observed": "Instantiation de points de contrôle, points optionnels et actions correctives à partir d'un modèle.",
+      "prior_limit": "Analogie de consignes/contrôles structurés, pas couverture de chaque prestation textile."
+    },
+    {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "root_path": "tmp/master-data-native-23/erpnext/erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "sha256": "428849432a8cd578a5c57e09233498a3681cbdde2f075768994b65587b4f1373",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/doctype/quality_inspection/quality_inspection.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 299,
+        "declarative_units": 0,
+        "physical_lines": 715,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 46,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    }
+  ],
+  "attribution": 0.6,
+  "attribution_basis": "Part d’analogie retenue après exclusion supposée des responsabilités natives hors périmètre ; pas proportion observée. Les quatre portefeuilles montrent surtout inspection ou réparation. Le verdict qualité n’est pas la décision sur les usages et la récupération de valeur.",
+  "new_complement_fraction": 0.75,
+  "new_complement_basis": "Chiffrer le dossier de décision et les alternatives admissibles ; exclure l’exécution physique de réparation/rebut. Ne pas inventer un optimiseur universel.",
+  "schemas": [
+    {
+      "name": "DispositionCase",
+      "fields": [
+        "goods",
+        "quantity",
+        "unit",
+        "inspection",
+        "ownership",
+        "scope",
+        "status"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    },
+    {
+      "name": "DispositionOption",
+      "fields": [
+        "case",
+        "use",
+        "treatment",
+        "cost",
+        "value",
+        "conditions",
+        "limits"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    },
+    {
+      "name": "DispositionDecision",
+      "fields": [
+        "case",
+        "option",
+        "quantity",
+        "authority",
+        "date",
+        "justification"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    }
+  ],
+  "template_source": "audits/2026-10-30-propriete-stock-calcul-02/inputs.json#schema_templates",
+  "scaffold_source": "audits/2026-10-30-propriete-stock-calcul-02/inputs.json#new_module_scaffolding",
+  "reuse": "Services génériques Master Data, Stock et Propriété du stock déjà financés ; autres mécanismes communs de la campagne à réconcilier. Le code natif sert de règle de taille, ce n’est pas une facture historique.",
+  "no_extra_AI": true,
+  "no_generic_rebuild": true,
+  "logical_code_not_calibrated_to_physical_SLOC": true
+}

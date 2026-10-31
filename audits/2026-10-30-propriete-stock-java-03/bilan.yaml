@@ -1,0 +1,223 @@
+id: propriete-stock-java-03
+decision:
+  status: 100_JH_maintenus_comme_hypothese_de_travail_non_consolidee
+  rounded_jh: 100
+  exact_jh: 98.9157173042935
+  reason: Le registre et les deux dates étaient déjà dimensionnés comme nouveaux modules. La revue ne démontre pas
+    un manque de volume chiffrable permettant une correction de taille.
+  not_a_validation: Ni un équivalent Java complet, ni une productivité Flow, ni un coût de réalisation observé ne
+    sont démontrés. Ne pas présenter 100 JH comme une estimation confirmée par les quatre produits.
+  provisional_volume: 493.15000000000003
+  allocation_jh: 45.799818679241014
+  partial_witness_program_units:
+    journal: 163
+    dated_query: 53
+  witness_limit: Ces témoins partiels contiennent des comportements financiers exclus et délèguent des services.
+    Leur taille ne démontre ni une borne basse ni une borne haute du code Flow. Aucune soustraction ni conversion
+    de ces tailles en JH.
+  module_assumptions:
+  - id: OWN-F04
+    behavior_units: 281.8
+    fraction: 1
+  - id: OWN-F05
+    behavior_units: 211.35000000000002
+    fraction: 0.75
+  journal_primitives_correction: Le libellé ancien sur les primitives de journal ne prouve que la disponibilité
+    de persistance/audit techniques. Le journal de propriété et sa sélection de versions restent à construire dans
+    OWN-F04/F05.
+  nominal_calculated_months: 7.04841851479819
+  retained_schedule_months: null
+  new_adoption: false
+  statistical_uncertainty: null
+  sensitive_assumption:
+    id: registre-et-deux-dates
+    lower_jh: 77.60663032402552
+    upper_jh: 135.34802396926722
+    lower_change_jh: -21.309086980267978
+    upper_change_jh: 36.43230666497372
+    note: Volumes du nouveau registre et des corrections/lectures aux deux dates, uniquement.
+    not_additive: true
+explanation:
+  other_OSS:
+    arithmetic_reason: 'Les mêmes fractions de modules multiplient des analogues de tailles différentes : décision/réservation
+      Java 91 unités, ERPNext 178,05, Odoo 324,15, Tryton 346 ; correction Java 281,8, ERPNext 611,7, Odoo 528,3,
+      Tryton 420,8. Le total Java est donc plus petit avant même COCOMO.'
+    interpretation: Ces différences portent sur les chaînes et conventions de code sélectionnées. Les appels à des
+      services délégués, la génération de code et les frontières des composants diffèrent. Ce n'est pas une mesure
+      de productivité comparée, ni la preuve que Java coûterait moitié moins.
+    scope: Les quatre montants dimensionnent le même besoin Flow par analogies natives, avec un patrimoine Master
+      Data et Stock disponible. Ils ne sont pas quatre historiques de coût réellement consommé, ni quatre implémentations
+      natives complètes du registre Flow.
+    no_additional_framework_discount: Aucune nouvelle réduction Spring. Les mécanismes génériques sont déjà exclus
+      du nouveau financement ; le nouveau comportement de propriété reste financé.
+  COSMIC:
+    same_scope_count: 80
+    arithmetic: 80 CFP × 20 h/CFP × 1 ÷ 7 h/JH = 228,57142857142858 JH.
+    gap_reason: La voie fonctionnelle utilise un rendement historique, qui n'est pas recalibré sur la réutilisation
+      de Master Data et Stock ni sur ce composant. La voie COCOMO dépend d'une taille de nouveau code supposée par
+      analogie. Le désaccord peut provenir des deux ; aucun des deux biais n'est mesuré.
+    java_implied_rate: À 98,9157 JH, le calcul Java correspond à 8,6551 h/CFP. Le code étudié ne démontre pas ce
+      rendement en projet.
+    no_convergence_claim: L'écart reste de 129,6557 JH, soit 131,077 % au-dessus du Java non arrondi. Ne pas moyenner,
+      relever les coefficients ou transformer cet écart en confiance.
+  source_review_limits: Lecture statique des sources figées ; aucun démarrage des quatre ERP ni test fonctionnel
+    de leurs garanties temporelles. L'absence d'analogue dans les chemins étudiés ne prouve pas son absence de tout
+    le produit.
+  what_is_confirmed: Les sources, les frontières des analogies, l'arithmétique et le fait que les compléments sont
+    déjà inclus dans le calcul.
+  what_is_not_confirmed: La suffisance des fractions de nouveau code, le rendement du projet Flow et une équivalence
+    native complète.
+findings:
+- id: registre
+  status: analogie_partielle
+  observed: Le journal comptable sépare création, validation et contre-écriture. Le stock dispose de mouvements
+    et d'un historique de quantités.
+  not_demonstrated: Un journal de propriété autonome et générique dans ces chemins.
+  estimate_consequence: OWN-F04 demeure du nouveau code. Son volume de 281,8 unités n'est pas une mesure de code
+    propriétaire existant.
+- id: correction
+  status: analogie_partielle
+  observed: La contre-écriture crée une nouvelle écriture ; le batch Stock efface puis reconstruit son historique.
+  not_demonstrated: Une conservation métier des versions reconnues de propriété, avec correctionOf et connaissance
+    passée.
+  estimate_consequence: La correction doit être définie par la nouvelle famille ; ne pas réutiliser le batch comme
+    preuve de la garantie.
+- id: deux-dates
+  status: complement_flow_non_apparie
+  observed: La requête Stock utilise realDate entre beginDate et endDate. L'audit technique contient des états précédent/courant
+    et des horodatages.
+  not_demonstrated: Une requête combinant date d'effet, date de connaissance et sélection des corrections valides.
+  estimate_consequence: OWN-F05 finance cette fonction par analogie. Les 211,35 unités sont une hypothèse, non une
+    mesure native.
+functional_example:
+  status: sémantique cible proposée pour rendre la garantie lisible ; ni preuve native ni réalisation Flow
+  events:
+  - effective_at: '2026-01-10'
+    known_at: '2026-01-12'
+    quantity: 10
+    revision: 1
+  - effective_at: '2026-01-10'
+    known_at: '2026-02-05'
+    quantity: 6
+    revision: 2
+    corrects: 1
+  queries:
+  - effective_at: '2026-01-20'
+    known_at: '2026-01-31'
+    expected_quantity: 10
+  - effective_at: '2026-01-20'
+    known_at: '2026-02-06'
+    expected_quantity: 6
+  meaning: 'Au 20 janvier : 10 unités selon ce qu''on savait au 31 janvier, 6 selon ce qu''on sait après la correction
+    du 5 février. L''ancien résultat doit rester explicable.'
+  exclusions: Pas de moteur temporel général, de langage contractuel, de comptabilité financière ni de règles spécifiques
+    Beaumanoir construits ici.
+native_comparisons:
+- id: erpnext
+  name: ERPNext avec Frappe
+  jh: 169.84832256574626
+  rounded_jh: 170
+  equivalent_units: 2094.475
+  schedule_months: 8.37033249868487
+  reservation_ruler: 178.05
+  correction_ruler: 611.6999999999999
+  new_behavior_units: 1910.475
+  program_units: 1970.475
+  declarative_units: 124
+  control_higher_jh: 58.723106005682325
+  control_higher_pct: 34.57385102107871
+  implied_hours_per_CFP: 14.861728224502798
+  higher_than_java_jh: 70.93260526145276
+  higher_than_java_pct: 71.71014596521952
+- id: odoo
+  name: Odoo
+  jh: 212.2616519281577
+  rounded_jh: 210
+  equivalent_units: 2565.125
+  schedule_months: 8.98509285706432
+  reservation_ruler: 324.15000000000003
+  correction_ruler: 528.3
+  new_behavior_units: 2161.125
+  program_units: 2355.125
+  declarative_units: 210
+  control_higher_jh: 16.30977664327088
+  control_higher_pct: 7.683807458914484
+  implied_hours_per_CFP: 18.572894543713797
+  higher_than_java_jh: 113.34593462386421
+  higher_than_java_pct: 114.588396781453
+- id: tryton
+  name: Tryton
+  jh: 195.00778159987527
+  rounded_jh: 200
+  equivalent_units: 2374.8
+  schedule_months: 8.746134399145
+  reservation_ruler: 346.0
+  correction_ruler: 420.8
+  new_behavior_units: 1984.8
+  program_units: 2180.8
+  declarative_units: 194
+  control_higher_jh: 33.56364697155331
+  control_higher_pct: 17.211439818550698
+  implied_hours_per_CFP: 17.063180889989088
+  higher_than_java_jh: 96.09206429558178
+  higher_than_java_pct: 97.14539500327805
+- id: axelor
+  name: Axelor avec Open Platform
+  jh: 98.9157173042935
+  rounded_jh: 100
+  equivalent_units: 1281.05
+  schedule_months: 7.04841851479819
+  reservation_ruler: 91
+  correction_ruler: 281.8
+  new_behavior_units: 907.0500000000001
+  program_units: 991.05
+  declarative_units: 290
+  control_higher_jh: 129.65571126713508
+  control_higher_pct: 131.0769560193113
+  implied_hours_per_CFP: 8.655125264125681
+  higher_than_java_jh: 0.0
+  higher_than_java_pct: 0.0
+functional_control:
+  CFP: 80
+  jh: 228.57142857142858
+  hours_per_CFP: 20
+  factor: 1
+  explanation: 'Comptage inchangé : la date de connaissance est un attribut de la lecture déjà comptée. Le rendement
+    historique reste non calibré sur ce composant ni sa réutilisation.'
+  activities: Conventions des phases de la précédente itération conservées ; contrôle fonctionnel et COCOMO n ont
+    pas une calibration commune observée.
+cumulative:
+  adopted_jh: 1840
+  Master_Data_jh: 1500
+  Stock_jh: 340
+  ownership_adopted_jh: null
+  conditional_addition_if_100_later_adopted: 1940
+  conditional_addition_is_not_a_retained_total: true
+  integrated_cocomo_total: false
+  schedules_added: false
+progress:
+  total_capabilities: 88
+  studied_or_proposed: 16
+  studied_or_proposed_pct: 18.181818181818183
+  adopted: 14
+  adopted_pct: 15.909090909090908
+  remaining_to_estimate: 72
+  remaining_to_adopt: 74
+  new_capabilities_studied: 0
+  new_capabilities_adopted: 0
+  advance: Frontière entre audit technique, historique Stock et registre de propriété clarifiée ; sources Java supplémentaires
+    vérifiées.
+  effort_uncertainty_reduced: false
+  reason: La couverture sémantique est mieux qualifiée, mais les fractions de nouveau code et le rendement ISBSG
+    restent non calibrés.
+recommendation:
+  another_general_source_iteration_worthwhile: false
+  proposed_next_step: Clore cette revue de code. Pour décider, présenter explicitement les 100 JH comme hypothèse
+    Java/Spring et le contrôle à 229 JH, avec la sensibilité du registre. Une consolidation doit assumer ce désaccord
+    ; aucune moyenne ni hausse mécanique.
+  targeted_reopening: 'Seulement si le périmètre change : moteur temporel général, clauses spécifiques, historique
+    non borné avec exigences de performance nouvelles, ou nouvelles données de productivité.'
+active_model_changed: false
+application_changed: false
+skill_changed: false
+adoption: false

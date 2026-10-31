@@ -1,0 +1,218 @@
+{
+  "support": [
+    {
+      "repo": "odoo",
+      "path": "odoo/sql_db.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "e14cfae96530442676859369fc26ea465a4f263b0bdfc129b922da3966a13daa",
+      "ranges": [
+        [
+          87,
+          91
+        ],
+        [
+          214,
+          242
+        ],
+        [
+          786,
+          800
+        ]
+      ],
+      "fragments": [
+        "PG_CONCURRENCY_EXCEPTIONS_TO_RETRY = (\n    psycopg2.errors.LockNotAvailable,\n    psycopg2.errors.SerializationFailure,\n    psycopg2.errors.DeadlockDetected,\n)",
+        "\n        However, most database management systems implement a limited\n        serializable isolation in the form of\n        `snapshot isolation <http://en.wikipedia.org/wiki/Snapshot_isolation>`_,\n        providing most of the same advantages as True Serializability,\n        with a fraction of the performance cost.\n        With PostgreSQL up to version 9.0, this snapshot isolation was\n        the implementation of both the ``REPEATABLE READ`` and\n        ``SERIALIZABLE`` levels of the SQL standard.\n        As of PostgreSQL 9.1, the previous snapshot isolation implementation\n        was kept for ``REPEATABLE READ``, while a new ``SERIALIZABLE``\n        level was introduced, providing some additional heuristics to\n        detect a concurrent update by parallel transactions, and forcing\n        one of them to rollback.\n\n        OpenERP implements its own level of locking protection\n        for transactions that are highly likely to provoke concurrent\n        updates, such as stock reservations or document sequences updates.\n        Therefore we mostly care about the properties of snapshot isolation,\n        but we don't really need additional heuristics to trigger transaction\n        rollbacks, as we are taking care of triggering instant rollbacks\n        ourselves when it matters (and we can save the additional performance\n        hit of these heuristics).\n\n        As a result of the above, we have selected ``REPEATABLE READ`` as\n        the default transaction isolation level for OpenERP cursors, as\n        it will be mapped to the desired ``snapshot isolation`` level for\n        all supported PostgreSQL version (>10).\n",
+        "    @property\n    def dbname(self) -> str:\n        return self.__dbname\n\n    def cursor(self) -> Cursor:\n        _logger.debug('create cursor to %r', self.dsn)\n        cnx = self.__pool.borrow(self.__dsn)\n        cnx.set_session(\n            # See the docstring of this class.\n            isolation_level=ISOLATION_LEVEL_REPEATABLE_READ,\n            readonly=self.__pool.readonly,\n            autocommit=False,\n        )\n        return Cursor(cnx, self.__dbname)\n"
+      ],
+      "meaning": "REPEATABLE READ et classes de conflits reprises.",
+      "role": "framework_or_model_evidence",
+      "stock_additional_units": null
+    },
+    {
+      "repo": "platform",
+      "path": "axelor-core/src/main/java/com/axelor/db/Model.java",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "sha256": "d00256743e19e855f82e1ca85d0f9a2c14734f2ea2717ad39bac98e852b80305",
+      "ranges": [
+        [
+          14,
+          27
+        ],
+        [
+          49,
+          56
+        ]
+      ],
+      "fragments": [
+        " * The base abstract model class to extend all domain objects.\n *\n * <p>The derived model classes should implement {@link #getId()} and {@link #setId(Long)} using\n * appropriate {@link GeneratedValue#strategy()}.\n *\n * <p>A generic implementation {@link JpaModel} should be used in most cases if sequence of record\n * ids are important.\n */\n@MappedSuperclass\npublic abstract class Model {\n\n  @Version private Integer version;\n\n  // Represents the collection id of the record in the UI widgets (collection fields)",
+        "\n  public Integer getVersion() {\n    return version;\n  }\n\n  public void setVersion(Integer version) {\n    this.version = version;\n  }"
+      ],
+      "meaning": "Champ @Version hérité ; pas une absence de contrôle de concurrence.",
+      "role": "framework_or_model_evidence",
+      "stock_additional_units": null
+    },
+    {
+      "repo": "platform",
+      "path": "axelor-core/src/main/java/com/axelor/db/JpaModel.java",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "sha256": "f6a44924ffcc76ad8d271ef867cce00d57d5e1cb7e9f49ede4ba82a9f61ba0d7",
+      "ranges": [
+        [
+          12,
+          27
+        ]
+      ],
+      "fragments": [
+        "/**\n * A generic implementation of {@link Model}.\n *\n * <p>This class uses {@link GenerationType#AUTO} strategy for id generation which is best suited\n * for models where sequence of record ids is important.\n *\n * <p>This is the most optimal strategy so this class should be used whenever possible.\n */\n@MappedSuperclass\npublic abstract class JpaModel extends Model {\n\n  @Id\n  @GeneratedValue(strategy = GenerationType.AUTO)\n  private Long id;\n\n  public Long getId() {"
+      ],
+      "meaning": "Héritage Model.",
+      "role": "framework_or_model_evidence",
+      "stock_additional_units": null
+    },
+    {
+      "repo": "platform",
+      "path": "gradle/libs.gradle",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "sha256": "15ab3e1d4da58b3264c7c66fe672f63ca39a048250ac5540e788b9bd9f2b8c2a",
+      "ranges": [
+        [
+          1,
+          10
+        ],
+        [
+          114,
+          120
+        ]
+      ],
+      "fragments": [
+        "def libs = ext.libs = [:]\ndef versions = ext.libsVersions = [:]\n\n// versions\nversions.guice = \"7.0.0\"\nversions.guava = \"33.5.0-jre\"\nversions.hibernate = \"6.6.58.Final\"\nversions.hibernate_validator = \"8.0.5.Final\"\nversions.caffeine = \"3.2.4\"\nversions.redisson = \"4.7.0\"",
+        "\n// Hibernate\nlibs.hibernate = [\n  \"org.hibernate.orm:hibernate-core:${versions.hibernate}\",\n  \"org.hibernate.orm:hibernate-hikaricp:${versions.hibernate}\",\n  \"org.hibernate.validator:hibernate-validator:${versions.hibernate_validator}\",\n  \"org.hibernate.orm:hibernate-jcache:${versions.hibernate}\","
+      ],
+      "meaning": "Hibernate 6.6.58.Final dans la révision native.",
+      "role": "framework_or_model_evidence",
+      "stock_additional_units": null
+    },
+    {
+      "repo": "tryton",
+      "path": "trytond/trytond/backend/postgresql/database.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "7f820fdaa78b7a750da93091e3166e12b03fce5e8852910bcd75c80baab714bc",
+      "ranges": [
+        [
+          277,
+          289
+        ]
+      ],
+      "fragments": [
+        "                'TRYTOND_APPNAME', 'trytond'),\n            }\n\n    def connect(self):\n        return self\n\n    def get_connection(\n            self, autocommit=False, readonly=False, statement_timeout=None):\n        conn = self._connpool.getconn()\n        conn.isolation_level = IsolationLevel.REPEATABLE_READ\n        conn.read_only = readonly\n        conn.autocommit = autocommit\n        if statement_timeout:"
+      ],
+      "meaning": "Isolation REPEATABLE READ du backend PostgreSQL.",
+      "role": "framework_or_model_evidence",
+      "stock_additional_units": null
+    },
+    {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_move_line.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "98a746a2ef3d2ba456d68fa86afb76f3bb4e01da2d9abeca17949244353e1904",
+      "ranges": [
+        [
+          62,
+          64
+        ]
+      ],
+      "fragments": [
+        "    date = fields.Datetime(\n        'Date', related=\"move_id.date\", store=True)\n    owner_id = fields.Many2one("
+      ],
+      "meaning": "date est liée à move_id.date et stockée ; la date du mouvement se propage aux lignes.",
+      "role": "framework_or_model_evidence",
+      "stock_additional_units": null
+    },
+    {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/bin/bin.py",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "sha256": "37b7749583c62a7c727de801a97b844eb70e70ce85d59ae85bc97dbe5dda3a30",
+      "ranges": [
+        [
+          219,
+          220
+        ]
+      ],
+      "fragments": [
+        "def on_doctype_update():\n\tfrappe.db.add_unique(\"Bin\", [\"item_code\", \"warehouse\"], constraint_name=\"unique_item_warehouse\")"
+      ],
+      "meaning": "Contrainte unique item/warehouse ; elle ne prouve pas seule l’exclusion entre nouvelles réservations distinctes.",
+      "role": "framework_or_model_evidence",
+      "stock_additional_units": null
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/resources/domains/StockLocationLine.xml",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "sha256": "b16f379d3dccba14d8f9eec8ee36167d4a07e188acf924dd7e8674c0750ac749",
+      "ranges": [
+        [
+          1,
+          36
+        ]
+      ],
+      "fragments": [
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<domain-models xmlns=\"http://axelor.com/xml/ns/domain-models\"\n  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n  xsi:schemaLocation=\"http://axelor.com/xml/ns/domain-models https://axelor.com/xml/ns/domain-models/domain-models_8.2.xsd\">\n\n  <module name=\"stock\" package=\"com.axelor.apps.stock.db\"/>\n\n  <entity name=\"StockLocationLine\">\n\n    <many-to-one name=\"stockLocation\" ref=\"com.axelor.apps.stock.db.StockLocation\"\n      title=\"Stock location\" readonly=\"true\"/>\n\n    <many-to-one name=\"product\" ref=\"com.axelor.apps.base.db.Product\" title=\"Product\"\n      readonly=\"true\"/>\n    <many-to-one name=\"unit\" ref=\"com.axelor.apps.base.db.Unit\" title=\"Unit\"/>\n    <decimal name=\"currentQty\" title=\"Current Qty\" precision=\"20\" scale=\"10\" readonly=\"true\"/>\n    <decimal name=\"futureQty\" title=\"Future Qty\" precision=\"20\" scale=\"10\" readonly=\"true\"/>\n    <decimal name=\"avgPrice\" precision=\"20\" scale=\"10\" readonly=\"true\" title=\"Average Price\"/>\n    <decimal name=\"stockLocationLineValue\" title=\"Value\" transient=\"true\" precision=\"27\"\n      scale=\"2\"/>\n    <boolean name=\"isAvgPriceChanged\" transient=\"true\"/>\n    <date name=\"lastFutureStockMoveDate\" title=\"Last Future Stock Move\" readonly=\"true\"/>\n\n    <string name=\"rack\" title=\"Rack\"/>\n    <many-to-one name=\"trackingNumber\" ref=\"com.axelor.apps.stock.db.TrackingNumber\"\n      title=\"Tracking Nbr\" readonly=\"true\"/>\n    <many-to-one name=\"detailsStockLocation\"\n      ref=\"com.axelor.apps.stock.db.StockLocation\" title=\"Stock location details\" readonly=\"true\"/>\n\n    <decimal name=\"lastInventoryRealQty\" precision=\"20\" scale=\"10\"/>\n    <datetime name=\"lastInventoryDateT\" tz=\"true\" title=\"Last inventory date\"/>\n\n  </entity>\n</domain-models>"
+      ],
+      "meaning": "Déclaration du modèle StockLocationLine ; quantité et références.",
+      "role": "framework_or_model_evidence",
+      "stock_additional_units": null
+    }
+  ],
+  "tests_read_not_run": [
+    {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/stock_ledger_entry/test_stock_ledger_entry.py",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "sha256": "b98fd1b169e088a502a29553e28812a61a21e3f2fd3e09aa8c9e42fe57bf5b78",
+      "start": 1342,
+      "end": 1399,
+      "source_fragment": "\tdef test_update_qty_in_future_sle_shifts_same_timestamp_later_entry(self):\n\t\t# update_qty_in_future_sle treats \"future\" as strictly after the current entry in the\n\t\t# (posting_datetime, creation) order. An entry sharing the exact posting timestamp but created\n\t\t# later must still have its running balance shifted; comparing posting_datetime alone would skip\n\t\t# it. The current entry itself (same timestamp, same creation) must not be shifted.\n\t\tfrom erpnext.stock.stock_ledger import update_qty_in_future_sle\n\n\t\titem = make_item().name\n\t\twarehouse = \"_Test Warehouse - _TC\"\n\n\t\treceipt1 = make_purchase_receipt(\n\t\t\titem_code=item,\n\t\t\twarehouse=warehouse,\n\t\t\tqty=10,\n\t\t\trate=10,\n\t\t\tposting_date=\"2021-01-01\",\n\t\t\tposting_time=\"02:00:00\",\n\t\t)\n\t\ttime.sleep(1)\n\t\treceipt2 = make_purchase_receipt(\n\t\t\titem_code=item,\n\t\t\twarehouse=warehouse,\n\t\t\tqty=20,\n\t\t\trate=10,\n\t\t\tposting_date=\"2021-01-01\",\n\t\t\tposting_time=\"02:00:00\",  # identical timestamp, later creation\n\t\t)\n\n\t\tdef sle(voucher):\n\t\t\treturn frappe.db.get_value(\n\t\t\t\t\"Stock Ledger Entry\",\n\t\t\t\t{\"voucher_no\": voucher.name, \"is_cancelled\": 0},\n\t\t\t\t[\"name\", \"posting_date\", \"posting_time\", \"creation\", \"qty_after_transaction\"],\n\t\t\t\tas_dict=True,\n\t\t\t)\n\n\t\tsle1, sle2 = sle(receipt1), sle(receipt2)\n\t\tself.assertEqual(sle1.qty_after_transaction, 10)\n\t\tself.assertEqual(sle2.qty_after_transaction, 30)\n\n\t\t# Simulate a +5 qty shift originating at receipt1's ledger position.\n\t\targs = frappe._dict(\n\t\t\t{\n\t\t\t\t\"item_code\": item,\n\t\t\t\t\"warehouse\": warehouse,\n\t\t\t\t\"voucher_type\": \"Purchase Receipt\",\n\t\t\t\t\"voucher_no\": receipt1.name,\n\t\t\t\t\"posting_date\": sle1.posting_date,\n\t\t\t\t\"posting_time\": sle1.posting_time,\n\t\t\t\t\"creation\": sle1.creation,\n\t\t\t\t\"actual_qty\": 5,\n\t\t\t}\n\t\t)\n\t\tupdate_qty_in_future_sle(args, allow_negative_stock=True)\n\n\t\t# receipt2 (same timestamp, later creation) is shifted; receipt1 (the current entry) is not.\n\t\tself.assertEqual(frappe.db.get_value(\"Stock Ledger Entry\", sle2.name, \"qty_after_transaction\"), 35)\n\t\tself.assertEqual(frappe.db.get_value(\"Stock Ledger Entry\", sle1.name, \"qty_after_transaction\"), 10)",
+      "note": "Test source de propagation dans le cas de deux écritures au même instant ; non exécuté.",
+      "executed": false,
+      "included_in_production_size": false
+    },
+    {
+      "repo": "odoo",
+      "path": "addons/stock/tests/test_quant.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "14a9f56256cb6d90836777a29844cd6dfc4670ad69896d1128d4c8d40f9e3c0a",
+      "start": 329,
+      "end": 382,
+      "source_fragment": "    def test_to_date_consignment(self):\n        \"\"\" Check that computing past quantities with 'to_date' correctly ignores\n        consigned stock moves when checking company-owned stock.\n        \"\"\"\n        self.env.user.group_ids += self.env.ref('stock.group_tracking_owner')\n\n        today = fields.Datetime.now()\n        yesterday = today - timedelta(days=1)\n\n        # Create Incoming Consignment Move (10 units)\n        picking_in = self.env['stock.picking'].create({\n            'picking_type_id': self.picking_type_in.id,\n            'location_id': self.supplier_location.id,\n            'location_dest_id': self.stock_location.id,\n            'owner_id': self.partner_1.id,\n            'move_ids': [\n                Command.create({\n                    'product_id': self.productA.id,\n                    'product_uom_qty': 10,\n                    'location_id': self.supplier_location.id,\n                    'location_dest_id': self.stock_location.id,\n                }),\n            ],\n        })\n        picking_in.action_confirm()\n        picking_in.button_validate()\n\n        # Create Outgoing Move (4 Units)\n        picking_out = self.env['stock.picking'].create({\n            'picking_type_id': self.picking_type_out.id,\n            'location_id': self.stock_location.id,\n            'location_dest_id': self.customer_location.id,\n            'move_ids': [\n                Command.create({\n                    'product_id': self.productA.id,\n                    'product_uom_qty': 4.0,\n                    'location_id': self.stock_location.id,\n                    'location_dest_id': self.customer_location.id,\n                }),\n            ],\n        })\n\n        picking_out.action_confirm()\n\n        picking_out.button_validate()\n\n        # Mimic _with_valuation_context()\n        product_past = self.productA.with_context(to_date=yesterday, owners=[False, self.env.company.partner_id.id])\n\n        self.assertEqual(\n            product_past.qty_available,\n            0.0,\n            \"Company-owned past quantity should be 0.0, it must ignore consigned stock moves.\"\n        )",
+      "note": "Test source de quantité passée et de propriété ; non exécuté.",
+      "executed": false,
+      "included_in_production_size": false
+    },
+    {
+      "repo": "tryton",
+      "path": "modules/stock/tests/scenario_stock_inventory.rst",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "6091d3853995b02e4a1fc7aa0b25e0e0ad6448ef3ad00a0e271c9a90a224538f",
+      "start": 145,
+      "end": 180,
+      "source_fragment": "    >>> StockMove.click(incoming_moves, 'do')\n\nUpdate the inventory::\n\n    >>> inventory.click('complete_lines')\n    >>> line_p1.reload()\n    >>> line_p1.expected_quantity\n    2.0\n    >>> line_p1.quantity\n    3.0\n    >>> line_p2.reload()\n    >>> line_p2.expected_quantity\n    3.8\n    >>> line_p2.quantity = 3.8\n    >>> line_p2.save()\n\nConfirm the inventory::\n\n    >>> inventory.click('confirm')\n    >>> line_p1.reload()\n    >>> line_p1.expected_quantity\n    2.0\n    >>> move, = line_p1.moves\n    >>> move.quantity\n    1.0\n    >>> assertEqual(move.from_location, lost_found_loc)\n    >>> assertEqual(move.to_location, inventory.location)\n    >>> line_p2.reload()\n    >>> len(line_p2.moves)\n    0\n\nCreating an inventory with empty quantities::\n\n    >>> inventory = Inventory()\n    >>> inventory.location = storage_loc\n    >>> inventory.empty_quantity = 'keep'",
+      "note": "Scénario source de confirmation d’inventaire et de mouvement de delta ; non exécuté.",
+      "executed": false,
+      "included_in_production_size": false
+    }
+  ],
+  "external_primary_sources": [
+    {
+      "url": "https://docs.hibernate.org/orm/6.6/userguide/html_single/#locking-optimistic",
+      "checked_on": "2026-10-30",
+      "interpretation": "@Version détecte les mises à jour concurrentes sur la même entité gérée ; cela ne couvre pas toutes les invariants entre lignes ni un nouvel appel métier. Docs de branche 6.6 consultées, pas preuve de test sur 6.6.58."
+    },
+    {
+      "url": "https://www.postgresql.org/docs/18/sql-select.html#SQL-FOR-UPDATE-SHARE",
+      "checked_on": "2026-10-30",
+      "interpretation": "Une clause de verrouillage ne s’applique pas à un agrégat ; réserve sur la requête SUM/FOR UPDATE observée côté ERPNext, sans déduire le comportement de MariaDB."
+    }
+  ]
+}

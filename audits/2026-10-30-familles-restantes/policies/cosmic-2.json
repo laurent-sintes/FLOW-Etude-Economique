@@ -1,0 +1,228 @@
+{
+  "groups": [
+    {
+      "id": "FulfilmentPolicy",
+      "object_of_interest": "FulfilmentPolicy",
+      "attributes": [
+        "scope",
+        "version",
+        "effectiveFrom",
+        "effectiveUntil",
+        "criteria",
+        "authority",
+        "status"
+      ]
+    },
+    {
+      "id": "Agreement",
+      "object_of_interest": "Agreement",
+      "attributes": [
+        "reference",
+        "scope",
+        "businessAttributes"
+      ]
+    },
+    {
+      "id": "Outcome",
+      "object_of_interest": "Outcome",
+      "attributes": [
+        "reference",
+        "scope",
+        "businessAttributes"
+      ]
+    },
+    {
+      "id": "ActivationRequest",
+      "object_of_interest": "ActivationRequest",
+      "attributes": [
+        "reference",
+        "scope",
+        "businessAttributes"
+      ]
+    },
+    {
+      "id": "PolicyActivation",
+      "object_of_interest": "PolicyActivation",
+      "attributes": [
+        "policy",
+        "version",
+        "checks",
+        "decision",
+        "at",
+        "reason"
+      ]
+    },
+    {
+      "id": "Query",
+      "object_of_interest": "Query",
+      "attributes": [
+        "reference",
+        "scope",
+        "businessAttributes"
+      ]
+    },
+    {
+      "id": "PolicyExplanation",
+      "object_of_interest": "PolicyExplanation",
+      "attributes": [
+        "policy",
+        "context",
+        "criteriaApplied",
+        "decision",
+        "limits"
+      ]
+    }
+  ],
+  "processes": [
+    {
+      "id": "policies-P01",
+      "label": "Tenir une version de politique",
+      "trigger": "Réception de la demande ou du fait métier nommé dans le processus.",
+      "functional_user": "Capacité consommatrice, producteur autorisé ou opérateur extérieur au composant.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "movements": [
+        {
+          "id": "policies-P01-E-FulfilmentPolicy",
+          "type": "E",
+          "group": "FulfilmentPolicy",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P01-R-Agreement",
+          "type": "R",
+          "group": "Agreement",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P01-R-FulfilmentPolicy",
+          "type": "R",
+          "group": "FulfilmentPolicy",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P01-W-FulfilmentPolicy",
+          "type": "W",
+          "group": "FulfilmentPolicy",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P01-X-Outcome",
+          "type": "X",
+          "group": "Outcome",
+          "cfp": 1
+        }
+      ]
+    },
+    {
+      "id": "policies-P02",
+      "label": "Activer après contrôle de cohérence",
+      "trigger": "Réception de la demande ou du fait métier nommé dans le processus.",
+      "functional_user": "Capacité consommatrice, producteur autorisé ou opérateur extérieur au composant.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "movements": [
+        {
+          "id": "policies-P02-E-ActivationRequest",
+          "type": "E",
+          "group": "ActivationRequest",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P02-R-FulfilmentPolicy",
+          "type": "R",
+          "group": "FulfilmentPolicy",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P02-R-Agreement",
+          "type": "R",
+          "group": "Agreement",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P02-W-PolicyActivation",
+          "type": "W",
+          "group": "PolicyActivation",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P02-X-PolicyActivation",
+          "type": "X",
+          "group": "PolicyActivation",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P02-X-Outcome",
+          "type": "X",
+          "group": "Outcome",
+          "cfp": 1
+        }
+      ]
+    },
+    {
+      "id": "policies-P03",
+      "label": "Expliquer la politique applicable",
+      "trigger": "Réception de la demande ou du fait métier nommé dans le processus.",
+      "functional_user": "Capacité consommatrice, producteur autorisé ou opérateur extérieur au composant.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "movements": [
+        {
+          "id": "policies-P03-E-Query",
+          "type": "E",
+          "group": "Query",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P03-R-FulfilmentPolicy",
+          "type": "R",
+          "group": "FulfilmentPolicy",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P03-R-PolicyActivation",
+          "type": "R",
+          "group": "PolicyActivation",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P03-W-PolicyExplanation",
+          "type": "W",
+          "group": "PolicyExplanation",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P03-X-PolicyExplanation",
+          "type": "X",
+          "group": "PolicyExplanation",
+          "cfp": 1
+        },
+        {
+          "id": "policies-P03-X-Outcome",
+          "type": "X",
+          "group": "Outcome",
+          "cfp": 1
+        }
+      ]
+    }
+  ],
+  "CFP": 17,
+  "movements": {
+    "E": 3,
+    "R": 6,
+    "W": 3,
+    "X": 5
+  },
+  "boundary": "Composant logique de la famille ; lectures de données métier explicites et résultats fournis. Ne pas additionner les CFP entre familles sans réconcilier les interfaces.",
+  "variant_rule": "Un type d’ordre ou d’acte ne crée pas à lui seul un second processus identique ; les contrats typés restent à qualifier.",
+  "certified": false,
+  "human_review": false,
+  "completeness": "Comptage d’opportunité proposé sur ces processus, pas preuve d’exhaustivité des exigences.",
+  "hours_per_CFP": 20,
+  "factor": 1,
+  "day_hours": 7
+}

@@ -1,0 +1,718 @@
+{
+  "family": "ba-demand-supply-plan-preparation",
+  "slug": "plan-preparation",
+  "iteration": 3,
+  "status": "candidat_conditionnel_non_adopte",
+  "scope": [
+    {
+      "id": "BC-029",
+      "native_id": "demand-forecast-development",
+      "source": {
+        "name": "Demand Forecast Qualification",
+        "definition": "[Demand Forecast Qualification](glossary:TER361) : vérifier et qualifier une prévision de produit pour son emploi dans le plan opérationnel.",
+        "finality": "Mettre à disposition une prévision opérationnellement utilisable, reliée à sa version source et à ses réserves.",
+        "scope": "Recevoir le [Forecast Plan](glossary:TER372) versionné par [Demand & Supply Forecasting](model:subdomain-demand-supply-forecasting), vérifier produit, lieu, canal, période, hypothèses, statut et fraîcheur. Rapprocher les signaux récents et relever les écarts ; demander une révision à la responsabilité source si nécessaire. Qualifier la version et les adaptations opérationnelles explicitement autorisées sans créer une seconde prévision de produit maîtresse. [Demand Plan Development](model:demand-plan-development) utilise cette entrée avec les commandes identifiées, sans double compte. [Master Planning](model:D05.f) consomme la demande retenue ; Order Management garde les engagements. Exemple fictif : une hypothèse de lancement à 1 000 pièces arrive avec son horizon ; 300 commandes connues et de nouvelles ventes conduisent à qualifier son emploi, puis à signaler au chef de produit qu’une révision pourrait être nécessaire.",
+        "nature": "decision",
+        "market_comparisons": [
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA Production Planning",
+            "element_name": "Execute Supply Chain Planning",
+            "element_type": "Périmètre fonctionnel ou processus produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Independent requirements and consumption ; forecast demand",
+            "differences": "La documentation produit couvre le calcul ou l’emploi d’une prévision ; la capacité FLOW qualifie une prévision source sans reprendre l’autorité du chef de produit.",
+            "flow_position": "La prévision de produit est tenue dans Design & Development ; FLOW qualifie une version pour la demande opérationnelle et distingue commandes et prévision résiduelle.",
+            "term_choice": "Demand Forecast Qualification nomme une responsabilité FLOW ; le terme produit ne lui est pas assimilé.",
+            "definition_choice": "La prévision de produit est tenue dans Design & Development ; FLOW qualifie une version pour la demande opérationnelle et distingue commandes et prévision résiduelle.",
+            "concept_name": "Execute Supply Chain Planning",
+            "scope_summary": "Besoins prévisionnels et commandes client, consommation de prévision et calcul des besoins.",
+            "approach_summary": "Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.",
+            "source_title": "Execute Supply Chain Planning",
+            "source_url": "https://learning.sap.com/courses/exploring-production-planning-in-sap-s-4hana/execute-supply-chain-planning",
+            "source_version": "Page évolutive ; édition globale non indiquée",
+            "consulted_on": "2026-10-12",
+            "source_locator": "Independent requirements ; sales order consumption ; MRP",
+            "evidence_limits": "Appui produit partiel ; ni taxonomie FLOW, ni preuve de réalisation Beaumanoir.",
+            "source_refs": [
+              "ELM866",
+              "CMP312",
+              "U974",
+              "U1079"
+            ],
+            "status": "proposed"
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Supply Chain Management",
+            "element_name": "Master planning home page",
+            "element_type": "Périmètre fonctionnel ou processus produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Independent requirements and consumption ; forecast demand",
+            "differences": "La documentation produit couvre le calcul ou l’emploi d’une prévision ; la capacité FLOW qualifie une prévision source sans reprendre l’autorité du chef de produit.",
+            "flow_position": "La prévision de produit est tenue dans Design & Development ; FLOW qualifie une version pour la demande opérationnelle et distingue commandes et prévision résiduelle.",
+            "term_choice": "Demand Forecast Qualification nomme une responsabilité FLOW ; le terme produit ne lui est pas assimilé.",
+            "definition_choice": "La prévision de produit est tenue dans Design & Development ; FLOW qualifie une version pour la demande opérationnelle et distingue commandes et prévision résiduelle.",
+            "concept_name": "Master planning home page",
+            "scope_summary": "Équilibrer besoins et ressources et produire des propositions, distinctes des commandes affermies.",
+            "approach_summary": "Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.",
+            "source_title": "Master planning home page",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/master-planning/master-planning-home-page",
+            "source_version": "Page mise à jour 2026-03-26",
+            "consulted_on": "2026-10-12",
+            "source_locator": "Net requirements ; forecast planning ; planned orders",
+            "evidence_limits": "Appui produit partiel ; ni taxonomie FLOW, ni preuve de réalisation Beaumanoir.",
+            "source_refs": [
+              "ELM865",
+              "CMP312",
+              "U974",
+              "U1079"
+            ],
+            "status": "proposed"
+          }
+        ],
+        "examples": [
+          {
+            "title": "Qualifier une prévision de collection",
+            "situation": "Une prévision de 1 000 pièces pour une saison est reçue avec sa version. Le planificateur vérifie son horizon et sa maille puis signale une évolution des ventes au chef de produit.",
+            "lesson": "La qualification opérationnelle trace la version utilisée ; elle ne déplace pas l’autorité de la prévision source.",
+            "source_refs": [
+              "U1098"
+            ]
+          }
+        ]
+      },
+      "functions": [
+        {
+          "id": "BC-029.01",
+          "resultat": "Vérifier la prévision reçue et ses unités"
+        },
+        {
+          "id": "BC-029.02",
+          "resultat": "Qualifier horizon et qualité d’utilisation"
+        },
+        {
+          "id": "BC-029.03",
+          "resultat": "Exposer les limites avant son usage opérationnel"
+        }
+      ],
+      "boundary": "Ne recrée pas un modèle statistique de prévision produit."
+    },
+    {
+      "id": "BC-030",
+      "native_id": "demand-plan-development",
+      "source": {
+        "name": "Demand Plan Development",
+        "definition": "[Demand Plan Development](glossary:TER366) : calculer et réviser le [Demand Plan](glossary:TER099) en distinguant les commandes identifiées de la prévision encore à couvrir.",
+        "finality": "Fournir la demande à couvrir, avec son origine et son horizon, au calcul des ressources.",
+        "scope": "Construire, par produit, lieu et période, un plan versionné à partir des commandes connues et de la prévision produite ou reçue. Cette capacité détermine la part prévisionnelle résiduelle selon les règles de consommation autorisées, par produit, lieu et période, et conserve la règle, les commandes prises en compte et leurs versions. Sans règle applicable ou données suffisantes, elle signale l’incertitude au lieu de déduire arbitrairement une quantité. [Availability](model:D03) utilise le résultat pour évaluer une demande identifiée ; elle ne redéfinit pas le plan de demande. [Demand Forecast Qualification](glossary:TER361) qualifie le [Forecast Plan](glossary:TER372) reçu de [Demand & Supply Forecasting](glossary:TER373) ; [Supply Plan Development](model:supply-plan-development) calcule les apports et mouvements proposés. Relancer le calcul lorsque commandes, hypothèses ou prévision changent. [Master Planning](model:D05.f) utilise la version qualifiée et ne pilote pas ce calcul. Le plan ne confirme ni ne modifie les commandes.",
+        "nature": "decision",
+        "market_comparisons": [
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Supply Chain Management",
+            "element_name": "Forecast reduction keys",
+            "element_type": "Périmètre fonctionnel ou processus produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Dynamics distingue commandes effectives et besoins de prévision restants lors du master planning.",
+            "differences": "Les méthodes de réduction Microsoft sont des paramètres produit ; FLOW ne fixe ni méthode universelle ni règle installée.",
+            "flow_position": "FLOW construit un plan de demande traçable avant de calculer la couverture, en conservant la provenance des deux parts.",
+            "term_choice": "Demand Plan Development est une responsabilité FLOW, sans équivalence directe avec Forecast reduction.",
+            "definition_choice": "Responsabilité de construction du plan proposée ; aucune règle locale présumée.",
+            "concept_name": "Forecast reduction",
+            "scope_summary": "Une prévision incluse au master plan peut être réduite par des commandes selon la méthode paramétrée.",
+            "approach_summary": "Appui au contrôle du double comptage, sans importer une méthode de réduction.",
+            "source_title": "Forecast reduction keys",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/master-planning/reduction-keys",
+            "source_version": "Page mise à jour 2026-03-26",
+            "consulted_on": "2026-10-15",
+            "source_locator": "Methods to reduce forecast requirements ; Reduce forecast by transactions",
+            "evidence_limits": "Appui produit partiel ; ni taxonomie FLOW, ni preuve de réalisation Beaumanoir.",
+            "source_refs": [
+              "U1086",
+              "U1087"
+            ],
+            "status": "proposed"
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA Production Planning",
+            "element_name": "Demand Management",
+            "element_type": "Périmètre fonctionnel ou processus produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "SAP S/4HANA rapproche besoins indépendants planifiés et commandes client dans un programme de demande.",
+            "differences": "La maille FLOW rend explicite un plan de demande versionné ; les stratégies SAP de consommation ne sont pas transposées automatiquement.",
+            "flow_position": "FLOW calcule une demande planifiée distinguant commandes et prévision résiduelle avant le calcul du plan d’approvisionnement.",
+            "term_choice": "Demand Plan Development est une capacité FLOW, pas le nom natif du processus SAP.",
+            "definition_choice": "Responsabilité de construction du plan proposée ; aucun déploiement installé déduit.",
+            "concept_name": "Demand Management",
+            "scope_summary": "Demand Management rapproche besoins indépendants planifiés et commandes client, avec consommation possible selon la stratégie.",
+            "approach_summary": "Appui à la séparation entre programme de demande et calcul des besoins matières.",
+            "source_title": "Execute Supply Chain Planning",
+            "source_url": "https://learning.sap.com/courses/exploring-production-planning-in-sap-s-4hana/execute-supply-chain-planning",
+            "source_version": "Page évolutive ; édition globale non indiquée",
+            "consulted_on": "2026-10-15",
+            "source_locator": "Demand Management ; sales orders ; consumption",
+            "evidence_limits": "Appui produit partiel ; ni taxonomie FLOW, ni preuve de réalisation Beaumanoir.",
+            "source_refs": [
+              "U1086",
+              "U1087"
+            ],
+            "status": "proposed"
+          }
+        ],
+        "examples": [
+          {
+            "title": "Éviter un double compte",
+            "situation": "Illustration fictive : 100 pièces prévues et 60 commandées donnent, si la règle de consommation applicable laisse 40 pièces prévisionnelles, une demande planifiée de 100 et non 160 pièces.",
+            "lesson": "Les 60 commandes et les 40 pièces encore prévisionnelles restent identifiables séparément.",
+            "source_refs": [
+              "U1087"
+            ]
+          }
+        ]
+      },
+      "functions": [
+        {
+          "id": "BC-030.01",
+          "resultat": "Rapprocher commandes et prévision qualifiée"
+        },
+        {
+          "id": "BC-030.02",
+          "resultat": "Calculer la prévision résiduelle sans double besoin"
+        },
+        {
+          "id": "BC-030.03",
+          "resultat": "Versionner le plan de demande"
+        }
+      ],
+      "boundary": "Les règles Beaumanoir de consommation seront configurées dans l’intégration."
+    },
+    {
+      "id": "BC-032",
+      "native_id": "supply-plan-development",
+      "source": {
+        "name": "Supply Plan Development",
+        "definition": "[Supply Plan Development](glossary:TER363) : projeter les besoins bruts et les apports envisagés à partir du plan de demande et des contraintes connues.",
+        "finality": "Produire un scénario versionné de ressources à préparer, distinct du besoin net opérationnel.",
+        "scope": "Établir et réviser le [Supply Plan](glossary:TER098) à partir du [Demand Plan](glossary:TER099), des délais et des contraintes connus. Distinguer besoins bruts, achats envisagés, autres apports et transferts projetés, avec leurs hypothèses, dates, provenance et statut ; signaler les capacités incertaines et les écarts à instruire. Les commandes et apports fermes restent identifiés, mais leur déduction du stock courant pour établir les besoins nets relève de [Master Planning](model:D05.f). Une contribution externe conserve sa version et son statut. Réviser ce scénario lorsque la demande ou les contraintes évoluent ; [Planning Scenario Reconciliation](model:planning-scenario-reconciliation) confronte les versions. Une proposition n’affermit ni achat ni transfert. MAP porte la planification et le carnet d’achat dans l’existant ; aucun transfert installé n’est déduit.",
+        "nature": "decision",
+        "market_comparisons": [
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Supply Chain Management",
+            "source_title": "Master planning home page",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/master-planning/master-planning-home-page",
+            "source_version": "Documentation en ligne consultée le 2026-10-16",
+            "source_locator": "The three main planning processes",
+            "consulted_on": "2026-10-16",
+            "concept_name": "Master planning home page",
+            "element_name": "Master planning home page",
+            "element_type": "Processus de planification documenté",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Microsoft distingue les besoins bruts issus des prévisions et les besoins nets du master plan opérationnel.",
+            "differences": "Le module logiciel regroupe plusieurs processus ; FLOW répartit les responsabilités métier entre plusieurs Business Areas.",
+            "flow_position": "FLOW conserve prévision et projection de ressources en amont ; Master Planning calcule les besoins nets opérationnels.",
+            "evidence_limits": "Comparaison fonctionnelle ; ne prouve ni découpage métier universel ni réalisation installée chez Beaumanoir.",
+            "status": "proposed",
+            "source_refs": [
+              "U1094"
+            ],
+            "definition_choice": "FLOW conserve prévision et projection de ressources en amont ; Master Planning calcule les besoins nets opérationnels.",
+            "term_choice": "Le nom FLOW décrit une responsabilité métier ; le nom du processus éditeur ne fixe pas sa hiérarchie.",
+            "scope_summary": "Microsoft distingue les besoins bruts issus des prévisions et les besoins nets du master plan opérationnel.",
+            "approach_summary": "FLOW conserve prévision et projection de ressources en amont ; Master Planning calcule les besoins nets opérationnels."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Supply Chain Management",
+            "source_title": "Inventory forecasts",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/master-planning/inventory-forecast",
+            "source_version": "Documentation en ligne consultée le 2026-10-16",
+            "source_locator": "Forecast planning ; demand and supply forecast lines",
+            "consulted_on": "2026-10-16",
+            "concept_name": "Inventory forecasts",
+            "element_name": "Inventory forecasts",
+            "element_type": "Processus de planification documenté",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Les prévisions de demande et d’offre alimentent un calcul de besoins bruts et des ordres planifiés.",
+            "differences": "Une prévision peut aussi être sélectionnée comme entrée du master plan ; elle n’est pas exclue de tout calcul net.",
+            "flow_position": "FLOW qualifie la prévision résiduelle retenue avant son éventuelle prise en compte dans les besoins nets.",
+            "evidence_limits": "Comparaison fonctionnelle ; ne prouve ni découpage métier universel ni réalisation installée chez Beaumanoir.",
+            "status": "proposed",
+            "source_refs": [
+              "U1094"
+            ],
+            "definition_choice": "FLOW qualifie la prévision résiduelle retenue avant son éventuelle prise en compte dans les besoins nets.",
+            "term_choice": "Le nom FLOW décrit une responsabilité métier ; le nom du processus éditeur ne fixe pas sa hiérarchie.",
+            "scope_summary": "Les prévisions de demande et d’offre alimentent un calcul de besoins bruts et des ordres planifiés.",
+            "approach_summary": "FLOW qualifie la prévision résiduelle retenue avant son éventuelle prise en compte dans les besoins nets."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA Production Planning",
+            "source_title": "Understanding MRP in SAP S/4HANA",
+            "source_url": "https://learning.sap.com/courses/exploring-production-planning-in-sap-s-4hana/understanding-mrp-in-sap-s-4hana",
+            "source_version": "Documentation en ligne consultée le 2026-10-16",
+            "source_locator": "Deterministic Planning ; Steps 2 and 3 ; net requirements ; procurement proposals",
+            "consulted_on": "2026-10-16",
+            "concept_name": "Understanding MRP in SAP S/4HANA",
+            "element_name": "Understanding MRP in SAP S/4HANA",
+            "element_type": "Processus de planification documenté",
+            "relationship": "Recouvrement partiel",
+            "similarities": "SAP rapproche demandes connues ou prévues, stock disponible et réceptions fermes pour calculer les manques, puis propose un approvisionnement.",
+            "differences": "Le MRP SAP couvre ici matériaux et production ; la maille omnicanale et les décisions de carnet FLOW ne sont pas démontrées par cette source.",
+            "flow_position": "FLOW distingue projection des besoins bruts, calcul des besoins nets et décisions de carnet.",
+            "evidence_limits": "Comparaison fonctionnelle ; ne prouve ni découpage métier universel ni réalisation installée chez Beaumanoir.",
+            "status": "proposed",
+            "source_refs": [
+              "U1094"
+            ],
+            "definition_choice": "FLOW distingue projection des besoins bruts, calcul des besoins nets et décisions de carnet.",
+            "term_choice": "Le nom FLOW décrit une responsabilité métier ; le nom du processus éditeur ne fixe pas sa hiérarchie.",
+            "scope_summary": "SAP rapproche demandes connues ou prévues, stock disponible et réceptions fermes pour calculer les manques, puis propose un approvisionnement.",
+            "approach_summary": "FLOW distingue projection des besoins bruts, calcul des besoins nets et décisions de carnet."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA Production Planning",
+            "element_name": "Execute Supply Chain Planning",
+            "element_type": "Périmètre fonctionnel ou processus produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "MRP and planned orders ; master planning",
+            "differences": "Le document décrit des fonctions ou processus produit ; FLOW distingue les responsabilités indépendamment des applications. Le regroupement et la maille ne sont pas des équivalents natifs démontrés.",
+            "flow_position": "FLOW calcule et révise les apports et mouvements proposés à partir de la demande, du stock et des contraintes, sans créer seul une commande ferme.",
+            "term_choice": "Supply Plan Development nomme une responsabilité FLOW ; le terme produit ne lui est pas assimilé.",
+            "definition_choice": "Service rendu et frontière métier proposés ; aucune réalisation installée déduite.",
+            "concept_name": "Execute Supply Chain Planning",
+            "scope_summary": "Besoins prévisionnels et commandes client, consommation de prévision et calcul des besoins.",
+            "approach_summary": "Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.",
+            "source_title": "Execute Supply Chain Planning",
+            "source_url": "https://learning.sap.com/courses/exploring-production-planning-in-sap-s-4hana/execute-supply-chain-planning",
+            "source_version": "Page évolutive ; édition globale non indiquée",
+            "consulted_on": "2026-10-12",
+            "source_locator": "Independent requirements ; sales order consumption ; MRP",
+            "evidence_limits": "Appui produit partiel ; ni taxonomie FLOW, ni preuve de réalisation Beaumanoir.",
+            "source_refs": [
+              "ELM866",
+              "CMP312",
+              "U974",
+              "U1079"
+            ],
+            "status": "proposed"
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Supply Chain Management",
+            "element_name": "Master planning home page",
+            "element_type": "Périmètre fonctionnel ou processus produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "MRP and planned orders ; master planning",
+            "differences": "Le document décrit des fonctions ou processus produit ; FLOW distingue les responsabilités indépendamment des applications. Le regroupement et la maille ne sont pas des équivalents natifs démontrés.",
+            "flow_position": "FLOW calcule et révise les apports et mouvements proposés à partir de la demande, du stock et des contraintes, sans créer seul une commande ferme.",
+            "term_choice": "Supply Plan Development nomme une responsabilité FLOW ; le terme produit ne lui est pas assimilé.",
+            "definition_choice": "Service rendu et frontière métier proposés ; aucune réalisation installée déduite.",
+            "concept_name": "Master planning home page",
+            "scope_summary": "Équilibrer besoins et ressources et produire des propositions, distinctes des commandes affermies.",
+            "approach_summary": "Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.",
+            "source_title": "Master planning home page",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/master-planning/master-planning-home-page",
+            "source_version": "Page mise à jour 2026-03-26",
+            "consulted_on": "2026-10-12",
+            "source_locator": "Net requirements ; forecast planning ; planned orders",
+            "evidence_limits": "Appui produit partiel ; ni taxonomie FLOW, ni preuve de réalisation Beaumanoir.",
+            "source_refs": [
+              "ELM865",
+              "CMP312",
+              "U974",
+              "U1079"
+            ],
+            "status": "proposed"
+          }
+        ],
+        "examples": [
+          {
+            "title": "Tester un retard sur les ressources prévues",
+            "situation": "Illustration fictive : un fournisseur signale un délai plus long pour 50 des 80 pièces envisagées ; le scénario réévalue les apports possibles et signale la contrainte.",
+            "lesson": "Le scénario ne confond pas ces apports envisagés avec les 30 pièces effectivement attendues à date dans le calcul net.",
+            "source_refs": [
+              "U1094"
+            ]
+          }
+        ]
+      },
+      "functions": [
+        {
+          "id": "BC-032.01",
+          "resultat": "Projeter les besoins bruts"
+        },
+        {
+          "id": "BC-032.02",
+          "resultat": "Établir les apports envisagés selon les contraintes connues"
+        },
+        {
+          "id": "BC-032.03",
+          "resultat": "Réviser les dates et hypothèses du plan"
+        }
+      ],
+      "boundary": "Ne produit pas automatiquement une commande ferme ni un ordonnanceur d’usine."
+    },
+    {
+      "id": "BC-034",
+      "native_id": "planning-scenario-reconciliation",
+      "source": {
+        "name": "Planning Scenario Reconciliation",
+        "definition": "[Planning Scenario Reconciliation](glossary:TER365) : qualifier les écarts entre demande et approvisionnement et retenir, sous autorité applicable, une version de plan cohérente ou un écart explicite.",
+        "finality": "Évaluer les écarts entre plans et scénarios avant de retenir une version cohérente.",
+        "scope": "Rapprocher les quantités, dates et hypothèses du [Demand Plan](glossary:TER099) et du [Supply Plan](glossary:TER098) à l’horizon prévisionnel. Si les scénarios ne se ferment pas, expliciter le manque, les options à instruire et la décision attendue. [Simulation & Analysis](model:BHV006) compare les alternatives. La capacité qualifie la cohérence de la version retenue ; [Master Planning](model:D05.f) calcule ensuite les besoins nets à partir des faits opérationnels, sans transfert de responsabilité.",
+        "nature": "decision",
+        "market_comparisons": [
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA Production Planning",
+            "element_name": "Introducing Predictive MRP (pMRP)",
+            "element_type": "Périmètre fonctionnel ou processus produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Simulations de scénarios selon demande et contraintes de ressources.",
+            "differences": "Le document décrit des fonctions ou processus produit ; FLOW distingue les responsabilités indépendamment des applications. Le regroupement et la maille ne sont pas des équivalents natifs démontrés.",
+            "flow_position": "FLOW qualifie le manque et les hypothèses avant de retenir une version cohérente ou un écart explicite ; elle ne produit pas la simulation elle-même.",
+            "term_choice": "Planning Scenario Reconciliation nomme une responsabilité FLOW ; le terme produit ne lui est pas assimilé.",
+            "definition_choice": "Service rendu et frontière métier proposés ; aucune réalisation installée déduite.",
+            "concept_name": "Introducing Predictive MRP (pMRP)",
+            "scope_summary": "Simulations de scénarios selon demande et contraintes de ressources.",
+            "approach_summary": "Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.",
+            "source_title": "Introducing Predictive MRP (pMRP)",
+            "source_url": "https://learning.sap.com/courses/exploring-production-planning-in-sap-s-4hana/introducing-predictive-mrp-pmrp-",
+            "source_version": "Page évolutive ; édition globale non indiquée",
+            "consulted_on": "2026-10-15",
+            "source_locator": "Planning scenarios",
+            "evidence_limits": "Appui à la simulation ; la réconciliation métier de tous les plans FLOW n’est pas démontrée. Aucune réalisation Beaumanoir démontrée.",
+            "source_refs": [
+              "ELM866",
+              "CMP312",
+              "U974",
+              "U1079",
+              "ELM912",
+              "CMP321"
+            ],
+            "status": "proposed"
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Supply Chain Management",
+            "element_name": "Master plans overview",
+            "element_type": "Périmètre fonctionnel ou processus produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Plusieurs plans permettent de simuler des prévisions ou stratégies différentes.",
+            "differences": "Le document décrit des fonctions ou processus produit ; FLOW distingue les responsabilités indépendamment des applications. Le regroupement et la maille ne sont pas des équivalents natifs démontrés.",
+            "flow_position": "FLOW qualifie le manque et les hypothèses avant de retenir une version cohérente ou un écart explicite ; elle ne produit pas la simulation elle-même.",
+            "term_choice": "Planning Scenario Reconciliation nomme une responsabilité FLOW ; le terme produit ne lui est pas assimilé.",
+            "definition_choice": "Service rendu et frontière métier proposés ; aucune réalisation installée déduite.",
+            "concept_name": "Master plans overview",
+            "scope_summary": "Plusieurs plans permettent de simuler des prévisions ou stratégies différentes.",
+            "approach_summary": "Appui sélectif à la responsabilité ; aucune transposition de tout le module produit.",
+            "source_title": "Master plans overview",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/master-planning/master-plans",
+            "source_version": "Page mise à jour 2024-12-12 ; avertissement relatif au catalogue de juillet 2026",
+            "consulted_on": "2026-10-15",
+            "source_locator": "Using master plans",
+            "evidence_limits": "Appui aux scénarios de planification ; la réconciliation métier entre domaines n’est pas entièrement décrite. Aucune réalisation Beaumanoir démontrée.",
+            "source_refs": [
+              "ELM864",
+              "CMP312",
+              "U974",
+              "U1079",
+              "ELM303",
+              "CMP321"
+            ],
+            "status": "proposed"
+          }
+        ],
+        "examples": [
+          {
+            "title": "Application indicative",
+            "situation": "Illustration fictive : évaluer les écarts entre plans et scénarios avant de retenir une version cohérente.",
+            "lesson": "Le cas illustre le savoir-faire visé ; il ne décrit aucun déploiement Beaumanoir.",
+            "source_refs": [
+              "U1079"
+            ]
+          }
+        ]
+      },
+      "functions": [
+        {
+          "id": "BC-034.01",
+          "resultat": "Rapprocher les versions de demande et d’approvisionnement"
+        },
+        {
+          "id": "BC-034.02",
+          "resultat": "Qualifier les écarts de couverture"
+        },
+        {
+          "id": "BC-034.03",
+          "resultat": "Retenir une version ou un écart sous autorité"
+        }
+      ],
+      "boundary": "N’applique pas directement les effets aux commandes."
+    }
+  ],
+  "native_estimates": [
+    {
+      "id": "erpnext",
+      "native_analogue_units": 1213,
+      "base_equivalent_units": 727.8,
+      "complement_equivalent_units": 827.45,
+      "equivalent_units": 1555.25,
+      "common_analogy_jh": 53.11651076616148,
+      "complement_marginal_jh": 69.31623139001546,
+      "jh": 122.43274215617694,
+      "rounded_jh": 120,
+      "not_observed_effort": true
+    },
+    {
+      "id": "odoo",
+      "native_analogue_units": 349,
+      "base_equivalent_units": 209.4,
+      "complement_equivalent_units": 342.85,
+      "equivalent_units": 552.25,
+      "common_analogy_jh": 13.497487617435825,
+      "complement_marginal_jh": 25.712936687867845,
+      "jh": 39.21042430530367,
+      "rounded_jh": 40,
+      "not_observed_effort": true
+    },
+    {
+      "id": "tryton",
+      "native_analogue_units": 286,
+      "base_equivalent_units": 171.6,
+      "complement_equivalent_units": 291.9,
+      "equivalent_units": 463.5,
+      "common_analogy_jh": 10.84360133405751,
+      "complement_marginal_jh": 21.495636704563125,
+      "jh": 32.339238038620636,
+      "rounded_jh": 30,
+      "not_observed_effort": true
+    },
+    {
+      "id": "axelor",
+      "native_analogue_units": 65,
+      "base_equivalent_units": 39.0,
+      "complement_equivalent_units": 143.25,
+      "equivalent_units": 182.25,
+      "common_analogy_jh": 2.126026306545815,
+      "complement_marginal_jh": 9.459905716441426,
+      "jh": 11.58593202298724,
+      "rounded_jh": 10,
+      "not_observed_effort": true
+    }
+  ],
+  "proposed_java_jh": 10,
+  "diagnostic_java_jh": 11.58593202298724,
+  "diagnostic_rounded_jh": 10,
+  "roles": [
+    {
+      "id": "coordination",
+      "label": "Pilotage de l’équipe produit",
+      "jh": 1
+    },
+    {
+      "id": "analyse_produit",
+      "label": "Analyse métier et fonctionnelle",
+      "jh": 1
+    },
+    {
+      "id": "architecture",
+      "label": "Architecture et conception technique",
+      "jh": 1
+    },
+    {
+      "id": "dev_java",
+      "label": "Développement Java et tests développeur",
+      "jh": 4
+    },
+    {
+      "id": "dev_frontend",
+      "label": "Développement interface et tests développeur",
+      "jh": 1
+    },
+    {
+      "id": "qa",
+      "label": "QA et qualification indépendante",
+      "jh": 1
+    },
+    {
+      "id": "plateforme",
+      "label": "Plateforme / DevOps et mise en service",
+      "jh": 1
+    },
+    {
+      "id": "ux",
+      "label": "UX et ergonomie",
+      "jh": 0
+    },
+    {
+      "id": "securite",
+      "label": "Expertise et revue de sécurité",
+      "jh": 0
+    }
+  ],
+  "roles_status": "Répartition du diagnostic total par activités publiées COCOMO et clés d’organisation Stock proposées ; pas charge observée ni adoption.",
+  "activities": [
+    {
+      "id": "management",
+      "label": "Gestion du projet logiciel",
+      "jh": 1.1016949152542375,
+      "percent_by_phase": [
+        14,
+        12,
+        10,
+        14
+      ],
+      "weights": {
+        "coordination": 1
+      }
+    },
+    {
+      "id": "environment",
+      "label": "Environnement et gestion de configuration",
+      "jh": 0.5864406779661018,
+      "percent_by_phase": [
+        10,
+        8,
+        5,
+        5
+      ],
+      "weights": {
+        "plateforme": 0.8,
+        "dev_java": 0.2
+      }
+    },
+    {
+      "id": "requirements",
+      "label": "Analyse et exigences",
+      "jh": 1.1152542372881356,
+      "percent_by_phase": [
+        38,
+        18,
+        8,
+        4
+      ],
+      "weights": {
+        "analyse_produit": 0.9,
+        "architecture": 0.1
+      }
+    },
+    {
+      "id": "design",
+      "label": "Conception et architecture",
+      "jh": 1.9,
+      "percent_by_phase": [
+        19,
+        36,
+        16,
+        4
+      ],
+      "weights": {
+        "architecture": 0.4,
+        "dev_java": 0.4,
+        "dev_frontend": 0.05,
+        "ux": 0.1,
+        "securite": 0.05
+      }
+    },
+    {
+      "id": "implementation",
+      "label": "Réalisation et tests unitaires",
+      "jh": 2.6881355932203395,
+      "percent_by_phase": [
+        8,
+        13,
+        34,
+        19
+      ],
+      "weights": {
+        "dev_java": 0.85,
+        "dev_frontend": 0.15
+      }
+    },
+    {
+      "id": "assessment",
+      "label": "Évaluation, vérification et validation",
+      "jh": 2.0338983050847457,
+      "percent_by_phase": [
+        8,
+        10,
+        24,
+        24
+      ],
+      "weights": {
+        "qa": 0.7,
+        "dev_java": 0.2,
+        "dev_frontend": 0.05,
+        "securite": 0.05
+      }
+    },
+    {
+      "id": "deployment",
+      "label": "Préparation du déploiement",
+      "jh": 0.5745762711864406,
+      "percent_by_phase": [
+        3,
+        3,
+        3,
+        30
+      ],
+      "weights": {
+        "plateforme": 0.7,
+        "dev_java": 0.2,
+        "coordination": 0.1
+      }
+    }
+  ],
+  "activity_source_ref": "audits/2026-10-30-master-data-calcul/repartitions-sources.json#cocomo",
+  "delay": {
+    "calculated_months": 3.4013947131885685,
+    "rounded_months": 3,
+    "status": "Délai local nominal du diagnostic ; pas engagement ni calendrier global. Dépend des mécanismes des autres familles."
+  },
+  "functional_control": {
+    "CFP": 33,
+    "jh": 94.28571428571429,
+    "gap_jh": 82.69978226272706,
+    "gap_pct": 713.7948168403312,
+    "denominator": 11.58593202298724,
+    "not_confidence": true
+  },
+  "measured_change": {
+    "java_units_iteration_2": 9,
+    "java_units_iteration_3": 65,
+    "jh_iteration_2": 6.799309562149925,
+    "jh_iteration_3": 11.58593202298724,
+    "additional_source_files": 1,
+    "resolved_direct_calls": 1,
+    "remaining_delegations": 0
+  },
+  "limits": [
+    "Ajouter prévision et MRP ; le périmètre qualifie une prévision reçue, sans développer un modèle statistique commercial.",
+    "Les parts de pertinence et de nouveau code sont des hypothèses non calibrées.",
+    "Le composant natif peut rester plus large que le périmètre Flow ; les quatre chiffres ne sont ni des charges historiques ni des validations indépendantes.",
+    "Un même code peut servir d’analogue à plusieurs familles ; cela ne prouve pas à lui seul un mécanisme Flow commun ni un financement distinct.",
+    "Le comptage COSMIC est proposé, sans revue humaine ni preuve d’exhaustivité."
+  ],
+  "cumulative": {
+    "adopted_jh": 1940,
+    "newly_adopted_jh": 0,
+    "capabilities_reviewed": 37,
+    "total_capabilities": 88,
+    "reviewed_pct": 42.04545454545455
+  },
+  "next_iteration_worthwhile": true,
+  "next_iteration_reason": "Audit transversal demandé : vérifier les mécanismes communs, l’exhaustivité fonctionnelle et les analogues non appariés avant une nouvelle adoption.",
+  "lineage": {
+    "iteration_1_sha256": "418cb599c21c6b5a917a2a2040b5a90589378516514d079863b4abd26bc359c1",
+    "analysis_1_sha256": "336c7e2da153f0ea4b29de449cad629c4ca7b93d37659425d8a775cdd303182a",
+    "iteration_2_sha256": "f02611d9b1bc518384bdfcdf627aa01c17f52399a26fc8df29741a1b98253e81",
+    "analysis_2_sha256": "c3a46dccc03a71280c1e82c28c62b0b7f22d4de462f7437338ead677cb96edd0",
+    "inputs_3_sha256": "8ebff5e21a59ba66037a3c1cbe761a704e821344a557831767119ddc6a0cf51e"
+  }
+}

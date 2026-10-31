@@ -1,5 +1,6 @@
-import {useMemo,useState} from 'react';
-import {ArrowLeft,Search} from 'lucide-react';
+import {DossierNavigation,DossierSheet,useDossierFocus} from './Dossier';
+import {dossierHref,dossierTargetPage,navigationPages,selectDossierPage} from './dossierNavigation';
+import type {ReactNode} from 'react';
 import {useStudy,type Data} from './context';
 import {MethodDocument,MethodText} from './MethodDocument';
 import {SourceLink} from './components';
@@ -10,61 +11,40 @@ export function DeliveryConditionsPage(){
  return <MethodDocument method={data.content.delivery_method} prefix="delivery-conditions" className="delivery-conditions-page"/>;
 }
 
-export function DeliveryReadinessPage(){
- const {data}=useStudy();
- return <MethodDocument method={data.content.delivery_readiness} prefix="delivery-readiness" className="delivery-readiness-page"/>;
-}
+const targetId=(kind:string,id:string)=>'delivery-readiness-'+kind+'-'+id;
 
-const searchable=(text:string)=>text.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr');
-export function RetainedScopePage(){
- const {data}=useStudy(),S=data.content.delivery_readiness.scope,L=S.labels;
- const [query,setQuery]=useState('');
- const rows=useMemo(()=>{
-  const needle=searchable(query.trim());
-  const exact=S.rows.find((row:Data)=>searchable(row.capability_id)===needle||searchable(row.id)===needle);
-  if(exact)return [exact];
-  return S.rows.filter((row:Data)=>searchable([row.name,row.capability_id,...row.path,row.boundary].join(' ')).includes(needle));
- },[S.rows,query]);
- const groups=useMemo(()=>{
-  const visible=new Map<string,Data>(rows.map((row:Data)=>[row.capability_id,row]));
-  return S.hierarchy.map((domain:Data)=>({...domain,subdomains:domain.subdomains.map((subdomain:Data)=>({...subdomain,
-   areas:subdomain.areas.map((area:Data)=>({...area,rows:area.capability_ids.map((id:string)=>visible.get(id)).filter(Boolean)})).filter((area:Data)=>area.rows.length)
-  })).filter((subdomain:Data)=>subdomain.areas.length)})).filter((domain:Data)=>domain.subdomains.length);
- },[S.hierarchy,rows]);
- const subdomainCount=S.hierarchy.reduce((sum:number,domain:Data)=>sum+domain.subdomains.length,0);
- const areaCount=S.hierarchy.reduce((sum:number,domain:Data)=>sum+domain.subdomains.reduce((total:number,subdomain:Data)=>total+subdomain.areas.length,0),0);
- const count=(value:number)=>(value===1?L.capability_count_one:L.capability_count).replace('{count}',String(value));
- const subdomainSize=(subdomain:Data)=>subdomain.areas.reduce((sum:number,area:Data)=>sum+area.rows.length,0);
- const goTo=(id:string)=>{const target=document.getElementById(id);target?.focus({preventScroll:true});target?.scrollIntoView({block:'start'});};
- const summary=L.hierarchy_summary.replace('{capabilities}',String(S.rows.length)).replace('{subdomains}',String(subdomainCount)).replace('{areas}',String(areaCount));
- return <div className="essential-page core-method-page delivery-scope-page">
-  <p className="core-method-lead"><MethodText>{S.introduction}</MethodText></p>
-  <dl className="delivery-scope-provenance"><div><dt>{L.capture_date}</dt><dd><time dateTime={S.source.date}>{new Intl.DateTimeFormat(data.ui.locale,{dateStyle:'long'}).format(new Date(S.source.date))}</time></dd></div><div><dt>{L.version}</dt><dd>{S.source.version}</dd></div></dl>
-  <div className="delivery-scope-source"><SourceLink path={S.link.href}>{S.link.label}</SourceLink></div>
-  <aside className="core-method-callout"><p><MethodText>{S.note}</MethodText></p></aside>
-  <p className="delivery-scope-summary"><MethodText>{summary}</MethodText></p>
-  <div className="delivery-scope-direct"><button type="button" className="text-button" aria-controls="scope-capabilities" onClick={()=>goTo('scope-capabilities')} disabled={!rows.length}>{L.open_capabilities}</button></div>
-  <div className="delivery-scope-toolbar"><label htmlFor="delivery-scope-search"><Search size={18} aria-hidden="true"/><span>{L.search}</span></label><input type="search" id="delivery-scope-search" value={query} onChange={event=>setQuery(event.target.value)}/><p role="status">{(rows.length===1?L.results_one:L.results).replace('{count}',String(rows.length))}</p>{!rows.length&&<p>{L.no_results}</p>}</div>
-  {groups.length>0&&<nav className="core-method-navigation delivery-scope-navigation" aria-labelledby="scope-navigation-title">
-   <h2 id="scope-navigation-title" tabIndex={-1}>{L.navigation_title}</h2>
-   {groups.map((domain:Data)=><div key={domain.id}><h3>{domain.label}</h3><ol>{domain.subdomains.map((subdomain:Data)=><li key={subdomain.id}>
-    <button type="button" aria-controls={'scope-subdomain-'+subdomain.id} onClick={()=>goTo('scope-subdomain-'+subdomain.id)}><span>{subdomain.label}</span><span className="delivery-scope-count">{count(subdomainSize(subdomain))}</span></button>
-    <ul className="delivery-scope-area-links">{subdomain.areas.map((area:Data)=><li key={area.id}><button type="button" aria-controls={'scope-area-'+area.id} onClick={()=>goTo('scope-area-'+area.id)}><span>{area.label}</span><span className="delivery-scope-count">{count(area.rows.length)}</span></button></li>)}</ul>
-   </li>)}</ol></div>)}
-  </nav>}
-  <div id="scope-capabilities" tabIndex={-1} className="delivery-scope-groups">{groups.map((domain:Data)=>domain.subdomains.map((subdomain:Data)=><section className="delivery-scope-subdomain" key={subdomain.id} aria-labelledby={'scope-subdomain-'+subdomain.id}>
-   <header><p className="delivery-scope-path">{domain.label} / {L.subdomain}</p><h2 id={'scope-subdomain-'+subdomain.id} tabIndex={-1}>{subdomain.label}</h2><p className="delivery-scope-count">{count(subdomainSize(subdomain))}</p></header>
-   {subdomain.areas.map((area:Data)=><section className="delivery-scope-area" key={area.id} aria-labelledby={'scope-area-'+area.id}>
-    <header><p className="delivery-scope-path">{L.business_area}</p><h3 id={'scope-area-'+area.id} tabIndex={-1}>{area.label}</h3><p className="delivery-scope-count">{count(area.rows.length)}</p></header>
-    <div className="delivery-scope-list">{area.rows.map((row:Data)=><article className="delivery-scope-capability" key={row.capability_id} data-capability={row.capability_id} aria-labelledby={'scope-capability-'+row.capability_id}>
-     <header><h4 id={'scope-capability-'+row.capability_id}>{row.name}</h4><p className="delivery-scope-id">{row.capability_id}</p></header>
-     <div className="delivery-scope-boundary"><h5>{L.boundary}</h5><p><MethodText>{row.boundary}</MethodText></p></div>
-     {row.definition&&<p><MethodText>{row.definition}</MethodText></p>}
-     <SourceLink path={row.href}>{L.native_reference}</SourceLink>
-    </article>)}</div>
-    <button type="button" className="text-button delivery-scope-return" aria-controls="scope-navigation-title" onClick={()=>goTo('scope-navigation-title')}>{L.back_to_navigation}</button>
-   </section>)}
-  </section>))}</div>
-  <a className="text-button essential-structure-next" href="#modele"><ArrowLeft size={17} aria-hidden="true"/>{L.back_label}</a>
+export function DeliveryReadinessPage({view,focus}:{view?:string;focus?:string}){
+ const {data}=useStudy(),D=data.content.delivery_readiness,L=D.labels;
+ const N=data.ui.essential.dossiers.delivery,pages=navigationPages('capacite-realisation',N.pages),current=selectDossierPage(pages,view);
+ useDossierFocus(focus);
+ const goTo=(kind:string,id:string)=>{
+  const owner=dossierTargetPage(pages,kind==='proof'?'partenaire':kind==='role'?'organisation':kind==='gate'?'jalons':id),target=targetId(kind,id);
+  if(owner.id!==current.id){location.hash=dossierHref('capacite-realisation',owner.id,pages[0].id,'view',target);return;}
+  const element=document.getElementById(target);element?.focus({preventScroll:true});element?.scrollIntoView({block:'start',behavior:'auto'});
+ };
+ const proofs=new Map<string,Data>(D.proofs.map((row:Data)=>[row.id,row])),roles=new Map<string,Data>(D.roles.map((row:Data)=>[row.id,row])),gates=new Map<string,Data>(D.gates.map((row:Data)=>[row.id,row]));
+ const partnerProofs=new Set(D.partner.map((row:Data)=>row.proof_ref));
+ const validation=(owner:string)=>owner.endsWith(L.validation_suffix)?owner.slice(0,-L.validation_suffix.length):owner;
+ const proofLinks=(ids:string[])=><span className="delivery-proof-links">{ids.map(id=>{const proof=proofs.get(id)!;return <button type="button" className="text-button" key={id} data-proof-ref={id} aria-controls={current.id==='proofs'?targetId('proof',id):undefined} title={proof.title} onClick={()=>goTo('proof',id)}>{proof.short_title}</button>;})}</span>;
+ const state=(status:string)=><span className="delivery-state" data-status={status}>{L.states[status]}</span>;
+ const section=(id:string,children:ReactNode)=>{if(!current.sections?.includes(id))return null;const row=D.sections.find((item:Data)=>item.id===id);return <li key={id}><section className="core-method-section" aria-labelledby={targetId('section',id)}><h2 id={targetId('section',id)} tabIndex={-1}>{row.title}</h2><p className="core-method-lead"><MethodText>{row.lead}</MethodText></p>{children}</section></li>;};
+ return <div className="essential-page core-method-page delivery-readiness-page dossier-page">
+  <DossierNavigation pages={pages} current={current.id} label={N.navigation}/>
+  <DossierSheet view={current.id}>
+  {current.id==='missions'&&<section className="core-method-introduction" aria-labelledby="delivery-readiness-principle-title">
+   <h2 id="delivery-readiness-principle-title">{D.principle.title}</h2><p className="delivery-review-date">{L.review_date} <time dateTime={D.date}>{new Intl.DateTimeFormat(data.ui.locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(D.date))}</time></p>
+   <p><MethodText>{D.principle.text}</MethodText></p>
+   <div className="delivery-document-summary"><p><strong>{D.proofs.filter((p:Data)=>p.status==='disponible').length}</strong> {L.available_summary}</p><p><strong>{D.proofs.filter((p:Data)=>p.status==='attendue').length}</strong> {L.expected_summary}</p></div>
+   <aside className="core-method-notice"><h3>{D.notice.title}</h3><p><MethodText>{D.notice.text}</MethodText></p></aside>
+   <p><a className="text-button" href={D.method_link.href}>{D.method_link.label} →</a></p>
+  </section>}
+  <ol className="core-method-sections">
+   {section('organisation',<div className="core-method-table-scroll" tabIndex={0} role="region" aria-label={D.sections[0].title}><table className="core-method-table delivery-role-table"><thead><tr>{L.role_columns.map((text:string)=><th scope="col" key={text}>{text}</th>)}</tr></thead><tbody>{D.roles.map((role:Data)=><tr key={role.id} data-delivery-role={role.id}><th scope="row" id={targetId('role',role.id)} tabIndex={-1}>{role.title}</th><td><p>{role.actor}</p><small title={role.validation_owner}>{L.validation_label} : {validation(role.validation_owner)}</small></td><td>{state(role.status)}{proofLinks(role.proof_refs)}</td></tr>)}</tbody></table></div>)}
+   {section('points-chauds',<div className="delivery-hotspots">{D.hotspots.map((hotspot:Data)=>{const role=roles.get(hotspot.role_ref)!,gate=gates.get(hotspot.gate_ref)!;return <article key={hotspot.id} data-hotspot={hotspot.id}><h3>{hotspot.title}</h3><p>{hotspot.risk}</p><p><strong>{L.action_label} : </strong>{hotspot.action}</p><div className="delivery-case-relations"><button type="button" className="text-button" aria-controls={current.id==='missions'?targetId('role',role.id):undefined} onClick={()=>goTo('role',role.id)}>{role.title}</button><button type="button" className="text-button" aria-controls={current.id==='gates'?targetId('gate',gate.id):undefined} onClick={()=>goTo('gate',gate.id)}>{gate.title}</button></div>{proofLinks([...hotspot.available_refs,...hotspot.expected_refs])}<div className="delivery-native-links">{hotspot.capability_refs.map((id:string)=>{const capability=D.scope.rows.find((row:Data)=>row.capability_id===id);return <SourceLink path={capability.href} key={id}>{capability.name}</SourceLink>;})}</div></article>;})}</div>)}
+   {section('partenaire',<div className="core-method-table-scroll" tabIndex={0} role="region" aria-label={D.sections[2].title}><table className="core-method-table delivery-proof-register"><thead><tr>{L.proof_columns.map((text:string)=><th scope="col" key={text}>{text}</th>)}</tr></thead><tbody>{D.proofs.map((proof:Data)=><tr key={proof.id} data-delivery-proof={proof.id}><th scope="row"><h3 id={targetId('proof',proof.id)} tabIndex={-1}>{proof.title}</h3>{partnerProofs.has(proof.id)&&<small className="delivery-partner-requirement">{L.partner_requirement}</small>}</th><td><span className="delivery-state" data-status={proof.status}>{L.proof_states[proof.status]}</span>{proof.href&&<SourceLink path={proof.href}>{L.proof_access}</SourceLink>}</td><td>{proof.detail}</td></tr>)}</tbody></table></div>)}
+   {section('jalons',<div className="delivery-gates">{D.gates.map((gate:Data)=><article key={gate.id} data-delivery-gate={gate.id}><header><h3 id={targetId('gate',gate.id)} tabIndex={-1}>{gate.title}</h3>{state(gate.status)}</header><p>{gate.expected}</p><p className="delivery-validation" title={gate.validation_owner}><strong>{L.validation_label} : </strong>{validation(gate.validation_owner)}</p><dl><div><dt>{L.proceed_label}</dt><dd>{gate.proceed}</dd></div><div><dt>{L.reconsider_label}</dt><dd>{gate.reconsider}</dd></div></dl>{proofLinks(gate.proof_refs)}</article>)}</div>)}
+  </ol>
+  <a className="text-button essential-structure-next" href={D.next.href}>{D.next.label} →</a>
+  </DossierSheet>
  </div>;
 }

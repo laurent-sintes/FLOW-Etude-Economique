@@ -115,7 +115,7 @@ class AuditCorrectionsTests(unittest.TestCase):
             p=prepare(bundle['evidence'],reg['calculations'][0],reg,evaluate)
         self.assertEqual(p['trace']['CFP'],420)
         self.assertAlmostEqual(p['rows'][3]['jh'],1496.947499268186)
-        self.assertEqual(len(bundle['evidence']),20)
+        self.assertTrue(set(self.registry['proofs'])<=set(bundle['evidence']))
 
     def test_comparability_and_consolidation_are_not_probabilities(self):
         a=self.result['alignment']

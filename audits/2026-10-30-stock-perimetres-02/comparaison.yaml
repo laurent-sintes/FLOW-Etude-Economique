@@ -1,0 +1,1594 @@
+id: stock-perimetres-02
+status: quatre_selections_constituees_comparabilite_partielle
+unit: Inventory State Management
+stack_target: java-spring
+rules_source: source/fondamentaux.yaml#estimation_model
+common_contracts:
+- id: C1
+  result: Conserver des mouvements reconnus et leurs corrections, reliés à leur origine.
+  capabilities:
+  - BC-009
+  - BC-010
+  limit: Les écritures natives passent souvent par la réalisation des mouvements ; ces appels ne sont pas assimilés
+    à une ingestion externe complète.
+- id: C2
+  result: Lire des quantités par produit, lieu, lot ou autre dimension native, avec contexte de date.
+  capabilities:
+  - BC-011
+  limit: La double date fait/connaissance et les limites de connaissance Flow ne sont pas présumées équivalentes
+    aux filtres natifs.
+- id: C3
+  result: Rapprocher quantités attendues et constatées, préparer les ajustements de stock.
+  capabilities:
+  - BC-013
+  limit: 'Politique de comptage, tolérances, prix et exécution mélangés : fonctions mixtes conservées comme limites,
+    pas comptées intégralement.'
+- id: C4
+  result: Tenir des quantités réservées, disponibles et consommées ou libérées.
+  capabilities:
+  - BC-018
+  limit: Pas de preuve de protocole universel d’expiration ni d’équivalence des décisions de réservation ; allocation
+    et commandes sont isolées.
+- id: C5
+  result: Composer les positions à partir de mouvements présents et attendus connus.
+  capabilities:
+  - BC-011
+  - BC-012
+  limit: Une somme native de mouvements planifiés n’est pas le contrat complet de fourniture versionnée à la planification.
+comparison_matrix:
+- product: erpnext
+  contract: C1
+  status: mécanisme partiel observé
+  method_count: 14
+  evidence:
+  - path: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py
+    symbol: StockLedgerEntry.autoname
+    lines:
+    - 85
+    - 92
+  - path: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py
+    symbol: StockLedgerEntry.set_posting_datetime
+    lines:
+    - 111
+    - 114
+  - path: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py
+    symbol: StockLedgerEntry.get_dimension_sle_query
+    lines:
+    - 175
+    - 186
+  - path: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py
+    symbol: StockLedgerEntry.get_future_dimension_qty
+    lines:
+    - 163
+    - 173
+  - path: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py
+    symbol: StockLedgerEntry.validate_mandatory
+    lines:
+    - 321
+    - 328
+  - path: erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py
+    symbol: StockLedgerEntry.block_transactions_against_group_warehouse
+    lines:
+    - 404
+    - 407
+  - path: erpnext/stock/stock_ledger.py
+    symbol: get_previous_sle
+    lines:
+    - 2285
+    - 2303
+  - path: erpnext/stock/stock_ledger.py
+    symbol: get_stock_ledger_entries
+    lines:
+    - 2306
+    - 2396
+  - path: erpnext/stock/stock_ledger.py
+    symbol: get_prior_ledger_condition
+    lines:
+    - 2428
+    - 2434
+  - path: erpnext/stock/stock_ledger.py
+    symbol: validate_item_warehouse
+    lines:
+    - 542
+    - 546
+  - path: erpnext/stock/stock_ledger.py
+    symbol: update_qty_in_future_sle
+    lines:
+    - 2575
+    - 2619
+  - path: erpnext/stock/stock_ledger.py
+    symbol: get_stock_reco_qty_shift
+    lines:
+    - 2622
+    - 2654
+  - path: erpnext/stock/stock_ledger.py
+    symbol: get_next_reco_datetime_condition
+    lines:
+    - 2657
+    - 2670
+  - path: erpnext/stock/stock_ledger.py
+    symbol: get_datetime_limit_condition
+    lines:
+    - 2708
+    - 2713
+- product: erpnext
+  contract: C2
+  status: mécanisme partiel observé
+  method_count: 18
+  evidence:
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: Bin.set_projected_qty
+    lines:
+    - 100
+    - 110
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: Bin.update_reserved_stock
+    lines:
+    - 207
+    - 216
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: get_bin_details
+    lines:
+    - 223
+    - 238
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: get_projected_qty_term
+    lines:
+    - 252
+    - 263
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: get_actual_qty
+    lines:
+    - 310
+    - 311
+  - path: erpnext/stock/report/stock_balance/stock_balance.py
+    symbol: StockBalanceReport.get_group_by_key
+    lines:
+    - 557
+    - 567
+  - path: erpnext/stock/report/stock_balance/stock_balance.py
+    symbol: StockBalanceReport.apply_inventory_dimensions_filters
+    lines:
+    - 569
+    - 577
+  - path: erpnext/stock/report/stock_balance/stock_balance.py
+    symbol: StockBalanceReport.apply_warehouse_filters
+    lines:
+    - 579
+    - 594
+  - path: erpnext/stock/report/stock_balance/stock_balance.py
+    symbol: StockBalanceReport.apply_items_filters
+    lines:
+    - 596
+    - 607
+  - path: erpnext/stock/report/stock_balance/stock_balance.py
+    symbol: StockBalanceReport.apply_date_filters
+    lines:
+    - 609
+    - 616
+  - path: erpnext/stock/stock_ledger.py
+    symbol: get_previous_sle
+    lines:
+    - 2285
+    - 2303
+  - path: erpnext/stock/stock_ledger.py
+    symbol: get_stock_ledger_entries
+    lines:
+    - 2306
+    - 2396
+  - path: erpnext/stock/stock_ledger.py
+    symbol: get_prior_ledger_condition
+    lines:
+    - 2428
+    - 2434
+  - path: erpnext/stock/stock_ledger.py
+    symbol: validate_item_warehouse
+    lines:
+    - 542
+    - 546
+  - path: erpnext/stock/stock_ledger.py
+    symbol: update_qty_in_future_sle
+    lines:
+    - 2575
+    - 2619
+  - path: erpnext/stock/stock_ledger.py
+    symbol: get_stock_reco_qty_shift
+    lines:
+    - 2622
+    - 2654
+  - path: erpnext/stock/stock_ledger.py
+    symbol: get_next_reco_datetime_condition
+    lines:
+    - 2657
+    - 2670
+  - path: erpnext/stock/stock_ledger.py
+    symbol: get_datetime_limit_condition
+    lines:
+    - 2708
+    - 2713
+- product: erpnext
+  contract: C3
+  status: mécanisme partiel observé
+  method_count: 4
+  evidence:
+  - path: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py
+    symbol: StockReconciliation.get_item_warehouses_changing_qty
+    lines:
+    - 834
+    - 844
+  - path: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py
+    symbol: StockReconciliation.get_balance_before_reconciliation
+    lines:
+    - 926
+    - 936
+  - path: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py
+    symbol: StockReconciliation.get_current_qty_from_ledger
+    lines:
+    - 1313
+    - 1331
+  - path: erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py
+    symbol: StockReconciliation.is_adjustment_row
+    lines:
+    - 1269
+    - 1286
+- product: erpnext
+  contract: C4
+  status: mécanisme partiel observé
+  method_count: 12
+  evidence:
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: Bin.set_projected_qty
+    lines:
+    - 100
+    - 110
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: Bin.update_reserved_stock
+    lines:
+    - 207
+    - 216
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: get_bin_details
+    lines:
+    - 223
+    - 238
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: get_projected_qty_term
+    lines:
+    - 252
+    - 263
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: get_actual_qty
+    lines:
+    - 310
+    - 311
+  - path: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py
+    symbol: StockReservationEntry.update_reserved_stock_in_bin
+    lines:
+    - 643
+    - 648
+  - path: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py
+    symbol: StockReservationEntry.update_status
+    lines:
+    - 650
+    - 654
+  - path: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py
+    symbol: StockReservationEntry.get_total_reserved_qty
+    lines:
+    - 741
+    - 758
+  - path: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py
+    symbol: StockReservationEntry.get_row_reserved_qty
+    lines:
+    - 760
+    - 777
+  - path: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py
+    symbol: get_sre_reserved_qty_for_item_and_warehouse
+    lines:
+    - 914
+    - 934
+  - path: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py
+    symbol: get_sre_reserved_qty_for_items_and_warehouses
+    lines:
+    - 937
+    - 969
+  - path: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py
+    symbol: get_status
+    lines:
+    - 2179
+    - 2195
+- product: erpnext
+  contract: C5
+  status: mécanisme partiel observé
+  method_count: 5
+  evidence:
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: Bin.set_projected_qty
+    lines:
+    - 100
+    - 110
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: Bin.update_reserved_stock
+    lines:
+    - 207
+    - 216
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: get_bin_details
+    lines:
+    - 223
+    - 238
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: get_projected_qty_term
+    lines:
+    - 252
+    - 263
+  - path: erpnext/stock/doctype/bin/bin.py
+    symbol: get_actual_qty
+    lines:
+    - 310
+    - 311
+- product: odoo
+  contract: C1
+  status: mécanisme partiel observé
+  method_count: 18
+  evidence:
+  - path: addons/stock/models/stock_move.py
+    symbol: StockMove._compute_quantity_product_uom
+    lines:
+    - 265
+    - 268
+  - path: addons/stock/models/stock_move.py
+    symbol: StockMove._compute_product_qty
+    lines:
+    - 404
+    - 408
+  - path: addons/stock/models/stock_move.py
+    symbol: StockMove._get_available_quantity
+    lines:
+    - 2077
+    - 2081
+  - path: addons/stock/models/stock_move.py
+    symbol: StockMove._get_quantity_field
+    lines:
+    - 3009
+    - 3010
+  - path: addons/stock/models/stock_move.py
+    symbol: StockMove._get_product_uom_field
+    lines:
+    - 3012
+    - 3013
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_available_quantity
+    lines:
+    - 121
+    - 124
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_inventory_diff_quantity
+    lines:
+    - 218
+    - 224
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_inventory_quantity_set
+    lines:
+    - 226
+    - 228
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_is_outdated
+    lines:
+    - 230
+    - 235
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._search_is_outdated
+    lines:
+    - 237
+    - 242
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_gather_domain
+    lines:
+    - 785
+    - 804
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._gather
+    lines:
+    - 806
+    - 826
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_available_quantity
+    lines:
+    - 828
+    - 867
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_quants_by_products_locations
+    lines:
+    - 951
+    - 967
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._update_available_quantity
+    lines:
+    - 1072
+    - 1140
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._update_reserved_quantity
+    lines:
+    - 1142
+    - 1155
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_inventory_move_values
+    lines:
+    - 1288
+    - 1327
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant.action_clear_inventory_quantity
+    lines:
+    - 580
+    - 584
+- product: odoo
+  contract: C2
+  status: mécanisme partiel observé
+  method_count: 29
+  evidence:
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._compute_quantities
+    lines:
+    - 139
+    - 154
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._compute_quantities_dict
+    lines:
+    - 156
+    - 274
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._get_domain_locations
+    lines:
+    - 349
+    - 402
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._get_domain_locations_new
+    lines:
+    - 404
+    - 466
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._search_qty_available
+    lines:
+    - 468
+    - 479
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._search_free_qty
+    lines:
+    - 481
+    - 488
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._search_field_by_quants
+    lines:
+    - 493
+    - 532
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._get_dates_info
+    lines:
+    - 726
+    - 732
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._get_only_qty_available
+    lines:
+    - 734
+    - 744
+  - path: addons/stock/models/stock_lot.py
+    symbol: StockLot._product_qty
+    lines:
+    - 226
+    - 261
+  - path: addons/stock/models/stock_lot.py
+    symbol: StockLot._search_product_qty
+    lines:
+    - 263
+    - 289
+  - path: addons/stock/models/stock_move.py
+    symbol: StockMove._compute_quantity_product_uom
+    lines:
+    - 265
+    - 268
+  - path: addons/stock/models/stock_move.py
+    symbol: StockMove._compute_product_qty
+    lines:
+    - 404
+    - 408
+  - path: addons/stock/models/stock_move.py
+    symbol: StockMove._get_available_quantity
+    lines:
+    - 2077
+    - 2081
+  - path: addons/stock/models/stock_move.py
+    symbol: StockMove._get_quantity_field
+    lines:
+    - 3009
+    - 3010
+  - path: addons/stock/models/stock_move.py
+    symbol: StockMove._get_product_uom_field
+    lines:
+    - 3012
+    - 3013
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_available_quantity
+    lines:
+    - 121
+    - 124
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_inventory_diff_quantity
+    lines:
+    - 218
+    - 224
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_inventory_quantity_set
+    lines:
+    - 226
+    - 228
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_is_outdated
+    lines:
+    - 230
+    - 235
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._search_is_outdated
+    lines:
+    - 237
+    - 242
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_gather_domain
+    lines:
+    - 785
+    - 804
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._gather
+    lines:
+    - 806
+    - 826
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_available_quantity
+    lines:
+    - 828
+    - 867
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_quants_by_products_locations
+    lines:
+    - 951
+    - 967
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._update_available_quantity
+    lines:
+    - 1072
+    - 1140
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._update_reserved_quantity
+    lines:
+    - 1142
+    - 1155
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_inventory_move_values
+    lines:
+    - 1288
+    - 1327
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant.action_clear_inventory_quantity
+    lines:
+    - 580
+    - 584
+- product: odoo
+  contract: C3
+  status: mécanisme partiel observé
+  method_count: 13
+  evidence:
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_available_quantity
+    lines:
+    - 121
+    - 124
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_inventory_diff_quantity
+    lines:
+    - 218
+    - 224
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_inventory_quantity_set
+    lines:
+    - 226
+    - 228
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_is_outdated
+    lines:
+    - 230
+    - 235
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._search_is_outdated
+    lines:
+    - 237
+    - 242
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_gather_domain
+    lines:
+    - 785
+    - 804
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._gather
+    lines:
+    - 806
+    - 826
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_available_quantity
+    lines:
+    - 828
+    - 867
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_quants_by_products_locations
+    lines:
+    - 951
+    - 967
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._update_available_quantity
+    lines:
+    - 1072
+    - 1140
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._update_reserved_quantity
+    lines:
+    - 1142
+    - 1155
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_inventory_move_values
+    lines:
+    - 1288
+    - 1327
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant.action_clear_inventory_quantity
+    lines:
+    - 580
+    - 584
+- product: odoo
+  contract: C4
+  status: mécanisme partiel observé
+  method_count: 13
+  evidence:
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_available_quantity
+    lines:
+    - 121
+    - 124
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_inventory_diff_quantity
+    lines:
+    - 218
+    - 224
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_inventory_quantity_set
+    lines:
+    - 226
+    - 228
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._compute_is_outdated
+    lines:
+    - 230
+    - 235
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._search_is_outdated
+    lines:
+    - 237
+    - 242
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_gather_domain
+    lines:
+    - 785
+    - 804
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._gather
+    lines:
+    - 806
+    - 826
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_available_quantity
+    lines:
+    - 828
+    - 867
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_quants_by_products_locations
+    lines:
+    - 951
+    - 967
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._update_available_quantity
+    lines:
+    - 1072
+    - 1140
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._update_reserved_quantity
+    lines:
+    - 1142
+    - 1155
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant._get_inventory_move_values
+    lines:
+    - 1288
+    - 1327
+  - path: addons/stock/models/stock_quant.py
+    symbol: StockQuant.action_clear_inventory_quantity
+    lines:
+    - 580
+    - 584
+- product: odoo
+  contract: C5
+  status: mécanisme partiel observé
+  method_count: 9
+  evidence:
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._compute_quantities
+    lines:
+    - 139
+    - 154
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._compute_quantities_dict
+    lines:
+    - 156
+    - 274
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._get_domain_locations
+    lines:
+    - 349
+    - 402
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._get_domain_locations_new
+    lines:
+    - 404
+    - 466
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._search_qty_available
+    lines:
+    - 468
+    - 479
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._search_free_qty
+    lines:
+    - 481
+    - 488
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._search_field_by_quants
+    lines:
+    - 493
+    - 532
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._get_dates_info
+    lines:
+    - 726
+    - 732
+  - path: addons/stock/models/product.py
+    symbol: ProductProduct._get_only_qty_available
+    lines:
+    - 734
+    - 744
+- product: tryton
+  contract: C1
+  status: mécanisme partiel observé
+  method_count: 9
+  evidence:
+  - path: modules/stock/move.py
+    symbol: StockMixin._quantity_context
+    lines:
+    - 45
+    - 61
+  - path: modules/stock/move.py
+    symbol: StockMixin._get_quantity
+    lines:
+    - 63
+    - 111
+  - path: modules/stock/move.py
+    symbol: StockMixin._search_quantity
+    lines:
+    - 113
+    - 188
+  - path: modules/stock/move.py
+    symbol: Move.assign
+    lines:
+    - 875
+    - 878
+  - path: modules/stock/move.py
+    symbol: Move.cancel
+    lines:
+    - 1026
+    - 1030
+  - path: modules/stock/move.py
+    symbol: Move._assign_try_lock
+    lines:
+    - 1348
+    - 1388
+  - path: modules/stock/move.py
+    symbol: Move.compute_quantities_query
+    lines:
+    - 1390
+    - 1750
+  - path: modules/stock/move.py
+    symbol: Move.compute_quantities
+    lines:
+    - 1752
+    - 1858
+  - path: modules/stock/move.py
+    symbol: _location_children
+    lines:
+    - 1861
+    - 1884
+- product: tryton
+  contract: C2
+  status: mécanisme partiel observé
+  method_count: 19
+  evidence:
+  - path: modules/stock/location.py
+    symbol: Location._get_quantity_grouping
+    lines:
+    - 394
+    - 406
+  - path: modules/stock/location.py
+    symbol: Location.get_quantity
+    lines:
+    - 408
+    - 442
+  - path: modules/stock/location.py
+    symbol: Location.search_quantity
+    lines:
+    - 444
+    - 462
+  - path: modules/stock/location.py
+    symbol: Location.get_quantity_uom
+    lines:
+    - 464
+    - 480
+  - path: modules/stock/move.py
+    symbol: StockMixin._quantity_context
+    lines:
+    - 45
+    - 61
+  - path: modules/stock/move.py
+    symbol: StockMixin._get_quantity
+    lines:
+    - 63
+    - 111
+  - path: modules/stock/move.py
+    symbol: StockMixin._search_quantity
+    lines:
+    - 113
+    - 188
+  - path: modules/stock/move.py
+    symbol: Move.assign
+    lines:
+    - 875
+    - 878
+  - path: modules/stock/move.py
+    symbol: Move.cancel
+    lines:
+    - 1026
+    - 1030
+  - path: modules/stock/move.py
+    symbol: Move._assign_try_lock
+    lines:
+    - 1348
+    - 1388
+  - path: modules/stock/move.py
+    symbol: Move.compute_quantities_query
+    lines:
+    - 1390
+    - 1750
+  - path: modules/stock/move.py
+    symbol: Move.compute_quantities
+    lines:
+    - 1752
+    - 1858
+  - path: modules/stock/move.py
+    symbol: _location_children
+    lines:
+    - 1861
+    - 1884
+  - path: modules/stock/product.py
+    symbol: Product._quantity_locations
+    lines:
+    - 168
+    - 174
+  - path: modules/stock/product.py
+    symbol: Product.get_quantity
+    lines:
+    - 176
+    - 181
+  - path: modules/stock/product.py
+    symbol: Product.search_quantity
+    lines:
+    - 183
+    - 186
+  - path: modules/stock/product.py
+    symbol: Product.products_by_location
+    lines:
+    - 284
+    - 333
+  - path: modules/stock/product.py
+    symbol: ProductQuantitiesByWarehouse.get_quantity
+    lines:
+    - 779
+    - 835
+  - path: modules/stock/product.py
+    symbol: ProductQuantitiesByWarehouseMove.get_cumulative_quantity
+    lines:
+    - 1018
+    - 1089
+- product: tryton
+  contract: C3
+  status: mécanisme partiel observé
+  method_count: 10
+  evidence:
+  - path: modules/stock/inventory.py
+    symbol: Inventory.default_date
+    lines:
+    - 120
+    - 123
+  - path: modules/stock/inventory.py
+    symbol: Inventory.default_state
+    lines:
+    - 116
+    - 118
+  - path: modules/stock/inventory.py
+    symbol: Inventory.complete_lines
+    lines:
+    - 265
+    - 338
+  - path: modules/stock/inventory.py
+    symbol: Inventory.grouping
+    lines:
+    - 261
+    - 263
+  - path: modules/stock/inventory.py
+    symbol: InventoryLine.default_expected_quantity
+    lines:
+    - 419
+    - 421
+  - path: modules/stock/inventory.py
+    symbol: InventoryLine.on_change_with_quantity_variation
+    lines:
+    - 468
+    - 474
+  - path: modules/stock/inventory.py
+    symbol: InventoryLine.unique_key
+    lines:
+    - 519
+    - 527
+  - path: modules/stock/inventory.py
+    symbol: InventoryLine.get_move
+    lines:
+    - 536
+    - 577
+  - path: modules/stock/inventory.py
+    symbol: InventoryLine.cancel_move
+    lines:
+    - 529
+    - 534
+  - path: modules/stock/inventory.py
+    symbol: InventoryLine.update_for_complete
+    lines:
+    - 579
+    - 582
+- product: tryton
+  contract: C4
+  status: mécanisme partiel observé
+  method_count: 9
+  evidence:
+  - path: modules/stock/move.py
+    symbol: StockMixin._quantity_context
+    lines:
+    - 45
+    - 61
+  - path: modules/stock/move.py
+    symbol: StockMixin._get_quantity
+    lines:
+    - 63
+    - 111
+  - path: modules/stock/move.py
+    symbol: StockMixin._search_quantity
+    lines:
+    - 113
+    - 188
+  - path: modules/stock/move.py
+    symbol: Move.assign
+    lines:
+    - 875
+    - 878
+  - path: modules/stock/move.py
+    symbol: Move.cancel
+    lines:
+    - 1026
+    - 1030
+  - path: modules/stock/move.py
+    symbol: Move._assign_try_lock
+    lines:
+    - 1348
+    - 1388
+  - path: modules/stock/move.py
+    symbol: Move.compute_quantities_query
+    lines:
+    - 1390
+    - 1750
+  - path: modules/stock/move.py
+    symbol: Move.compute_quantities
+    lines:
+    - 1752
+    - 1858
+  - path: modules/stock/move.py
+    symbol: _location_children
+    lines:
+    - 1861
+    - 1884
+- product: tryton
+  contract: C5
+  status: mécanisme partiel observé
+  method_count: 15
+  evidence:
+  - path: modules/stock/move.py
+    symbol: StockMixin._quantity_context
+    lines:
+    - 45
+    - 61
+  - path: modules/stock/move.py
+    symbol: StockMixin._get_quantity
+    lines:
+    - 63
+    - 111
+  - path: modules/stock/move.py
+    symbol: StockMixin._search_quantity
+    lines:
+    - 113
+    - 188
+  - path: modules/stock/move.py
+    symbol: Move.assign
+    lines:
+    - 875
+    - 878
+  - path: modules/stock/move.py
+    symbol: Move.cancel
+    lines:
+    - 1026
+    - 1030
+  - path: modules/stock/move.py
+    symbol: Move._assign_try_lock
+    lines:
+    - 1348
+    - 1388
+  - path: modules/stock/move.py
+    symbol: Move.compute_quantities_query
+    lines:
+    - 1390
+    - 1750
+  - path: modules/stock/move.py
+    symbol: Move.compute_quantities
+    lines:
+    - 1752
+    - 1858
+  - path: modules/stock/move.py
+    symbol: _location_children
+    lines:
+    - 1861
+    - 1884
+  - path: modules/stock/product.py
+    symbol: Product._quantity_locations
+    lines:
+    - 168
+    - 174
+  - path: modules/stock/product.py
+    symbol: Product.get_quantity
+    lines:
+    - 176
+    - 181
+  - path: modules/stock/product.py
+    symbol: Product.search_quantity
+    lines:
+    - 183
+    - 186
+  - path: modules/stock/product.py
+    symbol: Product.products_by_location
+    lines:
+    - 284
+    - 333
+  - path: modules/stock/product.py
+    symbol: ProductQuantitiesByWarehouse.get_quantity
+    lines:
+    - 779
+    - 835
+  - path: modules/stock/product.py
+    symbol: ProductQuantitiesByWarehouseMove.get_cumulative_quantity
+    lines:
+    - 1018
+    - 1089
+- product: axelor
+  contract: C1
+  status: mécanisme partiel observé
+  method_count: 12
+  evidence:
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineHistoryServiceImpl.java
+    symbol: getStockLineHistoryLines
+    lines:
+    - 68
+    - 77
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: updateLocation
+    lines:
+    - 392
+    - 417
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: getOrCreateStockLocationLine
+    lines:
+    - 419
+    - 443
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: getOrCreateDetailLocationLine
+    lines:
+    - 445
+    - 467
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: createLocationLine
+    lines:
+    - 469
+    - 486
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: createDetailLocationLine
+    lines:
+    - 488
+    - 508
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: convertToProductUnit
+    lines:
+    - 557
+    - 562
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: convertFromProductUnit
+    lines:
+    - 564
+    - 569
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: productUnit
+    lines:
+    - 571
+    - 573
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: convert
+    lines:
+    - 575
+    - 582
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: computeFutureQty
+    lines:
+    - 589
+    - 667
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: getCompany
+    lines:
+    - 693
+    - 705
+- product: axelor
+  contract: C2
+  status: mécanisme partiel observé
+  method_count: 23
+  evidence:
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getAvailableQty
+    lines:
+    - 96
+    - 104
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getStockLocationLine
+    lines:
+    - 106
+    - 117
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getStockLocationLines
+    lines:
+    - 119
+    - 129
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getStockLocationLineListForAProduct
+    lines:
+    - 131
+    - 159
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getAvailableStockForAProduct
+    lines:
+    - 161
+    - 168
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getRequestedReservedQtyForAProduct
+    lines:
+    - 170
+    - 176
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getTrackingNumberAvailableQty
+    lines:
+    - 36
+    - 48
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getTrackingNumberAvailableQty
+    lines:
+    - 50
+    - 65
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getDetailLocationLine
+    lines:
+    - 67
+    - 79
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getDetailLocationLines
+    lines:
+    - 81
+    - 94
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getTrackingNumberAvailableQtyIncludingSubLocations
+    lines:
+    - 178
+    - 194
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineHistoryServiceImpl.java
+    symbol: getStockLineHistoryLines
+    lines:
+    - 68
+    - 77
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: updateLocation
+    lines:
+    - 392
+    - 417
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: getOrCreateStockLocationLine
+    lines:
+    - 419
+    - 443
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: getOrCreateDetailLocationLine
+    lines:
+    - 445
+    - 467
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: createLocationLine
+    lines:
+    - 469
+    - 486
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: createDetailLocationLine
+    lines:
+    - 488
+    - 508
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: convertToProductUnit
+    lines:
+    - 557
+    - 562
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: convertFromProductUnit
+    lines:
+    - 564
+    - 569
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: productUnit
+    lines:
+    - 571
+    - 573
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: convert
+    lines:
+    - 575
+    - 582
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: computeFutureQty
+    lines:
+    - 589
+    - 667
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: getCompany
+    lines:
+    - 693
+    - 705
+- product: axelor
+  contract: C3
+  status: mécanisme partiel observé
+  method_count: 12
+  evidence:
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryLineServiceImpl.java
+    symbol: getCurrentQty
+    lines:
+    - 239
+    - 250
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryLineServiceImpl.java
+    symbol: getCurrentQtyInProductUnit
+    lines:
+    - 252
+    - 267
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryLineServiceImpl.java
+    symbol: missingUnitException
+    lines:
+    - 282
+    - 301
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryLineServiceImpl.java
+    symbol: isPresentInStockLocation
+    lines:
+    - 354
+    - 369
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryStockLocationUpdateServiceImpl.java
+    symbol: fetchDistinctProductIdsPage
+    lines:
+    - 114
+    - 126
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryStockLocationUpdateServiceImpl.java
+    symbol: fetchInventoryLinesForProducts
+    lines:
+    - 135
+    - 147
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryStockLocationUpdateServiceImpl.java
+    symbol: fetchStockLocationLinesForProducts
+    lines:
+    - 155
+    - 184
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryStockLocationUpdateServiceImpl.java
+    symbol: buildTrackedMap
+    lines:
+    - 255
+    - 273
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryStockLocationUpdateServiceImpl.java
+    symbol: sumRealQty
+    lines:
+    - 302
+    - 307
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java
+    symbol: computeDiff
+    lines:
+    - 368
+    - 374
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java
+    symbol: checkMissingStockLocation
+    lines:
+    - 376
+    - 416
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java
+    symbol: getStockMoveLinesCount
+    lines:
+    - 418
+    - 424
+- product: axelor
+  contract: C4
+  status: mécanisme partiel observé
+  method_count: 16
+  evidence:
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getAvailableQty
+    lines:
+    - 96
+    - 104
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getStockLocationLine
+    lines:
+    - 106
+    - 117
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getStockLocationLines
+    lines:
+    - 119
+    - 129
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getStockLocationLineListForAProduct
+    lines:
+    - 131
+    - 159
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getAvailableStockForAProduct
+    lines:
+    - 161
+    - 168
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getRequestedReservedQtyForAProduct
+    lines:
+    - 170
+    - 176
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getTrackingNumberAvailableQty
+    lines:
+    - 36
+    - 48
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getTrackingNumberAvailableQty
+    lines:
+    - 50
+    - 65
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getDetailLocationLine
+    lines:
+    - 67
+    - 79
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getDetailLocationLines
+    lines:
+    - 81
+    - 94
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    symbol: getTrackingNumberAvailableQtyIncludingSubLocations
+    lines:
+    - 178
+    - 194
+  - path: axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java
+    symbol: computeRealReservedQty
+    lines:
+    - 663
+    - 670
+  - path: axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java
+    symbol: convertUnitWithProduct
+    lines:
+    - 923
+    - 935
+  - path: axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java
+    symbol: updateRequestedReservedQty
+    lines:
+    - 937
+    - 968
+  - path: axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java
+    symbol: updateReservedQty
+    lines:
+    - 995
+    - 1020
+  - path: axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java
+    symbol: checkBeforeUpdatingQties
+    lines:
+    - 853
+    - 865
+- product: axelor
+  contract: C5
+  status: mécanisme partiel observé
+  method_count: 11
+  evidence:
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: updateLocation
+    lines:
+    - 392
+    - 417
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: getOrCreateStockLocationLine
+    lines:
+    - 419
+    - 443
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: getOrCreateDetailLocationLine
+    lines:
+    - 445
+    - 467
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: createLocationLine
+    lines:
+    - 469
+    - 486
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: createDetailLocationLine
+    lines:
+    - 488
+    - 508
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: convertToProductUnit
+    lines:
+    - 557
+    - 562
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: convertFromProductUnit
+    lines:
+    - 564
+    - 569
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: productUnit
+    lines:
+    - 571
+    - 573
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: convert
+    lines:
+    - 575
+    - 582
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: computeFutureQty
+    lines:
+    - 589
+    - 667
+  - path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java
+    symbol: getCompany
+    lines:
+    - 693
+    - 705
+flow_complements_or_unproven_equivalences:
+- capabilities:
+  - BC-009
+  - BC-010
+  subject: Faits externes, corrections tardives, double date, filiation et Handling Units
+  existing: Champs et lectures de stock observés ; équivalence du protocole non démontrée.
+  new_work: Contrat des faits et effets, reconstruction corrigée, propagation des corrections, liens explicites
+    sans inventer de généalogie.
+- capabilities:
+  - BC-011
+  subject: Positions explicables et limites de connaissance
+  existing: Quantités natives présentes et attendues.
+  new_work: Origine, fraîcheur, incertitudes et prévention des doubles comptes entre commandes, plans et réalisations.
+- capabilities:
+  - BC-012
+  subject: Fourniture à la planification
+  existing: Réutiliser les requêtes de quantité sélectionnées ; les compter une seule fois.
+  new_work: Contrat d’extraction par périmètre/date/version, statut de fraîcheur et corrections ; pas un moteur
+    de planification.
+- capabilities:
+  - BC-016
+  subject: Fourniture à Finance
+  existing: Registres natifs source de faits ; écritures comptables exclues.
+  new_work: Préparation du fait, justificatifs, correction liée, suivi acceptation/rejet et référence de prise en
+    compte ; raccordements Beaumanoir exclus.
+- capabilities:
+  - BC-017
+  subject: Constats produit
+  existing: Le stock peut fournir des faits ; aucun processus produit équivalent établi dans ces sélections.
+  new_work: Préparer les constats documentés et leurs corrections ; ni diagnostic de cause ni PLM.
+- capabilities:
+  - BC-018
+  subject: Réservations sous concurrence
+  existing: Mises à jour et verrouillages natifs repérés.
+  new_work: Qualifier garanties de quantité, consommation/libération, échéance et conflits par rapport au contrat
+    Flow ; ne pas compter les décisions d’affectation.
+perimeters:
+  erpnext:
+    source_files: 11
+    methods: 35
+    declarations: 58
+    mixed_boundary_methods: 18
+    presentation_context_files: 3
+    dependency_calls: 139
+  odoo:
+    source_files: 4
+    methods: 29
+    declarations: 25
+    mixed_boundary_methods: 6
+    presentation_context_files: 3
+    dependency_calls: 163
+  tryton:
+    source_files: 4
+    methods: 29
+    declarations: 30
+    mixed_boundary_methods: 5
+    presentation_context_files: 5
+    dependency_calls: 290
+  axelor:
+    source_files: 15
+    methods: 40
+    declarations: 57
+    mixed_boundary_methods: 24
+    presentation_context_files: 3
+    dependency_calls: 288
+interpretation: Les comptes de méthodes et champs sont des tailles de sélection, pas des unités COCOMO ni des JH.
+  Les méthodes mixtes et les fichiers de présentation de contexte ne sont pas ajoutés automatiquement.
+remaining_blocks:
+- Isoler les appels d’écriture/réalisation et valorisation dans les méthodes mixtes identifiées.
+- Fermer les dépendances applicatives retenues ; les correspondances de nom d’appel ne prouvent pas le dispatch
+  réel.
+- Sélectionner les fragments de vues et permissions ; les fichiers repérés restent du contexte, hors taille chiffrable.
+- Qualifier les garanties Flow et les trois contrats de fourniture ; ne pas prétendre à huit capacités intégralement
+  couvertes par les quatre OSS.
+new_jh: null
+new_roles_jh: null
+new_months: null
+progress:
+  native_products_with_selection: 4
+  common_outcomes_with_evidence_in_each_product: 5
+  source_files: 34
+  selected_methods: 133
+  selected_declarations: 170
+  mixed_methods_excluded: 53
+  presentation_context_files: 14
+  new_family_capabilities_framed: 8
+  full_family_native_equivalence_demonstrated: false
+  new_family_capabilities_costed: 0
+  campaign_capabilities_framed: 14
+  adopted_capabilities: 6
+  total_capabilities: 88
+  adopted_coverage_pct: 6.8
+  remaining_unestimated_java_capabilities: 82
+  cumulative_adopted_gross_jh: 1500
+  master_data_months: 17
+next_iteration:
+  worthwhile: true
+  objective: Résoudre les méthodes mixtes prioritaires et fermer leurs dépendances, puis mesurer les tailles natives
+    réellement comparables.
+  stop_condition: Si les garanties ou interfaces non comparables dominent, compléter les analogies ciblées ; ne
+    pas appliquer un coefficient pour combler le manque.

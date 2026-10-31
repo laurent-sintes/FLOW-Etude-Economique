@@ -1,0 +1,187 @@
+{
+  "id": "propriete-stock-java-03",
+  "purpose": "Contrôler les analogues Java du registre de propriété et des lectures aux deux dates, sans recalibration ni adoption.",
+  "previous": "audits/2026-10-30-propriete-stock-calcul-02",
+  "decision_policy": "Conserver le point de calcul si la revue ne démontre pas de volume manquant identifiable ; distinguer cette continuité d'une validation de productivité ou d'une équivalence produit complète. Ne pas ajuster pour rapprocher les méthodes.",
+  "new_effort_hypotheses": false,
+  "scope": [
+    "BC-014",
+    "BC-015"
+  ],
+  "frozen_volume_hypotheses": [
+    "OWN-F04 : 1 chaîne de correction native, pour du nouveau code de registre.",
+    "OWN-F05 : 0,75 chaîne de correction, pour du nouveau code de correction et lecture aux deux dates.",
+    "Les mécanismes de persistance, transaction et audit technique disponibles ne constituent pas un registre de propriété déjà livré.",
+    "Les fonctions de choix des versions, conservation des corrections et lecture aux deux dates sont spécifiques à la nouvelle famille."
+  ],
+  "repos": {
+    "axelor": {
+      "root": "tmp/oss-audit-axelor",
+      "repository": "axelor/axelor-open-suite",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e"
+    },
+    "platform": {
+      "root": "tmp/oss-audit-axelor-platform",
+      "repository": "axelor/axelor-open-platform",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3"
+    }
+  },
+  "files": [
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineHistoryServiceImpl.java",
+      "selectors": [
+        "saveHistory",
+        "getStockLineHistoryLines"
+      ],
+      "use": "Témoin historique Stock, déjà financé. Enregistre un état avec une date, sans requête aux deux dates."
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/resources/domains/StockLocationLineHistory.xml",
+      "selectors": [],
+      "use": "dateT et quantité ; pas de référence de correction ni de date de connaissance métier explicite dans ce modèle."
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/batch/BatchRecomputeStockLocationLines.java",
+      "selectors": [
+        "clearWapHistoryLines",
+        "resetStockLocations",
+        "recomputeStockMoves"
+      ],
+      "use": "Reconstruction du stock, non équivalent à un journal de propriété conservant les connaissances successives."
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockHistoryServiceImpl.java",
+      "selectors": [
+        "computeStockHistoryLineList",
+        "fetchAndFillResultForStockHistoryQuery",
+        "fillIncomingStockHistoryLineFields",
+        "fillOutgoingStockHistoryLineFields"
+      ],
+      "use": "Analogie de requête datée et d'agrégation ; les bornes begin/end portent la même date de mouvement, pas deux dimensions temporelles."
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-account/src/main/java/com/axelor/apps/account/service/move/MoveCreateServiceImpl.java",
+      "selectors": [
+        "createMove@227"
+      ],
+      "use": "Analogie de création d'une écriture autonome ; devises, règles comptables et autres services délégués ne sont pas un périmètre de propriété mesuré."
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-account/src/main/java/com/axelor/apps/account/service/move/MoveValidateServiceImpl.java",
+      "selectors": [
+        "accounting@444",
+        "validateWellBalancedMove",
+        "updateValidateStatus",
+        "freezeFieldsOnMoveLines",
+        "setMoveLineFixedInformation"
+      ],
+      "use": "Analogie de validation, conservation d'attributs et enregistrement ; la balance monétaire n'est pas une preuve d'invariant de quantité de propriété."
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-account/src/main/java/com/axelor/apps/account/service/move/MoveReverseServiceImpl.java",
+      "selectors": [
+        "generateReverse@108",
+        "generateReverseMoveLine"
+      ],
+      "use": "Analogie d'une écriture d'annulation ; ne prouve ni correction rétroactive libre, ni lecture de ce qu'on savait dans le passé."
+    },
+    {
+      "repo": "platform",
+      "path": "axelor-core/src/main/java/com/axelor/db/Model.java",
+      "selectors": [],
+      "use": "Version technique de concurrence, réutilisée ; ne prouve pas un historique métier."
+    },
+    {
+      "repo": "platform",
+      "path": "axelor-core/src/main/java/com/axelor/auth/db/AuditableModel.java",
+      "selectors": [],
+      "use": "Dates de création et de modification techniques, réutilisées ; updatedOn n'est pas à lui seul une conservation des versions."
+    },
+    {
+      "repo": "platform",
+      "path": "axelor-core/src/main/resources/domains/AuditLog.xml",
+      "selectors": [],
+      "use": "États précédent et courant dans l'audit technique ; rétention et requêtes métier aux deux dates non démontrées."
+    },
+    {
+      "repo": "platform",
+      "path": "axelor-core/src/main/java/com/axelor/db/audit/AuditTrail.java",
+      "selectors": [
+        "onPreInsert",
+        "onPreUpdate"
+      ],
+      "use": "Branchement de l'audit sur les modifications Hibernate ; pas de service de positions de propriété."
+    },
+    {
+      "repo": "platform",
+      "path": "axelor-core/src/main/java/com/axelor/db/audit/AuditTracker.java",
+      "selectors": [
+        "track",
+        "processStore"
+      ],
+      "use": "Capture et persistance de changements techniques ; ne finance pas une seconde construction du framework."
+    }
+  ],
+  "findings": [
+    {
+      "id": "registre",
+      "status": "analogie_partielle",
+      "observed": "Le journal comptable sépare création, validation et contre-écriture. Le stock dispose de mouvements et d'un historique de quantités.",
+      "not_demonstrated": "Un journal de propriété autonome et générique dans ces chemins.",
+      "estimate_consequence": "OWN-F04 demeure du nouveau code. Son volume de 281,8 unités n'est pas une mesure de code propriétaire existant."
+    },
+    {
+      "id": "correction",
+      "status": "analogie_partielle",
+      "observed": "La contre-écriture crée une nouvelle écriture ; le batch Stock efface puis reconstruit son historique.",
+      "not_demonstrated": "Une conservation métier des versions reconnues de propriété, avec correctionOf et connaissance passée.",
+      "estimate_consequence": "La correction doit être définie par la nouvelle famille ; ne pas réutiliser le batch comme preuve de la garantie."
+    },
+    {
+      "id": "deux-dates",
+      "status": "complement_flow_non_apparie",
+      "observed": "La requête Stock utilise realDate entre beginDate et endDate. L'audit technique contient des états précédent/courant et des horodatages.",
+      "not_demonstrated": "Une requête combinant date d'effet, date de connaissance et sélection des corrections valides.",
+      "estimate_consequence": "OWN-F05 finance cette fonction par analogie. Les 211,35 unités sont une hypothèse, non une mesure native."
+    }
+  ],
+  "functional_example": {
+    "status": "sémantique cible proposée pour rendre la garantie lisible ; ni preuve native ni réalisation Flow",
+    "events": [
+      {
+        "effective_at": "2026-01-10",
+        "known_at": "2026-01-12",
+        "quantity": 10,
+        "revision": 1
+      },
+      {
+        "effective_at": "2026-01-10",
+        "known_at": "2026-02-05",
+        "quantity": 6,
+        "revision": 2,
+        "corrects": 1
+      }
+    ],
+    "queries": [
+      {
+        "effective_at": "2026-01-20",
+        "known_at": "2026-01-31",
+        "expected_quantity": 10
+      },
+      {
+        "effective_at": "2026-01-20",
+        "known_at": "2026-02-06",
+        "expected_quantity": 6
+      }
+    ],
+    "meaning": "Au 20 janvier : 10 unités selon ce qu'on savait au 31 janvier, 6 selon ce qu'on sait après la correction du 5 février. L'ancien résultat doit rester explicable.",
+    "exclusions": "Pas de moteur temporel général, de langage contractuel, de comptabilité financière ni de règles spécifiques Beaumanoir construits ici."
+  }
+}

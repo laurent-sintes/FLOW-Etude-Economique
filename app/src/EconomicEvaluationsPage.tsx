@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react';
 import type {ReactNode} from 'react';
 import {SourceLink} from './components';
 import {isModelDataReference} from './documentVisibility';
-import {CoreEvaluationResults,CoreEvaluationTrace} from './CoreEvaluationPage';
+import {CoreEvaluationResults,CoreEvaluationTrace,RetainedCoreFamilies} from './CoreEvaluationPage';
 import {MethodText} from './MethodDocument';
 import {request,useStudy,useFormat,type Data} from './context';
 import './economicEvaluations.css';
@@ -62,7 +62,7 @@ function EconomicReadingContent({reading}:{reading:EconomicReading}){
  return <div className="essential-page core-method-page economic-evaluations-page">
   <nav className="core-method-navigation" aria-label={E.navigation_label}><h2>{E.navigation_label}</h2><ol>{chapters.map(chapter=><li key={chapter.id}><button type="button" aria-controls={headingId(chapter.id)} onClick={()=>goTo(chapter.id)}>{chapter.title}</button></li>)}</ol></nav>
   <section className="economic-introduction" aria-labelledby="economic-evaluation-intro"><h2 id="economic-evaluation-intro">{E.intro.title}</h2><p className="core-method-lead"><MethodText>{E.intro.text}</MethodText></p><ApplicationNote section={note('scope')}/><div className="economic-price-convention"><h3>{L.price_convention}</h3><p><MethodText>{reading.price_convention.text}</MethodText></p><SourceLink path={reading.price_convention.source}>{L.source}</SourceLink></div></section>
-  {chapter('core',<><CoreEvaluationResults status={application.status} details={false}/><CoreEvaluationTrace options={reading.options} editorial={E}/></>)}
+  {chapter('core',<><CoreEvaluationResults status={application.status} details={false} showNotice={false}/><CoreEvaluationTrace options={reading.options} editorial={E}/></>)}
   {chapter('selection',<>
    <p className="core-method-lead"><MethodText>{S.selection.lead}</MethodText></p>
    <div className="core-method-table-scroll" role="region" tabIndex={0} aria-label={S.selection.caption}><table className="core-method-table economic-evaluation-table" data-evaluation="selection"><caption>{S.selection.caption}</caption><thead><tr><th scope="col">{L.option}</th><th scope="col">{L.budget}</th><th scope="col">{L.duration}</th></tr></thead><tbody>{reading.options.filter(option=>option.selection!==null).map(option=><tr key={option.stack} data-option={option.stack}><th scope="row">{option.name}</th><td className="core-method-number">{amount(option.selection!.budget_eur_ht)}</td><td className="core-method-number">{n(option.selection!.months,0)} {L.months}</td></tr>)}</tbody></table></div>
@@ -84,7 +84,7 @@ function EconomicReadingContent({reading}:{reading:EconomicReading}){
  </div>;
 }
 
-export function EconomicEvaluationsPage(){
+export function EconomicEvaluationsPage({familyId}:{familyId?:string}){
  const {data}=useStudy();
  const [reading,setReading]=useState<EconomicReading|null>(null),[error,setError]=useState(''),[retry,setRetry]=useState(0);
  useEffect(()=>{
@@ -95,7 +95,14 @@ export function EconomicEvaluationsPage(){
   }).catch(reason=>{if(current)setError(reason.code==='version'?'version':'network');});
   return ()=>{current=false;};
  },[data.model_version,retry]);
+ useEffect(()=>{
+  if(!reading)return;
+  const heading=document.getElementById('economic-family-detail-heading')||document.querySelector('main')?.querySelector<HTMLElement>('h1');
+  if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}
+ },[familyId,Boolean(reading)]);
  if(error)return <div className="essential-page economic-evaluation-state" role="alert"><p>{error==='version'?data.ui.server_update.message:data.ui.errors.network}</p><button type="button" className="text-button" onClick={()=>error==='version'?window.location.reload():setRetry(value=>value+1)}>{error==='version'?data.ui.server_update.action:data.ui.labels.retry}</button></div>;
  if(!reading)return <p className="economic-evaluation-state" role="status">{data.ui.labels.loading}</p>;
+ const unit=reading.options.flatMap(option=>option.core?.units||[]).find((unit:Data)=>unit.id===familyId);
+ if(unit)return <div className="essential-page economic-family-detail"><a className="text-button" href="#evaluation-core">← {data.ui.essential.core_results.back_to_evaluations}</a><h2 id="economic-family-detail-heading" tabIndex={-1}>{unit.label}</h2><RetainedCoreFamilies units={[unit]}/><a className="text-button" href="#evaluation-core">← {data.ui.essential.core_results.back_to_evaluations}</a></div>;
  return <EconomicReadingContent reading={reading}/>;
 }

@@ -1,0 +1,571 @@
+[
+  [
+    "eligibility",
+    [
+      "Restriction:provider,scope,kind,from,until,authority,reason,version",
+      "EligibilityDecision:restriction,context,requestedService,decision,reason,asOf"
+    ],
+    [
+      [
+        "Recevoir ou réviser une restriction",
+        "E Restriction;R Party Agreement Restriction;W Restriction;X Outcome"
+      ],
+      [
+        "Contrôler une sollicitation",
+        "E ServiceRequest;R Party Restriction Agreement;W EligibilityDecision;X EligibilityDecision Outcome"
+      ],
+      [
+        "Expliquer le droit applicable",
+        "E Query;R Restriction EligibilityDecision;X Restriction EligibilityDecision Outcome"
+      ]
+    ]
+  ],
+  [
+    "policies",
+    [
+      "FulfilmentPolicy:scope,version,effectiveFrom,effectiveUntil,criteria,authority,status",
+      "PolicyActivation:policy,version,checks,decision,at,reason",
+      "PolicyExplanation:policy,context,criteriaApplied,decision,limits"
+    ],
+    [
+      [
+        "Tenir une version de politique",
+        "E FulfilmentPolicy;R Agreement FulfilmentPolicy;W FulfilmentPolicy;X Outcome"
+      ],
+      [
+        "Activer après contrôle de cohérence",
+        "E ActivationRequest;R FulfilmentPolicy Agreement;W PolicyActivation;X PolicyActivation Outcome"
+      ],
+      [
+        "Expliquer la politique applicable",
+        "E Query;R FulfilmentPolicy PolicyActivation;W PolicyExplanation;X PolicyExplanation Outcome"
+      ]
+    ]
+  ],
+  [
+    "disposition",
+    [
+      "DispositionCase:goods,quantity,unit,inspection,ownership,scope,status",
+      "DispositionOption:case,use,treatment,cost,value,conditions,limits",
+      "DispositionDecision:case,option,quantity,authority,date,justification"
+    ],
+    [
+      [
+        "Qualifier les issues admissibles",
+        "E InspectionFact;R StockPosition Ownership Policy;W DispositionCase DispositionOption;X DispositionOption Outcome"
+      ],
+      [
+        "Comparer les devenirs",
+        "E AlternativeRequest;R DispositionCase DispositionOption Cost Policy;W DispositionOption;X DispositionOption Outcome"
+      ],
+      [
+        "Autoriser et transmettre la décision",
+        "E Authorization;R DispositionCase DispositionOption;W DispositionDecision;X DispositionDecision Outcome"
+      ],
+      [
+        "Lire et expliquer les décisions partielles",
+        "E Query;R DispositionCase DispositionOption DispositionDecision;X DispositionDecision Outcome"
+      ]
+    ]
+  ],
+  [
+    "orders",
+    [
+      "Order:kind,party,scope,status,version,agreement,requestedAt",
+      "OrderLine:order,goods,quantity,unit,destination,date,price,acceptedQuantity",
+      "OrderChange:order,line,version,authority,quantity,date,reason,status",
+      "OrderLink:sourceOrder,targetOrder,sourceLine,targetLine,quantity,kind",
+      "OrderBalance:line,accepted,realized,remaining,resultRef,asOf"
+    ],
+    [
+      [
+        "Recevoir une commande typée et ses lignes",
+        "E OrderRequest;R Party Goods Agreement;W Order OrderLine;X Order Outcome"
+      ],
+      [
+        "Accepter une révision autorisée",
+        "E OrderChange;R Order OrderLine Agreement;W Order OrderLine OrderChange;X OrderChange Outcome"
+      ],
+      [
+        "Restructurer sans perdre la filiation",
+        "E RestructureRequest;R Order OrderLine OrderBalance;W Order OrderLine OrderLink;X Order OrderLink Outcome"
+      ],
+      [
+        "Rapprocher les engagements et résultats",
+        "E ServiceResult;R Order OrderLine;W OrderBalance;X OrderBalance Outcome"
+      ],
+      [
+        "Suivre le retour et sa résolution financière",
+        "E ReturnRequest;R Order OrderLine Ownership;W Order OrderLine OrderLink;X ResolutionRequest Outcome"
+      ],
+      [
+        "Recevoir la résolution de retour",
+        "E FinancialResult;R Order OrderLink OrderBalance;W OrderBalance;X OrderBalance Outcome"
+      ],
+      [
+        "Lire le reste à satisfaire",
+        "E Query;R Order OrderLine OrderChange OrderLink OrderBalance;X Order OrderBalance Outcome"
+      ]
+    ]
+  ],
+  [
+    "master-plan",
+    [
+      "PlanContribution:kind,source,version,horizon,scope,status,limits",
+      "MasterPlan:version,scope,horizon,demandCut,supplyCut,stockCut,status",
+      "CoverageGap:plan,goods,period,quantity,unit,cause,limits",
+      "PlanApplication:plan,change,authority,target,status,result",
+      "PlanScenario:base,assumptions,calculatorVersions,result,comparisons"
+    ],
+    [
+      [
+        "Recevoir une contribution de plan",
+        "E PlanContribution;R MasterReference;W PlanContribution;X Outcome"
+      ],
+      [
+        "Lire demande et apports qualifiés",
+        "E Query;R PlanContribution MasterPlan;X PlanContribution Outcome"
+      ],
+      [
+        "Calculer les besoins nets",
+        "E PlanningRequest;R PlanContribution StockPosition OrderBalance Policy;W MasterPlan CoverageGap;X MasterPlan CoverageGap Outcome"
+      ],
+      [
+        "Appliquer les choix autorisés",
+        "E ApplicationAuthorization;R MasterPlan CoverageGap Order;W PlanApplication;X AuthorizedChange Outcome"
+      ],
+      [
+        "Rapprocher les effets partiels",
+        "E ApplicationResult;R PlanApplication MasterPlan;W PlanApplication CoverageGap;X PlanApplication Outcome"
+      ],
+      [
+        "Comparer des scénarios isolés",
+        "E ScenarioRequest;R MasterPlan PlanContribution Policy;W PlanScenario;X CalculatorRequest PlanScenario Outcome"
+      ]
+    ]
+  ],
+  [
+    "plan-preparation",
+    [
+      "ForecastQualification:source,version,horizon,unit,scope,quality,limits",
+      "DemandPlan:version,forecast,ordersCut,residualDemand,period,status",
+      "SupplyPlan:version,demandPlan,assumptions,apports,dates,limits",
+      "PlanReconciliation:demandPlan,supplyPlan,gaps,authority,retainedVersion,status"
+    ],
+    [
+      [
+        "Qualifier une prévision reçue",
+        "E Forecast;R MasterReference;W ForecastQualification;X ForecastQualification Outcome"
+      ],
+      [
+        "Calculer commandes et prévision résiduelle",
+        "E DemandPlanningRequest;R ForecastQualification OrderBalance Policy;W DemandPlan;X DemandPlan Outcome"
+      ],
+      [
+        "Projeter les besoins et apports",
+        "E SupplyPlanningRequest;R DemandPlan StockPosition ServiceCapacity Policy;W SupplyPlan;X SupplyPlan Outcome"
+      ],
+      [
+        "Réconcilier les versions de plan",
+        "E ReconciliationRequest;R DemandPlan SupplyPlan;W PlanReconciliation;X PlanReconciliation Outcome"
+      ],
+      [
+        "Retenir une version ou un écart explicite",
+        "E Authorization;R PlanReconciliation DemandPlan SupplyPlan;W PlanReconciliation;X PlanReconciliation Outcome"
+      ]
+    ]
+  ],
+  [
+    "backlog",
+    [
+      "DemandPriority:demand,policy,criteria,rank,authority,stability",
+      "SupplyAssignment:demand,resource,quantity,period,scope,status,reason",
+      "DeliveryRelease:order,line,quantity,releaseAt,authority,remaining,reason"
+    ],
+    [
+      [
+        "Classer et arbitrer les demandes",
+        "E PriorityRequest;R Order Policy DemandPriority;W DemandPriority;X DemandPriority Outcome"
+      ],
+      [
+        "Affecter les ressources admissibles",
+        "E AssignmentRequest;R Order StockPosition SupplyPlan DemandPriority Policy;W SupplyAssignment;X ReservationRequest SupplyAssignment Outcome"
+      ],
+      [
+        "Choisir une libération complète ou partielle",
+        "E ReleaseRequest;R Order SupplyAssignment Policy;W DeliveryRelease;X DeliveryRelease Outcome"
+      ],
+      [
+        "Expliquer les demandes maintenues en attente",
+        "E Query;R DemandPriority SupplyAssignment DeliveryRelease;X SupplyAssignment DeliveryRelease Outcome"
+      ]
+    ]
+  ],
+  [
+    "optimization",
+    [
+      "OptimizationRun:scope,horizon,policy,inputCuts,objective,algorithm,status",
+      "StockRecommendation:run,goods,location,period,target,threshold,cost,limits",
+      "ProtectionRecommendation:run,beneficiary,quantity,ceiling,period,tradeoff",
+      "ReservationRecommendation:run,demand,milestone,duration,reassessment,reason",
+      "ReplenishmentProposal:run,goods,quantity,date,source,limits",
+      "RedistributionProposal:run,goods,quantity,from,to,date,cost,constraints"
+    ],
+    [
+      [
+        "Construire le contexte de recommandation",
+        "E OptimizationRequest;R StockPosition DemandPlan SupplyPlan Policy;W OptimizationRun;X Outcome"
+      ],
+      [
+        "Recommander cibles et protections",
+        "E TargetRequest;R OptimizationRun StockPosition DemandPlan Cost;W StockRecommendation ProtectionRecommendation;X StockRecommendation ProtectionRecommendation Outcome"
+      ],
+      [
+        "Recommander les conditions de réservation",
+        "E ReservationRuleRequest;R OptimizationRun Order DemandPriority Policy;W ReservationRecommendation;X ReservationRecommendation Outcome"
+      ],
+      [
+        "Proposer apports et redistributions",
+        "E SupplyAdjustmentRequest;R OptimizationRun StockPosition CoverageGap ServiceCapacity;W ReplenishmentProposal RedistributionProposal;X ReplenishmentProposal RedistributionProposal Outcome"
+      ],
+      [
+        "Soumettre les choix autorisés aux capacités responsables",
+        "E Authorization;R StockRecommendation ProtectionRecommendation ReservationRecommendation ReplenishmentProposal RedistributionProposal;W OptimizationRun;X AuthorizedChange Outcome"
+      ]
+    ]
+  ],
+  [
+    "promising",
+    [
+      "PromiseRequest:order,goods,quantity,unit,scope,requestedDate,policy",
+      "PromiseOption:request,resources,quantity,date,capacity,conditions,limits",
+      "PromiseValuation:option,cost,marginalValue,unknownCosts,service,choice,authority"
+    ],
+    [
+      [
+        "Calculer ATP sans réservation implicite",
+        "E PromiseRequest;R StockPosition SupplyPlan SupplyAssignment Policy;W PromiseOption;X PromiseOption Outcome"
+      ],
+      [
+        "Établir une possibilité CTP",
+        "E FeasibilityRequest;R PromiseRequest PromiseOption MaterialRequirement ServiceCapacity LeadTime Policy;W PromiseOption;X PromiseOption Outcome"
+      ],
+      [
+        "Comparer les options économiques PTP",
+        "E ValuationRequest;R PromiseOption Cost Agreement Policy;W PromiseValuation;X PromiseValuation Outcome"
+      ],
+      [
+        "Restituer conditions et limites",
+        "E Query;R PromiseRequest PromiseOption PromiseValuation;X PromiseOption PromiseValuation Outcome"
+      ]
+    ]
+  ],
+  [
+    "service-planning",
+    [
+      "CapacityOffer:provider,kind,scope,period,quantity,unit,version,limits",
+      "ServiceRequirement:demand,kind,quantity,places,dates,conditions",
+      "ServiceSelection:requirement,offer,cost,date,authority,reason",
+      "TransportPlan:requirements,stops,quantities,windows,capacity,version,limits"
+    ],
+    [
+      [
+        "Qualifier une capacité reçue",
+        "E CapacityOffer;R Provider Agreement;W CapacityOffer;X Outcome"
+      ],
+      [
+        "Déterminer les prestations nécessaires",
+        "E DemandContext;R Order StockPosition Policy;W ServiceRequirement;X ServiceRequirement Outcome"
+      ],
+      [
+        "Choisir une prestation admissible",
+        "E SelectionRequest;R ServiceRequirement CapacityOffer Eligibility Policy Cost;W ServiceSelection;X ServiceSelection Outcome"
+      ],
+      [
+        "Décider un plan de transport",
+        "E TransportPlanningRequest;R ServiceRequirement CapacityOffer ServiceSelection;W TransportPlan;X TransportPlan Outcome"
+      ]
+    ]
+  ],
+  [
+    "coordination",
+    [
+      "FulfilmentCase:demand,orders,services,dependencies,state,version",
+      "AdaptationProposal:case,event,options,promiseImpact,authority,decision",
+      "ServiceRelease:case,orders,batch,releaseAt,authority,reason"
+    ],
+    [
+      [
+        "Organiser les dépendances de prestations",
+        "E CoordinationRequest;R Order ServiceRequirement ProcessDefinition;W FulfilmentCase;X ServiceOrderRequest ProcessRequest Outcome"
+      ],
+      [
+        "Traiter un résultat ou aléa",
+        "E ServiceFact;R FulfilmentCase Order PromiseOption;W FulfilmentCase AdaptationProposal;X AdaptationProposal Outcome"
+      ],
+      [
+        "Autoriser et appliquer une adaptation",
+        "E Authorization;R FulfilmentCase AdaptationProposal;W AdaptationProposal;X AuthorizedChange Outcome"
+      ],
+      [
+        "Choisir regroupement et libération",
+        "E ReleaseRequest;R FulfilmentCase Order ServiceCapacity Policy;W ServiceRelease;X ServiceRelease Outcome"
+      ]
+    ]
+  ],
+  [
+    "assurance",
+    [
+      "OperationFact:service,demand,kind,value,origin,effectiveAt,knownAt,correctionOf",
+      "ServiceReconciliation:service,expected,observed,missing,nonconformity,status",
+      "OperationView:scope,asOf,progress,results,waiting,limits"
+    ],
+    [
+      [
+        "Intégrer un fait de prestation",
+        "E OperationFact;R Order MasterReference;W OperationFact;X Outcome"
+      ],
+      [
+        "Reconnaître une correction de fait",
+        "E Correction;R OperationFact;W OperationFact;X OperationFact Outcome"
+      ],
+      [
+        "Rapprocher attendu et constaté",
+        "E ReconciliationRequest;R Order OperationFact;W ServiceReconciliation;X ServiceReconciliation RecognizedFact Outcome"
+      ],
+      [
+        "Lire avancement et attentes",
+        "E Query;R OperationFact ServiceReconciliation Order;X OperationView Outcome"
+      ]
+    ]
+  ],
+  [
+    "goods-orders",
+    [
+      "GoodsServiceRequirement:order,kind,goods,quantity,unit,requirements,version",
+      "GoodsServiceCommitment:order,provider,date,acceptedQuantity,conditions,status",
+      "GoodsServiceResult:order,goods,quantity,quality,proof,remaining,status"
+    ],
+    [
+      [
+        "Enregistrer une demande de prestation typée",
+        "E GoodsServiceRequirement;R Order Goods Agreement;W GoodsServiceRequirement;X OrderChange Outcome"
+      ],
+      [
+        "Maintenir l’engagement et les changements",
+        "E ServiceAcceptance;R GoodsServiceRequirement Order;W GoodsServiceCommitment;X GoodsServiceCommitment Outcome"
+      ],
+      [
+        "Rapprocher résultat, manquants et conformité",
+        "E ServiceResult;R GoodsServiceRequirement GoodsServiceCommitment OperationFact;W GoodsServiceResult;X GoodsServiceResult Outcome"
+      ],
+      [
+        "Lire les biens confiés et leur restitution",
+        "E Query;R GoodsServiceRequirement GoodsServiceCommitment GoodsServiceResult OrderLink;X GoodsServiceResult Outcome"
+      ]
+    ]
+  ],
+  [
+    "transport-orders",
+    [
+      "TransportInstruction:order,goods,quantity,origin,destination,windows,conditions",
+      "TransportBooking:order,provider,capacity,period,confirmation,releaseConditions,status",
+      "TransportResult:order,collection,delivery,quantity,incident,proof,remaining"
+    ],
+    [
+      [
+        "Porter les instructions de transport",
+        "E TransportInstruction;R Order Goods TransportPlan Agreement;W TransportInstruction;X ServiceOrderRequest Outcome"
+      ],
+      [
+        "Demander une réservation autonome",
+        "E BookingRequest;R CapacityOffer Agreement;W TransportBooking;X BookingInstruction Outcome"
+      ],
+      [
+        "Recevoir confirmation ou changement de booking",
+        "E BookingResult;R TransportBooking;W TransportBooking;X TransportBooking Outcome"
+      ],
+      [
+        "Libérer la réservation",
+        "E ReleaseAuthorization;R TransportBooking Agreement;W TransportBooking;X BookingRelease Outcome"
+      ],
+      [
+        "Rapprocher les résultats de transport",
+        "E ServiceResult;R TransportInstruction OperationFact;W TransportResult;X TransportResult Outcome"
+      ]
+    ]
+  ],
+  [
+    "customs",
+    [
+      "CustomsCase:order,goods,procedure,authority,provider,status,version",
+      "CustomsDocument:case,kind,reference,version,validity,missing",
+      "CustomsOutcome:case,result,date,authority,proof,exceptions"
+    ],
+    [
+      [
+        "Constituer un dossier confié",
+        "E CustomsRequest;R Order Goods Agreement;W CustomsCase CustomsDocument;X ServiceOrderRequest Outcome"
+      ],
+      [
+        "Suivre pièces et avancement de procédure",
+        "E ProcedureUpdate;R CustomsCase CustomsDocument;W CustomsCase CustomsDocument;X CustomsCase Outcome"
+      ],
+      [
+        "Reconnaître le résultat et les écarts",
+        "E CustomsResult;R CustomsCase CustomsDocument OperationFact;W CustomsOutcome;X CustomsOutcome RecognizedFact Outcome"
+      ]
+    ]
+  ],
+  [
+    "financial-services",
+    [
+      "BillingRequest:order,eligibleLines,quantity,amount,currency,authority,version",
+      "InvoiceRecognition:request,invoiceOrCredit,source,amount,status,correctionOf",
+      "PaymentRequest:order,invoice,amount,currency,paymentOrRefund,authority",
+      "PaymentRecognition:request,source,amount,status,remaining,correctionOf"
+    ],
+    [
+      [
+        "Demander facture ou avoir sur éléments éligibles",
+        "E BillingRequest;R Order OrderBalance Agreement;W BillingRequest;X InvoiceInstruction Outcome"
+      ],
+      [
+        "Reconnaître facture, rejet ou correction",
+        "E InvoiceResult;R BillingRequest InvoiceRecognition;W InvoiceRecognition;X InvoiceRecognition Outcome"
+      ],
+      [
+        "Demander encaissement ou remboursement autorisé",
+        "E PaymentRequest;R InvoiceRecognition Order Agreement;W PaymentRequest;X PaymentInstruction Outcome"
+      ],
+      [
+        "Rapprocher paiement partiel, refus ou correction",
+        "E PaymentResult;R PaymentRequest PaymentRecognition;W PaymentRecognition;X PaymentRecognition Outcome"
+      ],
+      [
+        "Lire le reste financier à traiter",
+        "E Query;R BillingRequest InvoiceRecognition PaymentRequest PaymentRecognition;X FinancialBalance Outcome"
+      ]
+    ]
+  ],
+  [
+    "workflow",
+    [
+      "ActivityDefinition:kind,inputContract,resultContract,preconditions,effects,version",
+      "ProcessDefinition:version,activities,composition,conditions,authority,status",
+      "ProcessInstance:definition,context,plan,state,waits,version",
+      "ProcessSentry:instance,event,condition,reaction,decision,seenAt",
+      "ActivityExecution:instance,activity,state,attempt,result,limits"
+    ],
+    [
+      [
+        "Versionner activités et composition",
+        "E DefinitionRequest;R ActivityDefinition ProcessDefinition;W ActivityDefinition ProcessDefinition;X Outcome"
+      ],
+      [
+        "Composer ou adapter un parcours contextualisé",
+        "E PlanningRequest;R ProcessDefinition ActivityDefinition CaseContext;W ProcessInstance;X ProcessInstance Outcome"
+      ],
+      [
+        "Qualifier événement et réaction autorisée",
+        "E BusinessEvent;R ProcessInstance ProcessDefinition ProcessSentry;W ProcessSentry;X AuthorizedReaction Outcome"
+      ],
+      [
+        "Piloter activité, attente et résultat",
+        "E ExecutionResult;R ProcessInstance ActivityDefinition ActivityExecution;W ProcessInstance ActivityExecution;X ActivityRequest Outcome"
+      ],
+      [
+        "Reprendre une instance après interruption",
+        "E RecoveryRequest;R ProcessInstance ActivityExecution ProcessSentry;W ProcessInstance;X AuthorizedReaction Outcome"
+      ]
+    ]
+  ],
+  [
+    "human-work",
+    [
+      "HumanTask:case,context,requestedResult,formContract,state,version",
+      "WorkAssignment:task,personOrGroup,eligibility,reason,assignedAt,history",
+      "WorkDeadline:task,calendar,dueAt,pauses,escalation,state",
+      "HumanTaskResult:task,decision,documents,authority,date"
+    ],
+    [
+      [
+        "Solliciter une contribution humaine",
+        "E HumanWorkRequest;R ProcessInstance Identity;W HumanTask;X HumanTask Outcome"
+      ],
+      [
+        "Attribuer ou réattribuer le travail",
+        "E AssignmentRequest;R HumanTask Identity WorkAssignment Workload;W WorkAssignment;X AssignmentNotice Outcome"
+      ],
+      [
+        "Recevoir décision et pièces",
+        "E HumanTaskResult;R HumanTask WorkAssignment;W HumanTaskResult HumanTask;X HumanTaskResult Outcome"
+      ],
+      [
+        "Calculer ou réviser les échéances",
+        "E DeadlineRequest;R HumanTask Calendar WorkDeadline;W WorkDeadline;X WorkDeadline Outcome"
+      ],
+      [
+        "Détecter retard et déclencher la réaction",
+        "E TimerEvent;R WorkDeadline HumanTask;W WorkDeadline;X EscalationRequest Outcome"
+      ]
+    ]
+  ],
+  [
+    "supervision",
+    [
+      "ProcessIntervention:case,scope,action,authority,expectedEffect,result",
+      "ProcessException:cases,kind,severity,responsible,remediation,status",
+      "CaseEvent:case,origin,kind,payload,effectiveAt,knownAt,correctionOf",
+      "CaseReadCut:case,effectiveAt,knownAt,progress,waiting,limits"
+    ],
+    [
+      [
+        "Intervenir dans la portée autorisée",
+        "E InterventionRequest;R ProcessInstance Authority;W ProcessIntervention;X AuthorizedReaction Outcome"
+      ],
+      [
+        "Constater l’effet d’intervention",
+        "E InterventionResult;R ProcessIntervention ProcessInstance;W ProcessIntervention;X ProcessIntervention Outcome"
+      ],
+      [
+        "Prendre en charge et clore une exception",
+        "E ExceptionFact;R ProcessInstance ProcessException HumanTask;W ProcessException;X RemediationRequest Outcome"
+      ],
+      [
+        "Historiser un événement ou sa correction",
+        "E CaseEvent;R CaseEvent ProcessInstance;W CaseEvent;X Outcome"
+      ],
+      [
+        "Reconstituer les faits et la situation passée",
+        "E Query;R CaseEvent ProcessInstance HumanTask OrderBalance;X CaseReadCut Outcome"
+      ]
+    ]
+  ],
+  [
+    "intelligence",
+    [
+      "TraceAnalysis:scope,cut,caseSequences,variant,times,limits",
+      "PerformanceIndicator:name,formula,denominator,scope,version,authority",
+      "OperationalReport:indicators,scope,cut,results,drilldown,limits"
+    ],
+    [
+      [
+        "Reconstruire séquences et variantes de parcours",
+        "E TraceAnalysisRequest;R CaseEvent ProcessDefinition;W TraceAnalysis;X TraceAnalysis Outcome"
+      ],
+      [
+        "Comparer temps et parcours attendu",
+        "E ComparisonRequest;R TraceAnalysis ProcessDefinition;W TraceAnalysis;X TraceAnalysis Outcome"
+      ],
+      [
+        "Définir une assiette d’indicateur",
+        "E PerformanceIndicator;R MasterReference PerformanceIndicator;W PerformanceIndicator;X Outcome"
+      ],
+      [
+        "Calculer et partager une vue explicable",
+        "E ReportRequest;R PerformanceIndicator TraceAnalysis CaseEvent OrderBalance ServiceReconciliation;W OperationalReport;X OperationalReport Outcome"
+      ]
+    ]
+  ]
+]

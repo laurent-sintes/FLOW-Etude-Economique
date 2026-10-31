@@ -20,9 +20,9 @@ reading:
     lead: '**Build et Run décrivent la nature des activités, pas leur période.** Cette convention distingue la réalisation
       du service courant, indépendamment du choix Make ou Buy.'
   - id: workload
-    title: Que mesurent le brut, le net et le total projet
-    lead: '**Le brut et le net couvrent les mêmes travaux. Le total projet élargit le périmètre humain.** Ces distinctions
-      évitent de confondre développement, effort complet et budget en euros.'
+    title: Des efforts retenus aux budgets
+    lead: '**Chaque base conserve ses activités et son traitement.** Les familles retenues sont valorisées par rôle
+      ; les autres activités suivent leurs gains et financements propres.'
   - id: costs
     title: Quels postes sont financés
     lead: '**Chaque dépense est financée une seule fois.** Les structures de coût indiquent l’objet financé ; elles
@@ -32,7 +32,11 @@ reading:
     lead: '**Les dépenses suivent la consommation et les réceptions.** Les trois phases donnent des repères chronologiques
       ; une même nature de coût peut traverser plusieurs phases.'
   composition: '**{{notion.plateforme_beaumanoir}} = {{notion.core_system}} retenue + spécificités du Groupe.**
-    Cette composition décrit la cible métier, pas une formule de coût.'
+    La cible réunit les SI des marques historiques et de Boardriders.'
+  scope_areas_title: Business Areas du périmètre d’entrée
+  scope_areas_note: Les noms reprennent la cartographie Beaumanoir ; les fiches détaillées sont accessibles dans
+    Atlas.
+  scope_source_label: Beaumanoir Cartographie · capture de travail du
   strategy_note: '**Comparer exige d’expliciter les écarts de périmètre entre les offres et le besoin.** Une couverture
     déclarée ne prouve pas son inclusion dans le prix ; un point à qualifier ne crée aucun supplément automatique.'
   strategy_links:
@@ -47,7 +51,15 @@ reading:
     justifiée.'
   coverage_label: Couches concernées
   next_href: '#conditions-realisation'
-  next_label: Examiner les conditions de réalisation et les jalons de décision
+  next_label: Comprendre les critères de réalisation
+  workload_paths:
+  - title: Familles Core System retenues
+    text: '**Effort projet retenu → activités et rôles → valorisation.** La réutilisation, la QA, l’architecture
+      et le pilotage local déclarés sont déjà pris en compte. Aucun gain IA global ni provision de pilotage ne leur
+      est ajouté.'
+  - title: Autres activités à financer
+    text: '**Travaux et volumes → gains applicables → profils et tarifs.** Intégration et services conservent leurs
+      règles. Les achats, contrats et provisions distinctes complètent leurs budgets.'
 activity_reading:
   title: '{{notion.build}} et {{notion.run_activities}}, deux angles de lecture des activités'
   intro: Un budget annuel peut financer du Build. Du Run peut être consommé pendant la réalisation.
@@ -236,32 +248,29 @@ business_map:
     faire.'
   estimation: Les capacités retenues définissent le besoin commun. Elles structurent l’estimation Make et permettent
     de confronter les offres Buy aux fonctions attendues, avec leurs preuves et leurs limites.
-  scope_summary: '**La cartographie reçue situe le programme dans Business Operations. Les capacités retenues de
-    la chaîne logistique forment le périmètre d’entrée de l’évaluation.** Ce référentiel sert aussi à examiner les
-    offres Buy ; le schéma situe la cible dans un ensemble plus large.'
-  scope: 'Design & Development et Enterprise Management & Control restent hors du périmètre du programme présenté.
-    Le positionnement de la {{notion.flow_core_system}} est indicatif : cette vue de contexte ne remplace pas la
-    sélection des capacités chiffrées et n’étend pas le budget de construction aux autres domaines.'
+  scope_summary: '**Le périmètre évalué couvre les capacités retenues de la chaîne logistique, au sein de Business
+    Operations.** La cartographie Beaumanoir est l’information d’entrée commune aux évaluations Make et Buy.'
+  scope: Le positionnement de la {{notion.flow_core_system}} est indicatif. Design & Development et Enterprise Management
+    & Control restent hors du périmètre du programme ; le schéma n’étend pas le budget aux autres domaines.
 estimation:
-  title: Les trois niveaux de charge
+  title: Lire les charges sur leur périmètre
   intro: Les efforts humains sont exprimés en JH ; leur valorisation en euros intervient séparément.
   stages:
   - id: gross
     notion: charge_brute
-    producer: Part développement à identifier dans les calculs de référence
-    text: '**Les JH développeur restant à réaliser après réutilisation**, tests développeur inclus et QA indépendante
-      exclue. Ce sous-ensemble doit être identifié dans les calculs COCOMO et COSMIC × ISBSG : leur total peut couvrir
-      aussi analyse, conception et QA. Il ne peut donc pas être repris intégralement comme du développement brut.'
+    producer: Effort avant les réductions explicites
+    text: '**Charge après réutilisation, avant les gains applicables.** Les activités couvertes sont déclarées ;
+      les JH de développement sont identifiés au sein d’un éventuel effort projet.'
   - id: net
     notion: charge_nette
     producer: Calculée par le moteur
-    text: '**Les mêmes travaux après application des gains de productivité documentés.** Le moteur les applique
-      aux activités éligibles, sans seconde remise pour la réutilisation déjà comptée dans le brut.'
+    text: '**Effort sur les mêmes activités après les gains applicables.** Une activité sans réduction conserve
+      sa charge. Les familles retenues ne reçoivent aucune remise IA globale.'
   - id: total_project
     notion: charge_totale_projet
     producer: À constituer sur tout le périmètre déclaré
-    text: '**Le développement net et les autres efforts humains retenus** : qualification indépendante, architecture,
-      pilotage, intégration, déploiement et conduite du changement, selon le périmètre déclaré et sans double compte.'
+    text: '**Ensemble des efforts humains retenus sur le périmètre annoncé.** Les activités déjà incluses dans une
+      famille restent comptées une seule fois ; les efforts manquants sont signalés.'
   relations:
   - source_ref: gross
     target_ref: net
@@ -271,12 +280,14 @@ estimation:
     target_ref: total_project
     operation: add_project_activities
     text: 'Net → total projet : ajouter les autres efforts retenus, sans compter un travail deux fois.'
-  note: Les familles retenues financent leurs activités déclarées sans remise IA ni provision de pilotage supplémentaire.
-    Le résultat calculé, la décision arrondie et la ventilation par rôle restent distincts. Les capacités non couvertes
-    restent à réestimer. Une provision en euros ne dimensionne pas un effort humain.
+  note: '**Le cumul porte sur les décisions adoptées après contrôle des financements partagés.** Il ne constitue
+    pas une estimation COCOMO intégrée du Core System. Les délais locaux ne s’additionnent pas ; le calendrier global
+    reste à instruire. La cartographie métier ne couvre pas toutes les fonctions IT nécessaires au produit. Une
+    lecture distincte sépare runtime et outils métier des compléments IT ; les travaux déjà mêlés aux décisions
+    restent non ventilés tant que leur attribution n’est pas justifiée.'
   links:
   - href: '#complexite'
-    label: Comprendre l’estimation du brut par le skill
+    label: Comprendre le calcul et l’adoption des efforts projet
   - href: '#calcul-net'
     label: Consulter « {{vue.calcul_net}} »
   - href: '#evaluation-core'
@@ -317,6 +328,9 @@ estimation_model:
     - capabilities
     - includes
     - excludes
+    - professional_functions
+    - purpose_partition_status
+    - professional_group_id
   - id: market_reference
     label: Référence produit et framework
     owner: source/references-couts-integration.yaml
@@ -554,6 +568,77 @@ estimation_model:
     - empreinte SHA-256
     - dépendances vérifiées
     - mesures enregistrées distinctes des décisions adoptées
+  - id: component_attribution
+    label: Taille attribuée à un composant métier
+    owner: source/calculs-estimation-core.yaml
+    attributes:
+    - référence et révision
+    - mesures source et exclusions
+    - part de taille supposée
+    - plancher métier déjà mesuré
+    - propriétaire du mécanisme réutilisé
+  - id: product_purpose
+    label: Finalité métier ou IT des fonctions du produit
+    owner: source/fonctions-produit-core.yaml
+    attributes:
+    - id
+    - label
+    - definition
+  - id: professional_function
+    label: Fonction professionnelle du produit hors hiérarchie métier native
+    owner: source/fonctions-produit-core.yaml
+    attributes:
+    - id
+    - purpose
+    - boundary
+    - capability_refs
+    - dependencies
+    - evidence
+    - existing_funding_to_review
+    - additional_effort_status
+  - id: purpose_partition
+    label: Ventilation des efforts adoptés par finalité
+    owner: source/fonctions-produit-core.yaml
+    attributes:
+    - unit_id
+    - evidence
+    - basis
+    - role_effort_by_purpose
+    - unallocated_effort
+    - unallocated_cost
+  - id: product_estimate_proposal
+    label: Chiffrage professionnel et décision d’adoption
+    owner: source/proposition-produit-core.yaml
+    attributes:
+    - id
+    - status
+    - stack
+    - code_perimeters
+    - scope_replacements
+    - new_professional_functions
+    - reuse_credits
+    - cocomo_inputs
+    - forecast_cosmic
+    - role_allocations
+    - purpose_partition
+    - one_at_a_time_sensitivities
+    - assumptions
+    - adoption
+    - frozen_previous_decisions
+  - id: technical_trial
+    label: Essai technique ciblé et limite de preuve
+    owner: source/proposition-produit-core.yaml
+    attributes:
+    - id
+    - evaluated_on
+    - runtime_versions
+    - input_fixtures
+    - checks_and_negative_controls
+    - immutable_evidence
+    - observations
+    - existing_funding
+    - remaining_hypotheses
+    - effect_on_proposal
   relations:
   - id: analyzes
     source: scope_analysis
@@ -706,6 +791,70 @@ estimation_model:
     target: calculation_evidence
     cardinality: one-to-many
     meaning: Chaque calcul reconstruit ses entrées depuis une chaîne de preuves vérifiée et exportée.
+  - id: attribution_evidence
+    source: component_attribution
+    target: calculation_evidence
+    cardinality: many-to-many
+    meaning: Les mesures source sont distinctes des parts de pertinence supposées.
+  - id: attribution_input
+    source: component_attribution
+    target: cocomo_input
+    cardinality: many-to-one
+    meaning: Produit une taille équivalente, pas un effort observé.
+  - id: function_purpose
+    source: professional_function
+    target: product_purpose
+    cardinality: many-to-one
+    meaning: La finalité du travail est indépendante des rôles du projet et des couches techniques.
+  - id: function_evidence
+    source: professional_function
+    target: market_reference
+    cardinality: many-to-many
+    meaning: Comparer les fonctions administratives et professionnelles des suites, sans déduire leur absence d’un
+      fichier manquant.
+  - id: function_funding
+    source: professional_function
+    target: mechanism
+    cardinality: many-to-many
+    meaning: Rapprocher les travaux déjà financés avant toute charge complémentaire ; la présence de code ne prouve
+      pas la complétude du financement.
+  - id: purpose_of_adopted_unit
+    source: purpose_partition
+    target: evaluation_unit
+    cardinality: many-to-one
+    meaning: Ventiler une décision adoptée sans changer ses JH, rôles, prix ni calendrier.
+  - id: purpose_share
+    source: purpose_partition
+    target: product_purpose
+    cardinality: many-to-many
+    meaning: Une part déclarée de JH par rôle compte une fois ; une part inconnue reste non ventilée, sans devenir
+      zéro.
+  - id: proposal_units
+    source: product_estimate_proposal
+    target: evaluation_unit
+    cardinality: many-to-many
+    meaning: Avant adoption, conserver la référence économique. À la décision, remplacer explicitement l’unité élargie et ajouter les seuls lots nouveaux, avec leurs contrats et financements.
+  - id: proposal_functions
+    source: product_estimate_proposal
+    target: professional_function
+    cardinality: many-to-many
+    meaning: Couvrir les fonctions professionnelles par des lots cohérents ; déduire les mécanismes déjà financés.
+  - id: proposal_evidence
+    source: product_estimate_proposal
+    target: calculation_evidence
+    cardinality: many-to-many
+    meaning: Conserver chemins, révisions, mesures, comptages prévisionnels et hypothèses séparés ; proximité de
+      calculs partagés ne vaut pas indépendance.
+  - id: proposal_technical_trials
+    source: product_estimate_proposal
+    target: technical_trial
+    cardinality: one-to-many
+    meaning: Éprouver les choix techniques et les hypothèses de réutilisation sans assimiler le prototype à un bilan de charge.
+  - id: trial_funding
+    source: technical_trial
+    target: professional_function
+    cardinality: many-to-many
+    meaning: Rattacher les mécanismes observés aux lots déjà proposés et aux réutilisations financées, sans double compte.
   rules:
   - id: cocomo_exponent
     title: Exposant d’effort
@@ -1129,7 +1278,128 @@ estimation_model:
     unit: contrôle
     kind: algorithm
     note: Un contrôle structurel ne valide pas la justesse des hypothèses métier.
+  - id: component_attribution
+    title: Attribuer une taille métier au code mixte
+    expression: max(taille source après retrait du patrimoine déjà financé × part supposée, plancher métier mesuré)
+    variables:
+      inputs: Mesures sources, déductions du financement existant, part de pertinence et plancher par fichier
+    unit: unités logiques équivalentes
+    kind: algorithm
+    note: Union des fichiers et des instructions avant calcul ; attribution d’ingénierie, sans score de complexité
+      ni proportion observée.
+  - id: module_analogy
+    title: Dimensionner un module nouveau par analogie
+    expression: reference_units * fraction + scaffold_units
+    variables:
+      reference_units: Comportement natif après déduction du patrimoine déjà financé
+      fraction: Fraction de comportement nouveau supposée, pas norme de marché
+      scaffold_units: Structure du service nouveau mesurée dans la technologie native
+    domains:
+      reference_units:
+        minimum: 0
+      fraction:
+        minimum: 0
+      scaffold_units:
+        minimum: 0
+    unit: unités logiques équivalentes
+    kind: arithmetic
+    note: Schémas, vues et configurations ajoutés séparément. Les fractions et les partages du code restent des
+      hypothèses explicites.
+  - id: funded_module_preparation
+    title: Dimensionner de nouveaux modules sur des analogues déjà financés
+    expression: Reconstruire les analogues du calcul propriétaire référencé, appliquer les fractions de modules
+      nouveaux et leurs modèles ; ne pas ajouter le code déjà financé à la nouvelle famille.
+    variables:
+      inputs: Contrat propre à la famille, preuves et contrat figé du fournisseur des analogues
+    unit: contrôle
+    kind: algorithm
+    note: La dépendance au fournisseur et le propriétaire de financement sont explicites. Le contrôle de taille
+      ne valide pas la suffisance des fractions ni la productivité.
+  - id: coherent_component_preparation
+    title: Préparer une unité de composants cohérents
+    expression: Reconstruire les atomes et analogues natifs, attribuer la base une seule fois, sommer les tailles
+      des modules de l’unité puis appliquer COCOMO II une fois. Recompter COSMIC à la même frontière.
+    variables:
+      inputs: Contrat d’unité, archives complètes figées, mesures, modules, gabarits, allocations et comptage fonctionnel
+    unit: contrôle
+    kind: algorithm
+    note: Les archives gzip/base64 sont des preuves complètes de stockage. Les fractions restent des hypothèses.
+      Les allocations entre familles ne sont pas des estimations indépendantes par capacité.
+  - id: purpose_unallocated_jh
+    title: JH adoptés non encore ventilés entre métier et IT
+    expression: total - business - it
+    variables:
+      total: Total adopté sur la même assiette
+      business: Part métier explicitement attribuée
+      it: Part IT explicitement attribuée
+    unit: JH
+    kind: arithmetic
+    note: Les parts attribuées ne sont pas une nouvelle estimation. Leur somme et le non ventilé doivent conserver
+      le total et chaque rôle.
+    domains:
+      total:
+        minimum: 0
+      business:
+        minimum: 0
+      it:
+        minimum: 0
+  - id: purpose_unallocated_cost
+    title: Coût adopté non encore ventilé entre métier et IT
+    expression: total - business - it
+    variables:
+      total: Total adopté sur la même assiette
+      business: Part métier explicitement attribuée
+      it: Part IT explicitement attribuée
+    unit: EUR HT
+    kind: arithmetic
+    note: Les parts attribuées ne sont pas une nouvelle estimation. Leur somme et le non ventilé doivent conserver
+      le total et chaque rôle.
+    domains:
+      total:
+        minimum: 0
+      business:
+        minimum: 0
+      it:
+        minimum: 0
+  - id: product_purpose_partition
+    title: Ventilation des fonctions métier et IT du produit
+    expression: Contrôler les fonctions professionnelles et leurs preuves ; ventiler les JH adoptés par rôles et
+      finalités seulement sur une attribution justifiée ; conserver le reste non ventilé et le complément requis
+      inconnu.
+    variables:
+      adopted_units: Décisions adoptées et valorisées
+      declared_allocations: Attributions étayées en JH par rôle
+      professional_functions: Fonctions du produit et réutilisation à qualifier
+    unit: Ventilation des JH et EUR HT adoptés, sans nouveau budget
+    kind: algorithm
+    note: La cartographie native reste inchangée. Runtime et outils métier sont distincts des fonctions IT transverses
+      ; un rôle QA ou DevOps ne constitue pas une catégorie fonctionnelle.
+  - id: complete_product_proposal
+    title: Chiffrage proposé du produit métier et IT complet sur son périmètre déclaré
+    expression: Conserver les unités inchangées ; remplacer une unité élargie par son nouveau calcul COCOMO ; agréger
+      les tailles des compléments cohérents avant COCOMO ; déduire les réutilisations financées ; ventiler chaque
+      rôle une fois ; contrôler les fonctions COSMIC remplacées et consommées ; tester une hypothèse à la fois.
+    variables:
+      measured_components: Instructions et déclarations des périmètres OSS révisés
+      module_assumptions: Fractions de composants nouveaux proposées et sensibilités
+      adopted_units: Décisions conservées et unité explicitement remplacée
+      functional_forecast: Processus et mouvements prévisionnels, hors fonctions déjà comptées
+    unit: JH projet, EUR HT, mois nominaux et écarts entre méthodes
+    kind: algorithm
+    note: Les règles arithmétiques COCOMO et COSMIC du métamodèle sont réutilisées. Une proposition ne modifie les décisions et simulations qu’après adoption explicite et rattachement aux contrats actifs. La couverture déclarée n’est ni une exhaustivité future prouvée
+      ni une confiance statistique.
+  - id: professional_component_preparation
+    title: Adoption des lots professionnels depuis une base antérieure figée
+    expression: Reconstituer les tailles COCOMO et les comptages COSMIC depuis les preuves ; adopter les nouveaux lots et leur répartition de rôles ; conserver les unités inchangées, puis ventiler chaque JH par finalité une seule fois.
+    variables:
+      proposal_inputs: Mesures et hypothèses de composants
+      adoption_basis: Décisions antérieures et résultat de la proposition figés
+      component_scope: Groupe professionnel et fonctions financées
+    unit: JH projet, mois et rôles
+    kind: algorithm
+    note: Les distributions publiées d’activités sont conservées séparément des rôles adoptés. La reconstruction ne prend jamais les nouveaux lots comme base de leur propre complément.
   invariants:
+  - Un essai technique réussi démontre seulement ses cas et conditions déclarés. Son temps de réalisation et son code ne calibrent pas automatiquement les JH ; les effets sur le chiffrage sont explicités séparément.
   - Le référentiel reçu conserve identifiants, libellés, définitions, périmètres, hiérarchie et relations. Aucun
     score de complexité ni hypothèse FLOW ne lui est ajouté.
   - Une comparaison déclare périmètre, activités, unités et conventions horaires. Si les activités ne sont pas alignées,
@@ -1150,6 +1420,14 @@ estimation_model:
     avec le contrat FLOW est partielle.'
   - Le cumul des décisions adoptées ne vaut pas recalcul non linéaire de tout le Core System ; aucun délai local
     n’est agrégé.
+  - Les ensembles fortement liés sont estimés une fois sur leur taille totale ; ne pas cumuler leur charge et celle
+    de leurs composants ou mécanismes communs.
+  - La complétude du produit inclut les fonctions professionnelles IT absentes de la cartographie métier ; aucune
+    nouvelle capacité native n’est créée.
+  - Les coûts métier, IT et non ventilés partitionnent les seuls travaux adoptés. Les compléments inconnus restent
+    null ; ils ne sont ni inclus par défaut ni mis à zéro.
+  - Une ventilation par finalité conserve les JH de chaque rôle et les tarifs de chaque unité. Les familles déjà
+    adoptées ne sont pas estimées à nouveau par ce partage.
   implementations:
   - rules:
     - cocomo_exponent
@@ -1167,6 +1445,9 @@ estimation_model:
     - coverage
     - role_allocation
     - retained_rounding
+    - module_analogy
+    - purpose_unallocated_jh
+    - purpose_unallocated_cost
     path: tools/estimation_calculation.py
   - rules:
     - nonlinear_complements
@@ -1208,6 +1489,24 @@ estimation_model:
   - rules:
     - comparison_contract
     path: tools/estimation_preparation.py
+  - rules:
+    - component_attribution
+    path: tools/estimation_stock.py
+  - rules:
+    - funded_module_preparation
+    path: tools/estimation_ownership.py
+  - rules:
+    - coherent_component_preparation
+    path: tools/estimation_components.py
+  - path: tools/core_product_scope.py
+    rules:
+    - product_purpose_partition
+  - path: tools/core_product_estimate.py
+    rules:
+    - complete_product_proposal
+  - path: tools/estimation_professional.py
+    rules:
+    - professional_component_preparation
   labels:
     alignment: Alignement entre calculs
     reference: Référence de comparaison
@@ -1236,8 +1535,13 @@ estimation_model:
     funding: Mécanismes et financement
     funding_owner: Unité qui finance
     consolidation: Sens du cumul
-    shared_assumptions: Part des compléments communs dans la référence COCOMO
-    shared_assumptions_note: Les quatre références utilisent les mêmes compléments Flow. Leur proximité ne fournit
-      donc pas quatre validations indépendantes.
+    shared_assumptions: Part des compléments Flow dans la référence COCOMO
+    shared_assumptions_note: Les références partagent des hypothèses de périmètre, de fractions des modules Flow
+      et de COCOMO. La taille des analogues peut différer selon le produit ; leur proximité ne fournit pas quatre
+      validations indépendantes.
     activity_scope: Activités couvertes
     service_scope: Garanties de service
+    common_effort: Base commune
+    complement_effort: Compléments Flow
+    funding_consumed: Réutilisé
+    funding_funded: Financé dans cette famille

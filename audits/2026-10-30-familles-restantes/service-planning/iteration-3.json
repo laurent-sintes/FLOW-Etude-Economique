@@ -1,0 +1,813 @@
+{
+  "family": "ba-service-planning",
+  "slug": "service-planning",
+  "iteration": 3,
+  "status": "ordre_de_grandeur_non_consolidable",
+  "scope": [
+    {
+      "id": "BC-049",
+      "native_id": "D06.b",
+      "source": {
+        "name": "Service Capacity Visibility",
+        "definition": "Interpréter et qualifier les informations communiquées par les exécutants pour établir une connaissance exploitable des capacités de service, de leur portée et de leurs incertitudes.",
+        "finality": "Donner à [Availability](model:D03), à [Order Management](model:D04) et aux décisions d’exécution une connaissance exploitable des capacités annoncées par les exécutants.",
+        "nature": "knowledge",
+        "scope": "Interpréter les informations de capacité communiquées par les [Service Providers](glossary:TER088), sans présumer leur contenu ni une signification commune. Distinguer plafond, charge et disponibilité annoncée ; qualifier le service, l’unité, la période, l’origine et la fraîcheur. Cette [Visibility](method:MOD040) construit une connaissance métier, au-delà de la consultation des données reçues.\n\nSignaler les informations manquantes, ambiguës ou non comparables et les précisions nécessaires au fournisseur. Une donnée absente reste inconnue, et ne signifie ni zéro ni capacité illimitée. Illustration fictive : 1 000 pièces par jour et 200 commandes par créneau ne sont pas comparables sans connaître la composition des commandes et les règles de conversion.\n\nExemple : l’entrepôt annonce un plafond de 1 000 préparations sur un créneau ; si une charge ou un disponible sont également communiqués, les présenter avec leur sens et leur date de connaissance. Ne pas transformer sans règle connue ce plafond en capacité encore disponible.\n\nCette visibilité ne décide pas d’augmenter les ressources de l’exécutant, ne calcule pas implicitement un disponible à partir d’une formule non convenue et ne réserve pas la capacité. Les décisions de promesse d’[Availability](glossary:TER112) l’utilisent pour calculer la promesse recommandée ; [Service](glossary:TER075) Selection Decision et [Fulfilment Adaptation Decision](glossary:TER177) peuvent la mobiliser. Le nom est adopté U246 ; les détails de représentation et contrats restent proposés.\n\nPrécision éditoriale U435 : contextualiser les créneaux et dates communiqués avec leur calendrier applicable, fuseau et éventuelle heure limite. Une fermeture ou une information périmée doit rester visible aux décisions consommatrices ; aucun disponible ni engagement de capacité n’est déduit d’un plafond communiqué.\n\nConserver chez [Fulfilment](glossary:TER085), responsable du dialogue avec les exécutants ; [Availability](glossary:TER112) la consomme pour les [promesses](glossary:TER014) et [Order Backlog Management](glossary:TER269), dans [Master Plan](glossary:TER111), pour les arbitrages collectifs. Un plafond communiqué n’est pas un disponible calculé.\n\nDistinguer les capacités communiquées de picking, packing, services complémentaires de traitement des biens, tels que l’étiquetage ou le reconditionnement et cross-docking avec leur unité et leurs contraintes. Deux plafonds partageant les mêmes équipes ne sont pas nécessairement additifs.\n\nLa [capacité opérationnelle](glossary:TER199) est une mesure sur un horizon donné, distincte d’une aptitude métier.",
+        "market_comparisons": [
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Supply Chain Management",
+            "source_title": "Schedule workload capacity",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/schedule-workload-capacity",
+            "source_version": "Mise à jour du 7 mai 2025",
+            "source_locator": "Set up workload capacity : limites volume/poids ; View workload capacity : projections et données produit manquantes.",
+            "consulted_on": "2026-10-06",
+            "evidence_limits": "Document primaire consulté ; rapprochement de concepts, sans preuve de réalisation Beaumanoir.",
+            "element_name": "Workload capacity",
+            "element_type": "Concept documenté par la source primaire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Charge et plafond d’entrepôt sur une période.",
+            "differences": "Le produit configure des plafonds et projette la charge ; FLOW interprète les informations communiquées sans reprendre le dimensionnement des équipes ni présumer des données fournisseur.",
+            "flow_position": "Interpréter et qualifier les capacités annoncées par les exécutants pour éclairer les décisions Supply, sans transformer un plafond en disponible garanti ni présumer le sens des données fournisseur.",
+            "status": "proposed",
+            "source_refs": [
+              "U470",
+              "U471",
+              "ELM304",
+              "CMP186",
+              "U477",
+              "ELM443",
+              "CMP193",
+              "U857"
+            ],
+            "concept_name": "Workload capacity",
+            "scope_summary": "Charge et plafond d’entrepôt sur une période.",
+            "approach_summary": "Comparer des projections avec des limites configurées.",
+            "definition_choice": "Charge et plafond d’entrepôt sur une période. Frontière FLOW : Le produit configure des plafonds et projette la charge ; FLOW interprète les informations communiquées sans reprendre le dimensionnement des équipes ni présumer des données fournisseur.",
+            "term_choice": "Le repère natif « Workload capacity » étaye le rapprochement décrit ci-dessous. « Service Capacity Visibility » nomme la responsabilité FLOW à cette maille ; la proximité des termes ne prouve pas une nomenclature commune."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Field Service",
+            "source_title": "Work order architecture",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/field-service/field-service-architecture",
+            "source_version": "Documentation évolutive consultée le 19 septembre 2026",
+            "source_locator": "A work order is created ; scheduled ; performed ; reviewed and completed",
+            "consulted_on": "2026-09-19",
+            "evidence_limits": "Document primaire consulté ; rapprochement de concepts, sans preuve de réalisation Beaumanoir.",
+            "element_name": "Resource requirement / Scheduling",
+            "element_type": "Concept documenté par la source primaire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Besoins d’une intervention et ressources pour la réaliser.",
+            "differences": "La planification et l’affectation Field Service dépassent la seule visibilité.",
+            "flow_position": "Interpréter et qualifier les capacités annoncées par les exécutants pour éclairer les décisions Supply, sans transformer un plafond en disponible garanti ni présumer le sens des données fournisseur.",
+            "status": "proposed",
+            "source_refs": [
+              "U477",
+              "ELM397",
+              "CMP193"
+            ],
+            "concept_name": "Resource requirement / Scheduling",
+            "scope_summary": "Besoins d’une intervention et ressources pour la réaliser.",
+            "approach_summary": "Rechercher une ressource répondant au besoin et au créneau.",
+            "definition_choice": "Appui de Resource requirement / Scheduling : Besoins d’une intervention et ressources pour la réaliser. Limite de reprise dans FLOW : La planification et l’affectation Field Service dépassent la seule visibilité.",
+            "term_choice": "Le repère natif « Resource requirement / Scheduling » étaye le rapprochement décrit ci-dessous. « Service Capacity Visibility » nomme la responsabilité FLOW à cette maille ; la proximité des termes ne prouve pas une nomenclature commune."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Selecting Carriers and Tendering",
+            "concept_name": "Selecting Carriers and Tendering",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "La sélection du transporteur rapproche coûts, contraintes et capacités disponibles avant sollicitation.",
+            "approach_summary": "Rapprochement avec Service Capacity Visibility : La sélection du transporteur rapproche coûts, contraintes et capacités disponibles avant sollicitation.",
+            "similarities": "La sélection du transporteur rapproche coûts, contraintes et capacités disponibles avant sollicitation.",
+            "differences": "La source contrôle notamment des allocations de transport et sélectionne les transporteurs ; FLOW qualifie ici le sens des informations reçues, sans assimiler une allocation à une capacité physique restante. Le transport ne couvre pas toutes les prestations.",
+            "flow_position": "Interpréter et qualifier les capacités annoncées par les exécutants pour éclairer les décisions Supply, sans transformer un plafond en disponible garanti ni présumer le sens des données fournisseur.",
+            "source_title": "Selecting Carriers and Tendering",
+            "source_url": "https://learning.sap.com/courses/business-processes-in-sap-s-4hana-transportation-management/selecting-carriers-and-tendering_d66f6116-ed5d-491f-b91b-e958fdedf2a5",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Manual Carrier Selection : contrôle des transportation allocations configurées ; Automatic Carrier Selection : contraintes.",
+            "consulted_on": "2026-10-06",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Le périmètre documenté est le transport ; il ne prouve pas la visibilité de capacité de toutes les prestations.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM793",
+              "U857"
+            ],
+            "term_choice": "Le nom Service Capacity Visibility reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "La sélection du transporteur rapproche coûts, contraintes et capacités disponibles avant sollicitation. Frontière FLOW : La source contrôle notamment des allocations de transport et sélectionne les transporteurs ; FLOW qualifie ici le sens des informations reçues, sans assimiler une allocation à une capacité physique restante. Le transport ne couvre pas toutes les prestations."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Service Capacity Visibility porte la responsabilité décrite ; les produits apportent des correspondances partielles, sans taxonomie commune.",
+          "flow_scope": "Interpréter et qualifier les informations communiquées par les exécutants pour établir une connaissance exploitable des capacités de service, de leur portée et de leurs incertitudes.",
+          "flow_approach": "Interpréter les informations de capacité communiquées par les [Service Providers](glossary:TER088), sans présumer leur contenu ni une signification commune. Distinguer plafond, charge et disponibilité annoncée ; qualifier le service, l’unité, la période, l’origine et la fraîcheur. Cette [Visibility](method:MOD040) construit une connaissance métier, au-delà de la consultation des données reçues.\n\nSignaler les informations manquantes, ambiguës ou non comparables et les précisions nécessaires au fournisseur. Une donnée absente reste inconnue, et ne signifie ni zéro ni capacité illimitée. Illustration fictive : 1 000 pièces par jour et 200 commandes par créneau ne sont pas comparables sans connaître la composition des commandes et les règles de conversion.\n\nExemple : l’entrepôt annonce un plafond de 1 000 préparations sur un créneau ; si une charge ou un disponible sont également communiqués, les présenter avec leur sens et leur date de connaissance. Ne pas transformer sans règle connue ce plafond en capacité encore disponible.\n\nCette visibilité ne décide pas d’augmenter les ressources de l’exécutant, ne calcule pas implicitement un disponible à partir d’une formule non convenue et ne réserve pas la capacité. Les décisions de promesse d’[Availability](glossary:TER112) l’utilisent pour calculer la promesse recommandée ; [Service](glossary:TER075) Selection Decision et [Fulfilment Adaptation Decision](glossary:TER177) peuvent la mobiliser. Le nom est adopté U246 ; les détails de représentation et contrats restent proposés.\n\nPrécision éditoriale U435 : contextualiser les créneaux et dates communiqués avec leur calendrier applicable, fuseau et éventuelle heure limite. Une fermeture ou une information périmée doit rester visible aux décisions consommatrices ; aucun disponible ni engagement de capacité n’est déduit d’un plafond communiqué.\n\nConserver chez [Fulfilment](glossary:TER085), responsable du dialogue avec les exécutants ; [Availability](glossary:TER112) la consomme pour les [promesses](glossary:TER014) et [Order Backlog Management](glossary:TER269), dans [Master Plan](glossary:TER111), pour les arbitrages collectifs. Un plafond communiqué n’est pas un disponible calculé.\n\nDistinguer les capacités communiquées de picking, packing, services complémentaires de traitement des biens, tels que l’étiquetage ou le reconditionnement et cross-docking avec leur unité et leurs contraintes. Deux plafonds partageant les mêmes équipes ne sont pas nécessairement additifs.",
+          "synthesis": [
+            "Microsoft SCM compare charge prévue et capacité d’entrepôt ; Field Service rapproche les besoins d’intervention des ressources disponibles. Les deux montrent qu’une capacité dépend du travail, de la période et des moyens considérés.",
+            "FLOW isole ici l’interprétation de l’information communiquée. Calculer un reste disponible ou engager la capacité nécessite des données, des règles et des responsabilités supplémentaires ; les appuis consultés ne prouvent pas un modèle universel de données fournisseur."
+          ],
+          "examples": [
+            {
+              "title": "Illustration FLOW — un plafond ne suffit pas",
+              "situation": "L’entrepôt annonce un maximum de 1 000 préparations pour un créneau, sans communiquer sa charge engagée.",
+              "outcome": "La décision connaît le plafond, mais ne connaît pas encore le nombre de préparations supplémentaires possibles.",
+              "lesson": "La fiche conserve cette distinction au lieu de fabriquer un disponible.",
+              "source_title": "Schedule workload capacity",
+              "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/schedule-workload-capacity",
+              "source_refs": [
+                "U477",
+                "ELM443",
+                "CMP193"
+              ]
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "id": "BC-049.01",
+          "resultat": "Recevoir les capacités déclarées des exécutants"
+        },
+        {
+          "id": "BC-049.02",
+          "resultat": "Qualifier portée et période et incertitudes"
+        },
+        {
+          "id": "BC-049.03",
+          "resultat": "Exposer les possibilités utilisables"
+        }
+      ],
+      "boundary": "Ne planifie pas les ressources internes des exécutants."
+    },
+    {
+      "id": "BC-050",
+      "native_id": "D07.a",
+      "source": {
+        "name": "Service Requirements Decision",
+        "definition": "Établir les prestations et résultats nécessaires pour satisfaire un besoin Supply : biens concernés, quantités, lieux, échéances et contraintes à porter dans les ordres confiés.",
+        "finality": "Déterminer les résultats de prestation nécessaires à la réalisation du besoin Supply.",
+        "nature": "decision",
+        "scope": "Déterminer, à partir du besoin Supply et de ses contraintes, les prestations et résultats requis : préparation, réception, transport ou production de documents. Préciser biens ou documents concernés, quantités, destinataires, lieux et échéances utiles.\n\nExemple : réaliser la livraison requiert une préparation, un document et un transport. La décision explicite ces besoins ; les familles de [Service Orders](glossary:TER066) tiennent ensuite les demandes adressées aux exécutants et leurs évolutions. La décision de service choisit les moyens de service pour y répondre.\n\nLa capacité ne se limite plus à formuler un message ou à exprimer un [Service Order](glossary:TER066). Elle ne recrée ni l’autorisation de la commande [Order Management](model:D04), ni sa promesse [Order Management](model:D04), ni un [Agreement](glossary:TER048) ou un Case.\n\nFrontière : Ne choisit pas encore l’exécutant et ne pilote pas ses opérations internes.\n\nPeut être mobilisée en préparation de la promesse ; la consommation par les décisions de promesse d’[Availability](glossary:TER112) ne change pas son propriétaire.\n\nLes prestations requises peuvent distinguer picking, packing, réétiquetage, reconditionnement et cross-docking. Cette décision détermine le résultat nécessaire ; [Service Management](model:subdomain-service-orders) tient la prestation confiée et son engagement.\n\nLorsque le résultat attendu nécessite une préparation ou un packing commun, expliciter cette exigence pour les [Picking Order](model:service-order-picking) et [Packing Order](model:service-order-packing). [Service Order Release Decision](model:service-order-release-decision) choisit ensuite les ensembles et moments de libération ; une simultanéité d’envoi ne suffit pas à définir le traitement commun.\n\nLorsque la réception est une prestation explicitement confiée, [Receiving Order](model:service-order-receiving) porte sa demande, son engagement et les suites de son résultat.\n\nLes documents nécessaires à la prestation font partie de ses exigences : contenu attendu, destinataires, disponibilité et résultat reconnu. Le workflow pilote leur obtention et leurs éventuelles reprises. La génération technique d’un document ne crée ni capacité métier autonome ni commande supplémentaire.",
+        "market_comparisons": [
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Field Service",
+            "source_title": "Work order architecture",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/field-service/field-service-architecture",
+            "source_version": "Documentation évolutive consultée le 19 septembre 2026",
+            "source_locator": "A work order is created ; scheduled ; performed ; reviewed and completed",
+            "consulted_on": "2026-09-19",
+            "evidence_limits": "Document primaire consulté ; rapprochement de concepts, sans preuve de réalisation Beaumanoir.",
+            "element_name": "Work Order / Resource Requirement",
+            "element_type": "Concept documenté par la source primaire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Travail, prestations et caractéristiques nécessaires à une intervention.",
+            "differences": "FLOW couvre la Supply et sépare détermination du besoin et gestion de la demande.",
+            "flow_position": "Déterminer ce qu’il faut faire réaliser pour satisfaire le besoin Supply. Service Requirements Decision explicite les prestations et résultats nécessaires avant le choix des exécutants.",
+            "status": "proposed",
+            "source_refs": [
+              "U477",
+              "ELM397",
+              "CMP193"
+            ],
+            "concept_name": "Work Order / Resource Requirement",
+            "scope_summary": "Travail, prestations et caractéristiques nécessaires à une intervention.",
+            "approach_summary": "Décrire les besoins avant l’affectation de la ressource.",
+            "definition_choice": "Appui de Work Order / Resource Requirement : Travail, prestations et caractéristiques nécessaires à une intervention. Limite de reprise dans FLOW : FLOW couvre la Supply et sépare détermination du besoin et gestion de la demande.",
+            "term_choice": "Le repère natif « Work Order / Resource Requirement » étaye le rapprochement décrit ci-dessous. « Service Requirements Decision » nomme la responsabilité FLOW à cette maille ; la proximité des termes ne prouve pas une nomenclature commune."
+          },
+          {
+            "vendor": "TM Forum",
+            "product": "Service Ordering Management",
+            "source_title": "TMF641 Service Ordering Management API REST Specification",
+            "source_url": "https://tmf-open-api-table-documents.s3.eu-west-1.amazonaws.com/Historic/TMF641_Service_Ordering/3.0.0/user_guides/TMF641_Service_Ordering_Management_API_user_guides_18.5.1.pdf",
+            "source_version": "Version 3.0.0, Release 18.5.0, janvier 2019",
+            "source_locator": "Pages 5, 8–15 : Service Order ; dates ; dépendances ; états",
+            "consulted_on": "2026-09-19",
+            "evidence_limits": "PDF primaire consulté ; référence télécom historique. Les états et cardinalités TMF ne sont pas adoptés par FLOW.",
+            "element_name": "Service order item / Action",
+            "element_type": "Concept documenté par la source primaire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Action attendue sur un service.",
+            "differences": "Le document décrit une commande télécom, pas une capacité autonome de décision.",
+            "flow_position": "Déterminer ce qu’il faut faire réaliser pour satisfaire le besoin Supply. Service Requirements Decision explicite les prestations et résultats nécessaires avant le choix des exécutants.",
+            "status": "proposed",
+            "source_refs": [
+              "U477",
+              "ELM464",
+              "CMP193"
+            ],
+            "concept_name": "Service order item / Action",
+            "scope_summary": "Action attendue sur un service.",
+            "approach_summary": "Référencer le service et préciser le résultat demandé.",
+            "definition_choice": "Appui de Service order item / Action : Action attendue sur un service. Limite de reprise dans FLOW : Le document décrit une commande télécom, pas une capacité autonome de décision.",
+            "term_choice": "Le repère natif « Service order item / Action » étaye le rapprochement décrit ci-dessous. « Service Requirements Decision » nomme la responsabilité FLOW à cette maille ; la proximité des termes ne prouve pas une nomenclature commune."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Microsoft Dynamics 365 — application indiquée par la source",
+            "element_name": "Overview of the Service to deliver business process areas",
+            "concept_name": "Overview of the Service to deliver business process areas",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Le processus de service formalise les travaux demandés, les ressources et la progression de leur réalisation.",
+            "approach_summary": "Rapprochement avec Service Requirements Decision : Le processus de service formalise les travaux demandés, les ressources et la progression de leur réalisation.",
+            "similarities": "Le processus de service formalise les travaux demandés, les ressources et la progression de leur réalisation.",
+            "differences": "Appui transversal au service demandé ; ne démontre pas chaque prestation textile comme fonction native Dynamics.",
+            "flow_position": "FLOW conserve le périmètre métier de Service Requirements Decision. Appui transversal au service demandé ; ne démontre pas chaque prestation textile comme fonction native Dynamics.",
+            "source_title": "Overview of the Service to deliver business process areas - Dynamics 365 | Microsoft Learn",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/guidance/business-processes/service-to-cash-areas-overview",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Overview of the Service to deliver business process areas - Dynamics 365 | Microsoft Learn — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Appui transversal au service demandé ; ne démontre pas chaque prestation textile comme fonction native Dynamics.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM809"
+            ],
+            "term_choice": "Le nom Service Requirements Decision reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Le processus de service formalise les travaux demandés, les ressources et la progression de leur réalisation. Frontière conservée : Appui transversal au service demandé ; ne démontre pas chaque prestation textile comme fonction native Dynamics."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Working with Service Order Management: External Service Processin",
+            "concept_name": "Working with Service Order Management: External Service Processin",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Un service externe est demandé, acheté, puis rapproché d’une entrée de service acceptée.",
+            "approach_summary": "Rapprochement avec Service Requirements Decision : Un service externe est demandé, acheté, puis rapproché d’une entrée de service acceptée.",
+            "similarities": "Un service externe est demandé, acheté, puis rapproché d’une entrée de service acceptée.",
+            "differences": "FLOW distingue exigence de prestation, engagement d’achat et rapprochement opérationnel ; l’entrée de service SAP ne couvre pas tous les faits attendus d’une prestation logistique.",
+            "flow_position": "FLOW conserve le périmètre métier de Service Requirements Decision. FLOW distingue exigence de prestation, engagement d’achat et rapprochement opérationnel ; l’entrée de service SAP ne couvre pas tous les faits attendus d’une prestation logistique.",
+            "source_title": "Working with Service Order Management: External Service Processin",
+            "source_url": "https://learning.sap.com/courses/identifying-business-processes-in-sap-s4hana-service/working-with-service-order-management-external-service-processing_ca8699f0-3870-43c2-bb6e-4c68bddda055",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Working with Service Order Management: External Service Processin — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. FLOW distingue exigence de prestation, engagement d’achat et rapprochement opérationnel ; l’entrée de service SAP ne couvre pas tous les faits attendus d’une prestation logistique.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM814"
+            ],
+            "term_choice": "Le nom Service Requirements Decision reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Un service externe est demandé, acheté, puis rapproché d’une entrée de service acceptée. Frontière conservée : FLOW distingue exigence de prestation, engagement d’achat et rapprochement opérationnel ; l’entrée de service SAP ne couvre pas tous les faits attendus d’une prestation logistique."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Déterminer ce qu’il faut faire réaliser pour satisfaire le besoin Supply. Service Requirements Decision explicite les prestations et résultats nécessaires avant le choix des exécutants.",
+          "flow_scope": "Établir les prestations et résultats nécessaires pour satisfaire un besoin Supply : biens concernés, quantités, lieux, échéances et contraintes à porter dans les ordres confiés.",
+          "flow_approach": "Déterminer, à partir du besoin Supply et de ses contraintes, les prestations et résultats requis : préparation, réception, transport ou production de documents. Préciser biens ou documents concernés, quantités, destinataires, lieux et échéances utiles.\n\nExemple : réaliser la livraison requiert une préparation, un document et un transport. La décision explicite ces besoins ; les familles de Service Orders tient ensuite les demandes adressées aux exécutants et leurs évolutions. La décision de service choisit les moyens de service pour y répondre.\n\nLa capacité ne se limite plus à formuler un message ou à exprimer un Service Order. Elle ne recrée ni l’autorisation de la commande D04, ni sa promesse D04, ni un Agreement ou un Case. D07.a conserve son identité pour la responsabilité de détermination des prestations, précisée par U245/U247.\n\nFrontière : Ne choisit pas encore l’exécutant et ne pilote pas ses opérations internes.\n\nFrontière U673 : Peut être mobilisée en préparation de la promesse ; la consommation par Order Promising ne change pas son propriétaire.\n\nLes prestations requises peuvent distinguer picking, packing, réétiquetage, reconditionnement et cross-docking. Cette décision détermine le résultat nécessaire ; Service Management tient la prestation confiée et son engagement.\n\nLorsque le résultat attendu nécessite une préparation ou un packing commun, expliciter cette exigence pour les Picking Order et Packing Order. [Service Order Release Decision](model:service-order-release-decision) choisit ensuite les ensembles et moments de libération ; une simultanéité d’envoi ne suffit pas à définir le traitement commun.\n\nLorsque la réception est une prestation explicitement confiée, [Receiving Order](model:service-order-receiving) porte sa demande, son engagement et les suites de son résultat.",
+          "synthesis": [
+            "Field Service décrit le travail nécessaire avec des tâches, produits et prestations. TM Forum décrit des actions demandées sur des services, reliées à un catalogue. Les deux explicitent le contenu du travail avant sa réalisation.",
+            "FLOW isole la question « quelles prestations faut-il ? ». Les exemples éditeurs mêlent cette description à la tenue d’une commande de service ; FLOW distingue aussi le choix de l’exécutant et le suivi de la demande."
+          ],
+          "examples": [
+            {
+              "title": "Illustration FLOW — livrer exige plusieurs prestations",
+              "situation": "Une livraison requiert de préparer les colis, produire un document et les transporter.",
+              "outcome": "Les trois résultats et leurs contraintes sont explicités.",
+              "lesson": "Cette décision ne désigne pas encore le transporteur et ne confirme pas une nouvelle promesse.",
+              "source_title": "Work order architecture",
+              "source_url": "https://learn.microsoft.com/en-us/dynamics365/field-service/field-service-architecture",
+              "source_refs": [
+                "U477",
+                "ELM397",
+                "CMP193"
+              ]
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "id": "BC-050.01",
+          "resultat": "Déduire les prestations nécessaires d’un besoin"
+        },
+        {
+          "id": "BC-050.02",
+          "resultat": "Préciser biens et quantités et échéances"
+        },
+        {
+          "id": "BC-050.03",
+          "resultat": "Définir résultats attendus et contraintes"
+        }
+      ],
+      "boundary": "Ne prescrit pas les gestes opérationnels internes du prestataire."
+    },
+    {
+      "id": "BC-051",
+      "native_id": "D06.e",
+      "source": {
+        "name": "Service Selection Decision",
+        "definition": "Déterminer les services et exécutants à mobiliser pour les prestations nécessaires, en tenant compte de leur admissibilité et des contraintes.",
+        "finality": "Retenir des services utilisables pour réaliser les prestations requises dans le cadre Supply applicable.",
+        "nature": "decision",
+        "scope": "Comparer les options de prestation et vérifier leur admissibilité. Exploiter le catalogue des services, les lieux et relations du réseau, les conditions applicables et la visibilité sur la capacité. Déterminer les services utilisables, puis les moyens à mobiliser.\n\nExemple : identifier les transporteurs desservant une destination, compatibles avec les marchandises et les horaires, puis déterminer le service à solliciter.\n\nLa décision reste dans le besoin Supply et les contraintes issus des choix de satisfaction [Availability](model:D03) et des possibilités évaluées par les décisions de promesse d’[Availability](glossary:TER112) et des engagements [Order Management](model:D04). Elle ne reprend pas la décision de couverture de l’[Order](glossary:TER012) ou la révision de sa promesse. Elle peut être mobilisée pour le plan initial ou par Adaptation Decision.\n\nChoisir les moyens initiaux ou alternatifs en préservant promesse et grands équilibres. Consulter cette décision pendant une étude de faisabilité reste possible.\n\nLe résultat est le service et l’exécutant proposés ou retenus, avec leurs conditions. Les décisions de promesse [ATP](glossary:TER044), [CTP](glossary:TER045) et [PTP](glossary:TER068) choisissent une proposition de quantité et de date pour la demande ; [Fulfilment Adaptation Decision](glossary:TER177) détermine une révision locale du plan d’exécution ; [Service Order Release Decision](model:service-order-release-decision) détermine quels ordres libérer et quand. Ces décisions peuvent se solliciter selon le cas, sans ordre universel ni transfert de leurs engagements.\n\n[Transport Plan Decision](model:transport-plan-decision) construit ou révise les chargements et parcours confiés, en préservant les engagements et les affectations. Cette décision ne se confond ni avec le choix de prestation ou prestataire, ni avec le moment de libération des ordres, ni avec les engagements portés par [Transport Order](model:service-order-transport).",
+        "market_comparisons": [
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Field Service",
+            "source_title": "Work order architecture",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/field-service/field-service-architecture",
+            "source_version": "Documentation évolutive consultée le 19 septembre 2026",
+            "source_locator": "A work order is created ; scheduled ; performed ; reviewed and completed",
+            "consulted_on": "2026-09-19",
+            "evidence_limits": "Document primaire consulté ; rapprochement de concepts, sans preuve de réalisation Beaumanoir.",
+            "element_name": "Resource requirement / Scheduling",
+            "element_type": "Concept documenté par la source primaire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Ressources répondant aux caractéristiques et créneaux requis.",
+            "differences": "Le produit planifie l’intervention ; FLOW isole la décision de service.",
+            "flow_position": "Choisir les services et exécutants qui peuvent répondre aux prestations nécessaires. Service Selection Decision compare les options admissibles en tenant compte du besoin et des contraintes.",
+            "status": "proposed",
+            "source_refs": [
+              "U477",
+              "ELM397",
+              "CMP193"
+            ],
+            "concept_name": "Resource requirement / Scheduling",
+            "scope_summary": "Ressources répondant aux caractéristiques et créneaux requis.",
+            "approach_summary": "Faire correspondre besoin et exécutant.",
+            "definition_choice": "Appui de Resource requirement / Scheduling : Ressources répondant aux caractéristiques et créneaux requis. Limite de reprise dans FLOW : Le produit planifie l’intervention ; FLOW isole la décision de service.",
+            "term_choice": "Le repère natif « Resource requirement / Scheduling » étaye le rapprochement décrit ci-dessous. « Service Selection Decision » nomme la responsabilité FLOW à cette maille ; la proximité des termes ne prouve pas une nomenclature commune."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics AX Transportation Management",
+            "source_title": "Transportation scenario – Manual rating",
+            "source_url": "https://www.microsoft.com/en-us/dynamics-365/blog/business-leader/2016/02/16/transportation-charges-scenario-manual-rating-2/",
+            "source_version": "16 février 2016",
+            "source_locator": "Scenario ; Walkthrough étapes 1–3",
+            "consulted_on": "2026-09-19",
+            "evidence_limits": "Exemple éditeur historique, limité au transport et au tarif ; pas une recommandation de produit actuel.",
+            "element_name": "Carrier and carrier service selection",
+            "element_type": "Concept documenté par la source primaire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Choix d’une offre de transport adaptée au chargement.",
+            "differences": "L’exemple historique est centré sur le tarif, plus étroit que les contraintes FLOW.",
+            "flow_position": "Choisir les services et exécutants qui peuvent répondre aux prestations nécessaires. Service Selection Decision compare les options admissibles en tenant compte du besoin et des contraintes.",
+            "status": "proposed",
+            "source_refs": [
+              "U470",
+              "U471",
+              "ELM306",
+              "CMP186",
+              "U477",
+              "ELM474",
+              "CMP193"
+            ],
+            "concept_name": "Carrier and carrier service selection",
+            "scope_summary": "Choix d’une offre de transport adaptée au chargement.",
+            "approach_summary": "Comparer les possibilités et retenir un service.",
+            "definition_choice": "Appui de Carrier and carrier service selection : Choix d’une offre de transport adaptée au chargement. Limite de reprise dans FLOW : L’exemple historique est centré sur le tarif, plus étroit que les contraintes FLOW.",
+            "term_choice": "Le repère natif « Carrier and carrier service selection » étaye le rapprochement décrit ci-dessous. « Service Selection Decision » nomme la responsabilité FLOW à cette maille ; la proximité des termes ne prouve pas une nomenclature commune."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Selecting Carriers and Tendering",
+            "concept_name": "Selecting Carriers and Tendering",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "La sélection du transporteur rapproche coûts, contraintes et capacités disponibles avant sollicitation.",
+            "approach_summary": "Rapprochement avec Service Selection Decision : La sélection du transporteur rapproche coûts, contraintes et capacités disponibles avant sollicitation.",
+            "similarities": "La sélection du transporteur rapproche coûts, contraintes et capacités disponibles avant sollicitation.",
+            "differences": "Le périmètre documenté est le transport ; il ne prouve pas la visibilité de capacité de toutes les prestations.",
+            "flow_position": "FLOW conserve le périmètre métier de Service Selection Decision. Le périmètre documenté est le transport ; il ne prouve pas la visibilité de capacité de toutes les prestations.",
+            "source_title": "Selecting Carriers and Tendering",
+            "source_url": "https://learning.sap.com/courses/business-processes-in-sap-s-4hana-transportation-management/selecting-carriers-and-tendering_d66f6116-ed5d-491f-b91b-e958fdedf2a5",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Selecting Carriers and Tendering — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Le périmètre documenté est le transport ; il ne prouve pas la visibilité de capacité de toutes les prestations.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM793"
+            ],
+            "term_choice": "Le nom Service Selection Decision reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "La sélection du transporteur rapproche coûts, contraintes et capacités disponibles avant sollicitation. Frontière conservée : Le périmètre documenté est le transport ; il ne prouve pas la visibilité de capacité de toutes les prestations."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Service Selection Decision porte la responsabilité décrite ; les produits apportent des correspondances partielles, sans taxonomie commune.",
+          "flow_scope": "Déterminer les services et exécutants à mobiliser pour les prestations nécessaires, en tenant compte de leur admissibilité et des contraintes.",
+          "flow_approach": "Comparer les options de prestation et vérifier leur admissibilité. Exploiter le catalogue des services, les lieux et relations du réseau, les conditions applicables et la visibilité sur la capacité. Déterminer les services utilisables, puis les moyens à mobiliser.\n\nExemple : identifier les transporteurs desservant une destination, compatibles avec les marchandises et les horaires, puis déterminer le service à solliciter.\n\nLa décision reste dans le besoin Supply et les contraintes issus des choix de satisfaction [Availability](model:D03) et des possibilités évaluées par les décisions de promesse d’[Availability](glossary:TER112) et des engagements [Order Management](model:D04). Elle ne reprend pas la décision de couverture de l’[Order](glossary:TER012) ou la révision de sa promesse. Elle peut être mobilisée pour le plan initial ou par Adaptation Decision.\n\nChoisir les moyens initiaux ou alternatifs en préservant promesse et grands équilibres. Consulter cette décision pendant une étude de faisabilité reste possible.\n\nLe résultat est le service et l’exécutant proposés ou retenus, avec leurs conditions. Les décisions de promesse [ATP](glossary:TER044), [CTP](glossary:TER045) et [PTP](glossary:TER068) choisissent une proposition de quantité et de date pour la demande ; [Fulfilment Adaptation Decision](glossary:TER177) détermine une révision locale du plan d’exécution ; [Service Order Release Decision](model:service-order-release-decision) détermine quels ordres libérer et quand. Ces décisions peuvent se solliciter selon le cas, sans ordre universel ni transfert de leurs engagements.\n\n[Transport Plan Decision](model:transport-plan-decision) construit ou révise les chargements et parcours confiés, en préservant les engagements et les affectations. Cette décision ne se confond ni avec le choix de prestation ou prestataire, ni avec le moment de libération des ordres, ni avec les engagements portés par [Transport Order](model:service-order-transport).",
+          "synthesis": [
+            "Microsoft Field Service rapproche un besoin des ressources capables de le réaliser. Son exemple de transport dans Dynamics AX montre un choix de transporteur et de service lorsque les tarifs proposés ne conviennent pas. L’un insiste sur la ressource, l’autre sur l’offre de transport.",
+            "FLOW réunit admissibilité et comparaison des options à la maille du service. Le coût peut compter, mais aucune priorité automatique au moins cher n’est déduite ; la couverture de l’Order et sa promesse gardent leurs décisions propres."
+          ],
+          "examples": [
+            {
+              "title": "Exemple Microsoft — un tarif à convenir",
+              "situation": "Dans l’exemple Microsoft, les tarifs proposés ne conviennent pas au chargement ; un transporteur et son service sont choisis avec un tarif saisi manuellement.",
+              "outcome": "Le service retenu devient le moyen de transport utilisé dans ce scénario.",
+              "lesson": "Le choix dépend du contexte ; FLOW ne réduit pas sa décision à un classement tarifaire.",
+              "source_title": "Transportation scenario – Manual rating",
+              "source_url": "https://www.microsoft.com/en-us/dynamics-365/blog/business-leader/2016/02/16/transportation-charges-scenario-manual-rating-2/",
+              "source_refs": [
+                "U477",
+                "ELM474",
+                "CMP193"
+              ]
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "id": "BC-051.01",
+          "resultat": "Identifier les services et exécutants admissibles"
+        },
+        {
+          "id": "BC-051.02",
+          "resultat": "Comparer capacités et conditions et contraintes"
+        },
+        {
+          "id": "BC-051.03",
+          "resultat": "Retenir un choix motivé"
+        }
+      ],
+      "boundary": "Le contrôle d’éligibilité est réutilisé et non recodé."
+    },
+    {
+      "id": "BC-052",
+      "native_id": "transport-plan-decision",
+      "source": {
+        "name": "Transport Plan Decision",
+        "definition": "Construire et réviser un plan de transport qui regroupe les marchandises en chargements et détermine leurs trajets, arrêts et échéances compatibles avec les engagements.",
+        "scope": "Construire le [plan de transport](glossary:TER103) pour organiser les transports confiés en un ensemble réalisable : [Load Consolidation](model:transport-load-consolidation) constitue les chargements ; [Routing & Scheduling](model:transport-routing-scheduling) en détermine les trajets et échéances. Les deux stratégies peuvent s’articuler et être réexaminées sans séquence universelle imposée. Le plan rend explicites les capacités, compatibilités, créneaux et conditions restant à confirmer.\n\nPréserver les promesses portées par les [Orders](glossary:TER012) et les affectations d’[Order Backlog Management](glossary:TER269). Si aucune solution locale ne les respecte, faire examiner l’adaptation par les capacités responsables ; ne pas réaffecter implicitement la supply ni reconfirmer une commande. Ce plan de transport n’est ni le [Matching Master Plan](glossary:TER100) ni un [Supply Plan](glossary:TER098) prévisionnel externe.\n\n[Service Selection Decision](model:D06.e) choisit les prestations et prestataires admissibles en articulation avec le plan. [Transport Order](model:service-order-transport) porte les instructions et engagements de transport ; [Transport Booking Order](model:service-order-transport-booking) porte les réservations de transport confiées. [Service Order Release Decision](model:service-order-release-decision) décide quand libérer les ordres : une rétention d’ordres ne constitue pas à elle seule un plan de chargement ou de route.\n\nL’exécutant réalise les opérations et ses tâches internes. La capacité ne prescrit ni placement physique en trois dimensions, ni conduite, ni optimisation des tournées internes du transporteur qui ne sont pas confiées à l’orchestration. Exemple fictif : répartir les palettes destinées à six magasins entre deux chargements, puis retenir les arrêts et horaires compatibles avec leurs réceptions.\n\nLe mandat doit préciser les groupements, trajets, arrêts ou échéances effectivement confiés à l’orchestration. [Transport Planning & Dispatch](model:subdomain-transport-planning-dispatch) construit le plan local des moyens et opérations dans son propre mandat et communique possibilités, confirmations et écarts. Ne pas reconstruire deux fois le même plan : les contraintes de l’orchestration, le résultat local et les adaptations autorisées sont reliés. Aucun outil ou calculateur installé attribué par cette frontière.",
+        "nature": "decision",
+        "decomposition_rationale": "Deux problèmes différenciants et combinables : constituer les chargements compatibles et organiser leurs parcours dans le temps. Des objectifs de coût ou de remplissage ne créent pas de comportements supplémentaires.",
+        "market_comparisons": [
+          {
+            "vendor": "Microsoft",
+            "product": "Microsoft Dynamics 365",
+            "element_name": "Load building workbench - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "concept_name": "Load building workbench - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "element_type": "Mécanisme métier documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "La constitution de chargements rapproche les marchandises et les contraintes de poids et de volume des moyens de transport.",
+            "differences": "FLOW isole la décision sur les transports confiés et préserve promesses et affectations ; les fonctions produit comprennent aussi une planification détaillée et une exécution non reprises intégralement. Planning Loads SAP est un appui partiel à l’articulation chargement/parcours, pas la preuve de toutes les variantes de routage.",
+            "flow_position": "Construire le [plan de transport](glossary:TER103) pour organiser les transports confiés en un ensemble réalisable : [Load Consolidation](model:transport-load-consolidation) constitue les chargements ; [Routing & Scheduling](model:transport-routing-scheduling) en détermine les trajets et échéances. Les deux stratégies peuvent s’articuler et être réexaminées sans séquence universelle imposée. Le plan rend explicites les capacités, compatibilités, créneaux et conditions restant à confirmer.\n\nPréserver les promesses portées par les [Orders](glossary:TER012) et les affectations d’[Order Backlog Management](glossary:TER269). Si aucune solution locale ne les respecte, faire examiner l’adaptation par les capacités responsables ; ne pas réaffecter implicitement la supply ni reconfirmer une commande. Ce plan de transport n’est ni le [Matching Master Plan](glossary:TER100) ni un [Supply Plan](glossary:TER098) prévisionnel externe.\n\n[Service Selection Decision](model:D06.e) choisit les prestations et prestataires admissibles en articulation avec le plan. [Transport Order](model:service-order-transport) porte les instructions et engagements de transport ; [Transport Booking Order](model:service-order-transport-booking) porte les réservations de transport confiées. [Service Order Release Decision](model:service-order-release-decision) décide quand libérer les ordres : une rétention d’ordres ne constitue pas à elle seule un plan de chargement ou de route.\n\nL’exécutant réalise les opérations et ses tâches internes. La capacité ne prescrit ni placement physique en trois dimensions, ni conduite, ni optimisation des tournées internes du transporteur qui ne sont pas confiées à l’orchestration. Exemple fictif : répartir les palettes destinées à six magasins entre deux chargements, puis retenir les arrêts et horaires compatibles avec leurs réceptions.\n\nLe mandat doit préciser les groupements, trajets, arrêts ou échéances effectivement confiés à l’orchestration. [Transport Planning & Dispatch](model:subdomain-transport-planning-dispatch) construit le plan local des moyens et opérations dans son propre mandat et communique possibilités, confirmations et écarts. Ne pas reconstruire deux fois le même plan : les contraintes de l’orchestration, le résultat local et les adaptations autorisées sont reliés. Aucun outil ou calculateur installé attribué par cette frontière.",
+            "source_title": "Load building workbench - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/transportation/tasks/load-building-workbench",
+            "source_version": "Documentation évolutive ; version globale non présumée.",
+            "source_locator": "Create a load building strategy ; use a load building strategy",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "La stratégie standard documentée est fondée sur le volume ; pas de preuve d’un optimiseur universel ni d’une maille métier imposée. FLOW isole la décision sur les transports confiés et préserve promesses et affectations ; les fonctions produit comprennent aussi une planification détaillée et une exécution non reprises intégralement. Planning Loads SAP est un appui partiel à l’articulation chargement/parcours, pas la preuve de toutes les variantes de routage.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM832",
+              "U775",
+              "U777"
+            ],
+            "scope_summary": "La constitution de chargements rapproche les marchandises et les contraintes de poids et de volume des moyens de transport.",
+            "approach_summary": "Appui à la responsabilité décrite, avec les frontières FLOW explicitées.",
+            "term_choice": "Transport Plan Decision nomme la responsabilité FLOW ; la source ne prouve ni appellation native identique ni consensus de nomenclature.",
+            "definition_choice": "La constitution de chargements rapproche les marchandises et les contraintes de poids et de volume des moyens de transport. Frontière FLOW : FLOW isole la décision sur les transports confiés et préserve promesses et affectations ; les fonctions produit comprennent aussi une planification détaillée et une exécution non reprises intégralement. Planning Loads SAP est un appui partiel à l’articulation chargement/parcours, pas la preuve de toutes les variantes de routage."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Microsoft Dynamics 365",
+            "element_name": "Plan freight transportation routes with multiple stops - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "concept_name": "Plan freight transportation routes with multiple stops - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "element_type": "Mécanisme métier documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Les itinéraires, arrêts, dates, adresses et capacités servent à constituer et affecter les chargements aux trajets.",
+            "differences": "FLOW isole la décision sur les transports confiés et préserve promesses et affectations ; les fonctions produit comprennent aussi une planification détaillée et une exécution non reprises intégralement. Planning Loads SAP est un appui partiel à l’articulation chargement/parcours, pas la preuve de toutes les variantes de routage.",
+            "flow_position": "Construire le [plan de transport](glossary:TER103) pour organiser les transports confiés en un ensemble réalisable : [Load Consolidation](model:transport-load-consolidation) constitue les chargements ; [Routing & Scheduling](model:transport-routing-scheduling) en détermine les trajets et échéances. Les deux stratégies peuvent s’articuler et être réexaminées sans séquence universelle imposée. Le plan rend explicites les capacités, compatibilités, créneaux et conditions restant à confirmer.\n\nPréserver les promesses portées par les [Orders](glossary:TER012) et les affectations d’[Order Backlog Management](glossary:TER269). Si aucune solution locale ne les respecte, faire examiner l’adaptation par les capacités responsables ; ne pas réaffecter implicitement la supply ni reconfirmer une commande. Ce plan de transport n’est ni le [Matching Master Plan](glossary:TER100) ni un [Supply Plan](glossary:TER098) prévisionnel externe.\n\n[Service Selection Decision](model:D06.e) choisit les prestations et prestataires admissibles en articulation avec le plan. [Transport Order](model:service-order-transport) porte les instructions et engagements de transport ; [Transport Booking Order](model:service-order-transport-booking) porte les réservations de transport confiées. [Service Order Release Decision](model:service-order-release-decision) décide quand libérer les ordres : une rétention d’ordres ne constitue pas à elle seule un plan de chargement ou de route.\n\nL’exécutant réalise les opérations et ses tâches internes. La capacité ne prescrit ni placement physique en trois dimensions, ni conduite, ni optimisation des tournées internes du transporteur qui ne sont pas confiées à l’orchestration. Exemple fictif : répartir les palettes destinées à six magasins entre deux chargements, puis retenir les arrêts et horaires compatibles avec leurs réceptions.\n\nLe mandat doit préciser les groupements, trajets, arrêts ou échéances effectivement confiés à l’orchestration. [Transport Planning & Dispatch](model:subdomain-transport-planning-dispatch) construit le plan local des moyens et opérations dans son propre mandat et communique possibilités, confirmations et écarts. Ne pas reconstruire deux fois le même plan : les contraintes de l’orchestration, le résultat local et les adaptations autorisées sont reliés. Aucun outil ou calculateur installé attribué par cette frontière.",
+            "source_title": "Plan freight transportation routes with multiple stops - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/transportation/plan-freight-transportation-routes-multiple-stops",
+            "source_version": "Documentation évolutive ; version globale non présumée.",
+            "source_locator": "Route plans ; Route guides ; Scheduled routes ; Load building workbench",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Appui à la décision de transport ; ni reprise des tournées internes d’un prestataire ni preuve d’une optimisation globale identique entre éditeurs. FLOW isole la décision sur les transports confiés et préserve promesses et affectations ; les fonctions produit comprennent aussi une planification détaillée et une exécution non reprises intégralement. Planning Loads SAP est un appui partiel à l’articulation chargement/parcours, pas la preuve de toutes les variantes de routage.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM805",
+              "U775",
+              "U777"
+            ],
+            "scope_summary": "Les itinéraires, arrêts, dates, adresses et capacités servent à constituer et affecter les chargements aux trajets.",
+            "approach_summary": "Appui à la responsabilité décrite, avec les frontières FLOW explicitées.",
+            "term_choice": "Transport Plan Decision nomme la responsabilité FLOW ; la source ne prouve ni appellation native identique ni consensus de nomenclature.",
+            "definition_choice": "Les itinéraires, arrêts, dates, adresses et capacités servent à constituer et affecter les chargements aux trajets. Frontière FLOW : FLOW isole la décision sur les transports confiés et préserve promesses et affectations ; les fonctions produit comprennent aussi une planification détaillée et une exécution non reprises intégralement. Planning Loads SAP est un appui partiel à l’articulation chargement/parcours, pas la preuve de toutes les variantes de routage."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA",
+            "element_name": "Planning Loads",
+            "concept_name": "Planning Loads",
+            "element_type": "Mécanisme métier documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "La consolidation répartit les marchandises entre ressources de transport, avec contraintes de capacité et de compatibilité.",
+            "differences": "FLOW isole la décision sur les transports confiés et préserve promesses et affectations ; les fonctions produit comprennent aussi une planification détaillée et une exécution non reprises intégralement. Planning Loads SAP est un appui partiel à l’articulation chargement/parcours, pas la preuve de toutes les variantes de routage.",
+            "flow_position": "Construire le [plan de transport](glossary:TER103) pour organiser les transports confiés en un ensemble réalisable : [Load Consolidation](model:transport-load-consolidation) constitue les chargements ; [Routing & Scheduling](model:transport-routing-scheduling) en détermine les trajets et échéances. Les deux stratégies peuvent s’articuler et être réexaminées sans séquence universelle imposée. Le plan rend explicites les capacités, compatibilités, créneaux et conditions restant à confirmer.\n\nPréserver les promesses portées par les [Orders](glossary:TER012) et les affectations d’[Order Backlog Management](glossary:TER269). Si aucune solution locale ne les respecte, faire examiner l’adaptation par les capacités responsables ; ne pas réaffecter implicitement la supply ni reconfirmer une commande. Ce plan de transport n’est ni le [Matching Master Plan](glossary:TER100) ni un [Supply Plan](glossary:TER098) prévisionnel externe.\n\n[Service Selection Decision](model:D06.e) choisit les prestations et prestataires admissibles en articulation avec le plan. [Transport Order](model:service-order-transport) porte les instructions et engagements de transport ; [Transport Booking Order](model:service-order-transport-booking) porte les réservations de transport confiées. [Service Order Release Decision](model:service-order-release-decision) décide quand libérer les ordres : une rétention d’ordres ne constitue pas à elle seule un plan de chargement ou de route.\n\nL’exécutant réalise les opérations et ses tâches internes. La capacité ne prescrit ni placement physique en trois dimensions, ni conduite, ni optimisation des tournées internes du transporteur qui ne sont pas confiées à l’orchestration. Exemple fictif : répartir les palettes destinées à six magasins entre deux chargements, puis retenir les arrêts et horaires compatibles avec leurs réceptions.\n\nLe mandat doit préciser les groupements, trajets, arrêts ou échéances effectivement confiés à l’orchestration. [Transport Planning & Dispatch](model:subdomain-transport-planning-dispatch) construit le plan local des moyens et opérations dans son propre mandat et communique possibilités, confirmations et écarts. Ne pas reconstruire deux fois le même plan : les contraintes de l’orchestration, le résultat local et les adaptations autorisées sont reliés. Aucun outil ou calculateur installé attribué par cette frontière.",
+            "source_title": "Planning Loads",
+            "source_url": "https://learning.sap.com/courses/business-processes-in-sap-s-4hana-transportation-management/planning-loads_e752a3f5-f4a9-4957-9f4d-e6e550c15409",
+            "source_version": "Documentation évolutive ; version globale non présumée.",
+            "source_locator": "Load Planning as Part of the Planning Process ; Load Consolidation",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Le produit descend aussi au placement physique 3D ; cette partie reste hors proposition FLOW. Le plan d’acheminement n’est pas le master plan Supply. FLOW isole la décision sur les transports confiés et préserve promesses et affectations ; les fonctions produit comprennent aussi une planification détaillée et une exécution non reprises intégralement. Planning Loads SAP est un appui partiel à l’articulation chargement/parcours, pas la preuve de toutes les variantes de routage.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM834",
+              "U775",
+              "U777"
+            ],
+            "scope_summary": "La consolidation répartit les marchandises entre ressources de transport, avec contraintes de capacité et de compatibilité.",
+            "approach_summary": "Appui à la responsabilité décrite, avec les frontières FLOW explicitées.",
+            "term_choice": "Transport Plan Decision nomme la responsabilité FLOW ; la source ne prouve ni appellation native identique ni consensus de nomenclature.",
+            "definition_choice": "La consolidation répartit les marchandises entre ressources de transport, avec contraintes de capacité et de compatibilité. Frontière FLOW : FLOW isole la décision sur les transports confiés et préserve promesses et affectations ; les fonctions produit comprennent aussi une planification détaillée et une exécution non reprises intégralement. Planning Loads SAP est un appui partiel à l’articulation chargement/parcours, pas la preuve de toutes les variantes de routage."
+          }
+        ],
+        "finality": "Organiser des chargements et trajets réalisables qui respectent les engagements."
+      },
+      "functions": [
+        {
+          "id": "BC-052.01",
+          "resultat": "Constituer des chargements admissibles"
+        },
+        {
+          "id": "BC-052.02",
+          "resultat": "Proposer trajets et arrêts et échéances"
+        },
+        {
+          "id": "BC-052.03",
+          "resultat": "Réviser le plan selon les contraintes et engagements"
+        }
+      ],
+      "boundary": "La taille des problèmes et la qualité d’optimisation restent à établir ; pas de TMS complet."
+    }
+  ],
+  "native_estimates": [
+    {
+      "id": "erpnext",
+      "native_analogue_units": 478,
+      "base_equivalent_units": 286.8,
+      "complement_equivalent_units": 351.7,
+      "equivalent_units": 638.5,
+      "common_analogy_jh": 19.075444800181792,
+      "complement_marginal_jh": 26.919524057100027,
+      "jh": 45.99496885728182,
+      "rounded_jh": 50,
+      "not_observed_effort": true
+    },
+    {
+      "id": "odoo",
+      "native_analogue_units": 508,
+      "base_equivalent_units": 304.8,
+      "complement_equivalent_units": 452.2,
+      "equivalent_units": 757.0,
+      "common_analogy_jh": 20.396053388153188,
+      "complement_marginal_jh": 35.06864099704505,
+      "jh": 55.46469438519824,
+      "rounded_jh": 60,
+      "not_observed_effort": true
+    },
+    {
+      "id": "tryton",
+      "native_analogue_units": 144,
+      "base_equivalent_units": 86.39999999999999,
+      "complement_equivalent_units": 205.60000000000002,
+      "equivalent_units": 292.0,
+      "common_analogy_jh": 5.098695172217985,
+      "complement_marginal_jh": 14.357432496393885,
+      "jh": 19.45612766861187,
+      "rounded_jh": 20,
+      "not_observed_effort": true
+    },
+    {
+      "id": "axelor",
+      "native_analogue_units": 232,
+      "base_equivalent_units": 139.2,
+      "complement_equivalent_units": 257.8,
+      "equivalent_units": 397.0,
+      "common_analogy_jh": 8.614596745669372,
+      "complement_marginal_jh": 18.66040618571249,
+      "jh": 27.275002931381863,
+      "rounded_jh": 30,
+      "not_observed_effort": true
+    }
+  ],
+  "proposed_java_jh": null,
+  "diagnostic_java_jh": 27.275002931381863,
+  "diagnostic_rounded_jh": 30,
+  "roles": [
+    {
+      "id": "coordination",
+      "label": "Pilotage de l’équipe produit",
+      "jh": 3
+    },
+    {
+      "id": "analyse_produit",
+      "label": "Analyse métier et fonctionnelle",
+      "jh": 3
+    },
+    {
+      "id": "architecture",
+      "label": "Architecture et conception technique",
+      "jh": 3
+    },
+    {
+      "id": "dev_java",
+      "label": "Développement Java et tests développeur",
+      "jh": 11
+    },
+    {
+      "id": "dev_frontend",
+      "label": "Développement interface et tests développeur",
+      "jh": 2
+    },
+    {
+      "id": "qa",
+      "label": "QA et qualification indépendante",
+      "jh": 4
+    },
+    {
+      "id": "plateforme",
+      "label": "Plateforme / DevOps et mise en service",
+      "jh": 3
+    },
+    {
+      "id": "ux",
+      "label": "UX et ergonomie",
+      "jh": 0
+    },
+    {
+      "id": "securite",
+      "label": "Expertise et revue de sécurité",
+      "jh": 1
+    }
+  ],
+  "roles_status": "Répartition du diagnostic total par activités publiées COCOMO et clés d’organisation Stock proposées ; pas charge observée ni adoption.",
+  "activities": [
+    {
+      "id": "management",
+      "label": "Gestion du projet logiciel",
+      "jh": 3.3050847457627124,
+      "percent_by_phase": [
+        14,
+        12,
+        10,
+        14
+      ],
+      "weights": {
+        "coordination": 1
+      }
+    },
+    {
+      "id": "environment",
+      "label": "Environnement et gestion de configuration",
+      "jh": 1.7593220338983053,
+      "percent_by_phase": [
+        10,
+        8,
+        5,
+        5
+      ],
+      "weights": {
+        "plateforme": 0.8,
+        "dev_java": 0.2
+      }
+    },
+    {
+      "id": "requirements",
+      "label": "Analyse et exigences",
+      "jh": 3.345762711864407,
+      "percent_by_phase": [
+        38,
+        18,
+        8,
+        4
+      ],
+      "weights": {
+        "analyse_produit": 0.9,
+        "architecture": 0.1
+      }
+    },
+    {
+      "id": "design",
+      "label": "Conception et architecture",
+      "jh": 5.7,
+      "percent_by_phase": [
+        19,
+        36,
+        16,
+        4
+      ],
+      "weights": {
+        "architecture": 0.4,
+        "dev_java": 0.4,
+        "dev_frontend": 0.05,
+        "ux": 0.1,
+        "securite": 0.05
+      }
+    },
+    {
+      "id": "implementation",
+      "label": "Réalisation et tests unitaires",
+      "jh": 8.064406779661018,
+      "percent_by_phase": [
+        8,
+        13,
+        34,
+        19
+      ],
+      "weights": {
+        "dev_java": 0.85,
+        "dev_frontend": 0.15
+      }
+    },
+    {
+      "id": "assessment",
+      "label": "Évaluation, vérification et validation",
+      "jh": 6.101694915254237,
+      "percent_by_phase": [
+        8,
+        10,
+        24,
+        24
+      ],
+      "weights": {
+        "qa": 0.7,
+        "dev_java": 0.2,
+        "dev_frontend": 0.05,
+        "securite": 0.05
+      }
+    },
+    {
+      "id": "deployment",
+      "label": "Préparation du déploiement",
+      "jh": 1.7237288135593218,
+      "percent_by_phase": [
+        3,
+        3,
+        3,
+        30
+      ],
+      "weights": {
+        "plateforme": 0.7,
+        "dev_java": 0.2,
+        "coordination": 0.1
+      }
+    }
+  ],
+  "activity_source_ref": "audits/2026-10-30-master-data-calcul/repartitions-sources.json#cocomo",
+  "delay": {
+    "calculated_months": 4.823396501829178,
+    "rounded_months": 5,
+    "status": "Délai local nominal du diagnostic ; pas engagement ni calendrier global. Dépend des mécanismes des autres familles."
+  },
+  "functional_control": {
+    "CFP": 28,
+    "jh": 80.0,
+    "gap_jh": 52.72499706861814,
+    "gap_pct": 193.30885940237323,
+    "denominator": 27.275002931381863,
+    "not_confidence": true
+  },
+  "measured_change": {
+    "java_units_iteration_2": 96,
+    "java_units_iteration_3": 232,
+    "jh_iteration_2": 14.750152851515853,
+    "jh_iteration_3": 27.275002931381863,
+    "additional_source_files": 1,
+    "resolved_direct_calls": 4,
+    "remaining_delegations": 0
+  },
+  "limits": [
+    "Distinguer capacité reçue, besoin de prestation, choix du service et plan de transport ; ne pas construire un TMS d’exécutant.",
+    "Les parts de pertinence et de nouveau code sont des hypothèses non calibrées.",
+    "Le composant natif peut rester plus large que le périmètre Flow ; les quatre chiffres ne sont ni des charges historiques ni des validations indépendantes.",
+    "Un même code peut servir d’analogue à plusieurs familles ; cela ne prouve pas à lui seul un mécanisme Flow commun ni un financement distinct.",
+    "Le comptage COSMIC est proposé, sans revue humaine ni preuve d’exhaustivité."
+  ],
+  "cumulative": {
+    "adopted_jh": 1940,
+    "newly_adopted_jh": 0,
+    "capabilities_reviewed": 52,
+    "total_capabilities": 88,
+    "reviewed_pct": 59.09090909090909
+  },
+  "next_iteration_worthwhile": true,
+  "next_iteration_reason": "Audit transversal demandé : vérifier les mécanismes communs, l’exhaustivité fonctionnelle et les analogues non appariés avant une nouvelle adoption.",
+  "lineage": {
+    "iteration_1_sha256": "2972bd43d44db55d4720fc7495efe8303fbe04ab930e870e52e6c6fe8e39c80a",
+    "analysis_1_sha256": "d59a3464f5142eb2e91c51c3460e42bbfb4dfa2025d06cb34497a08250796e89",
+    "iteration_2_sha256": "9474bb638236d82237076e1636154f409dd480cb04f694095be90115295c29fb",
+    "analysis_2_sha256": "1db32ccb9eb1bb3d1f4b75a6edf850229c0efe199e95aab9c76e094405692e1c",
+    "inputs_3_sha256": "1b253043c0c18cebe62a7aefef51a34221cb80841f851fb90a17eb2f289d169e"
+  }
+}

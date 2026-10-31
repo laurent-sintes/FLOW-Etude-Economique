@@ -37,6 +37,11 @@ server_update:
   action: Recharger l’application
   note: La page, l’horizon et vos paramètres modifiés seront repris si le nouveau modèle est compatible. Les autres
     paramètres suivront la nouvelle référence.
+  unreachable_message: Serveur injoignable
+  unreachable_note: Les données déjà chargées restent affichées. La connexion est vérifiée automatiquement ; ne
+    rechargez pas la page pendant cette interruption.
+  retry: Vérifier la connexion
+  checking: Vérification en cours…
 reload_session:
   incompatible: Le brouillon ne peut pas être repris avec ce modèle. La référence est affichée ; vous pouvez récupérer
     le brouillon avant de poursuivre.
@@ -144,7 +149,7 @@ labels:
   mco_run: '{{notion.mco_run}}'
   total: Dépenses cumulées
   service: '{{notion.annees_service_complet}}'
-  remaining: Reste à financer pour achever la réalisation
+  remaining: Solde des financements initiaux estimés
   completion: Avancement de la réalisation
   delta: Écart à la référence
   build_progress: Obtention de la {{notion.core_system}}
@@ -1126,13 +1131,105 @@ composable:
     initiale. Run, {{notion.mco_client}} et évolutions client sont distincts. Buy conserve ses prix groupés et l’agrégat
     de services client ; une part non ventilée ne vaut pas zéro.
 essential:
+  dossiers:
+    model:
+      navigation: Dans les fondamentaux
+      pages:
+      - id: scope
+        label: Périmètre
+        short_label: Périmètre
+        sections:
+        - scope
+      - id: modes
+        label: Modes et activités
+        short_label: Modes
+        sections:
+        - strategies
+        - activities
+      - id: costs
+        label: Charges et coûts
+        short_label: Coûts
+        sections:
+        - workload
+        - costs
+      - id: calendar
+        label: Calendrier
+        short_label: Calendrier
+        sections:
+        - calendar
+    framework:
+      navigation: Dans {{vue.parametres_modele}}
+      pages:
+      - id: summary
+        label: Hypothèses
+        short_label: Hypothèses
+      - id: tarifs
+        label: Tarifs et sources
+        short_label: Tarifs
+      - id: diagnostics
+        label: Diagnostics
+        short_label: Diagnostics
+    market:
+      navigation: Dans le dossier de marché
+      pages:
+      - id: qualification
+        label: '{{notion.qualification}}'
+        short_label: État
+        sections:
+        - instruction
+        - axes
+      - id: products
+        label: Produits
+        short_label: Produits
+        sections:
+        - produits
+      - id: offers
+        label: Offres reçues
+        short_label: Offres
+        sections:
+        - offres
+      - id: references
+        label: Projets et services
+        short_label: Projets
+        sections:
+        - references
+    delivery:
+      navigation: Dans le dossier de réalisation
+      pages:
+      - id: missions
+        label: Missions
+        short_label: Missions
+        sections:
+        - organisation
+      - id: hotspots
+        label: Points chauds
+        short_label: Points chauds
+        sections:
+        - points-chauds
+      - id: proofs
+        label: Preuves
+        short_label: Preuves
+        sections:
+        - partenaire
+      - id: gates
+        label: Jalons
+        short_label: Jalons
+        sections:
+        - jalons
+    product_labels:
+      erpnext: ERPNext
+      odoo-community: Odoo
+      tryton: Tryton
+      axelor-open-suite: Axelor
+      microsoft: Microsoft
+      sap: SAP
   home: Accueil — Vue d’ensemble
   nav:
   - id: synvance
     label: Repères Synvance
     icon: files
-  - id: perimetre-retenu
-    label: Périmètre métier
+  - id: cartographie
+    label: Cartographie métier
     icon: grid
   - id: vision
     label: Vue d’ensemble
@@ -1141,7 +1238,7 @@ essential:
     label: '{{vue.concepts}}'
     icon: compass
   - id: conditions-realisation
-    label: Conditions de réalisation
+    label: Critères de réalisation
     icon: compass
   - id: marche
     label: '{{vue.evaluation_marche}}'
@@ -1187,7 +1284,7 @@ essential:
     sequential: false
     items:
     - synvance
-    - perimetre-retenu
+    - cartographie
   - label: Framework d’évaluation
     items:
     - vision
@@ -1223,32 +1320,48 @@ essential:
     reset: Effacer les filtres
     empty: Aucune notion ne correspond à cette recherche. Essayer un autre terme ou effacer les filtres.
     unknown_term: La notion demandée n’est pas référencée. Le glossaire complet reste consultable ci-dessous.
+  cartography:
+    source_title: Référence du périmètre métier
+    source_name: Beaumanoir Cartographie
+    intro: La cartographie reçue définit le périmètre métier utilisé par l’étude. Ses capacités structurent les
+      travaux Make et servent à examiner la couverture des solutions Buy.
+    model_link: Comprendre son rôle dans les {{vue.concepts}}
+    input_link: Consulter la cartographie utilisée par l’étude
   pages:
+    cartographie:
+      title: Cartographie métier
+      intro: Le référentiel reçu du projet Beaumanoir Cartographie, sa provenance et le périmètre utilisé par l’étude.
     glossaire:
       title: Glossaire de l’étude
       intro: Retrouver les notions, leurs définitions et leur usage dans l’étude.
     synvance:
       title: Repères Synvance
-      intro: Les repères essentiels, les deux dossiers fournisseur et les pièces originales.
+      intro: La demande, le périmètre, les dates et les conclusions de l’étude, avant les chiffres des deux finalistes.
+    synvance-business:
+      title: Synvance — périmètre et architecture
+      intro: La direction donnée par la consultation et les réponses Microsoft et SAP par métier.
+    synvance-oms:
+      title: Synvance — comparer les OMS B2C
+      intro: Solutions proposées, lien avec l’ERP, différences et parcours restant à vérifier.
+    synvance-costs:
+      title: Synvance — comparer les coûts
+      intro: Des offres reçues au coût complet du modèle, sur des périmètres et des périodes explicites.
     synvance-microsoft:
       title: Repères Synvance — Microsoft
       intro: Pilote Avanade, projection du COPIL, abonnements et support documentés.
     synvance-sap:
       title: Repères Synvance — SAP
       intro: Lots Delaware, total imprimé, abonnements et services documentés.
-    perimetre-retenu:
-      title: Périmètre métier retenu
-      intro: 'Consulter le référentiel métier reçu : capacités, définitions, périmètres et hiérarchie.'
     vision:
       title: Comprendre l’étude en une page
     conditions-realisation:
-      title: Conditions de réalisation
-      intro: Définir les responsabilités, les preuves et les décisions nécessaires pour construire et porter le
-        produit dans la durée.
+      title: Critères de réalisation
+      intro: Les critères communs à Make et Buy pour examiner les responsabilités, les moyens, les preuves et les
+        décisions de poursuite.
     capacite-realisation:
       title: Préparer la réalisation
-      intro: Examiner le périmètre, les capacités à réunir, les points chauds et les preuves attendues avant de
-        s’engager.
+      intro: Le dossier FLOW présente missions proposées, essais, pièces à réunir et jalons, dans l’hypothèse Make
+        avec eXalt.
     comparer:
       title: Comparer les structures de coût
       intro: Les trois postes de coût, pour les cinq options.
@@ -1306,14 +1419,15 @@ essential:
   core_results:
     status_ref: core
     make_title: Construction de la {{notion.core_system}} en Make
-    make_note: '**La charge retenue porte sur Master Data Java/Spring, tous rôles compris.** Les autres capacités
-      restent à réestimer. Les montants Make affichés sont partiels.'
+    make_note: '**Les unités Java/Spring couvrent le périmètre de construction, tous rôles compris.** Les mécanismes
+      communs sont intégrés une seule fois. .NET et Rust restent à réestimer ; les délais locaux ne s’additionnent
+      pas.'
     option: Option
-    central: Charge retenue · partielle
+    central: Charge retenue
     uncertainty: Incertitude sur les JH
     percent_unit: '%'
     jh_unit: JH
-    cost: Construction retenue · partielle
+    cost: Construction retenue
     buy_title: Solutions Buy
     buy_note: Microsoft et SAP sont les deux solutions Buy chiffrées. Aucun coût de construction générique n’est
       ajouté. Leur sélection, leurs droits d’usage et leur intégration figurent dans les autres postes de l’étude.
@@ -1325,13 +1439,13 @@ essential:
     next: Comparer les structures de coût
     pending: À réestimer
     unknown_uncertainty: Non calibrée
-    family_title: Estimation retenue par famille
+    family_title: Estimations retenues par unité
     role: Rôle
     days: '{{notion.charge_brute}}'
     rate: Tarif de cadrage
     role_cost: Prestations
     months: mois
-    duration: Délai de la famille
+    duration: Délai nominal local
     coverage: Capacités avec estimation retenue
     remaining: Capacités restant à réestimer
     assumptions: Hypothèses qui peuvent changer le résultat
@@ -1341,22 +1455,33 @@ essential:
     role_note: Le total couvre tous les rôles. Le pilotage produit et la QA sont déjà inclus ; aucune provision
       proportionnelle de pilotage ni réduction IA supplémentaire ne s’ajoute.
     tools: Outillage de réalisation
-    total: Total de la famille
+    total: Total de l’unité
     average_team: Capacité moyenne indicative
     fte: ETP
     crosscheck: Comparaison fonctionnelle conservée
     provenance: Origine du chiffre retenu
     rate_unit: € HT / JH
-    no_allocation: Charge retenue au niveau de la famille, sans ventilation arbitraire par capacité.
+    no_allocation: Charge retenue au niveau de l’unité, sans ventilation arbitraire par capacité.
     unestimated_capacity: Cette capacité reste à réestimer.
     legacy_title: Travaux encore à réestimer
-    family_link: Voir l’estimation Master Data et ses hypothèses
+    family_link: Voir les estimations retenues et leurs hypothèses
     rate_note: 'Les tarifs réutilisent les hypothèses du modèle : coordination produit au tarif de coordination,
       architecture et sécurité au tarif architecte, QA au tarif QA ; autres rôles au tarif expert Java. Les analogies
       pour analyse, UX et DevOps restent à confirmer. Ce ne sont pas des devis.'
     coverage_note: La couverture compte les capacités rattachées à une estimation retenue. Elle ne mesure ni leur
       poids économique ni un taux de confiance.
     tools_note: L’outillage suit le tarif par JH existant du modèle. Il est valorisé séparément des prestations.
+    family_details: Voir les hypothèses et la démonstration
+    back_to_evaluations: Revenir aux évaluations
+    review_title: Revue des hypothèses
+    review_note: La décision active ne renseigne pas d’auteur ni de périmètre de revue humaine. Le statut retenu
+      désigne l’adoption économique.
+    family_capabilities: Capacités couvertes
+    component_title: Répartition entre les familles de cette unité
+    component_note: Parts allouées à l’intérieur de l’unité selon les tailles de code. Elles sont comprises dans
+      son total et ne sont pas des estimations indépendantes par capacité.
+    component_family: Famille
+    component_days: Part allouée
   market_method:
     source: source/methode-evaluation-marche.yaml
     application:
@@ -1492,6 +1617,11 @@ essential:
       scope_note: 'La cartographie retenue compte {total} capacités. Le rapprochement produit porte sur {compared}
         : les capacités suivantes restent hors de ce périmètre comparatif.'
       scope_link: Revoir les capacités et leur complexité
+      scope_bridge_title: Périmètre produit et décisions de coût
+      scope_bridge_link: Examiner les {{vue.evaluations_economiques}}
+      scope_bridge_note: Le rapprochement produit et le périmètre chiffré sont distincts. Les capacités ci-dessous,
+        exclues du rapprochement produit, sont couvertes par une décision active. Leur correspondance produit reste
+        à qualifier ; leur estimation ne démontre pas une couverture éditeur.
     findings_title: Ce que le marché permet de soutenir
     findings:
     - '**Des points d’appui existent.** Les offres reçues documentent des périmètres et des prix. Les références
@@ -1619,9 +1749,8 @@ essential:
       label: Revoir « {{vue.calcul_run}} »
     simulate_action: Tester les hypothèses dans Simuler
     ia_title: Réduction de l’effort par assistance IA
-    ia_note: Les gains ci-dessous restent des hypothèses pour les activités auxquelles ils s’appliquent. Les familles
-      du Core System retenues conservent leur effort projet par rôle, sans remise IA globale. Le pilotage de leur
-      équipe produit est déjà inclus.
+    ia_note: Les familles retenues sont valorisées directement par rôle. Les gains ci-dessous concernent les activités
+      annuelles éligibles ; les taux sans assiette active sont conservés dans les diagnostics.
     ia_formula: JH nets = JH bruts × (1 − gain en % / 100)
     ia_detail: Taux de réduction de l’effort retenus pour la construction
     ia_make_scope: Construction Make
@@ -1797,6 +1926,11 @@ essential:
     - '**Temps :** les séquences Buy retenues précèdent leur prolongation par indexation. Le calendrier détermine
       quand les dépenses sont engagées.'
     core_family_rule: 'Familles Make retenues : pas de remise supplémentaire'
+    tariff_details_link: Justifications des tarifs, sources et réserves
+    back_to_summary: Revenir aux {{vue.parametres_modele}}
+    diagnostics_link: Consulter les diagnostics et paramètres sans assiette active
+    diagnostics_summary: Ces repères historiques ne financent pas les familles retenues. Les valeurs et leurs traitements
+      restent consultables dans la fiche.
   reference: Scénario de référence
   explain: D’où vient ce chiffre ?
   show_source: Voir la pièce
@@ -1836,12 +1970,12 @@ essential:
         label: Tester les hypothèses du scénario
       simuler:
         href: '#conditions-realisation'
-        label: Examiner les conditions de réalisation
+        label: Comprendre les critères de réalisation
     decision_links:
     - href: '#capacite-realisation'
-      label: Capacité de réalisation et preuves attendues
+      label: Dispositif, preuves et jalons FLOW
     - href: '#conditions-realisation'
-      label: Conditions et jalons avant investissement
+      label: Critères de réalisation avant investissement
     proof_title: Retrouver les hypothèses et les travaux
     proof_note: Ces vues expliquent les montants de référence et leurs sources. Les paramètres modifiés dans une
       simulation restent des hypothèses personnelles.
@@ -1853,8 +1987,8 @@ essential:
     - href: '#se-projeter'
       label: Calendrier de référence
     service_start: Service complet à partir du mois
-    remaining_note: Ce solde couvre les financements initiaux et transitoires encore nécessaires. Un solde nul ne
-      supprime pas les dépenses récurrentes ultérieures.
+    remaining_note: Ce solde concerne les financements initiaux et transitoires déjà estimés. Les travaux Make encore
+      à chiffrer et les dépenses récurrentes ultérieures n’y sont pas compris.
     schedule_note: Le sélecteur d’horizon porte sur la comparaison ci-dessus. L’échéancier ci-dessous conserve les
       quinze années du plan, depuis le même début de projet.
     reference_amount: Référence à cet horizon
@@ -1870,9 +2004,11 @@ essential:
       label: Modifier les hypothèses
     - id: annual
       label: Lire l’échéancier complet
+    partial_amount: Part chiffrée
+    partial_reference: Référence Make partielle
   structure:
-    scope: Les budgets initiaux et la base annuelle ont des temporalités différentes ; leurs montants ne s’additionnent
-      pas ici.
+    scope: Trois agrégats regroupent les sept structures du modèle. Les budgets initiaux et la base annuelle ont
+      des temporalités différentes ; leurs montants ne s’additionnent pas ici.
     phases:
     - key: obtention
       title: '{{notion.obtenir_core_system}}'
@@ -1907,7 +2043,9 @@ essential:
         source: source/plan-investissement.yaml#repartition
   projection:
     horizon_title: Dépenses cumulées à l’horizon choisi
-    horizon_note: Les cinq options partent du même début de projet ; leurs dates de service complet diffèrent.
+    horizon_note: Le cumul réunit construction ou sélection, intégration et fonctionnement jusqu’à l’horizon choisi.
+      Les montants ci-dessous en donnent la décomposition. Les cinq options partent du même début de projet ; leurs
+      dates de service complet diffèrent.
     chart_title: Échéancier complet sur quinze ans
     chart_unit: k€ HT
     selected_option: Option affichée
@@ -1918,7 +2056,7 @@ essential:
   less_options: Revenir aux trois options
   service_years: Années de service complet à cet horizon
   years: ans
-  remaining: Reste à financer pour achever la réalisation
+  remaining: Solde des financements initiaux estimés
   breakdown: Voir les agrégats budgétaires
   comparison_limit: Les années de service diffèrent. Temps interne, transformation, maintien et décommissionnement
     des SI historiques sont exclus ; les suppléments Buy inconnus ne sont pas chiffrés.
@@ -2199,6 +2337,10 @@ essential:
     invalid: Corrigez la valeur indiquée ; le dernier résultat valide reste affiché.
     modified: Modification en cours
     no_change: Les montants sont ceux de la référence.
+    diagnostic_title: Contrepoint diagnostique
+    diagnostic_note: Ce réglage modifie uniquement le repère SAP retraité. Il ne modifie ni les budgets ni les dates
+      des cinq options.
+    diagnostic_result: Repère après continuité · hors budgets actifs
   proofs:
     total:
       title: Dépenses cumulées
@@ -2317,7 +2459,7 @@ buy_selection_migration:
   options:
   - microsoft
   - sap
-
 model_download:
   label: Télécharger le modèle métier et le métamodèle
-  description: Un fichier YAML unique avec les données métier, les objets, leurs relations, les règles de calcul et les indicateurs. Il correspond aux sources utilisées lors de la construction de cette application.
+  description: Un fichier YAML unique avec les données métier, les objets, leurs relations, les règles de calcul
+    et les indicateurs. Il correspond aux sources utilisées lors de la construction de cette application.

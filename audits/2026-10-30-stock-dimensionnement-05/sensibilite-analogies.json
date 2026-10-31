@@ -1,0 +1,446 @@
+{
+  "status": "contre-épreuve du choix des analogies, non intervalle statistique",
+  "checks": [
+    {
+      "product": "erpnext",
+      "target_scope_and_quantity_unchanged": true,
+      "count": 40,
+      "original_analogue": "erpnext:guard",
+      "alternative": {
+        "id": "erpnext:guard-alternative",
+        "product": "erpnext",
+        "repo": "erpnext",
+        "path": "erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+        "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+        "sha256": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+        "symbol": "StockReservationEntry.validate_with_allowed_qty",
+        "start": 675,
+        "end": 739,
+        "program_units": 23,
+        "counted_nodes": [
+          {
+            "kind": "FunctionDef",
+            "start": 675,
+            "end": 739
+          },
+          {
+            "kind": "Expr",
+            "start": 678,
+            "end": 681
+          },
+          {
+            "kind": "Assign",
+            "start": 683,
+            "end": 683
+          },
+          {
+            "kind": "Assign",
+            "start": 685,
+            "end": 685
+          },
+          {
+            "kind": "If",
+            "start": 686,
+            "end": 690
+          },
+          {
+            "kind": "Assign",
+            "start": 692,
+            "end": 692
+          },
+          {
+            "kind": "Assign",
+            "start": 693,
+            "end": 693
+          },
+          {
+            "kind": "Assign",
+            "start": 694,
+            "end": 694
+          },
+          {
+            "kind": "If",
+            "start": 696,
+            "end": 705
+          },
+          {
+            "kind": "If",
+            "start": 707,
+            "end": 735
+          },
+          {
+            "kind": "If",
+            "start": 737,
+            "end": 739
+          },
+          {
+            "kind": "Assign",
+            "start": 687,
+            "end": 689
+          },
+          {
+            "kind": "Assign",
+            "start": 690,
+            "end": 690
+          },
+          {
+            "kind": "Assign",
+            "start": 697,
+            "end": 699
+          },
+          {
+            "kind": "If",
+            "start": 701,
+            "end": 705
+          },
+          {
+            "kind": "Assign",
+            "start": 708,
+            "end": 708
+          },
+          {
+            "kind": "Assign",
+            "start": 709,
+            "end": 734
+          },
+          {
+            "kind": "Expr",
+            "start": 735,
+            "end": 735
+          },
+          {
+            "kind": "Assign",
+            "start": 738,
+            "end": 738
+          },
+          {
+            "kind": "Expr",
+            "start": 739,
+            "end": 739
+          },
+          {
+            "kind": "Expr",
+            "start": 702,
+            "end": 702
+          },
+          {
+            "kind": "Return",
+            "start": 703,
+            "end": 703
+          },
+          {
+            "kind": "Expr",
+            "start": 705,
+            "end": 705
+          }
+        ],
+        "usage": "gabarit mesuré pour un nouveau traitement ; pas ajout une seconde fois de ce code source natif",
+        "limitation": "Autre validation native, de contenu différent. Test du caractère trop large de la catégorie, sans équivalence fonctionnelle revendiquée.",
+        "source_fragment": "\tdef validate_with_allowed_qty(self, qty_to_be_reserved: float) -> None:\n\t\t\"\"\"Validates `Reserved Qty` with `Max Reserved Qty`.\"\"\"\n\n\t\tself.db_set(\n\t\t\t\"available_qty\",\n\t\t\tget_available_qty_to_reserve(self.item_code, self.warehouse, ignore_sre=self.name),\n\t\t)\n\n\t\ttotal_reserved_qty = self.get_total_reserved_qty()\n\n\t\tvoucher_delivered_qty = 0\n\t\tif self.voucher_type == \"Sales Order\":\n\t\t\tdelivered_qty, conversion_factor = frappe.db.get_value(\n\t\t\t\t\"Sales Order Item\", self.voucher_detail_no, [\"delivered_qty\", \"conversion_factor\"]\n\t\t\t)\n\t\t\tvoucher_delivered_qty = flt(delivered_qty) * flt(conversion_factor)\n\n\t\tallowed_qty = min(self.available_qty, (self.voucher_qty - voucher_delivered_qty - total_reserved_qty))\n\t\tallowed_qty = flt(allowed_qty, self.precision(\"reserved_qty\"))\n\t\tqty_to_be_reserved = flt(qty_to_be_reserved, self.precision(\"reserved_qty\"))\n\n\t\tif self.get(\"_action\") != \"submit\" and self.voucher_type == \"Sales Order\" and allowed_qty <= 0:\n\t\t\tmsg = _(\"Item {0} is already reserved/delivered against Sales Order {1}.\").format(\n\t\t\t\tfrappe.bold(self.item_code), frappe.bold(self.voucher_no)\n\t\t\t)\n\n\t\t\tif self.docstatus == 1:\n\t\t\t\tself.cancel()\n\t\t\t\treturn frappe.msgprint(msg)\n\t\t\telse:\n\t\t\t\tfrappe.throw(msg)\n\n\t\tif qty_to_be_reserved > allowed_qty:\n\t\t\tactual_qty = _get_stock_balance(self.item_code, self.warehouse)\n\t\t\tmsg = \"\"\"\n\t\t\t\tCannot reserve more than Allowed Qty {} {} for Item {} against {} {}.<br /><br />\n\t\t\t\tThe <b>Allowed Qty</b> is calculated as follows:<br />\n\t\t\t\t<ul>\n\t\t\t\t\t<li>Actual Qty [Available Qty at Warehouse] = {}</li>\n\t\t\t\t\t<li>Reserved Stock [Ignore current SRE] = {}</li>\n\t\t\t\t\t<li>Available Qty To Reserve [Actual Qty - Reserved Stock] = {}</li>\n\t\t\t\t\t<li>Voucher Qty [Voucher Item Qty] = {}</li>\n\t\t\t\t\t<li>Delivered Qty [Qty delivered against the Voucher Item] = {}</li>\n\t\t\t\t\t<li>Total Reserved Qty [Qty reserved against the Voucher Item] = {}</li>\n\t\t\t\t\t<li>Allowed Qty [Minimum of (Available Qty To Reserve, (Voucher Qty - Delivered Qty - Total Reserved Qty))] = {}</li>\n\t\t\t\t</ul>\n\t\t\t\"\"\".format(\n\t\t\t\tfrappe.bold(allowed_qty),\n\t\t\t\tself.stock_uom,\n\t\t\t\tfrappe.bold(self.item_code),\n\t\t\t\tself.voucher_type,\n\t\t\t\tfrappe.bold(self.voucher_no),\n\t\t\t\tactual_qty,\n\t\t\t\tactual_qty - self.available_qty,\n\t\t\t\tself.available_qty,\n\t\t\t\tself.voucher_qty,\n\t\t\t\tvoucher_delivered_qty,\n\t\t\t\ttotal_reserved_qty,\n\t\t\t\tallowed_qty,\n\t\t\t)\n\t\t\tfrappe.throw(msg)\n\n\t\tif qty_to_be_reserved <= self.delivered_qty:\n\t\t\tmsg = _(\"Reserved Qty should be greater than Delivered Qty.\")\n\t\t\tfrappe.throw(msg)",
+        "source_url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py"
+      },
+      "original_trial_jh": 131.7051683304327,
+      "alternative_trial_jh": 188.44390934591024,
+      "change_jh": 56.73874101547753,
+      "change_pct": 43.080117306502906,
+      "meaning": "sensibilité au choix du gabarit ; pas une probabilité, une enveloppe ou une nouvelle estimation"
+    },
+    {
+      "product": "odoo",
+      "target_scope_and_quantity_unchanged": true,
+      "count": 40,
+      "original_analogue": "odoo:guard",
+      "alternative": {
+        "id": "odoo:guard-alternative",
+        "product": "odoo",
+        "repo": "odoo",
+        "path": "addons/stock/models/stock_quant.py",
+        "commit": "299075f17026b830a9755f3c43f3e83143995946",
+        "sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+        "symbol": "StockQuant._get_available_quantity",
+        "start": 828,
+        "end": 867,
+        "program_units": 18,
+        "counted_nodes": [
+          {
+            "kind": "FunctionDef",
+            "start": 828,
+            "end": 867
+          },
+          {
+            "kind": "Assign",
+            "start": 847,
+            "end": 847
+          },
+          {
+            "kind": "Assign",
+            "start": 848,
+            "end": 848
+          },
+          {
+            "kind": "If",
+            "start": 849,
+            "end": 867
+          },
+          {
+            "kind": "Assign",
+            "start": 850,
+            "end": 850
+          },
+          {
+            "kind": "If",
+            "start": 851,
+            "end": 854
+          },
+          {
+            "kind": "Assign",
+            "start": 856,
+            "end": 856
+          },
+          {
+            "kind": "For",
+            "start": 857,
+            "end": 863
+          },
+          {
+            "kind": "If",
+            "start": 864,
+            "end": 867
+          },
+          {
+            "kind": "Return",
+            "start": 852,
+            "end": 852
+          },
+          {
+            "kind": "Return",
+            "start": 854,
+            "end": 854
+          },
+          {
+            "kind": "If",
+            "start": 858,
+            "end": 859
+          },
+          {
+            "kind": "If",
+            "start": 860,
+            "end": 863
+          },
+          {
+            "kind": "Return",
+            "start": 865,
+            "end": 865
+          },
+          {
+            "kind": "Return",
+            "start": 867,
+            "end": 867
+          },
+          {
+            "kind": "Continue",
+            "start": 859,
+            "end": 859
+          },
+          {
+            "kind": "AugAssign",
+            "start": 861,
+            "end": 861
+          },
+          {
+            "kind": "AugAssign",
+            "start": 863,
+            "end": 863
+          }
+        ],
+        "usage": "gabarit mesuré pour un nouveau traitement ; pas ajout une seconde fois de ce code source natif",
+        "limitation": "Autre validation native, de contenu différent. Test du caractère trop large de la catégorie, sans équivalence fonctionnelle revendiquée.",
+        "source_fragment": "    def _get_available_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False, allow_negative=False):\n        \"\"\" Return the available quantity, i.e. the sum of `quantity` minus the sum of\n        `reserved_quantity`, for the set of quants sharing the combination of `product_id,\n        location_id` if `strict` is set to False or sharing the *exact same characteristics*\n        otherwise.\n        The set of quants to filter from can be in `self`, if not a search will be done\n        This method is called in the following usecases:\n            - when a stock move checks its availability\n            - when a stock move actually assign\n            - when editing a move line, to check if the new value is forced or not\n            - when validating a move line with some forced values and have to potentially unlink an\n              equivalent move line in another picking\n        In the two first usecases, `strict` should be set to `False`, as we don't know what exact\n        quants we'll reserve, and the characteristics are meaningless in this context.\n        In the last ones, `strict` should be set to `True`, as we work on a specific set of\n        characteristics.\n\n        :return: available quantity as a float\n        \"\"\"\n        self = self.sudo()\n        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)\n        if not product_id.tracking:\n            available_quantity = sum(quants.mapped('quantity')) - sum(quants.mapped('reserved_quantity'))\n            if allow_negative:\n                return available_quantity\n            else:\n                return available_quantity if product_id.uom_id.compare(available_quantity, 0.0) >= 0.0 else 0.0\n        else:\n            availaible_quantities = {lot_id: 0.0 for lot_id in list(set(quants.mapped('lot_id'))) + ['untracked']}\n            for quant in quants:\n                if not quant.lot_id and strict and lot_id:\n                    continue\n                if not quant.lot_id:\n                    availaible_quantities['untracked'] += quant.quantity - quant.reserved_quantity\n                else:\n                    availaible_quantities[quant.lot_id] += quant.quantity - quant.reserved_quantity\n            if allow_negative:\n                return sum(availaible_quantities.values())\n            else:\n                return sum(available_quantity for available_quantity in availaible_quantities.values() if product_id.uom_id.compare(available_quantity, 0) > 0)",
+        "source_url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_quant.py"
+      },
+      "original_trial_jh": 168.7361513211736,
+      "alternative_trial_jh": 215.61963915882447,
+      "change_jh": 46.883487837650875,
+      "change_pct": 27.785087825318776,
+      "meaning": "sensibilité au choix du gabarit ; pas une probabilité, une enveloppe ou une nouvelle estimation"
+    },
+    {
+      "product": "tryton",
+      "target_scope_and_quantity_unchanged": true,
+      "count": 40,
+      "original_analogue": "tryton:guard",
+      "alternative": {
+        "id": "tryton:guard-alternative",
+        "product": "tryton",
+        "repo": "tryton",
+        "path": "modules/stock/inventory.py",
+        "commit": "e011222dc305c431677e586706fd241dffe02236",
+        "sha256": "305d949d7165962450c6915c06692ca9322080d0778fe86be57c0452652f31bb",
+        "symbol": "InventoryLine.on_change_with_tolerance_quantity_variation",
+        "start": 476,
+        "end": 494,
+        "program_units": 12,
+        "counted_nodes": [
+          {
+            "kind": "FunctionDef",
+            "start": 479,
+            "end": 494
+          },
+          {
+            "kind": "If",
+            "start": 480,
+            "end": 494
+          },
+          {
+            "kind": "Assign",
+            "start": 481,
+            "end": 481
+          },
+          {
+            "kind": "Assign",
+            "start": 482,
+            "end": 482
+          },
+          {
+            "kind": "Assign",
+            "start": 483,
+            "end": 483
+          },
+          {
+            "kind": "Assign",
+            "start": 484,
+            "end": 486
+          },
+          {
+            "kind": "Assign",
+            "start": 487,
+            "end": 487
+          },
+          {
+            "kind": "Assign",
+            "start": 488,
+            "end": 488
+          },
+          {
+            "kind": "If",
+            "start": 489,
+            "end": 490
+          },
+          {
+            "kind": "If",
+            "start": 491,
+            "end": 494
+          },
+          {
+            "kind": "Assign",
+            "start": 490,
+            "end": 490
+          },
+          {
+            "kind": "Return",
+            "start": 492,
+            "end": 494
+          }
+        ],
+        "usage": "gabarit mesuré pour un nouveau traitement ; pas ajout une seconde fois de ce code source natif",
+        "limitation": "Autre validation native, de contenu différent. Test du caractère trop large de la catégorie, sans équivalence fonctionnelle revendiquée.",
+        "source_fragment": "    @fields.depends('expected_quantity', 'inventory',\n        '_parent_inventory.company',\n        methods=['on_change_with_quantity_variation'])\n    def on_change_with_tolerance_quantity_variation(self, name=None):\n        if self.inventory:\n            pool = Pool()\n            Configuration = pool.get('stock.configuration')\n            config = Configuration(1)\n            quantity_tolerance = config.get_multivalue(\n                'inventory_quantity_tolerance',\n                company=self.inventory.company.id)\n            quantity_variation = self.on_change_with_quantity_variation()\n            percentage = None\n            if self.expected_quantity and quantity_variation is not None:\n                percentage = abs(quantity_variation) / self.expected_quantity\n            if quantity_tolerance and percentage is not None:\n                return round(\n                    percentage / quantity_tolerance,\n                    self.__class__.tolerance_quantity_variation.digits[1])",
+        "source_url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/inventory.py"
+      },
+      "original_trial_jh": 247.99729974178365,
+      "alternative_trial_jh": 229.60250008353773,
+      "change_jh": -18.394799658245915,
+      "change_pct": -7.417338687719059,
+      "meaning": "sensibilité au choix du gabarit ; pas une probabilité, une enveloppe ou une nouvelle estimation"
+    },
+    {
+      "product": "axelor",
+      "target_scope_and_quantity_unchanged": true,
+      "count": 40,
+      "original_analogue": "axelor:guard",
+      "alternative": {
+        "id": "axelor:guard-alternative",
+        "product": "axelor",
+        "repo": "axelor",
+        "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java",
+        "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+        "sha256": "2e7a5404cc4a641c89e30cd488bea400a5f136a8b4a193b9efa98f9169d62238",
+        "symbol": "checkMissingStockLocation",
+        "start": 376,
+        "end": 416,
+        "program_units": 12,
+        "counted_nodes": [
+          {
+            "kind": "method_declaration",
+            "start": 376,
+            "end": 416
+          },
+          {
+            "kind": "throw_statement",
+            "start": 411,
+            "end": 415
+          },
+          {
+            "kind": "if_statement",
+            "start": 406,
+            "end": 409
+          },
+          {
+            "kind": "expression_statement",
+            "start": 408,
+            "end": 408
+          },
+          {
+            "kind": "expression_statement",
+            "start": 392,
+            "end": 404
+          },
+          {
+            "kind": "if_statement",
+            "start": 395,
+            "end": 403
+          },
+          {
+            "kind": "expression_statement",
+            "start": 398,
+            "end": 402
+          },
+          {
+            "kind": "expression_statement",
+            "start": 396,
+            "end": 396
+          },
+          {
+            "kind": "local_variable_declaration",
+            "start": 391,
+            "end": 391
+          },
+          {
+            "kind": "if_statement",
+            "start": 387,
+            "end": 389
+          },
+          {
+            "kind": "return_statement",
+            "start": 388,
+            "end": 388
+          },
+          {
+            "kind": "local_variable_declaration",
+            "start": 378,
+            "end": 385
+          }
+        ],
+        "usage": "gabarit mesuré pour un nouveau traitement ; pas ajout une seconde fois de ce code source natif",
+        "limitation": "Autre validation native, de contenu différent. Test du caractère trop large de la catégorie, sans équivalence fonctionnelle revendiquée.",
+        "source_fragment": "  protected void checkMissingStockLocation(Inventory inventory) throws AxelorException {\n\n    List<InventoryLine> inventoryLinesWithMissingStockLocation =\n        inventoryLineRepository\n            .all()\n            .filter(\"self.inventory = :inventory and self.stockLocation is null\")\n            .bind(\"inventory\", inventory)\n            .fetch(\n                INVENTORY_LINE_WITHOUT_STOCK_LOCATION_DISPLAY_LIMIT\n                    + 1); // Fetch limit + 1 to check for excess items\n\n    if (CollectionUtils.isEmpty(inventoryLinesWithMissingStockLocation)) {\n      return;\n    }\n\n    StringHtmlListBuilder stringHTMLListInventoryLine = new StringHtmlListBuilder();\n    inventoryLinesWithMissingStockLocation.stream()\n        .forEach(\n            inventoryLine -> {\n              if (inventoryLine.getTrackingNumber() == null) {\n                stringHTMLListInventoryLine.append(inventoryLine.getProduct().getFullName());\n              } else {\n                stringHTMLListInventoryLine.append(\n                    String.format(\n                        \"%s : %s\",\n                        inventoryLine.getProduct().getFullName(),\n                        inventoryLine.getTrackingNumber().getTrackingNumberSeq()));\n              }\n            });\n\n    if (inventoryLinesWithMissingStockLocation.size()\n        > INVENTORY_LINE_WITHOUT_STOCK_LOCATION_DISPLAY_LIMIT) {\n      stringHTMLListInventoryLine.append(\"...\");\n    }\n\n    throw new AxelorException(\n        TraceBackRepository.CATEGORY_NO_VALUE,\n        String.format(\n            I18n.get(StockExceptionMessage.INVENTORY_LINE_STOCK_LOCATION_MISSING),\n            stringHTMLListInventoryLine));\n  }",
+        "source_url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java"
+      },
+      "original_trial_jh": 133.9727155729658,
+      "alternative_trial_jh": 158.6040531654869,
+      "change_jh": 24.631337592521106,
+      "change_pct": 18.385338751386357,
+      "meaning": "sensibilité au choix du gabarit ; pas une probabilité, une enveloppe ou une nouvelle estimation"
+    }
+  ]
+}

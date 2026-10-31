@@ -1,0 +1,950 @@
+{
+  "family": "ba-service-provider-controls",
+  "iteration": 2,
+  "analysis_ref": "analyse-1.json",
+  "capabilities": [
+    "BC-001"
+  ],
+  "cocomo": {
+    "A": 2.94,
+    "B": 0.91,
+    "SF_sum": 18.97,
+    "C": 3.67,
+    "D": 0.28,
+    "month_hours": 152,
+    "day_hours": 7,
+    "effort_phase_factor": 1.18,
+    "schedule_phase_factor": 1.25,
+    "other_EM": 1,
+    "SCED": 1,
+    "REVL": 0,
+    "source": "https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf",
+    "source_locations": "Équation 4 et tables 6, 36, 57, 63 ; autres paramètres conservés nominaux.",
+    "activity_distribution_ref": "../2026-10-30-master-data-calcul/repartitions-sources.json#cocomo"
+  },
+  "native_reference_banks": {
+    "erpnext": 2,
+    "odoo": 21,
+    "tryton": 49,
+    "axelor": 15
+  },
+  "source_selection": [
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/buying/doctype/supplier/supplier.py",
+      "sha256": "ed9ab3a45615dcb5c213fc3a0526202872d16751290cfed07fcf93f56842aac1",
+      "name": "Supplier.is_blocked_for",
+      "start": 101,
+      "end": 107,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          101,
+          107,
+          1,
+          3
+        ],
+        [
+          "Return",
+          103,
+          107,
+          2,
+          3
+        ]
+      ],
+      "source": "\tdef is_blocked_for(self, hold_type: str) -> bool:\n\t\t\"\"\"Whether transactions of `hold_type` (\"Invoices\", \"Payments\" or \"All\") are on hold today.\"\"\"\n\t\treturn bool(\n\t\t\tself.on_hold\n\t\t\tand self.hold_type in (\"All\", hold_type)\n\t\t\tand (not self.release_date or getdate(nowdate()) < getdate(self.release_date))\n\t\t)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/purchase/models/purchase_order.py",
+      "sha256": "615950e6f537564c6e49945cb7cff6206d446730df895e47de6c3a955a723e36",
+      "name": "PurchaseOrder._check_order_line_company_id",
+      "start": 207,
+      "end": 221,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          209,
+          211,
+          12,
+          13
+        ],
+        [
+          "Assign",
+          213,
+          215,
+          16,
+          17
+        ],
+        [
+          "For",
+          208,
+          221,
+          8,
+          18
+        ],
+        [
+          "FunctionDef",
+          207,
+          221,
+          4,
+          18
+        ],
+        [
+          "If",
+          212,
+          221,
+          12,
+          18
+        ],
+        [
+          "Raise",
+          216,
+          221,
+          16,
+          18
+        ]
+      ],
+      "source": "    def _check_order_line_company_id(self):\n        for order in self:\n            invalid_companies = order.order_line.product_id.company_id.filtered(\n                lambda c: order.company_id not in c._accessible_branches()\n            )\n            if invalid_companies:\n                bad_products = order.order_line.product_id.filtered(\n                    lambda p: p.company_id and p.company_id in invalid_companies\n                )\n                raise ValidationError(_(\n                    \"Your RFQ contains products from company %(product_company)s whereas your RFQ belongs to company %(quote_company)s. \\n Please change the company of your RFQ or remove the products from other companies (%(bad_products)s).\",\n                    product_company=', '.join(invalid_companies.sudo().mapped('display_name')),\n                    quote_company=order.company_id.display_name,\n                    bad_products=', '.join(bad_products.mapped('display_name')),\n                ))"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/purchase/models/purchase_order.py",
+      "sha256": "615950e6f537564c6e49945cb7cff6206d446730df895e47de6c3a955a723e36",
+      "name": "PurchaseOrder._compute_purchase_warning_text",
+      "start": 363,
+      "end": 377,
+      "program_units": 15,
+      "nodes": [
+        [
+          "Assign",
+          365,
+          365,
+          12,
+          43
+        ],
+        [
+          "Assign",
+          368,
+          368,
+          12,
+          35
+        ],
+        [
+          "Assign",
+          372,
+          372,
+          16,
+          51
+        ],
+        [
+          "Assign",
+          377,
+          377,
+          12,
+          61
+        ],
+        [
+          "Expr",
+          370,
+          370,
+          16,
+          108
+        ],
+        [
+          "Expr",
+          373,
+          373,
+          16,
+          95
+        ],
+        [
+          "Expr",
+          376,
+          376,
+          20,
+          84
+        ],
+        [
+          "For",
+          367,
+          377,
+          8,
+          61
+        ],
+        [
+          "For",
+          374,
+          376,
+          12,
+          84
+        ],
+        [
+          "FunctionDef",
+          363,
+          377,
+          4,
+          61
+        ],
+        [
+          "If",
+          364,
+          366,
+          8,
+          18
+        ],
+        [
+          "If",
+          369,
+          370,
+          12,
+          108
+        ],
+        [
+          "If",
+          371,
+          373,
+          12,
+          95
+        ],
+        [
+          "If",
+          375,
+          376,
+          16,
+          84
+        ],
+        [
+          "Return",
+          366,
+          366,
+          12,
+          18
+        ]
+      ],
+      "source": "    def _compute_purchase_warning_text(self):\n        if not self.env.user.has_group('purchase.group_warning_purchase'):\n            self.purchase_warning_text = ''\n            return\n        for order in self:\n            warnings = OrderedSet()\n            if partner_msg := order.partner_id.purchase_warn_msg:\n                warnings.add((order.partner_id.name or order.partner_id.display_name) + ' - ' + partner_msg)\n            if partner_parent_msg := order.partner_id.parent_id.purchase_warn_msg:\n                parent = order.partner_id.parent_id\n                warnings.add((parent.name or parent.display_name) + ' - ' + partner_parent_msg)\n            for line in order.order_line:\n                if product_msg := line.purchase_line_warn_msg:\n                    warnings.add(line.product_id.display_name + ' - ' + product_msg)\n            order.purchase_warning_text = '\\n'.join(warnings)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale_credit_limit/sale.py",
+      "sha256": "28bcdf688e4155e861af681e9da30d6b46c528f7de91a9374b6003133aa57743",
+      "name": "Sale.must_check_credit_limit",
+      "start": 10,
+      "end": 11,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          10,
+          11,
+          4,
+          46
+        ],
+        [
+          "Return",
+          11,
+          11,
+          8,
+          46
+        ]
+      ],
+      "source": "    def must_check_credit_limit(self):\n        return self.shipment_method == 'order'"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/account_credit_limit/party.py",
+      "sha256": "62bf1943fbeab00bbc9bae7e0a7c95ef36f2fcd0cd673d652e7834d31730a904",
+      "name": "Party.check_credit_limit",
+      "start": 42,
+      "end": 125,
+      "program_units": 47,
+      "nodes": [
+        [
+          "Assign",
+          48,
+          48,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          49,
+          49,
+          8,
+          45
+        ],
+        [
+          "Assign",
+          51,
+          51,
+          12,
+          49
+        ],
+        [
+          "Assign",
+          53,
+          53,
+          12,
+          26
+        ],
+        [
+          "Assign",
+          54,
+          54,
+          8,
+          35
+        ],
+        [
+          "Assign",
+          55,
+          55,
+          8,
+          37
+        ],
+        [
+          "Assign",
+          56,
+          56,
+          8,
+          34
+        ],
+        [
+          "Assign",
+          57,
+          57,
+          8,
+          46
+        ],
+        [
+          "Assign",
+          62,
+          63,
+          8,
+          54
+        ],
+        [
+          "Assign",
+          68,
+          69,
+          12,
+          42
+        ],
+        [
+          "Assign",
+          70,
+          70,
+          12,
+          39
+        ],
+        [
+          "Assign",
+          71,
+          71,
+          12,
+          38
+        ],
+        [
+          "Assign",
+          73,
+          73,
+          16,
+          66
+        ],
+        [
+          "Assign",
+          76,
+          76,
+          12,
+          32
+        ],
+        [
+          "Assign",
+          81,
+          81,
+          12,
+          35
+        ],
+        [
+          "Assign",
+          83,
+          84,
+          8,
+          67
+        ],
+        [
+          "Assign",
+          86,
+          86,
+          12,
+          29
+        ],
+        [
+          "Assign",
+          87,
+          87,
+          12,
+          77
+        ],
+        [
+          "Assign",
+          88,
+          88,
+          12,
+          60
+        ],
+        [
+          "Assign",
+          96,
+          96,
+          12,
+          74
+        ],
+        [
+          "Assign",
+          106,
+          110,
+          12,
+          22
+        ],
+        [
+          "Assign",
+          112,
+          112,
+          16,
+          37
+        ],
+        [
+          "Assign",
+          119,
+          119,
+          16,
+          79
+        ],
+        [
+          "Expr",
+          82,
+          82,
+          12,
+          24
+        ],
+        [
+          "For",
+          80,
+          82,
+          8,
+          24
+        ],
+        [
+          "FunctionDef",
+          42,
+          125,
+          4,
+          54
+        ],
+        [
+          "FunctionDef",
+          67,
+          78,
+          8,
+          50
+        ],
+        [
+          "If",
+          59,
+          60,
+          8,
+          18
+        ],
+        [
+          "If",
+          64,
+          65,
+          8,
+          18
+        ],
+        [
+          "If",
+          72,
+          73,
+          12,
+          66
+        ],
+        [
+          "If",
+          74,
+          75,
+          12,
+          27
+        ],
+        [
+          "If",
+          85,
+          103,
+          8,
+          39
+        ],
+        [
+          "If",
+          89,
+          95,
+          12,
+          39
+        ],
+        [
+          "If",
+          97,
+          103,
+          12,
+          39
+        ],
+        [
+          "If",
+          105,
+          125,
+          8,
+          54
+        ],
+        [
+          "If",
+          111,
+          125,
+          12,
+          54
+        ],
+        [
+          "If",
+          113,
+          118,
+          16,
+          54
+        ],
+        [
+          "If",
+          120,
+          125,
+          16,
+          54
+        ],
+        [
+          "Raise",
+          90,
+          95,
+          16,
+          39
+        ],
+        [
+          "Raise",
+          98,
+          103,
+          16,
+          39
+        ],
+        [
+          "Raise",
+          114,
+          118,
+          20,
+          54
+        ],
+        [
+          "Raise",
+          121,
+          125,
+          20,
+          54
+        ],
+        [
+          "Return",
+          60,
+          60,
+          12,
+          18
+        ],
+        [
+          "Return",
+          65,
+          65,
+          12,
+          18
+        ],
+        [
+          "Return",
+          75,
+          75,
+          16,
+          27
+        ],
+        [
+          "Return",
+          77,
+          78,
+          12,
+          50
+        ],
+        [
+          "Try",
+          50,
+          53,
+          8,
+          26
+        ]
+      ],
+      "source": "    def check_credit_limit(self, amount, company, origin=None):\n        '''\n        Check if amount will not reach credit limit for party\n        If origin is set and user is in group credit_limit then a warning will\n        be raised\n        '''\n        pool = Pool()\n        ModelData = pool.get('ir.model.data')\n        try:\n            Dunning = pool.get('account.dunning')\n        except KeyError:\n            Dunning = None\n        User = pool.get('res.user')\n        Group = pool.get('res.group')\n        Lang = pool.get('ir.lang')\n        Warning = pool.get('res.user.warning')\n\n        if amount <= 0:\n            return\n\n        credit_limit_amount = self.get_multivalue(\n            'credit_limit_amount', company=company.id)\n        if credit_limit_amount is None:\n            return\n\n        def in_group():\n            group = Group(ModelData.get_id('account_credit_limit',\n                    'group_credit_limit'))\n            transaction = Transaction()\n            user_id = transaction.user\n            if user_id == 0:\n                user_id = transaction.context.get('user', user_id)\n            if user_id == 0:\n                return True\n            user = User(user_id)\n            return origin and (group in user.groups\n                or User.is_administrator(user_id))\n\n        for model in self._credit_limit_to_lock():\n            Model = pool.get(model)\n            Model.lock()\n        exceeded_amount = (\n            self.credit_amount + amount - self.credit_limit_amount)\n        if exceeded_amount > 0:\n            lang = Lang.get()\n            limit = lang.currency(self.credit_limit_amount, company.currency)\n            amount = lang.currency(amount, company.currency)\n            if not in_group():\n                raise CreditLimitError(\n                    gettext('account_credit_limit'\n                        '.msg_party_credit_limit_amount',\n                        party=self.rec_name,\n                        limit=limit,\n                        amount=amount))\n            warning_name = Warning.format('credit_limit_amount', [origin])\n            if Warning.check(warning_name):\n                raise CreditLimitWarning(warning_name,\n                    gettext('account_credit_limit'\n                        '.msg_party_credit_limit_amount',\n                        party=self.rec_name,\n                        limit=limit,\n                        amount=amount))\n\n        if Dunning:\n            dunnings = Dunning.search([\n                    ('party', '=', self.id),\n                    ('level.credit_limit', '=', True),\n                    ('blocked', '!=', True),\n                    ])\n            if dunnings:\n                dunning = dunnings[0]\n                if not in_group():\n                    raise CreditLimitError(\n                        gettext('account_credit_limit'\n                            '.msg_party_credit_limit_dunning',\n                            party=self.rec_name,\n                            dunning=dunning.rec_name))\n                warning_name = Warning.format('credit_limit_dunning', [origin])\n                if Warning.check(warning_name):\n                    raise CreditLimitWarning(warning_name,\n                        gettext('account_credit_limit'\n                            '.msg_party_credit_limit_dunning',\n                            party=self.rec_name,\n                            dunning=dunning.rec_name))"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorder/SaleOrderCheckBlockingSupplychainServiceImpl.java",
+      "sha256": "56ec1dfb21846b9d01fae3da0793bd32b90b8c5b4db29daafc7191fc0418e71f",
+      "name": "checkBlocking",
+      "start": 43,
+      "end": 51,
+      "program_units": 5,
+      "nodes": [
+        [
+          "expression_statement",
+          48,
+          48,
+          6,
+          91
+        ],
+        [
+          "if_statement",
+          46,
+          49,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          45,
+          45,
+          4,
+          47
+        ],
+        [
+          "method_declaration",
+          43,
+          51,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          50,
+          50,
+          4,
+          21
+        ]
+      ],
+      "source": "  @Override\n  public List<String> checkBlocking(SaleOrder saleOrder) {\n    List<String> alertList = new ArrayList<>();\n    if (saleOrderBlockingSupplychainService.hasOnGoingBlocking(saleOrder)\n        && appSupplychainService.getAppSupplychain().getCustomerStockMoveGenerationAuto()) {\n      alertList.add(I18n.get(SupplychainExceptionMessage.SALE_ORDER_LINES_CANNOT_DELIVER));\n    }\n    return alertList;\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorder/SaleOrderBlockingSupplychainServiceImpl.java",
+      "sha256": "5c170f37ab87c8848b0926adfae19ae4698a4a16641c4aae01c0dfa37d800a12",
+      "name": "hasOnGoingBlocking",
+      "start": 37,
+      "end": 48,
+      "program_units": 5,
+      "nodes": [
+        [
+          "expression_statement",
+          39,
+          39,
+          4,
+          38
+        ],
+        [
+          "if_statement",
+          40,
+          46,
+          4,
+          5
+        ],
+        [
+          "method_declaration",
+          37,
+          48,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          41,
+          45,
+          6,
+          52
+        ],
+        [
+          "return_statement",
+          47,
+          47,
+          4,
+          17
+        ]
+      ],
+      "source": "  @Override\n  public boolean hasOnGoingBlocking(SaleOrder saleOrder) {\n    Objects.requireNonNull(saleOrder);\n    if (saleOrder.getSaleOrderLineList() != null) {\n      return saleOrder.getSaleOrderLineList().stream()\n          .anyMatch(\n              sol ->\n                  saleOrderLineBlockingSupplychainService.isDeliveryBlocked(\n                      sol, saleOrder.getCompany()));\n    }\n    return false;\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorderline/SaleOrderLineBlockingSupplychainServiceImpl.java",
+      "sha256": "9c34a280990aead5e05a70950d1613f8050b19d3ad9de98a9e280a006d514d38",
+      "name": "isDeliveryBlocked",
+      "start": 37,
+      "end": 47,
+      "program_units": 5,
+      "nodes": [
+        [
+          "expression_statement",
+          39,
+          39,
+          4,
+          42
+        ],
+        [
+          "if_statement",
+          41,
+          43,
+          4,
+          5
+        ],
+        [
+          "method_declaration",
+          37,
+          47,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          42,
+          42,
+          6,
+          51
+        ],
+        [
+          "return_statement",
+          45,
+          46,
+          4,
+          100
+        ]
+      ],
+      "source": "  @Override\n  public boolean isDeliveryBlocked(SaleOrderLine saleOrderLine, Company company) {\n    Objects.requireNonNull(saleOrderLine);\n\n    if (saleOrderLine.getDeliveryBlockingToDate() == null) {\n      return saleOrderLine.getIsDeliveryBlocking();\n    }\n\n    return saleOrderLine.getIsDeliveryBlocking()\n        && appBaseService.getTodayDate(company).isBefore(saleOrderLine.getDeliveryBlockingToDate());\n  }"
+    }
+  ],
+  "source_files": [
+    {
+      "repo": "erpnext",
+      "path": "erpnext/buying/doctype/supplier/supplier.py",
+      "root_path": "tmp/master-data-native-23/erpnext/erpnext/buying/doctype/supplier/supplier.py",
+      "sha256": "ed9ab3a45615dcb5c213fc3a0526202872d16751290cfed07fcf93f56842aac1",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/buying/doctype/supplier/supplier.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 128,
+        "declarative_units": 0,
+        "physical_lines": 306,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 60,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    },
+    {
+      "repo": "odoo",
+      "path": "addons/purchase/models/purchase_order.py",
+      "root_path": "tmp/odoo20-audit/addons/purchase/models/purchase_order.py",
+      "sha256": "615950e6f537564c6e49945cb7cff6206d446730df895e47de6c3a955a723e36",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/purchase/models/purchase_order.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 751,
+        "declarative_units": 0,
+        "physical_lines": 1433,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    },
+    {
+      "repo": "odoo",
+      "path": "addons/purchase/models/res_partner.py",
+      "root_path": "tmp/odoo20-audit/addons/purchase/models/res_partner.py",
+      "sha256": "fadfeca481eb1a7c0b49e49b583c64fd88dd6a65c0adba5f4caad8821b5794b5",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/purchase/models/res_partner.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 41,
+        "declarative_units": 0,
+        "physical_lines": 79,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    },
+    {
+      "repo": "tryton",
+      "path": "modules/sale_credit_limit/sale.py",
+      "root_path": "tmp/tryton-code-audit-2026-10-28/modules/sale_credit_limit/sale.py",
+      "sha256": "28bcdf688e4155e861af681e9da30d6b46c528f7de91a9374b6003133aa57743",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/sale_credit_limit/sale.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 31,
+        "declarative_units": 0,
+        "physical_lines": 52,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    },
+    {
+      "repo": "tryton",
+      "path": "modules/account_credit_limit/party.py",
+      "root_path": "tmp/tryton-code-audit-2026-10-28/modules/account_credit_limit/party.py",
+      "sha256": "62bf1943fbeab00bbc9bae7e0a7c95ef36f2fcd0cd673d652e7834d31730a904",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/account_credit_limit/party.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 77,
+        "declarative_units": 0,
+        "physical_lines": 145,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorder/SaleOrderCheckBlockingSupplychainServiceImpl.java",
+      "root_path": "tmp/oss-audit-axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorder/SaleOrderCheckBlockingSupplychainServiceImpl.java",
+      "sha256": "56ec1dfb21846b9d01fae3da0793bd32b90b8c5b4db29daafc7191fc0418e71f",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorder/SaleOrderCheckBlockingSupplychainServiceImpl.java",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 19,
+        "declarative_units": 0,
+        "physical_lines": 52,
+        "details": {
+          "convention": "Arbre syntaxique : instructions et déclarations ; JSX compté séparément"
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorder/SaleOrderBlockingSupplychainServiceImpl.java",
+      "root_path": "tmp/oss-audit-axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorder/SaleOrderBlockingSupplychainServiceImpl.java",
+      "sha256": "5c170f37ab87c8848b0926adfae19ae4698a4a16641c4aae01c0dfa37d800a12",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "pinned_blob_verified": true,
+      "path_resolved_by_unique_filename": false,
+      "whole_file": {
+        "program_units": 14,
+        "declarative_units": 0,
+        "physical_lines": 49,
+        "details": {
+          "convention": "Arbre syntaxique : instructions et déclarations ; JSX compté séparément"
+        }
+      }
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorderline/SaleOrderLineBlockingSupplychainServiceImpl.java",
+      "root_path": "tmp/oss-audit-axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/saleorderline/SaleOrderLineBlockingSupplychainServiceImpl.java",
+      "sha256": "9c34a280990aead5e05a70950d1613f8050b19d3ad9de98a9e280a006d514d38",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "pinned_blob_verified": true,
+      "path_resolved_by_unique_filename": false,
+      "whole_file": {
+        "program_units": 15,
+        "declarative_units": 0,
+        "physical_lines": 48,
+        "details": {
+          "convention": "Arbre syntaxique : instructions et déclarations ; JSX compté séparément"
+        }
+      }
+    }
+  ],
+  "attribution": 0.7,
+  "attribution_basis": "Part d’analogie retenue après exclusion supposée des responsabilités natives hors périmètre ; pas proportion observée. Le contrôle Java sélectionné délègue le blocage à d’autres services ; l’avertissement Odoo ne démontre pas un refus. Le blocage ERPNext est limité aux factures/paiements, pas à tout prestataire.",
+  "new_complement_fraction": 0.75,
+  "new_complement_basis": "Ajouter le service Java appelé ; dimensionner suspension datée, portée et justification dans un objet propre, avec refus par défaut si la condition requise manque.",
+  "schemas": [
+    {
+      "name": "Restriction",
+      "fields": [
+        "provider",
+        "scope",
+        "kind",
+        "from",
+        "until",
+        "authority",
+        "reason",
+        "version"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    },
+    {
+      "name": "EligibilityDecision",
+      "fields": [
+        "restriction",
+        "context",
+        "requestedService",
+        "decision",
+        "reason",
+        "asOf"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    }
+  ],
+  "template_source": "audits/2026-10-30-propriete-stock-calcul-02/inputs.json#schema_templates",
+  "scaffold_source": "audits/2026-10-30-propriete-stock-calcul-02/inputs.json#new_module_scaffolding",
+  "reuse": "Services génériques Master Data, Stock et Propriété du stock déjà financés ; autres mécanismes communs de la campagne à réconcilier. Le code natif sert de règle de taille, ce n’est pas une facture historique.",
+  "no_extra_AI": true,
+  "no_generic_rebuild": true,
+  "logical_code_not_calibrated_to_physical_SLOC": true
+}

@@ -20,11 +20,12 @@ export function FrameworkVisionPage(){
   <section className="vision-opening" aria-labelledby="vision-opening-title">
    <h2 id="vision-opening-title">{V.opening.title}</h2>
    <p><MethodText>{V.opening.text}</MethodText></p>
+   <p className="vision-status" role="status"><MethodText>{data.ui.essential.core_status_summary}</MethodText></p>
   </section>
   <aside className="vision-adaptation" aria-labelledby="vision-adaptation-title">
    <h2 id="vision-adaptation-title">{V.adaptation.title}</h2>
    <p><MethodText>{V.adaptation.text}</MethodText></p>
-   <a className="text-button" href={V.adaptation.href}>{V.adaptation.label}<ArrowRight size={15} aria-hidden="true"/></a>
+   <div className="vision-adaptation-links"><a className="text-button" href={V.adaptation.reference_link.href}>{V.adaptation.reference_link.label}<ArrowRight size={15} aria-hidden="true"/></a><a className="text-button" href={V.adaptation.href}>{V.adaptation.label}<ArrowRight size={15} aria-hidden="true"/></a></div>
   </aside>
   <section className="vision-section" aria-labelledby="vision-approach-title">
    <h2 id="vision-approach-title">{V.approach.title}</h2>
@@ -52,13 +53,6 @@ export function FrameworkVisionPage(){
     <div><h3>{item.title}</h3><p><MethodText>{item.text}</MethodText></p>
      {item.href.startsWith('#')?<a className="text-button" href={item.href}>{item.label}<ArrowRight size={15} aria-hidden="true"/></a>:<SourceLink path={item.href}>{item.label}</SourceLink>}
     </div>
-   </article>)}</div>
-  </section>
-  <section className="vision-section" aria-labelledby="vision-dimensions-title">
-   <h2 id="vision-dimensions-title">{V.dimensions.title}</h2>
-   <div className="vision-dimensions">{V.dimensions.items.map((item:Data,index:number)=><article key={item.title}>
-    <span className="vision-dimension-number" aria-hidden="true">{index+1}</span>
-    <div><h3>{item.title}</h3><p><MethodText>{item.text}</MethodText></p></div>
    </article>)}</div>
   </section>
   <section className="vision-section vision-confidence" aria-labelledby="vision-confidence-title">

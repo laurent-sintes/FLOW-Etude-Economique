@@ -1,0 +1,756 @@
+{
+  "complements": [
+    {
+      "id": "STOCK-F01",
+      "included": [
+        "Une identité sémantique stable par fait et un résultat d’application Stock.",
+        "Deux dates conservées : fait et connaissance ; corrections reliées à leur origine.",
+        "Un solde externe autoritatif par portion et intervalle déclaré, sans inventer de mouvements.",
+        "Filiations et contenus reçus, quantités et limites explicitement fournis."
+      ],
+      "excluded": [
+        "Moteur de résolution automatique de sources contradictoires.",
+        "Généalogie déduite de faits absents ou décision de rappel/usage.",
+        "Règles et correspondances propres à Beaumanoir."
+      ],
+      "reuse": [
+        "master-data-common-domain",
+        "master-data-admission",
+        "master-data-versions"
+      ],
+      "components": [
+        "K1",
+        "K2"
+      ],
+      "dimensioning_hypotheses": {
+        "structures": [
+          {
+            "package": "STOCK-F01",
+            "name": "StockFactExtension",
+            "new_model": false,
+            "extends_native_model": "native movement/ledger",
+            "fields": [
+              "sourceFactKey",
+              "eventAt",
+              "knownAt",
+              "revisionOf",
+              "effectKey",
+              "authorityScope",
+              "authorityMode",
+              "provenanceRef"
+            ],
+            "view": false,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          },
+          {
+            "package": "STOCK-F01",
+            "name": "ExternalStockBalance",
+            "new_model": true,
+            "extends_native_model": null,
+            "fields": [
+              "productRef",
+              "siteRef",
+              "partyRef",
+              "unitRef",
+              "quantity",
+              "asOf",
+              "knownAt",
+              "sourceRef",
+              "authorityScope",
+              "coversFrom",
+              "coversTo",
+              "revisionOf"
+            ],
+            "view": false,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          },
+          {
+            "package": "STOCK-F01",
+            "name": "StockEffectReceipt",
+            "new_model": true,
+            "extends_native_model": null,
+            "fields": [
+              "admissionRef",
+              "semanticKey",
+              "effectRef",
+              "resultKind",
+              "appliedAt"
+            ],
+            "view": false,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          },
+          {
+            "package": "STOCK-F01",
+            "name": "StockLineageEdge",
+            "new_model": true,
+            "extends_native_model": null,
+            "fields": [
+              "fromFactRef",
+              "toFactRef",
+              "quantity",
+              "unitRef",
+              "relationKind",
+              "knownAt",
+              "revisionOf"
+            ],
+            "view": true,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          },
+          {
+            "package": "STOCK-F01",
+            "name": "StockHandlingLink",
+            "new_model": true,
+            "extends_native_model": null,
+            "fields": [
+              "containerRef",
+              "contentRef",
+              "quantity",
+              "unitRef",
+              "factRef",
+              "knownAt",
+              "revisionOf"
+            ],
+            "view": true,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          }
+        ],
+        "behavior_inventory": [
+          "Valider la clé sémantique producteur/identité du fait",
+          "Refuser le réemploi de clé avec une quantité différente",
+          "Vérifier les deux dates et la relation de correction",
+          "Valider la portion de stock et l’autorité événement/solde",
+          "Interdire un cycle de correction ou de filiation",
+          "Vérifier la conservation des quantités de filiation/contenu",
+          "Retrouver l’effet Stock d’une admission générique",
+          "Rechercher les versions visibles à date de connaissance",
+          "Chercher le solde autoritatif couvrant la période",
+          "Composer admission générique et effet Stock dans une transaction",
+          "Admettre un solde externe et marquer sa frontière de couverture",
+          "Enregistrer une correction liée sans écraser son origine",
+          "Enregistrer liens de filiation et contenu connu",
+          "Sélectionner les effets reconnus entre solde externe et date de vue",
+          "Composer correction et filiation sans double effet"
+        ],
+        "field_count": 39,
+        "new_models": 4,
+        "extensions": 1,
+        "behavior_count": 15
+      },
+      "status": "périmètre de travaux borné sous hypothèses ; charge non bornée en JH",
+      "unknowns": [
+        "Taille équivalente du complément complet, sans chevauchement avec le noyau natif."
+      ],
+      "equivalent_size": null,
+      "effort_jh": null,
+      "hypotheses_are_not_proven_upper_effort_bounds": true
+    },
+    {
+      "id": "STOCK-F02",
+      "included": [
+        "Positions avec provenance, fraîcheur et limites connues.",
+        "Apports fournis par leurs producteurs ; leur réalisation cesse de compter comme attente pour la même quantité.",
+        "Une coupe versionnée fournie à la planification par le mécanisme commun."
+      ],
+      "excluded": [
+        "Construction du plan ou des commandes sources.",
+        "Promesse ATP/CTP/PTP ou optimisation d’allocation."
+      ],
+      "reuse": [
+        "master-data-common-domain",
+        "master-data-protection",
+        "master-data-versions"
+      ],
+      "components": [
+        "K2",
+        "K5"
+      ],
+      "dimensioning_hypotheses": {
+        "structures": [
+          {
+            "package": "STOCK-F02",
+            "name": "ProducerCoverage",
+            "new_model": true,
+            "extends_native_model": null,
+            "fields": [
+              "producerRef",
+              "stockScope",
+              "sequenceRef",
+              "lastEventAt",
+              "lastReceivedAt",
+              "coverageFrom",
+              "coverageTo",
+              "limitReason"
+            ],
+            "view": true,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          },
+          {
+            "package": "STOCK-F02",
+            "name": "ExpectedSupplyExtension",
+            "new_model": false,
+            "extends_native_model": "native planned quantity",
+            "fields": [
+              "sourceRef",
+              "sourceVersion",
+              "expectedAt",
+              "knownAt",
+              "revisionOf",
+              "limitation"
+            ],
+            "view": false,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          },
+          {
+            "package": "STOCK-F02",
+            "name": "PlanningStockProvision",
+            "new_model": true,
+            "extends_native_model": null,
+            "fields": [
+              "cutRef",
+              "knownAt",
+              "effectiveAt",
+              "scopeRef",
+              "payloadVersion",
+              "contentHash",
+              "limitation",
+              "publicationRef"
+            ],
+            "view": true,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          }
+        ],
+        "behavior_inventory": [
+          "Vérifier la couverture du producteur et les ruptures de séquence",
+          "Valider les apports attendus sans les assimiler à des faits réalisés",
+          "Qualifier la fraîcheur et les limites d’une position",
+          "Former un contexte commun de provenance et de dates",
+          "Lire les dépendances et corrections d’une généalogie",
+          "Lire les références de propriété fournies sans tenir leur registre",
+          "Admettre/réviser un apport attendu fourni",
+          "Composer position et réservations avec leurs limites",
+          "Fournir une coupe immuable à la planification via publication commune",
+          "Enregistrer la version de coupe effectivement fournie"
+        ],
+        "field_count": 22,
+        "new_models": 2,
+        "extensions": 1,
+        "behavior_count": 10
+      },
+      "status": "périmètre de travaux borné sous hypothèses ; charge non bornée en JH",
+      "unknowns": [
+        "Taille équivalente du complément complet, sans chevauchement avec le noyau natif."
+      ],
+      "equivalent_size": null,
+      "effort_jh": null,
+      "hypotheses_are_not_proven_upper_effort_bounds": true
+    },
+    {
+      "id": "STOCK-F03",
+      "included": [
+        "Protocole et tolérance déclarés, comptage daté et preuve.",
+        "Rapprochement avec les mouvements concomitants et décision autorisée liée au correctif."
+      ],
+      "excluded": [
+        "Moteur générique de règles métier spécifique au Groupe.",
+        "Pilotage des opérateurs et terminaux d’entrepôt.",
+        "Calcul de valorisation financière."
+      ],
+      "reuse": [
+        "java-spring-framework-services",
+        "master-data-protection"
+      ],
+      "components": [
+        "K3",
+        "K1"
+      ],
+      "dimensioning_hypotheses": {
+        "structures": [
+          {
+            "package": "STOCK-F03",
+            "name": "VerificationProtocol",
+            "new_model": true,
+            "extends_native_model": null,
+            "fields": [
+              "scopeRef",
+              "allowedMethod",
+              "toleranceKind",
+              "toleranceValue",
+              "approvalRole",
+              "validFrom",
+              "validTo"
+            ],
+            "view": true,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          },
+          {
+            "package": "STOCK-F03",
+            "name": "CountExtension",
+            "new_model": false,
+            "extends_native_model": "native inventory/count",
+            "fields": [
+              "observedAt",
+              "baseFactCut",
+              "proofRef",
+              "observerRef",
+              "protocolRef"
+            ],
+            "view": false,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          },
+          {
+            "package": "STOCK-F03",
+            "name": "StockAdjustmentDecision",
+            "new_model": true,
+            "extends_native_model": null,
+            "fields": [
+              "countRef",
+              "decisionVersion",
+              "decisionKind",
+              "reason",
+              "authorRef",
+              "authorizedAt",
+              "baseFactCut",
+              "correctionFactRef"
+            ],
+            "view": true,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          }
+        ],
+        "behavior_inventory": [
+          "Valider le protocole et les tolérances de comptage",
+          "Vérifier l’habilitation à décider une correction",
+          "Refuser un constat hors campagne ou hors portion autorisée",
+          "Préparer la campagne et son instant de référence",
+          "Enregistrer un constat et sa preuve",
+          "Appliquer une décision autorisée à travers le service de faits",
+          "Rapprocher le comptage et les mouvements concomitants",
+          "Réviser la décision lorsque la base de rapprochement a changé",
+          "Consulter protocole/campagne/constats/décisions avec leurs liens"
+        ],
+        "field_count": 20,
+        "new_models": 2,
+        "extensions": 1,
+        "behavior_count": 9
+      },
+      "status": "périmètre de travaux borné sous hypothèses ; charge non bornée en JH",
+      "unknowns": [
+        "Taille équivalente du complément complet, sans chevauchement avec le noyau natif."
+      ],
+      "equivalent_size": null,
+      "effort_jh": null,
+      "hypotheses_are_not_proven_upper_effort_bounds": true
+    },
+    {
+      "id": "STOCK-F04",
+      "included": [
+        "Engagement d’une quantité sur une portion fournie, avec identité et version attendue.",
+        "Contrôle et mutation atomiques sur une seule base transactionnelle.",
+        "Consommation/libération/expiration explicites, conflit retourné et rejeu par clé."
+      ],
+      "excluded": [
+        "Sélection optimale des ressources, allocation commerciale ou solveur.",
+        "Réservation distribuée entre bases autonomes.",
+        "Garantie de succès sans attente sous contention."
+      ],
+      "reuse": [
+        "java-spring-framework-services",
+        "master-data-admission"
+      ],
+      "components": [
+        "K4"
+      ],
+      "dimensioning_hypotheses": {
+        "structures": [
+          {
+            "package": "STOCK-F04",
+            "name": "StockCommitmentExtension",
+            "new_model": false,
+            "extends_native_model": "native reservation",
+            "fields": [
+              "commitmentKey",
+              "expectedVersion",
+              "expiresAt",
+              "originalQuantity",
+              "consumedQuantity",
+              "releasedQuantity",
+              "lastCommandRef"
+            ],
+            "view": false,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          },
+          {
+            "package": "STOCK-F04",
+            "name": "StockConflictResult",
+            "new_model": true,
+            "extends_native_model": null,
+            "fields": [
+              "commandRef",
+              "commitmentRef",
+              "expectedVersion",
+              "currentVersion",
+              "conflictKind",
+              "recoveryKey",
+              "resolvedAt"
+            ],
+            "view": true,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          }
+        ],
+        "behavior_inventory": [
+          "Valider identité et durée de l’engagement",
+          "Vérifier la version attendue pour une révision",
+          "Interdire consommation ou libération au-delà du restant",
+          "Ordonner les portions verrouillées d’un engagement multiple",
+          "Protéger la première création par unicité et traitement du conflit",
+          "Réaliser contrôle et modification sous la même transaction",
+          "Créer/réviser l’engagement avec les primitives natives",
+          "Consommer une réservation sur commande distincte du fait",
+          "Libérer/expirer une réservation sur commande distincte",
+          "Enregistrer un conflit explicite et sa clé de reprise bornée",
+          "Enregistrer le résultat Stock d’une commande rejouée"
+        ],
+        "field_count": 14,
+        "new_models": 1,
+        "extensions": 1,
+        "behavior_count": 11
+      },
+      "status": "périmètre de travaux borné sous hypothèses ; charge non bornée en JH",
+      "unknowns": [
+        "Taille équivalente du complément complet, sans chevauchement avec le noyau natif."
+      ],
+      "equivalent_size": null,
+      "effort_jh": null,
+      "hypotheses_are_not_proven_upper_effort_bounds": true
+    },
+    {
+      "id": "STOCK-F05",
+      "included": [
+        "Un contrat canonique Finance de faits, corrections liées et versions.",
+        "Retours acceptation/rejet/référence de prise en compte.",
+        "Publication et journal communs réutilisés."
+      ],
+      "excluded": [
+        "Écritures de comptabilité générale, valorisation, fiscalité.",
+        "Connecteurs et mapping de chaque application Beaumanoir."
+      ],
+      "reuse": [
+        "master-data-admission",
+        "master-data-versions"
+      ],
+      "components": [
+        "K5"
+      ],
+      "dimensioning_hypotheses": {
+        "structures": [
+          {
+            "package": "STOCK-F05",
+            "name": "FinanceContribution",
+            "new_model": true,
+            "extends_native_model": null,
+            "fields": [
+              "factRef",
+              "ownershipRef",
+              "version",
+              "correctionOf",
+              "payloadHash",
+              "provisionRef",
+              "consumerRef"
+            ],
+            "view": true,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          },
+          {
+            "package": "STOCK-F05",
+            "name": "FinanceReceipt",
+            "new_model": true,
+            "extends_native_model": null,
+            "fields": [
+              "contributionRef",
+              "consumerRef",
+              "resultCode",
+              "reason",
+              "externalRef",
+              "receivedAt",
+              "version"
+            ],
+            "view": true,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          }
+        ],
+        "behavior_inventory": [
+          "Construire la contribution Finance typée avec faits/propriété/provenance",
+          "Construire la correction Finance liée à la contribution originale",
+          "Valider auteur, référence et version du retour Finance",
+          "Refuser une transition de retour incompatible ou périmée",
+          "Fournir les faits à Finance par le service de publication commun",
+          "Enregistrer acceptation/rejet et référence externe de prise en compte",
+          "Consulter les contributions et leur état de retour"
+        ],
+        "field_count": 14,
+        "new_models": 2,
+        "extensions": 0,
+        "behavior_count": 7
+      },
+      "status": "périmètre de travaux borné sous hypothèses ; charge non bornée en JH",
+      "unknowns": [
+        "Taille équivalente du complément complet, sans chevauchement avec le noyau natif."
+      ],
+      "equivalent_size": null,
+      "effort_jh": null,
+      "hypotheses_are_not_proven_upper_effort_bounds": true
+    },
+    {
+      "id": "STOCK-F06",
+      "included": [
+        "Un contrat canonique de constat produit : fait, produit, contexte, preuve, destinataire et correction.",
+        "Fourniture via les services communs."
+      ],
+      "excluded": [
+        "PLM, workflow de résolution qualité et diagnostic causal.",
+        "Connecteurs des applications du Groupe."
+      ],
+      "reuse": [
+        "master-data-common-domain",
+        "master-data-admission"
+      ],
+      "components": [
+        "K5"
+      ],
+      "dimensioning_hypotheses": {
+        "structures": [
+          {
+            "package": "STOCK-F06",
+            "name": "ProductObservation",
+            "new_model": true,
+            "extends_native_model": null,
+            "fields": [
+              "productRef",
+              "factRef",
+              "contextRef",
+              "proofRef",
+              "observedAt",
+              "reason",
+              "receiverRef",
+              "correctionOf",
+              "version",
+              "provisionRef"
+            ],
+            "view": true,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          }
+        ],
+        "behavior_inventory": [
+          "Relier fait produit contexte et preuve à un constat",
+          "Construire une correction de constat liée à son origine",
+          "Valider le responsable produit et la portée du constat",
+          "Fournir le constat au responsable par le service de publication commun",
+          "Conserver la version de constat fournie et son résultat"
+        ],
+        "field_count": 10,
+        "new_models": 1,
+        "extensions": 0,
+        "behavior_count": 5
+      },
+      "status": "périmètre de travaux borné sous hypothèses ; charge non bornée en JH",
+      "unknowns": [
+        "Taille équivalente du complément complet, sans chevauchement avec le noyau natif."
+      ],
+      "equivalent_size": null,
+      "effort_jh": null,
+      "hypotheses_are_not_proven_upper_effort_bounds": true
+    },
+    {
+      "id": "STOCK-F07",
+      "included": [
+        "Coordinateur de reprise et chaîne de livraison Master Data réutilisés.",
+        "Rapprochement Stock spécifique : faits, quantités, engagements et sorties déclarées avant réouverture.",
+        "Objectifs de service conservés comme paramètres à définir ; aucune durée de reprise inventée."
+      ],
+      "excluded": [
+        "Reconstruction du moteur de backup, de CI/CD ou des transactions du framework.",
+        "Haute disponibilité multi-région et consensus distribué présumés gratuits."
+      ],
+      "reuse": [
+        "master-data-reprise",
+        "master-data-service"
+      ],
+      "components": [
+        "K1",
+        "K2",
+        "K3",
+        "K4",
+        "K5"
+      ],
+      "dimensioning_hypotheses": {
+        "structures": [
+          {
+            "package": "STOCK-F07",
+            "name": "StockRecoveryCheckpoint",
+            "new_model": true,
+            "extends_native_model": null,
+            "fields": [
+              "epochRef",
+              "cutRef",
+              "lastFactRef",
+              "lastCommitmentRef",
+              "lastProvisionRef",
+              "validationState",
+              "discrepancyCount"
+            ],
+            "view": true,
+            "generic_fields_not_recharged": [
+              "identifiant technique",
+              "auteur/date ORM",
+              "organisation et portée",
+              "identité/version d’enveloppe",
+              "journal générique admission"
+            ],
+            "status": "schéma proposé, pas spécification validée"
+          }
+        ],
+        "behavior_inventory": [
+          "Lire les faits/soldes/engagements dans une même coupe de reprise",
+          "Lire les curseurs de contributions et consommateurs déclarés",
+          "Rapprocher les positions restaurées et les faits reconnus",
+          "Rapprocher réservations restantes et consommations/libérations",
+          "Rapprocher les sorties Finance/planification/produit après reprise",
+          "Brancher le blocage/reprise Stock sur le coordinateur Master Data",
+          "Exécuter une reconstruction Stock bornée et contrôlée",
+          "Empêcher réouverture sur invariants Stock non vérifiés",
+          "Configurer les limites et alertes propres aux traitements Stock"
+        ],
+        "field_count": 7,
+        "new_models": 1,
+        "extensions": 0,
+        "behavior_count": 9
+      },
+      "status": "périmètre de travaux borné sous hypothèses ; charge non bornée en JH",
+      "unknowns": [
+        "Taille équivalente du complément complet, sans chevauchement avec le noyau natif.",
+        "Volumes, débit, latence, RPO/RTO et qualification du service."
+      ],
+      "equivalent_size": null,
+      "effort_jh": null,
+      "hypotheses_are_not_proven_upper_effort_bounds": true
+    }
+  ],
+  "architecture_assumptions": [
+    "Un module Stock sur une base transactionnelle ; pas de nouvelle plateforme distribuée.",
+    "Références et mécanismes communs Master Data réalisés et utilisables ; ce sont des travaux financés, pas du code Flow livré.",
+    "Deux versions canoniques de payload, service de transformation/publication commun réutilisé.",
+    "Les hypothèses structurent le périmètre ; elles ne constituent pas des plafonds de taille ou d’effort prouvés."
+  ],
+  "exclusion": "Aucun ratio arbitraire de retrait des prix/WMS, aucune nouvelle extrapolation par catégories de petites méthodes."
+}

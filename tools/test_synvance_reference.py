@@ -5,6 +5,7 @@ import unittest
 
 from synvance_reference import SOURCE, compile_synvance_reference
 from validate_stacks import ROOT, read
+from test_support import reference_study
 
 
 class SynvanceReferenceTests(unittest.TestCase):
@@ -18,15 +19,121 @@ class SynvanceReferenceTests(unittest.TestCase):
         cls.annual = {slug: read(ROOT / f'source/maintenance/maintenance-{slug}.yaml')['valorisation_annuelle']
             for slug in ('microsoft', 'sap')}
         cls.documents = set(read(ROOT / 'config/publication.yaml')['documents'])
+        study = reference_study()
+        cls.architecture = study.architecture
+        cls.baseline = study.baseline
+        cls.economic_evaluations = study.content['economic_evaluations']
 
     def compile(self, **changes):
         def document_path(path):
             self.assertIn(path.split('#')[0], self.documents)
             self.assertTrue((ROOT / path.split('#')[0]).is_file())
         args = dict(editorial=self.editorial, guide=self.guide, prices=self.prices,
-            annual=self.annual, glossary=self.glossary, document_path=document_path)
+            annual=self.annual, glossary=self.glossary, document_path=document_path,
+            architecture=self.architecture, baseline=self.baseline, economic_evaluations=self.economic_evaluations)
         args.update(changes)
         return compile_synvance_reference(**args)
+
+    def test_brief_resolves_original_evidence_and_rejects_broken_references(self):
+        guide = deepcopy(self.guide)
+        piece = next(row for row in guide['pieces'] if row['id'] == 'copil')
+        piece['titre'] = 'Original committee record'
+        result = self.compile(guide=guide)
+        question = next(row for row in result['brief']['questions'] if row['id'] == 'choix')
+        self.assertTrue(any(proof['label'] == piece['titre'] and
+            proof['path'] == 'sources/client/copil-5.pdf#page=8' for proof in question['proofs']))
+        self.assertNotIn('proof_refs', question)
+        for target in ('question', 'highlights'):
+            editorial = deepcopy(self.editorial)
+            item = editorial['brief']['questions'][0] if target == 'question' else editorial['brief']['highlights']
+            item['proof_refs'] = ['missing']
+            with self.assertRaisesRegex(ValueError, 'unknown proof'):
+                self.compile(editorial=editorial)
+        editorial = deepcopy(self.editorial)
+        editorial['brief']['questions'][1]['id'] = editorial['brief']['questions'][0]['id']
+        with self.assertRaisesRegex(ValueError, 'duplicate id:brief/questions'):
+            self.compile(editorial=editorial)
+
+    def test_business_scope_rejects_unknown_evidence_and_duplicate_axes(self):
+        for target in ('architecture', 'axis', 'candidate', 'oms'):
+            editorial = deepcopy(self.editorial)
+            business = editorial['business']
+            if target == 'architecture':
+                business['architecture_proof_refs'] = ['missing']
+            else:
+                item = {'axis': business['axes'][0], 'candidate': business['others'][0], 'oms': business['oms']}[target]
+                item['proof_refs'] = ['missing']
+            with self.assertRaisesRegex(ValueError, 'unknown proof'):
+                self.compile(editorial=editorial)
+        editorial = deepcopy(self.editorial)
+        editorial['business']['axes'][1]['id'] = editorial['business']['axes'][0]['id']
+        with self.assertRaisesRegex(ValueError, 'duplicate id:business/axes'):
+            self.compile(editorial=editorial)
+
+    def test_pattern_reading_requires_known_patterns_and_original_evidence(self):
+        result = self.compile()
+        for provider in result['business']['pattern_reading']['providers']:
+            self.assertTrue(provider['proofs'])
+            self.assertNotIn('proof_refs', provider)
+        for field, value, error in [('pattern_ref', 'unknown', 'unknown architecture pattern'),
+                                    ('proof_refs', ['unknown'], 'unknown proof')]:
+            editorial = deepcopy(self.editorial)
+            editorial['business']['pattern_reading']['providers'][0][field] = value
+            with self.assertRaisesRegex(ValueError, error):
+                self.compile(editorial=editorial)
+
+    def test_cost_comparison_tracks_sources_and_covers_all_documented_annual_posts(self):
+        annual = deepcopy(self.annual)
+        post = next(row for row in annual['sap']['postes'] if row['id'] == 'rfi-evolutions')
+        post['montants_documentes_eur_ht'][0]['montant'] += 123.45
+        result = self.compile(annual=annual)
+        rows = {row['structure_ref']:row for row in result['costs']['rows']}
+        entry = next(e for e in rows['client_care']['sap']['entries'] if e['source_id'] == 'evolutions')
+        self.assertEqual(entry['amounts'][0]['amount_eur'], post['montants_documentes_eur_ht'][0]['montant'])
+        self.assertNotIn('amount_eur', rows['client_care']['microsoft'])
+        self.assertEqual(rows['client_care']['microsoft']['entries'], [])
+        editorial = deepcopy(self.editorial)
+        next(row for row in editorial['costs']['rows'] if row['structure_ref'] == 'client_care')['sap']['entries'].pop()
+        with self.assertRaisesRegex(ValueError, 'source annual comparison coverage:sap'):
+            self.compile(editorial=editorial)
+
+    def test_model_comparison_reconciles_all_structures_and_horizons_without_repricing(self):
+        result = self.compile()
+        model = result['costs']['model']
+        self.assertEqual([h['years'] for h in model['horizons']], [3,5,7,10])
+        for horizon in model['horizons']:
+            self.assertEqual({r['id'] for r in horizon['rows']}, {r['id'] for r in self.architecture['cost_structures']})
+            for slug in ('microsoft','sap'):
+                option = next(o for o in self.baseline['options'] if o['stack'] == slug)
+                original = next(h for h in option['horizons'] if h['years'] == horizon['years'])
+                self.assertAlmostEqual(sum(row['amounts'][slug] for row in horizon['rows']), original['totals']['total'], places=2)
+                self.assertEqual(horizon['totals'][slug], original['totals']['total'])
+                cloud = next(row for row in horizon['rows'] if row['id'] == 'run_cloud')
+                self.assertAlmostEqual(cloud['amounts'][slug], original['cost_natures']['run_cloud'] + original['cost_natures']['technical_purchases'], places=2)
+        changed = deepcopy(self.baseline)
+        option = next(o for o in changed['options'] if o['stack'] == 'microsoft')
+        option['horizons'][0]['cost_natures']['grouped_buy'] += 100
+        option['horizons'][0]['totals']['total'] += 100
+        updated = self.compile(baseline=changed)
+        self.assertEqual(updated['costs']['model']['horizons'][0]['totals']['microsoft'], model['horizons'][0]['totals']['microsoft'] + 100)
+        option['horizons'][0]['totals']['total'] += 10
+        with self.assertRaisesRegex(ValueError, 'model total reconciliation:microsoft'):
+            self.compile(baseline=changed)
+
+    def test_cost_comparison_rejects_duplicate_categories_and_has_isolated_outputs(self):
+        editorial = deepcopy(self.editorial)
+        editorial['costs']['rows'][1]['structure_ref'] = editorial['costs']['rows'][0]['structure_ref']
+        with self.assertRaisesRegex(ValueError, 'cost structure coverage'):
+            self.compile(editorial=editorial)
+        architecture = deepcopy(self.architecture)
+        architecture['cost_structures'][0]['cost_nature_refs'].append('grouped_buy')
+        with self.assertRaisesRegex(ValueError, 'duplicate model nature allocation'):
+            self.compile(architecture=architecture)
+        before = deepcopy((self.architecture,self.baseline,self.economic_evaluations))
+        result = self.compile()
+        result['costs']['model']['bridge'][0]['annual']['items']['services_mco'] = -1
+        result['costs']['model']['horizons'][0]['rows'][0]['amounts']['microsoft'] = -1
+        self.assertEqual((self.architecture,self.baseline,self.economic_evaluations), before)
 
     def test_prices_follow_their_owners_and_keep_published_total_distinct(self):
         prices = deepcopy(self.prices)

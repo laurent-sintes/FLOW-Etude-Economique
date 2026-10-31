@@ -1,0 +1,176 @@
+id: stock-chaines-06
+scope: Deux chaînes dans chacun des quatre OSS natifs ; pas toute la famille Stock, pas intégration Beaumanoir.
+status: huit_dossiers_natifs_mesures_chiffrage_Flow_non_recevable
+scenarios:
+  correction: Delta de quantité pris en compte à une date d’effet passée, actualisation des positions concernées
+    ; distinguer date d’effet et état des connaissances.
+  reservation: Deux demandes portant sur une même portion produit/lieu/unité, contrôle disponible et engagement
+    protégés dans une transaction ; distinguer conflit SQL et nouvel appel métier rejoué.
+  conditions:
+  - Standard des révisions épinglées ; extensions installées non présumées.
+  - Moteur de base et niveau d’isolation sont des conditions de la référence.
+  - La mesure inclut les composants natifs nécessaires même quand une responsabilité excédentaire est mêlée. Cette
+    inclusion est une limite, pas une charge Flow automatique.
+results:
+- product: erpnext
+  correction: La propagation est identifiée dans une chaîne native réelle. La création du fait et le recalcul courant
+    ne sont pas séparables gratuitement de la valorisation native.
+  reservation: Le verrou existe sur la requête d’agrégat, et la création concurrente du Bin a un savepoint et une
+    unicité. Ce sont deux mécanismes distincts.
+  correction_jh: null
+  reservation_jh: null
+  stock_family_jh: null
+  measured_sizes:
+    native_domain_program_units: 1394
+    framework_program_units_observed_not_recharged: 283
+    unique_method_count: 163
+    source_files: 7
+    domain_nodes_already_in_iteration03: 298
+    additional_domain_nodes_measured: 1096
+    per_chain_domain_unit_sum: 1446
+    note: Union sans doublon des deux dossiers. Contient des responsabilités natives mêlées et des composants entiers
+      ; aucune conversion automatique en coût Stock.
+    domain_overlap_between_chains: 52
+- product: odoo
+  correction: L’écriture effective, la propagation de date et la lecture passée sont reliées ; la correction est
+    mêlée aux mécanismes de mouvement/colis/réaffectation.
+  reservation: La chaîne complète inclut les hooks et la politique de transaction, absents de l’analogie à une petite
+    méthode. Les doublons de quants sont un cas explicitement traité ; pas de contrainte unique inventée.
+  correction_jh: null
+  reservation_jh: null
+  stock_family_jh: null
+  measured_sizes:
+    native_domain_program_units: 882
+    framework_program_units_observed_not_recharged: 261
+    unique_method_count: 44
+    source_files: 6
+    domain_nodes_already_in_iteration03: 302
+    additional_domain_nodes_measured: 580
+    per_chain_domain_unit_sum: 1237
+    note: Union sans doublon des deux dossiers. Contient des responsabilités natives mêlées et des composants entiers
+      ; aucune conversion automatique en coût Stock.
+    domain_overlap_between_chains: 355
+- product: tryton
+  correction: L’effet historique provient de l’agrégation des mouvements datés ; un moteur de propagation identique
+    à ERPNext n’est pas requis dans cette architecture.
+  reservation: Ordre verrou/lecture/écriture et reprise RPC identifiés. La politique de répartition est embarquée
+    dans assign_try et doit être isolée pour comparer Flow.
+  correction_jh: null
+  reservation_jh: null
+  stock_family_jh: null
+  measured_sizes:
+    native_domain_program_units: 645
+    framework_program_units_observed_not_recharged: 307
+    unique_method_count: 29
+    source_files: 6
+    domain_nodes_already_in_iteration03: 381
+    additional_domain_nodes_measured: 264
+    per_chain_domain_unit_sum: 937
+    note: Union sans doublon des deux dossiers. Contient des responsabilités natives mêlées et des composants entiers
+      ; aucune conversion automatique en coût Stock.
+    domain_overlap_between_chains: 292
+- product: axelor
+  correction: La reconstruction complète est un vrai analogue de reprise. Elle utilise plusieurs transactions et
+    trace les anomalies ; elle ne prouve pas une correction rétroactive en ligne atomique.
+  reservation: Le contrôle de concurrence optimiste du framework existe ; l’absence de FOR UPDATE dans ce service
+    ne démontre pas une absence de protection.
+  correction_jh: null
+  reservation_jh: null
+  stock_family_jh: null
+  measured_sizes:
+    native_domain_program_units: 537
+    framework_program_units_observed_not_recharged: 48
+    unique_method_count: 76
+    source_files: 10
+    domain_nodes_already_in_iteration03: 193
+    additional_domain_nodes_measured: 344
+    per_chain_domain_unit_sum: 554
+    note: Union sans doublon des deux dossiers. Contient des responsabilités natives mêlées et des composants entiers
+      ; aucune conversion automatique en coût Stock.
+    domain_overlap_between_chains: 17
+what_really_progressed:
+- Les hooks de persistance et la fin de transaction sont reliés aux traitements métier ; on ne confond plus le corps
+  d’une petite méthode avec le travail complet.
+- 'Odoo : le retry couvre la transaction et son flush, avec cinq tentatives ; date de ligne liée à la date du mouvement.'
+- 'Tryton : verrou avant la lecture des quantités dans assign_try, transition et reprise transactionnelle RPC identifiées.'
+- 'Axelor : protection de version héritée du framework et reconstruction globale Stock existantes identifiées. Aucune
+  absence de protection déduite de l’absence de FOR UPDATE.'
+- 'ERPNext : propagation ordonnée et borne au prochain inventaire reliées au moteur courant ; création concurrente
+  du Bin distinguée de la protection des réservations.'
+remaining_uncertainty:
+- Les protections transactionnelles natives ne démontrent pas l’idempotence d’un nouvel appel métier après perte
+  de réponse.
+- Le contrat Flow selon date de fait et date de connaissance n’est pas équivalent aux seules requêtes natives à
+  date d’effet.
+- Quantités, valorisation et exécution/affectation restent couplées dans plusieurs composants natifs ; leur taille
+  intégrale serait un mauvais coût Flow.
+- Objectifs de volume/latence/reprise et maîtrise de la stack restent des hypothèses. L’absence de tests OSS exécutés
+  n’est pas, à elle seule, le motif de refus du chiffrage.
+uncertainty_assessment:
+  understanding_of_mechanisms_improved: true
+  effort_interval_narrowing_demonstrated: false
+  numeric_confidence: null
+  alignment: null
+  reason: Des dépendances sont résolues et certains travaux génériques ne sont plus supposés absents ; aucune réduction
+    chiffrée de l’incertitude sur les JH n’est démontrée.
+cost_decision:
+  COCOMO_executed: false
+  reason: Pas d’assiette comparable complète après séparation des responsabilités ; aucun total autonome ni extrapolation
+    aux huit capacités.
+  COSMIC_recounted: false
+  reason_COSMIC: Les deux chaînes sont des mécanismes internes qui recoupent plusieurs processus déjà comptés. Ne
+    pas leur attribuer des CFP additionnels.
+  stock_retained_jh: null
+  cumulative_retained_gross_jh: 1500
+  master_data_months: 17
+  roles_unchanged: true
+progress:
+  current_campaign_framed_capabilities: 14
+  total_capabilities: 88
+  framed_pct: 15.909090909090908
+  adopted_capabilities: 6
+  adopted_pct: 6.818181818181818
+  stock_capabilities_studied: 8
+  stock_capabilities_with_accepted_full_estimate: 0
+  chain_dossiers_completed: 8
+  chain_dossiers_target: 8
+  chain_dossiers_pct: 100
+  native_complete_stock_family_costs_receivable: 0
+  new_capabilities_adopted: 0
+  remaining_java_not_adopted: 82
+  historical_note: Les 88 capacités ont des repérages historiques ; les 14 désignent le cadrage de la méthode actuelle.
+    Huit dossiers de chaîne ne sont pas huit capacités chiffrées.
+next_iteration:
+  repeat_reading_same_chains_worthwhile: false
+  change_approach_worthwhile: true
+  recommendation: Arrêter le raffinement des mêmes chaînes. Chiffrer au niveau de composants Stock cohérents, avec
+    frontières quantitatives/valorisation/exécution explicites, puis borner les compléments Flow ; ne plus multiplier
+    un catalogue de petites méthodes.
+  prerequisite: Choisir et documenter un périmètre natif de référence suffisamment complet. Les compléments temporels
+    et de rejeu restent des adaptations, avec réutilisation de Master Data qualifiée.
+  no_external_project_actuals_required: true
+  stop_condition: Si le périmètre ne peut pas être isolé sans inventer sa taille, annoncer l’échec de cette transposition
+    et conserver le coût inconnu. Pas de nouvelle itération de simple inspection de ces huit dossiers.
+evidence:
+- erpnext-correction.json
+- erpnext-reservation.json
+- odoo-correction.json
+- odoo-reservation.json
+- tryton-correction.json
+- tryton-reservation.json
+- axelor-correction.json
+- axelor-reservation.json
+- mesures-union.json
+- preuves-complementaires.json
+- graphe-chemins.json
+- comparaison-garanties.json
+- verification.json
+measurements_summary:
+  unique_source_files: 29
+  unique_source_methods: 312
+  unique_native_domain_instructions_declarations: 3458
+  newly_measured_native_domain_instructions_declarations: 2284
+  critical_path_edges: 61
+  comparison_criteria: 6
+  product_criterion_observations: 24
+  sizes_are_not_a_product_complexity_ranking: true

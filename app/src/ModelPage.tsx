@@ -7,23 +7,20 @@ import {GlossaryText} from './GlossaryText';
 import {ModelMap} from './ModelMap';
 import {CostActivityTags,costStructureIcons} from './ArchitectureLayers';
 import './modelReading.css';
+import {DossierNavigation,DossierSheet} from './Dossier';
+import {navigationPages,selectDossierPage} from './dossierNavigation';
 
 const icons:Record<string,LucideIcon>={make:Hammer,buy:ShoppingCart,programme:Layers3,product:Boxes,platform:Cloud,...costStructureIcons,calendar:CalendarClock,service:ChartNoAxesCombined};
 const sectionId=(id:string)=>`model-chapter-${id}`;
 const Text=({children,className=''}:{children:string;className?:string})=><p className={className}><MethodText>{children}</MethodText></p>;
 
-export function ModelPage(){
+export function ModelPage({view}:{view?:string}){
  const {data}=useStudy(),E=data.ui.essential,R=E.model_reading;
- const goToSection=(id:string)=>{
-  const heading=document.getElementById(sectionId(id));
-  heading?.focus({preventScroll:true});
-  heading?.scrollIntoView({block:'start',behavior:'auto'});
- };
+ const N=E.dossiers.model,pages=navigationPages('modele',N.pages),current=selectDossierPage(pages,view);
+ const chapters=R.chapters.filter((chapter:Data)=>current.sections?.includes(chapter.id));
  const links=(items:Data[])=><div className="model-reading-links">{items.map(link=>link.href.startsWith('source/')?<SourceLink path={link.href} key={link.href}>{link.label}</SourceLink>:<a className="text-button" href={link.href} key={link.href}>{link.label} <span aria-hidden="true">→</span></a>)}</div>;
  const content:Record<string,ReactNode>={
   scope:<>
-   <div className="model-reading-concepts">{E.concepts.map((concept:Data)=>{const Icon=icons[concept.icon],term=data.glossary.notions[concept.notion];return <article key={concept.notion}><Icon aria-hidden="true" size={22}/><h3><GlossaryText>{term.libelle}</GlossaryText></h3><Text>{concept.text}</Text></article>;})}</div>
-   <Text className="model-reading-composition">{R.composition}</Text>
    <Text>{R.scope}</Text>
    <ModelMap/>
   </>,
@@ -37,15 +34,9 @@ export function ModelPage(){
    <Text className="model-reading-callout">{R.activity_note}</Text>
   </>,
   workload:<>
-   <div className="model-reading-workloads">{E.model_workload.stages.map((stage:Data)=>{const term=data.glossary.notions[stage.notion];return <article key={stage.id}><h3><GlossaryText>{term.libelle}</GlossaryText></h3><p className="model-reading-producer">{stage.producer}</p><Text>{stage.text}</Text></article>;})}</div>
-   <div className="model-reading-relations">{E.model_workload.relations.map((relation:Data)=><Text key={relation.operation}>{relation.text}</Text>)}</div>
+   <div className="model-reading-workloads model-reading-workload-paths">{R.workload_paths.map((path:Data)=><article key={path.title}><h3>{path.title}</h3><Text>{path.text}</Text></article>)}</div>
    <Text className="model-reading-callout">{R.workload_note}</Text>
    {links(E.model_workload.links)}
-   <section className="model-estimation-rules"><h3>{E.estimation_model.title}</h3><Text>{E.estimation_model.purpose}</Text>
-    {E.estimation_model.rules.map((rule:Data)=><article key={rule.id}><h4>{rule.title}</h4><p className="core-method-formula">{rule.expression} · {rule.unit}</p>
-     <dl>{Object.entries(rule.variables).map(([key,value])=><div key={key}><dt>{key}</dt><dd>{String(value)}</dd></div>)}</dl>{rule.note&&<Text>{rule.note}</Text>}</article>)}
-    <ul>{E.estimation_model.invariants.map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ul>
-   </section>
   </>,
   costs:<>
    <Text>{R.costs_intro}</Text>
@@ -62,9 +53,12 @@ export function ModelPage(){
   </>
  };
  return <div className="essential-page essential-model model-reading">
-  <section className="model-download"><a className="text-button" href={import.meta.env.BASE_URL+'exports/flow-modele-metier.yaml'} download="flow-modele-metier.yaml">{data.ui.model_download.label}</a><Text>{data.ui.model_download.description}</Text></section>
-  <nav className="model-reading-navigation" aria-label={R.toc_label}><h2>{R.toc_label}</h2><ol>{R.chapters.map((chapter:Data)=><li key={chapter.id}><button type="button" aria-controls={sectionId(chapter.id)} onClick={()=>goToSection(chapter.id)}>{chapter.title}</button></li>)}</ol></nav>
-  {R.chapters.map((chapter:Data,index:number)=><section className="model-reading-chapter" key={chapter.id} data-chapter={chapter.id} aria-labelledby={sectionId(chapter.id)}><h2 id={sectionId(chapter.id)} tabIndex={-1}><span aria-hidden="true">{index+1}</span>{chapter.title}</h2><Text className="model-reading-lead">{chapter.lead}</Text>{content[chapter.id]}</section>)}
+  <section className="model-download dossier-download"><a className="text-button" href={import.meta.env.BASE_URL+'exports/flow-modele-metier.yaml'} download="flow-modele-metier.yaml" title={data.ui.model_download.description}>{data.ui.model_download.label}</a><Text>{data.ui.model_download.description}</Text></section>
+  <aside className="model-reading-callout model-reading-status" role="status"><Text>{E.core_status_summary}</Text></aside>
+  <DossierNavigation pages={pages} current={current.id} label={N.navigation}/>
+  <DossierSheet view={current.id}>
+  {chapters.map((chapter:Data,index:number)=><section className="model-reading-chapter" key={chapter.id} data-chapter={chapter.id} aria-labelledby={sectionId(chapter.id)}><h2 id={sectionId(chapter.id)} tabIndex={-1}><span aria-hidden="true">{index+1}</span>{chapter.title}</h2>{chapter.id!=='scope'&&<Text className="model-reading-lead">{chapter.lead}</Text>}{content[chapter.id]}</section>)}
   <a className="text-button essential-structure-next" href={R.next_href}>{R.next_label} <span aria-hidden="true">→</span></a>
+  </DossierSheet>
  </div>;
 }

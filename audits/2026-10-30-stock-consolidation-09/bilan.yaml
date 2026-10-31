@@ -1,0 +1,758 @@
+id: stock-java-spring-consolidation-09
+status: proposition_pour_decision_non_adoptee
+input_sha256: f3e876923b463751a53cb61855d9e3a9cc0ee57088338b613e55a046f98f7c0a
+primary_method: COCOMO II
+crosscheck: COSMIC × ISBSG
+proposed_jh: 340
+raw_reference_jh: 339.0185977157613
+rounding_delta_jh: 0.9814022842386976
+proposed_common_base_jh: 200
+proposed_Flow_complements_jh: 140
+selected_reference: axelor
+selection_rationale: Référence Java native Axelor et équivalence de services de framework déjà posée pour Master
+  Data. Pas moyenne des quatre produits, pas prime ni remise Spring. La proximité ERPNext/Tryton est un contrôle
+  descriptif, pas une validation indépendante.
+framework_assumption: Persistance, transactions, verrouillage optimiste, sécurité, métadonnées, composants UI, admission
+  générique et livraison disponibles via le patrimoine Master Data et des composants Spring équivalents. Aucun coût
+  de reconstruction Axelor à financer ; travail spécifique Stock inclus. Une UI entièrement sur mesure, une réécriture
+  du socle ou des garanties supérieures exigeraient une révision.
+size:
+  common_equivalent_units: 2427.7
+  Flow_complements_equivalent_units: 1498.97
+  total_equivalent_KSLOC: 3.92667
+  definition: Proxy logique d’instructions/déclarations, même convention que Master Data. Pondérations de pertinence
+    et tailles nouvelles supposées ; pas SLOC certifiées ni charges historiques.
+  cocomo:
+    A: 2.94
+    B: 0.91
+    SF_sum: 18.97
+    C: 3.67
+    D: 0.28
+    month_hours: 152
+    day_hours: 7
+    effort_phase_factor: 1.18
+    schedule_phase_factor: 1.25
+    other_EM: 1
+    SCED: 1
+    REVL: 0
+    source: https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf
+    source_locations: Équation 4 et tables 6, 36, 57, 63 ; autres paramètres conservés nominaux.
+    activity_distribution_ref: ../2026-10-30-master-data-calcul/repartitions-sources.json#cocomo
+  E: 1.0997
+  F: 0.31794
+native_estimates:
+- id: erpnext
+  unrounded_jh: 318.17039662584926
+  display:
+    base_common_jh: 180
+    Flow_complements_jh: 140
+    total_stock_jh: 320
+    rounding_step_jh: 10
+    local_schedule_months: 10.2
+  alignment_vs_java:
+    gap_jh: -20.84820108991204
+    gap_pct: -6.149574457089669
+    reason: null
+- id: odoo
+  unrounded_jh: 534.2250939927217
+  display:
+    base_common_jh: 280
+    Flow_complements_jh: 250
+    total_stock_jh: 530
+    rounding_step_jh: 10
+    local_schedule_months: 12.0
+  alignment_vs_java:
+    gap_jh: 195.20649627696037
+    gap_pct: 57.57987838785902
+    reason: null
+- id: tryton
+  unrounded_jh: 318.3495261820652
+  display:
+    base_common_jh: 130
+    Flow_complements_jh: 190
+    total_stock_jh: 320
+    rounding_step_jh: 10
+    local_schedule_months: 10.2
+  alignment_vs_java:
+    gap_jh: -20.669071533696126
+    gap_pct: -6.096736778737257
+    reason: null
+- id: axelor
+  unrounded_jh: 339.0185977157613
+  display:
+    base_common_jh: 200
+    Flow_complements_jh: 140
+    total_stock_jh: 340
+    rounding_step_jh: 10
+    local_schedule_months: 10.4
+  alignment_vs_java:
+    gap_jh: 0.0
+    gap_pct: 0.0
+    reason: null
+odoo_gap:
+  gap_jh: 195.20649627696037
+  gap_pct: 57.57987838785902
+  reason: null
+  base_difference_jh: 76.2964715965091
+  Flow_complement_difference_jh: 118.91002468045127
+  position_analogue_odoo_units: 1332.05
+  position_analogue_java_units: 193.25
+  position_analogue_size_ratio: 6.892884864165588
+  position_module_ids:
+  - STOCK-F02
+  - STOCK-F05
+  size_decomposition:
+  - cause: base_native
+    size_delta: 830.1500000000001
+    share_of_size_gap_pct: 41.279482458768385
+    descriptive_share_of_jh_gap: 80.5802313890242
+  - cause: analogue_position_F02_F05
+    size_delta: 854.0999999999999
+    share_of_size_gap_pct: 42.47040410532322
+    descriptive_share_of_jh_gap: 82.90498780866778
+  - cause: autres_analogues_et_descriptions
+    size_delta: 326.7974999999999
+    share_of_size_gap_pct: 16.250113435908396
+    descriptive_share_of_jh_gap: 31.72127707926836
+  source_witnesses:
+  - repo: odoo
+    path: addons/stock/models/stock_quant.py
+    name: _run_least_packages_removal_strategy_astar
+    meaning: Recherche A* pour choisir des colis à prélever ; excès d’exécution/optimisation dans un fichier utilisé
+      globalement comme analogue de position.
+    start_line: 665
+    end_line: 773
+    sha256: 99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd
+    measured_whole_method_nodes: 75
+    url: https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_quant.py#L665
+  - repo: odoo
+    path: addons/stock/models/stock_quant.py
+    name: _apply_inventory
+    meaning: Application d’un inventaire, pas simple fourniture d’une position.
+    start_line: 1031
+    end_line: 1070
+    sha256: 99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd
+    measured_whole_method_nodes: 26
+    url: https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_quant.py#L1031
+  - repo: odoo
+    path: addons/stock/models/product.py
+    name: _compute_quantities_dict
+    meaning: 'Calcul groupé de quantités présentes, attendues et historiques : comportement pertinent pour la position.'
+    start_line: 156
+    end_line: 274
+    sha256: 8dd1b558936b11243268a48eaea5e141a02ce4be756b33878a7b3ead38c7e9cc
+    measured_whole_method_nodes: 93
+    url: https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/product.py#L156
+  - repo: odoo
+    path: addons/stock/models/stock_location.py
+    name: _get_putaway_strategy
+    meaning: Stratégie de rangement d’entrepôt, présente dans le composant global ; pas une fonction de restitution
+      de stock.
+    start_line: 293
+    end_line: 372
+    sha256: 8dfc20f28614563392d5934b15af6aa4d957a077ce347bf59cd1d467d5b2bf58
+    measured_whole_method_nodes: 42
+    url: https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_location.py#L293
+  - repo: axelor
+    path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java
+    name: getAvailableStockForAProduct
+    meaning: Composition d’une requête sur les positions actuelles/futures ; exemple du service Java plus ciblé.
+    start_line: 161
+    end_line: 168
+    sha256: ed09c909ddd50fb847e1eb4f44d7a12ef4c474da264098f0d2ea35dea5c2d0dd
+    measured_whole_method_nodes: 4
+    url: https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java#L161
+  decomposition_note: Parts descriptives du désaccord de taille et répartition proportionnelle de l’écart JH ; pas
+    efforts autonomes ni décomposition causale mesurée.
+  conclusion: 'Odoo est plus volumineux dans ce modèle de source : davantage de base native et un analogue K2 élargi
+    à plusieurs responsabilités. Les attributions grossières et conventions de langage subsistent ; 534 JH ne prouvent
+    pas que Spring coûterait autant, ni que Java serait intrinsèquement plus productif.'
+  no_corrected_odoo_estimate_invented: true
+  native_inputs_08_unchanged: true
+functional_control:
+  CFP: 169
+  hours_per_CFP: 20
+  factor: 1
+  jh: 482.85714285714283
+  alignment_vs_unrounded_java:
+    gap_jh: 143.83854514138153
+    gap_pct: 42.42792168646102
+    reason: null
+  implied_java_hours_per_CFP: 14.042190437930943
+  implied_rate_not_used_to_recalibrate: true
+  productivity_gap_hours_per_CFP: 5.957809562069057
+  source: https://cosmic-sizing.org/wp-content/uploads/2015/07/Performance-of-Business-Application-Real-Time-and-Component-Software-Projects-2012.pdf
+  source_table: 7
+  source_printed_page: 12
+  effort_definition_printed_pages:
+  - 46
+  - 47
+  cohort: Projets métier historiques terminés entre 1999 et 2011 ; repère Java multi-plateforme/PC normalisé à 100–200
+    CFP, pas sous-échantillon Stock Spring.
+  activity_alignment_status: partiel_pas_strictement_appaire
+  activities: 'ISBSG Normalized Level 1 : planifier, spécifier, concevoir, construire, tester et mettre en œuvre.
+    COCOMO : phases Inception, Élaboration, Construction et Transition, incluant pilotage logiciel et préparation
+    de mise en service.'
+  staff_boundary: ISBSG exclut les intervenants non affectés formellement au projet ; la proposition Flow répartit
+    les travaux spécifiques de plateforme et de sécurité. Les experts rattachés sont inclus dans la proposition.
+  differences:
+  - Le benchmark 20 h/CFP n’est pas conditionné à la réutilisation des services Master Data déjà financés.
+  - 169 CFP proposés mesurent le service fonctionnel cible ; les tailles de code analogues et leurs attributions
+    sont estimées, pas du code Flow réalisé.
+  - Le déploiement du benchmark peut couvrir plus que la mise en service logicielle initiale ; la part de la cohorte
+    PDR Java effectivement concernée est inconnue.
+  - Une sous-estimation des tailles COCOMO ou une surestimation du comptage fonctionnel reste possible ; aucun écart
+    n’est expliqué automatiquement par la méthode.
+  implementation_illustrations:
+  - published_median_percent: 7.4
+    illustrative_jh: 35.73142857142857
+    residual_jh_after_removing_this_hypothetical_share: 108.10711656995295
+  - published_median_percent: 8.4
+    illustrative_jh: 40.56
+    residual_jh_after_removing_this_hypothetical_share: 103.27854514138153
+  illustration_note: 7,4 % et 8,4 % sont des médianes globales de populations distinctes publiées en annexe, pas
+    des corrections appliquées ni un intervalle. Elles ne suffisent pas à faire disparaître l’écart.
+  reconciliation: Origines possibles identifiées et écart arithmétique quantifié ; ventilation causale des 143,84
+    JH non démontrée. Contrôle conservé à 482,86 JH, aucune moyenne ni ajustement de convergence.
+activities:
+- id: management
+  label: Gestion du projet logiciel
+  jh: 37.45762711864407
+  published_phase_percent: &id001
+  - 14
+  - 12
+  - 10
+  - 14
+  role_weights:
+    coordination: 1
+  rationale: Pilotage local de la famille Stock, pas pilotage du programme Groupe.
+- id: environment
+  label: Environnement et gestion de configuration
+  jh: 19.938983050847458
+  published_phase_percent: &id002
+  - 10
+  - 8
+  - 5
+  - 5
+  role_weights:
+    plateforme: 0.8
+    dev_java: 0.2
+  rationale: Configuration applicative, environnements et automatisation spécifiques Stock. Pas seconde construction
+    du socle déjà financé en Master Data.
+- id: requirements
+  label: Analyse et exigences
+  jh: 37.91864406779661
+  published_phase_percent: &id003
+  - 38
+  - 18
+  - 8
+  - 4
+  role_weights:
+    analyse_produit: 0.9
+    architecture: 0.1
+  rationale: Analyse des huit capacités Stock et de leurs contrats ; contribution de l’architecte aux exigences
+    structurantes.
+- id: design
+  label: Conception et architecture
+  jh: 64.6
+  published_phase_percent: &id004
+  - 19
+  - 36
+  - 16
+  - 4
+  role_weights:
+    architecture: 0.4
+    dev_java: 0.4
+    dev_frontend: 0.05
+    ux: 0.1
+    securite: 0.05
+  rationale: 'Stock orienté services, cohérence des effets, historique, transactions et concurrence : davantage
+    de conception Java que dans la clé Master Data. Interface de consultation, vérification et administration ;
+    pas WMS terminal complet.'
+- id: implementation
+  label: Réalisation et tests unitaires
+  jh: 91.39661016949152
+  published_phase_percent: &id005
+  - 8
+  - 13
+  - 34
+  - 19
+  role_weights:
+    dev_java: 0.85
+    dev_frontend: 0.15
+  rationale: '85 % Java et 15 % interface : choix d’organisation au lieu de 75/25 en Master Data ; aucun changement
+    du total COCOMO.'
+- id: assessment
+  label: Évaluation, vérification et validation
+  jh: 69.15254237288136
+  published_phase_percent: &id006
+  - 8
+  - 10
+  - 24
+  - 24
+  role_weights:
+    qa: 0.7
+    dev_java: 0.2
+    dev_frontend: 0.05
+    securite: 0.05
+  rationale: 70 % QA, 20 % Java, 5 % interface et 5 % sécurité. Qualification des corrections, conflits, replay
+    et reprise ; tests développeur déjà dans la réalisation, sans double compte.
+- id: deployment
+  label: Préparation du déploiement
+  jh: 19.535593220338985
+  published_phase_percent: &id007
+  - 3
+  - 3
+  - 3
+  - 30
+  role_weights:
+    plateforme: 0.7
+    dev_java: 0.2
+    coordination: 0.1
+  rationale: Branchement, configuration et qualification de mise en service Stock ; mécanismes communs de livraison
+    déjà financés.
+activity_to_role:
+- activity: management
+  role: coordination
+  weight: 1
+  jh: 37.45762711864407
+- activity: environment
+  role: plateforme
+  weight: 0.8
+  jh: 15.951186440677967
+- activity: environment
+  role: dev_java
+  weight: 0.2
+  jh: 3.9877966101694917
+- activity: requirements
+  role: analyse_produit
+  weight: 0.9
+  jh: 34.126779661016954
+- activity: requirements
+  role: architecture
+  weight: 0.1
+  jh: 3.7918644067796614
+- activity: design
+  role: architecture
+  weight: 0.4
+  jh: 25.84
+- activity: design
+  role: dev_java
+  weight: 0.4
+  jh: 25.84
+- activity: design
+  role: dev_frontend
+  weight: 0.05
+  jh: 3.23
+- activity: design
+  role: ux
+  weight: 0.1
+  jh: 6.46
+- activity: design
+  role: securite
+  weight: 0.05
+  jh: 3.23
+- activity: implementation
+  role: dev_java
+  weight: 0.85
+  jh: 77.6871186440678
+- activity: implementation
+  role: dev_frontend
+  weight: 0.15
+  jh: 13.709491525423728
+- activity: assessment
+  role: qa
+  weight: 0.7
+  jh: 48.40677966101695
+- activity: assessment
+  role: dev_java
+  weight: 0.2
+  jh: 13.830508474576272
+- activity: assessment
+  role: dev_frontend
+  weight: 0.05
+  jh: 3.457627118644068
+- activity: assessment
+  role: securite
+  weight: 0.05
+  jh: 3.457627118644068
+- activity: deployment
+  role: plateforme
+  weight: 0.7
+  jh: 13.67491525423729
+- activity: deployment
+  role: dev_java
+  weight: 0.2
+  jh: 3.907118644067797
+- activity: deployment
+  role: coordination
+  weight: 0.1
+  jh: 1.9535593220338985
+roles:
+- id: coordination
+  label: Pilotage de l’équipe produit
+  unrounded_jh: 39.411186440677966
+  jh: 40
+  master_data_retained_jh: 170
+  cumulative_proposed_jh: 210
+  average_people_at_capacity_convention: 0.2222222222222222
+- id: analyse_produit
+  label: Analyse métier et fonctionnelle
+  unrounded_jh: 34.126779661016954
+  jh: 35
+  master_data_retained_jh: 150
+  cumulative_proposed_jh: 185
+  average_people_at_capacity_convention: 0.19444444444444445
+- id: architecture
+  label: Architecture et conception technique
+  unrounded_jh: 29.631864406779663
+  jh: 30
+  master_data_retained_jh: 130
+  cumulative_proposed_jh: 160
+  average_people_at_capacity_convention: 0.16666666666666666
+- id: dev_java
+  label: Développement Java et tests développeur
+  unrounded_jh: 125.25254237288135
+  jh: 125
+  master_data_retained_jh: 480
+  cumulative_proposed_jh: 605
+  average_people_at_capacity_convention: 0.6944444444444444
+- id: dev_frontend
+  label: Développement interface et tests développeur
+  unrounded_jh: 20.397118644067795
+  jh: 20
+  master_data_retained_jh: 180
+  cumulative_proposed_jh: 200
+  average_people_at_capacity_convention: 0.1111111111111111
+- id: qa
+  label: QA et qualification indépendante
+  unrounded_jh: 48.40677966101695
+  jh: 50
+  master_data_retained_jh: 200
+  cumulative_proposed_jh: 250
+  average_people_at_capacity_convention: 0.2777777777777778
+- id: plateforme
+  label: Plateforme / DevOps et mise en service
+  unrounded_jh: 29.626101694915256
+  jh: 30
+  master_data_retained_jh: 130
+  cumulative_proposed_jh: 160
+  average_people_at_capacity_convention: 0.16666666666666666
+- id: ux
+  label: UX et ergonomie
+  unrounded_jh: 6.46
+  jh: 5
+  master_data_retained_jh: 30
+  cumulative_proposed_jh: 35
+  average_people_at_capacity_convention: 0.027777777777777776
+- id: securite
+  label: Expertise et revue de sécurité
+  unrounded_jh: 6.687627118644068
+  jh: 5
+  master_data_retained_jh: 30
+  cumulative_proposed_jh: 35
+  average_people_at_capacity_convention: 0.027777777777777776
+role_allocation_status: Hypothèses d’organisation pour cette proposition ; ni observations de temps OSS ni disponibilité
+  confirmée.
+role_rounding_jh: 5
+activity_reference:
+  source: https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf
+  table: 57
+  printed_pages:
+  - 64
+  - 65
+  pdf_pages:
+  - 68
+  - 69
+  type: Répartition par défaut MBASE/RUP, pas observation de l'équipe FLOW
+  phase_order:
+  - Inception
+  - Elaboration
+  - Construction
+  - Transition
+  phase_effort_percent_of_base:
+  - 6
+  - 24
+  - 76
+  - 12
+  phase_schedule_percent_of_base:
+  - 12.5
+  - 37.5
+  - 62.5
+  - 12.5
+  base: Elaboration + Construction =100% de l'effort COCOMO calculé. La colonne totale incluant Inception/Transition
+    utilise118%, pas100%.
+  activities:
+  - id: management
+    label: Gestion du projet logiciel
+    percent_by_phase: *id001
+    possible_flow_roles:
+    - coordination
+    mapping: Activité de pilotage logiciel ; pas tout le pilotage du programme.
+  - id: environment
+    label: Environnement et gestion de configuration
+    percent_by_phase: *id002
+    possible_flow_roles:
+    - plateforme
+    - dev_java
+    - dev_frontend
+    mapping: Outillage, configuration et environnement de réalisation ; pas exploitation annuelle.
+  - id: requirements
+    label: Analyse et exigences
+    percent_by_phase: *id003
+    possible_flow_roles:
+    - analyse_produit
+    - architecture
+    mapping: À répartir selon les responsabilités réelles ; pas une équivalence à100% avec un rôle.
+  - id: design
+    label: Conception et architecture
+    percent_by_phase: *id004
+    possible_flow_roles:
+    - architecture
+    - dev_java
+    - dev_frontend
+    - ux
+    - securite
+    - expert_optimisation
+    mapping: Plusieurs rôles interviennent ; aucune clé de ventilation n'est démontrée.
+  - id: implementation
+    label: Réalisation et tests unitaires
+    percent_by_phase: *id005
+    possible_flow_roles:
+    - dev_java
+    - dev_frontend
+    mapping: Pas de ratio Java/interface fourni ; ne pas ajouter les tests unitaires à nouveau.
+  - id: assessment
+    label: Évaluation, vérification et validation
+    percent_by_phase: *id006
+    possible_flow_roles:
+    - qa
+    - dev_java
+    - dev_frontend
+    - architecture
+    - securite
+    mapping: Comprend des revues et validations ; ne pas assimiler toute la ligne à une QA indépendante.
+  - id: deployment
+    label: Préparation du déploiement
+    percent_by_phase: *id007
+    possible_flow_roles:
+    - plateforme
+    - coordination
+    - dev_java
+    - dev_frontend
+    mapping: Dans la base E+C, préparation ; la transition opérationnelle complète reste une phase distincte.
+  apply_to_current_calculation: true
+  application_status: Scénario d'allocation calculé par activités sur le résultat nominal COCOMO ; ni budget retenu
+    ni JH par rôle.
+isbsg_distribution_preserved_but_not_applied:
+  source: https://cosmic-sizing.org/wp-content/uploads/2015/07/Performance-of-Business-Application-Real-Time-and-Component-Software-Projects-2012.pdf
+  table: 18
+  pages:
+  - 30
+  - 31
+  type: Moyennes publiées par activité
+  population: 13 nouveaux projets Java ;6 sur mainframe, autres surtout PC ; sous-ensemble distinct du taux PDR.
+  activities:
+  - label: Spécification
+    percent: 9
+  - label: Conception
+    percent: 16
+  - label: Réalisation
+    percent: 54
+  - label: Test
+    percent: 20
+  denominator: Sous-total Specify+Design+Build+Test. Mise en œuvre exclue ; planning traité séparément.
+  sum_percent: 99
+  rounding: Valeurs publiées totalisant99%. Aucune renormalisation silencieuse.
+  planning:
+    mean_percent: 4.7
+    cohort_n: 15
+    denominator: Planning+Specify+Design+Build+Test
+    source_page: 30
+    language_filter: Sous-ensemble tous langages ; pas13Java.
+    applied: false
+  apply_to_current_calculation: false
+  reason: Les800JH PDR portent sur6activités normalisées. Part de mise en œuvre inconnue ; autre population. Ne
+    pas appliquer9/16/54/20% directement aux800JH.
+schedule:
+  unrounded_months: 10.436994130535364
+  proposed_months: 10
+  formula: 3.67 * (340 / 1.18 * 7 / 152) ** 0.31794 * 1.25
+  source_rule: source/fondamentaux.yaml#estimation_model.rules.cocomo_schedule
+  productive_jh_per_person_month: 18
+  average_people: 1.8888888888888888
+  role_availability_confirmed: false
+  starts_when: Travaux Stock effectivement engagés, services Master Data nécessaires disponibles ; pas délai depuis
+    le démarrage du programme.
+  scope: Délai local calculé du produit logiciel Stock, qualification et préparation de mise en service incluses.
+  limit: Pas planning engagé, pas neuf personnes à plein temps. Les 17 mois Master Data et le délai Stock ne sont
+    pas additionnés.
+hypothesis_sensitivities:
+- id: attribution-du-code-mixte
+  lower_total_jh: 233.445504681376
+  upper_total_jh: 449.86653475625866
+  lower_change_jh: -105.5730930343853
+  upper_change_jh: 110.84793704049736
+  lower_change_pct: -31.14079691961309
+  upper_change_pct: 32.6967127430083
+  direction: Une seule famille d’hypothèses modifiée à la fois ; impacts non additionnables.
+  note: Attribution source sur base et analogues dépendants, avec plancher des instructions Stock déjà mesurées.
+- id: volume-des-sept-modules-Flow
+  lower_total_jh: 286.762181954813
+  upper_total_jh: 423.4223052372591
+  lower_change_jh: -52.2564157609483
+  upper_change_jh: 84.40370752149778
+  lower_change_pct: -15.414026284410783
+  upper_change_pct: 24.896482992435484
+  direction: Une seule famille d’hypothèses modifiée à la fois ; impacts non additionnables.
+  note: Quantité de comportement nouveau par rapport aux analogues ; champs/structure maintenus. Variations conjointes
+    explicites, pas intervalle probabiliste.
+- id: F01-admission-et-revisions
+  lower_total_jh: 325.66500067257795
+  upper_total_jh: 352.4200628202681
+  lower_change_jh: -13.353597043183356
+  upper_change_jh: 13.40146510450677
+  lower_change_pct: -3.9388980820395076
+  upper_change_pct: 3.9530176795028735
+  direction: Une seule famille d’hypothèses modifiée à la fois ; impacts non additionnables.
+  note: Un demi-module à un module et demi de correction de référence, au lieu d’un module central.
+- id: F04-commandes-et-expiration
+  lower_total_jh: 336.8592177066501
+  upper_total_jh: 343.34109435114084
+  lower_change_jh: -2.159380009111203
+  upper_change_jh: 4.322496635379537
+  lower_change_pct: -0.6369503100008874
+  upper_change_pct: 1.2750028064842591
+  direction: Une seule famille d’hypothèses modifiée à la fois ; impacts non additionnables.
+  note: Un quart à une chaîne de réservation de référence, au lieu d’une moitié.
+- id: F07-rapprochement-apres-reprise
+  lower_total_jh: 335.0074217212569
+  upper_total_jh: 345.7134426108628
+  lower_change_jh: -4.011175994504413
+  upper_change_jh: 6.6948448951014825
+  lower_change_pct: -1.1831728470151504
+  upper_change_pct: 1.9747721630052135
+  direction: Une seule famille d’hypothèses modifiée à la fois ; impacts non additionnables.
+  note: Taille du nouveau module de rapprochement ; ne promet aucun RPO/RTO.
+- id: capacite-equipe-PERS
+  lower_total_jh: 281.38543610408186
+  upper_total_jh: 427.1634331218592
+  lower_change_jh: -57.63316161167944
+  upper_change_jh: 88.14483540609791
+  lower_change_pct: -17.000000000000007
+  upper_change_pct: 25.999999999999993
+  direction: Une seule famille d’hypothèses modifiée à la fois ; impacts non additionnables.
+  note: Valeurs de sensibilité reprises des hypothèses COCOMO Master Data, équipe nominale au centre.
+- id: experience-ecosysteme-PREX
+  lower_total_jh: 294.9461800127123
+  upper_total_jh: 379.7008294416526
+  lower_change_jh: -44.072417703048984
+  upper_change_jh: 40.68223172589131
+  lower_change_pct: -13.000000000000005
+  upper_change_pct: 11.999999999999988
+  direction: Une seule famille d’hypothèses modifiée à la fois ; impacts non additionnables.
+  note: Valeurs de sensibilité reprises de Master Data ; maîtrise de l’écosystème nominale au centre.
+- id: poids-declaratif
+  lower_total_jh: 290.387027761025
+  upper_total_jh: 438.1421424710464
+  lower_change_jh: -48.63156995473628
+  upper_change_jh: 99.12354475528508
+  lower_change_pct: -14.344808893201126
+  upper_change_pct: 29.238379670955947
+  direction: Une seule famille d’hypothèses modifiée à la fois ; impacts non additionnables.
+  note: Convention du proxy XML/JSON/vues, pas multiplicateur direct de productivité.
+limits:
+  probability: null
+  statistical_uncertainty: null
+  human_review: null
+  observed_project_effort: null
+  assumptions:
+  - id: H1
+    text: Les 62 fichiers et les compléments définissent une base d’opportunité suffisante ; extensions installables
+      et cas rares non exhaustifs. Les parties mixtes sont attribuées par jugement d’ingénierie, avec minimum déjà
+      mesuré et sensibilité.
+  - id: H2
+    text: Les nouveaux modules Flow sont de taille comparable aux fractions explicites des composants/chaînes natives.
+      Ces fractions ne sont ni des normes de marché ni des observations d’effort.
+  - id: H3
+    text: Master Data et ses services génériques sont disponibles et utilisables ; leur coût retenu est conservé,
+      seuls les travaux spécifiques Stock sont ajoutés.
+  - id: H4
+    text: Un module Stock, une base transactionnelle, architecture standard réutilisant les services Master Data.
+      Pas de réservation distribuée entre bases ; aucun engagement de débit, latence ou RPO/RTO spécifique.
+  - id: H5
+    text: Équipe nominale maîtrisant son écosystème, PERS=PREX=1 ; conventions 152 h/mois-personne, 7 h/JH, phases
+      1,18 et délai 1,25. Les essais de sensibilité ne sont pas des probabilités.
+  - id: H6
+    text: 'Base commune : mouvements/registre, positions connues, comptages et quantités engagées. Compléments :
+      admission externe, révisions/double date, autorité, filiation/contenu, protocoles, reprise, et contributions
+      typées. Pas intégration Groupe, GL, PLM, promesse ou optimisation.'
+  - id: H7
+    text: Les quatre chiffres sont des charges modélisées du périmètre cible dans chaque écosystème natif, après
+      patrimoine Master Data. Pas coût historique des produits, ni mesure de code Flow existant.
+  - id: H8
+    text: La projection Java/Spring peut utiliser Axelor comme référence sous l’équivalence de framework déjà posée
+      ; cette équivalence n’est pas une calibration empirique. Les quatre alternatives ne sont pas additionnées.
+  framework_equivalence_is_hypothesis: true
+  no_specific_numeric_stock_performance_guarantee: true
+  MD_service_objectives: Les objectifs S1 de comparaison et la qualification propres à Master Data restent chez
+    leur propriétaire ; ils ne valent pas tests de charge ni garanties Stock.
+  no_extra_ai_discount: true
+  no_extra_qa_or_coordination: true
+scope:
+  capabilities:
+  - BC-009
+  - BC-010
+  - BC-011
+  - BC-012
+  - BC-013
+  - BC-016
+  - BC-017
+  - BC-018
+  common: Registre/mouvements, positions actuelles et datées, apports connus, comptages/ajustements et engagements.
+  Flow_complements: Admission/révision/double date/filiation, provenance/fraîcheur, protocoles et autorité, identité
+    des commandes et expiration, contributions planning/Finance/produit, rapprochement après reprise.
+  excludes:
+  - Intégration, connecteurs et migrations spécifiques Beaumanoir
+  - Comptabilité générale et valorisation financière
+  - WMS physique et terminaux
+  - ATP/CTP/PTP, allocation et optimisation
+  - Run, MCO et achats
+  - Garantie de réservation distribuée entre bases
+  reuse_owner: master-data-java-spring
+  reuse_policy: Services et référentiels Master Data déjà financés. Un seul propriétaire ; appels/adaptations Stock
+    dans le dimensionnement nouveau. Aucun second AAM sur l’intégralité du framework.
+cumulative:
+  retained_gross_jh: 1500
+  retained_master_data_months: 17
+  proposed_stock_gross_jh: 340
+  proposed_java_gross_jh: 1840
+  roles: 1840
+  explanation: Cumul Master Data retenue + proposition Stock. Pas adoption, pas somme des quatre alternatives ni
+    recalcul COCOMO intégré de tout Flow.
+  combined_months: null
+  schedules_are_not_added: true
+progress:
+  total_capabilities: 88
+  studied_in_current_method: 14
+  retained: 6
+  stock_consolidated_proposed: 8
+  studied_or_proposed_pct: 15.909090909090908
+  retained_pct: 6.818181818181818
+  other_capabilities: 74
+  stock_percent_of_88: 9.090909090909092
+  new_capabilities_this_iteration: 0
+  new_retained_decisions: 0
+  improvement: Consolidation Java/Spring, ventilation des activités vers les rôles, délai calculé et explication
+    documentée des désaccords. La couverture n’augmente pas.
+  historical_note: Les repérages historiques des 88 capacités ne deviennent pas 88 estimations actuelles.
+next_iteration:
+  general_refinement_worthwhile: false
+  recommendation: Arrêter l’affinage Stock à périmètre constant et passer à une autre famille. Réouvrir sur changement
+    d’architecture, garanties, disponibilité du patrimoine, interface ou équipe.
+  targeted_validation: 'Au jalon d’architecture/réalisation : corrections rétroactives, première réservation concurrente
+    et reprise, avec scénario reproductible ; pas préalable imposé à cette étude d’opportunité.'
+  uncertainty_reduction: Aucune réduction statistiquement démontrée. Meilleure traçabilité des causes et sensibilité
+    des hypothèses, pas précision prédictive prouvée.
+active_business_model_changed: false
+application_changed: false

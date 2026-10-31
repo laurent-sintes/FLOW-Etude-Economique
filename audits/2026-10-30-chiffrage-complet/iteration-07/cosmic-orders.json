@@ -1,0 +1,684 @@
+{
+  "id": "orders",
+  "boundary": "Gestion des commandes",
+  "groups": [
+    {
+      "id": "OrderRequest",
+      "object_of_interest": "OrderRequest",
+      "attributes": [
+        "businessAttributes",
+        "reference",
+        "scope"
+      ]
+    },
+    {
+      "id": "Party",
+      "object_of_interest": "Party",
+      "attributes": [
+        "businessAttributes",
+        "reference",
+        "scope"
+      ]
+    },
+    {
+      "id": "Goods",
+      "object_of_interest": "Goods",
+      "attributes": [
+        "businessAttributes",
+        "reference",
+        "scope"
+      ]
+    },
+    {
+      "id": "Agreement",
+      "object_of_interest": "Agreement",
+      "attributes": [
+        "businessAttributes",
+        "reference",
+        "scope"
+      ]
+    },
+    {
+      "id": "Order",
+      "object_of_interest": "Order",
+      "attributes": [
+        "agreement",
+        "kind",
+        "party",
+        "requestedAt",
+        "scope",
+        "status",
+        "version"
+      ]
+    },
+    {
+      "id": "OrderLine",
+      "object_of_interest": "OrderLine",
+      "attributes": [
+        "acceptedQuantity",
+        "date",
+        "destination",
+        "goods",
+        "order",
+        "price",
+        "quantity",
+        "unit"
+      ]
+    },
+    {
+      "id": "Outcome",
+      "object_of_interest": "Outcome",
+      "attributes": [
+        "businessAttributes",
+        "reference",
+        "scope"
+      ]
+    },
+    {
+      "id": "OrderChange",
+      "object_of_interest": "OrderChange",
+      "attributes": [
+        "authority",
+        "date",
+        "line",
+        "order",
+        "quantity",
+        "reason",
+        "status",
+        "version"
+      ]
+    },
+    {
+      "id": "RestructureRequest",
+      "object_of_interest": "RestructureRequest",
+      "attributes": [
+        "businessAttributes",
+        "reference",
+        "scope"
+      ]
+    },
+    {
+      "id": "OrderBalance",
+      "object_of_interest": "OrderBalance",
+      "attributes": [
+        "accepted",
+        "asOf",
+        "line",
+        "realized",
+        "remaining",
+        "resultRef"
+      ]
+    },
+    {
+      "id": "OrderLink",
+      "object_of_interest": "OrderLink",
+      "attributes": [
+        "kind",
+        "quantity",
+        "sourceLine",
+        "sourceOrder",
+        "targetLine",
+        "targetOrder"
+      ]
+    },
+    {
+      "id": "ServiceResult",
+      "object_of_interest": "ServiceResult",
+      "attributes": [
+        "businessAttributes",
+        "reference",
+        "scope"
+      ]
+    },
+    {
+      "id": "ReturnRequest",
+      "object_of_interest": "ReturnRequest",
+      "attributes": [
+        "businessAttributes",
+        "reference",
+        "scope"
+      ]
+    },
+    {
+      "id": "Ownership",
+      "object_of_interest": "Ownership",
+      "attributes": [
+        "businessAttributes",
+        "reference",
+        "scope"
+      ]
+    },
+    {
+      "id": "ResolutionRequest",
+      "object_of_interest": "ResolutionRequest",
+      "attributes": [
+        "businessAttributes",
+        "reference",
+        "scope"
+      ]
+    },
+    {
+      "id": "FinancialResult",
+      "object_of_interest": "FinancialResult",
+      "attributes": [
+        "businessAttributes",
+        "reference",
+        "scope"
+      ]
+    },
+    {
+      "id": "Query",
+      "object_of_interest": "Query",
+      "attributes": [
+        "businessAttributes",
+        "reference",
+        "scope"
+      ]
+    }
+  ],
+  "processes": [
+    {
+      "id": "orders-P01",
+      "label": "Recevoir une commande typée et ses lignes",
+      "trigger": "Réception de la demande ou du fait métier nommé dans le processus.",
+      "functional_user": "Producteur autorisé, opérateur ou composant extérieur à cette unité cohérente.",
+      "capabilities": [
+        "BC-020",
+        "BC-021",
+        "BC-022",
+        "BC-023",
+        "BC-024",
+        "BC-025",
+        "BC-026",
+        "BC-027"
+      ],
+      "movements": [
+        {
+          "id": "orders-P01-E-OrderRequest",
+          "type": "E",
+          "group": "OrderRequest",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P01-R-Agreement",
+          "type": "R",
+          "group": "Agreement",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P01-R-Goods",
+          "type": "R",
+          "group": "Goods",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P01-R-Party",
+          "type": "R",
+          "group": "Party",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P01-W-Order",
+          "type": "W",
+          "group": "Order",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P01-W-OrderLine",
+          "type": "W",
+          "group": "OrderLine",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P01-X-Order",
+          "type": "X",
+          "group": "Order",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P01-X-Outcome",
+          "type": "X",
+          "group": "Outcome",
+          "cfp": 1
+        }
+      ],
+      "origin_processes": [
+        "orders-P01"
+      ]
+    },
+    {
+      "id": "orders-P02",
+      "label": "Accepter une révision autorisée",
+      "trigger": "Réception de la demande ou du fait métier nommé dans le processus.",
+      "functional_user": "Producteur autorisé, opérateur ou composant extérieur à cette unité cohérente.",
+      "capabilities": [
+        "BC-020",
+        "BC-021",
+        "BC-022",
+        "BC-023",
+        "BC-024",
+        "BC-025",
+        "BC-026",
+        "BC-027"
+      ],
+      "movements": [
+        {
+          "id": "orders-P02-E-OrderChange",
+          "type": "E",
+          "group": "OrderChange",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P02-R-Agreement",
+          "type": "R",
+          "group": "Agreement",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P02-R-Order",
+          "type": "R",
+          "group": "Order",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P02-R-OrderLine",
+          "type": "R",
+          "group": "OrderLine",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P02-W-Order",
+          "type": "W",
+          "group": "Order",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P02-W-OrderChange",
+          "type": "W",
+          "group": "OrderChange",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P02-W-OrderLine",
+          "type": "W",
+          "group": "OrderLine",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P02-X-OrderChange",
+          "type": "X",
+          "group": "OrderChange",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P02-X-Outcome",
+          "type": "X",
+          "group": "Outcome",
+          "cfp": 1
+        }
+      ],
+      "origin_processes": [
+        "orders-P02"
+      ]
+    },
+    {
+      "id": "orders-P03",
+      "label": "Restructurer sans perdre la filiation",
+      "trigger": "Réception de la demande ou du fait métier nommé dans le processus.",
+      "functional_user": "Producteur autorisé, opérateur ou composant extérieur à cette unité cohérente.",
+      "capabilities": [
+        "BC-020",
+        "BC-021",
+        "BC-022",
+        "BC-023",
+        "BC-024",
+        "BC-025",
+        "BC-026",
+        "BC-027"
+      ],
+      "movements": [
+        {
+          "id": "orders-P03-E-RestructureRequest",
+          "type": "E",
+          "group": "RestructureRequest",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P03-R-Order",
+          "type": "R",
+          "group": "Order",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P03-R-OrderBalance",
+          "type": "R",
+          "group": "OrderBalance",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P03-R-OrderLine",
+          "type": "R",
+          "group": "OrderLine",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P03-W-Order",
+          "type": "W",
+          "group": "Order",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P03-W-OrderLine",
+          "type": "W",
+          "group": "OrderLine",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P03-W-OrderLink",
+          "type": "W",
+          "group": "OrderLink",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P03-X-Order",
+          "type": "X",
+          "group": "Order",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P03-X-OrderLink",
+          "type": "X",
+          "group": "OrderLink",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P03-X-Outcome",
+          "type": "X",
+          "group": "Outcome",
+          "cfp": 1
+        }
+      ],
+      "origin_processes": [
+        "orders-P03"
+      ]
+    },
+    {
+      "id": "orders-P04",
+      "label": "Rapprocher les engagements et résultats",
+      "trigger": "Réception de la demande ou du fait métier nommé dans le processus.",
+      "functional_user": "Producteur autorisé, opérateur ou composant extérieur à cette unité cohérente.",
+      "capabilities": [
+        "BC-020",
+        "BC-021",
+        "BC-022",
+        "BC-023",
+        "BC-024",
+        "BC-025",
+        "BC-026",
+        "BC-027"
+      ],
+      "movements": [
+        {
+          "id": "orders-P04-E-ServiceResult",
+          "type": "E",
+          "group": "ServiceResult",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P04-R-Order",
+          "type": "R",
+          "group": "Order",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P04-R-OrderLine",
+          "type": "R",
+          "group": "OrderLine",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P04-W-OrderBalance",
+          "type": "W",
+          "group": "OrderBalance",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P04-X-OrderBalance",
+          "type": "X",
+          "group": "OrderBalance",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P04-X-Outcome",
+          "type": "X",
+          "group": "Outcome",
+          "cfp": 1
+        }
+      ],
+      "origin_processes": [
+        "orders-P04"
+      ]
+    },
+    {
+      "id": "orders-P05",
+      "label": "Suivre le retour et sa résolution financière",
+      "trigger": "Réception de la demande ou du fait métier nommé dans le processus.",
+      "functional_user": "Producteur autorisé, opérateur ou composant extérieur à cette unité cohérente.",
+      "capabilities": [
+        "BC-020",
+        "BC-021",
+        "BC-022",
+        "BC-023",
+        "BC-024",
+        "BC-025",
+        "BC-026",
+        "BC-027"
+      ],
+      "movements": [
+        {
+          "id": "orders-P05-E-ReturnRequest",
+          "type": "E",
+          "group": "ReturnRequest",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P05-R-Order",
+          "type": "R",
+          "group": "Order",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P05-R-OrderLine",
+          "type": "R",
+          "group": "OrderLine",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P05-R-Ownership",
+          "type": "R",
+          "group": "Ownership",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P05-W-Order",
+          "type": "W",
+          "group": "Order",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P05-W-OrderLine",
+          "type": "W",
+          "group": "OrderLine",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P05-W-OrderLink",
+          "type": "W",
+          "group": "OrderLink",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P05-X-Outcome",
+          "type": "X",
+          "group": "Outcome",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P05-X-ResolutionRequest",
+          "type": "X",
+          "group": "ResolutionRequest",
+          "cfp": 1
+        }
+      ],
+      "origin_processes": [
+        "orders-P05"
+      ]
+    },
+    {
+      "id": "orders-P06",
+      "label": "Recevoir la résolution de retour",
+      "trigger": "Réception de la demande ou du fait métier nommé dans le processus.",
+      "functional_user": "Producteur autorisé, opérateur ou composant extérieur à cette unité cohérente.",
+      "capabilities": [
+        "BC-020",
+        "BC-021",
+        "BC-022",
+        "BC-023",
+        "BC-024",
+        "BC-025",
+        "BC-026",
+        "BC-027"
+      ],
+      "movements": [
+        {
+          "id": "orders-P06-E-FinancialResult",
+          "type": "E",
+          "group": "FinancialResult",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P06-R-Order",
+          "type": "R",
+          "group": "Order",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P06-R-OrderBalance",
+          "type": "R",
+          "group": "OrderBalance",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P06-R-OrderLink",
+          "type": "R",
+          "group": "OrderLink",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P06-W-OrderBalance",
+          "type": "W",
+          "group": "OrderBalance",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P06-X-OrderBalance",
+          "type": "X",
+          "group": "OrderBalance",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P06-X-Outcome",
+          "type": "X",
+          "group": "Outcome",
+          "cfp": 1
+        }
+      ],
+      "origin_processes": [
+        "orders-P06"
+      ]
+    },
+    {
+      "id": "orders-P07",
+      "label": "Lire le reste à satisfaire",
+      "trigger": "Réception de la demande ou du fait métier nommé dans le processus.",
+      "functional_user": "Producteur autorisé, opérateur ou composant extérieur à cette unité cohérente.",
+      "capabilities": [
+        "BC-020",
+        "BC-021",
+        "BC-022",
+        "BC-023",
+        "BC-024",
+        "BC-025",
+        "BC-026",
+        "BC-027"
+      ],
+      "movements": [
+        {
+          "id": "orders-P07-E-Query",
+          "type": "E",
+          "group": "Query",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P07-R-Order",
+          "type": "R",
+          "group": "Order",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P07-R-OrderBalance",
+          "type": "R",
+          "group": "OrderBalance",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P07-R-OrderChange",
+          "type": "R",
+          "group": "OrderChange",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P07-R-OrderLine",
+          "type": "R",
+          "group": "OrderLine",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P07-R-OrderLink",
+          "type": "R",
+          "group": "OrderLink",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P07-X-Order",
+          "type": "X",
+          "group": "Order",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P07-X-OrderBalance",
+          "type": "X",
+          "group": "OrderBalance",
+          "cfp": 1
+        },
+        {
+          "id": "orders-P07-X-Outcome",
+          "type": "X",
+          "group": "Outcome",
+          "cfp": 1
+        }
+      ],
+      "origin_processes": [
+        "orders-P07"
+      ]
+    }
+  ],
+  "CFP": 58,
+  "unit": "CFP",
+  "hours_per_CFP": 20,
+  "factor": 1,
+  "day_hours": 7,
+  "review": "Revue statique proposée ; pas certification ni calibration historique de Flow.",
+  "merge_reasons": "Deux événements ne sont pas comptés deux fois parce qu’ils alimentent plusieurs modules internes.",
+  "not_global_core_count": true
+}

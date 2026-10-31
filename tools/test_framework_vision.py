@@ -30,6 +30,8 @@ class FrameworkVisionTests(unittest.TestCase):
         compiled = self.compile(self.document)
         self.assertEqual(compiled, before)
         self.assertIsNot(compiled, self.document)
+        self.assertEqual(compiled['adaptation']['href'], '#simuler')
+        self.assertEqual(compiled['adaptation']['reference_link']['href'], '#parametres')
         hydrated = hydrate_framework_vision(self.ui, self.glossary)
         self.assertEqual(hydrated['essential']['framework_vision'], compiled)
         self.assertEqual(self.ui['essential']['framework_vision'], {'source': SOURCE})
@@ -59,7 +61,7 @@ class FrameworkVisionTests(unittest.TestCase):
         def duplicate_confidence_link(d): d['confidence']['links'].append(deepcopy(d['confidence']['links'][0]))
         def invalid_confidence_link(d): d['confidence']['links'][0]['href'] = '#absent'
         def missing_adaptation(d): d.pop('adaptation')
-        def wrong_adaptation_link(d): d['adaptation']['href'] = '#simuler'
+        def wrong_adaptation_link(d): d['adaptation']['href'] = '#leviers'
         def unknown_adaptation_field(d): d['adaptation']['budget'] = 1000
         def duplicate_step(d): d['approach']['steps'].append(deepcopy(d['approach']['steps'][0]))
         def missing_step(d): d['approach']['steps'].pop()
@@ -100,7 +102,7 @@ class FrameworkVisionTests(unittest.TestCase):
             ui['essential']['framework_vision'] = reference
             with self.subTest(reference=reference), self.assertRaisesRegex(ValueError, 'ERR_FRAMEWORK_VISION'):
                 hydrate_framework_vision(ui, self.glossary)
-        for route in ('modele', 'leviers', 'synvance', 'perimetre-retenu', 'conditions-realisation', 'capacite-realisation'):
+        for route in ('modele', 'parametres', 'simuler', 'cartographie', 'synvance', 'conditions-realisation', 'capacite-realisation'):
             ui = deepcopy(self.ui)
             ui['essential']['pages'].pop(route)
             with self.subTest(missing_route=route), self.assertRaisesRegex(ValueError, 'unknown reading link'):

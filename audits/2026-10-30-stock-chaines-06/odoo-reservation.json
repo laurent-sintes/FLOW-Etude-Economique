@@ -1,0 +1,4636 @@
+{
+  "id": "odoo-reservation",
+  "product": "odoo",
+  "kind": "reservation",
+  "status": "dossier natif bout en bout aux frontières déclarées, pas équivalence Flow démontrée",
+  "pattern": "Mouvement → sélection des quantités → création/modification de ligne → hook de réservation → quant verrouillé ou créé → flush → reprise éventuelle de la transaction.",
+  "native_stages": [
+    "StockMove._update_reserved_quantity et _get_reserve_quantity",
+    "StockMoveLine.create/write appelle la mutation réservée",
+    "StockQuant._update_reserved_quantity → _update_available_quantity → ORM.try_lock_for_update",
+    "ORM.flush + retrying : rollback et au plus cinq tentatives puis commit/résultat ou erreur"
+  ],
+  "result": "La chaîne complète inclut les hooks et la politique de transaction, absents de l’analogie à une petite méthode. Les doublons de quants sont un cas explicitement traité ; pas de contrainte unique inventée.",
+  "gap": "La sélection native peut réserver partiellement et choisir des quants ; un engagement Flow sur une portion imposée et son identité de commande exigent un contrat explicite.",
+  "unresolved": [
+    "Délimitation de la sélection/prélèvement native par rapport à une quantité et portion imposées.",
+    "Idempotence du nouvel appel métier après perte de la réponse, distincte du retry de la transaction avortée."
+  ],
+  "files": [
+    {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_move.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "9d663d336cff509764e5c6b46dafd76646e73f02eb19d2e5d7d71771b17dec28",
+      "git_object_sha256": "7cdeed6eb47b16e481ec5888abc030d125b3737bd84b3ca6d89382ac6166a66b",
+      "source_url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_move.py",
+      "role": "stock_quantity",
+      "classification_basis": "traitement de quantité/état de stock observé dans la chaîne",
+      "methods": [
+        {
+          "name": "StockMove._update_reserved_quantity",
+          "start": 1988,
+          "end": 1998,
+          "calls": [
+            "self._update_reserved_quantity_vals",
+            "self.ensure_one",
+            "self.env['stock.move.line'].create"
+          ],
+          "source_fragment": "    def _update_reserved_quantity(self, need, location_id, lot_id=None, package_id=None, owner_id=None, strict=True):\n        \"\"\" Create or update move lines and reserves quantity from quants\n            Expects the need (qty to reserve) and location_id to reserve from.\n            `quant_ids` can be passed as an optimization since no search on the database\n            is performed and reservation is done on the passed quants set\n        \"\"\"\n        self.ensure_one()\n        move_line_vals, taken_quantity = self._update_reserved_quantity_vals(need, location_id, lot_id, package_id, owner_id, strict)\n        if move_line_vals:\n            self.env['stock.move.line'].create(move_line_vals)\n        return taken_quantity",
+          "program_units": 6
+        },
+        {
+          "name": "StockMove._update_reserved_quantity_vals",
+          "start": 2000,
+          "end": 2045,
+          "calls": [
+            "candidate_lines.get",
+            "float_compare",
+            "float_round",
+            "grouped_quants.values",
+            "move_line_vals.append",
+            "self._add_serial_move_line_to_vals_list",
+            "self._prepare_move_line_vals",
+            "self.ensure_one",
+            "self.env['decimal.precision'].precision_get",
+            "self.env['stock.quant'].with_context",
+            "self.env['stock.quant'].with_context(packaging_uom_id=self.packaging_uom_id)._get_reserve_quantity",
+            "self.product_id.uom_id._compute_quantity",
+            "to_update.uom_id._compute_quantity",
+            "to_update.with_context"
+          ],
+          "source_fragment": "    def _update_reserved_quantity_vals(self, need, location_id, lot_id=None, package_id=None, owner_id=None, strict=True):\n        self.ensure_one()\n        if not lot_id:\n            lot_id = self.env['stock.lot']\n        if not package_id:\n            package_id = self.env['stock.package']\n        if not owner_id:\n            owner_id = self.env['res.partner']\n\n        quants = self.env['stock.quant'].with_context(packaging_uom_id=self.packaging_uom_id)._get_reserve_quantity(\n            self.product_id, location_id, need, uom_id=self.uom_id,\n            lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)\n\n        taken_quantity = 0\n        rounding = self.env['decimal.precision'].precision_get('Product Unit')\n        # Find a candidate move line to update or create a new one.\n        candidate_lines = {}\n        for line in self.move_line_ids:\n            if line.result_package_id or line.product_id.tracking == 'serial':\n                continue\n            candidate_lines[line.location_id, line.lot_id, line.package_id, line.owner_id] = line\n        move_line_vals = []\n        grouped_quants = {}\n        # Handle quants duplication\n        for quant, quantity in quants:\n            if (quant.location_id, quant.lot_id, quant.package_id, quant.owner_id) not in grouped_quants:\n                grouped_quants[quant.location_id, quant.lot_id, quant.package_id, quant.owner_id] = [quant, quantity]\n            else:\n                grouped_quants[quant.location_id, quant.lot_id, quant.package_id, quant.owner_id][1] += quantity\n        for reserved_quant, quantity in grouped_quants.values():\n            taken_quantity += quantity\n            to_update = candidate_lines.get((reserved_quant.location_id, reserved_quant.lot_id, reserved_quant.package_id, reserved_quant.owner_id))\n            if to_update:\n                uom_quantity = self.product_id.uom_id._compute_quantity(quantity, to_update.uom_id, rounding_method='HALF-UP')\n                uom_quantity = float_round(uom_quantity, precision_digits=rounding)\n                uom_quantity_back_to_product_uom = to_update.uom_id._compute_quantity(uom_quantity, self.product_id.uom_id, rounding_method='HALF-UP')\n            if to_update and float_compare(quantity, uom_quantity_back_to_product_uom, precision_digits=rounding) == 0:\n                to_update.with_context(reserved_quant=reserved_quant).quantity += uom_quantity\n            else:\n                if self.product_id.tracking == 'serial' and (self.picking_type_id.use_create_lots or self.picking_type_id.use_existing_lots):\n                    vals_list = self._add_serial_move_line_to_vals_list(reserved_quant, quantity)\n                    if vals_list:\n                        move_line_vals += vals_list\n                else:\n                    move_line_vals.append(self._prepare_move_line_vals(quantity=quantity, reserved_quant=reserved_quant))\n        return move_line_vals, taken_quantity",
+          "program_units": 37
+        },
+        {
+          "name": "StockMove._prepare_move_line_vals",
+          "start": 1955,
+          "end": 1986,
+          "calls": [
+            "dict",
+            "float_compare",
+            "float_round",
+            "self.ensure_one",
+            "self.env['decimal.precision'].precision_get",
+            "self.product_id.uom_id._compute_quantity",
+            "self.uom_id._compute_quantity"
+          ],
+          "source_fragment": "    def _prepare_move_line_vals(self, quantity=None, reserved_quant=None):\n        self.ensure_one()\n        vals = {\n            'move_id': self.id,\n            'product_id': self.product_id.id,\n            'uom_id': self.uom_id.id,\n            'location_id': self.location_id.id,\n            'location_dest_id': self.location_dest_id.id,\n            'picking_id': self.picking_id.id,\n            'company_id': self.company_id.id,\n        }\n        if quantity:\n            # TODO could be also move in create/write\n            rounding = self.env['decimal.precision'].precision_get('Product Unit')\n            uom_quantity = self.product_id.uom_id._compute_quantity(quantity, self.uom_id, rounding_method='HALF-UP')\n            uom_quantity = float_round(uom_quantity, precision_digits=rounding)\n            uom_quantity_back_to_product_uom = self.uom_id._compute_quantity(uom_quantity, self.product_id.uom_id, rounding_method='HALF-UP')\n            if float_compare(quantity, uom_quantity_back_to_product_uom, precision_digits=rounding) == 0:\n                vals = dict(vals, quantity=uom_quantity)\n            else:\n                vals = dict(vals, quantity=quantity, uom_id=self.product_id.uom_id.id)\n        package = None\n        if reserved_quant:\n            package = reserved_quant.package_id\n            vals = dict(\n                vals,\n                location_id=reserved_quant.location_id.id,\n                lot_id=reserved_quant.lot_id.id or False,\n                package_id=package.id or False,\n                owner_id =reserved_quant.owner_id.id or False,\n            )\n        return vals",
+          "program_units": 16
+        },
+        {
+          "name": "StockMove._should_bypass_reservation",
+          "start": 2050,
+          "end": 2053,
+          "calls": [
+            "location.should_bypass_reservation",
+            "self.ensure_one"
+          ],
+          "source_fragment": "    def _should_bypass_reservation(self, forced_location=False):\n        self.ensure_one()\n        location = forced_location or self.location_id\n        return location.should_bypass_reservation() or not self.product_id.is_storable",
+          "program_units": 4
+        },
+        {
+          "name": "StockMove._recompute_state",
+          "start": 2535,
+          "end": 2554,
+          "calls": [
+            "any",
+            "defaultdict",
+            "move.uom_id.compare",
+            "moves_state_to_write.items",
+            "moves_state_to_write['assigned'].add",
+            "moves_state_to_write['confirmed'].add",
+            "moves_state_to_write['partially_available'].add",
+            "moves_state_to_write['waiting'].add",
+            "orig.uom_id.compare",
+            "self.browse",
+            "self.browse(moves_ids).filtered",
+            "self.env.context.get"
+          ],
+          "source_fragment": "    def _recompute_state(self):\n        if self.env.context.get('preserve_state'):\n            return\n        moves_state_to_write = defaultdict(set)\n        for move in self:\n            if move.state in ('cancel', 'done') or (move.state == 'draft' and not move.quantity):\n                continue\n            elif move.uom_id.compare(move.quantity, move.product_uom_qty) >= 0:\n                moves_state_to_write['assigned'].add(move.id)\n            elif move.quantity and move.uom_id.compare(move.quantity, move.product_uom_qty) <= 0:\n                moves_state_to_write['partially_available'].add(move.id)\n            elif (move.procure_method == 'make_to_order' and not move.move_orig_ids) or\\\n                 (move.move_orig_ids and any(orig.uom_id.compare(orig.product_uom_qty, 0) > 0\n                                             and orig.state not in ('done', 'cancel') for orig in move.move_orig_ids)):\n                # In the process of merging a negative move, we may still have a negative move in the move_orig_ids at that point.\n                moves_state_to_write['waiting'].add(move.id)\n            else:\n                moves_state_to_write['confirmed'].add(move.id)\n        for state, moves_ids in moves_state_to_write.items():\n            self.browse(moves_ids).filtered(lambda m: m.state != state).state = state",
+          "program_units": 16
+        },
+        {
+          "name": "StockMove.write",
+          "start": 872,
+          "end": 942,
+          "calls": [
+            "(self - move_to_unreserve).filtered",
+            "(self - move_to_unreserve).filtered(lambda m: m.state == 'assigned').write",
+            "Command.clear",
+            "UserError",
+            "_",
+            "any",
+            "defaultdict",
+            "int",
+            "m.uom_id.compare",
+            "ml.location_id.parent_path.split",
+            "ml.unlink",
+            "move.uom_id.compare",
+            "move_to_recompute_state._recompute_state",
+            "move_to_unreserve._do_unreserve",
+            "move_to_unreserve.filtered",
+            "picking._find_auto_batch",
+            "receipt_moves_to_reassign._action_assign",
+            "self._set_date_deadline",
+            "self._set_references",
+            "self._update_orderpoints",
+            "self.env.context.get",
+            "self.env.user.has_group",
+            "self.env['stock.move.line']._log_message",
+            "self.filtered",
+            "super",
+            "super().write",
+            "vals.get",
+            "wh_by_moves.items"
+          ],
+          "source_fragment": "    def write(self, vals):\n        # Handle the write on the initial demand by updating the reserved quantity and logging\n        # messages according to the state of the stock.move records.\n        receipt_moves_to_reassign = self.env['stock.move']\n        move_to_recompute_state = self.env['stock.move']\n        move_to_check_location = self.env['stock.move']\n        if 'quantity' in vals:\n            if any(move.state == 'cancel' for move in self):\n                raise UserError(_('You cannot change a cancelled stock move, create a new line instead.'))\n        if 'uom_id' in vals and any(move.state == 'done' for move in self) and not self.env.context.get('skip_uom_conversion'):\n            raise UserError(_('You cannot change the UoM for a stock move that has been set to \\'Done\\'.'))\n        if 'product_uom_qty' in vals:\n            for move in self.filtered(lambda m: m.state not in ('done', 'draft') and m.picking_id):\n                if move.uom_id.compare(vals['product_uom_qty'], move.product_uom_qty):\n                    self.env['stock.move.line']._log_message(move.picking_id, move, 'stock.track_move_template', vals)\n            if self.env.context.get('do_not_unreserve') is None:\n                move_to_unreserve = self.filtered(\n                    lambda m: m.state not in ['draft', 'done', 'cancel'] and m.uom_id.compare(m.quantity, vals.get('product_uom_qty')) == 1\n                )\n                move_to_unreserve._do_unreserve()\n                (self - move_to_unreserve).filtered(lambda m: m.state == 'assigned').write({'state': 'partially_available'})\n                # When editing the initial demand, directly run again action assign on receipt moves.\n                receipt_moves_to_reassign |= move_to_unreserve.filtered(lambda m: m.location_id.usage == 'supplier')\n                receipt_moves_to_reassign |= (self - move_to_unreserve).filtered(\n                    lambda m:\n                        m.location_id.usage == 'supplier' and\n                        m.state in ('partially_available', 'assigned')\n                )\n                move_to_recompute_state |= self - move_to_unreserve - receipt_moves_to_reassign\n        if 'date_deadline' in vals:\n            self._set_date_deadline(vals.get('date_deadline'))\n        if 'move_orig_ids' in vals or ('move_line_ids' in vals and 'quantity' in vals):\n            move_to_recompute_state |= self.filtered(lambda m: m.state not in ['draft', 'cancel', 'done'])\n        if 'location_id' in vals:\n            move_to_check_location = self.filtered(lambda m: m.location_id.id != vals.get('location_id'))\n        if 'product_id' in vals or 'location_id' in vals or 'location_dest_id' in vals:\n            self._update_orderpoints()\n        res = super().write(vals)\n        if move_to_recompute_state:\n            move_to_recompute_state._recompute_state()\n        if move_to_check_location:\n            for ml in move_to_check_location.move_line_ids:\n                parent_path = [int(loc_id) for loc_id in ml.location_id.parent_path.split('/')[:-1]]\n                if move_to_check_location.location_id.id not in parent_path:\n                    receipt_moves_to_reassign |= move_to_check_location\n                    move_to_check_location.procure_method = 'make_to_stock'\n                    move_to_check_location.move_orig_ids = [Command.clear()]\n                    ml.unlink()\n        if 'location_id' in vals or 'location_dest_id' in vals:\n            wh_by_moves = defaultdict(self.env['stock.move'].browse)\n            for move in self:\n                move_warehouse = move.location_id.warehouse_id or move.location_dest_id.warehouse_id\n                if move_warehouse == move.warehouse_id:\n                    continue\n                wh_by_moves[move_warehouse] |= move\n            for warehouse, moves in wh_by_moves.items():\n                moves.warehouse_id = warehouse.id\n        if receipt_moves_to_reassign:\n            receipt_moves_to_reassign._action_assign()\n        if ('product_id' in vals or 'state' in vals or 'date' in vals or 'product_uom_qty' in vals or\n                'location_id' in vals or 'location_dest_id' in vals):\n            self._update_orderpoints()\n        if 'picking_id' in vals:\n            self._set_references()\n        if self.env.user.has_group('stock.group_stock_picking_batch') and\\\n           'state' in vals and vals['state'] in ('partially_available', 'assigned'):\n            for picking in self.picking_id:\n                if picking.state != 'assigned':\n                    continue\n                picking._find_auto_batch()\n        return res",
+          "program_units": 60
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 872,
+          "end": 942
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1955,
+          "end": 1986
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1988,
+          "end": 1998
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 2000,
+          "end": 2045
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 2050,
+          "end": 2053
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 2535,
+          "end": 2554
+        },
+        {
+          "kind": "Assign",
+          "start": 875,
+          "end": 875
+        },
+        {
+          "kind": "Assign",
+          "start": 876,
+          "end": 876
+        },
+        {
+          "kind": "Assign",
+          "start": 877,
+          "end": 877
+        },
+        {
+          "kind": "If",
+          "start": 878,
+          "end": 880
+        },
+        {
+          "kind": "If",
+          "start": 881,
+          "end": 882
+        },
+        {
+          "kind": "If",
+          "start": 883,
+          "end": 900
+        },
+        {
+          "kind": "If",
+          "start": 901,
+          "end": 902
+        },
+        {
+          "kind": "If",
+          "start": 903,
+          "end": 904
+        },
+        {
+          "kind": "If",
+          "start": 905,
+          "end": 906
+        },
+        {
+          "kind": "If",
+          "start": 907,
+          "end": 908
+        },
+        {
+          "kind": "Assign",
+          "start": 909,
+          "end": 909
+        },
+        {
+          "kind": "If",
+          "start": 910,
+          "end": 911
+        },
+        {
+          "kind": "If",
+          "start": 912,
+          "end": 919
+        },
+        {
+          "kind": "If",
+          "start": 920,
+          "end": 928
+        },
+        {
+          "kind": "If",
+          "start": 929,
+          "end": 930
+        },
+        {
+          "kind": "If",
+          "start": 931,
+          "end": 933
+        },
+        {
+          "kind": "If",
+          "start": 934,
+          "end": 935
+        },
+        {
+          "kind": "If",
+          "start": 936,
+          "end": 941
+        },
+        {
+          "kind": "Return",
+          "start": 942,
+          "end": 942
+        },
+        {
+          "kind": "Expr",
+          "start": 1956,
+          "end": 1956
+        },
+        {
+          "kind": "Assign",
+          "start": 1957,
+          "end": 1965
+        },
+        {
+          "kind": "If",
+          "start": 1966,
+          "end": 1975
+        },
+        {
+          "kind": "Assign",
+          "start": 1976,
+          "end": 1976
+        },
+        {
+          "kind": "If",
+          "start": 1977,
+          "end": 1985
+        },
+        {
+          "kind": "Return",
+          "start": 1986,
+          "end": 1986
+        },
+        {
+          "kind": "Expr",
+          "start": 1994,
+          "end": 1994
+        },
+        {
+          "kind": "Assign",
+          "start": 1995,
+          "end": 1995
+        },
+        {
+          "kind": "If",
+          "start": 1996,
+          "end": 1997
+        },
+        {
+          "kind": "Return",
+          "start": 1998,
+          "end": 1998
+        },
+        {
+          "kind": "Expr",
+          "start": 2001,
+          "end": 2001
+        },
+        {
+          "kind": "If",
+          "start": 2002,
+          "end": 2003
+        },
+        {
+          "kind": "If",
+          "start": 2004,
+          "end": 2005
+        },
+        {
+          "kind": "If",
+          "start": 2006,
+          "end": 2007
+        },
+        {
+          "kind": "Assign",
+          "start": 2009,
+          "end": 2011
+        },
+        {
+          "kind": "Assign",
+          "start": 2013,
+          "end": 2013
+        },
+        {
+          "kind": "Assign",
+          "start": 2014,
+          "end": 2014
+        },
+        {
+          "kind": "Assign",
+          "start": 2016,
+          "end": 2016
+        },
+        {
+          "kind": "For",
+          "start": 2017,
+          "end": 2020
+        },
+        {
+          "kind": "Assign",
+          "start": 2021,
+          "end": 2021
+        },
+        {
+          "kind": "Assign",
+          "start": 2022,
+          "end": 2022
+        },
+        {
+          "kind": "For",
+          "start": 2024,
+          "end": 2028
+        },
+        {
+          "kind": "For",
+          "start": 2029,
+          "end": 2044
+        },
+        {
+          "kind": "Return",
+          "start": 2045,
+          "end": 2045
+        },
+        {
+          "kind": "Expr",
+          "start": 2051,
+          "end": 2051
+        },
+        {
+          "kind": "Assign",
+          "start": 2052,
+          "end": 2052
+        },
+        {
+          "kind": "Return",
+          "start": 2053,
+          "end": 2053
+        },
+        {
+          "kind": "If",
+          "start": 2536,
+          "end": 2537
+        },
+        {
+          "kind": "Assign",
+          "start": 2538,
+          "end": 2538
+        },
+        {
+          "kind": "For",
+          "start": 2539,
+          "end": 2552
+        },
+        {
+          "kind": "For",
+          "start": 2553,
+          "end": 2554
+        },
+        {
+          "kind": "If",
+          "start": 879,
+          "end": 880
+        },
+        {
+          "kind": "Raise",
+          "start": 882,
+          "end": 882
+        },
+        {
+          "kind": "For",
+          "start": 884,
+          "end": 886
+        },
+        {
+          "kind": "If",
+          "start": 887,
+          "end": 900
+        },
+        {
+          "kind": "Expr",
+          "start": 902,
+          "end": 902
+        },
+        {
+          "kind": "AugAssign",
+          "start": 904,
+          "end": 904
+        },
+        {
+          "kind": "Assign",
+          "start": 906,
+          "end": 906
+        },
+        {
+          "kind": "Expr",
+          "start": 908,
+          "end": 908
+        },
+        {
+          "kind": "Expr",
+          "start": 911,
+          "end": 911
+        },
+        {
+          "kind": "For",
+          "start": 913,
+          "end": 919
+        },
+        {
+          "kind": "Assign",
+          "start": 921,
+          "end": 921
+        },
+        {
+          "kind": "For",
+          "start": 922,
+          "end": 926
+        },
+        {
+          "kind": "For",
+          "start": 927,
+          "end": 928
+        },
+        {
+          "kind": "Expr",
+          "start": 930,
+          "end": 930
+        },
+        {
+          "kind": "Expr",
+          "start": 933,
+          "end": 933
+        },
+        {
+          "kind": "Expr",
+          "start": 935,
+          "end": 935
+        },
+        {
+          "kind": "For",
+          "start": 938,
+          "end": 941
+        },
+        {
+          "kind": "Assign",
+          "start": 1968,
+          "end": 1968
+        },
+        {
+          "kind": "Assign",
+          "start": 1969,
+          "end": 1969
+        },
+        {
+          "kind": "Assign",
+          "start": 1970,
+          "end": 1970
+        },
+        {
+          "kind": "Assign",
+          "start": 1971,
+          "end": 1971
+        },
+        {
+          "kind": "If",
+          "start": 1972,
+          "end": 1975
+        },
+        {
+          "kind": "Assign",
+          "start": 1978,
+          "end": 1978
+        },
+        {
+          "kind": "Assign",
+          "start": 1979,
+          "end": 1985
+        },
+        {
+          "kind": "Expr",
+          "start": 1997,
+          "end": 1997
+        },
+        {
+          "kind": "Assign",
+          "start": 2003,
+          "end": 2003
+        },
+        {
+          "kind": "Assign",
+          "start": 2005,
+          "end": 2005
+        },
+        {
+          "kind": "Assign",
+          "start": 2007,
+          "end": 2007
+        },
+        {
+          "kind": "If",
+          "start": 2018,
+          "end": 2019
+        },
+        {
+          "kind": "Assign",
+          "start": 2020,
+          "end": 2020
+        },
+        {
+          "kind": "If",
+          "start": 2025,
+          "end": 2028
+        },
+        {
+          "kind": "AugAssign",
+          "start": 2030,
+          "end": 2030
+        },
+        {
+          "kind": "Assign",
+          "start": 2031,
+          "end": 2031
+        },
+        {
+          "kind": "If",
+          "start": 2032,
+          "end": 2035
+        },
+        {
+          "kind": "If",
+          "start": 2036,
+          "end": 2044
+        },
+        {
+          "kind": "Return",
+          "start": 2537,
+          "end": 2537
+        },
+        {
+          "kind": "If",
+          "start": 2540,
+          "end": 2552
+        },
+        {
+          "kind": "Assign",
+          "start": 2554,
+          "end": 2554
+        },
+        {
+          "kind": "Raise",
+          "start": 880,
+          "end": 880
+        },
+        {
+          "kind": "If",
+          "start": 885,
+          "end": 886
+        },
+        {
+          "kind": "Assign",
+          "start": 888,
+          "end": 890
+        },
+        {
+          "kind": "Expr",
+          "start": 891,
+          "end": 891
+        },
+        {
+          "kind": "Expr",
+          "start": 892,
+          "end": 892
+        },
+        {
+          "kind": "AugAssign",
+          "start": 894,
+          "end": 894
+        },
+        {
+          "kind": "AugAssign",
+          "start": 895,
+          "end": 899
+        },
+        {
+          "kind": "AugAssign",
+          "start": 900,
+          "end": 900
+        },
+        {
+          "kind": "Assign",
+          "start": 914,
+          "end": 914
+        },
+        {
+          "kind": "If",
+          "start": 915,
+          "end": 919
+        },
+        {
+          "kind": "Assign",
+          "start": 923,
+          "end": 923
+        },
+        {
+          "kind": "If",
+          "start": 924,
+          "end": 925
+        },
+        {
+          "kind": "AugAssign",
+          "start": 926,
+          "end": 926
+        },
+        {
+          "kind": "Assign",
+          "start": 928,
+          "end": 928
+        },
+        {
+          "kind": "If",
+          "start": 939,
+          "end": 940
+        },
+        {
+          "kind": "Expr",
+          "start": 941,
+          "end": 941
+        },
+        {
+          "kind": "Assign",
+          "start": 1973,
+          "end": 1973
+        },
+        {
+          "kind": "Assign",
+          "start": 1975,
+          "end": 1975
+        },
+        {
+          "kind": "Continue",
+          "start": 2019,
+          "end": 2019
+        },
+        {
+          "kind": "Assign",
+          "start": 2026,
+          "end": 2026
+        },
+        {
+          "kind": "AugAssign",
+          "start": 2028,
+          "end": 2028
+        },
+        {
+          "kind": "Assign",
+          "start": 2033,
+          "end": 2033
+        },
+        {
+          "kind": "Assign",
+          "start": 2034,
+          "end": 2034
+        },
+        {
+          "kind": "Assign",
+          "start": 2035,
+          "end": 2035
+        },
+        {
+          "kind": "AugAssign",
+          "start": 2037,
+          "end": 2037
+        },
+        {
+          "kind": "If",
+          "start": 2039,
+          "end": 2044
+        },
+        {
+          "kind": "Continue",
+          "start": 2541,
+          "end": 2541
+        },
+        {
+          "kind": "If",
+          "start": 2542,
+          "end": 2552
+        },
+        {
+          "kind": "Expr",
+          "start": 886,
+          "end": 886
+        },
+        {
+          "kind": "AugAssign",
+          "start": 916,
+          "end": 916
+        },
+        {
+          "kind": "Assign",
+          "start": 917,
+          "end": 917
+        },
+        {
+          "kind": "Assign",
+          "start": 918,
+          "end": 918
+        },
+        {
+          "kind": "Expr",
+          "start": 919,
+          "end": 919
+        },
+        {
+          "kind": "Continue",
+          "start": 925,
+          "end": 925
+        },
+        {
+          "kind": "Continue",
+          "start": 940,
+          "end": 940
+        },
+        {
+          "kind": "Assign",
+          "start": 2040,
+          "end": 2040
+        },
+        {
+          "kind": "If",
+          "start": 2041,
+          "end": 2042
+        },
+        {
+          "kind": "Expr",
+          "start": 2044,
+          "end": 2044
+        },
+        {
+          "kind": "Expr",
+          "start": 2543,
+          "end": 2543
+        },
+        {
+          "kind": "If",
+          "start": 2544,
+          "end": 2552
+        },
+        {
+          "kind": "AugAssign",
+          "start": 2042,
+          "end": 2042
+        },
+        {
+          "kind": "Expr",
+          "start": 2545,
+          "end": 2545
+        },
+        {
+          "kind": "If",
+          "start": 2546,
+          "end": 2552
+        },
+        {
+          "kind": "Expr",
+          "start": 2550,
+          "end": 2550
+        },
+        {
+          "kind": "Expr",
+          "start": 2552,
+          "end": 2552
+        }
+      ],
+      "program_units": 139,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_move_line.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "98a746a2ef3d2ba456d68fa86afb76f3bb4e01da2d9abeca17949244353e1904",
+      "git_object_sha256": "ff4a06f0e17862942f676fa277a03510378cff1db41c4bfe85146da26b1ea76f",
+      "source_url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_move_line.py",
+      "role": "native_integration",
+      "classification_basis": "La réservation effective est déclenchée dans les hooks create/write des lignes, pas seulement dans _get_reserve_quantity.",
+      "methods": [
+        {
+          "name": "StockMoveLine.create",
+          "start": 349,
+          "end": 434,
+          "calls": [
+            "(mls | mls.picking_id.move_line_ids)._get_lines_not_entire_pack",
+            "Quant._get_available_quantity",
+            "Quant._update_available_quantity",
+            "abs",
+            "create_move",
+            "created_moves.add",
+            "location.should_bypass_reservation",
+            "min",
+            "ml.move_id.move_dest_ids.filtered",
+            "ml.uom_id._compute_quantity",
+            "mls.filtered",
+            "move._should_bypass_reservation",
+            "move_done._check_quantity",
+            "move_line._get_linkable_moves",
+            "move_line._prepare_stock_move_vals",
+            "move_line.write",
+            "move_to_recompute_state.add",
+            "next_moves._action_assign",
+            "next_moves._do_unreserve",
+            "self._copy_quant_info",
+            "self.env.context.get",
+            "self.env.context.get('reserved_quant', self.env['stock.quant'])._update_reserved_quantity",
+            "self.env['stock.move'].browse",
+            "self.env['stock.move'].browse(created_moves)._post_process_created_moves",
+            "self.env['stock.move'].browse(move_to_recompute_state)._recompute_state",
+            "self.env['stock.move'].create",
+            "self.env['stock.picking'].browse",
+            "set",
+            "super",
+            "super().create",
+            "vals.get",
+            "vals.update"
+          ],
+          "source_fragment": "    @api.model_create_multi\n    def create(self, vals_list):\n        for vals in vals_list:\n            if vals.get('move_id'):\n                vals['company_id'] = self.env['stock.move'].browse(vals['move_id']).company_id.id\n            elif vals.get('picking_id'):\n                vals['company_id'] = self.env['stock.picking'].browse(vals['picking_id']).company_id.id\n            if vals.get('move_id') and 'picked' not in vals:\n                vals['picked'] = self.env['stock.move'].browse(vals['move_id']).picked\n            if vals.get('quant_id'):\n                vals.update(self._copy_quant_info(vals))\n\n        mls = super().create(vals_list)\n        # A new line can break the entirety of a package it shares with lines already in the transfer.\n        if mls_not_entire_pack := (mls | mls.picking_id.move_line_ids)._get_lines_not_entire_pack():\n            mls_not_entire_pack.is_entire_pack = False\n\n        created_moves = set()\n\n        def create_move(move_line):\n            new_move = self.env['stock.move'].create(move_line._prepare_stock_move_vals())\n            move_line.move_id = new_move.id\n            created_moves.add(new_move.id)\n\n        # If the move line is directly create on the picking view.\n        # If this picking is already done we should generate an\n        # associated done move.\n        for move_line in mls:\n            if move_line.move_id or not move_line.picking_id:\n                continue\n            if move_line.picking_id.state != 'done':\n                moves = move_line._get_linkable_moves()\n                if moves:\n                    vals = {\n                        'move_id': moves[0].id,\n                        'picking_id': moves[0].picking_id.id,\n                    }\n                    if moves[0].picked:\n                        vals['picked'] = True\n                    move_line.write(vals)\n                else:\n                    create_move(move_line)\n            else:\n                create_move(move_line)\n\n        move_to_recompute_state = set()\n        for move_line in mls:\n            if move_line.state == 'done':\n                continue\n            location = move_line.location_id\n            product = move_line.product_id\n            move = move_line.move_id\n            if move:\n                reservation = not move._should_bypass_reservation()\n            else:\n                reservation = product.is_storable and not location.should_bypass_reservation()\n            if move_line.quantity_product_uom and reservation:\n                self.env.context.get('reserved_quant', self.env['stock.quant'])._update_reserved_quantity(\n                    product, location, move_line.quantity_product_uom, lot_id=move_line.lot_id, package_id=move_line.package_id, owner_id=move_line.owner_id)\n\n                if move:\n                    move_to_recompute_state.add(move.id)\n        self.env['stock.move'].browse(move_to_recompute_state)._recompute_state()\n        self.env['stock.move'].browse(created_moves)._post_process_created_moves()\n\n        for ml in mls:\n            if ml.state == 'done':\n                if ml.product_id.is_storable:\n                    Quant = self.env['stock.quant']\n                    quantity = ml.uom_id._compute_quantity(ml.quantity, ml.move_id.product_id.uom_id, rounding_method='HALF-UP')\n                    available_qty, in_date = Quant._update_available_quantity(ml.product_id, ml.location_id, -quantity, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id)\n                    if available_qty < 0 and ml.lot_id:\n                        # see if we can compensate the negative quants with some untracked quants\n                        untracked_qty = Quant._get_available_quantity(ml.product_id, ml.location_id, lot_id=False, package_id=ml.package_id, owner_id=ml.owner_id, strict=True)\n                        if untracked_qty:\n                            taken_from_untracked_qty = min(untracked_qty, abs(quantity))\n                            Quant._update_available_quantity(ml.product_id, ml.location_id, -taken_from_untracked_qty, lot_id=False, package_id=ml.package_id, owner_id=ml.owner_id)\n                            Quant._update_available_quantity(ml.product_id, ml.location_id, taken_from_untracked_qty, lot_id=ml.lot_id, package_id=ml.package_id, owner_id=ml.owner_id)\n                    Quant._update_available_quantity(ml.product_id, ml.location_dest_id, quantity, lot_id=ml.lot_id, package_id=ml.result_package_id, owner_id=ml.owner_id, in_date=in_date)\n                next_moves = ml.move_id.move_dest_ids.filtered(lambda move: move.state not in ('done', 'cancel'))\n                next_moves._do_unreserve()\n                next_moves._action_assign()\n        move_done = mls.filtered(lambda m: m.state == \"done\").move_id\n        if move_done:\n            move_done._check_quantity()\n        return mls",
+          "program_units": 66
+        },
+        {
+          "name": "StockMoveLine.write",
+          "start": 436,
+          "end": 551,
+          "calls": [
+            "UserError",
+            "_",
+            "abs",
+            "any",
+            "isinstance",
+            "len",
+            "ml._free_reservation",
+            "ml._log_message",
+            "ml._synchronize_quant",
+            "ml.move_id._should_bypass_reservation",
+            "ml.move_id.move_dest_ids.filtered",
+            "ml.product_id.uom_id.compare",
+            "ml.uom_id.is_zero",
+            "mls.filtered",
+            "mls_to_update.write",
+            "move_done._check_quantity",
+            "moves_to_recompute_state._recompute_state",
+            "new_ml_uom._compute_quantity",
+            "next_moves._action_assign",
+            "next_moves._do_unreserve",
+            "packages_to_check.filtered",
+            "self._copy_quant_info",
+            "self._get_lines_not_entire_pack",
+            "self.env.context.get",
+            "self.env['stock.package'].browse",
+            "self.env[model].browse",
+            "self.filtered",
+            "self.result_package_id._get_all_package_dest_ids",
+            "super",
+            "super(StockMoveLine, self).write",
+            "updates.get",
+            "updates.keys",
+            "vals.get",
+            "vals.update",
+            "{'result_package_id'}.difference"
+          ],
+          "source_fragment": "    def write(self, vals):\n        if 'product_id' in vals and any(vals.get('state', ml.state) != 'draft' and vals['product_id'] != ml.product_id.id for ml in self):\n            raise UserError(_(\"Changing the product is only allowed in 'Draft' state.\"))\n\n        if ('lot_id' in vals or 'quant_id' in vals) and len(self.product_id) > 1:\n            raise UserError(_(\"Changing the Lot/Serial number for move lines with different products is not allowed.\"))\n\n        moves_to_recompute_state = self.env['stock.move']\n        packages_to_check = self.env['stock.package']\n        if 'result_package_id' in vals:\n            # Either changed the result package or removed it\n            packages_to_check = self.env['stock.package'].browse(self.result_package_id._get_all_package_dest_ids())\n        triggers = [\n            ('location_id', 'stock.location'),\n            ('location_dest_id', 'stock.location'),\n            ('lot_id', 'stock.lot'),\n            ('package_id', 'stock.package'),\n            ('result_package_id', 'stock.package'),\n            ('owner_id', 'res.partner'),\n            ('uom_id', 'uom.uom')\n        ]\n        if vals.get('quant_id'):\n            vals.update(self._copy_quant_info(vals))\n        updates = {}\n        for key, model in triggers:\n            if self.env.context.get('skip_uom_conversion'):\n                continue\n            if key in vals:\n                updates[key] = vals[key] if isinstance(vals[key], models.BaseModel) else self.env[model].browse(vals[key])\n\n        # When we try to write on a reserved move line any fields from `triggers`, result_package_id excepted,\n        # or directly reserved_uom_qty` (the actual reserved quantity), we need to make sure the associated\n        # quants are correctly updated in order to not make them out of sync (i.e. the sum of the\n        # move lines `reserved_uom_qty` should always be equal to the sum of `reserved_quantity` on\n        # the quants). If the new charateristics are not available on the quants, we chose to\n        # reserve the maximum possible.\n        if (updates and {'result_package_id'}.difference(updates.keys())) or 'quantity' in vals:\n            for ml in self:\n                if not ml.product_id.is_storable or ml.state == 'done':\n                    continue\n                if 'quantity' in vals or 'uom_id' in vals:\n                    new_ml_uom = updates.get('uom_id', ml.uom_id)\n                    new_reserved_qty = new_ml_uom._compute_quantity(\n                        vals.get('quantity', ml.quantity), ml.product_id.uom_id, rounding_method='HALF-UP')\n                    # Make sure `reserved_uom_qty` is not negative.\n                    if ml.product_id.uom_id.compare(new_reserved_qty, 0) < 0:\n                        raise UserError(_('Reserving a negative quantity is not allowed.'))\n                else:\n                    new_reserved_qty = ml.quantity_product_uom\n\n                # Unreserve the old charateristics of the move line.\n                if not ml.uom_id.is_zero(ml.quantity_product_uom):\n                    ml._synchronize_quant(-ml.quantity_product_uom, ml.location_id, action=\"reserved\")\n\n                # Reserve the maximum available of the new charateristics of the move line.\n                if not ml.move_id._should_bypass_reservation(updates.get('location_id', ml.location_id)):\n                    ml._synchronize_quant(\n                        new_reserved_qty, updates.get('location_id', ml.location_id), action=\"reserved\",\n                        lot=updates.get('lot_id', ml.lot_id), package=updates.get('package_id', ml.package_id),\n                        owner=updates.get('owner_id', ml.owner_id))\n\n                if ('quantity' in vals and vals['quantity'] != ml.quantity) or 'uom_id' in vals:\n                    moves_to_recompute_state |= ml.move_id\n\n        # When editing a done move line, the reserved availability of a potential chained move is impacted. Take care of running again `_action_assign` on the concerned moves.\n        mls = self.env['stock.move.line']\n        if updates or 'quantity' in vals:\n            next_moves = self.env['stock.move']\n            mls = self.filtered(lambda ml: ml.move_id.state == 'done' and ml.product_id.is_storable)\n            if not updates:  # we can skip those where quantity is already good up to UoM rounding\n                mls = mls.filtered(lambda ml: not ml.uom_id.is_zero(ml.quantity - vals['quantity']))\n            for ml in mls:\n                # undo the original move line\n                in_date = ml._synchronize_quant(-ml.quantity_product_uom, ml.location_dest_id, package=ml.result_package_id)[1]\n                ml._synchronize_quant(ml.quantity_product_uom, ml.location_id, in_date=in_date)\n\n                # Unreserve and reserve following move in order to have the real reserved quantity on move_line.\n                next_moves |= ml.move_id.move_dest_ids.filtered(lambda move: move.state not in ('done', 'cancel'))\n\n                # Log a note\n                if ml.picking_id:\n                    ml._log_message(ml.picking_id, ml, 'stock.track_move_template', vals)\n            move_done = mls.move_id\n            if move_done:\n                move_done._check_quantity()\n\n        res = super(StockMoveLine, self).write(vals)\n\n        for ml in mls:\n            available_qty, dummy = ml._synchronize_quant(-ml.quantity_product_uom, ml.location_id)\n            ml._synchronize_quant(ml.quantity_product_uom, ml.location_dest_id, package=ml.result_package_id)\n            if available_qty < 0:\n                ml._free_reservation(\n                    ml.product_id, ml.location_id,\n                    abs(available_qty), lot_id=ml.lot_id, package_id=ml.package_id,\n                    owner_id=ml.owner_id)\n\n        if packages_to_check:\n            # Clear the dest from packages if not linked to any active picking\n            packages_to_check.filtered(lambda p: p.package_dest_id and not p.picking_ids).package_dest_id = False\n        if updates or 'quantity' in vals:\n            # Updated fields could imply that entire packs are no longer entire.\n            if mls_to_update := self._get_lines_not_entire_pack():\n                mls_to_update.write({'is_entire_pack': False})\n\n        # As stock_account values according to a move's `product_uom_qty`, we consider that any\n        # done stock move should have its `quantity_done` equals to its `product_uom_qty`, and\n        # this is what move's `action_done` will do. So, we replicate the behavior here.\n        if updates or 'quantity' in vals:\n            next_moves._do_unreserve()\n            next_moves._action_assign()\n\n        if moves_to_recompute_state:\n            moves_to_recompute_state._recompute_state()\n\n        return res",
+          "program_units": 66
+        },
+        {
+          "name": "StockMoveLine._synchronize_quant",
+          "start": 759,
+          "end": 779,
+          "calls": [
+            "abs",
+            "min",
+            "quants_value.get",
+            "self.env['stock.quant']._get_available_quantity",
+            "self.env['stock.quant']._update_available_quantity",
+            "self.env['stock.quant']._update_reserved_quantity",
+            "self.move_id._should_bypass_reservation",
+            "self.uom_id.is_zero"
+          ],
+          "source_fragment": "    def _synchronize_quant(self, quantity, location, action=\"available\", in_date=False, **quants_value):\n        \"\"\" quantity should be express in product's UoM\"\"\"\n        lot = quants_value.get('lot', self.lot_id)\n        package = quants_value.get('package', self.package_id)\n        owner = quants_value.get('owner', self.owner_id)\n        available_qty = 0\n        if not self.product_id.is_storable or self.uom_id.is_zero(quantity):\n            return 0, False\n        if action == \"available\":\n            available_qty, in_date = self.env['stock.quant']._update_available_quantity(self.product_id, location, quantity, lot_id=lot, package_id=package, owner_id=owner, in_date=in_date)\n        elif action == \"reserved\" and not self.move_id._should_bypass_reservation(location):\n            self.env['stock.quant']._update_reserved_quantity(self.product_id, location, quantity, lot_id=lot, package_id=package, owner_id=owner)\n        if available_qty < 0 and lot:\n            # see if we can compensate the negative quants with some untracked quants\n            untracked_qty = self.env['stock.quant']._get_available_quantity(self.product_id, location, lot_id=False, package_id=package, owner_id=owner, strict=True)\n            if not untracked_qty:\n                return available_qty, in_date\n            taken_from_untracked_qty = min(untracked_qty, abs(quantity))\n            self.env['stock.quant']._update_available_quantity(self.product_id, location, -taken_from_untracked_qty, lot_id=False, package_id=package, owner_id=owner, in_date=in_date)\n            self.env['stock.quant']._update_available_quantity(self.product_id, location, taken_from_untracked_qty, lot_id=lot, package_id=package, owner_id=owner, in_date=in_date)\n        return available_qty, in_date",
+          "program_units": 19
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 350,
+          "end": 434
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 436,
+          "end": 551
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 759,
+          "end": 779
+        },
+        {
+          "kind": "For",
+          "start": 351,
+          "end": 359
+        },
+        {
+          "kind": "Assign",
+          "start": 361,
+          "end": 361
+        },
+        {
+          "kind": "If",
+          "start": 363,
+          "end": 364
+        },
+        {
+          "kind": "Assign",
+          "start": 366,
+          "end": 366
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 368,
+          "end": 371
+        },
+        {
+          "kind": "For",
+          "start": 376,
+          "end": 392
+        },
+        {
+          "kind": "Assign",
+          "start": 394,
+          "end": 394
+        },
+        {
+          "kind": "For",
+          "start": 395,
+          "end": 410
+        },
+        {
+          "kind": "Expr",
+          "start": 411,
+          "end": 411
+        },
+        {
+          "kind": "Expr",
+          "start": 412,
+          "end": 412
+        },
+        {
+          "kind": "For",
+          "start": 414,
+          "end": 430
+        },
+        {
+          "kind": "Assign",
+          "start": 431,
+          "end": 431
+        },
+        {
+          "kind": "If",
+          "start": 432,
+          "end": 433
+        },
+        {
+          "kind": "Return",
+          "start": 434,
+          "end": 434
+        },
+        {
+          "kind": "If",
+          "start": 437,
+          "end": 438
+        },
+        {
+          "kind": "If",
+          "start": 440,
+          "end": 441
+        },
+        {
+          "kind": "Assign",
+          "start": 443,
+          "end": 443
+        },
+        {
+          "kind": "Assign",
+          "start": 444,
+          "end": 444
+        },
+        {
+          "kind": "If",
+          "start": 445,
+          "end": 447
+        },
+        {
+          "kind": "Assign",
+          "start": 448,
+          "end": 456
+        },
+        {
+          "kind": "If",
+          "start": 457,
+          "end": 458
+        },
+        {
+          "kind": "Assign",
+          "start": 459,
+          "end": 459
+        },
+        {
+          "kind": "For",
+          "start": 460,
+          "end": 464
+        },
+        {
+          "kind": "If",
+          "start": 472,
+          "end": 498
+        },
+        {
+          "kind": "Assign",
+          "start": 501,
+          "end": 501
+        },
+        {
+          "kind": "If",
+          "start": 502,
+          "end": 520
+        },
+        {
+          "kind": "Assign",
+          "start": 522,
+          "end": 522
+        },
+        {
+          "kind": "For",
+          "start": 524,
+          "end": 531
+        },
+        {
+          "kind": "If",
+          "start": 533,
+          "end": 535
+        },
+        {
+          "kind": "If",
+          "start": 536,
+          "end": 539
+        },
+        {
+          "kind": "If",
+          "start": 544,
+          "end": 546
+        },
+        {
+          "kind": "If",
+          "start": 548,
+          "end": 549
+        },
+        {
+          "kind": "Return",
+          "start": 551,
+          "end": 551
+        },
+        {
+          "kind": "Assign",
+          "start": 761,
+          "end": 761
+        },
+        {
+          "kind": "Assign",
+          "start": 762,
+          "end": 762
+        },
+        {
+          "kind": "Assign",
+          "start": 763,
+          "end": 763
+        },
+        {
+          "kind": "Assign",
+          "start": 764,
+          "end": 764
+        },
+        {
+          "kind": "If",
+          "start": 765,
+          "end": 766
+        },
+        {
+          "kind": "If",
+          "start": 767,
+          "end": 770
+        },
+        {
+          "kind": "If",
+          "start": 771,
+          "end": 778
+        },
+        {
+          "kind": "Return",
+          "start": 779,
+          "end": 779
+        },
+        {
+          "kind": "If",
+          "start": 352,
+          "end": 355
+        },
+        {
+          "kind": "If",
+          "start": 356,
+          "end": 357
+        },
+        {
+          "kind": "If",
+          "start": 358,
+          "end": 359
+        },
+        {
+          "kind": "Assign",
+          "start": 364,
+          "end": 364
+        },
+        {
+          "kind": "Assign",
+          "start": 369,
+          "end": 369
+        },
+        {
+          "kind": "Assign",
+          "start": 370,
+          "end": 370
+        },
+        {
+          "kind": "Expr",
+          "start": 371,
+          "end": 371
+        },
+        {
+          "kind": "If",
+          "start": 377,
+          "end": 378
+        },
+        {
+          "kind": "If",
+          "start": 379,
+          "end": 392
+        },
+        {
+          "kind": "If",
+          "start": 396,
+          "end": 397
+        },
+        {
+          "kind": "Assign",
+          "start": 398,
+          "end": 398
+        },
+        {
+          "kind": "Assign",
+          "start": 399,
+          "end": 399
+        },
+        {
+          "kind": "Assign",
+          "start": 400,
+          "end": 400
+        },
+        {
+          "kind": "If",
+          "start": 401,
+          "end": 404
+        },
+        {
+          "kind": "If",
+          "start": 405,
+          "end": 410
+        },
+        {
+          "kind": "If",
+          "start": 415,
+          "end": 430
+        },
+        {
+          "kind": "Expr",
+          "start": 433,
+          "end": 433
+        },
+        {
+          "kind": "Raise",
+          "start": 438,
+          "end": 438
+        },
+        {
+          "kind": "Raise",
+          "start": 441,
+          "end": 441
+        },
+        {
+          "kind": "Assign",
+          "start": 447,
+          "end": 447
+        },
+        {
+          "kind": "Expr",
+          "start": 458,
+          "end": 458
+        },
+        {
+          "kind": "If",
+          "start": 461,
+          "end": 462
+        },
+        {
+          "kind": "If",
+          "start": 463,
+          "end": 464
+        },
+        {
+          "kind": "For",
+          "start": 473,
+          "end": 498
+        },
+        {
+          "kind": "Assign",
+          "start": 503,
+          "end": 503
+        },
+        {
+          "kind": "Assign",
+          "start": 504,
+          "end": 504
+        },
+        {
+          "kind": "If",
+          "start": 505,
+          "end": 506
+        },
+        {
+          "kind": "For",
+          "start": 507,
+          "end": 517
+        },
+        {
+          "kind": "Assign",
+          "start": 518,
+          "end": 518
+        },
+        {
+          "kind": "If",
+          "start": 519,
+          "end": 520
+        },
+        {
+          "kind": "Assign",
+          "start": 525,
+          "end": 525
+        },
+        {
+          "kind": "Expr",
+          "start": 526,
+          "end": 526
+        },
+        {
+          "kind": "If",
+          "start": 527,
+          "end": 531
+        },
+        {
+          "kind": "Assign",
+          "start": 535,
+          "end": 535
+        },
+        {
+          "kind": "If",
+          "start": 538,
+          "end": 539
+        },
+        {
+          "kind": "Expr",
+          "start": 545,
+          "end": 545
+        },
+        {
+          "kind": "Expr",
+          "start": 546,
+          "end": 546
+        },
+        {
+          "kind": "Expr",
+          "start": 549,
+          "end": 549
+        },
+        {
+          "kind": "Return",
+          "start": 766,
+          "end": 766
+        },
+        {
+          "kind": "Assign",
+          "start": 768,
+          "end": 768
+        },
+        {
+          "kind": "If",
+          "start": 769,
+          "end": 770
+        },
+        {
+          "kind": "Assign",
+          "start": 773,
+          "end": 773
+        },
+        {
+          "kind": "If",
+          "start": 774,
+          "end": 775
+        },
+        {
+          "kind": "Assign",
+          "start": 776,
+          "end": 776
+        },
+        {
+          "kind": "Expr",
+          "start": 777,
+          "end": 777
+        },
+        {
+          "kind": "Expr",
+          "start": 778,
+          "end": 778
+        },
+        {
+          "kind": "Assign",
+          "start": 353,
+          "end": 353
+        },
+        {
+          "kind": "If",
+          "start": 354,
+          "end": 355
+        },
+        {
+          "kind": "Assign",
+          "start": 357,
+          "end": 357
+        },
+        {
+          "kind": "Expr",
+          "start": 359,
+          "end": 359
+        },
+        {
+          "kind": "Continue",
+          "start": 378,
+          "end": 378
+        },
+        {
+          "kind": "Assign",
+          "start": 380,
+          "end": 380
+        },
+        {
+          "kind": "If",
+          "start": 381,
+          "end": 390
+        },
+        {
+          "kind": "Expr",
+          "start": 392,
+          "end": 392
+        },
+        {
+          "kind": "Continue",
+          "start": 397,
+          "end": 397
+        },
+        {
+          "kind": "Assign",
+          "start": 402,
+          "end": 402
+        },
+        {
+          "kind": "Assign",
+          "start": 404,
+          "end": 404
+        },
+        {
+          "kind": "Expr",
+          "start": 406,
+          "end": 407
+        },
+        {
+          "kind": "If",
+          "start": 409,
+          "end": 410
+        },
+        {
+          "kind": "If",
+          "start": 416,
+          "end": 427
+        },
+        {
+          "kind": "Assign",
+          "start": 428,
+          "end": 428
+        },
+        {
+          "kind": "Expr",
+          "start": 429,
+          "end": 429
+        },
+        {
+          "kind": "Expr",
+          "start": 430,
+          "end": 430
+        },
+        {
+          "kind": "Continue",
+          "start": 462,
+          "end": 462
+        },
+        {
+          "kind": "Assign",
+          "start": 464,
+          "end": 464
+        },
+        {
+          "kind": "If",
+          "start": 474,
+          "end": 475
+        },
+        {
+          "kind": "If",
+          "start": 476,
+          "end": 484
+        },
+        {
+          "kind": "If",
+          "start": 487,
+          "end": 488
+        },
+        {
+          "kind": "If",
+          "start": 491,
+          "end": 495
+        },
+        {
+          "kind": "If",
+          "start": 497,
+          "end": 498
+        },
+        {
+          "kind": "Assign",
+          "start": 506,
+          "end": 506
+        },
+        {
+          "kind": "Assign",
+          "start": 509,
+          "end": 509
+        },
+        {
+          "kind": "Expr",
+          "start": 510,
+          "end": 510
+        },
+        {
+          "kind": "AugAssign",
+          "start": 513,
+          "end": 513
+        },
+        {
+          "kind": "If",
+          "start": 516,
+          "end": 517
+        },
+        {
+          "kind": "Expr",
+          "start": 520,
+          "end": 520
+        },
+        {
+          "kind": "Expr",
+          "start": 528,
+          "end": 531
+        },
+        {
+          "kind": "Expr",
+          "start": 539,
+          "end": 539
+        },
+        {
+          "kind": "Expr",
+          "start": 770,
+          "end": 770
+        },
+        {
+          "kind": "Return",
+          "start": 775,
+          "end": 775
+        },
+        {
+          "kind": "Assign",
+          "start": 355,
+          "end": 355
+        },
+        {
+          "kind": "Assign",
+          "start": 382,
+          "end": 385
+        },
+        {
+          "kind": "If",
+          "start": 386,
+          "end": 387
+        },
+        {
+          "kind": "Expr",
+          "start": 388,
+          "end": 388
+        },
+        {
+          "kind": "Expr",
+          "start": 390,
+          "end": 390
+        },
+        {
+          "kind": "Expr",
+          "start": 410,
+          "end": 410
+        },
+        {
+          "kind": "Assign",
+          "start": 417,
+          "end": 417
+        },
+        {
+          "kind": "Assign",
+          "start": 418,
+          "end": 418
+        },
+        {
+          "kind": "Assign",
+          "start": 419,
+          "end": 419
+        },
+        {
+          "kind": "If",
+          "start": 420,
+          "end": 426
+        },
+        {
+          "kind": "Expr",
+          "start": 427,
+          "end": 427
+        },
+        {
+          "kind": "Continue",
+          "start": 475,
+          "end": 475
+        },
+        {
+          "kind": "Assign",
+          "start": 477,
+          "end": 477
+        },
+        {
+          "kind": "Assign",
+          "start": 478,
+          "end": 479
+        },
+        {
+          "kind": "If",
+          "start": 481,
+          "end": 482
+        },
+        {
+          "kind": "Assign",
+          "start": 484,
+          "end": 484
+        },
+        {
+          "kind": "Expr",
+          "start": 488,
+          "end": 488
+        },
+        {
+          "kind": "Expr",
+          "start": 492,
+          "end": 495
+        },
+        {
+          "kind": "AugAssign",
+          "start": 498,
+          "end": 498
+        },
+        {
+          "kind": "Expr",
+          "start": 517,
+          "end": 517
+        },
+        {
+          "kind": "Assign",
+          "start": 387,
+          "end": 387
+        },
+        {
+          "kind": "Assign",
+          "start": 422,
+          "end": 422
+        },
+        {
+          "kind": "If",
+          "start": 423,
+          "end": 426
+        },
+        {
+          "kind": "Raise",
+          "start": 482,
+          "end": 482
+        },
+        {
+          "kind": "Assign",
+          "start": 424,
+          "end": 424
+        },
+        {
+          "kind": "Expr",
+          "start": 425,
+          "end": 425
+        },
+        {
+          "kind": "Expr",
+          "start": 426,
+          "end": 426
+        }
+      ],
+      "program_units": 151,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_quant.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+      "git_object_sha256": "9a0eeb90be321aeef4d4ea00356de3d7925b92e8237c064fae55f5c8fc6c5750",
+      "source_url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_quant.py",
+      "role": "stock_quantity",
+      "classification_basis": "traitement de quantité/état de stock observé dans la chaîne",
+      "methods": [
+        {
+          "name": "StockQuant._get_reserve_quantity",
+          "start": 869,
+          "end": 949,
+          "calls": [
+            "UserError",
+            "_",
+            "abs",
+            "defaultdict",
+            "int",
+            "min",
+            "product_id.uom_id._compute_quantity",
+            "product_id.uom_id.compare",
+            "product_id.uom_id.is_zero",
+            "quants._get_available_quantity",
+            "quants.filtered",
+            "quants.filtered(lambda q: product_id.uom_id.compare(q.quantity, 0) > 0).mapped",
+            "quants.mapped",
+            "reserved_quants.append",
+            "self._gather",
+            "self.env.context.get",
+            "self.env.context.get('packaging_uom_id')._check_qty",
+            "self.sudo",
+            "sum",
+            "uom_id._compute_quantity"
+          ],
+          "source_fragment": "    def _get_reserve_quantity(self, product_id, location_id, quantity, uom_id=None, lot_id=None, package_id=None, owner_id=None, strict=False):\n        \"\"\" Get the quantity available to reserve for the set of quants\n        sharing the combination of `product_id, location_id` if `strict` is set to False or sharing\n        the *exact same characteristics* otherwise. If no quants are in self, `_gather` will do a search to fetch the quants\n        Typically, this method is called before the `stock.move.line` creation to know the reserved_qty that could be use.\n        It's also called by `_update_reserve_quantity` to find the quant to reserve.\n\n        :return: a list of tuples (quant, quantity_reserved) showing on which quant the reservation\n            could be done and how much the system is able to reserve on it\n        \"\"\"\n        self = self.sudo()\n\n        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict, qty=quantity)\n\n        # avoid quants with negative qty to not lower available_qty\n        available_quantity = quants._get_available_quantity(product_id, location_id, lot_id, package_id, owner_id, strict)\n\n        # do full packaging reservation when it's needed\n        if self.env.context.get('packaging_uom_id') and product_id.product_tmpl_id.categ_id.packaging_reserve_method == \"full\":\n            available_quantity = self.env.context.get('packaging_uom_id')._check_qty(min(quantity, available_quantity), product_id.uom_id, \"DOWN\")\n\n        quantity = min(quantity, available_quantity)\n\n        # `quantity` is in the quants unit of measure. There's a possibility that the move's\n        # unit of measure won't be respected if we blindly reserve this quantity, a common usecase\n        # is if the move's unit of measure's rounding does not allow fractional reservation. We chose\n        # to convert `quantity` to the move's unit of measure with a down rounding method and\n        # then get it back in the quants unit of measure with an half-up rounding_method. This\n        # way, we'll never reserve more than allowed. We do not apply this logic if\n        # `available_quantity` is brought by a chained move line. In this case, `_prepare_move_line_vals`\n        # will take care of changing the UOM to the UOM of the product.\n        if not strict and uom_id and product_id.uom_id != uom_id:\n            quantity_move_uom = product_id.uom_id._compute_quantity(quantity, uom_id, rounding_method='DOWN')\n            quantity = uom_id._compute_quantity(quantity_move_uom, product_id.uom_id, rounding_method='HALF-UP')\n\n        if product_id.tracking == 'serial':\n            if product_id.uom_id.compare(quantity, int(quantity)) != 0:\n                quantity = 0\n\n        reserved_quants = []\n\n        if product_id.uom_id.compare(quantity, 0) > 0:\n            # if we want to reserve\n            available_quantity = sum(quants.filtered(lambda q: product_id.uom_id.compare(q.quantity, 0) > 0).mapped('quantity')) - sum(quants.mapped('reserved_quantity'))\n        elif product_id.uom_id.compare(quantity, 0) < 0:\n            # if we want to unreserve\n            available_quantity = sum(quants.mapped('reserved_quantity'))\n            if product_id.uom_id.compare(abs(quantity), available_quantity) > 0:\n                raise UserError(_('It is not possible to unreserve more products of %s than you have in stock.', product_id.display_name))\n        else:\n            return reserved_quants\n\n        negative_reserved_quantity = defaultdict(float)\n        for quant in quants:\n            if product_id.uom_id.compare(quant.quantity - quant.reserved_quantity, 0) < 0:\n                negative_reserved_quantity[(quant.location_id, quant.lot_id, quant.package_id, quant.owner_id)] += quant.quantity - quant.reserved_quantity\n        for quant in quants:\n            if product_id.uom_id.compare(quantity, 0) > 0:\n                max_quantity_on_quant = quant.quantity - quant.reserved_quantity\n                if product_id.uom_id.compare(max_quantity_on_quant, 0) <= 0:\n                    continue\n                negative_quantity = negative_reserved_quantity[(quant.location_id, quant.lot_id, quant.package_id, quant.owner_id)]\n                if negative_quantity:\n                    negative_qty_to_remove = min(abs(negative_quantity), max_quantity_on_quant)\n                    negative_reserved_quantity[(quant.location_id, quant.lot_id, quant.package_id, quant.owner_id)] += negative_qty_to_remove\n                    max_quantity_on_quant -= negative_qty_to_remove\n                if product_id.uom_id.compare(max_quantity_on_quant, 0) <= 0:\n                    continue\n                max_quantity_on_quant = min(max_quantity_on_quant, quantity)\n                reserved_quants.append((quant, max_quantity_on_quant))\n                quantity -= max_quantity_on_quant\n                available_quantity -= max_quantity_on_quant\n            else:\n                max_quantity_on_quant = min(quant.reserved_quantity, abs(quantity))\n                reserved_quants.append((quant, -max_quantity_on_quant))\n                quantity += max_quantity_on_quant\n                available_quantity += max_quantity_on_quant\n\n            if product_id.uom_id.is_zero(quantity) or product_id.uom_id.is_zero(available_quantity):\n                break\n        return reserved_quants",
+          "program_units": 48
+        },
+        {
+          "name": "StockQuant._get_available_quantity",
+          "start": 828,
+          "end": 867,
+          "calls": [
+            "availaible_quantities.values",
+            "list",
+            "product_id.uom_id.compare",
+            "quants.mapped",
+            "self._gather",
+            "self.sudo",
+            "set",
+            "sum"
+          ],
+          "source_fragment": "    def _get_available_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False, allow_negative=False):\n        \"\"\" Return the available quantity, i.e. the sum of `quantity` minus the sum of\n        `reserved_quantity`, for the set of quants sharing the combination of `product_id,\n        location_id` if `strict` is set to False or sharing the *exact same characteristics*\n        otherwise.\n        The set of quants to filter from can be in `self`, if not a search will be done\n        This method is called in the following usecases:\n            - when a stock move checks its availability\n            - when a stock move actually assign\n            - when editing a move line, to check if the new value is forced or not\n            - when validating a move line with some forced values and have to potentially unlink an\n              equivalent move line in another picking\n        In the two first usecases, `strict` should be set to `False`, as we don't know what exact\n        quants we'll reserve, and the characteristics are meaningless in this context.\n        In the last ones, `strict` should be set to `True`, as we work on a specific set of\n        characteristics.\n\n        :return: available quantity as a float\n        \"\"\"\n        self = self.sudo()\n        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)\n        if not product_id.tracking:\n            available_quantity = sum(quants.mapped('quantity')) - sum(quants.mapped('reserved_quantity'))\n            if allow_negative:\n                return available_quantity\n            else:\n                return available_quantity if product_id.uom_id.compare(available_quantity, 0.0) >= 0.0 else 0.0\n        else:\n            availaible_quantities = {lot_id: 0.0 for lot_id in list(set(quants.mapped('lot_id'))) + ['untracked']}\n            for quant in quants:\n                if not quant.lot_id and strict and lot_id:\n                    continue\n                if not quant.lot_id:\n                    availaible_quantities['untracked'] += quant.quantity - quant.reserved_quantity\n                else:\n                    availaible_quantities[quant.lot_id] += quant.quantity - quant.reserved_quantity\n            if allow_negative:\n                return sum(availaible_quantities.values())\n            else:\n                return sum(available_quantity for available_quantity in availaible_quantities.values() if product_id.uom_id.compare(available_quantity, 0) > 0)",
+          "program_units": 18
+        },
+        {
+          "name": "StockQuant._gather",
+          "start": 806,
+          "end": 826,
+          "calls": [
+            "res.sorted",
+            "self._get_gather_domain",
+            "self._get_removal_strategy",
+            "self._get_removal_strategy_order",
+            "self._run_least_packages_removal_strategy_astar",
+            "self.env.context.get",
+            "self.search"
+          ],
+          "source_fragment": "    def _gather(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False, qty=0):\n        \"\"\" if records in self, the records are filtered based on the wanted characteristics passed to this function\n            if not, a search is done with all the characteristics passed.\n        \"\"\"\n        removal_strategy = self._get_removal_strategy(product_id, location_id)\n        domain = self._get_gather_domain(product_id, location_id, lot_id, package_id, owner_id, strict)\n        if removal_strategy == 'least_packages' and qty:\n            domain = self._run_least_packages_removal_strategy_astar(domain, qty)\n        order = self._get_removal_strategy_order(removal_strategy)\n\n        quants_cache = self.env.context.get('quants_cache')\n        if quants_cache is not None and strict and removal_strategy != 'least_packages':\n            res = self.env['stock.quant']\n            if lot_id:\n                res |= quants_cache[product_id.id, location_id.id, lot_id.id, package_id.id, owner_id.id]\n            res |= quants_cache[product_id.id, location_id.id, False, package_id.id, owner_id.id]\n        else:\n            res = self.search(domain, order=order)\n        if removal_strategy == \"closest\":\n            res = res.sorted(lambda q: (q.location_id.complete_name, -q.id))\n        return res.sorted(lambda q: not q.lot_id)",
+          "program_units": 16
+        },
+        {
+          "name": "StockQuant._get_gather_domain",
+          "start": 785,
+          "end": 804,
+          "calls": [
+            "Domain",
+            "Domain.AND",
+            "domains.append",
+            "domains.extend",
+            "self.env.context.get"
+          ],
+          "source_fragment": "    def _get_gather_domain(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False):\n        domains = [Domain('product_id', '=', product_id.id)]\n        if not strict:\n            if lot_id:\n                domains.append(Domain('lot_id', 'in', [lot_id.id, False]))\n            if package_id:\n                domains.append(Domain('package_id', '=', package_id.id))\n            if owner_id:\n                domains.append(Domain('owner_id', '=', owner_id.id))\n            domains.append(Domain('location_id', 'child_of', location_id.id))\n        else:\n            domains.extend((\n                Domain('lot_id', 'in', [False, lot_id.id if lot_id else False]),\n                Domain('package_id', '=', package_id.id if package_id else False),\n                Domain('owner_id', '=', owner_id.id if owner_id else False),\n                Domain('location_id', '=', location_id.id),\n            ))\n        if self.env.context.get('with_expiration'):\n            domains.append(Domain('removal_date', '>=', self.env.context['with_expiration']) | Domain('removal_date', '=', False))\n        return Domain.AND(domains)",
+          "program_units": 14
+        },
+        {
+          "name": "StockQuant._update_reserved_quantity",
+          "start": 1142,
+          "end": 1155,
+          "calls": [
+            "self._update_available_quantity"
+          ],
+          "source_fragment": "    @api.model\n    def _update_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=True):\n        \"\"\" Increase or decrease `reserved_quantity` of a set of quants for a given set of\n        product_id/location_id/lot_id/package_id/owner_id.\n\n        :param product_id:\n        :param location_id:\n        :param quantity:\n        :param lot_id:\n        :param package_id:\n        :param owner_id:\n        :return: available_quantity\n        \"\"\"\n        self._update_available_quantity(product_id, location_id, reserved_quantity=quantity, lot_id=lot_id, package_id=package_id, owner_id=owner_id)",
+          "program_units": 2
+        },
+        {
+          "name": "StockQuant._update_available_quantity",
+          "start": 1072,
+          "end": 1140,
+          "calls": [
+            "ValidationError",
+            "_",
+            "fields.Datetime.now",
+            "location_id.should_bypass_reservation",
+            "max",
+            "min",
+            "product_id.uom_id.compare",
+            "quant.uom_id.compare",
+            "quant.write",
+            "quants.filtered",
+            "quants.try_lock_for_update",
+            "self._gather",
+            "self._get_available_quantity",
+            "self.create",
+            "self.sudo"
+          ],
+          "source_fragment": "    @api.model\n    def _update_available_quantity(self, product_id, location_id, quantity=False, reserved_quantity=False, lot_id=None, package_id=None, owner_id=None, in_date=None):\n        \"\"\" Increase or decrease `quantity` or 'reserved quantity' of a set of quants for a given set of\n        product_id/location_id/lot_id/package_id/owner_id.\n\n        :param product_id:\n        :param location_id:\n        :param quantity:\n        :param lot_id:\n        :param package_id:\n        :param owner_id:\n        :param datetime in_date: Should only be passed when calls to this method are done in\n                                 order to move a quant. When creating a tracked quant, the\n                                 current datetime will be used.\n        :return: tuple (available_quantity, in_date as a datetime)\n        \"\"\"\n        if not (quantity or reserved_quantity):\n            raise ValidationError(_('Quantity or Reserved Quantity should be set.'))\n        self = self.sudo()\n        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)\n        if lot_id:\n            if product_id.uom_id.compare(quantity, 0) > 0:\n                quants = quants.filtered(lambda q: q.lot_id)\n            else:\n                # Don't remove quantity from a negative quant without lot\n                quants = quants.filtered(lambda q: product_id.uom_id.compare(q.quantity, 0) > 0 or q.lot_id)\n\n        if location_id.should_bypass_reservation():\n            incoming_dates = []\n        else:\n            incoming_dates = [quant.in_date for quant in quants if quant.in_date and\n                              quant.uom_id.compare(quant.quantity, 0) > 0]\n        if in_date:\n            incoming_dates += [in_date]\n        # If multiple incoming dates are available for a given lot_id/package_id/owner_id, we\n        # consider only the oldest one as being relevant.\n        if incoming_dates:\n            in_date = min(incoming_dates)\n        else:\n            in_date = fields.Datetime.now()\n\n        quant = None\n        if quants:\n            # quants are already ordered in _gather\n            # lock the first available\n            quant = quants.try_lock_for_update(allow_referencing=True, limit=1)\n\n        if quant:\n            vals = {'in_date': in_date}\n            if quantity:\n                vals['quantity'] = quant.quantity + quantity\n            if reserved_quantity:\n                vals['reserved_quantity'] = max(0, quant.reserved_quantity + reserved_quantity)\n            quant.write(vals)\n        else:\n            vals = {\n                'product_id': product_id.id,\n                'location_id': location_id.id,\n                'lot_id': lot_id and lot_id.id,\n                'package_id': package_id and package_id.id,\n                'owner_id': owner_id and owner_id.id,\n                'in_date': in_date,\n            }\n            if quantity:\n                vals['quantity'] = quantity\n            if reserved_quantity:\n                vals['reserved_quantity'] = reserved_quantity\n            self.create(vals)\n        return self._get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True, allow_negative=True), in_date",
+          "program_units": 34
+        },
+        {
+          "name": "StockQuant.create",
+          "start": 285,
+          "end": 346,
+          "calls": [
+            "UserError",
+            "_",
+            "_add_to_cache",
+            "any",
+            "field.startswith",
+            "fields.Date.context_today",
+            "quant._check_company",
+            "quant.filtered",
+            "quant.write",
+            "quant[0].sudo",
+            "self._gather",
+            "self._get_inventory_fields_create",
+            "self._is_inventory_mode",
+            "self.env.context.get",
+            "self.env['product.product'].browse",
+            "self.env['res.partner'].browse",
+            "self.env['stock.location'].browse",
+            "self.env['stock.lot'].browse",
+            "self.env['stock.lot'].create",
+            "self.env['stock.lot'].search",
+            "self.env['stock.package'].browse",
+            "self.sudo",
+            "self.sudo().create",
+            "super",
+            "super().create",
+            "vals.get",
+            "vals.pop"
+          ],
+          "source_fragment": "    @api.model_create_multi\n    def create(self, vals_list):\n        \"\"\" Override to handle the \"inventory mode\" and create a quant as\n        superuser the conditions are met.\n        \"\"\"\n        def _add_to_cache(quant):\n            if 'quants_cache' in self.env.context:\n                self.env.context['quants_cache'][\n                    quant.product_id.id, quant.location_id.id, quant.lot_id.id, quant.package_id.id, quant.owner_id.id\n                ] |= quant\n\n        quants = self.env['stock.quant']\n        is_inventory_mode = self._is_inventory_mode()\n        allowed_fields = self._get_inventory_fields_create()\n        for vals in vals_list:\n            if is_inventory_mode and any(f in vals for f in ['inventory_quantity', 'inventory_quantity_auto_apply']):\n                if any(field for field in vals if not field.startswith('x_') and field not in allowed_fields):\n                    raise UserError(_(\"Quant's creation is restricted, you can't do this operation.\"))\n                auto_apply = 'inventory_quantity_auto_apply' in vals\n                inventory_quantity = vals.pop('inventory_quantity_auto_apply', False) or vals.pop(\n                    'inventory_quantity', False) or 0\n                # Create an empty quant or write on a similar one.\n                product = self.env['product.product'].browse(vals['product_id'])\n                location = self.env['stock.location'].browse(vals['location_id'])\n                lot_id = self.env['stock.lot'].browse(vals.get('lot_id'))\n                package_id = self.env['stock.package'].browse(vals.get('package_id'))\n                owner_id = self.env['res.partner'].browse(vals.get('owner_id'))\n                quant = self.env['stock.quant']\n                if not self.env.context.get('import_quant_lines'):\n                    # Merge quants later, to make sure one line = one record during batch import\n                    quant = self._gather(product, location, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)\n                if lot_id:\n                    if self.env.context.get('import_file') and lot_id.product_id != product:\n                        lot_name = lot_id.name\n                        lot_id = self.env['stock.lot'].search([('product_id', '=', product.id), ('name', '=', lot_name)], limit=1)\n                        if not lot_id:\n                            company_id = location.company_id or self.env.company\n                            lot_id = self.env['stock.lot'].create({'name': lot_name, 'product_id': product.id, 'company_id': company_id.id})\n                        vals['lot_id'] = lot_id.id\n                    quant = quant.filtered(lambda q: q.lot_id)\n                if quant:\n                    quant = quant[0].sudo()\n                else:\n                    quant = self.sudo().create(vals)\n                    _add_to_cache(quant)\n                if auto_apply:\n                    quant.write({'inventory_quantity_auto_apply': inventory_quantity})\n                else:\n                    # Set the `inventory_quantity` field to create the necessary move.\n                    quant.inventory_quantity = inventory_quantity\n                    quant.user_id = vals.get('user_id', self.env.user.id)\n                    quant.inventory_date = fields.Date.context_today(self)\n                quants |= quant\n            else:\n                if 'inventory_quantity' not in vals:\n                    vals['inventory_quantity_set'] = vals.get('inventory_quantity_set', False)\n                quant = super().create(vals)\n                _add_to_cache(quant)\n                quants |= quant\n                if self._is_inventory_mode() and quant.company_id:\n                    quant._check_company()\n        return quants",
+          "program_units": 48
+        },
+        {
+          "name": "StockQuant.write",
+          "start": 387,
+          "end": 396,
+          "calls": [
+            "UserError",
+            "_",
+            "any",
+            "self._get_forbidden_fields_write",
+            "self._is_inventory_mode",
+            "self.sudo",
+            "super",
+            "super(StockQuant, self).write",
+            "vals.keys"
+          ],
+          "source_fragment": "    def write(self, vals):\n        \"\"\" Override to handle the \"inventory mode\" and create the inventory move. \"\"\"\n        forbidden_fields = self._get_forbidden_fields_write()\n        if self._is_inventory_mode() and any(field for field in forbidden_fields if field in vals.keys()):\n            if any(quant.location_id.usage == 'inventory' for quant in self):\n                # Do nothing when user tries to modify manually a inventory loss\n                return\n            self = self.sudo()\n            raise UserError(_(\"Quant's editing is restricted, you can't do this operation.\"))\n        return super(StockQuant, self).write(vals)",
+          "program_units": 8
+        },
+        {
+          "name": "StockQuant._is_inventory_mode",
+          "start": 1265,
+          "end": 1271,
+          "calls": [
+            "self.env.context.get",
+            "self.env.user.has_group"
+          ],
+          "source_fragment": "    @api.model\n    def _is_inventory_mode(self):\n        \"\"\" Used to control whether a quant was written on or created during an\n        \"inventory session\", meaning a mode where we need to create the stock.move\n        record necessary to be consistent with the `inventory_quantity` field.\n        \"\"\"\n        return self.env.context.get('inventory_mode') and self.env.user.has_group('stock.group_stock_user')",
+          "program_units": 2
+        },
+        {
+          "name": "StockQuant._get_inventory_fields_create",
+          "start": 1273,
+          "end": 1277,
+          "calls": [
+            "self._get_inventory_fields_write"
+          ],
+          "source_fragment": "    @api.model\n    def _get_inventory_fields_create(self):\n        \"\"\" Returns a list of fields user can edit when he want to create a quant in `inventory_mode`.\n        \"\"\"\n        return ['product_id', 'owner_id'] + self._get_inventory_fields_write()",
+          "program_units": 2
+        },
+        {
+          "name": "StockQuant._get_forbidden_fields_write",
+          "start": 382,
+          "end": 385,
+          "calls": [],
+          "source_fragment": "    @api.model\n    def _get_forbidden_fields_write(self):\n        \"\"\" Returns a list of fields user can't edit when he want to edit a quant in `inventory_mode`.\"\"\"\n        return ['product_id', 'location_id', 'lot_id', 'package_id', 'owner_id']",
+          "program_units": 2
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 286,
+          "end": 346
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 383,
+          "end": 385
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 387,
+          "end": 396
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 785,
+          "end": 804
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 806,
+          "end": 826
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 828,
+          "end": 867
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 869,
+          "end": 949
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1073,
+          "end": 1140
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1143,
+          "end": 1155
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1266,
+          "end": 1271
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1274,
+          "end": 1277
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 290,
+          "end": 294
+        },
+        {
+          "kind": "Assign",
+          "start": 296,
+          "end": 296
+        },
+        {
+          "kind": "Assign",
+          "start": 297,
+          "end": 297
+        },
+        {
+          "kind": "Assign",
+          "start": 298,
+          "end": 298
+        },
+        {
+          "kind": "For",
+          "start": 299,
+          "end": 345
+        },
+        {
+          "kind": "Return",
+          "start": 346,
+          "end": 346
+        },
+        {
+          "kind": "Return",
+          "start": 385,
+          "end": 385
+        },
+        {
+          "kind": "Assign",
+          "start": 389,
+          "end": 389
+        },
+        {
+          "kind": "If",
+          "start": 390,
+          "end": 395
+        },
+        {
+          "kind": "Return",
+          "start": 396,
+          "end": 396
+        },
+        {
+          "kind": "Assign",
+          "start": 786,
+          "end": 786
+        },
+        {
+          "kind": "If",
+          "start": 787,
+          "end": 801
+        },
+        {
+          "kind": "If",
+          "start": 802,
+          "end": 803
+        },
+        {
+          "kind": "Return",
+          "start": 804,
+          "end": 804
+        },
+        {
+          "kind": "Assign",
+          "start": 810,
+          "end": 810
+        },
+        {
+          "kind": "Assign",
+          "start": 811,
+          "end": 811
+        },
+        {
+          "kind": "If",
+          "start": 812,
+          "end": 813
+        },
+        {
+          "kind": "Assign",
+          "start": 814,
+          "end": 814
+        },
+        {
+          "kind": "Assign",
+          "start": 816,
+          "end": 816
+        },
+        {
+          "kind": "If",
+          "start": 817,
+          "end": 823
+        },
+        {
+          "kind": "If",
+          "start": 824,
+          "end": 825
+        },
+        {
+          "kind": "Return",
+          "start": 826,
+          "end": 826
+        },
+        {
+          "kind": "Assign",
+          "start": 847,
+          "end": 847
+        },
+        {
+          "kind": "Assign",
+          "start": 848,
+          "end": 848
+        },
+        {
+          "kind": "If",
+          "start": 849,
+          "end": 867
+        },
+        {
+          "kind": "Assign",
+          "start": 879,
+          "end": 879
+        },
+        {
+          "kind": "Assign",
+          "start": 881,
+          "end": 881
+        },
+        {
+          "kind": "Assign",
+          "start": 884,
+          "end": 884
+        },
+        {
+          "kind": "If",
+          "start": 887,
+          "end": 888
+        },
+        {
+          "kind": "Assign",
+          "start": 890,
+          "end": 890
+        },
+        {
+          "kind": "If",
+          "start": 900,
+          "end": 902
+        },
+        {
+          "kind": "If",
+          "start": 904,
+          "end": 906
+        },
+        {
+          "kind": "Assign",
+          "start": 908,
+          "end": 908
+        },
+        {
+          "kind": "If",
+          "start": 910,
+          "end": 919
+        },
+        {
+          "kind": "Assign",
+          "start": 921,
+          "end": 921
+        },
+        {
+          "kind": "For",
+          "start": 922,
+          "end": 924
+        },
+        {
+          "kind": "For",
+          "start": 925,
+          "end": 948
+        },
+        {
+          "kind": "Return",
+          "start": 949,
+          "end": 949
+        },
+        {
+          "kind": "If",
+          "start": 1088,
+          "end": 1089
+        },
+        {
+          "kind": "Assign",
+          "start": 1090,
+          "end": 1090
+        },
+        {
+          "kind": "Assign",
+          "start": 1091,
+          "end": 1091
+        },
+        {
+          "kind": "If",
+          "start": 1092,
+          "end": 1097
+        },
+        {
+          "kind": "If",
+          "start": 1099,
+          "end": 1103
+        },
+        {
+          "kind": "If",
+          "start": 1104,
+          "end": 1105
+        },
+        {
+          "kind": "If",
+          "start": 1108,
+          "end": 1111
+        },
+        {
+          "kind": "Assign",
+          "start": 1113,
+          "end": 1113
+        },
+        {
+          "kind": "If",
+          "start": 1114,
+          "end": 1117
+        },
+        {
+          "kind": "If",
+          "start": 1119,
+          "end": 1139
+        },
+        {
+          "kind": "Return",
+          "start": 1140,
+          "end": 1140
+        },
+        {
+          "kind": "Expr",
+          "start": 1155,
+          "end": 1155
+        },
+        {
+          "kind": "Return",
+          "start": 1271,
+          "end": 1271
+        },
+        {
+          "kind": "Return",
+          "start": 1277,
+          "end": 1277
+        },
+        {
+          "kind": "If",
+          "start": 291,
+          "end": 294
+        },
+        {
+          "kind": "If",
+          "start": 300,
+          "end": 345
+        },
+        {
+          "kind": "If",
+          "start": 391,
+          "end": 393
+        },
+        {
+          "kind": "Assign",
+          "start": 394,
+          "end": 394
+        },
+        {
+          "kind": "Raise",
+          "start": 395,
+          "end": 395
+        },
+        {
+          "kind": "If",
+          "start": 788,
+          "end": 789
+        },
+        {
+          "kind": "If",
+          "start": 790,
+          "end": 791
+        },
+        {
+          "kind": "If",
+          "start": 792,
+          "end": 793
+        },
+        {
+          "kind": "Expr",
+          "start": 794,
+          "end": 794
+        },
+        {
+          "kind": "Expr",
+          "start": 796,
+          "end": 801
+        },
+        {
+          "kind": "Expr",
+          "start": 803,
+          "end": 803
+        },
+        {
+          "kind": "Assign",
+          "start": 813,
+          "end": 813
+        },
+        {
+          "kind": "Assign",
+          "start": 818,
+          "end": 818
+        },
+        {
+          "kind": "If",
+          "start": 819,
+          "end": 820
+        },
+        {
+          "kind": "AugAssign",
+          "start": 821,
+          "end": 821
+        },
+        {
+          "kind": "Assign",
+          "start": 823,
+          "end": 823
+        },
+        {
+          "kind": "Assign",
+          "start": 825,
+          "end": 825
+        },
+        {
+          "kind": "Assign",
+          "start": 850,
+          "end": 850
+        },
+        {
+          "kind": "If",
+          "start": 851,
+          "end": 854
+        },
+        {
+          "kind": "Assign",
+          "start": 856,
+          "end": 856
+        },
+        {
+          "kind": "For",
+          "start": 857,
+          "end": 863
+        },
+        {
+          "kind": "If",
+          "start": 864,
+          "end": 867
+        },
+        {
+          "kind": "Assign",
+          "start": 888,
+          "end": 888
+        },
+        {
+          "kind": "Assign",
+          "start": 901,
+          "end": 901
+        },
+        {
+          "kind": "Assign",
+          "start": 902,
+          "end": 902
+        },
+        {
+          "kind": "If",
+          "start": 905,
+          "end": 906
+        },
+        {
+          "kind": "Assign",
+          "start": 912,
+          "end": 912
+        },
+        {
+          "kind": "If",
+          "start": 913,
+          "end": 919
+        },
+        {
+          "kind": "If",
+          "start": 923,
+          "end": 924
+        },
+        {
+          "kind": "If",
+          "start": 926,
+          "end": 945
+        },
+        {
+          "kind": "If",
+          "start": 947,
+          "end": 948
+        },
+        {
+          "kind": "Raise",
+          "start": 1089,
+          "end": 1089
+        },
+        {
+          "kind": "If",
+          "start": 1093,
+          "end": 1097
+        },
+        {
+          "kind": "Assign",
+          "start": 1100,
+          "end": 1100
+        },
+        {
+          "kind": "Assign",
+          "start": 1102,
+          "end": 1103
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1105,
+          "end": 1105
+        },
+        {
+          "kind": "Assign",
+          "start": 1109,
+          "end": 1109
+        },
+        {
+          "kind": "Assign",
+          "start": 1111,
+          "end": 1111
+        },
+        {
+          "kind": "Assign",
+          "start": 1117,
+          "end": 1117
+        },
+        {
+          "kind": "Assign",
+          "start": 1120,
+          "end": 1120
+        },
+        {
+          "kind": "If",
+          "start": 1121,
+          "end": 1122
+        },
+        {
+          "kind": "If",
+          "start": 1123,
+          "end": 1124
+        },
+        {
+          "kind": "Expr",
+          "start": 1125,
+          "end": 1125
+        },
+        {
+          "kind": "Assign",
+          "start": 1127,
+          "end": 1134
+        },
+        {
+          "kind": "If",
+          "start": 1135,
+          "end": 1136
+        },
+        {
+          "kind": "If",
+          "start": 1137,
+          "end": 1138
+        },
+        {
+          "kind": "Expr",
+          "start": 1139,
+          "end": 1139
+        },
+        {
+          "kind": "AugAssign",
+          "start": 292,
+          "end": 294
+        },
+        {
+          "kind": "If",
+          "start": 301,
+          "end": 302
+        },
+        {
+          "kind": "Assign",
+          "start": 303,
+          "end": 303
+        },
+        {
+          "kind": "Assign",
+          "start": 304,
+          "end": 305
+        },
+        {
+          "kind": "Assign",
+          "start": 307,
+          "end": 307
+        },
+        {
+          "kind": "Assign",
+          "start": 308,
+          "end": 308
+        },
+        {
+          "kind": "Assign",
+          "start": 309,
+          "end": 309
+        },
+        {
+          "kind": "Assign",
+          "start": 310,
+          "end": 310
+        },
+        {
+          "kind": "Assign",
+          "start": 311,
+          "end": 311
+        },
+        {
+          "kind": "Assign",
+          "start": 312,
+          "end": 312
+        },
+        {
+          "kind": "If",
+          "start": 313,
+          "end": 315
+        },
+        {
+          "kind": "If",
+          "start": 316,
+          "end": 324
+        },
+        {
+          "kind": "If",
+          "start": 325,
+          "end": 329
+        },
+        {
+          "kind": "If",
+          "start": 330,
+          "end": 336
+        },
+        {
+          "kind": "AugAssign",
+          "start": 337,
+          "end": 337
+        },
+        {
+          "kind": "If",
+          "start": 339,
+          "end": 340
+        },
+        {
+          "kind": "Assign",
+          "start": 341,
+          "end": 341
+        },
+        {
+          "kind": "Expr",
+          "start": 342,
+          "end": 342
+        },
+        {
+          "kind": "AugAssign",
+          "start": 343,
+          "end": 343
+        },
+        {
+          "kind": "If",
+          "start": 344,
+          "end": 345
+        },
+        {
+          "kind": "Return",
+          "start": 393,
+          "end": 393
+        },
+        {
+          "kind": "Expr",
+          "start": 789,
+          "end": 789
+        },
+        {
+          "kind": "Expr",
+          "start": 791,
+          "end": 791
+        },
+        {
+          "kind": "Expr",
+          "start": 793,
+          "end": 793
+        },
+        {
+          "kind": "AugAssign",
+          "start": 820,
+          "end": 820
+        },
+        {
+          "kind": "Return",
+          "start": 852,
+          "end": 852
+        },
+        {
+          "kind": "Return",
+          "start": 854,
+          "end": 854
+        },
+        {
+          "kind": "If",
+          "start": 858,
+          "end": 859
+        },
+        {
+          "kind": "If",
+          "start": 860,
+          "end": 863
+        },
+        {
+          "kind": "Return",
+          "start": 865,
+          "end": 865
+        },
+        {
+          "kind": "Return",
+          "start": 867,
+          "end": 867
+        },
+        {
+          "kind": "Assign",
+          "start": 906,
+          "end": 906
+        },
+        {
+          "kind": "Assign",
+          "start": 915,
+          "end": 915
+        },
+        {
+          "kind": "If",
+          "start": 916,
+          "end": 917
+        },
+        {
+          "kind": "Return",
+          "start": 919,
+          "end": 919
+        },
+        {
+          "kind": "AugAssign",
+          "start": 924,
+          "end": 924
+        },
+        {
+          "kind": "Assign",
+          "start": 927,
+          "end": 927
+        },
+        {
+          "kind": "If",
+          "start": 928,
+          "end": 929
+        },
+        {
+          "kind": "Assign",
+          "start": 930,
+          "end": 930
+        },
+        {
+          "kind": "If",
+          "start": 931,
+          "end": 934
+        },
+        {
+          "kind": "If",
+          "start": 935,
+          "end": 936
+        },
+        {
+          "kind": "Assign",
+          "start": 937,
+          "end": 937
+        },
+        {
+          "kind": "Expr",
+          "start": 938,
+          "end": 938
+        },
+        {
+          "kind": "AugAssign",
+          "start": 939,
+          "end": 939
+        },
+        {
+          "kind": "AugAssign",
+          "start": 940,
+          "end": 940
+        },
+        {
+          "kind": "Assign",
+          "start": 942,
+          "end": 942
+        },
+        {
+          "kind": "Expr",
+          "start": 943,
+          "end": 943
+        },
+        {
+          "kind": "AugAssign",
+          "start": 944,
+          "end": 944
+        },
+        {
+          "kind": "AugAssign",
+          "start": 945,
+          "end": 945
+        },
+        {
+          "kind": "Break",
+          "start": 948,
+          "end": 948
+        },
+        {
+          "kind": "Assign",
+          "start": 1094,
+          "end": 1094
+        },
+        {
+          "kind": "Assign",
+          "start": 1097,
+          "end": 1097
+        },
+        {
+          "kind": "Assign",
+          "start": 1122,
+          "end": 1122
+        },
+        {
+          "kind": "Assign",
+          "start": 1124,
+          "end": 1124
+        },
+        {
+          "kind": "Assign",
+          "start": 1136,
+          "end": 1136
+        },
+        {
+          "kind": "Assign",
+          "start": 1138,
+          "end": 1138
+        },
+        {
+          "kind": "Raise",
+          "start": 302,
+          "end": 302
+        },
+        {
+          "kind": "Assign",
+          "start": 315,
+          "end": 315
+        },
+        {
+          "kind": "If",
+          "start": 317,
+          "end": 323
+        },
+        {
+          "kind": "Assign",
+          "start": 324,
+          "end": 324
+        },
+        {
+          "kind": "Assign",
+          "start": 326,
+          "end": 326
+        },
+        {
+          "kind": "Assign",
+          "start": 328,
+          "end": 328
+        },
+        {
+          "kind": "Expr",
+          "start": 329,
+          "end": 329
+        },
+        {
+          "kind": "Expr",
+          "start": 331,
+          "end": 331
+        },
+        {
+          "kind": "Assign",
+          "start": 334,
+          "end": 334
+        },
+        {
+          "kind": "Assign",
+          "start": 335,
+          "end": 335
+        },
+        {
+          "kind": "Assign",
+          "start": 336,
+          "end": 336
+        },
+        {
+          "kind": "Assign",
+          "start": 340,
+          "end": 340
+        },
+        {
+          "kind": "Expr",
+          "start": 345,
+          "end": 345
+        },
+        {
+          "kind": "Continue",
+          "start": 859,
+          "end": 859
+        },
+        {
+          "kind": "AugAssign",
+          "start": 861,
+          "end": 861
+        },
+        {
+          "kind": "AugAssign",
+          "start": 863,
+          "end": 863
+        },
+        {
+          "kind": "Raise",
+          "start": 917,
+          "end": 917
+        },
+        {
+          "kind": "Continue",
+          "start": 929,
+          "end": 929
+        },
+        {
+          "kind": "Assign",
+          "start": 932,
+          "end": 932
+        },
+        {
+          "kind": "AugAssign",
+          "start": 933,
+          "end": 933
+        },
+        {
+          "kind": "AugAssign",
+          "start": 934,
+          "end": 934
+        },
+        {
+          "kind": "Continue",
+          "start": 936,
+          "end": 936
+        },
+        {
+          "kind": "Assign",
+          "start": 318,
+          "end": 318
+        },
+        {
+          "kind": "Assign",
+          "start": 319,
+          "end": 319
+        },
+        {
+          "kind": "If",
+          "start": 320,
+          "end": 322
+        },
+        {
+          "kind": "Assign",
+          "start": 323,
+          "end": 323
+        },
+        {
+          "kind": "Assign",
+          "start": 321,
+          "end": 321
+        },
+        {
+          "kind": "Assign",
+          "start": 322,
+          "end": 322
+        }
+      ],
+      "program_units": 194,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_quant.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+      "git_object_sha256": "9a0eeb90be321aeef4d4ea00356de3d7925b92e8237c064fae55f5c8fc6c5750",
+      "source_url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_quant.py",
+      "role": "native_integration",
+      "classification_basis": "Politique de prélèvement native utilisée par _gather ; pas algorithme d’allocation Flow à reconstruire.",
+      "methods": [
+        {
+          "name": "StockQuant._get_removal_strategy",
+          "start": 652,
+          "end": 663,
+          "calls": [
+            "loc.removal_strategy_id.with_context",
+            "location_id.sudo",
+            "product_id.categ_id.removal_strategy_id.with_context",
+            "product_id.sudo"
+          ],
+          "source_fragment": "    @api.model\n    def _get_removal_strategy(self, product_id, location_id):\n        product_id = product_id.sudo()\n        location_id = location_id.sudo()\n        if product_id.categ_id.removal_strategy_id:\n            return product_id.categ_id.removal_strategy_id.with_context(lang=None).method\n        loc = location_id\n        while loc:\n            if loc.removal_strategy_id:\n                return loc.removal_strategy_id.with_context(lang=None).method\n            loc = loc.location_id\n        return 'fifo'",
+          "program_units": 11
+        },
+        {
+          "name": "StockQuant._get_removal_strategy_order",
+          "start": 775,
+          "end": 783,
+          "calls": [
+            "UserError",
+            "_"
+          ],
+          "source_fragment": "    @api.model\n    def _get_removal_strategy_order(self, removal_strategy):\n        if removal_strategy in ['fifo', 'least_packages']:\n            return 'in_date ASC, id'\n        elif removal_strategy == 'lifo':\n            return 'in_date DESC, id DESC'\n        elif removal_strategy == 'closest':\n            return False\n        raise UserError(_('Removal strategy %s not implemented.', removal_strategy))",
+          "program_units": 8
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 653,
+          "end": 663
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 776,
+          "end": 783
+        },
+        {
+          "kind": "Assign",
+          "start": 654,
+          "end": 654
+        },
+        {
+          "kind": "Assign",
+          "start": 655,
+          "end": 655
+        },
+        {
+          "kind": "If",
+          "start": 656,
+          "end": 657
+        },
+        {
+          "kind": "Assign",
+          "start": 658,
+          "end": 658
+        },
+        {
+          "kind": "While",
+          "start": 659,
+          "end": 662
+        },
+        {
+          "kind": "Return",
+          "start": 663,
+          "end": 663
+        },
+        {
+          "kind": "If",
+          "start": 777,
+          "end": 782
+        },
+        {
+          "kind": "Raise",
+          "start": 783,
+          "end": 783
+        },
+        {
+          "kind": "Return",
+          "start": 657,
+          "end": 657
+        },
+        {
+          "kind": "If",
+          "start": 660,
+          "end": 661
+        },
+        {
+          "kind": "Assign",
+          "start": 662,
+          "end": 662
+        },
+        {
+          "kind": "Return",
+          "start": 778,
+          "end": 778
+        },
+        {
+          "kind": "If",
+          "start": 779,
+          "end": 782
+        },
+        {
+          "kind": "Return",
+          "start": 661,
+          "end": 661
+        },
+        {
+          "kind": "Return",
+          "start": 780,
+          "end": 780
+        },
+        {
+          "kind": "If",
+          "start": 781,
+          "end": 782
+        },
+        {
+          "kind": "Return",
+          "start": 782,
+          "end": 782
+        }
+      ],
+      "program_units": 19,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "odoo",
+      "path": "odoo/orm/models.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "1abb6593fd37d3febc963c7cdd4baf512128d795afad9e90906d995810a50892",
+      "git_object_sha256": "f4707eace423d4f0d9e8975457ffba50852fc923386cc4563d6b8e2d8ee805a6",
+      "source_url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/odoo/orm/models.py",
+      "role": "framework_reused",
+      "classification_basis": "Verrou SQL, flush et persistance différée de l’ORM ; pas écriture SQL directe à chaque appel write.",
+      "methods": [
+        {
+          "name": "BaseModel.try_lock_for_update",
+          "start": 5089,
+          "end": 5120,
+          "calls": [
+            "Query",
+            "SQL",
+            "SQL.identifier",
+            "isinstance",
+            "len",
+            "partition",
+            "query.add_where",
+            "query.select",
+            "self.browse",
+            "self.browse(ids)._as_query",
+            "self.env.execute_query",
+            "tuple"
+          ],
+          "source_fragment": "    @api.private\n    def try_lock_for_update(self, *, allow_referencing: bool = False, limit: int | None = None) -> Self:\n        \"\"\" Grab an exclusive write-lock on some rows with the given ids.\n\n        Skip locked records and browse the records that could be locked.\n\n        :param allow_referencing: Acquire a row lock which allows for other\n            transactions to reference this record. Use only when modifying\n            values that are not identifiers.\n        :param limit: The maximum number of rows to lock\n        :return: The recordset of locked records\n        \"\"\"\n        new_ids, ids = partition(lambda i: isinstance(i, NewId), self._ids)\n        if limit is not None:\n            if len(new_ids) >= limit:\n                return self.browse(new_ids[:limit])\n            # keep the order of ids when trying to lock\n            query = self.browse(ids)._as_query(ordered=True)\n            query.limit = limit - len(new_ids)\n        else:\n            query = Query(self)\n            query.add_where(SQL(\"%s IN %s\", SQL.identifier(self._table, 'id'), tuple(ids)))\n        if not ids:\n            return self\n        if allow_referencing:\n            lock_sql = SQL(\"FOR NO KEY UPDATE SKIP LOCKED\")\n        else:\n            lock_sql = SQL(\"FOR UPDATE SKIP LOCKED\")\n        sql = SQL(\"%s %s\", query.select(), lock_sql)\n        real_ids = (id_ for [id_] in self.env.execute_query(sql))\n        valid_ids = {*real_ids, *new_ids}\n        return self.browse(i for i in self._ids if i in valid_ids)",
+          "program_units": 18
+        },
+        {
+          "name": "BaseModel.write",
+          "start": 3805,
+          "end": 3991,
+          "calls": [
+            "AccessError",
+            "ValueError",
+            "_",
+            "any",
+            "bad_names.update",
+            "defaultdict",
+            "determine_inverses.values",
+            "determine_inverses[field.inverse].append",
+            "env.protecting",
+            "field._cache_missing_ids",
+            "field.write",
+            "fields[0].determine_inverse",
+            "fnames_modifying_relations.append",
+            "list",
+            "protected.update",
+            "real_recs._validate_fields",
+            "self._check_company",
+            "self._recompute_recordset",
+            "self.check_access",
+            "self.check_field_access",
+            "self.env.cr.now",
+            "self.env.transaction.invalidate_ormcache",
+            "self.env['ir.model']._get",
+            "self.filtered",
+            "self.flush_model",
+            "self.modified",
+            "self.pool.field_computed.get",
+            "self.pool.is_modifying_relations",
+            "set",
+            "sorted",
+            "vals.items",
+            "vals.keys",
+            "vals.keys().isdisjoint",
+            "vals.setdefault"
+          ],
+          "source_fragment": "    def write(self, vals: ValuesType) -> typing.Literal[True]:\n        \"\"\" Update all records in ``self`` with the provided values.\n\n        :param vals: fields to update and the value to set on them\n        :raise AccessError: if user is not allowed to modify the specified records/fields\n        :raise ValidationError: if invalid values are specified for selection fields\n        :raise UserError: if a loop would be created in a hierarchy of objects a result of the operation (such as setting an object as its own parent)\n\n        * For numeric fields (:class:`~odoo.fields.Integer`,\n          :class:`~odoo.fields.Float`) the value should be of the\n          corresponding type\n        * For :class:`~odoo.fields.Boolean`, the value should be a\n          :class:`python:bool`\n        * For :class:`~odoo.fields.Selection`, the value should match the\n          selection values (generally :class:`python:str`, sometimes\n          :class:`python:int`)\n        * For :class:`~odoo.fields.Many2one`, the value should be the\n          database identifier of the record to set\n        * The expected value of a :class:`~odoo.fields.One2many` or\n          :class:`~odoo.fields.Many2many` relational field is a list of\n          :class:`~odoo.fields.Command` that manipulate the relation the\n          implement. There are a total of 7 commands:\n          :meth:`~odoo.fields.Command.create`,\n          :meth:`~odoo.fields.Command.update`,\n          :meth:`~odoo.fields.Command.delete`,\n          :meth:`~odoo.fields.Command.unlink`,\n          :meth:`~odoo.fields.Command.link`,\n          :meth:`~odoo.fields.Command.clear`, and\n          :meth:`~odoo.fields.Command.set`.\n        * For :class:`~odoo.fields.Date` and `~odoo.fields.Datetime`,\n          the value should be either a date(time), or a string.\n\n          .. warning::\n\n            If a string is provided for Date(time) fields,\n            it must be UTC-only and formatted according to\n            :const:`odoo.tools.misc.DEFAULT_SERVER_DATE_FORMAT` and\n            :const:`odoo.tools.misc.DEFAULT_SERVER_DATETIME_FORMAT`\n\n        * Other non-relational fields use a string for value\n        \"\"\"\n        if not self:\n            return True\n\n        self.check_access('write')\n        for field_name in vals:\n            try:\n                self.check_field_access(self._fields[field_name], 'write')\n            except KeyError as e:\n                raise ValueError(f\"Invalid field {field_name!r} in {self._name!r}\") from e\n        env = self.env\n\n        bad_names = {'id', 'parent_path'}\n        if self._log_access:\n            # the superuser can set log_access fields while loading registry\n            if not (self.env.uid == SUPERUSER_ID and not self.pool.ready):\n                bad_names.update(LOG_ACCESS_COLUMNS)\n\n        # set magic fields\n        vals = {key: val for key, val in vals.items() if key not in bad_names}\n        if self._log_access:\n            vals.setdefault('write_uid', self.env.uid)\n            vals.setdefault('write_date', self.env.cr.now())\n\n        field_values = sorted(\n            [(self._fields[key], val) for key, val in vals.items()],\n            key=lambda item: self._fields_update_order__[item[0]]\n        )                                           # [(field, value)]\n        determine_inverses = defaultdict(list)      # {inverse: fields}\n        fnames_modifying_relations = []\n        protected = set()\n        for field, value in field_values:\n            if field.inverse:\n                if field.type in ('one2many', 'many2many'):\n                    # The written value is a list of commands that must applied\n                    # on the field's current value. Because the field is\n                    # protected while being written, the field's current value\n                    # will not be computed and default to an empty recordset. So\n                    # make sure the field's value is in cache before writing, in\n                    # order to avoid an inconsistent update.\n                    self[field.name]\n                determine_inverses[field.inverse].append(field)\n            if self.pool.is_modifying_relations(field):\n                fnames_modifying_relations.append(field.name)\n            if field.inverse or (field.compute and not field.readonly):\n                if field.store or field.type not in ('one2many', 'many2many'):\n                    # Protect the field from being recomputed while being\n                    # inversed. In the case of non-stored x2many fields, the\n                    # field's value may contain unexpeced new records (created\n                    # by command 0). Those new records are necessary for\n                    # inversing the field, but should no longer appear if the\n                    # field is recomputed afterwards. Not protecting the field\n                    # will automatically invalidate the field from the cache,\n                    # forcing its value to be recomputed once dependencies are\n                    # up-to-date.\n                    protected.update(self.pool.field_computed.get(field, [field]))\n\n        # force the computation of fields that are computed with some assigned\n        # fields, but are not assigned themselves\n        to_compute = [field.name\n                      for field in protected\n                      if field.compute and field.name not in vals]\n        if to_compute:\n            self._recompute_recordset(to_compute)\n\n        # protect fields being written against recomputation\n        with env.protecting(protected, self):\n            # Determine records depending on values. When modifying a relational\n            # field, you have to recompute what depends on the field's values\n            # before and after modification.  This is because the modification\n            # has an impact on the \"data path\" between a computed field and its\n            # dependency.  Note that this double call to modified() is only\n            # necessary for relational fields.\n            #\n            # It is best explained with a simple example: consider two sales\n            # orders SO1 and SO2.  The computed total amount on sales orders\n            # indirectly depends on the many2one field 'order_id' linking lines\n            # to their sales order.  Now consider the following code:\n            #\n            #   line = so1.line_ids[0]      # pick a line from SO1\n            #   line.order_id = so2         # move the line to SO2\n            #\n            # In this situation, the total amount must be recomputed on *both*\n            # sales order: the line's order before the modification, and the\n            # line's order after the modification.\n            self.modified(fnames_modifying_relations, before=True)\n\n            real_recs = self.filtered('id')\n\n            for field, value in field_values:\n                field.write(self, value)\n\n            # determine records depending on new values\n            #\n            # Call modified after write, because the modified can trigger a\n            # search which can trigger a flush which can trigger a recompute\n            # which remove the field from the recompute list while all the\n            # values required for the computation could not be yet in cache.\n            # e.g. Write on `name` of `res.partner` trigger the recompute of\n            # `display_name`, which triggers a search on child_ids to find the\n            # childs to which the display_name must be recomputed, which\n            # triggers the flush of `display_name` because the _order of\n            # res.partner includes display_name. The computation of display_name\n            # is then done too soon because the parent_id was not yet written.\n            # (`test_01_website_reset_password_tour`)\n            self.modified(vals)\n\n            if self._parent_store and self._parent_name in vals:\n                self.flush_model([self._parent_name])\n\n            # validate non-inversed fields first\n            inverse_fields = [f.name for fs in determine_inverses.values() for f in fs]\n            real_recs._validate_fields(vals, inverse_fields)\n\n            for fields in determine_inverses.values():\n                # write again on non-stored fields that have been invalidated from cache\n                for field in fields:\n                    if not field.store and (not field.inherited or field.type not in ('one2many', 'many2many')) and any(field._cache_missing_ids(real_recs)):\n                        field.write(real_recs, vals[field.name])\n\n                # inverse records that are not being computed\n                try:\n                    fields[0].determine_inverse(real_recs)\n                except AccessError as e:\n                    if fields[0].inherited:\n                        description = self.env['ir.model']._get(self._name).name\n                        raise AccessError(_(\n                            \"%(previous_message)s\\n\\nImplicitly accessed through '%(document_kind)s' (%(document_model)s).\",\n                            previous_message=e.args[0],\n                            document_kind=description,\n                            document_model=self._name,\n                        ))\n                    raise\n\n            # invalidate the cache\n            if real_recs and (cache_name := self._clear_cache_name) and (\n                self._clear_cache_on_fields is None\n                or not vals.keys().isdisjoint(self._clear_cache_on_fields)\n            ):\n                self.env.transaction.invalidate_ormcache(cache_name)\n\n            # validate inversed fields\n            real_recs._validate_fields(inverse_fields)\n\n        if self._check_company_auto:\n            self._check_company(list(vals))\n        return True",
+          "program_units": 60
+        },
+        {
+          "name": "BaseModel._write_multi",
+          "start": 3997,
+          "end": 4085,
+          "calls": [
+            "SQL",
+            "SQL(', ').join",
+            "SQL.identifier",
+            "assignments.append",
+            "columns.append",
+            "defaultdict",
+            "len",
+            "parent_records._parent_store_update",
+            "self._parent_store_update_prepare",
+            "self.env.cr.now",
+            "self.env.execute_query",
+            "self.env['ir.default']._get_field_column_fallbacks",
+            "sorted",
+            "split_every",
+            "updates.items",
+            "updates[fnames].append",
+            "vals.items",
+            "zip"
+          ],
+          "source_fragment": "    def _write_multi(self, vals_list: list[ValuesType]) -> None:\n        \"\"\" Low-level implementation of write() \"\"\"\n        assert len(self) == len(vals_list)\n\n        if not self:\n            return\n        self.env.transaction._wrote__ = True\n\n        # determine records that require updating parent_path\n        parent_records = self._parent_store_update_prepare(vals_list)\n\n        if self._log_access:\n            # set magic fields (already done by write(), but not for computed fields)\n            log_vals = {'write_uid': self.env.uid, 'write_date': self.env.cr.now()}\n            vals_list = [(log_vals | vals) for vals in vals_list]\n\n        # determine SQL updates, grouped by set of updated fields:\n        # {(col1, col2, col3): [(id, val1, val2, val3)]}\n        updates = defaultdict(list)\n        for record, vals in zip(self, vals_list):\n            # sort vals.items() by key, then retrieve its keys and values\n            fnames, row = zip(*sorted(vals.items()))\n            updates[fnames].append(record._ids + row)\n\n        # perform updates (fnames, rows) in batches\n        updates_list = [\n            (fnames, sub_rows)\n            for fnames, rows in updates.items()\n            for sub_rows in split_every(UPDATE_BATCH_SIZE, rows)\n        ]\n\n        # update columns by group of updated fields\n        for fnames, rows in updates_list:\n            columns = []\n            assignments = []\n            for fname in fnames:\n                field = self._fields[fname]\n                assert field.store and field.column_type\n                column = SQL.identifier(fname)\n                # the type cast is necessary for some values, like NULLs\n                expr = SQL('\"__tmp\".%s::%s', column, SQL.identifier(field.column_type[0]))\n                if field.translate is True:\n                    # this is the SQL equivalent of:\n                    # None if expr is None else (\n                    #     (column or {'en_US': next(iter(expr.values()))}) | expr\n                    # )\n                    expr = SQL(\n                        \"\"\"CASE\n                            WHEN (%(expr)s -> 0)::boolean THEN\n                                COALESCE(\n                                    %(table)s.%(column)s,\n                                    jsonb_build_object('en_US', jsonb_path_query_first(%(expr)s -> 1, '$.*'))\n                                ) || (%(expr)s -> 1)\n                            ELSE (%(expr)s -> 1)\n                        END\"\"\",\n                        table=SQL.identifier(self._table),\n                        column=column,\n                        expr=expr,\n                    )\n                if field.company_dependent:\n                    fallbacks = self.env['ir.default']._get_field_column_fallbacks(self._name, fname)\n                    expr = SQL(\n                        \"\"\"(SELECT jsonb_object_agg(d.key, d.value)\n                        FROM jsonb_each(COALESCE(%(table)s.%(column)s, '{}'::jsonb) || %(expr)s) d\n                        JOIN jsonb_each(%(fallbacks)s) f\n                        ON d.key = f.key AND d.value != f.value)\"\"\",\n                        table=SQL.identifier(self._table),\n                        column=column,\n                        expr=expr,\n                        fallbacks=fallbacks\n                    )\n                columns.append(column)\n                assignments.append(SQL(\"%s = %s\", column, expr))\n\n            self.env.execute_query(SQL(\n                \"\"\" UPDATE %(table)s\n                    SET %(assignments)s\n                    FROM (VALUES %(values)s) AS \"__tmp\"(\"id\", %(columns)s)\n                    WHERE %(table)s.\"id\" = \"__tmp\".\"id\"\n                \"\"\",\n                table=SQL.identifier(self._table),\n                assignments=SQL(\", \").join(assignments),\n                values=SQL(\", \").join(rows),\n                columns=SQL(\", \").join(columns),\n            ))\n\n        # update parent_path\n        if parent_records:\n            parent_records._parent_store_update()",
+          "program_units": 32
+        },
+        {
+          "name": "BaseModel.flush_model",
+          "start": 5830,
+          "end": 5842,
+          "calls": [
+            "any",
+            "self._flush",
+            "self._recompute_model"
+          ],
+          "source_fragment": "    @api.private\n    def flush_model(self, fnames: Collection[str] | None = None) -> None:\n        \"\"\" Process the pending computations and database updates on ``self``'s\n        model.  When the parameter is given, the method guarantees that at least\n        the given fields are flushed to the database.  More fields can be\n        flushed, though.\n\n        :param fnames: optional iterable of field names to flush\n        \"\"\"\n        self._recompute_model(fnames)\n        dirty_fields = self.env._field_dirty\n        if fnames is None or any(self._fields[fname] in dirty_fields for fname in fnames):\n            self._flush()",
+          "program_units": 5
+        },
+        {
+          "name": "BaseModel._flush",
+          "start": 5865,
+          "end": 5910,
+          "calls": [
+            "AssertionError",
+            "OrderedSet",
+            "dict",
+            "dirty_field_ids.items",
+            "dirty_field_ids.values",
+            "dirty_fields.pop",
+            "enumerate",
+            "f.get_column_update",
+            "model.browse",
+            "model.browse(some_ids)._write_multi",
+            "self._fields.values",
+            "sorted",
+            "split_every",
+            "sum",
+            "vals_list.append"
+          ],
+          "source_fragment": "    def _flush(self) -> None:\n        # pop dirty fields and their corresponding record ids from cache\n        dirty_fields = self.env._field_dirty\n        dirty_field_ids = {\n            field: ids\n            for field in self._fields.values()\n            if (ids := dirty_fields.pop(field, None))\n        }\n        if not dirty_field_ids:\n            return\n\n        # for context-dependent fields, `get_column_update` contains the\n        # logic to find which value to flush\n        model = self\n\n        # sort dirty record ids so that records with the same set of modified\n        # fields are grouped together; for that purpose, map each dirty id to\n        # an integer that represents its subset of dirty fields (bitmask)\n        dirty_ids = sorted(\n            OrderedSet(id_ for ids in dirty_field_ids.values() for id_ in ids),\n            key=lambda id_: sum(\n                1 << field_index\n                for field_index, ids in enumerate(dirty_field_ids.values())\n                if id_ in ids\n            ),\n        )\n\n        # perform updates in batches in order to limit memory footprint\n        BATCH_SIZE = 1000\n        for some_ids in split_every(BATCH_SIZE, dirty_ids):\n            vals_list = []\n            try:\n                for id_ in some_ids:\n                    record = model.browse((id_,))\n                    vals_list.append({\n                        f.name: f.get_column_update(record)\n                        for f, ids in dirty_field_ids.items()\n                        if id_ in ids\n                    })\n            except KeyError:\n                raise AssertionError(\n                    f\"Could not find all values of {record} to flush them\\n\"\n                    f\"    Context: {self.env.context}\\n\"\n                    f\"    Cache: {dict(record._cache)!r}\"\n                )\n            model.browse(some_ids)._write_multi(vals_list)",
+          "program_units": 16
+        },
+        {
+          "name": "BaseModel.create",
+          "start": 4087,
+          "end": 4256,
+          "calls": [
+            "OrderedSet",
+            "ValueError",
+            "context_key.startswith",
+            "data['inversed'].items",
+            "data['record']._update_cache",
+            "data['record']._validate_fields",
+            "data['stored'].get",
+            "data_list.append",
+            "defaultdict",
+            "determine_inverses.values",
+            "determine_inverses[field.inverse].add",
+            "field.convert_to_cache",
+            "field_names.update",
+            "inv_names.isdisjoint",
+            "inv_rec_ids.append",
+            "inv_records.invalidate_recordset",
+            "isinstance",
+            "iter",
+            "min",
+            "next",
+            "next(iter(fields)).determine_inverse",
+            "parent.write",
+            "parent_data_list.append",
+            "protected.update",
+            "record._update_cache",
+            "records._check_company",
+            "self._create",
+            "self._fields.get",
+            "self._inherits.items",
+            "self._prepare_create_values",
+            "self.browse",
+            "self.check_access",
+            "self.check_field_access",
+            "self.env.context.get",
+            "self.env.protecting",
+            "self.env.transaction.invalidate_ormcache",
+            "self.env['ir.model.data']._update_xmlids",
+            "self.env[field.comodel_name].browse",
+            "self.env[field.comodel_name].browse(field.convert_to_cache(val, self)).check_access",
+            "self.env[model_name].browse",
+            "self.env[model_name].create",
+            "self.pool.field_computed.get",
+            "set",
+            "sorted",
+            "v.get",
+            "vals.items",
+            "vals.pop",
+            "zip"
+          ],
+          "source_fragment": "    @api.model_create_multi\n    def create(self, vals_list: list[ValuesType]) -> Self:\n        \"\"\"Create new records for the model.\n\n        The new records are initialized using the values from the list of dicts\n        ``vals_list``, and if necessary those from :meth:`~.default_get`.\n\n        :param vals_list:\n            values for the model's fields, as a list of dictionaries::\n\n                [{'field_name': field_value, ...}, ...]\n\n            For backward compatibility, ``vals_list`` may be a dictionary.\n            It is treated as a singleton list ``[vals]``, and a single record\n            is returned.\n\n            see :meth:`~.write` for details\n\n        :return: the created records\n        :raise AccessError: if the current user is not allowed to create records of the specified model\n        :raise ValidationError: if user tries to enter invalid value for a selection field\n        :raise ValueError: if a field name specified in the create values does not exist.\n        :raise UserError: if a loop would be created in a hierarchy of objects a result of the operation\n          (such as setting an object as its own parent)\n        \"\"\"\n        assert isinstance(vals_list, (list, tuple))\n        if not vals_list:\n            return self.browse()\n\n        self = self.browse()\n        self.check_access('create')\n\n        # check access to all user-provided fields\n        field_names = OrderedSet(fname for vals in vals_list for fname in vals)\n        field_names.update(\n            field_name\n            for context_key in self.env.context\n            if context_key.startswith('default_')\n            and (field_name := context_key[8:])\n            and field_name in self._fields\n        )\n        for field_name in field_names:\n            field = self._fields.get(field_name)\n            if field is None:\n                raise ValueError(f\"Invalid field {field_name!r} in {self._name!r}\")\n            self.check_field_access(field, 'write')\n\n        new_vals_list = self._prepare_create_values(vals_list)\n\n        # classify fields for each record\n        data_list = []\n        determine_inverses = defaultdict(OrderedSet)       # {inverse: fields}\n\n        for vals in new_vals_list:\n            precomputed = vals.pop('__precomputed__', ())\n\n            # distribute fields into sets for various purposes\n            data = {}\n            data['stored'] = stored = {}\n            data['inversed'] = inversed = {}\n            data['cached_only'] = cached_only = {}\n            data['inherited'] = inherited = defaultdict(dict)\n            data['protected'] = protected = set()\n            for key, val in vals.items():\n                field = self._fields.get(key)\n                if not field:\n                    raise ValueError(\"Invalid field %r on model %r\" % (key, self._name))\n                if field.store:\n                    stored[key] = val\n                if field.inherited:\n                    inherited[field.related_field.model_name][key] = val\n                elif field.inverse and field not in precomputed:\n                    inversed[key] = val\n                    determine_inverses[field.inverse].add(field)\n                elif not field.store and not field.compute:\n                    # cache only fields with `field.inverse` will be handed by `inversed` correctly\n                    cached_only[key] = val\n                # protect editable computed fields and precomputed fields\n                # against (re)computation\n                if (field.compute and (not field.readonly or field.precompute)) or key in cached_only:\n                    protected.update(self.pool.field_computed.get(field, [field]))\n                if field.type == 'many2one' and field.bypass_search_access and not self.env.su:\n                    self.env[field.comodel_name].browse(field.convert_to_cache(val, self)).check_access('read')\n\n            data_list.append(data)\n\n        # create or update parent records\n        for model_name, parent_name in self._inherits.items():\n            parent_data_list = []\n            for data in data_list:\n                if not data['stored'].get(parent_name):\n                    parent_data_list.append(data)\n                elif data['inherited'][model_name]:\n                    parent = self.env[model_name].browse(data['stored'][parent_name])\n                    parent.write(data['inherited'][model_name])\n\n            if parent_data_list:\n                parents = self.env[model_name].create([\n                    data['inherited'][model_name]\n                    for data in parent_data_list\n                ])\n                for parent, data in zip(parents, parent_data_list):\n                    data['stored'][parent_name] = parent.id\n\n        # create records with stored fields\n        records = self._create(data_list)\n\n        # protect fields being written against recomputation\n        protected_fields = [(data['protected'], data['record']) for data in data_list]\n        with self.env.protecting(protected_fields):\n            # fill cached_only fields\n            for data in data_list:\n                if vals := data['cached_only']:\n                    data['record']._update_cache(vals)\n            # call inverse method for each group of fields\n            for fields in sorted(determine_inverses.values(), key=lambda fields: min(self._fields_update_order__[f] for f in fields)):\n                # determine which records to inverse for those fields\n                inv_names = {field.name for field in fields}\n                inv_rec_ids = []\n                for data in data_list:\n                    if inv_names.isdisjoint(data['inversed']):\n                        continue\n                    record = data['record']\n                    record._update_cache({\n                        fname: value\n                        for fname, value in data['inversed'].items()\n                        if fname in inv_names and fname not in data['stored']\n                    })\n                    inv_rec_ids.append(record.id)\n\n                inv_records = self.browse(inv_rec_ids)\n                next(iter(fields)).determine_inverse(inv_records)\n                # Values of non-stored fields were cached before running inverse methods. In case of x2many create\n                # commands, the cache may therefore hold NewId records. We must now invalidate those values.\n                inv_relational_fnames = [field.name for field in fields if field.type in ('one2many', 'many2many') and not field.store]\n                inv_records.invalidate_recordset(fnames=inv_relational_fnames)\n\n        # invalidate the cache\n        if cache_name := self._clear_cache_name:\n            self.env.transaction.invalidate_ormcache(cache_name)\n\n        # check Python constraints for non-stored inversed fields\n        for data in data_list:\n            data['record']._validate_fields(data['inversed'], data['stored'])\n\n        if self._check_company_auto:\n            records._check_company()\n\n        import_module = self.env.context.get('_import_current_module')\n        if not import_module: # not an import -> bail\n            return records\n\n        # It is to support setting xids directly in create by\n        # providing an \"id\" key (otherwise stripped by create) during an import\n        # (which should strip 'id' from the input data anyway)\n        noupdate = self.env.context.get('noupdate', False)\n\n        xids = (v.get('id') for v in vals_list)\n        self.env['ir.model.data']._update_xmlids([\n            {\n                'xml_id': xid if '.' in xid else ('%s.%s' % (import_module, xid)),\n                'record': rec,\n                # note: this is not used when updating o2ms above...\n                'noupdate': noupdate,\n            }\n            for rec, xid in zip(records, xids)\n            if xid and isinstance(xid, str)\n        ])\n\n        return records",
+          "program_units": 86
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 3805,
+          "end": 3991
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 3997,
+          "end": 4085
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 4088,
+          "end": 4256
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 5090,
+          "end": 5120
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 5831,
+          "end": 5842
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 5865,
+          "end": 5910
+        },
+        {
+          "kind": "If",
+          "start": 3846,
+          "end": 3847
+        },
+        {
+          "kind": "Expr",
+          "start": 3849,
+          "end": 3849
+        },
+        {
+          "kind": "For",
+          "start": 3850,
+          "end": 3854
+        },
+        {
+          "kind": "Assign",
+          "start": 3855,
+          "end": 3855
+        },
+        {
+          "kind": "Assign",
+          "start": 3857,
+          "end": 3857
+        },
+        {
+          "kind": "If",
+          "start": 3858,
+          "end": 3861
+        },
+        {
+          "kind": "Assign",
+          "start": 3864,
+          "end": 3864
+        },
+        {
+          "kind": "If",
+          "start": 3865,
+          "end": 3867
+        },
+        {
+          "kind": "Assign",
+          "start": 3869,
+          "end": 3872
+        },
+        {
+          "kind": "Assign",
+          "start": 3873,
+          "end": 3873
+        },
+        {
+          "kind": "Assign",
+          "start": 3874,
+          "end": 3874
+        },
+        {
+          "kind": "Assign",
+          "start": 3875,
+          "end": 3875
+        },
+        {
+          "kind": "For",
+          "start": 3876,
+          "end": 3900
+        },
+        {
+          "kind": "Assign",
+          "start": 3904,
+          "end": 3906
+        },
+        {
+          "kind": "If",
+          "start": 3907,
+          "end": 3908
+        },
+        {
+          "kind": "With",
+          "start": 3911,
+          "end": 3987
+        },
+        {
+          "kind": "If",
+          "start": 3989,
+          "end": 3990
+        },
+        {
+          "kind": "Return",
+          "start": 3991,
+          "end": 3991
+        },
+        {
+          "kind": "Assert",
+          "start": 3999,
+          "end": 3999
+        },
+        {
+          "kind": "If",
+          "start": 4001,
+          "end": 4002
+        },
+        {
+          "kind": "Assign",
+          "start": 4003,
+          "end": 4003
+        },
+        {
+          "kind": "Assign",
+          "start": 4006,
+          "end": 4006
+        },
+        {
+          "kind": "If",
+          "start": 4008,
+          "end": 4011
+        },
+        {
+          "kind": "Assign",
+          "start": 4015,
+          "end": 4015
+        },
+        {
+          "kind": "For",
+          "start": 4016,
+          "end": 4019
+        },
+        {
+          "kind": "Assign",
+          "start": 4022,
+          "end": 4026
+        },
+        {
+          "kind": "For",
+          "start": 4029,
+          "end": 4081
+        },
+        {
+          "kind": "If",
+          "start": 4084,
+          "end": 4085
+        },
+        {
+          "kind": "Assert",
+          "start": 4112,
+          "end": 4112
+        },
+        {
+          "kind": "If",
+          "start": 4113,
+          "end": 4114
+        },
+        {
+          "kind": "Assign",
+          "start": 4116,
+          "end": 4116
+        },
+        {
+          "kind": "Expr",
+          "start": 4117,
+          "end": 4117
+        },
+        {
+          "kind": "Assign",
+          "start": 4120,
+          "end": 4120
+        },
+        {
+          "kind": "Expr",
+          "start": 4121,
+          "end": 4127
+        },
+        {
+          "kind": "For",
+          "start": 4128,
+          "end": 4132
+        },
+        {
+          "kind": "Assign",
+          "start": 4134,
+          "end": 4134
+        },
+        {
+          "kind": "Assign",
+          "start": 4137,
+          "end": 4137
+        },
+        {
+          "kind": "Assign",
+          "start": 4138,
+          "end": 4138
+        },
+        {
+          "kind": "For",
+          "start": 4140,
+          "end": 4171
+        },
+        {
+          "kind": "For",
+          "start": 4174,
+          "end": 4189
+        },
+        {
+          "kind": "Assign",
+          "start": 4192,
+          "end": 4192
+        },
+        {
+          "kind": "Assign",
+          "start": 4195,
+          "end": 4195
+        },
+        {
+          "kind": "With",
+          "start": 4196,
+          "end": 4222
+        },
+        {
+          "kind": "If",
+          "start": 4225,
+          "end": 4226
+        },
+        {
+          "kind": "For",
+          "start": 4229,
+          "end": 4230
+        },
+        {
+          "kind": "If",
+          "start": 4232,
+          "end": 4233
+        },
+        {
+          "kind": "Assign",
+          "start": 4235,
+          "end": 4235
+        },
+        {
+          "kind": "If",
+          "start": 4236,
+          "end": 4237
+        },
+        {
+          "kind": "Assign",
+          "start": 4242,
+          "end": 4242
+        },
+        {
+          "kind": "Assign",
+          "start": 4244,
+          "end": 4244
+        },
+        {
+          "kind": "Expr",
+          "start": 4245,
+          "end": 4254
+        },
+        {
+          "kind": "Return",
+          "start": 4256,
+          "end": 4256
+        },
+        {
+          "kind": "Assign",
+          "start": 5101,
+          "end": 5101
+        },
+        {
+          "kind": "If",
+          "start": 5102,
+          "end": 5110
+        },
+        {
+          "kind": "If",
+          "start": 5111,
+          "end": 5112
+        },
+        {
+          "kind": "If",
+          "start": 5113,
+          "end": 5116
+        },
+        {
+          "kind": "Assign",
+          "start": 5117,
+          "end": 5117
+        },
+        {
+          "kind": "Assign",
+          "start": 5118,
+          "end": 5118
+        },
+        {
+          "kind": "Assign",
+          "start": 5119,
+          "end": 5119
+        },
+        {
+          "kind": "Return",
+          "start": 5120,
+          "end": 5120
+        },
+        {
+          "kind": "Expr",
+          "start": 5839,
+          "end": 5839
+        },
+        {
+          "kind": "Assign",
+          "start": 5840,
+          "end": 5840
+        },
+        {
+          "kind": "If",
+          "start": 5841,
+          "end": 5842
+        },
+        {
+          "kind": "Assign",
+          "start": 5867,
+          "end": 5867
+        },
+        {
+          "kind": "Assign",
+          "start": 5868,
+          "end": 5872
+        },
+        {
+          "kind": "If",
+          "start": 5873,
+          "end": 5874
+        },
+        {
+          "kind": "Assign",
+          "start": 5878,
+          "end": 5878
+        },
+        {
+          "kind": "Assign",
+          "start": 5883,
+          "end": 5890
+        },
+        {
+          "kind": "Assign",
+          "start": 5893,
+          "end": 5893
+        },
+        {
+          "kind": "For",
+          "start": 5894,
+          "end": 5910
+        },
+        {
+          "kind": "Return",
+          "start": 3847,
+          "end": 3847
+        },
+        {
+          "kind": "Try",
+          "start": 3851,
+          "end": 3854
+        },
+        {
+          "kind": "If",
+          "start": 3860,
+          "end": 3861
+        },
+        {
+          "kind": "Expr",
+          "start": 3866,
+          "end": 3866
+        },
+        {
+          "kind": "Expr",
+          "start": 3867,
+          "end": 3867
+        },
+        {
+          "kind": "If",
+          "start": 3877,
+          "end": 3886
+        },
+        {
+          "kind": "If",
+          "start": 3887,
+          "end": 3888
+        },
+        {
+          "kind": "If",
+          "start": 3889,
+          "end": 3900
+        },
+        {
+          "kind": "Expr",
+          "start": 3908,
+          "end": 3908
+        },
+        {
+          "kind": "Expr",
+          "start": 3930,
+          "end": 3930
+        },
+        {
+          "kind": "Assign",
+          "start": 3932,
+          "end": 3932
+        },
+        {
+          "kind": "For",
+          "start": 3934,
+          "end": 3935
+        },
+        {
+          "kind": "Expr",
+          "start": 3950,
+          "end": 3950
+        },
+        {
+          "kind": "If",
+          "start": 3952,
+          "end": 3953
+        },
+        {
+          "kind": "Assign",
+          "start": 3956,
+          "end": 3956
+        },
+        {
+          "kind": "Expr",
+          "start": 3957,
+          "end": 3957
+        },
+        {
+          "kind": "For",
+          "start": 3959,
+          "end": 3977
+        },
+        {
+          "kind": "If",
+          "start": 3980,
+          "end": 3984
+        },
+        {
+          "kind": "Expr",
+          "start": 3987,
+          "end": 3987
+        },
+        {
+          "kind": "Expr",
+          "start": 3990,
+          "end": 3990
+        },
+        {
+          "kind": "Return",
+          "start": 4002,
+          "end": 4002
+        },
+        {
+          "kind": "Assign",
+          "start": 4010,
+          "end": 4010
+        },
+        {
+          "kind": "Assign",
+          "start": 4011,
+          "end": 4011
+        },
+        {
+          "kind": "Assign",
+          "start": 4018,
+          "end": 4018
+        },
+        {
+          "kind": "Expr",
+          "start": 4019,
+          "end": 4019
+        },
+        {
+          "kind": "Assign",
+          "start": 4030,
+          "end": 4030
+        },
+        {
+          "kind": "Assign",
+          "start": 4031,
+          "end": 4031
+        },
+        {
+          "kind": "For",
+          "start": 4032,
+          "end": 4069
+        },
+        {
+          "kind": "Expr",
+          "start": 4071,
+          "end": 4081
+        },
+        {
+          "kind": "Expr",
+          "start": 4085,
+          "end": 4085
+        },
+        {
+          "kind": "Return",
+          "start": 4114,
+          "end": 4114
+        },
+        {
+          "kind": "Assign",
+          "start": 4129,
+          "end": 4129
+        },
+        {
+          "kind": "If",
+          "start": 4130,
+          "end": 4131
+        },
+        {
+          "kind": "Expr",
+          "start": 4132,
+          "end": 4132
+        },
+        {
+          "kind": "Assign",
+          "start": 4141,
+          "end": 4141
+        },
+        {
+          "kind": "Assign",
+          "start": 4144,
+          "end": 4144
+        },
+        {
+          "kind": "Assign",
+          "start": 4145,
+          "end": 4145
+        },
+        {
+          "kind": "Assign",
+          "start": 4146,
+          "end": 4146
+        },
+        {
+          "kind": "Assign",
+          "start": 4147,
+          "end": 4147
+        },
+        {
+          "kind": "Assign",
+          "start": 4148,
+          "end": 4148
+        },
+        {
+          "kind": "Assign",
+          "start": 4149,
+          "end": 4149
+        },
+        {
+          "kind": "For",
+          "start": 4150,
+          "end": 4169
+        },
+        {
+          "kind": "Expr",
+          "start": 4171,
+          "end": 4171
+        },
+        {
+          "kind": "Assign",
+          "start": 4175,
+          "end": 4175
+        },
+        {
+          "kind": "For",
+          "start": 4176,
+          "end": 4181
+        },
+        {
+          "kind": "If",
+          "start": 4183,
+          "end": 4189
+        },
+        {
+          "kind": "For",
+          "start": 4198,
+          "end": 4200
+        },
+        {
+          "kind": "For",
+          "start": 4202,
+          "end": 4222
+        },
+        {
+          "kind": "Expr",
+          "start": 4226,
+          "end": 4226
+        },
+        {
+          "kind": "Expr",
+          "start": 4230,
+          "end": 4230
+        },
+        {
+          "kind": "Expr",
+          "start": 4233,
+          "end": 4233
+        },
+        {
+          "kind": "Return",
+          "start": 4237,
+          "end": 4237
+        },
+        {
+          "kind": "If",
+          "start": 5103,
+          "end": 5104
+        },
+        {
+          "kind": "Assign",
+          "start": 5106,
+          "end": 5106
+        },
+        {
+          "kind": "Assign",
+          "start": 5107,
+          "end": 5107
+        },
+        {
+          "kind": "Assign",
+          "start": 5109,
+          "end": 5109
+        },
+        {
+          "kind": "Expr",
+          "start": 5110,
+          "end": 5110
+        },
+        {
+          "kind": "Return",
+          "start": 5112,
+          "end": 5112
+        },
+        {
+          "kind": "Assign",
+          "start": 5114,
+          "end": 5114
+        },
+        {
+          "kind": "Assign",
+          "start": 5116,
+          "end": 5116
+        },
+        {
+          "kind": "Expr",
+          "start": 5842,
+          "end": 5842
+        },
+        {
+          "kind": "Return",
+          "start": 5874,
+          "end": 5874
+        },
+        {
+          "kind": "Assign",
+          "start": 5895,
+          "end": 5895
+        },
+        {
+          "kind": "Try",
+          "start": 5896,
+          "end": 5909
+        },
+        {
+          "kind": "Expr",
+          "start": 5910,
+          "end": 5910
+        },
+        {
+          "kind": "Expr",
+          "start": 3852,
+          "end": 3852
+        },
+        {
+          "kind": "Expr",
+          "start": 3861,
+          "end": 3861
+        },
+        {
+          "kind": "If",
+          "start": 3878,
+          "end": 3885
+        },
+        {
+          "kind": "Expr",
+          "start": 3886,
+          "end": 3886
+        },
+        {
+          "kind": "Expr",
+          "start": 3888,
+          "end": 3888
+        },
+        {
+          "kind": "If",
+          "start": 3890,
+          "end": 3900
+        },
+        {
+          "kind": "Expr",
+          "start": 3935,
+          "end": 3935
+        },
+        {
+          "kind": "Expr",
+          "start": 3953,
+          "end": 3953
+        },
+        {
+          "kind": "For",
+          "start": 3961,
+          "end": 3963
+        },
+        {
+          "kind": "Try",
+          "start": 3966,
+          "end": 3977
+        },
+        {
+          "kind": "Expr",
+          "start": 3984,
+          "end": 3984
+        },
+        {
+          "kind": "Assign",
+          "start": 4033,
+          "end": 4033
+        },
+        {
+          "kind": "Assert",
+          "start": 4034,
+          "end": 4034
+        },
+        {
+          "kind": "Assign",
+          "start": 4035,
+          "end": 4035
+        },
+        {
+          "kind": "Assign",
+          "start": 4037,
+          "end": 4037
+        },
+        {
+          "kind": "If",
+          "start": 4038,
+          "end": 4055
+        },
+        {
+          "kind": "If",
+          "start": 4056,
+          "end": 4067
+        },
+        {
+          "kind": "Expr",
+          "start": 4068,
+          "end": 4068
+        },
+        {
+          "kind": "Expr",
+          "start": 4069,
+          "end": 4069
+        },
+        {
+          "kind": "Raise",
+          "start": 4131,
+          "end": 4131
+        },
+        {
+          "kind": "Assign",
+          "start": 4151,
+          "end": 4151
+        },
+        {
+          "kind": "If",
+          "start": 4152,
+          "end": 4153
+        },
+        {
+          "kind": "If",
+          "start": 4154,
+          "end": 4155
+        },
+        {
+          "kind": "If",
+          "start": 4156,
+          "end": 4163
+        },
+        {
+          "kind": "If",
+          "start": 4166,
+          "end": 4167
+        },
+        {
+          "kind": "If",
+          "start": 4168,
+          "end": 4169
+        },
+        {
+          "kind": "If",
+          "start": 4177,
+          "end": 4181
+        },
+        {
+          "kind": "Assign",
+          "start": 4184,
+          "end": 4187
+        },
+        {
+          "kind": "For",
+          "start": 4188,
+          "end": 4189
+        },
+        {
+          "kind": "If",
+          "start": 4199,
+          "end": 4200
+        },
+        {
+          "kind": "Assign",
+          "start": 4204,
+          "end": 4204
+        },
+        {
+          "kind": "Assign",
+          "start": 4205,
+          "end": 4205
+        },
+        {
+          "kind": "For",
+          "start": 4206,
+          "end": 4215
+        },
+        {
+          "kind": "Assign",
+          "start": 4217,
+          "end": 4217
+        },
+        {
+          "kind": "Expr",
+          "start": 4218,
+          "end": 4218
+        },
+        {
+          "kind": "Assign",
+          "start": 4221,
+          "end": 4221
+        },
+        {
+          "kind": "Expr",
+          "start": 4222,
+          "end": 4222
+        },
+        {
+          "kind": "Return",
+          "start": 5104,
+          "end": 5104
+        },
+        {
+          "kind": "For",
+          "start": 5897,
+          "end": 5903
+        },
+        {
+          "kind": "Raise",
+          "start": 3854,
+          "end": 3854
+        },
+        {
+          "kind": "Expr",
+          "start": 3885,
+          "end": 3885
+        },
+        {
+          "kind": "Expr",
+          "start": 3900,
+          "end": 3900
+        },
+        {
+          "kind": "If",
+          "start": 3962,
+          "end": 3963
+        },
+        {
+          "kind": "Expr",
+          "start": 3967,
+          "end": 3967
+        },
+        {
+          "kind": "Assign",
+          "start": 4043,
+          "end": 4055
+        },
+        {
+          "kind": "Assign",
+          "start": 4057,
+          "end": 4057
+        },
+        {
+          "kind": "Assign",
+          "start": 4058,
+          "end": 4067
+        },
+        {
+          "kind": "Raise",
+          "start": 4153,
+          "end": 4153
+        },
+        {
+          "kind": "Assign",
+          "start": 4155,
+          "end": 4155
+        },
+        {
+          "kind": "Assign",
+          "start": 4157,
+          "end": 4157
+        },
+        {
+          "kind": "If",
+          "start": 4158,
+          "end": 4163
+        },
+        {
+          "kind": "Expr",
+          "start": 4167,
+          "end": 4167
+        },
+        {
+          "kind": "Expr",
+          "start": 4169,
+          "end": 4169
+        },
+        {
+          "kind": "Expr",
+          "start": 4178,
+          "end": 4178
+        },
+        {
+          "kind": "If",
+          "start": 4179,
+          "end": 4181
+        },
+        {
+          "kind": "Assign",
+          "start": 4189,
+          "end": 4189
+        },
+        {
+          "kind": "Expr",
+          "start": 4200,
+          "end": 4200
+        },
+        {
+          "kind": "If",
+          "start": 4207,
+          "end": 4208
+        },
+        {
+          "kind": "Assign",
+          "start": 4209,
+          "end": 4209
+        },
+        {
+          "kind": "Expr",
+          "start": 4210,
+          "end": 4214
+        },
+        {
+          "kind": "Expr",
+          "start": 4215,
+          "end": 4215
+        },
+        {
+          "kind": "Assign",
+          "start": 5898,
+          "end": 5898
+        },
+        {
+          "kind": "Expr",
+          "start": 5899,
+          "end": 5903
+        },
+        {
+          "kind": "Raise",
+          "start": 5905,
+          "end": 5909
+        },
+        {
+          "kind": "Expr",
+          "start": 3963,
+          "end": 3963
+        },
+        {
+          "kind": "If",
+          "start": 3969,
+          "end": 3976
+        },
+        {
+          "kind": "Raise",
+          "start": 3977,
+          "end": 3977
+        },
+        {
+          "kind": "Assign",
+          "start": 4159,
+          "end": 4159
+        },
+        {
+          "kind": "Expr",
+          "start": 4160,
+          "end": 4160
+        },
+        {
+          "kind": "If",
+          "start": 4161,
+          "end": 4163
+        },
+        {
+          "kind": "Assign",
+          "start": 4180,
+          "end": 4180
+        },
+        {
+          "kind": "Expr",
+          "start": 4181,
+          "end": 4181
+        },
+        {
+          "kind": "Continue",
+          "start": 4208,
+          "end": 4208
+        },
+        {
+          "kind": "Assign",
+          "start": 3970,
+          "end": 3970
+        },
+        {
+          "kind": "Raise",
+          "start": 3971,
+          "end": 3976
+        },
+        {
+          "kind": "Assign",
+          "start": 4163,
+          "end": 4163
+        }
+      ],
+      "program_units": 217,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": "java-spring-framework-services",
+      "funding_owner": "master-data-java-spring",
+      "stock_additional_generic_framework_units": 0
+    },
+    {
+      "repo": "odoo",
+      "path": "odoo/http/retrying.py",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "sha256": "a2755f611a51951e35539cec0ba4722ed3cafbff6315bfcc1c62904b74a856d7",
+      "git_object_sha256": "48592a8dccc89349f1e784005c07b381ecc82e946cf4748eb5622bcee7ad2124",
+      "source_url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/odoo/http/retrying.py",
+      "role": "framework_reused",
+      "classification_basis": "Reprise de toute la transaction sur les erreurs de concurrence autorisées ; commit et rollback.",
+      "methods": [
+        {
+          "name": "retrying",
+          "start": 27,
+          "end": 113,
+          "calls": [
+            "RuntimeError",
+            "ValidationError",
+            "_logger.info",
+            "_set_session_and_dbname",
+            "env._",
+            "env.cr.commit",
+            "env.cr.flush",
+            "env.cr.rollback",
+            "env.registry.values",
+            "file.seek",
+            "file.seekable",
+            "func",
+            "hasattr",
+            "isinstance",
+            "model._sql_error_to_message",
+            "psycopg2.errorcodes.lookup",
+            "random.uniform",
+            "repr",
+            "request.httprequest.files.items",
+            "time.sleep"
+          ],
+          "source_fragment": "def retrying[T](func: Callable[[], T], env: Environment, *, close_on_commit: bool = True) -> T:\n    \"\"\"\n    Call ``func``in a loop until the SQL transaction commits with no\n    serialisation error. It rollbacks the transaction in between calls.\n\n    A serialisation error occurs when two independent transactions\n    attempt to commit incompatible changes such as writing different\n    values on a same record. The first transaction to commit works, the\n    second is canceled with a :class:`psycopg2.errors.SerializationFailure`.\n\n    This function intercepts those serialization errors, rollbacks the\n    transaction, reset things that might have been modified, waits a\n    random bit, and then calls the function again.\n\n    It calls the function up to ``MAX_TRIES_ON_CONCURRENCY_FAILURE`` (5)\n    times. The time it waits between calls is random with an exponential\n    backoff: ``random.uniform(0.0, 2 ** i)`` where ``i`` is the n° of\n    the current attempt and starts at 1.\n\n    :param func: The function to call, you can pass arguments\n        using :func:`functools.partial`.\n    :param env: The environment where the registry\n        and the cursor are taken.\n    :param close_on_commit: Close the cursor after committing\n    \"\"\"\n    tryno = 0\n    while True:\n        tryno += 1\n        try:\n            result = func()\n            if not env.cr.closed:\n                env.cr.flush()  # submit the changes to the database\n            break\n        except (\n            psycopg2.IntegrityError,\n            psycopg2.OperationalError,\n            ConcurrencyError,\n        ) as exc:\n            if env.cr.closed:\n                raise\n            env.cr.rollback()\n            if request:\n                # We need to reset the `session` attribute of `request`\n                # which may have been modified during the transaction.\n                # The `dbname` remains the same (consistent with the session).\n                from .router import _set_session_and_dbname  # noqa: PLC0415\n                _set_session_and_dbname(request)\n                # Rewind files in case of failure\n                for filename, file in request.httprequest.files.items():\n                    if hasattr(file, \"seekable\") and file.seekable():\n                        file.seek(0)\n                    else:\n                        e = (\"Cannot retry request on input file \"\n                            f\"{filename!r} after serialization failure\")\n                        raise RuntimeError(e) from exc\n            if isinstance(exc, psycopg2.IntegrityError):\n                model = env['base']\n                for rclass in env.registry.values():\n                    if exc.diag.table_name == rclass._table:\n                        model = env[rclass._name]\n                        break\n                message = env._(\n                    \"The operation cannot be completed: %s\",\n                    model._sql_error_to_message(exc))\n                raise ValidationError(message) from exc\n\n            if isinstance(exc, PG_CONCURRENCY_EXCEPTIONS_TO_RETRY):\n                error = psycopg2.errorcodes.lookup(exc.pgcode)\n            elif isinstance(exc, ConcurrencyError):\n                error = repr(exc)\n            else:\n                raise\n\n            tryleft = MAX_TRIES_ON_CONCURRENCY_FAILURE - tryno\n            if not tryleft:\n                _logger.info(\"%s, maximum number of tries reached!\", error)\n                raise\n\n            wait_time = random.uniform(0.0, 2 ** tryno)\n            _logger.info(\"%s, %s tries left, try again in %.04f sec...\",\n                error, tryleft, wait_time)\n            time.sleep(wait_time)\n\n    if not env.cr.closed:\n        env.cr._closing = close_on_commit  # cursor should not be used after the commit\n        env.cr.commit()  # effectively commits and execute post-commits\n    return result",
+          "program_units": 44
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 27,
+          "end": 113
+        },
+        {
+          "kind": "Assign",
+          "start": 52,
+          "end": 52
+        },
+        {
+          "kind": "While",
+          "start": 53,
+          "end": 108
+        },
+        {
+          "kind": "If",
+          "start": 110,
+          "end": 112
+        },
+        {
+          "kind": "Return",
+          "start": 113,
+          "end": 113
+        },
+        {
+          "kind": "AugAssign",
+          "start": 54,
+          "end": 54
+        },
+        {
+          "kind": "Try",
+          "start": 55,
+          "end": 108
+        },
+        {
+          "kind": "Assign",
+          "start": 111,
+          "end": 111
+        },
+        {
+          "kind": "Expr",
+          "start": 112,
+          "end": 112
+        },
+        {
+          "kind": "Assign",
+          "start": 56,
+          "end": 56
+        },
+        {
+          "kind": "If",
+          "start": 57,
+          "end": 58
+        },
+        {
+          "kind": "Break",
+          "start": 59,
+          "end": 59
+        },
+        {
+          "kind": "Expr",
+          "start": 58,
+          "end": 58
+        },
+        {
+          "kind": "If",
+          "start": 65,
+          "end": 66
+        },
+        {
+          "kind": "Expr",
+          "start": 67,
+          "end": 67
+        },
+        {
+          "kind": "If",
+          "start": 68,
+          "end": 81
+        },
+        {
+          "kind": "If",
+          "start": 82,
+          "end": 91
+        },
+        {
+          "kind": "If",
+          "start": 93,
+          "end": 98
+        },
+        {
+          "kind": "Assign",
+          "start": 100,
+          "end": 100
+        },
+        {
+          "kind": "If",
+          "start": 101,
+          "end": 103
+        },
+        {
+          "kind": "Assign",
+          "start": 105,
+          "end": 105
+        },
+        {
+          "kind": "Expr",
+          "start": 106,
+          "end": 107
+        },
+        {
+          "kind": "Expr",
+          "start": 108,
+          "end": 108
+        },
+        {
+          "kind": "Raise",
+          "start": 66,
+          "end": 66
+        },
+        {
+          "kind": "ImportFrom",
+          "start": 72,
+          "end": 72
+        },
+        {
+          "kind": "Expr",
+          "start": 73,
+          "end": 73
+        },
+        {
+          "kind": "For",
+          "start": 75,
+          "end": 81
+        },
+        {
+          "kind": "Assign",
+          "start": 83,
+          "end": 83
+        },
+        {
+          "kind": "For",
+          "start": 84,
+          "end": 87
+        },
+        {
+          "kind": "Assign",
+          "start": 88,
+          "end": 90
+        },
+        {
+          "kind": "Raise",
+          "start": 91,
+          "end": 91
+        },
+        {
+          "kind": "Assign",
+          "start": 94,
+          "end": 94
+        },
+        {
+          "kind": "If",
+          "start": 95,
+          "end": 98
+        },
+        {
+          "kind": "Expr",
+          "start": 102,
+          "end": 102
+        },
+        {
+          "kind": "Raise",
+          "start": 103,
+          "end": 103
+        },
+        {
+          "kind": "If",
+          "start": 76,
+          "end": 81
+        },
+        {
+          "kind": "If",
+          "start": 85,
+          "end": 87
+        },
+        {
+          "kind": "Assign",
+          "start": 96,
+          "end": 96
+        },
+        {
+          "kind": "Raise",
+          "start": 98,
+          "end": 98
+        },
+        {
+          "kind": "Expr",
+          "start": 77,
+          "end": 77
+        },
+        {
+          "kind": "Assign",
+          "start": 79,
+          "end": 80
+        },
+        {
+          "kind": "Raise",
+          "start": 81,
+          "end": 81
+        },
+        {
+          "kind": "Assign",
+          "start": 86,
+          "end": 86
+        },
+        {
+          "kind": "Break",
+          "start": 87,
+          "end": 87
+        }
+      ],
+      "program_units": 44,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": "java-spring-framework-services",
+      "funding_owner": "master-data-java-spring",
+      "stock_additional_generic_framework_units": 0
+    }
+  ],
+  "units_by_role": {
+    "stock_quantity": 333,
+    "coupled_native": 0,
+    "native_integration": 170,
+    "framework_reused": 261
+  },
+  "method_count": 29,
+  "runtime_executed": false,
+  "closure": {
+    "main_stages_traced": true,
+    "critical_transaction_boundary_identified": true,
+    "all_dynamic_hooks_and_installed_extensions_closed": false,
+    "mixed_native_responsibilities_present": true,
+    "complete_Flow_retroactivity_and_command_replay_equivalence": false
+  },
+  "effort": {
+    "receivable_jh": null,
+    "COCOMO_executed": false,
+    "reason": "Le dossier mesure les composants natifs et leurs dépendances, pas une assiette homogène neuve/réutilisée du mécanisme Flow complet. Un total de famille ou de projet autonome tiré de ces seules méthodes serait trompeur."
+  },
+  "standard_ports_not_counted_as_new_stock": [
+    "ORM/repositories et transactions natifs",
+    "lecture des identités produit/lieu/unité/partenaire existantes",
+    "injection et services de date/configuration/logs"
+  ],
+  "native_domain_ports_requiring_scope_resolution": [
+    "Délimitation de la sélection/prélèvement native par rapport à une quantité et portion imposées.",
+    "Idempotence du nouvel appel métier après perte de la réponse, distincte du retry de la transaction avortée."
+  ]
+}

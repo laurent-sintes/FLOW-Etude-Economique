@@ -1,0 +1,6424 @@
+{
+  "family": "ba-execution-coordination",
+  "iteration": 2,
+  "analysis_ref": "analyse-1.json",
+  "capabilities": [
+    "BC-053",
+    "BC-054",
+    "BC-055"
+  ],
+  "cocomo": {
+    "A": 2.94,
+    "B": 0.91,
+    "SF_sum": 18.97,
+    "C": 3.67,
+    "D": 0.28,
+    "month_hours": 152,
+    "day_hours": 7,
+    "effort_phase_factor": 1.18,
+    "schedule_phase_factor": 1.25,
+    "other_EM": 1,
+    "SCED": 1,
+    "REVL": 0,
+    "source": "https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf",
+    "source_locations": "Équation 4 et tables 6, 36, 57, 63 ; autres paramètres conservés nominaux.",
+    "activity_distribution_ref": "../2026-10-30-master-data-calcul/repartitions-sources.json#cocomo"
+  },
+  "native_reference_banks": {
+    "erpnext": 198,
+    "odoo": 144,
+    "tryton": 186,
+    "axelor": 195
+  },
+  "source_selection": [
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_picking.py",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "name": "StockPicking._compute_validate_button_style",
+      "start": 581,
+      "end": 588,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Assign",
+          584,
+          584,
+          16,
+          59
+        ],
+        [
+          "Assign",
+          586,
+          586,
+          16,
+          57
+        ],
+        [
+          "Assign",
+          588,
+          588,
+          16,
+          59
+        ],
+        [
+          "For",
+          582,
+          588,
+          8,
+          59
+        ],
+        [
+          "FunctionDef",
+          581,
+          588,
+          4,
+          59
+        ],
+        [
+          "If",
+          583,
+          588,
+          12,
+          59
+        ],
+        [
+          "If",
+          585,
+          588,
+          12,
+          59
+        ]
+      ],
+      "source": "    def _compute_validate_button_style(self):\n        for picking in self:\n            if picking.state in ('done', 'cancel'):\n                picking.validate_button_style = 'invisible'\n            elif picking.state in ('waiting', 'assigned'):\n                picking.validate_button_style = 'primary'\n            else:\n                picking.validate_button_style = 'secondary'"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_picking.py",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "name": "StockPicking.action_confirm",
+      "start": 786,
+      "end": 803,
+      "program_units": 12,
+      "nodes": [
+        [
+          "Assign",
+          790,
+          790,
+          12,
+          88
+        ],
+        [
+          "Expr",
+          787,
+          787,
+          8,
+          29
+        ],
+        [
+          "Expr",
+          795,
+          795,
+          8,
+          84
+        ],
+        [
+          "Expr",
+          798,
+          798,
+          8,
+          111
+        ],
+        [
+          "Expr",
+          802,
+          802,
+          16,
+          42
+        ],
+        [
+          "For",
+          801,
+          802,
+          12,
+          42
+        ],
+        [
+          "FunctionDef",
+          786,
+          803,
+          4,
+          19
+        ],
+        [
+          "If",
+          788,
+          792,
+          8,
+          65
+        ],
+        [
+          "If",
+          791,
+          792,
+          12,
+          65
+        ],
+        [
+          "If",
+          800,
+          802,
+          8,
+          42
+        ],
+        [
+          "Return",
+          792,
+          792,
+          16,
+          65
+        ],
+        [
+          "Return",
+          803,
+          803,
+          8,
+          19
+        ]
+      ],
+      "source": "    def action_confirm(self):\n        self._check_company()\n        if not self.env.context.get('skip_zero_demand_check') and not modules.module.current_test:\n            # Check for zero demand moves before confirming\n            zero_demand_moves = self.move_ids.filtered(lambda m: m.product_uom_qty <= 0)\n            if zero_demand_moves:\n                return self._action_generate_zero_demand_wizard()\n\n        # call `_action_confirm` on every draft move\n        self.move_ids.filtered(lambda move: move.state == 'draft')._action_confirm()\n\n        # run scheduler for moves forecasted to not have enough in stock\n        self.move_ids.filtered(lambda move: move.state not in ('draft', 'cancel', 'done'))._trigger_scheduler()\n\n        if self.env.user.has_group('stock.group_stock_picking_batch'):\n            for picking in self:\n                picking._find_auto_batch()\n        return True"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_picking.py",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "name": "StockPicking.action_assign",
+      "start": 805,
+      "end": 818,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Assign",
+          812,
+          814,
+          8,
+          9
+        ],
+        [
+          "Expr",
+          811,
+          811,
+          8,
+          122
+        ],
+        [
+          "Expr",
+          817,
+          817,
+          8,
+          30
+        ],
+        [
+          "FunctionDef",
+          805,
+          818,
+          4,
+          19
+        ],
+        [
+          "If",
+          815,
+          816,
+          8,
+          71
+        ],
+        [
+          "Raise",
+          816,
+          816,
+          12,
+          71
+        ],
+        [
+          "Return",
+          818,
+          818,
+          8,
+          19
+        ]
+      ],
+      "source": "    def action_assign(self):\n        \"\"\" Check availability of picking moves.\n        This has the effect of changing the state and reserve quants on available moves, and may\n        also impact the state of the picking as it is computed based on move's states.\n        @return: True\n        \"\"\"\n        self.filtered(lambda picking: picking.state == 'draft').with_context(skip_zero_demand_check=True).action_confirm()\n        moves = self.move_ids.filtered(lambda move: move.state not in ('draft', 'cancel', 'done')).sorted(\n            key=lambda move: (-int(move.priority), not bool(move.date_deadline), move.date_deadline, move.date, move.id)\n        )\n        if not moves:\n            raise UserError(self.env._('There is nothing to reserve.'))\n        moves._action_assign()\n        return True"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_picking.py",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "name": "StockPicking.action_cancel",
+      "start": 820,
+      "end": 828,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Assign",
+          823,
+          823,
+          8,
+          64
+        ],
+        [
+          "Assign",
+          827,
+          827,
+          16,
+          39
+        ],
+        [
+          "Expr",
+          821,
+          821,
+          8,
+          38
+        ],
+        [
+          "Expr",
+          822,
+          822,
+          8,
+          39
+        ],
+        [
+          "For",
+          825,
+          827,
+          8,
+          39
+        ],
+        [
+          "FunctionDef",
+          820,
+          828,
+          4,
+          19
+        ],
+        [
+          "If",
+          826,
+          827,
+          12,
+          39
+        ],
+        [
+          "Return",
+          828,
+          828,
+          8,
+          19
+        ]
+      ],
+      "source": "    def action_cancel(self):\n        self.move_ids._action_cancel()\n        self.write({'is_locked': True})\n        self.filtered(lambda x: not x.move_ids).state = 'cancel'\n        # Remove the cancelled operation from its batch if the batch has other active picking(s).\n        for picking in self:\n            if picking.batch_id and any(picking.state != 'cancel' for picking in picking.batch_id.picking_ids):\n                picking.batch_id = None\n        return True"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_picking.py",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "name": "StockPicking._action_done",
+      "start": 1014,
+      "end": 1061,
+      "program_units": 21,
+      "nodes": [
+        [
+          "Assign",
+          1026,
+          1026,
+          8,
+          140
+        ],
+        [
+          "Assign",
+          1037,
+          1037,
+          16,
+          82
+        ],
+        [
+          "Assign",
+          1038,
+          1040,
+          16,
+          17
+        ],
+        [
+          "Assign",
+          1042,
+          1052,
+          20,
+          21
+        ],
+        [
+          "Assign",
+          1056,
+          1056,
+          8,
+          152
+        ],
+        [
+          "Expr",
+          1024,
+          1024,
+          8,
+          29
+        ],
+        [
+          "Expr",
+          1029,
+          1029,
+          16,
+          84
+        ],
+        [
+          "Expr",
+          1030,
+          1030,
+          16,
+          78
+        ],
+        [
+          "Expr",
+          1031,
+          1031,
+          8,
+          90
+        ],
+        [
+          "Expr",
+          1032,
+          1032,
+          8,
+          73
+        ],
+        [
+          "Expr",
+          1053,
+          1053,
+          20,
+          90
+        ],
+        [
+          "Expr",
+          1057,
+          1057,
+          8,
+          45
+        ],
+        [
+          "Expr",
+          1059,
+          1059,
+          8,
+          35
+        ],
+        [
+          "Expr",
+          1060,
+          1060,
+          8,
+          39
+        ],
+        [
+          "For",
+          1027,
+          1030,
+          8,
+          78
+        ],
+        [
+          "For",
+          1036,
+          1053,
+          12,
+          90
+        ],
+        [
+          "FunctionDef",
+          1014,
+          1061,
+          4,
+          19
+        ],
+        [
+          "If",
+          1028,
+          1030,
+          12,
+          78
+        ],
+        [
+          "If",
+          1035,
+          1053,
+          8,
+          90
+        ],
+        [
+          "If",
+          1041,
+          1053,
+          16,
+          90
+        ],
+        [
+          "Return",
+          1061,
+          1061,
+          8,
+          19
+        ]
+      ],
+      "source": "    def _action_done(self):\n        \"\"\"Call `_action_done` on the `stock.move` of the `stock.picking` in `self`.\n        This method makes sure every `stock.move.line` is linked to a `stock.move` by either\n        linking them to an existing one or a newly created one.\n\n        If the context key `cancel_backorder` is present, backorders won't be created.\n\n        :return: True\n        :rtype: bool\n        \"\"\"\n        self._check_company()\n\n        todo_moves = self.move_ids.filtered(lambda self: self.state in ['draft', 'waiting', 'partially_available', 'assigned', 'confirmed'])\n        for picking in self:\n            if picking.owner_id:\n                picking.move_ids.write({'restrict_partner_id': picking.owner_id.id})\n                picking.move_line_ids.write({'owner_id': picking.owner_id.id})\n        todo_moves._action_done(cancel_backorder=self.env.context.get('cancel_backorder'))\n        self.write({'date_done': fields.Datetime.now(), 'priority': '0'})\n\n        # notify followers when no backorder was created but quantities are incomplete\n        if self.env.context.get('cancel_backorder'):\n            for picking in self:\n                prec = self.env['decimal.precision'].precision_get('Product Unit')\n                incomplete_moves = picking.move_ids.filtered(\n                    lambda m: float_compare(m.quantity, m.product_uom_qty, precision_digits=prec) < 0\n                )\n                if incomplete_moves:\n                    msg = self.env._(\n                        'No backorder has been planned for undelivered demanded quantities: %s',\n                        Markup('<ul>%s</ul>') % Markup().join(\n                            Markup('<li>%s</li>') % self.env._(\n                                'Only %(nbr_done)s %(uom)s of %(product)s delivered in contrast to the expected %(nbr_demanded)s %(uom)s',\n                                product=move.product_id.display_name,\n                                nbr_done=move.quantity,\n                                nbr_demanded=move.product_uom_qty,\n                                uom=move.uom_id.name,\n                            ) for move in incomplete_moves)\n                    )\n                    picking.message_post(body=msg, subtype_xmlid='stock.mt_picking_state')\n\n        # if incoming/internal moves make other confirmed/partially_available moves available, assign them\n        done_incoming_moves = self.filtered(lambda p: p.picking_type_id.code in ('incoming', 'internal')).move_ids.filtered(lambda m: m.state == 'done')\n        done_incoming_moves._trigger_assign()\n\n        self._intercompany_unpack()\n        self._send_confirmation_email()\n        return True"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_picking.py",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "name": "StockPicking._send_confirmation_email",
+      "start": 1076,
+      "end": 1084,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          1077,
+          1077,
+          8,
+          82
+        ],
+        [
+          "Assign",
+          1079,
+          1079,
+          12,
+          89
+        ],
+        [
+          "Expr",
+          1080,
+          1084,
+          12,
+          13
+        ],
+        [
+          "For",
+          1078,
+          1084,
+          8,
+          13
+        ],
+        [
+          "FunctionDef",
+          1076,
+          1084,
+          4,
+          13
+        ]
+      ],
+      "source": "    def _send_confirmation_email(self):\n        subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')\n        for stock_pick in self.filtered(lambda p: p.company_id.stock_move_email_validation and p.picking_type_id.code == 'outgoing'):\n            delivery_template = stock_pick.company_id.stock_mail_confirmation_template_id\n            stock_pick.with_context(force_send=True).message_post_with_source(\n                delivery_template,\n                email_layout_xmlid='mail.mail_notification_light',\n                subtype_id=subtype_id,\n            )"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_picking.py",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "name": "StockPicking.button_validate",
+      "start": 1194,
+      "end": 1263,
+      "program_units": 46,
+      "nodes": [
+        [
+          "Assign",
+          1195,
+          1195,
+          8,
+          57
+        ],
+        [
+          "Assign",
+          1196,
+          1196,
+          8,
+          67
+        ],
+        [
+          "Assign",
+          1197,
+          1197,
+          8,
+          75
+        ],
+        [
+          "Assign",
+          1202,
+          1202,
+          16,
+          52
+        ],
+        [
+          "Assign",
+          1211,
+          1211,
+          12,
+          74
+        ],
+        [
+          "Assign",
+          1212,
+          1212,
+          8,
+          42
+        ],
+        [
+          "Assign",
+          1217,
+          1217,
+          8,
+          106
+        ],
+        [
+          "Assign",
+          1222,
+          1222,
+          8,
+          64
+        ],
+        [
+          "Assign",
+          1230,
+          1230,
+          12,
+          33
+        ],
+        [
+          "Assign",
+          1232,
+          1232,
+          16,
+          109
+        ],
+        [
+          "Assign",
+          1233,
+          1233,
+          16,
+          51
+        ],
+        [
+          "Assign",
+          1234,
+          1234,
+          16,
+          93
+        ],
+        [
+          "Assign",
+          1242,
+          1242,
+          20,
+          43
+        ],
+        [
+          "Assign",
+          1249,
+          1249,
+          16,
+          85
+        ],
+        [
+          "Assign",
+          1254,
+          1254,
+          8,
+          61
+        ],
+        [
+          "AugAssign",
+          1219,
+          1221,
+          12,
+          13
+        ],
+        [
+          "Continue",
+          1239,
+          1239,
+          20,
+          28
+        ],
+        [
+          "Expr",
+          1206,
+          1206,
+          12,
+          32
+        ],
+        [
+          "Expr",
+          1224,
+          1224,
+          12,
+          88
+        ],
+        [
+          "Expr",
+          1226,
+          1226,
+          12,
+          85
+        ],
+        [
+          "Expr",
+          1235,
+          1235,
+          16,
+          76
+        ],
+        [
+          "Expr",
+          1244,
+          1244,
+          16,
+          63
+        ],
+        [
+          "Expr",
+          1251,
+          1251,
+          20,
+          46
+        ],
+        [
+          "Expr",
+          1252,
+          1252,
+          16,
+          100
+        ],
+        [
+          "For",
+          1200,
+          1202,
+          8,
+          52
+        ],
+        [
+          "For",
+          1237,
+          1244,
+          12,
+          63
+        ],
+        [
+          "For",
+          1250,
+          1251,
+          16,
+          46
+        ],
+        [
+          "FunctionDef",
+          1194,
+          1263,
+          4,
+          19
+        ],
+        [
+          "If",
+          1198,
+          1199,
+          8,
+          22
+        ],
+        [
+          "If",
+          1201,
+          1202,
+          12,
+          52
+        ],
+        [
+          "If",
+          1205,
+          1206,
+          8,
+          32
+        ],
+        [
+          "If",
+          1210,
+          1211,
+          8,
+          74
+        ],
+        [
+          "If",
+          1213,
+          1214,
+          8,
+          22
+        ],
+        [
+          "If",
+          1218,
+          1221,
+          8,
+          13
+        ],
+        [
+          "If",
+          1223,
+          1224,
+          8,
+          88
+        ],
+        [
+          "If",
+          1225,
+          1226,
+          8,
+          85
+        ],
+        [
+          "If",
+          1229,
+          1252,
+          8,
+          100
+        ],
+        [
+          "If",
+          1231,
+          1235,
+          12,
+          76
+        ],
+        [
+          "If",
+          1238,
+          1239,
+          16,
+          28
+        ],
+        [
+          "If",
+          1241,
+          1242,
+          16,
+          43
+        ],
+        [
+          "If",
+          1247,
+          1252,
+          12,
+          100
+        ],
+        [
+          "If",
+          1255,
+          1262,
+          8,
+          13
+        ],
+        [
+          "Return",
+          1199,
+          1199,
+          12,
+          22
+        ],
+        [
+          "Return",
+          1214,
+          1214,
+          12,
+          22
+        ],
+        [
+          "Return",
+          1256,
+          1262,
+          12,
+          13
+        ],
+        [
+          "Return",
+          1263,
+          1263,
+          8,
+          19
+        ]
+      ],
+      "source": "    def button_validate(self):\n        self = self.filtered(lambda p: p.state != 'done')\n        draft_picking = self.filtered(lambda p: p.state == 'draft')\n        res = draft_picking.with_context(to_validate=True).action_confirm()\n        if res is not True:\n            return res\n        for move in draft_picking.move_ids:\n            if move.uom_id.is_zero(move.quantity) and not move.uom_id.is_zero(move.product_uom_qty):\n                move.quantity = move.product_uom_qty\n\n        # Sanity checks.\n        if not self.env.context.get('skip_sanity_check', False):\n            self._sanity_check()\n\n        # Run the pre-validation wizards. Processing a pre-validation wizard should work on the\n        # moves and/or the context and never call `_action_done`.\n        if not self.env.context.get('button_validate_picking_ids'):\n            self = self.with_context(button_validate_picking_ids=self.ids)\n        res = self._pre_action_done_hook()\n        if res is not True:\n            return res\n\n        # Call `_action_done`.\n        pickings_not_to_backorder = self.filtered(lambda p: p.picking_type_id.create_backorder == 'never')\n        if self.env.context.get('picking_ids_not_to_backorder'):\n            pickings_not_to_backorder |= self.browse(self.env.context['picking_ids_not_to_backorder']).filtered(\n                lambda p: p.picking_type_id.create_backorder != 'always'\n            )\n        pickings_to_backorder = self - pickings_not_to_backorder\n        if pickings_not_to_backorder:\n            pickings_not_to_backorder.with_context(cancel_backorder=True)._action_done()\n        if pickings_to_backorder:\n            pickings_to_backorder.with_context(cancel_backorder=False)._action_done()\n\n        # Remove done pickings from their batch.\n        if any(picking.state == 'done' for picking in self):\n            to_assign_ids = set()\n            if self and self.env.context.get('pickings_to_detach'):\n                pickings_to_detach = self.env['stock.picking'].browse(self.env.context['pickings_to_detach'])\n                pickings_to_detach.batch_id = False\n                pickings_to_detach.move_ids.filtered(lambda m: not m.quantity).picked = False\n                to_assign_ids.update(self.env.context['pickings_to_detach'])\n\n            for picking in self:\n                if picking.state != 'done':\n                    continue\n                # Avoid inconsistencies in states of the same batch when validating a single picking in a batch.\n                if picking.batch_id and any(p.state != 'done' for p in picking.batch_id.picking_ids):\n                    picking.batch_id = None\n                # If backorder were made and auto-batch is enabled, seek a batch for each of them with the selected criterias.\n                to_assign_ids.update(picking.backorder_ids.ids)\n\n            # If batch setting is enabled, auto-batch done pickings' backorders.\n            if self.env.user.has_group('stock.group_stock_picking_batch'):\n                # To avoid inconsistencies, all incorrect pickings must be removed before assigning backorder pickings\n                assignable_pickings = self.env['stock.picking'].browse(to_assign_ids)\n                for picking in assignable_pickings:\n                    picking._find_auto_batch()\n                assignable_pickings.move_line_ids.with_context(skip_auto_waveable=True)._auto_wave()\n\n        report_actions = self._get_autoprint_report_actions()\n        if report_actions:\n            return {\n                'type': 'ir.actions.client',\n                'tag': 'do_multi_print',\n                'params': {\n                    'reports': report_actions,\n                }\n            }\n        return True"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_picking.py",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "name": "StockPicking._pre_action_done_hook",
+      "start": 1290,
+      "end": 1309,
+      "program_units": 20,
+      "nodes": [
+        [
+          "Assign",
+          1292,
+          1292,
+          12,
+          32
+        ],
+        [
+          "Assign",
+          1293,
+          1293,
+          12,
+          28
+        ],
+        [
+          "Assign",
+          1296,
+          1296,
+          20,
+          39
+        ],
+        [
+          "Assign",
+          1300,
+          1300,
+          20,
+          35
+        ],
+        [
+          "Assign",
+          1304,
+          1304,
+          16,
+          46
+        ],
+        [
+          "Assign",
+          1306,
+          1306,
+          12,
+          59
+        ],
+        [
+          "Break",
+          1302,
+          1302,
+          20,
+          25
+        ],
+        [
+          "Continue",
+          1298,
+          1298,
+          20,
+          28
+        ],
+        [
+          "For",
+          1291,
+          1304,
+          8,
+          46
+        ],
+        [
+          "For",
+          1294,
+          1302,
+          12,
+          25
+        ],
+        [
+          "FunctionDef",
+          1290,
+          1309,
+          4,
+          19
+        ],
+        [
+          "If",
+          1295,
+          1296,
+          16,
+          39
+        ],
+        [
+          "If",
+          1297,
+          1298,
+          16,
+          28
+        ],
+        [
+          "If",
+          1299,
+          1300,
+          16,
+          35
+        ],
+        [
+          "If",
+          1301,
+          1302,
+          16,
+          25
+        ],
+        [
+          "If",
+          1303,
+          1304,
+          12,
+          46
+        ],
+        [
+          "If",
+          1305,
+          1308,
+          8,
+          124
+        ],
+        [
+          "If",
+          1307,
+          1308,
+          12,
+          124
+        ],
+        [
+          "Return",
+          1308,
+          1308,
+          16,
+          124
+        ],
+        [
+          "Return",
+          1309,
+          1309,
+          8,
+          19
+        ]
+      ],
+      "source": "    def _pre_action_done_hook(self):\n        for picking in self:\n            has_quantity = False\n            has_pick = False\n            for move in picking.move_ids:\n                if move.quantity:\n                    has_quantity = True\n                if move.location_dest_usage == 'inventory':\n                    continue\n                if move.picked:\n                    has_pick = True\n                if has_quantity and has_pick:\n                    break\n            if has_quantity and not has_pick:\n                picking.move_ids.picked = True\n        if not self.env.context.get('skip_backorder'):\n            pickings_to_backorder = self._check_backorder()\n            if pickings_to_backorder:\n                return pickings_to_backorder._action_generate_backorder_wizard(show_transfers=self._should_show_transfers())\n        return True"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_picking.py",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "name": "StockPicking._autoconfirm_picking",
+      "start": 1386,
+      "end": 1399,
+      "program_units": 10,
+      "nodes": [
+        [
+          "Assign",
+          1398,
+          1398,
+          8,
+          88
+        ],
+        [
+          "Continue",
+          1393,
+          1393,
+          16,
+          24
+        ],
+        [
+          "Continue",
+          1395,
+          1395,
+          16,
+          24
+        ],
+        [
+          "Expr",
+          1397,
+          1397,
+          16,
+          82
+        ],
+        [
+          "Expr",
+          1399,
+          1399,
+          8,
+          36
+        ],
+        [
+          "For",
+          1391,
+          1397,
+          8,
+          82
+        ],
+        [
+          "FunctionDef",
+          1386,
+          1399,
+          4,
+          36
+        ],
+        [
+          "If",
+          1392,
+          1393,
+          12,
+          24
+        ],
+        [
+          "If",
+          1394,
+          1395,
+          12,
+          24
+        ],
+        [
+          "If",
+          1396,
+          1397,
+          12,
+          82
+        ]
+      ],
+      "source": "    def _autoconfirm_picking(self):\n        \"\"\" Automatically run `action_confirm` on `self` if one of the\n        picking's move was added after the initial\n        call to `action_confirm`. Note that `action_confirm` will only work on draft moves.\n        \"\"\"\n        for picking in self:\n            if picking.state in ('done', 'cancel'):\n                continue\n            if not picking.move_ids:\n                continue\n            if any(move.additional for move in picking.move_ids):\n                picking.with_context(skip_zero_demand_check=True).action_confirm()\n        to_confirm = self.move_ids.filtered(lambda m: m.state == 'draft' and m.quantity)\n        to_confirm._action_confirm()"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_picking.py",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "name": "StockPicking.assign_batch_user",
+      "start": 2003,
+      "end": 2011,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Assign",
+          2004,
+          2004,
+          8,
+          67
+        ],
+        [
+          "Assign",
+          2008,
+          2008,
+          16,
+          93
+        ],
+        [
+          "Assign",
+          2010,
+          2010,
+          16,
+          97
+        ],
+        [
+          "Expr",
+          2005,
+          2005,
+          8,
+          44
+        ],
+        [
+          "Expr",
+          2011,
+          2011,
+          12,
+          47
+        ],
+        [
+          "For",
+          2006,
+          2011,
+          8,
+          47
+        ],
+        [
+          "FunctionDef",
+          2003,
+          2011,
+          4,
+          47
+        ],
+        [
+          "If",
+          2007,
+          2010,
+          12,
+          97
+        ]
+      ],
+      "source": "    def assign_batch_user(self, user_id):\n        pickings = self.filtered(lambda p: p.user_id.id != user_id)\n        pickings.write({'user_id': user_id})\n        for pick in pickings:\n            if user_id:\n                log_message = _('Assigned to %s Responsible', pick.batch_id._get_html_link())\n            else:\n                log_message = _('Unassigned responsible from %s', pick.batch_id._get_html_link())\n            pick.message_post(body=log_message)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentAssignMixin.assign_wizard",
+      "start": 201,
+      "end": 202,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          201,
+          202,
+          4,
+          33
+        ],
+        [
+          "Raise",
+          202,
+          202,
+          8,
+          33
+        ]
+      ],
+      "source": "    def assign_wizard(cls, shipments):\n        raise NotImplementedError"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentAssignMixin.assign_moves",
+      "start": 205,
+      "end": 206,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          205,
+          206,
+          4,
+          54
+        ],
+        [
+          "Return",
+          206,
+          206,
+          8,
+          54
+        ]
+      ],
+      "source": "    def assign_moves(self):\n        return getattr(self, self._assign_moves_field)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentAssignMixin.assign_try",
+      "start": 210,
+      "end": 211,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          210,
+          211,
+          4,
+          33
+        ],
+        [
+          "Raise",
+          211,
+          211,
+          8,
+          33
+        ]
+      ],
+      "source": "    def assign_try(cls, shipments):\n        raise NotImplementedError"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentAssignMixin.assign_reset",
+      "start": 214,
+      "end": 215,
+      "program_units": 2,
+      "nodes": [
+        [
+          "Expr",
+          215,
+          215,
+          8,
+          27
+        ],
+        [
+          "FunctionDef",
+          214,
+          215,
+          4,
+          27
+        ]
+      ],
+      "source": "    def assign_reset(cls, shipments):\n        cls.wait(shipments)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentAssignMixin.assign_force",
+      "start": 219,
+      "end": 220,
+      "program_units": 2,
+      "nodes": [
+        [
+          "Expr",
+          220,
+          220,
+          8,
+          29
+        ],
+        [
+          "FunctionDef",
+          219,
+          220,
+          4,
+          29
+        ]
+      ],
+      "source": "    def assign_force(cls, shipments):\n        cls.assign(shipments)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentAssignMixin.assign_ignore",
+      "start": 223,
+      "end": 242,
+      "program_units": 12,
+      "nodes": [
+        [
+          "Assign",
+          224,
+          224,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          225,
+          225,
+          8,
+          37
+        ],
+        [
+          "Assign",
+          226,
+          228,
+          8,
+          74
+        ],
+        [
+          "Assign",
+          230,
+          230,
+          12,
+          38
+        ],
+        [
+          "Assign",
+          232,
+          232,
+          12,
+          59
+        ],
+        [
+          "Expr",
+          233,
+          235,
+          8,
+          18
+        ],
+        [
+          "Expr",
+          242,
+          242,
+          20,
+          41
+        ],
+        [
+          "For",
+          237,
+          242,
+          12,
+          41
+        ],
+        [
+          "FunctionDef",
+          223,
+          242,
+          4,
+          41
+        ],
+        [
+          "If",
+          229,
+          232,
+          8,
+          59
+        ],
+        [
+          "If",
+          238,
+          242,
+          16,
+          41
+        ],
+        [
+          "With",
+          236,
+          242,
+          8,
+          41
+        ]
+      ],
+      "source": "    def assign_ignore(cls, shipments, moves=None):\n        pool = Pool()\n        Move = pool.get('stock.move')\n        assign_moves = {\n            m for s in shipments for m in s.assign_moves\n            if m.assignation_required and m.state in {'staging', 'draft'}}\n        if moves is None:\n            moves = list(assign_moves)\n        else:\n            moves = [m for m in moves if m in assign_moves]\n        Move.write(moves, {\n                'quantity': 0,\n                })\n        with cls.bulk_func('assign', auto=False) as assign:\n            for shipment in shipments:\n                if all(\n                        m.state not in {'staging', 'draft'}\n                        for m in shipment.assign_moves\n                        if m.assignation_required):\n                    assign.push(shipment)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentAssignMixin._get_assign_domain",
+      "start": 245,
+      "end": 253,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          246,
+          246,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          247,
+          247,
+          8,
+          34
+        ],
+        [
+          "Assign",
+          248,
+          248,
+          8,
+          39
+        ],
+        [
+          "FunctionDef",
+          245,
+          253,
+          4,
+          13
+        ],
+        [
+          "Return",
+          249,
+          253,
+          8,
+          13
+        ]
+      ],
+      "source": "    def _get_assign_domain(cls):\n        pool = Pool()\n        Date = pool.get('ir.date')\n        context = Transaction().context\n        return [\n            ('company', '=', context.get('company')),\n            ('state', '=', 'waiting'),\n            ('planned_date', '<=', Date.today()),\n            ]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentAssignMixin.to_assign",
+      "start": 256,
+      "end": 257,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          256,
+          257,
+          4,
+          51
+        ],
+        [
+          "Return",
+          257,
+          257,
+          8,
+          51
+        ]
+      ],
+      "source": "    def to_assign(cls):\n        return cls.search(cls._get_assign_domain())"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentAssignMixin.assign_order_key",
+      "start": 260,
+      "end": 261,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          260,
+          261,
+          4,
+          52
+        ],
+        [
+          "Return",
+          261,
+          261,
+          8,
+          52
+        ]
+      ],
+      "source": "    def assign_order_key(self):\n        return (self.planned_date, self.create_date)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentAssignMixin.get_partially_assigned",
+      "start": 263,
+      "end": 266,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          263,
+          266,
+          4,
+          43
+        ],
+        [
+          "Return",
+          264,
+          266,
+          8,
+          43
+        ]
+      ],
+      "source": "    def get_partially_assigned(self, name):\n        return (self.state != 'assigned'\n            and any(m.state == 'assigned' for m in self.assign_moves\n                if m.assignation_required))"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentAssignMixin.search_partially_assigned",
+      "start": 269,
+      "end": 291,
+      "program_units": 9,
+      "nodes": [
+        [
+          "Assign",
+          270,
+          273,
+          8,
+          13
+        ],
+        [
+          "Assign",
+          274,
+          277,
+          8,
+          13
+        ],
+        [
+          "Assign",
+          280,
+          280,
+          16,
+          45
+        ],
+        [
+          "Assign",
+          282,
+          282,
+          16,
+          36
+        ],
+        [
+          "FunctionDef",
+          269,
+          291,
+          4,
+          21
+        ],
+        [
+          "If",
+          278,
+          291,
+          8,
+          21
+        ],
+        [
+          "If",
+          279,
+          282,
+          12,
+          36
+        ],
+        [
+          "Return",
+          283,
+          289,
+          12,
+          17
+        ],
+        [
+          "Return",
+          291,
+          291,
+          12,
+          21
+        ]
+      ],
+      "source": "    def search_partially_assigned(cls, name, clause):\n        operators = {\n            '=': 'where',\n            '!=': 'not where',\n            }\n        reverse = {\n            '=': '!=',\n            '!=': '=',\n            }\n        if clause[1] in operators:\n            if not clause[2]:\n                operator = reverse[clause[1]]\n            else:\n                operator = clause[1]\n            return [\n                (cls._assign_moves_field, operators[operator], [\n                        ('state', '=', 'assigned'),\n                        ('assignation_required', '=', True),\n                        ]),\n                ('state', '=', 'waiting'),\n                ]\n        else:\n            return []"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentIn.preprocess_values",
+      "start": 682,
+      "end": 693,
+      "program_units": 11,
+      "nodes": [
+        [
+          "Assign",
+          683,
+          683,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          684,
+          684,
+          8,
+          55
+        ],
+        [
+          "Assign",
+          685,
+          685,
+          8,
+          56
+        ],
+        [
+          "Assign",
+          687,
+          687,
+          12,
+          69
+        ],
+        [
+          "Assign",
+          689,
+          689,
+          16,
+          48
+        ],
+        [
+          "Assign",
+          692,
+          692,
+          20,
+          53
+        ],
+        [
+          "FunctionDef",
+          682,
+          693,
+          4,
+          21
+        ],
+        [
+          "If",
+          686,
+          692,
+          8,
+          53
+        ],
+        [
+          "If",
+          688,
+          692,
+          12,
+          53
+        ],
+        [
+          "If",
+          690,
+          692,
+          16,
+          53
+        ],
+        [
+          "Return",
+          693,
+          693,
+          8,
+          21
+        ]
+      ],
+      "source": "    def preprocess_values(cls, mode, values):\n        pool = Pool()\n        Configuration = pool.get('stock.configuration')\n        values = super().preprocess_values(mode, values)\n        if mode == 'create' and not values.get('number'):\n            company_id = values.get('company', cls.default_company())\n            if company_id is not None:\n                configuration = Configuration(1)\n                if sequence := configuration.get_multivalue(\n                        'shipment_in_sequence', company=company_id):\n                    values['number'] = sequence.get()\n        return values"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentIn.create_inventory_moves",
+      "start": 730,
+      "end": 744,
+      "program_units": 11,
+      "nodes": [
+        [
+          "Assign",
+          738,
+          738,
+          12,
+          40
+        ],
+        [
+          "Assign",
+          740,
+          740,
+          16,
+          66
+        ],
+        [
+          "Assign",
+          743,
+          743,
+          12,
+          34
+        ],
+        [
+          "Continue",
+          734,
+          734,
+          16,
+          24
+        ],
+        [
+          "Expr",
+          742,
+          742,
+          20,
+          38
+        ],
+        [
+          "Expr",
+          744,
+          744,
+          8,
+          27
+        ],
+        [
+          "For",
+          731,
+          743,
+          8,
+          34
+        ],
+        [
+          "For",
+          739,
+          742,
+          12,
+          38
+        ],
+        [
+          "FunctionDef",
+          730,
+          744,
+          4,
+          27
+        ],
+        [
+          "If",
+          732,
+          734,
+          12,
+          24
+        ],
+        [
+          "If",
+          741,
+          742,
+          16,
+          38
+        ]
+      ],
+      "source": "    def create_inventory_moves(cls, shipments):\n        for shipment in shipments:\n            if shipment.warehouse_storage == shipment.warehouse_input:\n                # Do not create inventory moves\n                continue\n            # Use moves instead of inventory_moves because save reset before\n            # adding new records and as set_inventory_moves is just a proxy to\n            # moves, it will reset also the incoming_moves\n            moves = list(shipment.moves)\n            for incoming_move in shipment.incoming_moves:\n                move = shipment._get_inventory_move(incoming_move)\n                if move:\n                    moves.append(move)\n            shipment.moves = moves\n        cls.save(shipments)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentIn.cancel",
+      "start": 749,
+      "end": 752,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          750,
+          750,
+          8,
+          39
+        ],
+        [
+          "Expr",
+          751,
+          752,
+          8,
+          63
+        ],
+        [
+          "FunctionDef",
+          749,
+          752,
+          4,
+          63
+        ]
+      ],
+      "source": "    def cancel(cls, shipments):\n        Move = Pool().get('stock.move')\n        Move.cancel([m for s in shipments\n                for m in s.incoming_moves + s.inventory_moves])"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentInReturn.assign",
+      "start": 1078,
+      "end": 1080,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          1079,
+          1079,
+          8,
+          39
+        ],
+        [
+          "Expr",
+          1080,
+          1080,
+          8,
+          67
+        ],
+        [
+          "FunctionDef",
+          1078,
+          1080,
+          4,
+          67
+        ]
+      ],
+      "source": "    def assign(cls, shipments):\n        Move = Pool().get('stock.move')\n        Move.assign([m for s in shipments for m in s.assign_moves])"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentInReturn.cancel",
+      "start": 1103,
+      "end": 1105,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          1104,
+          1104,
+          8,
+          39
+        ],
+        [
+          "Expr",
+          1105,
+          1105,
+          8,
+          60
+        ],
+        [
+          "FunctionDef",
+          1103,
+          1105,
+          4,
+          60
+        ]
+      ],
+      "source": "    def cancel(cls, shipments):\n        Move = Pool().get('stock.move')\n        Move.cancel([m for s in shipments for m in s.moves])"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentInReturn.assign_wizard",
+      "start": 1109,
+      "end": 1110,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          1109,
+          1110,
+          4,
+          12
+        ],
+        [
+          "Pass",
+          1110,
+          1110,
+          8,
+          12
+        ]
+      ],
+      "source": "    def assign_wizard(cls, shipments):\n        pass"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentInReturn.assign_try",
+      "start": 1114,
+      "end": 1144,
+      "program_units": 26,
+      "nodes": [
+        [
+          "Assign",
+          1115,
+          1115,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          1116,
+          1116,
+          8,
+          37
+        ],
+        [
+          "Assign",
+          1117,
+          1117,
+          8,
+          66
+        ],
+        [
+          "Assign",
+          1118,
+          1118,
+          8,
+          37
+        ],
+        [
+          "Assign",
+          1120,
+          1120,
+          12,
+          55
+        ],
+        [
+          "Assign",
+          1124,
+          1124,
+          8,
+          22
+        ],
+        [
+          "Assign",
+          1127,
+          1127,
+          16,
+          54
+        ],
+        [
+          "Assign",
+          1129,
+          1129,
+          16,
+          35
+        ],
+        [
+          "Assign",
+          1131,
+          1131,
+          16,
+          42
+        ],
+        [
+          "Assign",
+          1133,
+          1133,
+          16,
+          31
+        ],
+        [
+          "Continue",
+          1143,
+          1143,
+          24,
+          32
+        ],
+        [
+          "Expr",
+          1123,
+          1123,
+          20,
+          57
+        ],
+        [
+          "Expr",
+          1135,
+          1135,
+          12,
+          33
+        ],
+        [
+          "Expr",
+          1144,
+          1144,
+          20,
+          41
+        ],
+        [
+          "For",
+          1119,
+          1123,
+          8,
+          57
+        ],
+        [
+          "For",
+          1121,
+          1123,
+          12,
+          57
+        ],
+        [
+          "For",
+          1125,
+          1133,
+          8,
+          31
+        ],
+        [
+          "For",
+          1138,
+          1144,
+          16,
+          41
+        ],
+        [
+          "FunctionDef",
+          1114,
+          1144,
+          4,
+          41
+        ],
+        [
+          "If",
+          1122,
+          1123,
+          16,
+          57
+        ],
+        [
+          "If",
+          1126,
+          1131,
+          12,
+          42
+        ],
+        [
+          "If",
+          1128,
+          1131,
+          12,
+          42
+        ],
+        [
+          "If",
+          1132,
+          1133,
+          12,
+          31
+        ],
+        [
+          "If",
+          1134,
+          1144,
+          8,
+          41
+        ],
+        [
+          "If",
+          1139,
+          1143,
+          20,
+          32
+        ],
+        [
+          "With",
+          1137,
+          1144,
+          12,
+          41
+        ]
+      ],
+      "source": "    def assign_try(cls, shipments, with_childs=None):\n        pool = Pool()\n        Move = pool.get('stock.move')\n        shipments = [s for s in shipments if s.state == 'waiting']\n        to_assign = defaultdict(list)\n        for shipment in shipments:\n            location_type = shipment.from_location.type\n            for move in shipment.assign_moves:\n                if move.assignation_required:\n                    to_assign[location_type].append(move)\n        success = True\n        for location_type, moves in to_assign.items():\n            if with_childs is None:\n                _with_childs = location_type == 'view'\n            elif not with_childs and location_type == 'view':\n                _with_childs = True\n            else:\n                _with_childs = with_childs\n            if not Move.assign_try(moves, with_childs=_with_childs):\n                success = False\n        if success:\n            cls.assign(shipments)\n        else:\n            with cls.bulk_func('assign', auto=False) as assign:\n                for shipment in shipments:\n                    if any(\n                            m.state in {'staging', 'draft'}\n                            for m in shipment.assign_moves\n                            if m.assignation_required):\n                        continue\n                    assign.push(shipment)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentOut.assign",
+      "start": 1603,
+      "end": 1607,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          1604,
+          1604,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          1605,
+          1605,
+          8,
+          37
+        ],
+        [
+          "Expr",
+          1606,
+          1606,
+          8,
+          67
+        ],
+        [
+          "Expr",
+          1607,
+          1607,
+          8,
+          66
+        ],
+        [
+          "FunctionDef",
+          1603,
+          1607,
+          4,
+          66
+        ]
+      ],
+      "source": "    def assign(cls, shipments):\n        pool = Pool()\n        Move = pool.get('stock.move')\n        Move.assign([m for s in shipments for m in s.assign_moves])\n        cls._sync_inventory_to_outgoing(shipments, quantity=False)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentOut.cancel",
+      "start": 1776,
+      "end": 1779,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          1777,
+          1777,
+          8,
+          39
+        ],
+        [
+          "Expr",
+          1778,
+          1779,
+          8,
+          63
+        ],
+        [
+          "FunctionDef",
+          1776,
+          1779,
+          4,
+          63
+        ]
+      ],
+      "source": "    def cancel(cls, shipments):\n        Move = Pool().get('stock.move')\n        Move.cancel([m for s in shipments\n                for m in s.outgoing_moves + s.inventory_moves])"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentOut.assign_wizard",
+      "start": 1829,
+      "end": 1830,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          1829,
+          1830,
+          4,
+          12
+        ],
+        [
+          "Pass",
+          1830,
+          1830,
+          8,
+          12
+        ]
+      ],
+      "source": "    def assign_wizard(cls, shipments):\n        pass"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentOut.assign_moves",
+      "start": 1833,
+      "end": 1837,
+      "program_units": 4,
+      "nodes": [
+        [
+          "FunctionDef",
+          1833,
+          1837,
+          4,
+          38
+        ],
+        [
+          "If",
+          1834,
+          1837,
+          8,
+          38
+        ],
+        [
+          "Return",
+          1835,
+          1835,
+          12,
+          39
+        ],
+        [
+          "Return",
+          1837,
+          1837,
+          12,
+          38
+        ]
+      ],
+      "source": "    def assign_moves(self):\n        if self.warehouse_storage != self.warehouse_output:\n            return self.inventory_moves\n        else:\n            return self.outgoing_moves"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentOut.assign_try",
+      "start": 1841,
+      "end": 1859,
+      "program_units": 11,
+      "nodes": [
+        [
+          "Assign",
+          1842,
+          1842,
+          8,
+          39
+        ],
+        [
+          "Assign",
+          1843,
+          1845,
+          8,
+          36
+        ],
+        [
+          "Assign",
+          1846,
+          1848,
+          8,
+          38
+        ],
+        [
+          "Continue",
+          1858,
+          1858,
+          24,
+          32
+        ],
+        [
+          "Expr",
+          1850,
+          1850,
+          12,
+          33
+        ],
+        [
+          "Expr",
+          1859,
+          1859,
+          20,
+          41
+        ],
+        [
+          "For",
+          1853,
+          1859,
+          16,
+          41
+        ],
+        [
+          "FunctionDef",
+          1841,
+          1859,
+          4,
+          41
+        ],
+        [
+          "If",
+          1849,
+          1859,
+          8,
+          41
+        ],
+        [
+          "If",
+          1854,
+          1858,
+          20,
+          32
+        ],
+        [
+          "With",
+          1852,
+          1859,
+          12,
+          41
+        ]
+      ],
+      "source": "    def assign_try(cls, shipments):\n        Move = Pool().get('stock.move')\n        shipments = [\n            s for s in shipments\n            if s.state == 'waiting']\n        to_assign = [\n            m for s in shipments for m in s.assign_moves\n            if m.assignation_required]\n        if Move.assign_try(to_assign):\n            cls.assign(shipments)\n        else:\n            with cls.bulk_func('assign', auto=False) as assign:\n                for shipment in shipments:\n                    if any(\n                            m.state in {'staging', 'draft'}\n                            for m in shipment.assign_moves\n                            if m.assignation_required):\n                        continue\n                    assign.push(shipment)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentOutReturn.preprocess_values",
+      "start": 2194,
+      "end": 2205,
+      "program_units": 11,
+      "nodes": [
+        [
+          "Assign",
+          2195,
+          2195,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          2196,
+          2196,
+          8,
+          55
+        ],
+        [
+          "Assign",
+          2197,
+          2197,
+          8,
+          56
+        ],
+        [
+          "Assign",
+          2199,
+          2199,
+          12,
+          69
+        ],
+        [
+          "Assign",
+          2201,
+          2201,
+          16,
+          48
+        ],
+        [
+          "Assign",
+          2204,
+          2204,
+          20,
+          53
+        ],
+        [
+          "FunctionDef",
+          2194,
+          2205,
+          4,
+          21
+        ],
+        [
+          "If",
+          2198,
+          2204,
+          8,
+          53
+        ],
+        [
+          "If",
+          2200,
+          2204,
+          12,
+          53
+        ],
+        [
+          "If",
+          2202,
+          2204,
+          16,
+          53
+        ],
+        [
+          "Return",
+          2205,
+          2205,
+          8,
+          21
+        ]
+      ],
+      "source": "    def preprocess_values(cls, mode, values):\n        pool = Pool()\n        Configuration = pool.get('stock.configuration')\n        values = super().preprocess_values(mode, values)\n        if mode == 'create' and not values.get('number'):\n            company_id = values.get('company', cls.default_company())\n            if company_id is not None:\n                configuration = Configuration(1)\n                if sequence := configuration.get_multivalue(\n                        'shipment_out_return_sequence', company=company_id):\n                    values['number'] = sequence.get()\n        return values"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentOutReturn.cancel",
+      "start": 2279,
+      "end": 2282,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          2280,
+          2280,
+          8,
+          39
+        ],
+        [
+          "Expr",
+          2281,
+          2282,
+          8,
+          63
+        ],
+        [
+          "FunctionDef",
+          2279,
+          2282,
+          4,
+          63
+        ]
+      ],
+      "source": "    def cancel(cls, shipments):\n        Move = Pool().get('stock.move')\n        Move.cancel([m for s in shipments\n                for m in s.incoming_moves + s.inventory_moves])"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentOutReturn.create_inventory_moves",
+      "start": 2308,
+      "end": 2322,
+      "program_units": 11,
+      "nodes": [
+        [
+          "Assign",
+          2316,
+          2316,
+          12,
+          40
+        ],
+        [
+          "Assign",
+          2318,
+          2318,
+          16,
+          66
+        ],
+        [
+          "Assign",
+          2321,
+          2321,
+          12,
+          34
+        ],
+        [
+          "Continue",
+          2312,
+          2312,
+          16,
+          24
+        ],
+        [
+          "Expr",
+          2320,
+          2320,
+          20,
+          38
+        ],
+        [
+          "Expr",
+          2322,
+          2322,
+          8,
+          27
+        ],
+        [
+          "For",
+          2309,
+          2321,
+          8,
+          34
+        ],
+        [
+          "For",
+          2317,
+          2320,
+          12,
+          38
+        ],
+        [
+          "FunctionDef",
+          2308,
+          2322,
+          4,
+          27
+        ],
+        [
+          "If",
+          2310,
+          2312,
+          12,
+          24
+        ],
+        [
+          "If",
+          2319,
+          2320,
+          16,
+          38
+        ]
+      ],
+      "source": "    def create_inventory_moves(cls, shipments):\n        for shipment in shipments:\n            if shipment.warehouse_storage == shipment.warehouse_input:\n                # Do not create inventory moves\n                continue\n            # Use moves instead of inventory_moves because save reset before\n            # adding new records and as set_inventory_moves is just a proxy to\n            # moves, it will reset also the incoming_moves\n            moves = list(shipment.moves)\n            for incoming_move in shipment.incoming_moves:\n                move = shipment._get_inventory_move(incoming_move)\n                if move:\n                    moves.append(move)\n            shipment.moves = moves\n        cls.save(shipments)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentInternal.assign",
+      "start": 2899,
+      "end": 2902,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          2900,
+          2900,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          2901,
+          2901,
+          8,
+          37
+        ],
+        [
+          "Expr",
+          2902,
+          2902,
+          8,
+          67
+        ],
+        [
+          "FunctionDef",
+          2899,
+          2902,
+          4,
+          67
+        ]
+      ],
+      "source": "    def assign(cls, shipments):\n        pool = Pool()\n        Move = pool.get('stock.move')\n        Move.assign([m for s in shipments for m in s.assign_moves])"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentInternal.cancel",
+      "start": 2967,
+      "end": 2969,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          2968,
+          2968,
+          8,
+          39
+        ],
+        [
+          "Expr",
+          2969,
+          2969,
+          8,
+          60
+        ],
+        [
+          "FunctionDef",
+          2967,
+          2969,
+          4,
+          60
+        ]
+      ],
+      "source": "    def cancel(cls, shipments):\n        Move = Pool().get('stock.move')\n        Move.cancel([m for s in shipments for m in s.moves])"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentInternal.assign_wizard",
+      "start": 2973,
+      "end": 2974,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          2973,
+          2974,
+          4,
+          12
+        ],
+        [
+          "Pass",
+          2974,
+          2974,
+          8,
+          12
+        ]
+      ],
+      "source": "    def assign_wizard(cls, shipments):\n        pass"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentInternal.assign_moves",
+      "start": 2977,
+      "end": 2978,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          2977,
+          2978,
+          4,
+          34
+        ],
+        [
+          "Return",
+          2978,
+          2978,
+          8,
+          34
+        ]
+      ],
+      "source": "    def assign_moves(self):\n        return self.outgoing_moves"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "ShipmentInternal.assign_try",
+      "start": 2982,
+      "end": 2997,
+      "program_units": 10,
+      "nodes": [
+        [
+          "Assign",
+          2983,
+          2983,
+          8,
+          39
+        ],
+        [
+          "Assign",
+          2984,
+          2986,
+          8,
+          38
+        ],
+        [
+          "Continue",
+          2996,
+          2996,
+          24,
+          32
+        ],
+        [
+          "Expr",
+          2988,
+          2988,
+          12,
+          33
+        ],
+        [
+          "Expr",
+          2997,
+          2997,
+          20,
+          41
+        ],
+        [
+          "For",
+          2991,
+          2997,
+          16,
+          41
+        ],
+        [
+          "FunctionDef",
+          2982,
+          2997,
+          4,
+          41
+        ],
+        [
+          "If",
+          2987,
+          2997,
+          8,
+          41
+        ],
+        [
+          "If",
+          2992,
+          2996,
+          20,
+          32
+        ],
+        [
+          "With",
+          2990,
+          2997,
+          12,
+          41
+        ]
+      ],
+      "source": "    def assign_try(cls, shipments):\n        Move = Pool().get('stock.move')\n        to_assign = [\n            m for s in shipments for m in s.assign_moves\n            if m.assignation_required]\n        if Move.assign_try(to_assign):\n            cls.assign(shipments)\n        else:\n            with cls.bulk_func('assign', auto=False) as assign:\n                for shipment in shipments:\n                    if any(\n                            m.state in {'staging', 'draft'}\n                            for m in shipment.assign_moves\n                            if m.assignation_required):\n                        continue\n                    assign.push(shipment)"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "Assign.transition_start",
+      "start": 3090,
+      "end": 3095,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Expr",
+          3091,
+          3091,
+          8,
+          32
+        ],
+        [
+          "FunctionDef",
+          3090,
+          3095,
+          4,
+          28
+        ],
+        [
+          "If",
+          3092,
+          3095,
+          8,
+          28
+        ],
+        [
+          "Return",
+          3093,
+          3093,
+          12,
+          24
+        ],
+        [
+          "Return",
+          3095,
+          3095,
+          12,
+          28
+        ]
+      ],
+      "source": "    def transition_start(self):\n        self.record.assign_try()\n        if self.record.state == 'assigned':\n            return 'end'\n        else:\n            return 'partial'"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "Assign.transition_cancel",
+      "start": 3105,
+      "end": 3107,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          3106,
+          3106,
+          8,
+          34
+        ],
+        [
+          "FunctionDef",
+          3105,
+          3107,
+          4,
+          20
+        ],
+        [
+          "Return",
+          3107,
+          3107,
+          8,
+          20
+        ]
+      ],
+      "source": "    def transition_cancel(self):\n        self.record.assign_reset()\n        return 'end'"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "Assign.transition_force",
+      "start": 3109,
+      "end": 3111,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          3110,
+          3110,
+          8,
+          34
+        ],
+        [
+          "FunctionDef",
+          3109,
+          3111,
+          4,
+          20
+        ],
+        [
+          "Return",
+          3111,
+          3111,
+          8,
+          20
+        ]
+      ],
+      "source": "    def transition_force(self):\n        self.record.assign_force()\n        return 'end'"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "name": "Assign.transition_ignore",
+      "start": 3113,
+      "end": 3115,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          3114,
+          3114,
+          8,
+          53
+        ],
+        [
+          "FunctionDef",
+          3113,
+          3115,
+          4,
+          20
+        ],
+        [
+          "Return",
+          3115,
+          3115,
+          8,
+          20
+        ]
+      ],
+      "source": "    def transition_ignore(self):\n        self.record.assign_ignore(self.partial.moves)\n        return 'end'"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "createStockMove",
+      "start": 159,
+      "end": 201,
+      "program_units": 12,
+      "nodes": [
+        [
+          "expression_statement",
+          189,
+          189,
+          4,
+          40
+        ],
+        [
+          "expression_statement",
+          190,
+          190,
+          4,
+          44
+        ],
+        [
+          "expression_statement",
+          191,
+          191,
+          4,
+          56
+        ],
+        [
+          "expression_statement",
+          192,
+          192,
+          4,
+          48
+        ],
+        [
+          "expression_statement",
+          193,
+          193,
+          4,
+          52
+        ],
+        [
+          "expression_statement",
+          195,
+          195,
+          6,
+          38
+        ],
+        [
+          "expression_statement",
+          197,
+          197,
+          4,
+          28
+        ],
+        [
+          "expression_statement",
+          198,
+          198,
+          4,
+          95
+        ],
+        [
+          "if_statement",
+          194,
+          196,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          178,
+          188,
+          4,
+          24
+        ],
+        [
+          "method_declaration",
+          159,
+          201,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          200,
+          200,
+          4,
+          21
+        ]
+      ],
+      "source": "  @Override\n  public StockMove createStockMove(\n      Address fromAddress,\n      Address toAddress,\n      Company company,\n      Partner clientPartner,\n      StockLocation fromStockLocation,\n      StockLocation toStockLocation,\n      LocalDate realDate,\n      LocalDate estimatedDate,\n      String note,\n      ShipmentMode shipmentMode,\n      FreightCarrierMode freightCarrierMode,\n      Partner carrierPartner,\n      Partner forwarderPartner,\n      Incoterm incoterm,\n      int typeSelect)\n      throws AxelorException {\n\n    StockMove stockMove =\n        this.createStockMove(\n            fromAddress,\n            toAddress,\n            company,\n            fromStockLocation,\n            toStockLocation,\n            realDate,\n            estimatedDate,\n            note,\n            typeSelect);\n    stockMove.setPartner(clientPartner);\n    stockMove.setShipmentMode(shipmentMode);\n    stockMove.setFreightCarrierMode(freightCarrierMode);\n    stockMove.setCarrierPartner(carrierPartner);\n    stockMove.setForwarderPartner(forwarderPartner);\n    if (appStockService.getAppStock().getIsIncotermEnabled()) {\n      stockMove.setIncoterm(incoterm);\n    }\n    stockMove.setNote(note);\n    stockMove.setIsIspmRequired(stockMoveToolService.getDefaultISPM(clientPartner, toAddress));\n\n    return stockMove;\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "createStockMove",
+      "start": 218,
+      "end": 256,
+      "program_units": 20,
+      "nodes": [
+        [
+          "expression_statement",
+          234,
+          234,
+          6,
+          56
+        ],
+        [
+          "expression_statement",
+          237,
+          237,
+          4,
+          42
+        ],
+        [
+          "expression_statement",
+          238,
+          238,
+          4,
+          38
+        ],
+        [
+          "expression_statement",
+          239,
+          239,
+          4,
+          54
+        ],
+        [
+          "expression_statement",
+          240,
+          240,
+          4,
+          34
+        ],
+        [
+          "expression_statement",
+          241,
+          241,
+          4,
+          64
+        ],
+        [
+          "expression_statement",
+          242,
+          242,
+          4,
+          36
+        ],
+        [
+          "expression_statement",
+          243,
+          243,
+          4,
+          46
+        ],
+        [
+          "expression_statement",
+          244,
+          244,
+          4,
+          54
+        ],
+        [
+          "expression_statement",
+          245,
+          245,
+          4,
+          50
+        ],
+        [
+          "expression_statement",
+          246,
+          246,
+          4,
+          28
+        ],
+        [
+          "expression_statement",
+          247,
+          248,
+          4,
+          87
+        ],
+        [
+          "expression_statement",
+          250,
+          250,
+          4,
+          40
+        ],
+        [
+          "expression_statement",
+          251,
+          251,
+          4,
+          80
+        ],
+        [
+          "expression_statement",
+          253,
+          253,
+          6,
+          90
+        ],
+        [
+          "if_statement",
+          233,
+          235,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          252,
+          254,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          231,
+          231,
+          4,
+          42
+        ],
+        [
+          "method_declaration",
+          218,
+          256,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          255,
+          255,
+          4,
+          21
+        ]
+      ],
+      "source": "  @Override\n  public StockMove createStockMove(\n      Address fromAddress,\n      Address toAddress,\n      Company company,\n      StockLocation fromStockLocation,\n      StockLocation toStockLocation,\n      LocalDate realDate,\n      LocalDate estimatedDate,\n      String note,\n      int typeSelect)\n      throws AxelorException {\n\n    StockMove stockMove = new StockMove();\n\n    if (stockMove.getStockMoveLineList() == null) {\n      stockMove.setStockMoveLineList(new ArrayList<>());\n    }\n\n    stockMove.setFromAddress(fromAddress);\n    stockMove.setToAddress(toAddress);\n    stockMoveToolService.computeAddressStr(stockMove);\n    stockMove.setCompany(company);\n    stockMove.setStatusSelect(StockMoveRepository.STATUS_DRAFT);\n    stockMove.setRealDate(realDate);\n    stockMove.setEstimatedDate(estimatedDate);\n    stockMove.setFromStockLocation(fromStockLocation);\n    stockMove.setToStockLocation(toStockLocation);\n    stockMove.setNote(note);\n    stockMove.setPrintingSettings(\n        Beans.get(TradingNameService.class).getDefaultPrintingSettings(null, company));\n\n    stockMove.setTypeSelect(typeSelect);\n    stockMove.setIsWithBackorder(company.getStockConfig().getIsWithBackorder());\n    if (typeSelect == StockMoveRepository.TYPE_INCOMING) {\n      stockMove.setIsWithReturnSurplus(company.getStockConfig().getIsWithReturnSurplus());\n    }\n    return stockMove;\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "createStockMove",
+      "start": 258,
+      "end": 284,
+      "program_units": 4,
+      "nodes": [
+        [
+          "expression_statement",
+          281,
+          281,
+          4,
+          46
+        ],
+        [
+          "local_variable_declaration",
+          270,
+          280,
+          4,
+          47
+        ],
+        [
+          "method_declaration",
+          258,
+          284,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          283,
+          283,
+          4,
+          21
+        ]
+      ],
+      "source": "  @Override\n  public StockMove createStockMove(\n      Address fromAddress,\n      Address toAddress,\n      Company company,\n      StockLocation fromStockLocation,\n      StockLocation toStockLocation,\n      LocalDate realDate,\n      LocalDate estimatedDate,\n      int typeSelect,\n      MassStockMove massStockMove)\n      throws AxelorException {\n    StockMove stockMove =\n        createStockMove(\n            fromAddress,\n            toAddress,\n            company,\n            fromStockLocation,\n            toStockLocation,\n            realDate,\n            estimatedDate,\n            null,\n            StockMoveRepository.TYPE_INTERNAL);\n    stockMove.setMassStockMove(massStockMove);\n\n    return stockMove;\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "createStockMoveMobility",
+      "start": 286,
+      "end": 306,
+      "program_units": 8,
+      "nodes": [
+        [
+          "enhanced_for_statement",
+          297,
+          300,
+          6,
+          7
+        ],
+        [
+          "expression_statement",
+          295,
+          295,
+          4,
+          25
+        ],
+        [
+          "expression_statement",
+          299,
+          299,
+          8,
+          54
+        ],
+        [
+          "expression_statement",
+          303,
+          303,
+          4,
+          28
+        ],
+        [
+          "if_statement",
+          296,
+          301,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          294,
+          294,
+          4,
+          95
+        ],
+        [
+          "method_declaration",
+          286,
+          306,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          305,
+          305,
+          4,
+          21
+        ]
+      ],
+      "source": "  @Override\n  public StockMove createStockMoveMobility(\n      StockLocation fromStockLocation,\n      StockLocation toStockLocation,\n      Company company,\n      List<StockMoveLine> stockMoveLines)\n      throws AxelorException {\n\n    StockMove stockMove = createStockMoveMobility(fromStockLocation, toStockLocation, company);\n    this.plan(stockMove);\n    if (stockMoveLines != null) {\n      for (StockMoveLine stockMoveLine : stockMoveLines) {\n        // This method will already set sml.stockMove = stockMove so no need to add in list.\n        createStockMoveLine(stockMove, stockMoveLine);\n      }\n    }\n\n    this.realize(stockMove);\n\n    return stockMove;\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "createStockMoveMobility",
+      "start": 308,
+      "end": 324,
+      "program_units": 14,
+      "nodes": [
+        [
+          "expression_statement",
+          312,
+          312,
+          4,
+          64
+        ],
+        [
+          "expression_statement",
+          313,
+          313,
+          4,
+          63
+        ],
+        [
+          "expression_statement",
+          314,
+          314,
+          4,
+          34
+        ],
+        [
+          "expression_statement",
+          315,
+          315,
+          4,
+          54
+        ],
+        [
+          "expression_statement",
+          316,
+          316,
+          4,
+          61
+        ],
+        [
+          "expression_statement",
+          317,
+          317,
+          4,
+          50
+        ],
+        [
+          "expression_statement",
+          318,
+          318,
+          4,
+          57
+        ],
+        [
+          "expression_statement",
+          319,
+          319,
+          4,
+          26
+        ],
+        [
+          "expression_statement",
+          320,
+          320,
+          4,
+          42
+        ],
+        [
+          "expression_statement",
+          321,
+          321,
+          4,
+          43
+        ],
+        [
+          "expression_statement",
+          322,
+          322,
+          4,
+          48
+        ],
+        [
+          "local_variable_declaration",
+          311,
+          311,
+          4,
+          42
+        ],
+        [
+          "method_declaration",
+          308,
+          324,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          323,
+          323,
+          4,
+          41
+        ]
+      ],
+      "source": "  @Transactional(rollbackOn = {Exception.class})\n  protected StockMove createStockMoveMobility(\n      StockLocation fromStockLocation, StockLocation toStockLocation, Company company) {\n    StockMove stockMove = new StockMove();\n    stockMove.setStatusSelect(StockMoveRepository.STATUS_DRAFT);\n    stockMove.setTypeSelect(StockMoveRepository.TYPE_INTERNAL);\n    stockMove.setCompany(company);\n    stockMove.setFromStockLocation(fromStockLocation);\n    stockMove.setFromAddress(fromStockLocation.getAddress());\n    stockMove.setToStockLocation(toStockLocation);\n    stockMove.setToAddress(toStockLocation.getAddress());\n    stockMove.setNote(\"\"); // comment to display on stock move\n    stockMove.setPickingOrderComments(\"\"); // comment to display on picking order\n    stockMove.setRealDate(LocalDate.now());\n    stockMove.setEstimatedDate(LocalDate.now());\n    return stockMoveRepo.save(stockMove);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "createStockMoveLine",
+      "start": 333,
+      "end": 363,
+      "program_units": 17,
+      "nodes": [
+        [
+          "expression_statement",
+          338,
+          338,
+          4,
+          90
+        ],
+        [
+          "expression_statement",
+          345,
+          345,
+          6,
+          73
+        ],
+        [
+          "expression_statement",
+          349,
+          349,
+          6,
+          71
+        ],
+        [
+          "expression_statement",
+          353,
+          353,
+          6,
+          75
+        ],
+        [
+          "expression_statement",
+          356,
+          356,
+          4,
+          51
+        ],
+        [
+          "expression_statement",
+          357,
+          357,
+          4,
+          70
+        ],
+        [
+          "expression_statement",
+          358,
+          358,
+          4,
+          54
+        ],
+        [
+          "expression_statement",
+          359,
+          359,
+          4,
+          42
+        ],
+        [
+          "expression_statement",
+          360,
+          360,
+          4,
+          70
+        ],
+        [
+          "expression_statement",
+          361,
+          361,
+          4,
+          59
+        ],
+        [
+          "if_statement",
+          344,
+          346,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          348,
+          350,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          352,
+          354,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          337,
+          337,
+          4,
+          49
+        ],
+        [
+          "local_variable_declaration",
+          340,
+          343,
+          4,
+          80
+        ],
+        [
+          "method_declaration",
+          333,
+          363,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          362,
+          362,
+          4,
+          49
+        ]
+      ],
+      "source": "  @Transactional(rollbackOn = {Exception.class})\n  protected StockMoveLine createStockMoveLine(StockMove stockMove, StockMoveLine stockMoveLine)\n      throws AxelorException {\n\n    Product product = stockMoveLine.getProduct();\n    stockMoveLineService.setProductInfo(stockMove, stockMoveLine, stockMove.getCompany());\n\n    TrackingNumberConfiguration trackingNumberConfiguration =\n        (TrackingNumberConfiguration)\n            productCompanyService.get(\n                product, \"trackingNumberConfiguration\", stockMove.getCompany());\n    if (trackingNumberConfiguration != null) {\n      stockMoveLine.setTrackingNumber(stockMoveLine.getTrackingNumber());\n    }\n\n    if (stockMoveLine.getToStockLocation() == null) {\n      stockMoveLine.setToStockLocation(stockMove.getToStockLocation());\n    }\n\n    if (stockMoveLine.getFromStockLocation() == null) {\n      stockMoveLine.setFromStockLocation(stockMove.getFromStockLocation());\n    }\n\n    stockMoveLine.setIsRealQtyModifiedByUser(true);\n    stockMoveLine.setUnitPriceUntaxed(product.getLastPurchasePrice());\n    stockMove.addStockMoveLineListItem(stockMoveLine);\n    stockMoveLineRepo.save(stockMoveLine);\n    stockMoveLineService.setAvailableStatus(stockMoveLine, stockMove);\n    stockMoveLineService.compute(stockMoveLine, stockMove);\n    return stockMoveLineRepo.save(stockMoveLine);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "validate",
+      "start": 365,
+      "end": 371,
+      "program_units": 3,
+      "nodes": [
+        [
+          "expression_statement",
+          369,
+          369,
+          4,
+          25
+        ],
+        [
+          "expression_statement",
+          370,
+          370,
+          4,
+          28
+        ],
+        [
+          "method_declaration",
+          365,
+          371,
+          2,
+          3
+        ]
+      ],
+      "source": "  @Override\n  @Transactional(rollbackOn = {Exception.class})\n  public void validate(StockMove stockMove) throws AxelorException {\n\n    this.plan(stockMove);\n    this.realize(stockMove);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "setPlannedStatus",
+      "start": 465,
+      "end": 468,
+      "program_units": 3,
+      "nodes": [
+        [
+          "expression_statement",
+          466,
+          466,
+          4,
+          66
+        ],
+        [
+          "expression_statement",
+          467,
+          467,
+          4,
+          34
+        ],
+        [
+          "method_declaration",
+          465,
+          468,
+          2,
+          3
+        ]
+      ],
+      "source": "  protected void setPlannedStatus(StockMove stockMove) {\n    stockMove.setStatusSelect(StockMoveRepository.STATUS_PLANNED);\n    stockMoveRepo.save(stockMove);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "setRealizedStatus",
+      "start": 647,
+      "end": 649,
+      "program_units": 2,
+      "nodes": [
+        [
+          "expression_statement",
+          648,
+          648,
+          4,
+          67
+        ],
+        [
+          "method_declaration",
+          647,
+          649,
+          2,
+          3
+        ]
+      ],
+      "source": "  protected void setRealizedStatus(StockMove stockMove) {\n    stockMove.setStatusSelect(StockMoveRepository.STATUS_REALIZED);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "sendSupplierCancellationMail",
+      "start": 651,
+      "end": 654,
+      "program_units": 2,
+      "nodes": [
+        [
+          "expression_statement",
+          653,
+          653,
+          4,
+          46
+        ],
+        [
+          "method_declaration",
+          651,
+          654,
+          2,
+          3
+        ]
+      ],
+      "source": "  public void sendSupplierCancellationMail(StockMove stockMove, Template template)\n      throws AxelorException {\n    sendMailForStockMove(stockMove, template);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "processBackorderLine",
+      "start": 921,
+      "end": 946,
+      "program_units": 10,
+      "nodes": [
+        [
+          "expression_statement",
+          927,
+          927,
+          4,
+          60
+        ],
+        [
+          "expression_statement",
+          936,
+          936,
+          6,
+          47
+        ],
+        [
+          "expression_statement",
+          937,
+          944,
+          6,
+          53
+        ],
+        [
+          "if_statement",
+          923,
+          925,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          930,
+          945,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          926,
+          926,
+          4,
+          78
+        ],
+        [
+          "local_variable_declaration",
+          929,
+          929,
+          4,
+          52
+        ],
+        [
+          "local_variable_declaration",
+          931,
+          934,
+          6,
+          85
+        ],
+        [
+          "method_declaration",
+          921,
+          946,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          924,
+          924,
+          6,
+          13
+        ]
+      ],
+      "source": "  protected void processBackorderLine(StockMoveLine stockMoveLine, StockMove newStockMove)\n      throws AxelorException {\n    if (stockMoveLine.getQty().compareTo(stockMoveLine.getRealQty()) <= 0) {\n      return;\n    }\n    StockMoveLine newStockMoveLine = copySplittedStockMoveLine(stockMoveLine);\n    newStockMove.addStockMoveLineListItem(newStockMoveLine);\n\n    Product product = newStockMoveLine.getProduct();\n    if (product != null) {\n      TrackingNumberConfiguration trackingNumberConfiguration =\n          (TrackingNumberConfiguration)\n              productCompanyService.get(\n                  product, \"trackingNumberConfiguration\", newStockMove.getCompany());\n\n      newStockMoveLine.setTrackingNumber(null);\n      stockMoveLineService.assignOrGenerateTrackingNumber(\n          newStockMoveLine,\n          newStockMove,\n          product,\n          trackingNumberConfiguration,\n          newStockMove.getTypeSelect() == StockMoveRepository.TYPE_OUTGOING\n              ? StockMoveLineService.TYPE_SALES\n              : StockMoveLineService.TYPE_PURCHASES);\n    }\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "cancel",
+      "start": 1084,
+      "end": 1098,
+      "program_units": 8,
+      "nodes": [
+        [
+          "expression_statement",
+          1088,
+          1088,
+          4,
+          61
+        ],
+        [
+          "expression_statement",
+          1089,
+          1089,
+          4,
+          62
+        ],
+        [
+          "expression_statement",
+          1096,
+          1096,
+          4,
+          47
+        ],
+        [
+          "expression_statement",
+          1097,
+          1097,
+          4,
+          22
+        ],
+        [
+          "if_statement",
+          1090,
+          1095,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          1087,
+          1087,
+          4,
+          55
+        ],
+        [
+          "method_declaration",
+          1084,
+          1098,
+          2,
+          3
+        ],
+        [
+          "throw_statement",
+          1092,
+          1094,
+          6,
+          74
+        ]
+      ],
+      "source": "  @Override\n  @Transactional(rollbackOn = {Exception.class})\n  public void cancel(StockMove stockMove, CancelReason cancelReason) throws AxelorException {\n    List<Integer> authorizedStatus = new ArrayList<>();\n    authorizedStatus.add(StockMoveRepository.STATUS_PLANNED);\n    authorizedStatus.add(StockMoveRepository.STATUS_REALIZED);\n    if (stockMove.getStatusSelect() == null\n        || !authorizedStatus.contains(stockMove.getStatusSelect())) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(StockExceptionMessage.STOCK_MOVE_CANCEL_WRONG_STATUS));\n    }\n    applyCancelReason(stockMove, cancelReason);\n    cancel(stockMove);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "cancel",
+      "start": 1100,
+      "end": 1141,
+      "program_units": 14,
+      "nodes": [
+        [
+          "expression_statement",
+          1103,
+          1103,
+          4,
+          70
+        ],
+        [
+          "expression_statement",
+          1104,
+          1104,
+          4,
+          36
+        ],
+        [
+          "expression_statement",
+          1106,
+          1106,
+          4,
+          31
+        ],
+        [
+          "expression_statement",
+          1109,
+          1115,
+          6,
+          17
+        ],
+        [
+          "expression_statement",
+          1117,
+          1125,
+          6,
+          16
+        ],
+        [
+          "expression_statement",
+          1126,
+          1126,
+          6,
+          81
+        ],
+        [
+          "expression_statement",
+          1133,
+          1133,
+          6,
+          71
+        ],
+        [
+          "expression_statement",
+          1136,
+          1136,
+          4,
+          48
+        ],
+        [
+          "expression_statement",
+          1139,
+          1139,
+          6,
+          68
+        ],
+        [
+          "if_statement",
+          1108,
+          1134,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          1137,
+          1140,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          1105,
+          1105,
+          4,
+          52
+        ],
+        [
+          "local_variable_declaration",
+          1127,
+          1132,
+          6,
+          43
+        ],
+        [
+          "method_declaration",
+          1100,
+          1141,
+          2,
+          3
+        ]
+      ],
+      "source": "  @Override\n  @Transactional(rollbackOn = {Exception.class})\n  public void cancel(StockMove stockMove) throws AxelorException {\n    LOG.debug(\"Stock move cancel : {} \", stockMove.getStockMoveSeq());\n    checkReversionStatus(stockMove);\n    int initialStatus = stockMove.getStatusSelect();\n    setCancelStatus(stockMove);\n\n    if (initialStatus == StockMoveRepository.STATUS_PLANNED) {\n      stockMoveLineService.updateLocations(\n          initialStatus,\n          StockMoveRepository.STATUS_CANCELED,\n          getPlannedStockMoveLineIds(stockMove, false),\n          stockMove.getEstimatedDate(),\n          false,\n          false);\n    } else {\n      stockMoveLineService.updateLocations(\n          initialStatus,\n          StockMoveRepository.STATUS_CANCELED,\n          stockMove.getStockMoveLineList().stream()\n              .map(StockMoveLine::getId)\n              .collect(Collectors.toSet()),\n          stockMove.getEstimatedDate(),\n          true,\n          true);\n      stockMove.setRealDate(appBaseService.getTodayDate(stockMove.getCompany()));\n      Set<Long> productIds =\n          stockMove.getStockMoveLineList().stream()\n              .map(StockMoveLine::getProduct)\n              .filter(p -> p != null)\n              .map(Product::getId)\n              .collect(Collectors.toSet());\n      weightedAveragePriceService.resetAvgPriceForProducts(productIds);\n    }\n\n    clearPlannedStockMoveLine(stockMove, false);\n    if (stockMove.getTypeSelect() == StockMoveRepository.TYPE_INCOMING\n        && initialStatus == StockMoveRepository.STATUS_REALIZED) {\n      partnerProductQualityRatingService.undoCalculation(stockMove);\n    }\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "checkReversionStatus",
+      "start": 1143,
+      "end": 1171,
+      "program_units": 7,
+      "nodes": [
+        [
+          "if_statement",
+          1145,
+          1147,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          1159,
+          1161,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          1148,
+          1158,
+          4,
+          21
+        ],
+        [
+          "method_declaration",
+          1143,
+          1171,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          1146,
+          1146,
+          6,
+          13
+        ],
+        [
+          "return_statement",
+          1160,
+          1160,
+          6,
+          13
+        ],
+        [
+          "throw_statement",
+          1162,
+          1170,
+          4,
+          53
+        ]
+      ],
+      "source": "  @Override\n  public void checkReversionStatus(StockMove stockMove) throws AxelorException {\n    if (stockMove == null || stockMove.getId() == null) {\n      return;\n    }\n    List<StockMove> reversionStockMoveList =\n        stockMoveRepo\n            .all()\n            .filter(\n                \"self.reversionOriginStockMove.id = :stockMoveId\"\n                    + \" AND self.statusSelect IN (:planned, :realized)\")\n            .bind(\"stockMoveId\", stockMove.getId())\n            .bind(\"planned\", StockMoveRepository.STATUS_PLANNED)\n            .bind(\"realized\", StockMoveRepository.STATUS_REALIZED)\n            .order(\"stockMoveSeq\")\n            .fetch();\n    if (reversionStockMoveList.isEmpty()) {\n      return;\n    }\n    throw new AxelorException(\n        stockMove,\n        TraceBackRepository.CATEGORY_INCONSISTENCY,\n        String.format(\n            I18n.get(StockExceptionMessage.STOCK_MOVE_CANCEL_WRONG_REVERSION_STATUS),\n            stockMove.getStockMoveSeq(),\n            reversionStockMoveList.stream()\n                .map(StockMove::getStockMoveSeq)\n                .collect(Collectors.joining(\", \"))));\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "setCancelStatus",
+      "start": 1178,
+      "end": 1181,
+      "program_units": 3,
+      "nodes": [
+        [
+          "expression_statement",
+          1179,
+          1179,
+          4,
+          67
+        ],
+        [
+          "expression_statement",
+          1180,
+          1180,
+          4,
+          34
+        ],
+        [
+          "method_declaration",
+          1178,
+          1181,
+          2,
+          3
+        ]
+      ],
+      "source": "  protected void setCancelStatus(StockMove stockMove) {\n    stockMove.setStatusSelect(StockMoveRepository.STATUS_CANCELED);\n    stockMoveRepo.save(stockMove);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "createSplitStockMoveLine",
+      "start": 1305,
+      "end": 1335,
+      "program_units": 18,
+      "nodes": [
+        [
+          "expression_statement",
+          1313,
+          1313,
+          4,
+          33
+        ],
+        [
+          "expression_statement",
+          1314,
+          1314,
+          4,
+          37
+        ],
+        [
+          "expression_statement",
+          1315,
+          1315,
+          4,
+          60
+        ],
+        [
+          "expression_statement",
+          1316,
+          1316,
+          4,
+          86
+        ],
+        [
+          "expression_statement",
+          1323,
+          1323,
+          6,
+          75
+        ],
+        [
+          "expression_statement",
+          1325,
+          1325,
+          6,
+          49
+        ],
+        [
+          "expression_statement",
+          1326,
+          1326,
+          6,
+          53
+        ],
+        [
+          "expression_statement",
+          1327,
+          1327,
+          6,
+          76
+        ],
+        [
+          "expression_statement",
+          1331,
+          1331,
+          6,
+          62
+        ],
+        [
+          "if_statement",
+          1321,
+          1328,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          1330,
+          1332,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          1310,
+          1310,
+          4,
+          90
+        ],
+        [
+          "local_variable_declaration",
+          1311,
+          1311,
+          4,
+          60
+        ],
+        [
+          "local_variable_declaration",
+          1312,
+          1312,
+          4,
+          52
+        ],
+        [
+          "local_variable_declaration",
+          1320,
+          1320,
+          4,
+          75
+        ],
+        [
+          "local_variable_declaration",
+          1329,
+          1329,
+          4,
+          78
+        ],
+        [
+          "method_declaration",
+          1305,
+          1335,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          1334,
+          1334,
+          4,
+          28
+        ]
+      ],
+      "source": "  protected StockMoveLine createSplitStockMoveLine(\n      StockMove originalStockMove,\n      StockMoveLine originalStockMoveLine,\n      StockMoveLine modifiedStockMoveLine) {\n\n    StockMoveLine newStockMoveLine = stockMoveLineRepo.copy(originalStockMoveLine, false);\n    BigDecimal netMass = originalStockMoveLine.getNetMass();\n    BigDecimal qty = modifiedStockMoveLine.getQty();\n    newStockMoveLine.setQty(qty);\n    newStockMoveLine.setRealQty(qty);\n    newStockMoveLine.setTotalNetMass(netMass.multiply(qty));\n    newStockMoveLine.setUnitPriceUntaxed(modifiedStockMoveLine.getUnitPriceUntaxed());\n\n    // Update quantity in original stock move.\n    // If the remaining quantity is 0, remove the stock move line\n    BigDecimal remainingQty = originalStockMoveLine.getQty().subtract(qty);\n    if (BigDecimal.ZERO.compareTo(remainingQty) == 0) {\n      // Remove the stock move line\n      originalStockMove.removeStockMoveLineListItem(originalStockMoveLine);\n    } else {\n      originalStockMoveLine.setQty(remainingQty);\n      originalStockMoveLine.setRealQty(remainingQty);\n      originalStockMoveLine.setTotalNetMass(netMass.multiply(remainingQty));\n    }\n    TrackingNumber trackingNumber = originalStockMoveLine.getTrackingNumber();\n    if (trackingNumber != null) {\n      trackingNumber.setOriginStockMoveLine(newStockMoveLine);\n    }\n\n    return newStockMoveLine;\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "applyCancelReason",
+      "start": 1528,
+      "end": 1544,
+      "program_units": 6,
+      "nodes": [
+        [
+          "expression_statement",
+          1543,
+          1543,
+          4,
+          44
+        ],
+        [
+          "if_statement",
+          1531,
+          1536,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          1537,
+          1542,
+          4,
+          5
+        ],
+        [
+          "method_declaration",
+          1528,
+          1544,
+          2,
+          3
+        ],
+        [
+          "throw_statement",
+          1532,
+          1535,
+          6,
+          65
+        ],
+        [
+          "throw_statement",
+          1538,
+          1541,
+          6,
+          66
+        ]
+      ],
+      "source": "  @Transactional(rollbackOn = {Exception.class})\n  protected void applyCancelReason(StockMove stockMove, CancelReason cancelReason)\n      throws AxelorException {\n    if (cancelReason == null) {\n      throw new AxelorException(\n          stockMove,\n          TraceBackRepository.CATEGORY_MISSING_FIELD,\n          I18n.get(StockExceptionMessage.CANCEL_REASON_MISSING));\n    }\n    if (!StockMove.class.getCanonicalName().equals(cancelReason.getApplicationType())) {\n      throw new AxelorException(\n          stockMove,\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          I18n.get(StockExceptionMessage.CANCEL_REASON_BAD_TYPE));\n    }\n    stockMove.setCancelReason(cancelReason);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "setAvailableStatus",
+      "start": 1546,
+      "end": 1559,
+      "program_units": 8,
+      "nodes": [
+        [
+          "enhanced_for_statement",
+          1554,
+          1556,
+          4,
+          5
+        ],
+        [
+          "expression_statement",
+          1550,
+          1550,
+          6,
+          47
+        ],
+        [
+          "expression_statement",
+          1555,
+          1555,
+          6,
+          72
+        ],
+        [
+          "expression_statement",
+          1558,
+          1558,
+          4,
+          58
+        ],
+        [
+          "if_statement",
+          1549,
+          1552,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          1548,
+          1548,
+          4,
+          77
+        ],
+        [
+          "method_declaration",
+          1546,
+          1559,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          1551,
+          1551,
+          6,
+          13
+        ]
+      ],
+      "source": "  @Override\n  public void setAvailableStatus(StockMove stockMove) throws AxelorException {\n    List<StockMoveLine> stockMoveLineList = stockMove.getStockMoveLineList();\n    if (stockMoveLineList == null) {\n      stockMove.setAvailableStatusSelect(null);\n      return;\n    }\n\n    for (StockMoveLine stockMoveLine : stockMoveLineList) {\n      stockMoveLineService.setAvailableStatus(stockMoveLine, stockMove);\n    }\n\n    setAvailableStatusSelectFromStockMoveLines(stockMove);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "setAvailableStatusSelect",
+      "start": 1561,
+      "end": 1575,
+      "program_units": 8,
+      "nodes": [
+        [
+          "continue_statement",
+          1569,
+          1569,
+          8,
+          17
+        ],
+        [
+          "enhanced_for_statement",
+          1567,
+          1573,
+          4,
+          5
+        ],
+        [
+          "expression_statement",
+          1572,
+          1572,
+          6,
+          99
+        ],
+        [
+          "expression_statement",
+          1574,
+          1574,
+          4,
+          58
+        ],
+        [
+          "if_statement",
+          1563,
+          1565,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          1568,
+          1570,
+          6,
+          7
+        ],
+        [
+          "method_declaration",
+          1561,
+          1575,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          1564,
+          1564,
+          6,
+          13
+        ]
+      ],
+      "source": "  @Override\n  public void setAvailableStatusSelect(StockMove stockMove) throws AxelorException {\n    if (stockMove == null || stockMove.getStockMoveLineList() == null) {\n      return;\n    }\n\n    for (StockMoveLine stockMoveLine : stockMove.getStockMoveLineList()) {\n      if (stockMoveLine == null || mustIgnoreForAvailableStatusSelect(stockMoveLine)) {\n        continue;\n      }\n\n      stockMoveLineService.updateAvailableQty(stockMoveLine, stockMoveLine.getFromStockLocation());\n    }\n    setAvailableStatusSelectFromStockMoveLines(stockMove);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "setAvailableStatusSelectFromStockMoveLines",
+      "start": 1577,
+      "end": 1615,
+      "program_units": 24,
+      "nodes": [
+        [
+          "continue_statement",
+          1584,
+          1584,
+          8,
+          17
+        ],
+        [
+          "continue_statement",
+          1591,
+          1591,
+          8,
+          17
+        ],
+        [
+          "enhanced_for_statement",
+          1582,
+          1604,
+          4,
+          5
+        ],
+        [
+          "expression_statement",
+          1596,
+          1596,
+          8,
+          20
+        ],
+        [
+          "expression_statement",
+          1599,
+          1599,
+          8,
+          30
+        ],
+        [
+          "expression_statement",
+          1602,
+          1602,
+          8,
+          18
+        ],
+        [
+          "expression_statement",
+          1607,
+          1607,
+          6,
+          79
+        ],
+        [
+          "expression_statement",
+          1609,
+          1609,
+          6,
+          89
+        ],
+        [
+          "expression_statement",
+          1611,
+          1611,
+          6,
+          81
+        ],
+        [
+          "expression_statement",
+          1613,
+          1613,
+          6,
+          47
+        ],
+        [
+          "if_statement",
+          1583,
+          1585,
+          6,
+          7
+        ],
+        [
+          "if_statement",
+          1590,
+          1592,
+          6,
+          7
+        ],
+        [
+          "if_statement",
+          1594,
+          1603,
+          6,
+          7
+        ],
+        [
+          "if_statement",
+          1597,
+          1603,
+          13,
+          7
+        ],
+        [
+          "if_statement",
+          1600,
+          1603,
+          13,
+          7
+        ],
+        [
+          "if_statement",
+          1606,
+          1614,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          1608,
+          1614,
+          11,
+          5
+        ],
+        [
+          "if_statement",
+          1610,
+          1614,
+          11,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          1578,
+          1578,
+          4,
+          22
+        ],
+        [
+          "local_variable_declaration",
+          1579,
+          1579,
+          4,
+          32
+        ],
+        [
+          "local_variable_declaration",
+          1580,
+          1580,
+          4,
+          20
+        ],
+        [
+          "local_variable_declaration",
+          1587,
+          1587,
+          6,
+          51
+        ],
+        [
+          "local_variable_declaration",
+          1588,
+          1588,
+          6,
+          46
+        ],
+        [
+          "method_declaration",
+          1577,
+          1615,
+          2,
+          3
+        ]
+      ],
+      "source": "  protected void setAvailableStatusSelectFromStockMoveLines(StockMove stockMove) {\n    int available = 0;\n    int availableForProduct = 0;\n    int missing = 0;\n\n    for (StockMoveLine stockMoveLine : stockMove.getStockMoveLineList()) {\n      if (stockMoveLine == null || mustIgnoreForAvailableStatusSelect(stockMoveLine)) {\n        continue;\n      }\n\n      Product product = stockMoveLine.getProduct();\n      BigDecimal qty = stockMoveLine.getQty();\n\n      if (qty == null) {\n        continue;\n      }\n\n      if (stockMoveLine.getAvailableQty().compareTo(stockMoveLine.getRealQty()) >= 0\n          || product != null && !product.getStockManaged()) {\n        available++;\n      } else if (stockMoveLine.getAvailableQtyForProduct().compareTo(stockMoveLine.getRealQty())\n          >= 0) {\n        availableForProduct++;\n      } else if (stockMoveLine.getAvailableQty().compareTo(stockMoveLine.getRealQty()) < 0\n          && stockMoveLine.getAvailableQtyForProduct().compareTo(stockMoveLine.getRealQty()) < 0) {\n        missing++;\n      }\n    }\n\n    if ((available > 0 || availableForProduct > 0) && missing == 0) {\n      stockMove.setAvailableStatusSelect(StockMoveRepository.STATUS_AVAILABLE);\n    } else if ((available > 0 || availableForProduct > 0) && missing > 0) {\n      stockMove.setAvailableStatusSelect(StockMoveRepository.STATUS_PARTIALLY_AVAILABLE);\n    } else if (available == 0 && availableForProduct == 0 && missing > 0) {\n      stockMove.setAvailableStatusSelect(StockMoveRepository.STATUS_UNAVAILABLE);\n    } else {\n      stockMove.setAvailableStatusSelect(null);\n    }\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "mustIgnoreForAvailableStatusSelect",
+      "start": 1617,
+      "end": 1627,
+      "program_units": 2,
+      "nodes": [
+        [
+          "method_declaration",
+          1617,
+          1627,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          1618,
+          1626,
+          4,
+          56
+        ]
+      ],
+      "source": "  protected boolean mustIgnoreForAvailableStatusSelect(StockMoveLine stockMoveLine) {\n    return stockMoveLine.getProduct() != null\n            && stockMoveLine.getProduct().getProductTypeSelect() != null\n            && stockMoveLine\n                .getProduct()\n                .getProductTypeSelect()\n                .equals(ProductRepository.PRODUCT_TYPE_SERVICE)\n        || stockMoveLine.getFromStockLocation() != null\n            && stockMoveLine.getFromStockLocation().getTypeSelect()\n                == StockLocationRepository.TYPE_VIRTUAL;\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "name": "setMergedStatus",
+      "start": 1824,
+      "end": 1827,
+      "program_units": 2,
+      "nodes": [
+        [
+          "expression_statement",
+          1826,
+          1826,
+          4,
+          65
+        ],
+        [
+          "method_declaration",
+          1824,
+          1827,
+          2,
+          3
+        ]
+      ],
+      "source": "  @Override\n  public void setMergedStatus(StockMove stockMove) {\n    stockMove.setStatusSelect(StockMoveRepository.STATUS_MERGED);\n  }"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "sha256": "95da2da558526cba54f858ae90f47b6238520d43e967c64664f2c77774baa9e6",
+      "name": "DeliveryTrip.validate",
+      "start": 62,
+      "end": 70,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Expr",
+          64,
+          64,
+          3,
+          53
+        ],
+        [
+          "Expr",
+          67,
+          67,
+          3,
+          42
+        ],
+        [
+          "Expr",
+          68,
+          68,
+          2,
+          51
+        ],
+        [
+          "Expr",
+          69,
+          69,
+          2,
+          32
+        ],
+        [
+          "Expr",
+          70,
+          70,
+          2,
+          31
+        ],
+        [
+          "FunctionDef",
+          62,
+          70,
+          1,
+          31
+        ],
+        [
+          "If",
+          63,
+          64,
+          2,
+          53
+        ],
+        [
+          "If",
+          66,
+          67,
+          2,
+          42
+        ]
+      ],
+      "source": "\tdef validate(self):\n\t\tif self._action == \"submit\" and not self.driver:\n\t\t\tfrappe.throw(_(\"A driver must be set to submit.\"))\n\n\t\tif self._action == \"submit\":\n\t\t\tself.validate_delivery_note_not_draft()\n\t\tself.validate_delivery_notes_not_on_other_trips()\n\t\tself.validate_stop_addresses()\n\t\tself.validate_stop_contacts()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "sha256": "95da2da558526cba54f858ae90f47b6238520d43e967c64664f2c77774baa9e6",
+      "name": "DeliveryTrip.on_cancel",
+      "start": 85,
+      "end": 87,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          86,
+          86,
+          2,
+          22
+        ],
+        [
+          "Expr",
+          87,
+          87,
+          2,
+          41
+        ],
+        [
+          "FunctionDef",
+          85,
+          87,
+          1,
+          41
+        ]
+      ],
+      "source": "\tdef on_cancel(self):\n\t\tself.update_status()\n\t\tself.update_delivery_notes(delete=True)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "sha256": "95da2da558526cba54f858ae90f47b6238520d43e967c64664f2c77774baa9e6",
+      "name": "DeliveryTrip.validate_stop_addresses",
+      "start": 89,
+      "end": 92,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          92,
+          92,
+          4,
+          98
+        ],
+        [
+          "For",
+          90,
+          92,
+          2,
+          98
+        ],
+        [
+          "FunctionDef",
+          89,
+          92,
+          1,
+          98
+        ],
+        [
+          "If",
+          91,
+          92,
+          3,
+          98
+        ]
+      ],
+      "source": "\tdef validate_stop_addresses(self):\n\t\tfor stop in self.delivery_stops:\n\t\t\tif stop.address and not stop.customer_address:\n\t\t\t\tstop.customer_address = get_address_display(frappe.get_doc(\"Address\", stop.address).as_dict())"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "sha256": "95da2da558526cba54f858ae90f47b6238520d43e967c64664f2c77774baa9e6",
+      "name": "DeliveryTrip.validate_stop_contacts",
+      "start": 94,
+      "end": 116,
+      "program_units": 9,
+      "nodes": [
+        [
+          "Assign",
+          95,
+          95,
+          2,
+          82
+        ],
+        [
+          "Assign",
+          99,
+          99,
+          2,
+          50
+        ],
+        [
+          "Assign",
+          100,
+          109,
+          2,
+          3
+        ],
+        [
+          "Expr",
+          112,
+          116,
+          4,
+          5
+        ],
+        [
+          "For",
+          110,
+          116,
+          2,
+          5
+        ],
+        [
+          "FunctionDef",
+          94,
+          116,
+          1,
+          5
+        ],
+        [
+          "If",
+          96,
+          97,
+          2,
+          9
+        ],
+        [
+          "If",
+          111,
+          116,
+          3,
+          5
+        ],
+        [
+          "Return",
+          97,
+          97,
+          3,
+          9
+        ]
+      ],
+      "source": "\tdef validate_stop_contacts(self):\n\t\tstops = [stop for stop in self.delivery_stops if stop.contact and stop.customer]\n\t\tif not stops:\n\t\t\treturn\n\n\t\tdynamic_link = frappe.qb.DocType(\"Dynamic Link\")\n\t\tcontact_customers = set(\n\t\t\tfrappe.qb.from_(dynamic_link)\n\t\t\t.select(dynamic_link.parent, dynamic_link.link_name)\n\t\t\t.where(\n\t\t\t\t(dynamic_link.parenttype == \"Contact\")\n\t\t\t\t& (dynamic_link.link_doctype == \"Customer\")\n\t\t\t\t& dynamic_link.parent.isin({stop.contact for stop in stops})\n\t\t\t)\n\t\t\t.run()\n\t\t)\n\t\tfor stop in stops:\n\t\t\tif (stop.contact, stop.customer) not in contact_customers:\n\t\t\t\tfrappe.throw(\n\t\t\t\t\t_(\"Row #{0}: Contact {1} does not belong to Customer {2}\").format(\n\t\t\t\t\t\tstop.idx, frappe.bold(stop.contact), frappe.bold(stop.customer)\n\t\t\t\t\t)\n\t\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "sha256": "95da2da558526cba54f858ae90f47b6238520d43e967c64664f2c77774baa9e6",
+      "name": "DeliveryTrip.validate_delivery_note_not_draft",
+      "start": 118,
+      "end": 130,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          119,
+          119,
+          2,
+          102
+        ],
+        [
+          "Assign",
+          120,
+          124,
+          2,
+          3
+        ],
+        [
+          "Expr",
+          126,
+          130,
+          3,
+          4
+        ],
+        [
+          "FunctionDef",
+          118,
+          130,
+          1,
+          4
+        ],
+        [
+          "If",
+          125,
+          130,
+          2,
+          4
+        ]
+      ],
+      "source": "\tdef validate_delivery_note_not_draft(self):\n\t\tdelivery_notes = list(set(stop.delivery_note for stop in self.delivery_stops if stop.delivery_note))\n\t\tdraft_delivery_notes = frappe.get_all(\n\t\t\t\"Delivery Note\",\n\t\t\t{\"docstatus\": 0, \"name\": [\"in\", delivery_notes]},\n\t\t\tpluck=\"name\",\n\t\t)\n\t\tif draft_delivery_notes:\n\t\t\tfrappe.throw(\n\t\t\t\t_(\n\t\t\t\t\t\"Delivery Notes should not be in draft state when submitting a Delivery Trip. The following Delivery Notes are still in draft state: {0}. Please submit them first.\"\n\t\t\t\t).format(\", \".join(draft_delivery_notes))\n\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "sha256": "95da2da558526cba54f858ae90f47b6238520d43e967c64664f2c77774baa9e6",
+      "name": "DeliveryTrip.validate_delivery_notes_not_on_other_trips",
+      "start": 132,
+      "end": 165,
+      "program_units": 12,
+      "nodes": [
+        [
+          "Assign",
+          133,
+          133,
+          2,
+          93
+        ],
+        [
+          "Assign",
+          137,
+          137,
+          2,
+          52
+        ],
+        [
+          "Assign",
+          138,
+          144,
+          2,
+          3
+        ],
+        [
+          "Assign",
+          152,
+          152,
+          2,
+          100
+        ],
+        [
+          "Assign",
+          153,
+          159,
+          2,
+          3
+        ],
+        [
+          "Expr",
+          146,
+          150,
+          3,
+          4
+        ],
+        [
+          "Expr",
+          161,
+          165,
+          3,
+          4
+        ],
+        [
+          "FunctionDef",
+          132,
+          165,
+          1,
+          4
+        ],
+        [
+          "If",
+          134,
+          135,
+          2,
+          9
+        ],
+        [
+          "If",
+          145,
+          150,
+          2,
+          4
+        ],
+        [
+          "If",
+          160,
+          165,
+          2,
+          4
+        ],
+        [
+          "Return",
+          135,
+          135,
+          3,
+          9
+        ]
+      ],
+      "source": "\tdef validate_delivery_notes_not_on_other_trips(self):\n\t\tdelivery_notes = {stop.delivery_note for stop in self.delivery_stops if stop.delivery_note}\n\t\tif not delivery_notes:\n\t\t\treturn\n\n\t\tdelivery_note = frappe.qb.DocType(\"Delivery Note\")\n\t\tnotes = (\n\t\t\tfrappe.qb.from_(delivery_note)\n\t\t\t.select(delivery_note.name, delivery_note.delivery_trip, delivery_note.company)\n\t\t\t.where(delivery_note.name.isin(delivery_notes))\n\t\t\t.for_update()\n\t\t\t.run(as_dict=True)\n\t\t)\n\t\tif other_company := [d.name for d in notes if self.company and d.company != self.company]:\n\t\t\tfrappe.throw(\n\t\t\t\t_(\"Delivery Notes {0} do not belong to Company {1}\").format(\n\t\t\t\t\t\", \".join(other_company), frappe.bold(self.company)\n\t\t\t\t)\n\t\t\t)\n\n\t\tother_trips = {d.delivery_trip for d in notes if d.delivery_trip and d.delivery_trip != self.name}\n\t\topen_trips = other_trips and set(\n\t\t\tfrappe.get_all(\n\t\t\t\t\"Delivery Trip\",\n\t\t\t\tfilters={\"name\": (\"in\", list(other_trips)), \"docstatus\": (\"<\", 2)},\n\t\t\t\tpluck=\"name\",\n\t\t\t)\n\t\t)\n\t\tif linked := [d for d in notes if open_trips and d.delivery_trip in open_trips]:\n\t\t\tfrappe.throw(\n\t\t\t\t_(\"Delivery Notes are already on another Delivery Trip: {0}\").format(\n\t\t\t\t\t\", \".join(f\"{d.name} ({d.delivery_trip})\" for d in linked)\n\t\t\t\t)\n\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "sha256": "95da2da558526cba54f858ae90f47b6238520d43e967c64664f2c77774baa9e6",
+      "name": "DeliveryTrip.update_status",
+      "start": 167,
+      "end": 177,
+      "program_units": 9,
+      "nodes": [
+        [
+          "Assign",
+          168,
+          168,
+          2,
+          71
+        ],
+        [
+          "Assign",
+          171,
+          171,
+          3,
+          65
+        ],
+        [
+          "Assign",
+          173,
+          173,
+          4,
+          24
+        ],
+        [
+          "Assign",
+          175,
+          175,
+          4,
+          25
+        ],
+        [
+          "Expr",
+          177,
+          177,
+          2,
+          31
+        ],
+        [
+          "FunctionDef",
+          167,
+          177,
+          1,
+          31
+        ],
+        [
+          "If",
+          170,
+          175,
+          2,
+          25
+        ],
+        [
+          "If",
+          172,
+          175,
+          3,
+          25
+        ],
+        [
+          "If",
+          174,
+          175,
+          3,
+          25
+        ]
+      ],
+      "source": "\tdef update_status(self):\n\t\tstatus = {0: \"Draft\", 1: \"Scheduled\", 2: \"Cancelled\"}[self.docstatus]\n\n\t\tif self.docstatus == 1:\n\t\t\tvisited_stops = [stop.visited for stop in self.delivery_stops]\n\t\t\tif all(visited_stops):\n\t\t\t\tstatus = \"Completed\"\n\t\t\telif any(visited_stops):\n\t\t\t\tstatus = \"In Transit\"\n\n\t\tself.db_set(\"status\", status)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "sha256": "95da2da558526cba54f858ae90f47b6238520d43e967c64664f2c77774baa9e6",
+      "name": "DeliveryTrip.process_route",
+      "start": 223,
+      "end": 280,
+      "program_units": 32,
+      "nodes": [
+        [
+          "Assign",
+          233,
+          233,
+          2,
+          56
+        ],
+        [
+          "Assign",
+          234,
+          234,
+          2,
+          45
+        ],
+        [
+          "Assign",
+          235,
+          235,
+          2,
+          90
+        ],
+        [
+          "Assign",
+          236,
+          236,
+          2,
+          23
+        ],
+        [
+          "Assign",
+          239,
+          239,
+          2,
+          9
+        ],
+        [
+          "Assign",
+          241,
+          241,
+          3,
+          52
+        ],
+        [
+          "Assign",
+          248,
+          248,
+          4,
+          33
+        ],
+        [
+          "Assign",
+          250,
+          250,
+          5,
+          21
+        ],
+        [
+          "Assign",
+          254,
+          254,
+          5,
+          45
+        ],
+        [
+          "Assign",
+          256,
+          256,
+          5,
+          80
+        ],
+        [
+          "Assign",
+          257,
+          257,
+          5,
+          50
+        ],
+        [
+          "Assign",
+          258,
+          258,
+          5,
+          57
+        ],
+        [
+          "Assign",
+          259,
+          259,
+          5,
+          67
+        ],
+        [
+          "Assign",
+          261,
+          261,
+          5,
+          55
+        ],
+        [
+          "Assign",
+          262,
+          262,
+          5,
+          82
+        ],
+        [
+          "Assign",
+          263,
+          263,
+          5,
+          56
+        ],
+        [
+          "Assign",
+          265,
+          265,
+          5,
+          79
+        ],
+        [
+          "Assign",
+          266,
+          266,
+          5,
+          90
+        ],
+        [
+          "Assign",
+          270,
+          272,
+          4,
+          5
+        ],
+        [
+          "Assign",
+          277,
+          277,
+          3,
+          39
+        ],
+        [
+          "Assign",
+          278,
+          278,
+          3,
+          68
+        ],
+        [
+          "AugAssign",
+          267,
+          267,
+          5,
+          13
+        ],
+        [
+          "AugAssign",
+          274,
+          274,
+          4,
+          25
+        ],
+        [
+          "Expr",
+          245,
+          245,
+          5,
+          70
+        ],
+        [
+          "Expr",
+          280,
+          280,
+          2,
+          13
+        ],
+        [
+          "For",
+          240,
+          274,
+          2,
+          25
+        ],
+        [
+          "For",
+          253,
+          267,
+          4,
+          13
+        ],
+        [
+          "FunctionDef",
+          223,
+          280,
+          1,
+          13
+        ],
+        [
+          "If",
+          243,
+          274,
+          3,
+          25
+        ],
+        [
+          "If",
+          244,
+          245,
+          4,
+          70
+        ],
+        [
+          "If",
+          249,
+          250,
+          4,
+          21
+        ],
+        [
+          "If",
+          276,
+          278,
+          2,
+          68
+        ]
+      ],
+      "source": "\tdef process_route(self, optimize: bool):\n\t\t\"\"\"\n\t\tEstimate the arrival times for each stop in the Delivery Trip.\n\t\tIf `optimize` is True, the stops will be re-arranged, based\n\t\ton the optimized order, before estimating the arrival times.\n\n\t\tArgs:\n\t\t        optimize (bool): True if route needs to be optimized, else False\n\t\t\"\"\"\n\n\t\tdeparture_datetime = get_datetime(self.departure_time)\n\t\troute_list = self.form_route_list(optimize)\n\t\tends_at_home = not (optimize and self.delivery_stops and self.delivery_stops[-1].locked)\n\t\ttotal_distance = None\n\n\t\t# For locks, maintain idx count while looping through route list\n\t\tidx = 0\n\t\tfor route_idx, route in enumerate(route_list):\n\t\t\tdirections = self.get_directions(route, optimize)\n\n\t\t\tif directions:\n\t\t\t\tif optimize and len(directions.get(\"waypoint_order\")) > 1:\n\t\t\t\t\tself.rearrange_stops(directions.get(\"waypoint_order\"), start=idx)\n\n\t\t\t\t# Avoid estimating last leg back to the home address\n\t\t\t\tlegs = directions.get(\"legs\")\n\t\t\t\tif ends_at_home and route_idx == len(route_list) - 1:\n\t\t\t\t\tlegs = legs[:-1]\n\n\t\t\t\t# Google Maps returns the legs in the optimized order\n\t\t\t\tfor leg in legs:\n\t\t\t\t\tdelivery_stop = self.delivery_stops[idx]\n\n\t\t\t\t\tdelivery_stop.lat, delivery_stop.lng = leg.get(\"end_location\", {}).values()\n\t\t\t\t\tdelivery_stop.uom = self.default_distance_uom\n\t\t\t\t\tdistance = leg.get(\"distance\", {}).get(\"value\", 0.0)  # in meters\n\t\t\t\t\tdelivery_stop.distance = distance * self.uom_conversion_factor\n\n\t\t\t\t\tduration = leg.get(\"duration\", {}).get(\"value\", 0)\n\t\t\t\t\testimated_arrival = departure_datetime + datetime.timedelta(seconds=duration)\n\t\t\t\t\tdelivery_stop.estimated_arrival = estimated_arrival\n\n\t\t\t\t\tstop_delay = frappe.db.get_single_value(\"Delivery Settings\", \"stop_delay\")\n\t\t\t\t\tdeparture_datetime = estimated_arrival + datetime.timedelta(minutes=cint(stop_delay))\n\t\t\t\t\tidx += 1\n\n\t\t\t\t# Include last leg in the final distance calculation\n\t\t\t\ttotal_distance = flt(total_distance) + sum(\n\t\t\t\t\tleg.get(\"distance\", {}).get(\"value\", 0.0) for leg in directions.get(\"legs\")\n\t\t\t\t)  # in meters\n\t\t\telse:\n\t\t\t\tidx += len(route) - 1\n\n\t\tif total_distance is not None:\n\t\t\tself.uom = self.default_distance_uom\n\t\t\tself.total_distance = total_distance * self.uom_conversion_factor\n\n\t\tself.save()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote.validate",
+      "start": 302,
+      "end": 326,
+      "program_units": 21,
+      "nodes": [
+        [
+          "Assign",
+          323,
+          323,
+          3,
+          45
+        ],
+        [
+          "Expr",
+          303,
+          303,
+          2,
+          30
+        ],
+        [
+          "Expr",
+          304,
+          304,
+          2,
+          45
+        ],
+        [
+          "Expr",
+          305,
+          305,
+          2,
+          20
+        ],
+        [
+          "Expr",
+          306,
+          306,
+          2,
+          28
+        ],
+        [
+          "Expr",
+          307,
+          307,
+          2,
+          19
+        ],
+        [
+          "Expr",
+          308,
+          308,
+          2,
+          20
+        ],
+        [
+          "Expr",
+          309,
+          309,
+          2,
+          27
+        ],
+        [
+          "Expr",
+          310,
+          310,
+          2,
+          64
+        ],
+        [
+          "Expr",
+          311,
+          311,
+          2,
+          27
+        ],
+        [
+          "Expr",
+          312,
+          312,
+          2,
+          56
+        ],
+        [
+          "Expr",
+          313,
+          313,
+          2,
+          44
+        ],
+        [
+          "Expr",
+          314,
+          314,
+          2,
+          35
+        ],
+        [
+          "Expr",
+          315,
+          315,
+          2,
+          51
+        ],
+        [
+          "Expr",
+          319,
+          319,
+          2,
+          25
+        ],
+        [
+          "Expr",
+          320,
+          320,
+          2,
+          29
+        ],
+        [
+          "Expr",
+          325,
+          325,
+          2,
+          51
+        ],
+        [
+          "Expr",
+          326,
+          326,
+          2,
+          71
+        ],
+        [
+          "FunctionDef",
+          302,
+          326,
+          1,
+          71
+        ],
+        [
+          "If",
+          322,
+          323,
+          2,
+          45
+        ],
+        [
+          "ImportFrom",
+          317,
+          317,
+          2,
+          77
+        ]
+      ],
+      "source": "\tdef validate(self):\n\t\tself.validate_posting_time()\n\t\tself.set_internal_return_target_warehouse()\n\t\tsuper().validate()\n\t\tself.validate_references()\n\t\tself.set_status()\n\t\tself.so_required()\n\t\tself.validate_proj_cust()\n\t\tself.check_sales_order_on_hold_or_close(\"against_sales_order\")\n\t\tself.validate_warehouse()\n\t\tself.validate_uom_is_integer(\"stock_uom\", \"stock_qty\")\n\t\tself.validate_uom_is_integer(\"uom\", \"qty\")\n\t\tself.validate_with_previous_doc()\n\t\tself.set_serial_and_batch_bundle_from_pick_list()\n\n\t\tfrom erpnext.stock.doctype.packed_item.packed_item import make_packing_list\n\n\t\tmake_packing_list(self)\n\t\tself.update_current_stock()\n\n\t\tif not self.installation_status:\n\t\t\tself.installation_status = \"Not Installed\"\n\n\t\tself.validate_against_stock_reservation_entries()\n\t\tself.reset_default_field_value(\"set_warehouse\", \"items\", \"warehouse\")"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote.validate_with_previous_doc",
+      "start": 356,
+      "end": 402,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Expr",
+          357,
+          390,
+          2,
+          3
+        ],
+        [
+          "Expr",
+          397,
+          402,
+          3,
+          4
+        ],
+        [
+          "FunctionDef",
+          356,
+          402,
+          1,
+          4
+        ],
+        [
+          "If",
+          392,
+          402,
+          2,
+          4
+        ]
+      ],
+      "source": "\tdef validate_with_previous_doc(self):\n\t\tsuper().validate_with_previous_doc(\n\t\t\t{\n\t\t\t\t\"Sales Order\": {\n\t\t\t\t\t\"ref_dn_field\": \"against_sales_order\",\n\t\t\t\t\t\"compare_fields\": [\n\t\t\t\t\t\t[\"customer\", \"=\"],\n\t\t\t\t\t\t[\"company\", \"=\"],\n\t\t\t\t\t\t[\"project\", \"=\"],\n\t\t\t\t\t\t[\"currency\", \"=\"],\n\t\t\t\t\t],\n\t\t\t\t},\n\t\t\t\t\"Sales Order Item\": {\n\t\t\t\t\t\"ref_dn_field\": \"so_detail\",\n\t\t\t\t\t\"compare_fields\": [[\"item_code\", \"=\"], [\"uom\", \"=\"], [\"conversion_factor\", \"=\"]],\n\t\t\t\t\t\"is_child_table\": True,\n\t\t\t\t\t\"allow_duplicate_prev_row_id\": True,\n\t\t\t\t},\n\t\t\t\t\"Sales Invoice\": {\n\t\t\t\t\t\"ref_dn_field\": \"against_sales_invoice\",\n\t\t\t\t\t\"compare_fields\": [\n\t\t\t\t\t\t[\"customer\", \"=\"],\n\t\t\t\t\t\t[\"company\", \"=\"],\n\t\t\t\t\t\t[\"project\", \"=\"],\n\t\t\t\t\t\t[\"currency\", \"=\"],\n\t\t\t\t\t],\n\t\t\t\t},\n\t\t\t\t\"Sales Invoice Item\": {\n\t\t\t\t\t\"ref_dn_field\": \"si_detail\",\n\t\t\t\t\t\"compare_fields\": [[\"item_code\", \"=\"], [\"uom\", \"=\"], [\"conversion_factor\", \"=\"]],\n\t\t\t\t\t\"is_child_table\": True,\n\t\t\t\t\t\"allow_duplicate_prev_row_id\": True,\n\t\t\t\t},\n\t\t\t}\n\t\t)\n\n\t\tif (\n\t\t\tcint(frappe.get_single_value(\"Selling Settings\", \"maintain_same_sales_rate\"))\n\t\t\tand not self.is_return\n\t\t\tand not self.is_internal_customer\n\t\t):\n\t\t\tself.validate_rate_with_reference_doc(\n\t\t\t\t[\n\t\t\t\t\t[\"Sales Order\", \"against_sales_order\", \"so_detail\"],\n\t\t\t\t\t[\"Sales Invoice\", \"against_sales_invoice\", \"si_detail\"],\n\t\t\t\t]\n\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote.validate_references",
+      "start": 404,
+      "end": 406,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          405,
+          405,
+          2,
+          40
+        ],
+        [
+          "Expr",
+          406,
+          406,
+          2,
+          42
+        ],
+        [
+          "FunctionDef",
+          404,
+          406,
+          1,
+          42
+        ]
+      ],
+      "source": "\tdef validate_references(self):\n\t\tself.validate_sales_order_references()\n\t\tself.validate_sales_invoice_references()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote.validate_sales_order_references",
+      "start": 408,
+      "end": 411,
+      "program_units": 2,
+      "nodes": [
+        [
+          "Expr",
+          409,
+          411,
+          2,
+          3
+        ],
+        [
+          "FunctionDef",
+          408,
+          411,
+          1,
+          3
+        ]
+      ],
+      "source": "\tdef validate_sales_order_references(self):\n\t\tself._validate_dependent_item_fields(\n\t\t\t\"against_sales_order\", \"so_detail\", _(\"References to Sales Orders are Incomplete\")\n\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote.validate_sales_invoice_references",
+      "start": 413,
+      "end": 419,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Expr",
+          417,
+          419,
+          2,
+          3
+        ],
+        [
+          "FunctionDef",
+          413,
+          419,
+          1,
+          3
+        ],
+        [
+          "If",
+          414,
+          415,
+          2,
+          9
+        ],
+        [
+          "Return",
+          415,
+          415,
+          3,
+          9
+        ]
+      ],
+      "source": "\tdef validate_sales_invoice_references(self):\n\t\tif self.is_return:\n\t\t\treturn\n\n\t\tself._validate_dependent_item_fields(\n\t\t\t\"against_sales_invoice\", \"si_detail\", _(\"References to Sales Invoices are Incomplete\")\n\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote._validate_dependent_item_fields",
+      "start": 421,
+      "end": 438,
+      "program_units": 12,
+      "nodes": [
+        [
+          "Assign",
+          422,
+          422,
+          2,
+          13
+        ],
+        [
+          "Assign",
+          424,
+          424,
+          3,
+          23
+        ],
+        [
+          "Assign",
+          426,
+          426,
+          4,
+          48
+        ],
+        [
+          "Assign",
+          428,
+          428,
+          4,
+          48
+        ],
+        [
+          "Expr",
+          431,
+          435,
+          4,
+          5
+        ],
+        [
+          "Expr",
+          438,
+          438,
+          3,
+          55
+        ],
+        [
+          "For",
+          423,
+          435,
+          2,
+          5
+        ],
+        [
+          "FunctionDef",
+          421,
+          438,
+          1,
+          55
+        ],
+        [
+          "If",
+          425,
+          428,
+          3,
+          48
+        ],
+        [
+          "If",
+          427,
+          428,
+          3,
+          48
+        ],
+        [
+          "If",
+          430,
+          435,
+          3,
+          5
+        ],
+        [
+          "If",
+          437,
+          438,
+          2,
+          55
+        ]
+      ],
+      "source": "\tdef _validate_dependent_item_fields(self, field_a: str, field_b: str, error_title: str):\n\t\terrors = []\n\t\tfor item in self.items:\n\t\t\tmissing_label = None\n\t\t\tif item.get(field_a) and not item.get(field_b):\n\t\t\t\tmissing_label = item.meta.get_label(field_b)\n\t\t\telif item.get(field_b) and not item.get(field_a):\n\t\t\t\tmissing_label = item.meta.get_label(field_a)\n\n\t\t\tif missing_label and missing_label != \"No Label\":\n\t\t\t\terrors.append(\n\t\t\t\t\t_(\"The field {0} in row {1} is not set\").format(\n\t\t\t\t\t\tfrappe.bold(_(missing_label)), frappe.bold(item.idx)\n\t\t\t\t\t)\n\t\t\t\t)\n\n\t\tif errors:\n\t\t\tfrappe.throw(\"<br>\".join(errors), title=error_title)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote.validate_proj_cust",
+      "start": 440,
+      "end": 452,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          443,
+          448,
+          3,
+          4
+        ],
+        [
+          "Expr",
+          450,
+          452,
+          4,
+          5
+        ],
+        [
+          "FunctionDef",
+          440,
+          452,
+          1,
+          5
+        ],
+        [
+          "If",
+          442,
+          452,
+          2,
+          5
+        ],
+        [
+          "If",
+          449,
+          452,
+          3,
+          5
+        ]
+      ],
+      "source": "\tdef validate_proj_cust(self):\n\t\t\"\"\"check for does customer belong to same project as entered..\"\"\"\n\t\tif self.project and self.customer:\n\t\t\tres = frappe.db.sql(\n\t\t\t\t\"\"\"select name from `tabProject`\n\t\t\t\twhere name = %s and (customer = %s or\n\t\t\t\t\tifnull(customer,'')='')\"\"\",\n\t\t\t\t(self.project, self.customer),\n\t\t\t)\n\t\t\tif not res:\n\t\t\t\tfrappe.throw(\n\t\t\t\t\t_(\"Customer {0} does not belong to project {1}\").format(self.customer, self.project)\n\t\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote.validate_warehouse",
+      "start": 454,
+      "end": 459,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Expr",
+          455,
+          455,
+          2,
+          30
+        ],
+        [
+          "Expr",
+          459,
+          459,
+          4,
+          83
+        ],
+        [
+          "For",
+          457,
+          459,
+          2,
+          83
+        ],
+        [
+          "FunctionDef",
+          454,
+          459,
+          1,
+          83
+        ],
+        [
+          "If",
+          458,
+          459,
+          3,
+          83
+        ]
+      ],
+      "source": "\tdef validate_warehouse(self):\n\t\tsuper().validate_warehouse()\n\n\t\tfor d in self.get_item_list():\n\t\t\tif not d[\"warehouse\"] and frappe.get_cached_value(\"Item\", d[\"item_code\"], \"is_stock_item\") == 1:\n\t\t\t\tfrappe.throw(_(\"Warehouse required for stock Item {0}\").format(d[\"item_code\"]))"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote.on_cancel",
+      "start": 527,
+      "end": 556,
+      "program_units": 15,
+      "nodes": [
+        [
+          "Assign",
+          548,
+          554,
+          2,
+          3
+        ],
+        [
+          "Expr",
+          528,
+          528,
+          2,
+          21
+        ],
+        [
+          "Expr",
+          530,
+          530,
+          2,
+          64
+        ],
+        [
+          "Expr",
+          531,
+          531,
+          2,
+          29
+        ],
+        [
+          "Expr",
+          533,
+          533,
+          2,
+          30
+        ],
+        [
+          "Expr",
+          534,
+          534,
+          2,
+          30
+        ],
+        [
+          "Expr",
+          536,
+          536,
+          2,
+          41
+        ],
+        [
+          "Expr",
+          540,
+          540,
+          2,
+          28
+        ],
+        [
+          "Expr",
+          542,
+          542,
+          2,
+          29
+        ],
+        [
+          "Expr",
+          543,
+          543,
+          2,
+          32
+        ],
+        [
+          "Expr",
+          545,
+          545,
+          2,
+          34
+        ],
+        [
+          "Expr",
+          546,
+          546,
+          2,
+          34
+        ],
+        [
+          "Expr",
+          547,
+          547,
+          2,
+          46
+        ],
+        [
+          "Expr",
+          556,
+          556,
+          2,
+          36
+        ],
+        [
+          "FunctionDef",
+          527,
+          556,
+          1,
+          36
+        ]
+      ],
+      "source": "\tdef on_cancel(self):\n\t\tsuper().on_cancel()\n\n\t\tself.check_sales_order_on_hold_or_close(\"against_sales_order\")\n\t\tself.check_next_docstatus()\n\n\t\tself.update_prevdoc_status()\n\t\tself.update_billing_status()\n\n\t\tself.update_stock_reservation_entries()\n\n\t\t# Updating stock ledger should always be called after updating prevdoc status,\n\t\t# because updating reserved qty in bin depends upon updated delivered qty in SO\n\t\tself.update_stock_ledger()\n\n\t\tself.cancel_packing_slips()\n\t\tself.update_pick_list_status()\n\n\t\tself.make_gl_entries_on_cancel()\n\t\tself.repost_future_sle_and_gle()\n\t\tself.update_project_consumed_material_cost()\n\t\tself.ignore_linked_doctypes = (\n\t\t\t\"GL Entry\",\n\t\t\t\"Stock Ledger Entry\",\n\t\t\t\"Repost Item Valuation\",\n\t\t\t\"Serial and Batch Bundle\",\n\t\t\t\"Quality Inspection\",\n\t\t)\n\n\t\tself.delete_auto_created_batches()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote.validate_packed_qty",
+      "start": 591,
+      "end": 606,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          595,
+          595,
+          3,
+          55
+        ],
+        [
+          "Expr",
+          602,
+          606,
+          5,
+          6
+        ],
+        [
+          "For",
+          596,
+          606,
+          3,
+          6
+        ],
+        [
+          "FunctionDef",
+          591,
+          606,
+          1,
+          6
+        ],
+        [
+          "If",
+          594,
+          606,
+          2,
+          6
+        ],
+        [
+          "If",
+          597,
+          606,
+          4,
+          6
+        ]
+      ],
+      "source": "\tdef validate_packed_qty(self):\n\t\t\"\"\"Validate that if packed qty exists, it should be equal to qty\"\"\"\n\n\t\tif frappe.db.exists(\"Packing Slip\", {\"docstatus\": 1, \"delivery_note\": self.name}):\n\t\t\tproduct_bundle_list = self.get_product_bundle_list()\n\t\t\tfor item in self.items + self.packed_items:\n\t\t\t\tif (\n\t\t\t\t\titem.item_code not in product_bundle_list\n\t\t\t\t\tand flt(item.packed_qty)\n\t\t\t\t\tand flt(item.packed_qty) != flt(item.qty)\n\t\t\t\t):\n\t\t\t\t\tfrappe.throw(\n\t\t\t\t\t\t_(\"Row {0}: Packed Qty must be equal to {1} Qty.\").format(\n\t\t\t\t\t\t\titem.idx, frappe.bold(item.doctype)\n\t\t\t\t\t\t)\n\t\t\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote.check_next_docstatus",
+      "start": 608,
+      "end": 625,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Assign",
+          609,
+          614,
+          2,
+          3
+        ],
+        [
+          "Assign",
+          618,
+          623,
+          2,
+          3
+        ],
+        [
+          "Expr",
+          616,
+          616,
+          3,
+          90
+        ],
+        [
+          "Expr",
+          625,
+          625,
+          3,
+          94
+        ],
+        [
+          "FunctionDef",
+          608,
+          625,
+          1,
+          94
+        ],
+        [
+          "If",
+          615,
+          616,
+          2,
+          90
+        ],
+        [
+          "If",
+          624,
+          625,
+          2,
+          94
+        ]
+      ],
+      "source": "\tdef check_next_docstatus(self):\n\t\tsubmit_rv = frappe.db.sql(\n\t\t\t\"\"\"select t1.name\n\t\t\tfrom `tabSales Invoice` t1,`tabSales Invoice Item` t2\n\t\t\twhere t1.name = t2.parent and t2.delivery_note = %s and t1.docstatus = 1\"\"\",\n\t\t\t(self.name),\n\t\t)\n\t\tif submit_rv:\n\t\t\tfrappe.throw(_(\"Sales Invoice {0} has already been submitted\").format(submit_rv[0][0]))\n\n\t\tsubmit_in = frappe.db.sql(\n\t\t\t\"\"\"select t1.name\n\t\t\tfrom `tabInstallation Note` t1, `tabInstallation Note Item` t2\n\t\t\twhere t1.name = t2.parent and t2.prevdoc_docname = %s and t1.docstatus = 1\"\"\",\n\t\t\t(self.name),\n\t\t)\n\t\tif submit_in:\n\t\t\tfrappe.throw(_(\"Installation Note {0} has already been submitted\").format(submit_in[0][0]))"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote.cancel_packing_slips",
+      "start": 627,
+      "end": 642,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Assign",
+          631,
+          635,
+          2,
+          3
+        ],
+        [
+          "Assign",
+          639,
+          639,
+          4,
+          45
+        ],
+        [
+          "Assign",
+          640,
+          640,
+          4,
+          46
+        ],
+        [
+          "Expr",
+          641,
+          641,
+          4,
+          15
+        ],
+        [
+          "Expr",
+          642,
+          642,
+          3,
+          50
+        ],
+        [
+          "For",
+          638,
+          641,
+          3,
+          15
+        ],
+        [
+          "FunctionDef",
+          627,
+          642,
+          1,
+          50
+        ],
+        [
+          "If",
+          637,
+          642,
+          2,
+          50
+        ]
+      ],
+      "source": "\tdef cancel_packing_slips(self):\n\t\t\"\"\"\n\t\tCancel submitted packing slips related to this delivery note\n\t\t\"\"\"\n\t\tres = frappe.db.sql(\n\t\t\t\"\"\"SELECT name FROM `tabPacking Slip` WHERE delivery_note = %s\n\t\t\tAND docstatus = 1\"\"\",\n\t\t\tself.name,\n\t\t)\n\n\t\tif res:\n\t\t\tfor r in res:\n\t\t\t\tps = frappe.get_doc(\"Packing Slip\", r[0])\n\t\t\t\tps.flags.cancelled_by_delivery_note = True\n\t\t\t\tps.cancel()\n\t\t\tfrappe.msgprint(_(\"Packing Slip(s) cancelled\"))"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote.update_status",
+      "start": 644,
+      "end": 647,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Expr",
+          645,
+          645,
+          2,
+          45
+        ],
+        [
+          "Expr",
+          646,
+          646,
+          2,
+          22
+        ],
+        [
+          "Expr",
+          647,
+          647,
+          2,
+          35
+        ],
+        [
+          "FunctionDef",
+          644,
+          647,
+          1,
+          35
+        ]
+      ],
+      "source": "\tdef update_status(self, status):\n\t\tself.set_status(update=True, status=status)\n\t\tself.notify_update()\n\t\tclear_doctype_notifications(self)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "DeliveryNote.update_billing_status",
+      "start": 649,
+      "end": 665,
+      "program_units": 14,
+      "nodes": [
+        [
+          "Assign",
+          650,
+          650,
+          2,
+          38
+        ],
+        [
+          "Assign",
+          661,
+          661,
+          3,
+          83
+        ],
+        [
+          "Assign",
+          662,
+          662,
+          3,
+          69
+        ],
+        [
+          "AugAssign",
+          658,
+          658,
+          4,
+          92
+        ],
+        [
+          "Expr",
+          652,
+          652,
+          3,
+          53
+        ],
+        [
+          "Expr",
+          656,
+          656,
+          4,
+          69
+        ],
+        [
+          "Expr",
+          663,
+          663,
+          3,
+          71
+        ],
+        [
+          "Expr",
+          665,
+          665,
+          2,
+          21
+        ],
+        [
+          "For",
+          654,
+          658,
+          2,
+          92
+        ],
+        [
+          "For",
+          660,
+          663,
+          2,
+          71
+        ],
+        [
+          "FunctionDef",
+          649,
+          665,
+          1,
+          21
+        ],
+        [
+          "If",
+          651,
+          652,
+          2,
+          53
+        ],
+        [
+          "If",
+          655,
+          658,
+          3,
+          92
+        ],
+        [
+          "If",
+          657,
+          658,
+          3,
+          92
+        ]
+      ],
+      "source": "\tdef update_billing_status(self, update_modified=True):\n\t\tupdated_delivery_notes = [self.name]\n\t\tif self.is_return and self.return_against:\n\t\t\tupdated_delivery_notes.append(self.return_against)\n\n\t\tfor d in self.get(\"items\"):\n\t\t\tif d.si_detail and not d.so_detail:\n\t\t\t\td.db_set(\"billed_amt\", d.amount, update_modified=update_modified)\n\t\t\telif d.so_detail:\n\t\t\t\tupdated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)\n\n\t\tfor dn in set(updated_delivery_notes):\n\t\t\tdn_doc = self if (dn == self.name) else frappe.get_lazy_doc(\"Delivery Note\", dn)\n\t\t\tupdate_dn_modified = update_modified and dn != self.return_against\n\t\t\tdn_doc.update_billing_percentage(update_modified=update_dn_modified)\n\n\t\tself.load_from_db()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "name": "update_delivery_note_status",
+      "start": 1343,
+      "end": 1349,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          1344,
+          1344,
+          1,
+          51
+        ],
+        [
+          "Expr",
+          1345,
+          1345,
+          1,
+          30
+        ],
+        [
+          "Expr",
+          1347,
+          1347,
+          2,
+          77
+        ],
+        [
+          "Expr",
+          1349,
+          1349,
+          1,
+          25
+        ],
+        [
+          "FunctionDef",
+          1343,
+          1349,
+          0,
+          25
+        ],
+        [
+          "If",
+          1346,
+          1347,
+          1,
+          77
+        ]
+      ],
+      "source": "def update_delivery_note_status(docname: str, status: str):\n\tdn = frappe.get_lazy_doc(\"Delivery Note\", docname)\n\tdn.check_permission(\"submit\")\n\tif dn.docstatus != 1:\n\t\tfrappe.throw(_(\"Only a submitted Delivery Note can be closed or reopened\"))\n\n\tdn.update_status(status)"
+    }
+  ],
+  "source_files": [
+    {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_picking.py",
+      "root_path": "tmp/odoo20-audit/addons/stock/models/stock_picking.py",
+      "sha256": "0b6aacd1b822716906d1ad2e5ecc11d4eb1ed63aebb33ebf4e48d948e536ddb5",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_picking.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 1120,
+        "declarative_units": 0,
+        "physical_lines": 2112,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-17-preuves.json",
+      "prior_observed": "Quantités réalisées/incomplètes, reliquat et fractionnement contrôlé.",
+      "prior_limit": "Exécution stock interne ; FLOW doit reconnaître les faits externes sans tenir un second stock."
+    },
+    {
+      "repo": "tryton",
+      "path": "modules/stock/shipment.py",
+      "root_path": "tmp/tryton-code-audit-2026-10-28/modules/stock/shipment.py",
+      "sha256": "913d6ef8082a21592f002585f45d5309c79586a4a66f81e7ae8516b95fbd02a4",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/shipment.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 1334,
+        "declarative_units": 0,
+        "physical_lines": 3236,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-17-preuves.json",
+      "prior_observed": "Réception et réalisation sont distinctes ; contrôle des quantités.",
+      "prior_limit": "Analogie de jalons, pas preuve des contrats externes d'une prestation FLOW."
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "root_path": "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 834,
+        "declarative_units": 0,
+        "physical_lines": 1931,
+        "details": {
+          "convention": "Arbre syntaxique : instructions et déclarations ; JSX compté séparément"
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-17-preuves.json",
+      "prior_observed": "Transition planifiée/réalisée contrôlée, conformité, traçabilité et dates.",
+      "prior_limit": "Contrôle opérationnel interne ; FLOW réemploie le principe en gardant les autorités de stock et prestataires séparées."
+    },
+    {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "root_path": "tmp/master-data-native-23/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "sha256": "95da2da558526cba54f858ae90f47b6238520d43e967c64664f2c77774baa9e6",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 265,
+        "declarative_units": 0,
+        "physical_lines": 604,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 26,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    },
+    {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "root_path": "tmp/master-data-native-23/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "sha256": "c245830e875a24fd955824ecf7c4347aa16d0e27773aaa31e6f75243a95b207f",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/doctype/delivery_note/delivery_note.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 609,
+        "declarative_units": 0,
+        "physical_lines": 1583,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 136,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    }
+  ],
+  "attribution": 0.5,
+  "attribution_basis": "Part d’analogie retenue après exclusion supposée des responsabilités natives hors périmètre ; pas proportion observée. Les mouvements de stock ne sont pas une coordination durable de prestations. Une annulation de document ne prouve pas la réversibilité d’un acte physique.",
+  "new_complement_fraction": 0.65,
+  "new_complement_basis": "Réutiliser les ordres et le moteur de processus ; chiffrer les dépendances métier, la replanification autorisée et les regroupements de libération.",
+  "schemas": [
+    {
+      "name": "FulfilmentCase",
+      "fields": [
+        "demand",
+        "orders",
+        "services",
+        "dependencies",
+        "state",
+        "version"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    },
+    {
+      "name": "AdaptationProposal",
+      "fields": [
+        "case",
+        "event",
+        "options",
+        "promiseImpact",
+        "authority",
+        "decision"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    },
+    {
+      "name": "ServiceRelease",
+      "fields": [
+        "case",
+        "orders",
+        "batch",
+        "releaseAt",
+        "authority",
+        "reason"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    }
+  ],
+  "template_source": "audits/2026-10-30-propriete-stock-calcul-02/inputs.json#schema_templates",
+  "scaffold_source": "audits/2026-10-30-propriete-stock-calcul-02/inputs.json#new_module_scaffolding",
+  "reuse": "Services génériques Master Data, Stock et Propriété du stock déjà financés ; autres mécanismes communs de la campagne à réconcilier. Le code natif sert de règle de taille, ce n’est pas une facture historique.",
+  "no_extra_AI": true,
+  "no_generic_rebuild": true,
+  "logical_code_not_calibrated_to_physical_SLOC": true
+}

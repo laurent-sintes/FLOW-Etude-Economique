@@ -123,6 +123,21 @@ def load_proofs(doc):
     return documents
 
 
+
+@scoped_model
+def _frozen_calculation_proofs(doc):
+    """Private, read-only evidence shared only by preparations in this snapshot.
+
+    Public load_proofs still returns isolated documents and validates explicit inputs.
+    Preparations copy any inputs they mutate; calculate returns independent outputs.
+    """
+    session = CURRENT.get()
+    key = ('validated_estimation_proofs', digest(doc))
+    if key not in session.memo:
+        session.memo[key] = load_proofs(doc)
+    return session.memo[key]
+
+
 def validate_binding(unit, document=None):
     c, doc = contract(unit['calculation'], document)
     require((unit['id'], unit['stack'], unit['capabilities']) ==
@@ -131,10 +146,18 @@ def validate_binding(unit, document=None):
     selected = [b for b in analysis()['blocs'] if b['id'] in {x['id'] for x in unit['capabilities']}]
     nodes = {n['id']: n for n in native()['nodes']}
     scope = c['scope']
-    require(scope['native_id'] in nodes and nodes[scope['native_id']]['kind'] == scope['level'], 'Invalid evaluation hierarchy')
-    require(all(scope['native_id'] in b['chemin'] for b in selected), 'Capabilities outside evaluation hierarchy')
+    professional=scope.get('professional_functions',[])
+    require(unit.get('professional_functions',[])==professional,'Professional function binding mismatch')
+    if professional:
+        known={f['id'] for f in read(ROOT/'source/fonctions-produit-core.yaml')['functions']}
+        require(set(professional)<=known and len(professional)==len(set(professional)),'Unknown professional function')
+    if scope['level']=='professional_function_group':
+        require(not unit['capabilities'] and bool(professional) and c['recipe']=='professional_components_v1','Professional group cannot invent native capabilities')
+    else:
+        require(scope['native_id'] in nodes and nodes[scope['native_id']]['kind'] == scope['level'], 'Invalid evaluation hierarchy')
+        require(all(scope['native_id'] in b['chemin'] for b in selected), 'Capabilities outside evaluation hierarchy')
     require(digest(selected) == c['scope']['analysis_sha256'], 'Study scope changed without rebinding calculation')
-    require(digest({k: unit[k] for k in ('capabilities', 'includes', 'excludes')}) == c['scope']['decision_scope_sha256'], 'Decision activity scope changed')
+    require(digest({k: unit[k] for k in ('capabilities', 'includes', 'excludes')+ (('professional_functions',) if 'professional_functions' in unit else ())}) == c['scope']['decision_scope_sha256'], 'Decision activity scope changed')
     return c
 
 

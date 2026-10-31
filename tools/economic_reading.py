@@ -32,7 +32,7 @@ SCHEMA = _object(dict(
     sections=_object(dict(
         core=_object(dict(title=TEXT, lead=TEXT, caption=TEXT, note=TEXT, capacity_note=TEXT,
                           links=dict(type='array', minItems=1, items=_object(dict(
-                              href=dict(enum=['#parametres', '#perimetre-retenu', '#complexite']), label=TEXT))))),
+                              href=dict(enum=['#parametres', '#cartographie', '#modele?section=scope', '#complexite']), label=TEXT))))),
         selection=_object(SECTION),
         integration=_object(dict(**SECTION, detail_title=TEXT, detail_note=TEXT,
             ledger_labels=_object({key:TEXT for key in ('travaux_communs','coordination_commune','deploiements',

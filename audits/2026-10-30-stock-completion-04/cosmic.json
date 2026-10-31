@@ -1,0 +1,1708 @@
+{
+  "status": "comptage_propose_sous_hypotheses_non_adopte",
+  "scope": "Huit capacités de la Business Area Inventory State Management. Pas seulement les fragments de code OSS mesurés.",
+  "measurement_boundary": "Produit Core System, fonctions Stock ; persistance logique interne, interfaces sources/consommateurs externes. Les appels internes à Master Data ne sont pas décomposés en sous-processus facturés ; les lectures de références nécessaires restent des R sur données persistantes.",
+  "source_method": "https://cosmic-sizing.org/wp-content/uploads/2022/11/Combination-of-Parts-v5.0-Sep-2024.pdf",
+  "rules_applied": [
+    "Un mouvement par type et objet d’intérêt dans un processus, sauf exigence distincte explicite.",
+    "Aucune multiplication par lignes, occurrences, pagination, retries ou nombre de serveurs.",
+    "Résultats normaux et réponses d’erreur inclus ; contrôles techniques internes non séparés en processus.",
+    "Les opérations et algorithmes internes n’augmentent pas seuls les CFP ; leurs contraintes restent dans les hypothèses d’effort."
+  ],
+  "groups": [
+    {
+      "id": "FACT",
+      "object": "Fait de stock reconnu",
+      "attributes": "Identité, produit, lieu, quantité, unité, date du fait et de connaissance, origine, correction liée."
+    },
+    {
+      "id": "BALANCE",
+      "object": "État externe de stock",
+      "attributes": "Source, périmètre, date, quantités connues et limite de connaissance ; pas de mouvements inventés."
+    },
+    {
+      "id": "LINEAGE",
+      "object": "Lien de filiation",
+      "attributes": "Biens ou lots source/destination, fait reconnu, quantité et dates."
+    },
+    {
+      "id": "HANDLING",
+      "object": "Unité de manutention",
+      "attributes": "Identité physique, contenant/contenu communiqués, versions et dates."
+    },
+    {
+      "id": "RESERVATION",
+      "object": "Engagement de quantité",
+      "attributes": "Besoin, référence de ressource, quantité réservée/consommée/libérée, période et statut."
+    },
+    {
+      "id": "EXPECTED",
+      "object": "Apport attendu",
+      "attributes": "Référence de commande/plan, quantité, échéance, réalisation, reliquat, fraîcheur."
+    },
+    {
+      "id": "OWNERSHIP",
+      "object": "Changement de propriété reconnu",
+      "attributes": "Fait détenu par le registre de propriété, sans recalcul de la décision de transfert."
+    },
+    {
+      "id": "POSITION",
+      "object": "Position de stock",
+      "attributes": "Produit, lieu, propriétaire, détenteur, état, date, quantités présentes/projetées et limites."
+    },
+    {
+      "id": "VERIFICATION",
+      "object": "Vérification de stock",
+      "attributes": "Périmètre de campagne ou contrôle, protocole, échéance, responsable et statut."
+    },
+    {
+      "id": "COUNT",
+      "object": "Constat de comptage",
+      "attributes": "Ligne vérification/produit/lieu, quantités attendues/constatées, dates, preuves et écart."
+    },
+    {
+      "id": "CHECK_POLICY",
+      "object": "Protocole de vérification",
+      "attributes": "Périmètre, campagne/tournant/ponctuel, seuils et règles déclarées ; pas moteur universel."
+    },
+    {
+      "id": "ADJUSTMENT",
+      "object": "Décision de correction",
+      "attributes": "Autorité, constat justifiant la correction, quantité décidée et lien au fait résultant."
+    },
+    {
+      "id": "PLAN_DATA",
+      "object": "Fourniture de positions au plan",
+      "attributes": "Périmètre, date, version, données de stock et limites de connaissance."
+    },
+    {
+      "id": "FIN_DATA",
+      "object": "Contribution de faits à Finance",
+      "attributes": "Faits transmis, justificatifs, version/corrections et état réception/acceptation/rejet."
+    },
+    {
+      "id": "FEEDBACK",
+      "object": "Constat produit documenté",
+      "attributes": "Produit, contexte, faits connus, preuves, corrections et destinataire ; pas cause inférée."
+    },
+    {
+      "id": "PRODUCT",
+      "object": "Référence produit",
+      "attributes": "Identité et caractéristiques utiles, déjà sous responsabilité Master Data."
+    },
+    {
+      "id": "SITE",
+      "object": "Référence de lieu",
+      "attributes": "Identité et périmètre de lieu, déjà sous responsabilité Master Data."
+    },
+    {
+      "id": "PARTY",
+      "object": "Référence de partie",
+      "attributes": "Identité des propriétaire/détenteur, déjà sous responsabilité Master Data."
+    },
+    {
+      "id": "UNIT",
+      "object": "Référence d’unité",
+      "attributes": "Unité et conversion déclarée, déjà sous responsabilité Master Data."
+    },
+    {
+      "id": "OUTCOME",
+      "object": "Résultat de la demande",
+      "attributes": "Acceptation/refus/erreur motivée ; un seul type de sortie de statut par processus."
+    }
+  ],
+  "assumptions": {
+    "H01": "Frontière mesurée : fonctionnalités du produit Core System pour Stock, au niveau fonctionnel. Interfaces sources et consommateurs externes sont les utilisateurs fonctionnels. Les raccordements propres à Beaumanoir sont exclus.",
+    "H02": "Faits, états externes et corrections portent identité stable, date du fait et date de connaissance. Les projections sont calculées sur demande ; elles ne sont pas un stockage supplémentaire à lire et écrire fictivement.",
+    "H03": "Filiations et Handling Units sont des objets reçus explicitement. Leur nombre d’occurrences, profondeur et nombre de lignes ne multiplient pas les mouvements COSMIC.",
+    "H04": "Les positions composent faits, états externes, engagements et apports attendus. Les données de propriété/commandes/plans sont supposées fournies par leurs producteurs, sans reconstruire ces capacités.",
+    "H05": "Trois modes de vérification combinables, avec protocoles paramétrés et décisions de correction explicites. Le comptage physique reste externe. Création et modification partageant le même résultat fonctionnel ne sont pas artificiellement doublées.",
+    "H06": "Consommation et libération sont des commandes métier distinctes de l’admission du fait réalisé. Si elles deviennent de simples étapes internes d’un autre processus, il faut fusionner les processus et recompter. Expiration et libération suivant le même traitement sont réunies.",
+    "H07": "Un contrat de fourniture typé par destination : planification, Finance et responsables produit. Les états métier de transmission/acceptation sont conservés ; les accusés techniques et le transport générique ne forment pas des processus supplémentaires."
+  },
+  "processes": [
+    {
+      "id": "S01",
+      "label": "Admettre des faits de stock et leurs liens",
+      "capabilities": [
+        "BC-009",
+        "BC-010"
+      ],
+      "functional_user": "Source de faits autorisée",
+      "trigger": "La source transmet un ensemble de faits réalisés avec liens explicitement fournis.",
+      "movements": [
+        {
+          "id": "S01-E-FACT",
+          "type": "E",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S01-E-LINEAGE",
+          "type": "E",
+          "group": "LINEAGE",
+          "cfp": 1
+        },
+        {
+          "id": "S01-E-HANDLING",
+          "type": "E",
+          "group": "HANDLING",
+          "cfp": 1
+        },
+        {
+          "id": "S01-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S01-R-PRODUCT",
+          "type": "R",
+          "group": "PRODUCT",
+          "cfp": 1
+        },
+        {
+          "id": "S01-R-SITE",
+          "type": "R",
+          "group": "SITE",
+          "cfp": 1
+        },
+        {
+          "id": "S01-R-PARTY",
+          "type": "R",
+          "group": "PARTY",
+          "cfp": 1
+        },
+        {
+          "id": "S01-R-UNIT",
+          "type": "R",
+          "group": "UNIT",
+          "cfp": 1
+        },
+        {
+          "id": "S01-R-HANDLING",
+          "type": "R",
+          "group": "HANDLING",
+          "cfp": 1
+        },
+        {
+          "id": "S01-R-LINEAGE",
+          "type": "R",
+          "group": "LINEAGE",
+          "cfp": 1
+        },
+        {
+          "id": "S01-W-FACT",
+          "type": "W",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S01-W-LINEAGE",
+          "type": "W",
+          "group": "LINEAGE",
+          "cfp": 1
+        },
+        {
+          "id": "S01-W-HANDLING",
+          "type": "W",
+          "group": "HANDLING",
+          "cfp": 1
+        },
+        {
+          "id": "S01-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 3,
+        "R": 7,
+        "W": 3,
+        "X": 1,
+        "CFP": 14
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H01",
+        "H02",
+        "H03"
+      ]
+    },
+    {
+      "id": "S02",
+      "label": "Admettre un état externe daté",
+      "capabilities": [
+        "BC-009",
+        "BC-010"
+      ],
+      "functional_user": "Source de stock autorisée",
+      "trigger": "La source transmet un solde connu et sa portée sans historique complet.",
+      "movements": [
+        {
+          "id": "S02-E-BALANCE",
+          "type": "E",
+          "group": "BALANCE",
+          "cfp": 1
+        },
+        {
+          "id": "S02-R-PRODUCT",
+          "type": "R",
+          "group": "PRODUCT",
+          "cfp": 1
+        },
+        {
+          "id": "S02-R-SITE",
+          "type": "R",
+          "group": "SITE",
+          "cfp": 1
+        },
+        {
+          "id": "S02-R-PARTY",
+          "type": "R",
+          "group": "PARTY",
+          "cfp": 1
+        },
+        {
+          "id": "S02-R-UNIT",
+          "type": "R",
+          "group": "UNIT",
+          "cfp": 1
+        },
+        {
+          "id": "S02-R-BALANCE",
+          "type": "R",
+          "group": "BALANCE",
+          "cfp": 1
+        },
+        {
+          "id": "S02-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S02-W-BALANCE",
+          "type": "W",
+          "group": "BALANCE",
+          "cfp": 1
+        },
+        {
+          "id": "S02-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 6,
+        "W": 1,
+        "X": 1,
+        "CFP": 9
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H01",
+        "H02"
+      ]
+    },
+    {
+      "id": "S03",
+      "label": "Admettre une correction liée à un fait reconnu",
+      "capabilities": [
+        "BC-009",
+        "BC-010"
+      ],
+      "functional_user": "Source de faits autorisée",
+      "trigger": "La source corrige explicitement un fait déjà reconnu.",
+      "movements": [
+        {
+          "id": "S03-E-FACT",
+          "type": "E",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S03-E-LINEAGE",
+          "type": "E",
+          "group": "LINEAGE",
+          "cfp": 1
+        },
+        {
+          "id": "S03-E-HANDLING",
+          "type": "E",
+          "group": "HANDLING",
+          "cfp": 1
+        },
+        {
+          "id": "S03-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S03-R-BALANCE",
+          "type": "R",
+          "group": "BALANCE",
+          "cfp": 1
+        },
+        {
+          "id": "S03-R-RESERVATION",
+          "type": "R",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S03-R-LINEAGE",
+          "type": "R",
+          "group": "LINEAGE",
+          "cfp": 1
+        },
+        {
+          "id": "S03-R-HANDLING",
+          "type": "R",
+          "group": "HANDLING",
+          "cfp": 1
+        },
+        {
+          "id": "S03-W-FACT",
+          "type": "W",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S03-W-LINEAGE",
+          "type": "W",
+          "group": "LINEAGE",
+          "cfp": 1
+        },
+        {
+          "id": "S03-W-HANDLING",
+          "type": "W",
+          "group": "HANDLING",
+          "cfp": 1
+        },
+        {
+          "id": "S03-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 3,
+        "R": 5,
+        "W": 3,
+        "X": 1,
+        "CFP": 12
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H02",
+        "H03"
+      ]
+    },
+    {
+      "id": "S04",
+      "label": "Consulter le registre à date",
+      "capabilities": [
+        "BC-010"
+      ],
+      "functional_user": "Lecteur autorisé",
+      "trigger": "Le lecteur demande les faits selon date et portée.",
+      "movements": [
+        {
+          "id": "S04-E-FACT",
+          "type": "E",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S04-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S04-X-FACT",
+          "type": "X",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S04-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 1,
+        "W": 0,
+        "X": 2,
+        "CFP": 4
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H02"
+      ]
+    },
+    {
+      "id": "S05",
+      "label": "Consulter les positions présentes et projetées",
+      "capabilities": [
+        "BC-011"
+      ],
+      "functional_user": "Lecteur autorisé",
+      "trigger": "Le lecteur demande une position documentée.",
+      "movements": [
+        {
+          "id": "S05-E-POSITION",
+          "type": "E",
+          "group": "POSITION",
+          "cfp": 1
+        },
+        {
+          "id": "S05-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S05-R-BALANCE",
+          "type": "R",
+          "group": "BALANCE",
+          "cfp": 1
+        },
+        {
+          "id": "S05-R-RESERVATION",
+          "type": "R",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S05-R-EXPECTED",
+          "type": "R",
+          "group": "EXPECTED",
+          "cfp": 1
+        },
+        {
+          "id": "S05-R-OWNERSHIP",
+          "type": "R",
+          "group": "OWNERSHIP",
+          "cfp": 1
+        },
+        {
+          "id": "S05-R-PRODUCT",
+          "type": "R",
+          "group": "PRODUCT",
+          "cfp": 1
+        },
+        {
+          "id": "S05-R-SITE",
+          "type": "R",
+          "group": "SITE",
+          "cfp": 1
+        },
+        {
+          "id": "S05-R-UNIT",
+          "type": "R",
+          "group": "UNIT",
+          "cfp": 1
+        },
+        {
+          "id": "S05-X-POSITION",
+          "type": "X",
+          "group": "POSITION",
+          "cfp": 1
+        },
+        {
+          "id": "S05-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 8,
+        "W": 0,
+        "X": 2,
+        "CFP": 11
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H02",
+        "H04"
+      ]
+    },
+    {
+      "id": "S06",
+      "label": "Consulter le détail des apports attendus",
+      "capabilities": [
+        "BC-011"
+      ],
+      "functional_user": "Lecteur autorisé",
+      "trigger": "Le lecteur demande échéances, avancement et reliquats des apports.",
+      "movements": [
+        {
+          "id": "S06-E-EXPECTED",
+          "type": "E",
+          "group": "EXPECTED",
+          "cfp": 1
+        },
+        {
+          "id": "S06-R-EXPECTED",
+          "type": "R",
+          "group": "EXPECTED",
+          "cfp": 1
+        },
+        {
+          "id": "S06-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S06-R-RESERVATION",
+          "type": "R",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S06-X-EXPECTED",
+          "type": "X",
+          "group": "EXPECTED",
+          "cfp": 1
+        },
+        {
+          "id": "S06-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 3,
+        "W": 0,
+        "X": 2,
+        "CFP": 6
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H04"
+      ]
+    },
+    {
+      "id": "S07",
+      "label": "Rechercher la filiation des biens",
+      "capabilities": [
+        "BC-011"
+      ],
+      "functional_user": "Lecteur autorisé",
+      "trigger": "Le lecteur demande les liens connus autour d’un bien ou lot.",
+      "movements": [
+        {
+          "id": "S07-E-LINEAGE",
+          "type": "E",
+          "group": "LINEAGE",
+          "cfp": 1
+        },
+        {
+          "id": "S07-R-LINEAGE",
+          "type": "R",
+          "group": "LINEAGE",
+          "cfp": 1
+        },
+        {
+          "id": "S07-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S07-R-HANDLING",
+          "type": "R",
+          "group": "HANDLING",
+          "cfp": 1
+        },
+        {
+          "id": "S07-R-PRODUCT",
+          "type": "R",
+          "group": "PRODUCT",
+          "cfp": 1
+        },
+        {
+          "id": "S07-X-LINEAGE",
+          "type": "X",
+          "group": "LINEAGE",
+          "cfp": 1
+        },
+        {
+          "id": "S07-X-FACT",
+          "type": "X",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S07-X-HANDLING",
+          "type": "X",
+          "group": "HANDLING",
+          "cfp": 1
+        },
+        {
+          "id": "S07-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 4,
+        "W": 0,
+        "X": 4,
+        "CFP": 9
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H03"
+      ]
+    },
+    {
+      "id": "S08",
+      "label": "Maintenir le protocole de vérification",
+      "capabilities": [
+        "BC-013"
+      ],
+      "functional_user": "Responsable stock",
+      "trigger": "Le responsable définit ou révise un protocole borné de campagne/contrôle.",
+      "movements": [
+        {
+          "id": "S08-E-CHECK_POLICY",
+          "type": "E",
+          "group": "CHECK_POLICY",
+          "cfp": 1
+        },
+        {
+          "id": "S08-R-CHECK_POLICY",
+          "type": "R",
+          "group": "CHECK_POLICY",
+          "cfp": 1
+        },
+        {
+          "id": "S08-W-CHECK_POLICY",
+          "type": "W",
+          "group": "CHECK_POLICY",
+          "cfp": 1
+        },
+        {
+          "id": "S08-X-CHECK_POLICY",
+          "type": "X",
+          "group": "CHECK_POLICY",
+          "cfp": 1
+        },
+        {
+          "id": "S08-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 1,
+        "W": 1,
+        "X": 2,
+        "CFP": 5
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H05"
+      ]
+    },
+    {
+      "id": "S09",
+      "label": "Préparer une vérification",
+      "capabilities": [
+        "BC-013"
+      ],
+      "functional_user": "Responsable stock",
+      "trigger": "Le responsable demande une campagne ou un contrôle ponctuel.",
+      "movements": [
+        {
+          "id": "S09-E-VERIFICATION",
+          "type": "E",
+          "group": "VERIFICATION",
+          "cfp": 1
+        },
+        {
+          "id": "S09-R-CHECK_POLICY",
+          "type": "R",
+          "group": "CHECK_POLICY",
+          "cfp": 1
+        },
+        {
+          "id": "S09-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S09-R-BALANCE",
+          "type": "R",
+          "group": "BALANCE",
+          "cfp": 1
+        },
+        {
+          "id": "S09-R-PRODUCT",
+          "type": "R",
+          "group": "PRODUCT",
+          "cfp": 1
+        },
+        {
+          "id": "S09-R-SITE",
+          "type": "R",
+          "group": "SITE",
+          "cfp": 1
+        },
+        {
+          "id": "S09-W-VERIFICATION",
+          "type": "W",
+          "group": "VERIFICATION",
+          "cfp": 1
+        },
+        {
+          "id": "S09-W-COUNT",
+          "type": "W",
+          "group": "COUNT",
+          "cfp": 1
+        },
+        {
+          "id": "S09-X-VERIFICATION",
+          "type": "X",
+          "group": "VERIFICATION",
+          "cfp": 1
+        },
+        {
+          "id": "S09-X-COUNT",
+          "type": "X",
+          "group": "COUNT",
+          "cfp": 1
+        },
+        {
+          "id": "S09-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 5,
+        "W": 2,
+        "X": 3,
+        "CFP": 11
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H05"
+      ]
+    },
+    {
+      "id": "S10",
+      "label": "Recevoir des constats de comptage",
+      "capabilities": [
+        "BC-013"
+      ],
+      "functional_user": "Exécutant du comptage",
+      "trigger": "L’exécutant transmet ses constats documentés.",
+      "movements": [
+        {
+          "id": "S10-E-COUNT",
+          "type": "E",
+          "group": "COUNT",
+          "cfp": 1
+        },
+        {
+          "id": "S10-R-VERIFICATION",
+          "type": "R",
+          "group": "VERIFICATION",
+          "cfp": 1
+        },
+        {
+          "id": "S10-R-COUNT",
+          "type": "R",
+          "group": "COUNT",
+          "cfp": 1
+        },
+        {
+          "id": "S10-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S10-R-RESERVATION",
+          "type": "R",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S10-W-COUNT",
+          "type": "W",
+          "group": "COUNT",
+          "cfp": 1
+        },
+        {
+          "id": "S10-W-VERIFICATION",
+          "type": "W",
+          "group": "VERIFICATION",
+          "cfp": 1
+        },
+        {
+          "id": "S10-X-COUNT",
+          "type": "X",
+          "group": "COUNT",
+          "cfp": 1
+        },
+        {
+          "id": "S10-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 4,
+        "W": 2,
+        "X": 2,
+        "CFP": 9
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H05"
+      ]
+    },
+    {
+      "id": "S11",
+      "label": "Établir une correction justifiée",
+      "capabilities": [
+        "BC-013",
+        "BC-010"
+      ],
+      "functional_user": "Autorité de correction",
+      "trigger": "L’autorité accepte ou refuse un ajustement justifié par les constats.",
+      "movements": [
+        {
+          "id": "S11-E-ADJUSTMENT",
+          "type": "E",
+          "group": "ADJUSTMENT",
+          "cfp": 1
+        },
+        {
+          "id": "S11-R-COUNT",
+          "type": "R",
+          "group": "COUNT",
+          "cfp": 1
+        },
+        {
+          "id": "S11-R-VERIFICATION",
+          "type": "R",
+          "group": "VERIFICATION",
+          "cfp": 1
+        },
+        {
+          "id": "S11-R-CHECK_POLICY",
+          "type": "R",
+          "group": "CHECK_POLICY",
+          "cfp": 1
+        },
+        {
+          "id": "S11-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S11-R-RESERVATION",
+          "type": "R",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S11-W-ADJUSTMENT",
+          "type": "W",
+          "group": "ADJUSTMENT",
+          "cfp": 1
+        },
+        {
+          "id": "S11-W-FACT",
+          "type": "W",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S11-W-COUNT",
+          "type": "W",
+          "group": "COUNT",
+          "cfp": 1
+        },
+        {
+          "id": "S11-W-VERIFICATION",
+          "type": "W",
+          "group": "VERIFICATION",
+          "cfp": 1
+        },
+        {
+          "id": "S11-X-ADJUSTMENT",
+          "type": "X",
+          "group": "ADJUSTMENT",
+          "cfp": 1
+        },
+        {
+          "id": "S11-X-FACT",
+          "type": "X",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S11-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 5,
+        "W": 4,
+        "X": 3,
+        "CFP": 13
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H05"
+      ]
+    },
+    {
+      "id": "S12",
+      "label": "Consulter une vérification et ses suites",
+      "capabilities": [
+        "BC-013"
+      ],
+      "functional_user": "Responsable stock",
+      "trigger": "Le responsable demande constats et décisions liés à une vérification.",
+      "movements": [
+        {
+          "id": "S12-E-VERIFICATION",
+          "type": "E",
+          "group": "VERIFICATION",
+          "cfp": 1
+        },
+        {
+          "id": "S12-R-VERIFICATION",
+          "type": "R",
+          "group": "VERIFICATION",
+          "cfp": 1
+        },
+        {
+          "id": "S12-R-COUNT",
+          "type": "R",
+          "group": "COUNT",
+          "cfp": 1
+        },
+        {
+          "id": "S12-R-ADJUSTMENT",
+          "type": "R",
+          "group": "ADJUSTMENT",
+          "cfp": 1
+        },
+        {
+          "id": "S12-X-VERIFICATION",
+          "type": "X",
+          "group": "VERIFICATION",
+          "cfp": 1
+        },
+        {
+          "id": "S12-X-COUNT",
+          "type": "X",
+          "group": "COUNT",
+          "cfp": 1
+        },
+        {
+          "id": "S12-X-ADJUSTMENT",
+          "type": "X",
+          "group": "ADJUSTMENT",
+          "cfp": 1
+        },
+        {
+          "id": "S12-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 3,
+        "W": 0,
+        "X": 4,
+        "CFP": 8
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H05"
+      ]
+    },
+    {
+      "id": "S13",
+      "label": "Établir ou réviser une réservation",
+      "capabilities": [
+        "BC-018"
+      ],
+      "functional_user": "Responsable du besoin",
+      "trigger": "Le responsable demande un engagement de quantité ou sa révision.",
+      "movements": [
+        {
+          "id": "S13-E-RESERVATION",
+          "type": "E",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S13-R-RESERVATION",
+          "type": "R",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S13-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S13-R-BALANCE",
+          "type": "R",
+          "group": "BALANCE",
+          "cfp": 1
+        },
+        {
+          "id": "S13-R-PRODUCT",
+          "type": "R",
+          "group": "PRODUCT",
+          "cfp": 1
+        },
+        {
+          "id": "S13-R-SITE",
+          "type": "R",
+          "group": "SITE",
+          "cfp": 1
+        },
+        {
+          "id": "S13-R-UNIT",
+          "type": "R",
+          "group": "UNIT",
+          "cfp": 1
+        },
+        {
+          "id": "S13-W-RESERVATION",
+          "type": "W",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S13-X-RESERVATION",
+          "type": "X",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S13-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 6,
+        "W": 1,
+        "X": 2,
+        "CFP": 10
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H06"
+      ]
+    },
+    {
+      "id": "S14",
+      "label": "Consommer une réservation",
+      "capabilities": [
+        "BC-018"
+      ],
+      "functional_user": "Responsable du besoin",
+      "trigger": "Le responsable indique la consommation reliée à une réalisation déjà reconnue.",
+      "movements": [
+        {
+          "id": "S14-E-RESERVATION",
+          "type": "E",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S14-R-RESERVATION",
+          "type": "R",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S14-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S14-W-RESERVATION",
+          "type": "W",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S14-X-RESERVATION",
+          "type": "X",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S14-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 2,
+        "W": 1,
+        "X": 2,
+        "CFP": 6
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H06"
+      ]
+    },
+    {
+      "id": "S15",
+      "label": "Libérer ou expirer une réservation",
+      "capabilities": [
+        "BC-018"
+      ],
+      "functional_user": "Responsable du besoin ou horloge métier",
+      "trigger": "Une libération est demandée ou une échéance métier est atteinte.",
+      "movements": [
+        {
+          "id": "S15-E-RESERVATION",
+          "type": "E",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S15-R-RESERVATION",
+          "type": "R",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S15-W-RESERVATION",
+          "type": "W",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S15-X-RESERVATION",
+          "type": "X",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S15-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 1,
+        "W": 1,
+        "X": 2,
+        "CFP": 5
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H06"
+      ]
+    },
+    {
+      "id": "S16",
+      "label": "Consulter les engagements",
+      "capabilities": [
+        "BC-018"
+      ],
+      "functional_user": "Lecteur autorisé",
+      "trigger": "Le lecteur demande la situation des réservations.",
+      "movements": [
+        {
+          "id": "S16-E-RESERVATION",
+          "type": "E",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S16-R-RESERVATION",
+          "type": "R",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S16-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S16-R-BALANCE",
+          "type": "R",
+          "group": "BALANCE",
+          "cfp": 1
+        },
+        {
+          "id": "S16-X-RESERVATION",
+          "type": "X",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S16-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 3,
+        "W": 0,
+        "X": 2,
+        "CFP": 6
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H06"
+      ]
+    },
+    {
+      "id": "S17",
+      "label": "Fournir des positions à la planification",
+      "capabilities": [
+        "BC-012"
+      ],
+      "functional_user": "Consommateur de planification",
+      "trigger": "Le consommateur demande une fourniture de stock datée/versionnée.",
+      "movements": [
+        {
+          "id": "S17-E-PLAN_DATA",
+          "type": "E",
+          "group": "PLAN_DATA",
+          "cfp": 1
+        },
+        {
+          "id": "S17-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S17-R-BALANCE",
+          "type": "R",
+          "group": "BALANCE",
+          "cfp": 1
+        },
+        {
+          "id": "S17-R-RESERVATION",
+          "type": "R",
+          "group": "RESERVATION",
+          "cfp": 1
+        },
+        {
+          "id": "S17-R-EXPECTED",
+          "type": "R",
+          "group": "EXPECTED",
+          "cfp": 1
+        },
+        {
+          "id": "S17-R-OWNERSHIP",
+          "type": "R",
+          "group": "OWNERSHIP",
+          "cfp": 1
+        },
+        {
+          "id": "S17-W-PLAN_DATA",
+          "type": "W",
+          "group": "PLAN_DATA",
+          "cfp": 1
+        },
+        {
+          "id": "S17-X-PLAN_DATA",
+          "type": "X",
+          "group": "PLAN_DATA",
+          "cfp": 1
+        },
+        {
+          "id": "S17-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 5,
+        "W": 1,
+        "X": 2,
+        "CFP": 9
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H04",
+        "H07"
+      ]
+    },
+    {
+      "id": "S18",
+      "label": "Fournir les faits à Finance",
+      "capabilities": [
+        "BC-016"
+      ],
+      "functional_user": "Consommateur Finance",
+      "trigger": "Finance demande les faits et corrections convenus pour un périmètre.",
+      "movements": [
+        {
+          "id": "S18-E-FIN_DATA",
+          "type": "E",
+          "group": "FIN_DATA",
+          "cfp": 1
+        },
+        {
+          "id": "S18-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S18-R-OWNERSHIP",
+          "type": "R",
+          "group": "OWNERSHIP",
+          "cfp": 1
+        },
+        {
+          "id": "S18-R-FIN_DATA",
+          "type": "R",
+          "group": "FIN_DATA",
+          "cfp": 1
+        },
+        {
+          "id": "S18-W-FIN_DATA",
+          "type": "W",
+          "group": "FIN_DATA",
+          "cfp": 1
+        },
+        {
+          "id": "S18-X-FIN_DATA",
+          "type": "X",
+          "group": "FIN_DATA",
+          "cfp": 1
+        },
+        {
+          "id": "S18-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 3,
+        "W": 1,
+        "X": 2,
+        "CFP": 7
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H07"
+      ]
+    },
+    {
+      "id": "S19",
+      "label": "Enregistrer le retour de Finance",
+      "capabilities": [
+        "BC-016"
+      ],
+      "functional_user": "Consommateur Finance",
+      "trigger": "Finance retourne acceptation, rejet ou référence de prise en compte.",
+      "movements": [
+        {
+          "id": "S19-E-FIN_DATA",
+          "type": "E",
+          "group": "FIN_DATA",
+          "cfp": 1
+        },
+        {
+          "id": "S19-R-FIN_DATA",
+          "type": "R",
+          "group": "FIN_DATA",
+          "cfp": 1
+        },
+        {
+          "id": "S19-W-FIN_DATA",
+          "type": "W",
+          "group": "FIN_DATA",
+          "cfp": 1
+        },
+        {
+          "id": "S19-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 1,
+        "W": 1,
+        "X": 1,
+        "CFP": 4
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H07"
+      ]
+    },
+    {
+      "id": "S20",
+      "label": "Préparer et transmettre un constat produit ou sa correction",
+      "capabilities": [
+        "BC-017"
+      ],
+      "functional_user": "Responsable des constats terrain",
+      "trigger": "Le responsable demande de fournir un constat et ses preuves aux responsables produit.",
+      "movements": [
+        {
+          "id": "S20-E-FEEDBACK",
+          "type": "E",
+          "group": "FEEDBACK",
+          "cfp": 1
+        },
+        {
+          "id": "S20-R-FEEDBACK",
+          "type": "R",
+          "group": "FEEDBACK",
+          "cfp": 1
+        },
+        {
+          "id": "S20-R-FACT",
+          "type": "R",
+          "group": "FACT",
+          "cfp": 1
+        },
+        {
+          "id": "S20-R-PRODUCT",
+          "type": "R",
+          "group": "PRODUCT",
+          "cfp": 1
+        },
+        {
+          "id": "S20-W-FEEDBACK",
+          "type": "W",
+          "group": "FEEDBACK",
+          "cfp": 1
+        },
+        {
+          "id": "S20-X-FEEDBACK",
+          "type": "X",
+          "group": "FEEDBACK",
+          "cfp": 1
+        },
+        {
+          "id": "S20-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 3,
+        "W": 1,
+        "X": 2,
+        "CFP": 7
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H07"
+      ]
+    },
+    {
+      "id": "S21",
+      "label": "Consulter le suivi des fournitures Finance",
+      "capabilities": [
+        "BC-016"
+      ],
+      "functional_user": "Responsable des fournitures",
+      "trigger": "Le responsable demande état, preuves et rejets liés aux faits transmis.",
+      "movements": [
+        {
+          "id": "S21-E-FIN_DATA",
+          "type": "E",
+          "group": "FIN_DATA",
+          "cfp": 1
+        },
+        {
+          "id": "S21-R-FIN_DATA",
+          "type": "R",
+          "group": "FIN_DATA",
+          "cfp": 1
+        },
+        {
+          "id": "S21-X-FIN_DATA",
+          "type": "X",
+          "group": "FIN_DATA",
+          "cfp": 1
+        },
+        {
+          "id": "S21-X-OUTCOME",
+          "type": "X",
+          "group": "OUTCOME",
+          "cfp": 1
+        }
+      ],
+      "count": {
+        "E": 1,
+        "R": 1,
+        "W": 0,
+        "X": 2,
+        "CFP": 4
+      },
+      "status": "processus proposé dans les hypothèses déclarées, non mesure certifiée",
+      "assumptions": [
+        "H07"
+      ]
+    }
+  ],
+  "capability_coverage": {
+    "BC-009": {
+      "native_id": "D01.f",
+      "native_name": "Inventory Tracking",
+      "processes": [
+        "S01",
+        "S02",
+        "S03"
+      ]
+    },
+    "BC-010": {
+      "native_id": "D01.g",
+      "native_name": "Inventory Ledger",
+      "processes": [
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S11"
+      ]
+    },
+    "BC-011": {
+      "native_id": "D01.c",
+      "native_name": "Inventory Visibility",
+      "processes": [
+        "S05",
+        "S06",
+        "S07"
+      ]
+    },
+    "BC-012": {
+      "native_id": "planning-data-provision",
+      "native_name": "Planning Data Provision",
+      "processes": [
+        "S17"
+      ]
+    },
+    "BC-013": {
+      "native_id": "D01.d",
+      "native_name": "Stocktaking",
+      "processes": [
+        "S08",
+        "S09",
+        "S10",
+        "S11",
+        "S12"
+      ]
+    },
+    "BC-016": {
+      "native_id": "accounting-data-provision",
+      "native_name": "Accounting Data Provision",
+      "processes": [
+        "S18",
+        "S19",
+        "S21"
+      ]
+    },
+    "BC-017": {
+      "native_id": "product-feedback",
+      "native_name": "Product Feedback",
+      "processes": [
+        "S20"
+      ]
+    },
+    "BC-018": {
+      "native_id": "D02.c",
+      "native_name": "Reservation",
+      "processes": [
+        "S13",
+        "S14",
+        "S15",
+        "S16"
+      ]
+    }
+  },
+  "result": {
+    "processes": 21,
+    "groups": 20,
+    "CFP": 169,
+    "movements": {
+      "E": 25,
+      "R": 77,
+      "W": 23,
+      "X": 44
+    },
+    "hours_per_CFP": 20,
+    "factor": 1,
+    "day_hours": 7,
+    "indicative_jh": 482.85714285714283,
+    "meaning": "Calcul conditionnel de comparaison sur tout le contrat proposé. Ni quatre coûts natifs ni budget Stock retenu ; le repère ISBSG et le facteur 1 sont des conventions reprises explicitement du pilote Master Data."
+  },
+  "benchmark_evidence": "audits/2026-10-30-master-data-decomposition-gap/benchmark-decision.json",
+  "nonfunctional_not_counted": [
+    "Volumes, concurrence, rétention, disponibilité, RPO/RTO, sécurité de la plateforme et sauvegardes.",
+    "Composants techniques de transport, protocole générique d’admission et interface générique déjà financés par Master Data."
+  ],
+  "uncertainty": "Le comptage peut varier si les groupes et déclencheurs proposés sont regroupés différemment. Aucune certification COSMIC ni validation humaine des exigences revendiquée ; aucune probabilité de dépassement déduite."
+}

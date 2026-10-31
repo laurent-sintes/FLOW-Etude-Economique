@@ -1,0 +1,5021 @@
+{
+  "family": "ba-process-intelligence",
+  "iteration": 2,
+  "analysis_ref": "analyse-1.json",
+  "capabilities": [
+    "BC-087",
+    "BC-088"
+  ],
+  "cocomo": {
+    "A": 2.94,
+    "B": 0.91,
+    "SF_sum": 18.97,
+    "C": 3.67,
+    "D": 0.28,
+    "month_hours": 152,
+    "day_hours": 7,
+    "effort_phase_factor": 1.18,
+    "schedule_phase_factor": 1.25,
+    "other_EM": 1,
+    "SCED": 1,
+    "REVL": 0,
+    "source": "https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf",
+    "source_locations": "Équation 4 et tables 6, 36, 57, 63 ; autres paramètres conservés nominaux.",
+    "activity_distribution_ref": "../2026-10-30-master-data-calcul/repartitions-sources.json#cocomo"
+  },
+  "native_reference_banks": {
+    "erpnext": 290,
+    "odoo": 33,
+    "tryton": 202,
+    "axelor": 33
+  },
+  "source_selection": [
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/sale/report/sale_report.py",
+      "sha256": "2f080eff65725dd069a201c08bd79d39055448cd8d2d655db800ecb2fa89849f",
+      "name": "SaleReport._get_done_states",
+      "start": 19,
+      "end": 20,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          19,
+          20,
+          4,
+          23
+        ],
+        [
+          "Return",
+          20,
+          20,
+          8,
+          23
+        ]
+      ],
+      "source": "    def _get_done_states(self):\n        return [\"sale\"]"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/sale/report/sale_report.py",
+      "sha256": "2f080eff65725dd069a201c08bd79d39055448cd8d2d655db800ecb2fa89849f",
+      "name": "SaleReport._selection_target_model",
+      "start": 23,
+      "end": 31,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          23,
+          31,
+          4,
+          9
+        ],
+        [
+          "Return",
+          24,
+          31,
+          8,
+          9
+        ]
+      ],
+      "source": "    def _selection_target_model(self):\n        return [\n            (model.model, model.name)\n            for model\n            in self.env['ir.model'].sudo().search_fetch(\n                [('transient', '=', False)], ['model', 'name']\n            )\n            if model.model in self.env\n        ]"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/sale/report/sale_report.py",
+      "sha256": "2f080eff65725dd069a201c08bd79d39055448cd8d2d655db800ecb2fa89849f",
+      "name": "SaleReport._table_sql",
+      "start": 124,
+      "end": 128,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          125,
+          125,
+          8,
+          35
+        ],
+        [
+          "Assign",
+          126,
+          126,
+          8,
+          113
+        ],
+        [
+          "Assign",
+          127,
+          127,
+          8,
+          71
+        ],
+        [
+          "FunctionDef",
+          124,
+          128,
+          4,
+          90
+        ],
+        [
+          "Return",
+          128,
+          128,
+          8,
+          90
+        ]
+      ],
+      "source": "    def _table_sql(self) -> SQL:\n        today = fields.Date.today()\n        query = self.env['sale.order.line'].sudo().with_context(date_to=today)._search(self._order_line_domain())\n        query.groupby = SQL(\", \").join(self._groupby_list(query.table))\n        return query.subselect(*self._select_dict_to_list(self._select_dict(query.table)))"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/sale/report/sale_report.py",
+      "sha256": "2f080eff65725dd069a201c08bd79d39055448cd8d2d655db800ecb2fa89849f",
+      "name": "SaleReport._order_line_domain",
+      "start": 130,
+      "end": 131,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          130,
+          131,
+          4,
+          49
+        ],
+        [
+          "Return",
+          131,
+          131,
+          8,
+          49
+        ]
+      ],
+      "source": "    def _order_line_domain(self):\n        return Domain('display_type', '=', False)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/sale/report/sale_report.py",
+      "sha256": "2f080eff65725dd069a201c08bd79d39055448cd8d2d655db800ecb2fa89849f",
+      "name": "SaleReport._select_dict_to_list",
+      "start": 133,
+      "end": 134,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          133,
+          134,
+          4,
+          148
+        ],
+        [
+          "Return",
+          134,
+          134,
+          8,
+          148
+        ]
+      ],
+      "source": "    def _select_dict_to_list(self, select_dict):\n        return [SQL(\"%s AS %s\", select_dict.get(fname, SQL(\"NULL\")), SQL.identifier(fname)) for fname, field in self._fields.items() if field.store]"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/sale/report/sale_report.py",
+      "sha256": "2f080eff65725dd069a201c08bd79d39055448cd8d2d655db800ecb2fa89849f",
+      "name": "SaleReport._select_dict",
+      "start": 136,
+      "end": 184,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          137,
+          137,
+          8,
+          136
+        ],
+        [
+          "Assign",
+          138,
+          138,
+          8,
+          74
+        ],
+        [
+          "Assign",
+          139,
+          139,
+          8,
+          67
+        ],
+        [
+          "FunctionDef",
+          136,
+          184,
+          4,
+          9
+        ],
+        [
+          "Return",
+          140,
+          184,
+          8,
+          9
+        ]
+      ],
+      "source": "    def _select_dict(self, table: TableSQL):\n        uom_ratio = SQL(\"(COALESCE(%s, 1) / NULLIF(COALESCE(%s, 1), 0.0))\", table.product_uom_id.factor, table.product_id.uom_id.factor)\n        order_rate = self._case_value_or_one(table.order_id.currency_rate)\n        rate = SQL(\"%s / %s\", table.consolidation_rate, order_rate)\n        return {\n            'id': SQL(\"MIN(%s)\", table.id),\n            'product_id': table.product_id,\n            'line_name': table.name,\n            'line_invoice_status': SQL(\"%s\", table.invoice_status),\n            'product_uom_id': SQL(\"CASE WHEN %s IS NULL THEN %s ELSE %s END\", table.product_id, table.product_id.uom_id, table.product_uom_id),\n            'product_uom_qty': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END\", table.is_downpayment, table.product_uom_qty, uom_ratio),\n            'qty_delivered': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END\", table.is_downpayment, table.qty_delivered, uom_ratio),\n            'qty_to_deliver': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM((%s - %s) * %s) ELSE 0 END\", table.is_downpayment, table.product_uom_qty, table.qty_delivered, uom_ratio),\n            'qty_invoiced': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END\", table.is_downpayment, table.qty_invoiced, uom_ratio),\n            'qty_to_invoice': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END\", table.is_downpayment, table.qty_to_invoice, uom_ratio),\n            'price_unit': SQL(\"CASE WHEN %s IS NOT TRUE THEN AVG(%s * %s) ELSE 0 END\", table.is_downpayment, table.price_unit, rate),\n            'price_total': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END\", table.is_downpayment, table.price_total, rate),\n            'price_subtotal': SQL(\"CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END\", table.is_downpayment, table.price_subtotal, rate),\n            'untaxed_amount_to_invoice': SQL(\"SUM(%s * %s)\", table.untaxed_amount_to_invoice, rate),\n            'untaxed_amount_invoiced': SQL(\"SUM(%s * %s)\", table.untaxed_amount_invoiced, rate),\n            'untaxed_delivered_amount': SQL(\"SUM(%s * %s * %s)\", table.price_unit, table.qty_delivered, rate),\n            'nbr': SQL(\"COUNT(*)\"),\n            'name': table.order_id.name,\n            'date': SQL(\"%s\", table.order_id.date_order),\n            'state': table.order_id.state,\n            'invoice_status': table.order_id.invoice_status,\n            'partner_id': table.order_id.partner_id,\n            'user_id': table.order_id.user_id,\n            'company_id': table.order_id.company_id,\n            'campaign_id': table.order_id.campaign_id,\n            'medium_id': table.order_id.medium_id,\n            'source_id': table.order_id.source_id,\n            'utm_reference': table.order_id.utm_reference,\n            'categ_id': table.product_id.categ_id,\n            'pricelist_id': table.order_id.pricelist_id,\n            'team_id': table.order_id.team_id,\n            'product_tmpl_id': table.product_id.product_tmpl_id,\n            'commercial_partner_id': table.order_id.partner_id.commercial_partner_id,\n            'country_id': table.order_id.partner_id.country_id,\n            'industry_id': table.order_id.partner_id.industry_id,\n            'state_id': table.order_id.partner_id.state_id,\n            'partner_zip': SQL(\"%s\", table.order_id.partner_id.zip),\n            'weight': SQL(\"SUM(%s * %s * %s)\", table.product_id.weight, table.product_uom_qty, uom_ratio),\n            'volume': SQL(\"SUM(%s * %s * %s)\", table.product_id.volume, table.product_uom_qty, uom_ratio),\n            'discount': table.discount,\n            'discount_amount': SQL(\"SUM(%s * %s * %s / 100.0 * %s)\", table.price_unit, table.product_uom_qty, table.discount, rate),\n            'currency_id': SQL(\"%s\", self.env.company.currency_id.id),\n            'order_reference': SQL(\"concat('sale.order', ',', %s)\", table.order_id),\n        }"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/sale/report/sale_report.py",
+      "sha256": "2f080eff65725dd069a201c08bd79d39055448cd8d2d655db800ecb2fa89849f",
+      "name": "SaleReport._groupby_list",
+      "start": 186,
+      "end": 204,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          187,
+          201,
+          8,
+          9
+        ],
+        [
+          "Expr",
+          203,
+          203,
+          12,
+          57
+        ],
+        [
+          "FunctionDef",
+          186,
+          204,
+          4,
+          27
+        ],
+        [
+          "If",
+          202,
+          203,
+          8,
+          57
+        ],
+        [
+          "Return",
+          204,
+          204,
+          8,
+          27
+        ]
+      ],
+      "source": "    def _groupby_list(self, table: TableSQL):\n        groupby_list = [\n            table.product_id,\n            table.price_unit,\n            table.invoice_status,\n            table.name,\n            table.product_uom_id,\n            table.is_downpayment,\n            table.discount,\n            table.order_id,\n            table.order_id.id,\n            table.product_id.uom_id,\n            table.product_id.product_tmpl_id,\n            table.product_id.product_tmpl_id.id,\n            table.order_id.partner_id.id,\n        ]\n        if table.consolidation_rate != SQL('1'):\n            groupby_list.append(table.consolidation_rate)\n        return groupby_list"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/sale/report/sale_report.py",
+      "sha256": "2f080eff65725dd069a201c08bd79d39055448cd8d2d655db800ecb2fa89849f",
+      "name": "SaleReport._case_value_or_one",
+      "start": 206,
+      "end": 207,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          206,
+          207,
+          4,
+          97
+        ],
+        [
+          "Return",
+          207,
+          207,
+          8,
+          97
+        ]
+      ],
+      "source": "    def _case_value_or_one(self, value):\n        return SQL(\"CASE COALESCE(%(value)s, 0) WHEN 0 THEN 1.0 ELSE %(value)s END\", value=value)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/sale/report/sale_report.py",
+      "sha256": "2f080eff65725dd069a201c08bd79d39055448cd8d2d655db800ecb2fa89849f",
+      "name": "SaleReport._get_order_reference",
+      "start": 209,
+      "end": 214,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          212,
+          212,
+          8,
+          58
+        ],
+        [
+          "Expr",
+          211,
+          211,
+          8,
+          25
+        ],
+        [
+          "Expr",
+          213,
+          213,
+          8,
+          32
+        ],
+        [
+          "FunctionDef",
+          209,
+          214,
+          4,
+          28
+        ],
+        [
+          "Return",
+          214,
+          214,
+          8,
+          28
+        ]
+      ],
+      "source": "    def _get_order_reference(self):\n        \"\"\"Resolve the order from the line id, without reading the view.\"\"\"\n        self.ensure_one()\n        line = self.env[\"sale.order.line\"].browse(self.id)\n        line.fetch([\"order_id\"])\n        return line.order_id"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/sale/report/sale_report.py",
+      "sha256": "2f080eff65725dd069a201c08bd79d39055448cd8d2d655db800ecb2fa89849f",
+      "name": "SaleReport.action_open_order",
+      "start": 217,
+      "end": 220,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          219,
+          219,
+          8,
+          43
+        ],
+        [
+          "FunctionDef",
+          217,
+          220,
+          4,
+          81
+        ],
+        [
+          "Return",
+          220,
+          220,
+          8,
+          81
+        ]
+      ],
+      "source": "    def action_open_order(self):\n\n        order = self._get_order_reference()\n        return order._get_records_action(context=clean_context(self.env.context))"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "Abstract.table_query",
+      "start": 42,
+      "end": 47,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          43,
+          43,
+          8,
+          47
+        ],
+        [
+          "FunctionDef",
+          42,
+          47,
+          4,
+          33
+        ],
+        [
+          "Return",
+          44,
+          47,
+          8,
+          33
+        ]
+      ],
+      "source": "    def table_query(cls):\n        from_item, tables, withs = cls._joins()\n        return from_item.select(*cls._columns(tables, withs),\n            where=cls._where(tables, withs),\n            group_by=cls._group_by(tables, withs),\n            with_=withs.values())"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "Abstract._sale_line_columns",
+      "start": 68,
+      "end": 80,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          68,
+          80,
+          4,
+          13
+        ],
+        [
+          "Return",
+          69,
+          80,
+          8,
+          13
+        ]
+      ],
+      "source": "    def _sale_line_columns(cls, line, sale):\n        return [\n            line.product.as_('product'),\n            Coalesce(line.actual_quantity, line.quantity).as_('quantity'),\n            line.unit_price.as_('unit_price'),\n            Concat('sale.sale,', line.sale).as_('order'),\n            sale.sale_date.as_('date'),\n            sale.company.as_('company'),\n            sale.currency.as_('currency'),\n            sale.party.as_('customer'),\n            sale.warehouse.as_('location'),\n            sale.shipment_address.as_('shipment_address'),\n            ]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "Abstract._joins",
+      "start": 87,
+      "end": 121,
+      "program_units": 18,
+      "nodes": [
+        [
+          "Assign",
+          88,
+          88,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          89,
+          89,
+          8,
+          45
+        ],
+        [
+          "Assign",
+          90,
+          90,
+          8,
+          48
+        ],
+        [
+          "Assign",
+          91,
+          91,
+          8,
+          39
+        ],
+        [
+          "Assign",
+          93,
+          93,
+          8,
+          19
+        ],
+        [
+          "Assign",
+          94,
+          94,
+          8,
+          40
+        ],
+        [
+          "Assign",
+          95,
+          95,
+          8,
+          28
+        ],
+        [
+          "Assign",
+          96,
+          97,
+          8,
+          72
+        ],
+        [
+          "Assign",
+          98,
+          98,
+          8,
+          62
+        ],
+        [
+          "Assign",
+          99,
+          99,
+          8,
+          73
+        ],
+        [
+          "Assign",
+          100,
+          100,
+          8,
+          18
+        ],
+        [
+          "Assign",
+          101,
+          101,
+          8,
+          64
+        ],
+        [
+          "Assign",
+          102,
+          102,
+          8,
+          46
+        ],
+        [
+          "Assign",
+          103,
+          103,
+          8,
+          67
+        ],
+        [
+          "Assign",
+          104,
+          104,
+          8,
+          52
+        ],
+        [
+          "Assign",
+          106,
+          120,
+          8,
+          18
+        ],
+        [
+          "FunctionDef",
+          87,
+          121,
+          4,
+          39
+        ],
+        [
+          "Return",
+          121,
+          121,
+          8,
+          39
+        ]
+      ],
+      "source": "    def _joins(cls):\n        pool = Pool()\n        Company = pool.get('company.company')\n        Currency = pool.get('currency.currency')\n        context = Transaction().context\n\n        tables = {}\n        company = context.get('company')\n        lines = cls._lines()\n        tables['line'] = line = Union(*(\n                l(len(lines), i, company) for i, l in enumerate(lines)))\n        tables['line.company'] = company = Company.__table__()\n        tables['line.company.currency'] = currency = Currency.__table__()\n        withs = {}\n        currency_sale = With(query=Currency.currency_rate_sql())\n        withs['currency_sale'] = currency_sale\n        currency_company = With(query=Currency.currency_rate_sql())\n        withs['currency_company'] = currency_company\n\n        from_item = (line\n            .join(currency_sale,\n                condition=(line.currency == currency_sale.currency)\n                & (currency_sale.start_date <= line.date)\n                & ((currency_sale.end_date == Null)\n                    | (currency_sale.end_date > line.date))\n                )\n            .join(company, condition=line.company == company.id)\n            .join(currency, condition=company.currency == currency.id)\n            .join(currency_company,\n                condition=(company.currency == currency_company.currency)\n                & (currency_company.start_date <= line.date)\n                & ((currency_company.end_date == Null)\n                    | (currency_company.end_date > line.date))\n                ))\n        return from_item, tables, withs"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "Abstract._columns",
+      "start": 124,
+      "end": 140,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Assign",
+          125,
+          125,
+          8,
+          29
+        ],
+        [
+          "Assign",
+          126,
+          126,
+          8,
+          50
+        ],
+        [
+          "Assign",
+          127,
+          127,
+          8,
+          52
+        ],
+        [
+          "Assign",
+          128,
+          128,
+          8,
+          46
+        ],
+        [
+          "Assign",
+          130,
+          133,
+          8,
+          28
+        ],
+        [
+          "FunctionDef",
+          124,
+          140,
+          4,
+          13
+        ],
+        [
+          "Return",
+          134,
+          140,
+          8,
+          13
+        ]
+      ],
+      "source": "    def _columns(cls, tables, withs):\n        line = tables['line']\n        currency = tables['line.company.currency']\n        currency_company = withs['currency_company']\n        currency_sale = withs['currency_sale']\n\n        revenue = Round(cls.revenue.sql_cast(\n                Sum(line.quantity * line.unit_price\n                    * currency_company.rate / currency_sale.rate)),\n            currency.digits)\n        return [\n            cls._column_id(tables, withs).as_('id'),\n            line.company.as_('company'),\n            revenue.as_('revenue'),\n            Count(line.order, distinct=True).as_('number'),\n            currency.id.as_('currency'),\n            ]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "Abstract._group_by",
+      "start": 148,
+      "end": 151,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          149,
+          149,
+          8,
+          29
+        ],
+        [
+          "Assign",
+          150,
+          150,
+          8,
+          50
+        ],
+        [
+          "FunctionDef",
+          148,
+          151,
+          4,
+          59
+        ],
+        [
+          "Return",
+          151,
+          151,
+          8,
+          59
+        ]
+      ],
+      "source": "    def _group_by(cls, tables, withs):\n        line = tables['line']\n        currency = tables['line.company.currency']\n        return [line.company, currency.id, currency.digits]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "Abstract._where",
+      "start": 154,
+      "end": 174,
+      "program_units": 17,
+      "nodes": [
+        [
+          "Assign",
+          155,
+          155,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          156,
+          156,
+          8,
+          45
+        ],
+        [
+          "Assign",
+          157,
+          157,
+          8,
+          39
+        ],
+        [
+          "Assign",
+          158,
+          158,
+          8,
+          29
+        ],
+        [
+          "Assign",
+          160,
+          160,
+          8,
+          29
+        ],
+        [
+          "Assign",
+          161,
+          161,
+          8,
+          44
+        ],
+        [
+          "Assign",
+          164,
+          164,
+          8,
+          40
+        ],
+        [
+          "Assign",
+          167,
+          167,
+          8,
+          44
+        ],
+        [
+          "Assign",
+          169,
+          172,
+          12,
+          27
+        ],
+        [
+          "AugAssign",
+          163,
+          163,
+          12,
+          43
+        ],
+        [
+          "AugAssign",
+          166,
+          166,
+          12,
+          41
+        ],
+        [
+          "AugAssign",
+          173,
+          173,
+          12,
+          49
+        ],
+        [
+          "FunctionDef",
+          154,
+          174,
+          4,
+          20
+        ],
+        [
+          "If",
+          162,
+          163,
+          8,
+          43
+        ],
+        [
+          "If",
+          165,
+          166,
+          8,
+          41
+        ],
+        [
+          "If",
+          168,
+          173,
+          8,
+          49
+        ],
+        [
+          "Return",
+          174,
+          174,
+          8,
+          20
+        ]
+      ],
+      "source": "    def _where(cls, tables, withs):\n        pool = Pool()\n        Location = pool.get('stock.location')\n        context = Transaction().context\n        line = tables['line']\n\n        where = Literal(True)\n        from_date = context.get('from_date')\n        if from_date:\n            where &= line.date >= from_date\n        to_date = context.get('to_date')\n        if to_date:\n            where &= line.date <= to_date\n        warehouse = context.get('warehouse')\n        if warehouse:\n            locations = Location.search([\n                    ('parent', 'child_of', warehouse),\n                    ],\n                query=True)\n            where &= line.location.in_(locations)\n        return where"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "Abstract.get_trend",
+      "start": 200,
+      "end": 203,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          201,
+          201,
+          8,
+          36
+        ],
+        [
+          "FunctionDef",
+          200,
+          203,
+          4,
+          79
+        ],
+        [
+          "Return",
+          202,
+          203,
+          8,
+          79
+        ]
+      ],
+      "source": "    def get_trend(self, name):\n        name = name[:-len('_trend')]\n        return sparkline([\n                getattr(ts, name) if ts else 0 for ts in self.time_series_all])"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "AbstractTimeseries._columns",
+      "start": 216,
+      "end": 218,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          216,
+          218,
+          4,
+          56
+        ],
+        [
+          "Return",
+          217,
+          218,
+          8,
+          56
+        ]
+      ],
+      "source": "    def _columns(cls, tables, withs):\n        return super()._columns(tables, withs) + [\n            cls._column_date(tables, withs).as_('date')]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "AbstractTimeseries._group_by",
+      "start": 229,
+      "end": 231,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          229,
+          231,
+          4,
+          56
+        ],
+        [
+          "Return",
+          230,
+          231,
+          8,
+          56
+        ]
+      ],
+      "source": "    def _group_by(cls, tables, withs):\n        return super()._group_by(tables, withs) + [\n            cls._column_date(tables, withs).as_('date')]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CustomerMixin._columns",
+      "start": 323,
+      "end": 326,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          324,
+          324,
+          8,
+          29
+        ],
+        [
+          "FunctionDef",
+          323,
+          326,
+          4,
+          42
+        ],
+        [
+          "Return",
+          325,
+          326,
+          8,
+          42
+        ]
+      ],
+      "source": "    def _columns(cls, tables, withs):\n        line = tables['line']\n        return super()._columns(tables, withs) + [\n            line.customer.as_('customer')]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CustomerMixin._group_by",
+      "start": 329,
+      "end": 332,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          330,
+          330,
+          8,
+          29
+        ],
+        [
+          "FunctionDef",
+          329,
+          332,
+          4,
+          26
+        ],
+        [
+          "Return",
+          331,
+          332,
+          8,
+          26
+        ]
+      ],
+      "source": "    def _group_by(cls, tables, withs):\n        line = tables['line']\n        return super()._group_by(tables, withs) + [\n            line.customer]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "Customer._where",
+      "start": 360,
+      "end": 364,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          361,
+          361,
+          8,
+          29
+        ],
+        [
+          "Assign",
+          362,
+          362,
+          8,
+          45
+        ],
+        [
+          "AugAssign",
+          363,
+          363,
+          8,
+          38
+        ],
+        [
+          "FunctionDef",
+          360,
+          364,
+          4,
+          20
+        ],
+        [
+          "Return",
+          364,
+          364,
+          8,
+          20
+        ]
+      ],
+      "source": "    def _where(cls, tables, withs):\n        line = tables['line']\n        where = super()._where(tables, withs)\n        where &= line.customer != Null\n        return where"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CustomerCategoryMixin._joins",
+      "start": 381,
+      "end": 392,
+      "program_units": 10,
+      "nodes": [
+        [
+          "Assign",
+          382,
+          382,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          383,
+          383,
+          8,
+          62
+        ],
+        [
+          "Assign",
+          384,
+          384,
+          8,
+          51
+        ],
+        [
+          "Assign",
+          386,
+          386,
+          12,
+          54
+        ],
+        [
+          "Assign",
+          387,
+          387,
+          12,
+          67
+        ],
+        [
+          "Assign",
+          388,
+          388,
+          12,
+          33
+        ],
+        [
+          "Assign",
+          389,
+          391,
+          12,
+          69
+        ],
+        [
+          "FunctionDef",
+          381,
+          392,
+          4,
+          39
+        ],
+        [
+          "If",
+          385,
+          391,
+          8,
+          69
+        ],
+        [
+          "Return",
+          392,
+          392,
+          8,
+          39
+        ]
+      ],
+      "source": "    def _joins(cls):\n        pool = Pool()\n        PartyCategory = pool.get('party.party-party.category')\n        from_item, tables, withs = super()._joins()\n        if 'line.customer.party_category' not in tables:\n            party_category = PartyCategory.__table__()\n            tables['line.customer.party_category'] = party_category\n            line = tables['line']\n            from_item = (from_item\n                .join(party_category,\n                    condition=line.customer == party_category.party))\n        return from_item, tables, withs"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CustomerCategoryMixin._columns",
+      "start": 395,
+      "end": 398,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          396,
+          396,
+          8,
+          63
+        ],
+        [
+          "FunctionDef",
+          395,
+          398,
+          4,
+          52
+        ],
+        [
+          "Return",
+          397,
+          398,
+          8,
+          52
+        ]
+      ],
+      "source": "    def _columns(cls, tables, withs):\n        party_category = tables['line.customer.party_category']\n        return super()._columns(tables, withs) + [\n            party_category.category.as_('category')]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CustomerCategoryMixin._group_by",
+      "start": 414,
+      "end": 416,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          415,
+          415,
+          8,
+          63
+        ],
+        [
+          "FunctionDef",
+          414,
+          416,
+          4,
+          75
+        ],
+        [
+          "Return",
+          416,
+          416,
+          8,
+          75
+        ]
+      ],
+      "source": "    def _group_by(cls, tables, withs):\n        party_category = tables['line.customer.party_category']\n        return super()._group_by(tables, withs) + [party_category.category]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CustomerCategoryMixin._where",
+      "start": 419,
+      "end": 423,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          420,
+          420,
+          8,
+          63
+        ],
+        [
+          "Assign",
+          421,
+          421,
+          8,
+          45
+        ],
+        [
+          "AugAssign",
+          422,
+          422,
+          8,
+          48
+        ],
+        [
+          "FunctionDef",
+          419,
+          423,
+          4,
+          20
+        ],
+        [
+          "Return",
+          423,
+          423,
+          8,
+          20
+        ]
+      ],
+      "source": "    def _where(cls, tables, withs):\n        party_category = tables['line.customer.party_category']\n        where = super()._where(tables, withs)\n        where &= party_category.category != Null\n        return where"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CustomerCategoryTree.table_query",
+      "start": 476,
+      "end": 479,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          477,
+          477,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          478,
+          478,
+          8,
+          45
+        ],
+        [
+          "FunctionDef",
+          476,
+          479,
+          4,
+          35
+        ],
+        [
+          "Return",
+          479,
+          479,
+          8,
+          35
+        ]
+      ],
+      "source": "    def table_query(cls):\n        pool = Pool()\n        Category = pool.get('party.category')\n        return Category.__table__()"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "ProductMixin._columns",
+      "start": 556,
+      "end": 559,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          557,
+          557,
+          8,
+          29
+        ],
+        [
+          "FunctionDef",
+          556,
+          559,
+          4,
+          40
+        ],
+        [
+          "Return",
+          558,
+          559,
+          8,
+          40
+        ]
+      ],
+      "source": "    def _columns(cls, tables, withs):\n        line = tables['line']\n        return super()._columns(tables, withs) + [\n            line.product.as_('product')]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "ProductMixin._group_by",
+      "start": 562,
+      "end": 565,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          563,
+          563,
+          8,
+          29
+        ],
+        [
+          "FunctionDef",
+          562,
+          565,
+          4,
+          25
+        ],
+        [
+          "Return",
+          564,
+          565,
+          8,
+          25
+        ]
+      ],
+      "source": "    def _group_by(cls, tables, withs):\n        line = tables['line']\n        return super()._group_by(tables, withs) + [\n            line.product]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "ProductMixin._where",
+      "start": 568,
+      "end": 572,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          569,
+          569,
+          8,
+          29
+        ],
+        [
+          "Assign",
+          570,
+          570,
+          8,
+          45
+        ],
+        [
+          "AugAssign",
+          571,
+          571,
+          8,
+          37
+        ],
+        [
+          "FunctionDef",
+          568,
+          572,
+          4,
+          20
+        ],
+        [
+          "Return",
+          572,
+          572,
+          8,
+          20
+        ]
+      ],
+      "source": "    def _where(cls, tables, withs):\n        line = tables['line']\n        where = super()._where(tables, withs)\n        where &= line.product != Null\n        return where"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "ProductCategoryMixin._joins",
+      "start": 619,
+      "end": 637,
+      "program_units": 16,
+      "nodes": [
+        [
+          "Assign",
+          620,
+          620,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          621,
+          621,
+          8,
+          45
+        ],
+        [
+          "Assign",
+          622,
+          622,
+          8,
+          76
+        ],
+        [
+          "Assign",
+          623,
+          623,
+          8,
+          51
+        ],
+        [
+          "Assign",
+          625,
+          625,
+          12,
+          41
+        ],
+        [
+          "Assign",
+          626,
+          626,
+          12,
+          44
+        ],
+        [
+          "Assign",
+          627,
+          627,
+          12,
+          33
+        ],
+        [
+          "Assign",
+          628,
+          629,
+          12,
+          69
+        ],
+        [
+          "Assign",
+          631,
+          631,
+          12,
+          60
+        ],
+        [
+          "Assign",
+          632,
+          632,
+          12,
+          72
+        ],
+        [
+          "Assign",
+          633,
+          633,
+          12,
+          44
+        ],
+        [
+          "Assign",
+          634,
+          636,
+          12,
+          78
+        ],
+        [
+          "FunctionDef",
+          619,
+          637,
+          4,
+          39
+        ],
+        [
+          "If",
+          624,
+          629,
+          8,
+          69
+        ],
+        [
+          "If",
+          630,
+          636,
+          8,
+          78
+        ],
+        [
+          "Return",
+          637,
+          637,
+          8,
+          39
+        ]
+      ],
+      "source": "    def _joins(cls):\n        pool = Pool()\n        Product = pool.get('product.product')\n        TemplateCategory = pool.get('product.template-product.category.all')\n        from_item, tables, withs = super()._joins()\n        if 'line.product' not in tables:\n            product = Product.__table__()\n            tables['line.product'] = product\n            line = tables['line']\n            from_item = (from_item\n                .join(product, condition=line.product == product.id))\n        if 'line.product.template_category' not in tables:\n            template_category = TemplateCategory.__table__()\n            tables['line.product.template_category'] = template_category\n            product = tables['line.product']\n            from_item = (from_item\n                .join(template_category,\n                    condition=product.template == template_category.template))\n        return from_item, tables, withs"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "ProductCategoryMixin._columns",
+      "start": 640,
+      "end": 643,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          641,
+          641,
+          8,
+          68
+        ],
+        [
+          "FunctionDef",
+          640,
+          643,
+          4,
+          55
+        ],
+        [
+          "Return",
+          642,
+          643,
+          8,
+          55
+        ]
+      ],
+      "source": "    def _columns(cls, tables, withs):\n        template_category = tables['line.product.template_category']\n        return super()._columns(tables, withs) + [\n            template_category.category.as_('category')]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "ProductCategoryMixin._group_by",
+      "start": 660,
+      "end": 662,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          661,
+          661,
+          8,
+          68
+        ],
+        [
+          "FunctionDef",
+          660,
+          662,
+          4,
+          78
+        ],
+        [
+          "Return",
+          662,
+          662,
+          8,
+          78
+        ]
+      ],
+      "source": "    def _group_by(cls, tables, withs):\n        template_category = tables['line.product.template_category']\n        return super()._group_by(tables, withs) + [template_category.category]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "ProductCategoryMixin._where",
+      "start": 665,
+      "end": 669,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          666,
+          666,
+          8,
+          68
+        ],
+        [
+          "Assign",
+          667,
+          667,
+          8,
+          45
+        ],
+        [
+          "AugAssign",
+          668,
+          668,
+          8,
+          51
+        ],
+        [
+          "FunctionDef",
+          665,
+          669,
+          4,
+          20
+        ],
+        [
+          "Return",
+          669,
+          669,
+          8,
+          20
+        ]
+      ],
+      "source": "    def _where(cls, tables, withs):\n        template_category = tables['line.product.template_category']\n        where = super()._where(tables, withs)\n        where &= template_category.category != Null\n        return where"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "ProductCategoryTree.table_query",
+      "start": 722,
+      "end": 725,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          723,
+          723,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          724,
+          724,
+          8,
+          47
+        ],
+        [
+          "FunctionDef",
+          722,
+          725,
+          4,
+          35
+        ],
+        [
+          "Return",
+          725,
+          725,
+          8,
+          35
+        ]
+      ],
+      "source": "    def table_query(cls):\n        pool = Pool()\n        Category = pool.get('product.category')\n        return Category.__table__()"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CountryMixin._joins",
+      "start": 797,
+      "end": 807,
+      "program_units": 10,
+      "nodes": [
+        [
+          "Assign",
+          798,
+          798,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          799,
+          799,
+          8,
+          43
+        ],
+        [
+          "Assign",
+          800,
+          800,
+          8,
+          51
+        ],
+        [
+          "Assign",
+          802,
+          802,
+          12,
+          41
+        ],
+        [
+          "Assign",
+          803,
+          803,
+          12,
+          53
+        ],
+        [
+          "Assign",
+          804,
+          804,
+          12,
+          33
+        ],
+        [
+          "Assign",
+          805,
+          806,
+          12,
+          78
+        ],
+        [
+          "FunctionDef",
+          797,
+          807,
+          4,
+          39
+        ],
+        [
+          "If",
+          801,
+          806,
+          8,
+          78
+        ],
+        [
+          "Return",
+          807,
+          807,
+          8,
+          39
+        ]
+      ],
+      "source": "    def _joins(cls):\n        pool = Pool()\n        Address = pool.get('party.address')\n        from_item, tables, withs = super()._joins()\n        if 'line.shipment_address' not in tables:\n            address = Address.__table__()\n            tables['line.shipment_address'] = address\n            line = tables['line']\n            from_item = (from_item\n                .join(address, condition=line.shipment_address == address.id))\n        return from_item, tables, withs"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CountryMixin._columns",
+      "start": 810,
+      "end": 813,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          811,
+          811,
+          8,
+          49
+        ],
+        [
+          "FunctionDef",
+          810,
+          813,
+          4,
+          43
+        ],
+        [
+          "Return",
+          812,
+          813,
+          8,
+          43
+        ]
+      ],
+      "source": "    def _columns(cls, tables, withs):\n        address = tables['line.shipment_address']\n        return super()._columns(tables, withs) + [\n            address.country.as_('country')]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CountryMixin._group_by",
+      "start": 816,
+      "end": 819,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          817,
+          817,
+          8,
+          49
+        ],
+        [
+          "FunctionDef",
+          816,
+          819,
+          4,
+          28
+        ],
+        [
+          "Return",
+          818,
+          819,
+          8,
+          28
+        ]
+      ],
+      "source": "    def _group_by(cls, tables, withs):\n        address = tables['line.shipment_address']\n        return super()._group_by(tables, withs) + [\n            address.country]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CountryMixin._where",
+      "start": 822,
+      "end": 826,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          823,
+          823,
+          8,
+          49
+        ],
+        [
+          "Assign",
+          824,
+          824,
+          8,
+          45
+        ],
+        [
+          "AugAssign",
+          825,
+          825,
+          8,
+          40
+        ],
+        [
+          "FunctionDef",
+          822,
+          826,
+          4,
+          20
+        ],
+        [
+          "Return",
+          826,
+          826,
+          8,
+          20
+        ]
+      ],
+      "source": "    def _where(cls, tables, withs):\n        address = tables['line.shipment_address']\n        where = super()._where(tables, withs)\n        where &= address.country != Null\n        return where"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "RegionTree.table_query",
+      "start": 857,
+      "end": 860,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          858,
+          858,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          859,
+          859,
+          8,
+          43
+        ],
+        [
+          "FunctionDef",
+          857,
+          860,
+          4,
+          33
+        ],
+        [
+          "Return",
+          860,
+          860,
+          8,
+          33
+        ]
+      ],
+      "source": "    def table_query(cls):\n        pool = Pool()\n        Region = pool.get('country.region')\n        return Region.__table__()"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "Country.__setup__",
+      "start": 952,
+      "end": 954,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          953,
+          953,
+          8,
+          27
+        ],
+        [
+          "Expr",
+          954,
+          954,
+          8,
+          48
+        ],
+        [
+          "FunctionDef",
+          952,
+          954,
+          4,
+          48
+        ]
+      ],
+      "source": "    def __setup__(cls):\n        super().__setup__()\n        cls._order.insert(0, ('country', 'ASC'))"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "Country._column_id",
+      "start": 957,
+      "end": 959,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          958,
+          958,
+          8,
+          49
+        ],
+        [
+          "FunctionDef",
+          957,
+          959,
+          4,
+          30
+        ],
+        [
+          "Return",
+          959,
+          959,
+          8,
+          30
+        ]
+      ],
+      "source": "    def _column_id(cls, tables, withs):\n        address = tables['line.shipment_address']\n        return address.country"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "SubdivisionMixin._columns",
+      "start": 971,
+      "end": 974,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          972,
+          972,
+          8,
+          49
+        ],
+        [
+          "FunctionDef",
+          971,
+          974,
+          4,
+          51
+        ],
+        [
+          "Return",
+          973,
+          974,
+          8,
+          51
+        ]
+      ],
+      "source": "    def _columns(cls, tables, withs):\n        address = tables['line.shipment_address']\n        return super()._columns(tables, withs) + [\n            address.subdivision.as_('subdivision')]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "SubdivisionMixin._group_by",
+      "start": 977,
+      "end": 980,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          978,
+          978,
+          8,
+          49
+        ],
+        [
+          "FunctionDef",
+          977,
+          980,
+          4,
+          32
+        ],
+        [
+          "Return",
+          979,
+          980,
+          8,
+          32
+        ]
+      ],
+      "source": "    def _group_by(cls, tables, withs):\n        address = tables['line.shipment_address']\n        return super()._group_by(tables, withs) + [\n            address.subdivision]"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "SubdivisionMixin._where",
+      "start": 983,
+      "end": 987,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          984,
+          984,
+          8,
+          49
+        ],
+        [
+          "Assign",
+          985,
+          985,
+          8,
+          45
+        ],
+        [
+          "AugAssign",
+          986,
+          986,
+          8,
+          44
+        ],
+        [
+          "FunctionDef",
+          983,
+          987,
+          4,
+          20
+        ],
+        [
+          "Return",
+          987,
+          987,
+          8,
+          20
+        ]
+      ],
+      "source": "    def _where(cls, tables, withs):\n        address = tables['line.shipment_address']\n        where = super()._where(tables, withs)\n        where &= address.subdivision != Null\n        return where"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CountryTree.union_models",
+      "start": 1028,
+      "end": 1029,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          1028,
+          1029,
+          4,
+          79
+        ],
+        [
+          "Return",
+          1029,
+          1029,
+          8,
+          79
+        ]
+      ],
+      "source": "    def union_models(cls):\n        return ['sale.reporting.country', 'sale.reporting.country.subdivision']"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CountryTree.union_column",
+      "start": 1032,
+      "end": 1039,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          1033,
+          1034,
+          8,
+          38
+        ],
+        [
+          "Assign",
+          1037,
+          1038,
+          12,
+          67
+        ],
+        [
+          "FunctionDef",
+          1032,
+          1039,
+          4,
+          21
+        ],
+        [
+          "If",
+          1035,
+          1038,
+          8,
+          67
+        ],
+        [
+          "Return",
+          1039,
+          1039,
+          8,
+          21
+        ]
+      ],
+      "source": "    def union_column(cls, name, field, table, Model):\n        column = super().union_column(\n            name, field, table, Model)\n        if (name == 'parent'\n                and Model.__name__ == 'sale.reporting.country.subdivision'):\n            column = cls.union_shard(\n                Column(table, 'country'), 'sale.reporting.country')\n        return column"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "CountryTree.time_series",
+      "start": 1055,
+      "end": 1057,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          1056,
+          1056,
+          8,
+          44
+        ],
+        [
+          "FunctionDef",
+          1055,
+          1057,
+          4,
+          33
+        ],
+        [
+          "Return",
+          1057,
+          1057,
+          8,
+          33
+        ]
+      ],
+      "source": "    def time_series(self):\n        record = self.union_unshard(self.id)\n        return record.time_series"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "OpenCountryTree.transition_start",
+      "start": 1069,
+      "end": 1077,
+      "program_units": 9,
+      "nodes": [
+        [
+          "Assign",
+          1070,
+          1070,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          1071,
+          1071,
+          8,
+          52
+        ],
+        [
+          "Assign",
+          1072,
+          1072,
+          8,
+          68
+        ],
+        [
+          "Assign",
+          1073,
+          1073,
+          8,
+          57
+        ],
+        [
+          "FunctionDef",
+          1069,
+          1077,
+          4,
+          32
+        ],
+        [
+          "If",
+          1074,
+          1077,
+          8,
+          32
+        ],
+        [
+          "If",
+          1076,
+          1077,
+          8,
+          32
+        ],
+        [
+          "Return",
+          1075,
+          1075,
+          12,
+          28
+        ],
+        [
+          "Return",
+          1077,
+          1077,
+          12,
+          32
+        ]
+      ],
+      "source": "    def transition_start(self):\n        pool = Pool()\n        Country = pool.get('sale.reporting.country')\n        Subdivision = pool.get('sale.reporting.country.subdivision')\n        record = self.model.union_unshard(self.record.id)\n        if isinstance(record, Country):\n            return 'country'\n        elif isinstance(record, Subdivision):\n            return 'subdivision'"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "name": "OpenCountryTree._do_action",
+      "start": 1079,
+      "end": 1086,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          1080,
+          1080,
+          8,
+          57
+        ],
+        [
+          "Assign",
+          1081,
+          1084,
+          8,
+          13
+        ],
+        [
+          "AugAssign",
+          1085,
+          1085,
+          8,
+          51
+        ],
+        [
+          "FunctionDef",
+          1079,
+          1086,
+          4,
+          27
+        ],
+        [
+          "Return",
+          1086,
+          1086,
+          8,
+          27
+        ]
+      ],
+      "source": "    def _do_action(self, action):\n        record = self.model.union_unshard(self.record.id)\n        data = {\n            'id': record.id,\n            'ids': [record.id],\n            }\n        action['name'] += ' (%s)' % record.rec_name\n        return action, data"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-crm/src/main/java/com/axelor/apps/crm/service/CrmReportingServiceImpl.java",
+      "sha256": "44124e783817359a991ca9f6b0f8b0b140646f8d5c00945b0cc020fe497693a0",
+      "name": "prepareQuery",
+      "start": 121,
+      "end": 161,
+      "program_units": 17,
+      "nodes": [
+        [
+          "expression_statement",
+          123,
+          123,
+          4,
+          60
+        ],
+        [
+          "expression_statement",
+          126,
+          126,
+          6,
+          47
+        ],
+        [
+          "expression_statement",
+          128,
+          128,
+          6,
+          44
+        ],
+        [
+          "expression_statement",
+          133,
+          139,
+          6,
+          21
+        ],
+        [
+          "expression_statement",
+          142,
+          148,
+          6,
+          21
+        ],
+        [
+          "expression_statement",
+          151,
+          153,
+          6,
+          95
+        ],
+        [
+          "expression_statement",
+          156,
+          156,
+          6,
+          65
+        ],
+        [
+          "expression_statement",
+          158,
+          158,
+          42,
+          99
+        ],
+        [
+          "if_statement",
+          125,
+          129,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          131,
+          139,
+          4,
+          21
+        ],
+        [
+          "if_statement",
+          141,
+          148,
+          4,
+          21
+        ],
+        [
+          "if_statement",
+          150,
+          153,
+          4,
+          95
+        ],
+        [
+          "if_statement",
+          155,
+          156,
+          4,
+          65
+        ],
+        [
+          "if_statement",
+          158,
+          158,
+          4,
+          99
+        ],
+        [
+          "local_variable_declaration",
+          122,
+          122,
+          4,
+          46
+        ],
+        [
+          "method_declaration",
+          121,
+          161,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          160,
+          160,
+          4,
+          28
+        ]
+      ],
+      "source": "  protected String prepareQuery(CrmReporting crmReporting, boolean isPartner, String model) {\n    StringBuilder query = new StringBuilder();\n    model = Strings.isNullOrEmpty(model) ? \"\" : model + \".\";\n\n    if (isPartner) {\n      partnerQuery(query, crmReporting, model);\n    } else {\n      leadQuery(query, crmReporting, model);\n    }\n\n    if (!crmReporting.getAgencySet().isEmpty()\n        && ((AppCrm) appBaseService.getApp(\"crm\")).getAgenciesManagement())\n      this.addParams(\n          query,\n          \"self.\"\n              + model\n              + \"agency.id IN (\"\n              + StringHelper.getIdListString(crmReporting.getAgencySet())\n              + \")\");\n\n    if (!crmReporting.getIndustrySectorSet().isEmpty())\n      this.addParams(\n          query,\n          \"self.\"\n              + model\n              + \"industrySector.id IN (\"\n              + StringHelper.getIdListString(crmReporting.getIndustrySectorSet())\n              + \")\");\n\n    if (appBaseService.getAppBase().getTeamManagement() && !crmReporting.getTeamSet().isEmpty())\n      this.addParams(\n          query,\n          \"self.team.id IN (\" + StringHelper.getIdListString(crmReporting.getTeamSet()) + \")\");\n\n    if (crmReporting.getFromDate() != null)\n      this.addParams(query, \"date(self.createdOn) >= :fromDate\");\n\n    if (crmReporting.getToDate() != null) this.addParams(query, \"date(self.createdOn) <= :toDate\");\n\n    return query.toString();\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-crm/src/main/java/com/axelor/apps/crm/service/CrmReportingServiceImpl.java",
+      "sha256": "44124e783817359a991ca9f6b0f8b0b140646f8d5c00945b0cc020fe497693a0",
+      "name": "partnerQuery",
+      "start": 163,
+      "end": 189,
+      "program_units": 7,
+      "nodes": [
+        [
+          "expression_statement",
+          166,
+          168,
+          6,
+          98
+        ],
+        [
+          "expression_statement",
+          171,
+          178,
+          6,
+          21
+        ],
+        [
+          "expression_statement",
+          181,
+          188,
+          6,
+          21
+        ],
+        [
+          "if_statement",
+          164,
+          168,
+          4,
+          98
+        ],
+        [
+          "if_statement",
+          170,
+          178,
+          4,
+          21
+        ],
+        [
+          "if_statement",
+          180,
+          188,
+          4,
+          21
+        ],
+        [
+          "method_declaration",
+          163,
+          189,
+          2,
+          3
+        ]
+      ],
+      "source": "  private void partnerQuery(StringBuilder query, CrmReporting crmReporting, String model) {\n    if (appBaseService.getAppBase().getEnableMultiCompany()\n        && !crmReporting.getCompanySet().isEmpty())\n      this.addParams(\n          query,\n          \"(\" + companyQuery(\"self.\" + model + \"companySet\", crmReporting.getCompanySet()) + \")\");\n\n    if (!crmReporting.getCategorySet().isEmpty())\n      this.addParams(\n          query,\n          \"self.\"\n              + model\n              + \"partnerCategory.id \"\n              + \"IN (\"\n              + StringHelper.getIdListString(crmReporting.getCategorySet())\n              + \")\");\n\n    if (!crmReporting.getCountrySet().isEmpty())\n      this.addParams(\n          query,\n          \"self.\"\n              + model\n              + \"partnerAddressList.address.country.id \"\n              + \"IN (\"\n              + StringHelper.getIdListString(crmReporting.getCountrySet())\n              + \")\");\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-crm/src/main/java/com/axelor/apps/crm/service/CrmReportingServiceImpl.java",
+      "sha256": "44124e783817359a991ca9f6b0f8b0b140646f8d5c00945b0cc020fe497693a0",
+      "name": "leadQuery",
+      "start": 191,
+      "end": 221,
+      "program_units": 7,
+      "nodes": [
+        [
+          "expression_statement",
+          194,
+          200,
+          6,
+          21
+        ],
+        [
+          "expression_statement",
+          203,
+          210,
+          6,
+          21
+        ],
+        [
+          "expression_statement",
+          213,
+          220,
+          6,
+          21
+        ],
+        [
+          "if_statement",
+          192,
+          200,
+          4,
+          21
+        ],
+        [
+          "if_statement",
+          202,
+          210,
+          4,
+          21
+        ],
+        [
+          "if_statement",
+          212,
+          220,
+          4,
+          21
+        ],
+        [
+          "method_declaration",
+          191,
+          221,
+          2,
+          3
+        ]
+      ],
+      "source": "  private void leadQuery(StringBuilder query, CrmReporting crmReporting, String model) {\n    if (appBaseService.getAppBase().getEnableMultiCompany()\n        && !crmReporting.getCompanySet().isEmpty())\n      this.addParams(\n          query,\n          \"self.\"\n              + model\n              + \"company.id IN (\"\n              + StringHelper.getIdListString(crmReporting.getCompanySet())\n              + \")\");\n\n    if (!crmReporting.getCategorySet().isEmpty())\n      this.addParams(\n          query,\n          \"self.\"\n              + model\n              + \"type.id \"\n              + \"IN (\"\n              + StringHelper.getIdListString(crmReporting.getCategorySet())\n              + \")\");\n\n    if (!crmReporting.getCountrySet().isEmpty())\n      this.addParams(\n          query,\n          \"self.\"\n              + model\n              + \"address.country.id \"\n              + \"IN (\"\n              + StringHelper.getIdListString(crmReporting.getCountrySet())\n              + \")\");\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-crm/src/main/java/com/axelor/apps/crm/service/CrmReportingServiceImpl.java",
+      "sha256": "44124e783817359a991ca9f6b0f8b0b140646f8d5c00945b0cc020fe497693a0",
+      "name": "companyQuery",
+      "start": 223,
+      "end": 225,
+      "program_units": 2,
+      "nodes": [
+        [
+          "method_declaration",
+          223,
+          225,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          224,
+          224,
+          4,
+          81
+        ]
+      ],
+      "source": "  protected String companyQuery(String queryStr, Set<Company> companies) {\n    return queryStr + \".id IN (\" + StringHelper.getIdListString(companies) + \")\";\n  }"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/selling/report/sales_analytics/sales_analytics.py",
+      "sha256": "1f3255a2b34259a756342f8922759b27734aecb905cff078f9374ccedf6bb338",
+      "name": "append_report",
+      "start": 36,
+      "end": 49,
+      "program_units": 11,
+      "nodes": [
+        [
+          "Assign",
+          43,
+          43,
+          1,
+          46
+        ],
+        [
+          "Expr",
+          38,
+          38,
+          1,
+          36
+        ],
+        [
+          "Expr",
+          39,
+          39,
+          1,
+          18
+        ],
+        [
+          "Expr",
+          42,
+          42,
+          2,
+          65
+        ],
+        [
+          "Expr",
+          45,
+          45,
+          2,
+          23
+        ],
+        [
+          "Expr",
+          46,
+          46,
+          2,
+          63
+        ],
+        [
+          "FunctionDef",
+          36,
+          49,
+          0,
+          12
+        ],
+        [
+          "If",
+          41,
+          42,
+          1,
+          65
+        ],
+        [
+          "If",
+          44,
+          49,
+          1,
+          12
+        ],
+        [
+          "Return",
+          47,
+          47,
+          2,
+          12
+        ],
+        [
+          "Return",
+          49,
+          49,
+          2,
+          12
+        ]
+      ],
+      "source": "def append_report(dt, org, new):\n\t# idx 1 is data, 3 is chart\n\tnew[1].insert(0, {\"entity\": _(dt)})  # heading\n\tnew[1].append({})  # empty row\n\t# datasets can be an empty list if no dates are supplied by the Dashboard Chart\n\tif not new[3][\"data\"][\"datasets\"]:\n\t\tnew[3][\"data\"][\"datasets\"].append({\"name\": None, \"values\": []})\n\tnew[3][\"data\"][\"datasets\"][0][\"name\"] = _(dt)  # override curve name\n\tif org:\n\t\torg[1].extend(new[1])\n\t\torg[3][\"data\"][\"datasets\"].extend(new[3][\"data\"][\"datasets\"])\n\t\treturn org\n\telse:\n\t\treturn new"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/selling/report/sales_analytics/sales_analytics.py",
+      "sha256": "1f3255a2b34259a756342f8922759b27734aecb905cff078f9374ccedf6bb338",
+      "name": "Analytics.get_columns",
+      "start": 122,
+      "end": 159,
+      "program_units": 10,
+      "nodes": [
+        [
+          "Assign",
+          123,
+          131,
+          2,
+          3
+        ],
+        [
+          "Assign",
+          154,
+          154,
+          3,
+          37
+        ],
+        [
+          "Expr",
+          133,
+          140,
+          3,
+          4
+        ],
+        [
+          "Expr",
+          143,
+          151,
+          3,
+          4
+        ],
+        [
+          "Expr",
+          155,
+          157,
+          3,
+          4
+        ],
+        [
+          "Expr",
+          159,
+          159,
+          2,
+          102
+        ],
+        [
+          "For",
+          153,
+          157,
+          2,
+          4
+        ],
+        [
+          "FunctionDef",
+          122,
+          159,
+          1,
+          102
+        ],
+        [
+          "If",
+          132,
+          140,
+          2,
+          4
+        ],
+        [
+          "If",
+          142,
+          151,
+          2,
+          4
+        ]
+      ],
+      "source": "\tdef get_columns(self):\n\t\tself.columns = [\n\t\t\t{\n\t\t\t\t\"label\": _(self.filters.tree_type),\n\t\t\t\t\"options\": self.filters.tree_type if self.filters.tree_type != \"Order Type\" else \"\",\n\t\t\t\t\"fieldname\": \"entity\",\n\t\t\t\t\"fieldtype\": \"Link\" if self.filters.tree_type != \"Order Type\" else \"Data\",\n\t\t\t\t\"width\": 140 if self.filters.tree_type != \"Order Type\" else 200,\n\t\t\t}\n\t\t]\n\t\tif self.filters.tree_type in [\"Customer\", \"Supplier\", \"Item\"]:\n\t\t\tself.columns.append(\n\t\t\t\t{\n\t\t\t\t\t\"label\": _(self.filters.tree_type + \" Name\"),\n\t\t\t\t\t\"fieldname\": \"entity_name\",\n\t\t\t\t\t\"fieldtype\": \"Data\",\n\t\t\t\t\t\"width\": 140,\n\t\t\t\t}\n\t\t\t)\n\n\t\tif self.filters.tree_type == \"Item\":\n\t\t\tself.columns.append(\n\t\t\t\t{\n\t\t\t\t\t\"label\": _(\"UOM\"),\n\t\t\t\t\t\"fieldname\": \"stock_uom\",\n\t\t\t\t\t\"fieldtype\": \"Link\",\n\t\t\t\t\t\"options\": \"UOM\",\n\t\t\t\t\t\"width\": 100,\n\t\t\t\t}\n\t\t\t)\n\n\t\tfor end_date in self.periodic_daterange:\n\t\t\tperiod = self.get_period(end_date)\n\t\t\tself.columns.append(\n\t\t\t\t{\"label\": _(period), \"fieldname\": scrub(period), \"fieldtype\": \"Float\", \"width\": 120}\n\t\t\t)\n\n\t\tself.columns.append({\"label\": _(\"Total\"), \"fieldname\": \"total\", \"fieldtype\": \"Float\", \"width\": 120})"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/selling/report/sales_analytics/sales_analytics.py",
+      "sha256": "1f3255a2b34259a756342f8922759b27734aecb905cff078f9374ccedf6bb338",
+      "name": "Analytics.get_sales_transactions_based_on_customer_or_territory_group",
+      "start": 331,
+      "end": 346,
+      "program_units": 9,
+      "nodes": [
+        [
+          "Assign",
+          333,
+          333,
+          3,
+          44
+        ],
+        [
+          "Assign",
+          335,
+          335,
+          3,
+          38
+        ],
+        [
+          "Assign",
+          338,
+          338,
+          3,
+          39
+        ],
+        [
+          "Assign",
+          340,
+          345,
+          2,
+          21
+        ],
+        [
+          "Expr",
+          336,
+          336,
+          3,
+          39
+        ],
+        [
+          "Expr",
+          346,
+          346,
+          2,
+          19
+        ],
+        [
+          "FunctionDef",
+          331,
+          346,
+          1,
+          19
+        ],
+        [
+          "If",
+          332,
+          338,
+          2,
+          39
+        ],
+        [
+          "If",
+          334,
+          338,
+          2,
+          39
+        ]
+      ],
+      "source": "\tdef get_sales_transactions_based_on_customer_or_territory_group(self):\n\t\tif self.filters.tree_type == \"Customer Group\":\n\t\t\tentity_field = \"customer_group as entity\"\n\t\telif self.filters.tree_type == \"Supplier Group\":\n\t\t\tentity_field = \"supplier as entity\"\n\t\t\tself.get_supplier_parent_child_map()\n\t\telse:\n\t\t\tentity_field = \"territory as entity\"\n\n\t\tself.entries = frappe.qb.get_query(\n\t\t\ttable=self.filters.doc_type,\n\t\t\tfields=[entity_field, self.value_field, self.date_field],\n\t\t\tfilters=self.document_filters,\n\t\t\tignore_permissions=False,\n\t\t).run(as_dict=True)\n\t\tself.get_groups()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/selling/report/sales_analytics/sales_analytics.py",
+      "sha256": "1f3255a2b34259a756342f8922759b27734aecb905cff078f9374ccedf6bb338",
+      "name": "Analytics.get_sales_transactions_based_on_item_group",
+      "start": 348,
+      "end": 375,
+      "program_units": 13,
+      "nodes": [
+        [
+          "Assign",
+          350,
+          350,
+          3,
+          34
+        ],
+        [
+          "Assign",
+          352,
+          352,
+          3,
+          28
+        ],
+        [
+          "Assign",
+          354,
+          354,
+          2,
+          54
+        ],
+        [
+          "Assign",
+          356,
+          356,
+          3,
+          20
+        ],
+        [
+          "Assign",
+          360,
+          360,
+          2,
+          42
+        ],
+        [
+          "Assign",
+          361,
+          361,
+          2,
+          57
+        ],
+        [
+          "Assign",
+          363,
+          373,
+          2,
+          21
+        ],
+        [
+          "Expr",
+          357,
+          357,
+          3,
+          20
+        ],
+        [
+          "Expr",
+          375,
+          375,
+          2,
+          19
+        ],
+        [
+          "FunctionDef",
+          348,
+          375,
+          1,
+          19
+        ],
+        [
+          "If",
+          349,
+          352,
+          2,
+          28
+        ],
+        [
+          "If",
+          355,
+          358,
+          2,
+          9
+        ],
+        [
+          "Return",
+          358,
+          358,
+          3,
+          9
+        ]
+      ],
+      "source": "\tdef get_sales_transactions_based_on_item_group(self):\n\t\tif self.filters[\"value_quantity\"] == \"Value\":\n\t\t\tvalue_field = \"base_net_amount\"\n\t\telse:\n\t\t\tvalue_field = \"stock_qty\"\n\n\t\tpermitted_names = self._get_permitted_parent_names()\n\t\tif not permitted_names:\n\t\t\tself.entries = []\n\t\t\tself.get_groups()\n\t\t\treturn\n\n\t\tdoctype = DocType(self.filters.doc_type)\n\t\tdoctype_item = DocType(f\"{self.filters.doc_type} Item\")\n\n\t\tself.entries = (\n\t\t\tfrappe.qb.from_(doctype_item)\n\t\t\t.join(doctype)\n\t\t\t.on(doctype.name == doctype_item.parent)\n\t\t\t.select(\n\t\t\t\tdoctype_item.item_group.as_(\"entity\"),\n\t\t\t\tdoctype_item[value_field].as_(\"value_field\"),\n\t\t\t\tdoctype[self.date_field],\n\t\t\t)\n\t\t\t.where((doctype_item.docstatus == 1) & (doctype.name.isin(permitted_names)))\n\t\t).run(as_dict=True)\n\n\t\tself.get_groups()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/selling/report/sales_analytics/sales_analytics.py",
+      "sha256": "1f3255a2b34259a756342f8922759b27734aecb905cff078f9374ccedf6bb338",
+      "name": "Analytics.get_rows_by_group",
+      "start": 433,
+      "end": 452,
+      "program_units": 17,
+      "nodes": [
+        [
+          "Assign",
+          435,
+          435,
+          2,
+          10
+        ],
+        [
+          "Assign",
+          438,
+          438,
+          3,
+          65
+        ],
+        [
+          "Assign",
+          439,
+          439,
+          3,
+          12
+        ],
+        [
+          "Assign",
+          441,
+          441,
+          4,
+          38
+        ],
+        [
+          "Assign",
+          442,
+          442,
+          4,
+          76
+        ],
+        [
+          "Assign",
+          443,
+          443,
+          4,
+          31
+        ],
+        [
+          "Assign",
+          449,
+          449,
+          3,
+          23
+        ],
+        [
+          "Assign",
+          450,
+          450,
+          3,
+          20
+        ],
+        [
+          "Assign",
+          452,
+          452,
+          2,
+          17
+        ],
+        [
+          "AugAssign",
+          446,
+          446,
+          5,
+          58
+        ],
+        [
+          "AugAssign",
+          447,
+          447,
+          4,
+          19
+        ],
+        [
+          "Expr",
+          434,
+          434,
+          2,
+          26
+        ],
+        [
+          "Expr",
+          445,
+          445,
+          5,
+          91
+        ],
+        [
+          "For",
+          437,
+          450,
+          2,
+          20
+        ],
+        [
+          "For",
+          440,
+          447,
+          3,
+          19
+        ],
+        [
+          "FunctionDef",
+          433,
+          452,
+          1,
+          17
+        ],
+        [
+          "If",
+          444,
+          446,
+          4,
+          58
+        ]
+      ],
+      "source": "\tdef get_rows_by_group(self):\n\t\tself.get_periodic_data()\n\t\tout = []\n\n\t\tfor d in reversed(self.group_entries):\n\t\t\trow = {\"entity\": d.name, \"indent\": self.depth_map.get(d.name)}\n\t\t\ttotal = 0\n\t\t\tfor end_date in self.periodic_daterange:\n\t\t\t\tperiod = self.get_period(end_date)\n\t\t\t\tamount = flt(self.entity_periodic_data.get(d.name, {}).get(period, 0.0))\n\t\t\t\trow[scrub(period)] = amount\n\t\t\t\tif d.parent and (self.filters.tree_type != \"Order Type\" or d.parent == \"Order Types\"):\n\t\t\t\t\tself.entity_periodic_data.setdefault(d.parent, frappe._dict()).setdefault(period, 0.0)\n\t\t\t\t\tself.entity_periodic_data[d.parent][period] += amount\n\t\t\t\ttotal += amount\n\n\t\t\trow[\"total\"] = total\n\t\t\tout = [row, *out]\n\n\t\tself.data = out"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/selling/report/sales_analytics/sales_analytics.py",
+      "sha256": "1f3255a2b34259a756342f8922759b27734aecb905cff078f9374ccedf6bb338",
+      "name": "Analytics.get_groups",
+      "start": 512,
+      "end": 536,
+      "program_units": 11,
+      "nodes": [
+        [
+          "Assign",
+          513,
+          518,
+          2,
+          3
+        ],
+        [
+          "Assign",
+          522,
+          522,
+          2,
+          51
+        ],
+        [
+          "Assign",
+          524,
+          524,
+          2,
+          33
+        ],
+        [
+          "Assign",
+          526,
+          530,
+          2,
+          3
+        ],
+        [
+          "Expr",
+          520,
+          520,
+          3,
+          74
+        ],
+        [
+          "Expr",
+          534,
+          534,
+          4,
+          71
+        ],
+        [
+          "Expr",
+          536,
+          536,
+          4,
+          40
+        ],
+        [
+          "For",
+          532,
+          536,
+          2,
+          40
+        ],
+        [
+          "FunctionDef",
+          512,
+          536,
+          1,
+          40
+        ],
+        [
+          "If",
+          519,
+          520,
+          2,
+          74
+        ],
+        [
+          "If",
+          533,
+          536,
+          3,
+          40
+        ]
+      ],
+      "source": "\tdef get_groups(self):\n\t\tparent_field_map = {\n\t\t\t\"Territory\": \"parent_territory\",\n\t\t\t\"Customer Group\": \"parent_customer_group\",\n\t\t\t\"Item Group\": \"parent_item_group\",\n\t\t\t\"Supplier Group\": \"parent_supplier_group\",\n\t\t}\n\t\tif self.filters.tree_type not in parent_field_map:\n\t\t\tfrappe.throw(_(\"Invalid Tree Type {0}\").format(self.filters.tree_type))\n\n\t\tparent = parent_field_map[self.filters.tree_type]\n\n\t\tself.depth_map = frappe._dict()\n\n\t\tself.group_entries = frappe.db.sql(\n\t\t\tf\"\"\"select name, lft, rgt , {parent} as parent\n\t\t\tfrom `tab{self.filters.tree_type}` order by lft\"\"\",\n\t\t\tas_dict=1,\n\t\t)\n\n\t\tfor d in self.group_entries:\n\t\t\tif d.parent:\n\t\t\t\tself.depth_map.setdefault(d.name, self.depth_map.get(d.parent) + 1)\n\t\t\telse:\n\t\t\t\tself.depth_map.setdefault(d.name, 0)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/selling/report/sales_analytics/sales_analytics.py",
+      "sha256": "1f3255a2b34259a756342f8922759b27734aecb905cff078f9374ccedf6bb338",
+      "name": "Analytics.get_chart_data",
+      "start": 563,
+      "end": 603,
+      "program_units": 27,
+      "nodes": [
+        [
+          "Assign",
+          564,
+          564,
+          2,
+          28
+        ],
+        [
+          "Assign",
+          567,
+          567,
+          3,
+          66
+        ],
+        [
+          "Assign",
+          569,
+          569,
+          3,
+          66
+        ],
+        [
+          "Assign",
+          571,
+          571,
+          3,
+          66
+        ],
+        [
+          "Assign",
+          573,
+          573,
+          2,
+          15
+        ],
+        [
+          "Assign",
+          576,
+          579,
+          4,
+          5
+        ],
+        [
+          "Assign",
+          587,
+          590,
+          6,
+          7
+        ],
+        [
+          "Assign",
+          591,
+          591,
+          6,
+          31
+        ],
+        [
+          "Assign",
+          594,
+          594,
+          6,
+          38
+        ],
+        [
+          "Assign",
+          598,
+          598,
+          2,
+          81
+        ],
+        [
+          "Assign",
+          601,
+          601,
+          3,
+          39
+        ],
+        [
+          "Assign",
+          603,
+          603,
+          3,
+          36
+        ],
+        [
+          "Continue",
+          581,
+          581,
+          5,
+          13
+        ],
+        [
+          "Expr",
+          584,
+          584,
+          6,
+          27
+        ],
+        [
+          "Expr",
+          593,
+          593,
+          6,
+          27
+        ],
+        [
+          "Expr",
+          596,
+          596,
+          5,
+          26
+        ],
+        [
+          "For",
+          575,
+          596,
+          3,
+          26
+        ],
+        [
+          "FunctionDef",
+          563,
+          603,
+          1,
+          36
+        ],
+        [
+          "If",
+          566,
+          571,
+          2,
+          66
+        ],
+        [
+          "If",
+          568,
+          571,
+          2,
+          66
+        ],
+        [
+          "If",
+          574,
+          596,
+          2,
+          26
+        ],
+        [
+          "If",
+          580,
+          596,
+          4,
+          26
+        ],
+        [
+          "If",
+          582,
+          596,
+          4,
+          26
+        ],
+        [
+          "If",
+          583,
+          584,
+          5,
+          27
+        ],
+        [
+          "If",
+          585,
+          596,
+          4,
+          26
+        ],
+        [
+          "If",
+          586,
+          594,
+          5,
+          38
+        ],
+        [
+          "If",
+          600,
+          603,
+          2,
+          36
+        ]
+      ],
+      "source": "\tdef get_chart_data(self):\n\t\tlength = len(self.columns)\n\n\t\tif self.filters.tree_type in [\"Customer\", \"Supplier\"]:\n\t\t\tlabels = [d.get(\"label\") for d in self.columns[2 : length - 1]]\n\t\telif self.filters.tree_type == \"Item\":\n\t\t\tlabels = [d.get(\"label\") for d in self.columns[3 : length - 1]]\n\t\telse:\n\t\t\tlabels = [d.get(\"label\") for d in self.columns[1 : length - 1]]\n\n\t\tdatasets = []\n\t\tif self.filters.curves != \"select\":\n\t\t\tfor curve in self.data:\n\t\t\t\tdata = {\n\t\t\t\t\t\"name\": curve.get(\"entity_name\", curve[\"entity\"]),\n\t\t\t\t\t\"values\": [curve[scrub(label)] for label in labels],\n\t\t\t\t}\n\t\t\t\tif self.filters.curves == \"non-zeros\" and not sum(data[\"values\"]):\n\t\t\t\t\tcontinue\n\t\t\t\telif self.filters.curves == \"total\" and \"indent\" in curve:\n\t\t\t\t\tif curve[\"indent\"] == 0:\n\t\t\t\t\t\tdatasets.append(data)\n\t\t\t\telif self.filters.curves == \"total\":\n\t\t\t\t\tif datasets:\n\t\t\t\t\t\ta = [\n\t\t\t\t\t\t\tdata[\"values\"][idx] + datasets[0][\"values\"][idx]\n\t\t\t\t\t\t\tfor idx in range(len(data[\"values\"]))\n\t\t\t\t\t\t]\n\t\t\t\t\t\tdatasets[0][\"values\"] = a\n\t\t\t\t\telse:\n\t\t\t\t\t\tdatasets.append(data)\n\t\t\t\t\t\tdatasets[0][\"name\"] = _(\"Total\")\n\t\t\t\telse:\n\t\t\t\t\tdatasets.append(data)\n\n\t\tself.chart = {\"data\": {\"labels\": labels, \"datasets\": datasets}, \"type\": \"line\"}\n\n\t\tif self.filters[\"value_quantity\"] == \"Value\":\n\t\t\tself.chart[\"fieldtype\"] = \"Currency\"\n\t\telse:\n\t\t\tself.chart[\"fieldtype\"] = \"Float\""
+    },
+    {
+      "repo": "frappe",
+      "product": "erpnext",
+      "path": "frappe/desk/reportview.py",
+      "sha256": "8ecd46e71fd612dd9372393d37ca73a751a7aabd034913da89f777cd073d8308",
+      "name": "get_count",
+      "start": 77,
+      "end": 118,
+      "program_units": 25,
+      "nodes": [
+        [
+          "Assign",
+          80,
+          80,
+          1,
+          25
+        ],
+        [
+          "Assign",
+          83,
+          83,
+          2,
+          43
+        ],
+        [
+          "Assign",
+          86,
+          86,
+          1,
+          37
+        ],
+        [
+          "Assign",
+          87,
+          87,
+          1,
+          30
+        ],
+        [
+          "Assign",
+          88,
+          88,
+          1,
+          40
+        ],
+        [
+          "Assign",
+          89,
+          89,
+          1,
+          21
+        ],
+        [
+          "Assign",
+          91,
+          91,
+          1,
+          26
+        ],
+        [
+          "Assign",
+          92,
+          92,
+          1,
+          39
+        ],
+        [
+          "Assign",
+          93,
+          93,
+          1,
+          64
+        ],
+        [
+          "Assign",
+          99,
+          99,
+          1,
+          45
+        ],
+        [
+          "Assign",
+          105,
+          105,
+          1,
+          101
+        ],
+        [
+          "Assign",
+          108,
+          108,
+          2,
+          71
+        ],
+        [
+          "Assign",
+          111,
+          111,
+          3,
+          15
+        ],
+        [
+          "Expr",
+          116,
+          116,
+          2,
+          104
+        ],
+        [
+          "FunctionDef",
+          77,
+          118,
+          0,
+          13
+        ],
+        [
+          "If",
+          82,
+          84,
+          1,
+          61
+        ],
+        [
+          "If",
+          96,
+          97,
+          1,
+          32
+        ],
+        [
+          "If",
+          110,
+          113,
+          2,
+          8
+        ],
+        [
+          "If",
+          115,
+          116,
+          1,
+          104
+        ],
+        [
+          "ImportFrom",
+          78,
+          78,
+          1,
+          49
+        ],
+        [
+          "Raise",
+          113,
+          113,
+          3,
+          8
+        ],
+        [
+          "Return",
+          84,
+          84,
+          2,
+          61
+        ],
+        [
+          "Return",
+          97,
+          97,
+          2,
+          32
+        ],
+        [
+          "Return",
+          118,
+          118,
+          1,
+          13
+        ],
+        [
+          "Try",
+          107,
+          113,
+          1,
+          8
+        ]
+      ],
+      "source": "def get_count() -> int | None:\n\tfrom frappe.query_builder.functions import Count\n\n\targs = get_form_params()\n\n\tif is_virtual_doctype(args.doctype):\n\t\tcontroller = get_controller(args.doctype)\n\t\treturn frappe.call(controller.get_count, args=args, **args)\n\n\targs.distinct = sbool(args.distinct)\n\targs.limit = cint(args.limit)\n\tfieldname = f\"`tab{args.doctype}`.name\"\n\targs.order_by = None\n\n\targs.fields = [fieldname]\n\tpartial_query = execute(**args, run=0)\n\tcount_query = frappe.qb.from_(partial_query).select(Count(\"*\"))\n\n\t# args.limit is specified to avoid getting accurate count.\n\tif not args.limit:\n\t\treturn count_query.run()[0][0]\n\n\tcount_sql, count_params = count_query.walk()\n\n\t# Count queries are notoriously unpredictable based on the type of filters used.\n\t# We should not attempt to fetch accurate count for 2 entire minutes! (default timeout)\n\t# Very short timeout is used to here to set an upper bound on damage a bad request can do.\n\t# Users can request accurate count by dropping limit from arguments.\n\ttimeout_clause = \"SET STATEMENT max_statement_time=1 FOR \" if frappe.db.db_type == \"mariadb\" else \"\"\n\n\ttry:\n\t\tcount = frappe.db.sql(timeout_clause + count_sql, count_params)[0][0]\n\texcept Exception as e:\n\t\tif frappe.db.is_statement_timeout(e):  # Skip fetching accurate count\n\t\t\tcount = None\n\t\telse:\n\t\t\traise\n\n\tif count == args.limit or count is None:\n\t\tfrappe.local.response_headers.set(\"Cache-Control\", \"private,max-age=600,stale-while-revalidate=10800\")\n\n\treturn count"
+    },
+    {
+      "repo": "frappe",
+      "product": "erpnext",
+      "path": "frappe/desk/reportview.py",
+      "sha256": "8ecd46e71fd612dd9372393d37ca73a751a7aabd034913da89f777cd073d8308",
+      "name": "setup_group_by",
+      "start": 211,
+      "end": 225,
+      "program_units": 11,
+      "nodes": [
+        [
+          "Assign",
+          218,
+          218,
+          3,
+          74
+        ],
+        [
+          "Expr",
+          215,
+          215,
+          3,
+          48
+        ],
+        [
+          "Expr",
+          219,
+          219,
+          3,
+          90
+        ],
+        [
+          "Expr",
+          221,
+          221,
+          3,
+          47
+        ],
+        [
+          "Expr",
+          223,
+          223,
+          2,
+          34
+        ],
+        [
+          "Expr",
+          224,
+          224,
+          2,
+          32
+        ],
+        [
+          "Expr",
+          225,
+          225,
+          2,
+          32
+        ],
+        [
+          "FunctionDef",
+          211,
+          225,
+          0,
+          32
+        ],
+        [
+          "If",
+          213,
+          225,
+          1,
+          32
+        ],
+        [
+          "If",
+          214,
+          215,
+          2,
+          48
+        ],
+        [
+          "If",
+          217,
+          221,
+          2,
+          47
+        ]
+      ],
+      "source": "def setup_group_by(data):\n\t\"\"\"Add columns for aggregated values e.g. count(name)\"\"\"\n\tif data.group_by and data.aggregate_function:\n\t\tif data.aggregate_function.lower() not in (\"count\", \"sum\", \"avg\"):\n\t\t\tfrappe.throw(_(\"Invalid aggregate function\"))\n\n\t\tif frappe.db.has_column(data.aggregate_on_doctype, data.aggregate_on_field):\n\t\t\tfield = f\"`tab{data.aggregate_on_doctype}`.`{data.aggregate_on_field}`\"\n\t\t\tdata.fields.append({data.aggregate_function.upper(): field, \"as\": \"_aggregate_column\"})\n\t\telse:\n\t\t\traise_invalid_field(data.aggregate_on_field)\n\n\t\tdata.pop(\"aggregate_on_doctype\")\n\t\tdata.pop(\"aggregate_on_field\")\n\t\tdata.pop(\"aggregate_function\")"
+    },
+    {
+      "repo": "frappe",
+      "product": "erpnext",
+      "path": "frappe/desk/reportview.py",
+      "sha256": "8ecd46e71fd612dd9372393d37ca73a751a7aabd034913da89f777cd073d8308",
+      "name": "_validate_group_by_field",
+      "start": 232,
+      "end": 248,
+      "program_units": 14,
+      "nodes": [
+        [
+          "Assign",
+          237,
+          237,
+          2,
+          45
+        ],
+        [
+          "Assign",
+          240,
+          240,
+          1,
+          41
+        ],
+        [
+          "Assign",
+          244,
+          244,
+          2,
+          58
+        ],
+        [
+          "Expr",
+          235,
+          235,
+          2,
+          26
+        ],
+        [
+          "Expr",
+          239,
+          239,
+          2,
+          26
+        ],
+        [
+          "Expr",
+          242,
+          242,
+          2,
+          26
+        ],
+        [
+          "Expr",
+          246,
+          246,
+          2,
+          26
+        ],
+        [
+          "Expr",
+          248,
+          248,
+          2,
+          26
+        ],
+        [
+          "FunctionDef",
+          232,
+          248,
+          0,
+          26
+        ],
+        [
+          "If",
+          234,
+          235,
+          1,
+          26
+        ],
+        [
+          "If",
+          241,
+          242,
+          1,
+          26
+        ],
+        [
+          "If",
+          247,
+          248,
+          1,
+          26
+        ],
+        [
+          "Try",
+          236,
+          239,
+          1,
+          26
+        ],
+        [
+          "Try",
+          243,
+          246,
+          1,
+          26
+        ]
+      ],
+      "source": "def _validate_group_by_field(raw: str, doctype: str):\n\t\"\"\"Validate a single `tabDoctype`.`fieldname` expression from saved report JSON.\"\"\"\n\tif not isinstance(raw, str) or not raw:\n\t\traise_invalid_field(raw)\n\ttry:\n\t\tfield_doctype, fieldname = parse_field(raw)\n\texcept ValueError:\n\t\traise_invalid_field(raw)\n\tfield_doctype = field_doctype or doctype\n\tif not _FIELDNAME_RE.match(fieldname):\n\t\traise_invalid_field(raw)\n\ttry:\n\t\thas_col = frappe.db.has_column(field_doctype, fieldname)\n\texcept frappe.db.TableMissingError:\n\t\traise_invalid_field(raw)\n\tif not has_col:\n\t\traise_invalid_field(raw)"
+    },
+    {
+      "repo": "frappe",
+      "product": "erpnext",
+      "path": "frappe/desk/reportview.py",
+      "sha256": "8ecd46e71fd612dd9372393d37ca73a751a7aabd034913da89f777cd073d8308",
+      "name": "_validate_group_by_args",
+      "start": 251,
+      "end": 262,
+      "program_units": 10,
+      "nodes": [
+        [
+          "Assign",
+          252,
+          252,
+          1,
+          46
+        ],
+        [
+          "Assign",
+          255,
+          255,
+          1,
+          24
+        ],
+        [
+          "Expr",
+          254,
+          254,
+          2,
+          87
+        ],
+        [
+          "Expr",
+          257,
+          257,
+          2,
+          83
+        ],
+        [
+          "Expr",
+          259,
+          259,
+          1,
+          64
+        ],
+        [
+          "Expr",
+          262,
+          262,
+          2,
+          69
+        ],
+        [
+          "FunctionDef",
+          251,
+          262,
+          0,
+          69
+        ],
+        [
+          "If",
+          253,
+          254,
+          1,
+          87
+        ],
+        [
+          "If",
+          256,
+          257,
+          1,
+          83
+        ],
+        [
+          "If",
+          261,
+          262,
+          1,
+          69
+        ]
+      ],
+      "source": "def _validate_group_by_args(group_by: dict, doctype: str):\n\traw_func = group_by.get(\"aggregate_function\")\n\tif not isinstance(raw_func, str):\n\t\tfrappe.throw(_(\"Invalid aggregate function: {0}\").format(raw_func), frappe.DataError)\n\tfunc = raw_func.lower()\n\tif func not in SUPPORTED_AGGREGATE_FUNCTIONS:\n\t\tfrappe.throw(_(\"Invalid aggregate function: {0}\").format(func), frappe.DataError)\n\n\t_validate_group_by_field(group_by.get(\"group_by\", \"\"), doctype)\n\n\tif func != \"count\":\n\t\t_validate_group_by_field(group_by.get(\"aggregate_on\", \"\"), doctype)"
+    },
+    {
+      "repo": "frappe",
+      "product": "erpnext",
+      "path": "frappe/desk/reportview.py",
+      "sha256": "8ecd46e71fd612dd9372393d37ca73a751a7aabd034913da89f777cd073d8308",
+      "name": "save_report",
+      "start": 382,
+      "end": 419,
+      "program_units": 24,
+      "nodes": [
+        [
+          "Assign",
+          386,
+          386,
+          2,
+          41
+        ],
+        [
+          "Assign",
+          403,
+          403,
+          2,
+          35
+        ],
+        [
+          "Assign",
+          404,
+          404,
+          2,
+          27
+        ],
+        [
+          "Assign",
+          405,
+          405,
+          2,
+          30
+        ],
+        [
+          "Assign",
+          407,
+          407,
+          1,
+          39
+        ],
+        [
+          "Assign",
+          411,
+          411,
+          1,
+          38
+        ],
+        [
+          "Assign",
+          412,
+          412,
+          1,
+          30
+        ],
+        [
+          "Expr",
+          388,
+          388,
+          3,
+          55
+        ],
+        [
+          "Expr",
+          391,
+          391,
+          3,
+          71
+        ],
+        [
+          "Expr",
+          394,
+          394,
+          3,
+          89
+        ],
+        [
+          "Expr",
+          397,
+          397,
+          3,
+          97
+        ],
+        [
+          "Expr",
+          399,
+          402,
+          3,
+          4
+        ],
+        [
+          "Expr",
+          409,
+          409,
+          2,
+          55
+        ],
+        [
+          "Expr",
+          413,
+          413,
+          1,
+          37
+        ],
+        [
+          "Expr",
+          414,
+          418,
+          1,
+          2
+        ],
+        [
+          "FunctionDef",
+          382,
+          419,
+          0,
+          19
+        ],
+        [
+          "If",
+          385,
+          405,
+          1,
+          30
+        ],
+        [
+          "If",
+          387,
+          388,
+          2,
+          55
+        ],
+        [
+          "If",
+          390,
+          391,
+          2,
+          71
+        ],
+        [
+          "If",
+          393,
+          394,
+          2,
+          89
+        ],
+        [
+          "If",
+          396,
+          397,
+          2,
+          97
+        ],
+        [
+          "If",
+          398,
+          402,
+          2,
+          4
+        ],
+        [
+          "If",
+          408,
+          409,
+          1,
+          55
+        ],
+        [
+          "Return",
+          419,
+          419,
+          1,
+          19
+        ]
+      ],
+      "source": "def save_report(name: str | int, doctype: str, report_settings: str):\n\t\"\"\"Save reports of type Report Builder from Report View\"\"\"\n\n\tif frappe.db.exists(\"Report\", name):\n\t\treport = frappe.get_doc(\"Report\", name)\n\t\tif report.is_standard == \"Yes\":\n\t\t\tfrappe.throw(_(\"Standard Reports cannot be edited\"))\n\n\t\tif report.report_type != \"Report Builder\":\n\t\t\tfrappe.throw(_(\"Only reports of type Report Builder can be edited\"))\n\n\t\tif report.owner != frappe.session.user and not report.has_permission(\"write\"):\n\t\t\tfrappe.throw(_(\"Insufficient Permissions for editing Report\"), frappe.PermissionError)\n\telse:\n\t\tif not frappe.has_permission(\"Report\", \"create\"):\n\t\t\tfrappe.throw(_(\"You don't have permission to create Report records.\"), frappe.PermissionError)\n\t\tif not frappe.has_permission(doctype, \"read\"):\n\t\t\tfrappe.throw(\n\t\t\t\t_(\"You don't have permission to create report for {0}\").format(_(doctype)),\n\t\t\t\tfrappe.PermissionError,\n\t\t\t)\n\t\treport = frappe.new_doc(\"Report\")\n\t\treport.report_name = name\n\t\treport.ref_doctype = doctype\n\n\tsettings = json.loads(report_settings)\n\tif isinstance(settings, dict) and isinstance(group_by := settings.get(\"group_by\"), dict):\n\t\t_validate_group_by_args(group_by, report.ref_doctype)\n\n\treport.report_type = \"Report Builder\"\n\treport.json = report_settings\n\treport.save(ignore_permissions=True)\n\tfrappe.msgprint(\n\t\t_(\"Report {0} saved\").format(frappe.bold(report.name)),\n\t\tindicator=\"green\",\n\t\talert=True,\n\t)\n\treturn report.name"
+    },
+    {
+      "repo": "frappe",
+      "product": "erpnext",
+      "path": "frappe/desk/reportview.py",
+      "sha256": "8ecd46e71fd612dd9372393d37ca73a751a7aabd034913da89f777cd073d8308",
+      "name": "delete_report",
+      "start": 423,
+      "end": 441,
+      "program_units": 10,
+      "nodes": [
+        [
+          "Assign",
+          426,
+          426,
+          1,
+          40
+        ],
+        [
+          "Expr",
+          428,
+          428,
+          2,
+          55
+        ],
+        [
+          "Expr",
+          431,
+          431,
+          2,
+          71
+        ],
+        [
+          "Expr",
+          434,
+          434,
+          2,
+          89
+        ],
+        [
+          "Expr",
+          436,
+          436,
+          1,
+          39
+        ],
+        [
+          "Expr",
+          437,
+          441,
+          1,
+          2
+        ],
+        [
+          "FunctionDef",
+          423,
+          441,
+          0,
+          2
+        ],
+        [
+          "If",
+          427,
+          428,
+          1,
+          55
+        ],
+        [
+          "If",
+          430,
+          431,
+          1,
+          71
+        ],
+        [
+          "If",
+          433,
+          434,
+          1,
+          89
+        ]
+      ],
+      "source": "def delete_report(name: str | int):\n\t\"\"\"Delete reports of type Report Builder from Report View\"\"\"\n\n\treport = frappe.get_doc(\"Report\", name)\n\tif report.is_standard == \"Yes\":\n\t\tfrappe.throw(_(\"Standard Reports cannot be deleted\"))\n\n\tif report.report_type != \"Report Builder\":\n\t\tfrappe.throw(_(\"Only reports of type Report Builder can be deleted\"))\n\n\tif report.owner != frappe.session.user and not report.has_permission(\"delete\"):\n\t\tfrappe.throw(_(\"Insufficient Permissions for deleting Report\"), frappe.PermissionError)\n\n\treport.delete(ignore_permissions=True)\n\tfrappe.msgprint(\n\t\t_(\"Report {0} deleted\").format(frappe.bold(report.name)),\n\t\tindicator=\"green\",\n\t\talert=True,\n\t)"
+    },
+    {
+      "repo": "frappe",
+      "product": "erpnext",
+      "path": "frappe/desk/reportview.py",
+      "sha256": "8ecd46e71fd612dd9372393d37ca73a751a7aabd034913da89f777cd073d8308",
+      "name": "export_query",
+      "start": 446,
+      "end": 478,
+      "program_units": 15,
+      "nodes": [
+        [
+          "Assign",
+          450,
+          450,
+          1,
+          32
+        ],
+        [
+          "Assign",
+          451,
+          451,
+          1,
+          40
+        ],
+        [
+          "Assign",
+          453,
+          453,
+          1,
+          30
+        ],
+        [
+          "Assign",
+          454,
+          454,
+          1,
+          41
+        ],
+        [
+          "Assign",
+          457,
+          457,
+          1,
+          71
+        ],
+        [
+          "Assign",
+          460,
+          460,
+          2,
+          28
+        ],
+        [
+          "Assign",
+          461,
+          461,
+          2,
+          61
+        ],
+        [
+          "Expr",
+          456,
+          456,
+          1,
+          42
+        ],
+        [
+          "Expr",
+          462,
+          469,
+          2,
+          3
+        ],
+        [
+          "Expr",
+          471,
+          475,
+          2,
+          3
+        ],
+        [
+          "FunctionDef",
+          446,
+          478,
+          0,
+          46
+        ],
+        [
+          "If",
+          459,
+          476,
+          1,
+          8
+        ],
+        [
+          "ImportFrom",
+          448,
+          448,
+          1,
+          45
+        ],
+        [
+          "Return",
+          476,
+          476,
+          2,
+          8
+        ],
+        [
+          "Return",
+          478,
+          478,
+          1,
+          46
+        ]
+      ],
+      "source": "def export_query():\n\t\"\"\"export from report builder\"\"\"\n\tfrom frappe.desk.utils import pop_csv_params\n\n\tform_params = get_form_params()\n\tform_params[\"limit_page_length\"] = None\n\n\tform_params[\"as_list\"] = True\n\tcsv_params = pop_csv_params(form_params)\n\t# the report view sends this for its on-screen table; exports keep document names\n\tform_params.pop(\"with_link_titles\", None)\n\texport_in_background = int(form_params.pop(\"export_in_background\", 0))\n\n\tif export_in_background:\n\t\tuser = frappe.session.user\n\t\tuser_email = frappe.get_cached_value(\"User\", user, \"email\")\n\t\tfrappe.enqueue(\n\t\t\t\"frappe.desk.reportview.run_report_view_export_job\",\n\t\t\tuser_email=user_email,\n\t\t\tform_params=form_params,\n\t\t\tcsv_params=csv_params,\n\t\t\tqueue=\"long\",\n\t\t\tnow=frappe.flags.in_test,\n\t\t)\n\n\t\tfrappe.msgprint(\n\t\t\t_(\n\t\t\t\t\"Your report is being generated in the background. You will receive an email on {0} with a download link once it is ready.\"\n\t\t\t).format(user_email)\n\t\t)\n\t\treturn\n\n\treturn _export_query(form_params, csv_params)"
+    },
+    {
+      "repo": "frappe",
+      "product": "erpnext",
+      "path": "frappe/desk/reportview.py",
+      "sha256": "8ecd46e71fd612dd9372393d37ca73a751a7aabd034913da89f777cd073d8308",
+      "name": "run_report_view_export_job",
+      "start": 481,
+      "end": 485,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          484,
+          484,
+          1,
+          103
+        ],
+        [
+          "Expr",
+          485,
+          485,
+          1,
+          98
+        ],
+        [
+          "FunctionDef",
+          481,
+          485,
+          0,
+          98
+        ],
+        [
+          "ImportFrom",
+          482,
+          482,
+          1,
+          48
+        ]
+      ],
+      "source": "def run_report_view_export_job(user_email, form_params, csv_params):\n\tfrom frappe.desk.utils import send_report_email\n\n\treport_name, file_extension, content = _export_query(form_params, csv_params, populate_response=False)\n\tsend_report_email(user_email, report_name, file_extension, content, attached_to_name=report_name)"
+    },
+    {
+      "repo": "frappe",
+      "product": "erpnext",
+      "path": "frappe/desk/reportview.py",
+      "sha256": "8ecd46e71fd612dd9372393d37ca73a751a7aabd034913da89f777cd073d8308",
+      "name": "_export_query",
+      "start": 488,
+      "end": 597,
+      "program_units": 64,
+      "nodes": [
+        [
+          "Assign",
+          492,
+          492,
+          1,
+          37
+        ],
+        [
+          "Assign",
+          493,
+          493,
+          1,
+          40
+        ],
+        [
+          "Assign",
+          497,
+          497,
+          2,
+          64
+        ],
+        [
+          "Assign",
+          498,
+          498,
+          1,
+          55
+        ],
+        [
+          "Assign",
+          499,
+          499,
+          1,
+          42
+        ],
+        [
+          "Assign",
+          500,
+          500,
+          1,
+          79
+        ],
+        [
+          "Assign",
+          501,
+          501,
+          1,
+          83
+        ],
+        [
+          "Assign",
+          503,
+          503,
+          1,
+          55
+        ],
+        [
+          "Assign",
+          505,
+          505,
+          2,
+          50
+        ],
+        [
+          "Assign",
+          507,
+          507,
+          2,
+          22
+        ],
+        [
+          "Assign",
+          510,
+          510,
+          2,
+          66
+        ],
+        [
+          "Assign",
+          517,
+          517,
+          2,
+          58
+        ],
+        [
+          "Assign",
+          518,
+          518,
+          2,
+          32
+        ],
+        [
+          "Assign",
+          530,
+          530,
+          1,
+          34
+        ],
+        [
+          "Assign",
+          531,
+          531,
+          1,
+          38
+        ],
+        [
+          "Assign",
+          534,
+          534,
+          2,
+          93
+        ],
+        [
+          "Assign",
+          547,
+          547,
+          2,
+          30
+        ],
+        [
+          "Assign",
+          549,
+          549,
+          1,
+          55
+        ],
+        [
+          "Assign",
+          551,
+          551,
+          1,
+          49
+        ],
+        [
+          "Assign",
+          552,
+          552,
+          1,
+          19
+        ],
+        [
+          "Assign",
+          553,
+          553,
+          1,
+          29
+        ],
+        [
+          "Assign",
+          554,
+          554,
+          1,
+          20
+        ],
+        [
+          "Assign",
+          559,
+          559,
+          2,
+          72
+        ],
+        [
+          "Assign",
+          560,
+          560,
+          2,
+          21
+        ],
+        [
+          "Assign",
+          562,
+          564,
+          3,
+          4
+        ],
+        [
+          "Assign",
+          568,
+          568,
+          1,
+          72
+        ],
+        [
+          "Assign",
+          571,
+          571,
+          2,
+          24
+        ],
+        [
+          "Assign",
+          572,
+          575,
+          2,
+          3
+        ],
+        [
+          "Assign",
+          577,
+          577,
+          2,
+          25
+        ],
+        [
+          "Assign",
+          579,
+          590,
+          2,
+          3
+        ],
+        [
+          "Assign",
+          592,
+          592,
+          2,
+          62
+        ],
+        [
+          "Expr",
+          495,
+          495,
+          2,
+          43
+        ],
+        [
+          "Expr",
+          519,
+          519,
+          2,
+          38
+        ],
+        [
+          "Expr",
+          520,
+          520,
+          2,
+          44
+        ],
+        [
+          "Expr",
+          521,
+          521,
+          2,
+          32
+        ],
+        [
+          "Expr",
+          523,
+          528,
+          1,
+          2
+        ],
+        [
+          "Expr",
+          557,
+          557,
+          2,
+          63
+        ],
+        [
+          "Expr",
+          565,
+          565,
+          3,
+          39
+        ],
+        [
+          "Expr",
+          566,
+          566,
+          2,
+          29
+        ],
+        [
+          "Expr",
+          597,
+          597,
+          1,
+          55
+        ],
+        [
+          "For",
+          538,
+          542,
+          3,
+          6
+        ],
+        [
+          "For",
+          561,
+          565,
+          2,
+          39
+        ],
+        [
+          "FunctionDef",
+          488,
+          597,
+          0,
+          55
+        ],
+        [
+          "If",
+          494,
+          497,
+          1,
+          64
+        ],
+        [
+          "If",
+          496,
+          497,
+          1,
+          64
+        ],
+        [
+          "If",
+          504,
+          505,
+          1,
+          50
+        ],
+        [
+          "If",
+          506,
+          507,
+          1,
+          22
+        ],
+        [
+          "If",
+          509,
+          510,
+          1,
+          66
+        ],
+        [
+          "If",
+          516,
+          521,
+          1,
+          32
+        ],
+        [
+          "If",
+          533,
+          534,
+          1,
+          93
+        ],
+        [
+          "If",
+          536,
+          544,
+          1,
+          94
+        ],
+        [
+          "If",
+          537,
+          544,
+          2,
+          94
+        ],
+        [
+          "If",
+          539,
+          542,
+          4,
+          6
+        ],
+        [
+          "If",
+          546,
+          547,
+          1,
+          30
+        ],
+        [
+          "If",
+          556,
+          566,
+          1,
+          29
+        ],
+        [
+          "If",
+          558,
+          566,
+          1,
+          29
+        ],
+        [
+          "If",
+          570,
+          592,
+          1,
+          62
+        ],
+        [
+          "If",
+          576,
+          592,
+          1,
+          62
+        ],
+        [
+          "If",
+          594,
+          595,
+          1,
+          39
+        ],
+        [
+          "ImportFrom",
+          489,
+          489,
+          1,
+          65
+        ],
+        [
+          "ImportFrom",
+          490,
+          490,
+          1,
+          83
+        ],
+        [
+          "Raise",
+          540,
+          542,
+          5,
+          6
+        ],
+        [
+          "Raise",
+          544,
+          544,
+          3,
+          94
+        ],
+        [
+          "Return",
+          595,
+          595,
+          2,
+          39
+        ]
+      ],
+      "source": "def _export_query(form_params, csv_params, populate_response=True):\n\tfrom frappe.desk.utils import get_csv_bytes, provide_binary_file\n\tfrom frappe.utils.xlsxutils import get_default_xlsx_styles, handle_html, make_xlsx\n\n\tdoctype = form_params.pop(\"doctype\")\n\towner_field = f\"`tab{doctype}`.`owner`\"\n\tif isinstance(form_params[\"fields\"], list):\n\t\tform_params[\"fields\"].append(owner_field)\n\telif isinstance(form_params[\"fields\"], tuple):\n\t\tform_params[\"fields\"] = form_params[\"fields\"] + (owner_field,)\n\tfile_format_type = form_params.pop(\"file_format_type\")\n\ttitle = form_params.pop(\"title\", doctype)\n\tadd_totals_row = 1 if form_params.pop(\"add_totals_row\", None) == \"1\" else None\n\ttranslate_values = 1 if form_params.pop(\"translate_values\", None) == \"1\" else None\n\n\tvisible_names = form_params.pop(\"visible_names\", None)\n\tif isinstance(visible_names, str):\n\t\tvisible_names = frappe.parse_json(visible_names)\n\tif not (isinstance(visible_names, list) and visible_names):\n\t\tvisible_names = None\n\n\tif selection := form_params.pop(\"selected_items\", None):\n\t\tform_params[\"filters\"] = {\"name\": (\"in\", json.loads(selection))}\n\n\t# visible_names is the client's ordered display sequence\n\t# When present, take precedence over generic filters/order/pagination: fetch\n\t# exactly those rows, then reorder in Python below.\n\t# Mirrors the visible_idx pattern in Query Report.\n\tif visible_names:\n\t\tform_params[\"filters\"] = {\"name\": (\"in\", visible_names)}\n\t\tform_params[\"order_by\"] = None\n\t\tform_params.pop(\"page_length\", None)\n\t\tform_params.pop(\"limit_page_length\", None)\n\t\tform_params.pop(\"start\", None)\n\n\tmake_access_log(\n\t\tdoctype=doctype,\n\t\tfile_type=file_format_type,\n\t\treport_name=form_params.report_name,\n\t\tfilters=form_params.filters,\n\t)\n\n\tdb_query = DatabaseQuery(doctype)\n\tret = db_query.execute(**form_params)\n\n\tif visible_names:\n\t\tret = _reorder_by_visible_names(ret, form_params.get(\"fields\", []), doctype, visible_names)\n\n\tif not frappe.permissions.can_export(doctype):\n\t\tif frappe.permissions.can_export(doctype, is_owner=True):\n\t\t\tfor row in ret:\n\t\t\t\tif row[-1] != frappe.session.user:\n\t\t\t\t\traise frappe.PermissionError(\n\t\t\t\t\t\t_(\"You are not allowed to export {} doctype\").format(doctype)\n\t\t\t\t\t)\n\t\telse:\n\t\t\traise frappe.PermissionError(_(\"You are not allowed to export {} doctype\").format(doctype))\n\n\tif add_totals_row:\n\t\tret = append_totals_row(ret)\n\n\tfields_info = get_field_info(db_query.fields, doctype)\n\n\tlabels = [info[\"label\"] for info in fields_info]\n\tsr_label = _(\"Sr\")\n\tdata = [[sr_label, *labels]]\n\tprocessed_data = []\n\n\tif frappe.local.lang == \"en\" or not translate_values:\n\t\tdata.extend([i + 1, *list(row)] for i, row in enumerate(ret))\n\telif translate_values:\n\t\ttranslatable_fields = [field[\"translatable\"] for field in fields_info]\n\t\tprocessed_data = []\n\t\tfor i, row in enumerate(ret):\n\t\t\tprocessed_row = [i + 1] + [\n\t\t\t\t_(value) if translatable_fields[idx] else value for idx, value in enumerate(row)\n\t\t\t]\n\t\t\tprocessed_data.append(processed_row)\n\t\tdata.extend(processed_data)\n\n\tdata = handle_duration_fieldtype_values(doctype, data, db_query.fields)\n\n\tif file_format_type == \"CSV\":\n\t\tfile_extension = \"csv\"\n\t\tcontent = get_csv_bytes(\n\t\t\t[[handle_html(v) if isinstance(v, str) else v for v in r] for r in data],\n\t\t\tcsv_params,\n\t\t)\n\telif file_format_type == \"Excel\":\n\t\tfile_extension = \"xlsx\"\n\n\t\tstyles = get_default_xlsx_styles(\n\t\t\tcolumns=[\n\t\t\t\t{\n\t\t\t\t\t\"fieldname\": \"sr\",\n\t\t\t\t\t\"label\": sr_label,\n\t\t\t\t\t\"fieldtype\": \"Int\",\n\t\t\t\t},\n\t\t\t\t*fields_info,\n\t\t\t],\n\t\t\tdata=data[1:],  # exclude header row\n\t\t\thas_total_row=bool(add_totals_row),\n\t\t)\n\n\t\tcontent = make_xlsx(data, doctype, styles=styles).getvalue()\n\n\tif not populate_response:\n\t\treturn title, file_extension, content\n\n\tprovide_binary_file(_(title), file_extension, content)"
+    },
+    {
+      "repo": "frappe",
+      "product": "erpnext",
+      "path": "frappe/desk/reportview.py",
+      "sha256": "8ecd46e71fd612dd9372393d37ca73a751a7aabd034913da89f777cd073d8308",
+      "name": "handle_duration_fieldtype_values",
+      "start": 735,
+      "end": 752,
+      "program_units": 15,
+      "nodes": [
+        [
+          "Assign",
+          738,
+          738,
+          3,
+          42
+        ],
+        [
+          "Assign",
+          742,
+          742,
+          2,
+          37
+        ],
+        [
+          "Assign",
+          743,
+          743,
+          2,
+          52
+        ],
+        [
+          "Assign",
+          746,
+          746,
+          3,
+          34
+        ],
+        [
+          "Assign",
+          748,
+          748,
+          4,
+          35
+        ],
+        [
+          "Assign",
+          750,
+          750,
+          5,
+          65
+        ],
+        [
+          "Assign",
+          751,
+          751,
+          5,
+          34
+        ],
+        [
+          "Continue",
+          740,
+          740,
+          3,
+          11
+        ],
+        [
+          "For",
+          736,
+          751,
+          1,
+          34
+        ],
+        [
+          "For",
+          747,
+          751,
+          3,
+          34
+        ],
+        [
+          "FunctionDef",
+          735,
+          752,
+          0,
+          12
+        ],
+        [
+          "If",
+          745,
+          751,
+          2,
+          34
+        ],
+        [
+          "If",
+          749,
+          751,
+          4,
+          34
+        ],
+        [
+          "Return",
+          752,
+          752,
+          1,
+          12
+        ],
+        [
+          "Try",
+          737,
+          740,
+          2,
+          11
+        ]
+      ],
+      "source": "def handle_duration_fieldtype_values(parent_doctype, data, fields):\n\tfor field in fields:\n\t\ttry:\n\t\t\tdoctype, fieldname = parse_field(field)\n\t\texcept ValueError:\n\t\t\tcontinue\n\n\t\tdoctype = doctype or parent_doctype\n\t\tdf = frappe.get_meta(doctype).get_field(fieldname)\n\n\t\tif df and df.fieldtype == \"Duration\":\n\t\t\tindex = fields.index(field) + 1\n\t\t\tfor i in range(1, len(data)):\n\t\t\t\tval_in_seconds = data[i][index]\n\t\t\t\tif val_in_seconds:\n\t\t\t\t\tduration_val = format_duration(val_in_seconds, df.hide_days)\n\t\t\t\t\tdata[i][index] = duration_val\n\treturn data"
+    }
+  ],
+  "source_files": [
+    {
+      "repo": "odoo",
+      "path": "addons/sale/report/sale_report.py",
+      "root_path": "tmp/odoo20-audit/addons/sale/report/sale_report.py",
+      "sha256": "2f080eff65725dd069a201c08bd79d39055448cd8d2d655db800ecb2fa89849f",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/sale/report/sale_report.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 87,
+        "declarative_units": 0,
+        "physical_lines": 220,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-20-preuves.json",
+      "prior_observed": "Agrégations de quantités, montants, dimensions et références aux commandes.",
+      "prior_limit": "Analogie de reporting traçable ; aucune découverte de processus démontrée par ces requêtes."
+    },
+    {
+      "repo": "tryton",
+      "path": "modules/sale/sale_reporting.py",
+      "root_path": "tmp/tryton-code-audit-2026-10-28/modules/sale/sale_reporting.py",
+      "sha256": "426bee3d317cf497ea48368ad728421eb2dbea70d92d8937c3325e352413b083",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/sale/sale_reporting.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 612,
+        "declarative_units": 0,
+        "physical_lines": 1088,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-20-preuves.json",
+      "prior_observed": "Requêtes groupées avec états de commande, société, devise et quantité.",
+      "prior_limit": "Assiette et dimensionnement des mesures comparables ; pas équivalent complet Process Mining."
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-crm/src/main/java/com/axelor/apps/crm/service/CrmReportingServiceImpl.java",
+      "root_path": "tmp/oss-audit-axelor/axelor-crm/src/main/java/com/axelor/apps/crm/service/CrmReportingServiceImpl.java",
+      "sha256": "44124e783817359a991ca9f6b0f8b0b140646f8d5c00945b0cc020fe497693a0",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-crm/src/main/java/com/axelor/apps/crm/service/CrmReportingServiceImpl.java",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 101,
+        "declarative_units": 0,
+        "physical_lines": 234,
+        "details": {
+          "convention": "Arbre syntaxique : instructions et déclarations ; JSX compté séparément"
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-20-preuves.json",
+      "prior_observed": "Filtres de période, agence, équipe et société dans les requêtes.",
+      "prior_limit": "Analogie de filtres et périmètres ; aucune couverture complète du reporting logistique ou du process mining revendiquée."
+    },
+    {
+      "repo": "erpnext",
+      "path": "erpnext/selling/report/sales_analytics/sales_analytics.py",
+      "root_path": "tmp/master-data-native-23/erpnext/erpnext/selling/report/sales_analytics/sales_analytics.py",
+      "sha256": "1f3255a2b34259a756342f8922759b27734aecb905cff078f9374ccedf6bb338",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/selling/report/sales_analytics/sales_analytics.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 320,
+        "declarative_units": 0,
+        "physical_lines": 603,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    },
+    {
+      "repo": "frappe",
+      "path": "frappe/desk/reportview.py",
+      "root_path": "tmp/master-data-native-23/frappe/frappe/desk/reportview.py",
+      "sha256": "8ecd46e71fd612dd9372393d37ca73a751a7aabd034913da89f777cd073d8308",
+      "commit": "2fcb9397a1f1da353b21e53d2f97ec56653acd02",
+      "url": "https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/desk/reportview.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 589,
+        "declarative_units": 0,
+        "physical_lines": 1053,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    }
+  ],
+  "attribution": 0.7,
+  "attribution_basis": "Part d’analogie retenue après exclusion supposée des responsabilités natives hors périmètre ; pas proportion observée. Les quatre sources montrent des agrégations et rapports, pas une découverte de processus ni un alignement optimal de traces.",
+  "new_complement_fraction": 0.8,
+  "new_complement_basis": "Limiter le mining aux séquences corrélées, variantes et temps de passage, sur le Process Ledger ; isoler le besoin d’une validation d’algorithme de traces avant engagement.",
+  "schemas": [
+    {
+      "name": "TraceAnalysis",
+      "fields": [
+        "scope",
+        "cut",
+        "caseSequences",
+        "variant",
+        "times",
+        "limits"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    },
+    {
+      "name": "PerformanceIndicator",
+      "fields": [
+        "name",
+        "formula",
+        "denominator",
+        "scope",
+        "version",
+        "authority"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    },
+    {
+      "name": "OperationalReport",
+      "fields": [
+        "indicators",
+        "scope",
+        "cut",
+        "results",
+        "drilldown",
+        "limits"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    }
+  ],
+  "template_source": "audits/2026-10-30-propriete-stock-calcul-02/inputs.json#schema_templates",
+  "scaffold_source": "audits/2026-10-30-propriete-stock-calcul-02/inputs.json#new_module_scaffolding",
+  "reuse": "Services génériques Master Data, Stock et Propriété du stock déjà financés ; autres mécanismes communs de la campagne à réconcilier. Le code natif sert de règle de taille, ce n’est pas une facture historique.",
+  "no_extra_AI": true,
+  "no_generic_rebuild": true,
+  "logical_code_not_calibrated_to_physical_SLOC": true
+}

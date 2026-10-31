@@ -73,9 +73,11 @@ class ApiTests(unittest.TestCase):
         self.assertIsNone(h.get('Content-Encoding'));self.assertEqual(refused,light)
         self.assertLess(len(packed),len(light)/2)
         small=json.loads(light);full=json.loads(get('/api/bootstrap')[0])
-        self.assertEqual(set(small['content']),{'complexity','framework','market_method','core_evaluation','synvance_reference','delivery_method','delivery_readiness'})
+        self.assertEqual(set(small['content']),{'complexity','framework','market_method','core_evaluation','synvance_reference','delivery_method','delivery_readiness','core_product_scope'})
         self.assertEqual(len(small['content']['complexity']['rows']),88)
         self.assertEqual(len(small['content']['core_evaluation']),5)
+        self.assertEqual(small['content']['core_product_scope'],full['content']['core_product_scope'])
+        self.assertEqual(small['content']['core_product_scope']['proposal']['status'],'retained')
         for key in ('delivery_method','delivery_readiness'):
             self.assertEqual(small['content'][key],full['content'][key])
         self.assertEqual([row['capability_id'] for row in small['content']['delivery_readiness']['scope']['rows']],
@@ -137,7 +139,20 @@ class ApiTests(unittest.TestCase):
                 self.assertEqual(json.loads(gzip.decompress(response.read())),record)
         self.assertEqual(record,self.study.content['economic_evaluations'])
         self.assertEqual([row['stack'] for row in record['options']],[row['stack'] for row in self.study.baseline['options']])
-        self.assertNotIn('economic_evaluations',self.study.bootstrap(essential=True)['content'])
+        initial=self.study.bootstrap(essential=True)['content']
+        self.assertNotIn('economic_evaluations',initial)
+        summaries={row['stack']:row['units'] for row in initial['core_evaluation']}
+        for option in record['options']:
+            if option['mode']!='Make':continue
+            details=option['core']['units']
+            self.assertEqual([unit['id'] for unit in summaries[option['stack']]],
+                             [unit['id'] for unit in details])
+            for summary,unit in zip(summaries[option['stack']],details):
+                for key in ('total_jh','months','capabilities'):
+                    self.assertEqual(summary[key],unit[key])
+                for key in ('alignment','roles','activities','funding','trace'):
+                    self.assertNotIn(key,summary)
+                    self.assertTrue(unit[key],key+' must remain available in the family detail')
         for version in ('', 'old'):
             with self.assertRaises(HTTPError) as error:urlopen(self.url+'/api/economic-evaluations?model_version='+version)
             self.assertEqual(error.exception.code,409)

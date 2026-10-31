@@ -1,0 +1,552 @@
+{
+  "status": "working_proposal_not_active_model",
+  "mechanisms": [
+    {
+      "id": "order-state",
+      "owner": "orders",
+      "name": "Cycle commun des commandes et lignes",
+      "base": true,
+      "fraction": 0.25,
+      "schemas": [
+        "OrderMutationEvidence:orderRef,lineRef,previousVersion,acceptedVersion,authorityRef,quantityBefore,quantityAfter,resultRef"
+      ],
+      "basis": "Réalisation du cycle commun observé ; complément pour contrôler et expliquer l’acceptation d’une contribution métier et conserver les invariants de quantité. Admission technique déjà financée."
+    },
+    {
+      "id": "order-lineage",
+      "owner": "orders",
+      "name": "Révisions et filiation des commandes",
+      "base": true,
+      "fraction": 0.35,
+      "schemas": [
+        "OrderLineageProof:sourceRef,targetRef,sourceLine,targetLine,quantity,acceptedChangeRef,proofRef"
+      ],
+      "basis": "Scission/amendement et suivi des origines. Complément estimé pour les filiations explicites et la conservation des engagements ; aucun second cycle d’état."
+    },
+    {
+      "id": "service-contract",
+      "owner": "goods-orders",
+      "name": "Contrat commun de prestation confiée",
+      "base": false,
+      "fraction": 1,
+      "schemas": [
+        "ServiceRequirement:orderRef,requirementsRef,providerRef,version,expectedResultsRef",
+        "ServiceCommitment:requirementRef,acceptedVersion,quantity,date,conditionsRef,status"
+      ],
+      "basis": "Module distinct du cycle Order : exigences confiées et engagement du prestataire. Les instructions de stock servent d’analogue ; aucune nouvelle exécution Stock n’est financée."
+    },
+    {
+      "id": "service-recognition",
+      "owner": "assurance",
+      "name": "Reconnaissance et rapprochement des résultats de prestation",
+      "base": false,
+      "fraction": 0.75,
+      "provider": "stock_correction",
+      "schemas": [
+        "ServiceResultAcceptance:serviceRef,sourceRef,expectedVersion,observedRef,acceptedRef,correctionOf,remaining,reason"
+      ],
+      "basis": "Nouveau contrôle métier de résultat sur le modèle de contribution/correction déjà étudié. Le noyau d’admission et les mouvements Stock gardent leurs propriétaires."
+    },
+    {
+      "id": "process-definitions",
+      "owner": "workflow",
+      "name": "Définitions et versions de parcours",
+      "base": true,
+      "fraction": 0.25,
+      "schemas": [
+        "ActivityBinding:activityRef,inputContractRef,resultContractRef,version,authorityRef"
+      ],
+      "basis": "Définitions/versionnement et leur adaptation au catalogue d’activités Flow ; studio graphique universel et moteur BPMN/DMN exclus."
+    },
+    {
+      "id": "process-runtime",
+      "owner": "workflow",
+      "name": "Adaptation du moteur de processus et corrélation",
+      "base": true,
+      "fraction": 0.35,
+      "schemas": [
+        "ProcessCorrelation:caseRef,instanceRef,definitionVersion,contextRef,lastRecognizedEventRef"
+      ],
+      "basis": "Adaptateur d’instance, déclenchement/attente/reprise et corrélation. Moteurs et transactions sont fournis par les bibliothèques et le patrimoine commun ; orchestration métier adaptative de Fulfilment exclue."
+    },
+    {
+      "id": "human-task",
+      "owner": "human-work",
+      "name": "Contexte et attribution du travail humain",
+      "base": true,
+      "fraction": 0.25,
+      "schemas": [
+        "TaskResultContract:taskRef,contextRef,resultContractRef,authorityRef,acceptedResultRef"
+      ],
+      "basis": "Tâche contextualisée, affectation et reconnaissance du résultat. Identités/droits et exécution durable sont consommés ; pas outil RH ni studio universel de formulaires."
+    },
+    {
+      "id": "work-deadline",
+      "owner": "human-work",
+      "name": "Échéances, pauses et réactions autorisées",
+      "base": false,
+      "fraction": 1,
+      "schemas": [
+        "TaskDeadlineState:taskRef,calendarRef,dueAt,pauseIntervals,lastReactionRef,authorityRef"
+      ],
+      "basis": "Calendriers et minuteurs réutilisés. Nouveau comportement de pause/reprise, réexamen et réaction autorisée sur les tâches ; règles Beaumanoir reçues/configurées."
+    },
+    {
+      "id": "case-ledger",
+      "owner": "supervision",
+      "name": "Journal métier du Case et lectures temporelles",
+      "base": false,
+      "fraction": 1.75,
+      "provider": "stock_correction",
+      "schemas": [
+        "CaseBusinessEvent:caseRef,sourceRef,kind,payloadRef,effectiveAt,knownAt,correctionOf,authorityRef",
+        "CaseReadCut:caseRef,effectiveAt,knownAt,recognizedEventsRef,limits"
+      ],
+      "basis": "Analogie explicite de nouveau registre (1 chaîne) et lecture/correction aux deux dates (0,75 chaîne), comme forme technique déjà étudiée pour la propriété. Ni audit technique ni journal Stock reconstruit. La suffisance pour le Case reste supposée."
+    },
+    {
+      "id": "process-intervention",
+      "owner": "supervision",
+      "name": "Autorisation d’intervention et effet reconnu",
+      "base": false,
+      "fraction": 0.5,
+      "schemas": [
+        "InterventionEvidence:caseRef,actionRef,scopeRef,authorityRef,expectedEffectRef,observedEffectRef,resultRef"
+      ],
+      "basis": "Contrôle et preuve autour des actions du moteur ; ces actions ne sont pas reconstruites ni financées deux fois."
+    },
+    {
+      "id": "process-exception",
+      "owner": "supervision",
+      "name": "Exception, responsabilité et résolution attestée",
+      "base": false,
+      "fraction": 0.5,
+      "schemas": [
+        "CaseException:caseRefs,kind,responsibleRef,remediationRef,expectedEvidenceRef,resolutionRef,status"
+      ],
+      "basis": "Dossier d’exception et constat de résolution sur tâches/interventions déjà financées ; ni nouveau moteur de processus ni simple reprise technique."
+    }
+  ],
+  "claims": [
+    {
+      "family": "orders",
+      "mechanism": "order-state",
+      "mode": "proposed_funding"
+    },
+    {
+      "family": "orders",
+      "mechanism": "order-lineage",
+      "mode": "proposed_funding"
+    },
+    {
+      "family": "orders",
+      "mechanism": "java-spring-framework-services",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "orders",
+      "mechanism": "master-data-admission",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "orders",
+      "mechanism": "master-data-common-domain",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "orders",
+      "mechanism": "master-data-protection",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "orders",
+      "mechanism": "stock-common-domain",
+      "mode": "consumed_already_funded",
+      "funding_owner": "stock-java-spring"
+    },
+    {
+      "family": "orders",
+      "mechanism": "ownership-own-f04",
+      "mode": "consumed_already_funded",
+      "funding_owner": "inventory-ownership-java-spring"
+    },
+    {
+      "family": "goods-orders",
+      "mechanism": "service-contract",
+      "mode": "proposed_funding"
+    },
+    {
+      "family": "goods-orders",
+      "mechanism": "java-spring-framework-services",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "goods-orders",
+      "mechanism": "master-data-admission",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "goods-orders",
+      "mechanism": "order-state",
+      "mode": "consumed",
+      "funding_owner": "orders"
+    },
+    {
+      "family": "goods-orders",
+      "mechanism": "order-lineage",
+      "mode": "consumed",
+      "funding_owner": "orders"
+    },
+    {
+      "family": "goods-orders",
+      "mechanism": "service-recognition",
+      "mode": "consumed",
+      "funding_owner": "assurance"
+    },
+    {
+      "family": "transport-orders",
+      "mechanism": "java-spring-framework-services",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "transport-orders",
+      "mechanism": "order-state",
+      "mode": "consumed",
+      "funding_owner": "orders"
+    },
+    {
+      "family": "transport-orders",
+      "mechanism": "order-lineage",
+      "mode": "consumed",
+      "funding_owner": "orders"
+    },
+    {
+      "family": "transport-orders",
+      "mechanism": "service-contract",
+      "mode": "consumed",
+      "funding_owner": "goods-orders"
+    },
+    {
+      "family": "transport-orders",
+      "mechanism": "service-recognition",
+      "mode": "consumed",
+      "funding_owner": "assurance"
+    },
+    {
+      "family": "customs",
+      "mechanism": "java-spring-framework-services",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "customs",
+      "mechanism": "order-state",
+      "mode": "consumed",
+      "funding_owner": "orders"
+    },
+    {
+      "family": "customs",
+      "mechanism": "order-lineage",
+      "mode": "consumed",
+      "funding_owner": "orders"
+    },
+    {
+      "family": "customs",
+      "mechanism": "service-contract",
+      "mode": "consumed",
+      "funding_owner": "goods-orders"
+    },
+    {
+      "family": "customs",
+      "mechanism": "service-recognition",
+      "mode": "consumed",
+      "funding_owner": "assurance"
+    },
+    {
+      "family": "financial-services",
+      "mechanism": "java-spring-framework-services",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "financial-services",
+      "mechanism": "master-data-admission",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "financial-services",
+      "mechanism": "order-state",
+      "mode": "consumed",
+      "funding_owner": "orders"
+    },
+    {
+      "family": "financial-services",
+      "mechanism": "order-lineage",
+      "mode": "consumed",
+      "funding_owner": "orders"
+    },
+    {
+      "family": "financial-services",
+      "mechanism": "service-contract",
+      "mode": "consumed",
+      "funding_owner": "goods-orders"
+    },
+    {
+      "family": "financial-services",
+      "mechanism": "service-recognition",
+      "mode": "consumed",
+      "funding_owner": "assurance"
+    },
+    {
+      "family": "workflow",
+      "mechanism": "process-definitions",
+      "mode": "proposed_funding"
+    },
+    {
+      "family": "workflow",
+      "mechanism": "process-runtime",
+      "mode": "proposed_funding"
+    },
+    {
+      "family": "workflow",
+      "mechanism": "java-spring-framework-services",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "workflow",
+      "mechanism": "master-data-admission",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "workflow",
+      "mechanism": "master-data-protection",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "workflow",
+      "mechanism": "external.process-engine",
+      "mode": "external_library_no_reconstruction",
+      "adaptation_funding_owner": "workflow"
+    },
+    {
+      "family": "human-work",
+      "mechanism": "human-task",
+      "mode": "proposed_funding"
+    },
+    {
+      "family": "human-work",
+      "mechanism": "work-deadline",
+      "mode": "proposed_funding"
+    },
+    {
+      "family": "human-work",
+      "mechanism": "java-spring-framework-services",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "human-work",
+      "mechanism": "master-data-common-domain",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "human-work",
+      "mechanism": "master-data-protection",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "human-work",
+      "mechanism": "process-runtime",
+      "mode": "consumed",
+      "funding_owner": "workflow"
+    },
+    {
+      "family": "supervision",
+      "mechanism": "case-ledger",
+      "mode": "proposed_funding"
+    },
+    {
+      "family": "supervision",
+      "mechanism": "process-intervention",
+      "mode": "proposed_funding"
+    },
+    {
+      "family": "supervision",
+      "mechanism": "process-exception",
+      "mode": "proposed_funding"
+    },
+    {
+      "family": "supervision",
+      "mechanism": "java-spring-framework-services",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "supervision",
+      "mechanism": "master-data-admission",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "supervision",
+      "mechanism": "master-data-protection",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "supervision",
+      "mechanism": "process-runtime",
+      "mode": "consumed",
+      "funding_owner": "workflow"
+    },
+    {
+      "family": "supervision",
+      "mechanism": "human-task",
+      "mode": "consumed",
+      "funding_owner": "human-work"
+    },
+    {
+      "family": "supervision",
+      "mechanism": "work-deadline",
+      "mode": "consumed",
+      "funding_owner": "human-work"
+    },
+    {
+      "family": "coordination",
+      "mechanism": "java-spring-framework-services",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "coordination",
+      "mechanism": "order-state",
+      "mode": "consumed",
+      "funding_owner": "orders"
+    },
+    {
+      "family": "coordination",
+      "mechanism": "order-lineage",
+      "mode": "consumed",
+      "funding_owner": "orders"
+    },
+    {
+      "family": "coordination",
+      "mechanism": "service-contract",
+      "mode": "consumed",
+      "funding_owner": "goods-orders"
+    },
+    {
+      "family": "coordination",
+      "mechanism": "service-recognition",
+      "mode": "consumed",
+      "funding_owner": "assurance"
+    },
+    {
+      "family": "coordination",
+      "mechanism": "process-definitions",
+      "mode": "consumed",
+      "funding_owner": "workflow"
+    },
+    {
+      "family": "coordination",
+      "mechanism": "process-runtime",
+      "mode": "consumed",
+      "funding_owner": "workflow"
+    },
+    {
+      "family": "coordination",
+      "mechanism": "human-task",
+      "mode": "consumed",
+      "funding_owner": "human-work"
+    },
+    {
+      "family": "coordination",
+      "mechanism": "case-ledger",
+      "mode": "consumed",
+      "funding_owner": "supervision"
+    },
+    {
+      "family": "assurance",
+      "mechanism": "service-recognition",
+      "mode": "proposed_funding"
+    },
+    {
+      "family": "assurance",
+      "mechanism": "java-spring-framework-services",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "assurance",
+      "mechanism": "master-data-admission",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "assurance",
+      "mechanism": "master-data-common-domain",
+      "mode": "consumed_already_funded",
+      "funding_owner": "master-data-java-spring"
+    },
+    {
+      "family": "assurance",
+      "mechanism": "stock-common-domain",
+      "mode": "consumed_already_funded",
+      "funding_owner": "stock-java-spring"
+    },
+    {
+      "family": "assurance",
+      "mechanism": "ownership-own-f04",
+      "mode": "consumed_already_funded",
+      "funding_owner": "inventory-ownership-java-spring"
+    },
+    {
+      "family": "assurance",
+      "mechanism": "order-state",
+      "mode": "consumed",
+      "funding_owner": "orders"
+    },
+    {
+      "family": "assurance",
+      "mechanism": "service-contract",
+      "mode": "consumed",
+      "funding_owner": "goods-orders"
+    }
+  ],
+  "existing_owners": {
+    "java-spring-framework-services": "master-data-java-spring",
+    "master-data-admission": "master-data-java-spring",
+    "master-data-common-domain": "master-data-java-spring",
+    "master-data-protection": "master-data-java-spring",
+    "stock-common-domain": "stock-java-spring",
+    "ownership-own-f04": "inventory-ownership-java-spring"
+  },
+  "exclusions": {
+    "orders": "Déclinaisons particulières de consignation, retours et résolutions commerciales ; à compléter au-delà du cycle commun.",
+    "goods-orders": "Douze charges utiles et invariants de prestation spécifiques ; un seul cycle et contrat commun.",
+    "transport-orders": "Instructions détaillées et booking autonome de capacité, changements/libération propres.",
+    "customs": "Dossier douanier, pièces, autorisations et résultat reconnus ; ni moteur réglementaire ni téléprocédure.",
+    "financial-services": "Éligibilité des factures/avoirs et rapprochements d’encaissements/remboursements ; pas fiscalité ni banque.",
+    "workflow": "Composition réactive contextuelle avancée et garanties non appariées ; aucun modeleur graphique universel.",
+    "human-work": "Expérience utilisateur métier et règles d’affectation/calendrier spécifiques non déduites du seul moteur.",
+    "supervision": "Vues métier transversales et garanties de volumétrie/historique non appariées.",
+    "coordination": "Décisions métier de dépendances, adaptation de promesse et regroupements/libérations ; distinctes de l’exécution du moteur.",
+    "assurance": "Variantes de preuve/résultat par prestation et restitution métier complète au-delà du protocole commun."
+  },
+  "business_exchange_is_not_duplicate_funding": true,
+  "ownership_is_economic_not_a_claim_that_native_source_code_will_be_copied": true,
+  "external_library_note": "Flowable est une dépendance prévue de la stack ; sa reconstruction n’est pas financée. L’adaptation applicative est financée dans workflow. La référence Axelor Studio observée appelle Camunda, pas Flowable."
+}

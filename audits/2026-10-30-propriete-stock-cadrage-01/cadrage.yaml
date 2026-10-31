@@ -1,0 +1,197 @@
+id: propriete-stock-cadrage-01
+date: '2026-10-30'
+status: cadrage_et_reperage_code_pas_estimation
+evaluation_unit:
+  level: business_area
+  native_id: ba-inventory-ownership-management
+  label: Gestion de la propriété du stock
+  capabilities:
+  - id: BC-014
+    native_id: D01.h
+    path: &id001
+    - supply-chain-orchestration
+    - D01
+    - ba-inventory-ownership-management
+    - D01.h
+    fields:
+      name: Inventory Ownership Transfer Decision
+      definition: Déterminer si les faits des processus, les échéances et les conditions applicables de l’accord
+        conduisent à reconnaître ou à demander un transfert de propriété, pour quelles quantités, entre quelles
+        parties et à quelle date, avec ou sans consignation.
+      finality: Déterminer les conséquences des faits et accords sur la propriété du stock, avec leur justification.
+      scope: 'Croiser les faits reçus par [Inventory Tracking](model:D01.f) avec les conditions applicables d’[Agreement](model:D11).
+        Couvrir achats et ventes avec ou sans consignation, consommation, échéances et jalons des biens en transit.
+        La réponse précise quantités, ancien et nouveau propriétaires, date d’effet, fondement et éventuel acte
+        restant à réaliser.
+
+
+        Un événement de réception, expédition ou douane n’impose pas seul un changement de propriétaire. Propriété,
+        détention, transfert de risque, disponibilité et statut douanier restent distincts. La décision applique
+        les conditions établies ; elle ne négocie pas l’accord et n’invente pas une condition manquante. Des faits
+        insuffisants conduisent à une détermination en attente de justification.
+
+
+        Si un acte distinct est requis, les familles d’[Orders](glossary:TER012) portent la demande et [Fulfilment
+        Orchestration](model:D06) coordonne sa réalisation et la réception du résultat, y compris externe. Une recommandation
+        ne vaut pas réalisation. [Inventory Ownership Ledger](model:inventory-ownership-ledger) conserve le changement
+        reconnu et ses preuves. Un transfert déjà établi par une source autorisée est intégré sans seconde décision
+        ni nouvelle exécution.
+
+
+        Les comportements distinguent consommation/vente, échéance et autres jalons contractuels. Ces mécanismes
+        peuvent se combiner selon l’accord, sans ordre universel. Exemple fictif : la vente de 20 vêtements parmi
+        100 pièces fournisseur satisfait la clause d’acquisition ; déterminer les 20 pièces et leur date, sans confondre
+        cette conséquence avec leur expédition physique.
+
+
+        Pour des sociétés liées, déterminer séparément chaque passage de propriété selon l’accord et les faits reconnus
+        ; le trajet peut aller de B au client tandis que la propriété passe de B à A puis au client. La date du
+        départ, le transfert de risque et la reconnaissance comptable ne se déduisent pas les uns des autres. Fournir
+        le résultat et ses limites au [registre de propriété](glossary:TER132) ; le cadre financier détermine les
+        éléments supplémentaires requis pour la [comptabilité](glossary:TER118). Une condition absente reste à justifier.'
+    study_analysis:
+      id: BC-014
+      capacite_id: D01.h
+      chemin: *id001
+      fonctions:
+      - id: BC-014.01
+        resultat: Évaluer les conditions de transfert de propriété
+      - id: BC-014.02
+        resultat: Reconnaître ou demander le transfert autorisé
+      - id: BC-014.03
+        resultat: Expliquer parties et quantités et date d’effet
+      variantes_source:
+      - BHV063
+      - BHV064
+      - BHV104
+      frontiere: Ne tient pas la valorisation comptable ; le transfert reconnu alimente le registre de propriété.
+  - id: BC-015
+    native_id: inventory-ownership-ledger
+    path: &id002
+    - supply-chain-orchestration
+    - D01
+    - ba-inventory-ownership-management
+    - inventory-ownership-ledger
+    fields:
+      name: Inventory Ownership Ledger
+      definition: Tenir le registre des changements de propriétaire reconnus, avec quantités, parties, date d’effet,
+        accord, fait déclencheur, acte éventuel et preuve.
+      finality: Expliquer qui possède quelles quantités, depuis quand et sur quel fondement.
+      scope: 'Établir et conserver les écritures reconnues de changement de propriétaire du stock, pour les achats
+        et ventes avec ou sans consignation, y compris les biens en transit. Relier ancien et nouveau propriétaires,
+        quantités et articles concernés, date d’effet et date de connaissance, condition contractuelle appliquée,
+        faits et justificatifs ; tracer annulations et corrections sans effacer leur explication.
+
+
+        [Inventory Ownership Transfer Decision](model:D01.h) détermine les conséquences des faits et conditions.
+        Quand un acte reste nécessaire, attendre son résultat ; une proposition ne devient pas un transfert réalisé.
+        [Inventory Tracking](model:D01.f) peut aussi fournir directement le transfert déjà établi par une source
+        autorisée, sans décision ou exécution en double.
+
+
+        Le registre est l’autorité locale sur les faits de propriété reconnus dans le domaine Supply, sans absorber
+        la maîtrise d’entreprise des accords ou des actes externes. Relier les effets à [Inventory Ledger](model:D01.g)
+        sans compter deux fois le stock. [Inventory Visibility](model:D01.c) restitue les positions par propriétaire.
+        Propriétaire, détenteur, disponibilité, risque et statut douanier restent distincts.
+
+
+        Exemple fictif : sur 100 vêtements fournisseur présents, 20 deviennent propres selon une clause satisfaite.
+        Le registre conserve 20 pièces transférées avec leur preuve ; les 100 pièces restent physiquement présentes
+        tant qu’aucune sortie n’est reconnue. Aucun registre financier, blockchain ou mécanisme d’immutabilité technique
+        n’est imposé.
+
+
+        Dans une chaîne [intercompany](glossary:TER122), conserver les parties et preuves de chaque passage reconnu,
+        même si le détenteur physique ne change pas ou si A n’a aucun entrepôt traversé. Relier les mêmes biens
+        et quantités aux engagements concernés sans doubler le [stock](glossary:TER005). Les positions de propriété
+        ne constituent ni un registre financier ni, à elles seules, un [stock](glossary:TER005) valorisé en transit
+        ; [Finance](glossary:TER117) garde sa méthode et ses dates de reconnaissance comptable.
+
+
+        [Pourquoi le contexte entre sociétés ne définit pas le trajet physique](principle:PRINCIPLE-CONFIGURABLE-CONTEXTS).
+        [Pourquoi conserver chaque changement de propriétaire reconnu](principle:PRINCIPLE-TRACEABLE-FACTS).'
+    study_analysis:
+      id: BC-015
+      capacite_id: inventory-ownership-ledger
+      chemin: *id002
+      fonctions:
+      - id: BC-015.01
+        resultat: Inscrire les changements de propriétaire reconnus
+      - id: BC-015.02
+        resultat: Conserver accord et preuve et correction
+      - id: BC-015.03
+        resultat: Reconstituer la propriété d’une quantité à date
+      variantes_source: []
+      frontiere: Réutilise la persistance des registres sans confondre leurs invariants métier.
+outputs:
+- id: O1
+  result: Qualifier une conséquence sur la propriété depuis des faits et une version de conditions reçues.
+  capacity: BC-014
+- id: O2
+  result: Déterminer parties, quantité, date d’effet et fondement ; sinon garder une justification en attente.
+  capacity: BC-014
+- id: O3
+  result: Demander l’acte nécessaire et attendre son résultat, ou intégrer un transfert déjà établi sans nouvelle
+    décision.
+  capacity: BC-014
+- id: O4
+  result: Inscrire chaque passage reconnu de propriété sans mouvement physique artificiel ni double stock.
+  capacity: BC-015
+- id: O5
+  result: Conserver sources, acte, annulations et corrections avec date d’effet et de connaissance.
+  capacity: BC-015
+- id: O6
+  result: Reconstituer les quantités par propriétaire à date, y compris passages entre sociétés.
+  capacity: BC-015
+excludes:
+- Valorisation comptable, écritures financières et facturation
+- Négociation des accords et codage des clauses propres à Beaumanoir
+- Mouvements physiques, réservations et réalisation des prestations
+- Disposition BC-019, décisions de réparation/rebut et optimisation
+- Construction des familles Orders et orchestration pas encore financées
+shared_funding: Réutilisation Master Data et Stock avec propriétaires inchangés. Adaptations et invariants de propriété
+  à dimensionner séparément.
+size_policy: La méthode amont autorise des parts de composants et analogies explicites. Les tailles brutes du repérage
+  ne deviennent pas des KSLOC Flow ni une facture de reconstruction.
+new_Flow_modules_to_size:
+- id: OWN-F01
+  name: Conditions de propriété et contexte applicables
+  work: Référencer conditions/version/portée reçues et rapprocher les faits de Stock et des accords. Pas nouvelle
+    édition des accords ni règles Beaumanoir.
+  candidate_analogue: Évaluation conditionnelle des dimensions ERPNext ; critères de consignation Tryton ; validation
+    de paramètres Java.
+  reuse: Accords, parties, articles, unités, versions et admission Master Data.
+- id: OWN-F02
+  name: Détermination du transfert et quantités
+  work: 'Trois familles de déclencheurs : consommation/vente, échéance et jalon reçu ; produire parties, quantité
+    et date ou justification manquante.'
+  candidate_analogue: Chaînes de consignation Tryton et propagation Odoo, sans confondre facturation et fait de
+    propriété.
+  reuse: Faits et positions Stock ; règles métier spécifiques fournies par intégration.
+- id: OWN-F03
+  name: Actes requis et transferts reconnus ailleurs
+  work: État local en attente, référence de demande externe, réception du résultat et admission d’un transfert déjà
+    établi. Pas reconstruction du moteur de processus.
+  candidate_analogue: Transitions et origines natives, protocoles de contribution Master Data/Stock.
+  reuse: 'Identité des commandes, admission et journal génériques déjà financés. Familles Orders/processus pas encore
+    estimées : dépendance distincte.'
+- id: OWN-F04
+  name: Registre autonome de propriété
+  work: Écritures ancien/nouveau propriétaire, quantité, fondement, preuves et liens ; plusieurs passages pour les
+    mêmes biens sans doubler la position physique.
+  candidate_analogue: Registres/mouvements des quatre OSS déjà étudiés ; la nouvelle écriture de propriété reste
+    à dimensionner.
+  reuse: Persistance, transactions et registres Stock ; nouveaux invariants métier non assimilés à une simple colonne.
+- id: OWN-F05
+  name: Corrections et lectures aux deux dates
+  work: Annulations/corrections expliquées ; lecture à date d’effet et selon la connaissance disponible.
+  candidate_analogue: Correction de propriétaire Odoo et chaînes de correction Stock ; dates physiques natives ne
+    suffisent pas seules.
+  reuse: Journal/version/reprise Master Data et correction Stock, sans financer à nouveau leurs moteurs.
+- id: OWN-F06
+  name: Rapprochement et fourniture des positions de propriété
+  work: Rapprocher le registre de propriété et les positions existantes ; rendre les résultats et limites disponibles
+    aux capacités Stock et Finance.
+  candidate_analogue: Restitutions filtrées Odoo, quantités et historiques Java/Tryton/ERPNext.
+  reuse: Inventory Visibility et Accounting Data Provision déjà financés en Stock. Pas seconde publication Finance
+    ni valorisation comptable.

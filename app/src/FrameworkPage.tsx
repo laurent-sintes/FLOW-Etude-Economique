@@ -1,4 +1,6 @@
-import type {ReactNode} from 'react';
+import {DossierNavigation,DossierSheet} from './Dossier';
+import {navigationPages} from './dossierNavigation';
+import {useEffect,type ReactNode} from 'react';
 import {useStudy,useFormat,type Data} from './context';
 import {CostActivityTags} from './ArchitectureLayers';
 import {MethodText} from './MethodDocument';
@@ -58,8 +60,10 @@ function ApplicationHypothesis({id}:{id:string}){
  </div>;
 }
 
-export function FrameworkPage(){
+export function FrameworkPage({detail}:{detail?:'tarifs'|'diagnostics'}){
  const {data}=useStudy(),{dailyRate,n,annualAmount}=useFormat(),T=data.ui.essential.framework,F=data.content.framework;
+ const N=data.ui.essential.dossiers.framework,pages=navigationPages('parametres',N.pages,'detail');
+ const dossierNav=<DossierNavigation pages={pages} current={detail||'summary'} label={N.navigation}/>;
  const percent=(value:number)=>n(value,1)+'\u00a0%';
  const natures=Object.keys(F.workload.ia.taux_pct[F.tariffs[0].key]);
  const activityAllocations=data.ui.essential.model_rows.filter((row:Data)=>row.activity_allocation);
@@ -107,41 +111,8 @@ export function FrameworkPage(){
  </article>)}</div>;
  const optionHeaders=(build=false)=><tr><th scope="col">{T.ia_nature_label}</th>{F.tariffs.map((option:Data)=><th scope="col" key={option.key}>{option.name}{build&&<small>{option.mode==='Make'?T.ia_make_scope:T.ia_buy_scope}</small>}</th>)}</tr>;
 
- return <div className="essential-page core-method-page framework-page">
-  <nav className="core-method-navigation" aria-label={T.navigation_label}>
-   <h2>{T.navigation_label}</h2><ol>{families.map(family=><li key={family.id}><button type="button" aria-controls={sectionId(family.id)} onClick={()=>goTo(family.id)}>{family.title}</button></li>)}</ol>
-  </nav>
-  <section className="core-method-introduction" aria-labelledby="framework-intro-title">
-   <div className="core-method-principle"><h2 id="framework-intro-title">{T.intro_title}</h2><p><MethodText>{T.intro_text}</MethodText></p></div>
-   <p className="framework-reference"><MethodText>{T.reference_note}</MethodText></p>
-   <div className="framework-retained-choices"><h3>{T.choices_title}</h3><ul className="core-method-bullets">{T.choices.map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ul></div>
-   <p className="framework-reference framework-reading-key"><strong>{T.usage_title} : </strong><MethodText>{T.usage_note}</MethodText></p>
-  </section>
-  <ol className="core-method-sections">
-   <ParameterSection id="gains" title={T.ia_title} lead={T.ia_note}>
-    <Formulas items={[T.ia_formula]}/>
-    <ApplicationHypothesis id="productivity"/>
-    <div className="framework-group">
-     <ParameterTable caption={T.ia_detail}><thead>{optionHeaders(true)}</thead><tbody>
-      {natures.map(key=><tr key={key}><th scope="row">{data.ui.natures[key]}</th>{F.tariffs.map((option:Data)=><td key={option.key}>{option.mode==='Make'?T.core_family_rule:percent(F.workload.ia.taux_pct[option.key][key])}</td>)}</tr>)}
-     </tbody></ParameterTable>
-     <p><strong>{T.ia_frontend} : {percent(F.workload.ia.frontend_pct)}</strong> · {T.core_family_rule}</p>
-     <SourceLink path={F.sources.gains}>{T.gains_source}</SourceLink>
-    </div>
-    <div className="framework-group">
-     <p><MethodText>{T.ia_maintenance_note}</MethodText></p>
-     <ParameterTable caption={T.ia_maintenance_detail}><thead>{optionHeaders()}</thead><tbody>
-      {F.workload.maintenance_ia[F.tariffs[0].key].map((activity:Data)=><tr key={activity.id}><th scope="row">{activity.label}</th>
-       {F.tariffs.map((option:Data)=>{const row=F.workload.maintenance_ia[option.key].find((entry:Data)=>entry.id===activity.id);
-        return <td key={option.key}>{row.traitement==='estimation'?percent(row.taux_pct):<><strong className="framework-treatment">{T.ia_treatments[row.traitement]}</strong><small>{T.ia_diagnostic} : {percent(row.taux_pct)}</small></>}</td>;
-       })}
-      </tr>)}
-     </tbody></ParameterTable>
-     {F.sources.annual_gains.some((row:Data)=>!isModelDataReference(row.path))&&<div className="framework-reading-sources"><h3>{T.annual_gains_sources}</h3><ProofLinks items={F.sources.annual_gains.map((row:Data)=>({path:row.path,title:F.tariffs.find((option:Data)=>option.key===row.key).name}))}/></div>}
-    </div>
-   </ParameterSection>
-
-   <ParameterSection id="tarifs" title={T.tariffs_title} lead={T.tariffs_note}>
+ useEffect(()=>{const heading=detail?document.getElementById(sectionId(detail)):document.querySelector('main')?.querySelector<HTMLElement>('h1');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}},[detail]);
+ const tariffDetail=(<>   <ParameterSection id="tarifs" title={T.tariffs_title} lead={T.tariffs_note}>
     <ParameterTable caption={T.tariffs_caption}><thead><tr><th scope="col">{T.tariff_profile}</th>{F.tariffs.map((option:Data)=><th scope="col" key={option.key}>{option.name}</th>)}</tr></thead>
      <tbody>{roles.map(role=><tr key={role.label}><th scope="row">{role.label}</th>{F.tariffs.map((option:Data)=><td className="framework-price" key={option.key}>{dailyRate(price(option,role.key).value)}</td>)}</tr>)}</tbody>
     </ParameterTable>
@@ -186,6 +157,56 @@ export function FrameworkPage(){
      <p><MethodText>{T.specialist_factor_note}</MethodText></p>
      {[specialist.source,specialist.sensitivity_source].some(path=>!isModelDataReference(path))&&<div className="framework-reading-sources"><SourceLink path={specialist.source}>{T.specialist_method}</SourceLink><SourceLink path={specialist.sensitivity_source}>{T.specialist_sensitivity}</SourceLink></div>}
     </div>
+   </ParameterSection></>);
+ const diagnosticDetail=(<>   <ParameterSection id="diagnostics" title={T.diagnostics_title} lead={T.diagnostics_note}>
+    <div className="framework-group">
+     <ParameterTable caption={T.ia_detail}><thead>{optionHeaders(true)}</thead><tbody>
+      {natures.map(key=><tr key={key}><th scope="row">{data.ui.natures[key]}</th>{F.tariffs.map((option:Data)=><td key={option.key}>{option.mode==='Make'?T.core_family_rule:percent(F.workload.ia.taux_pct[option.key][key])}</td>)}</tr>)}
+     </tbody></ParameterTable>
+     <p><strong>{T.ia_frontend} : {percent(F.workload.ia.frontend_pct)}</strong> · {T.core_family_rule}</p>
+     <SourceLink path={F.sources.gains}>{T.gains_source}</SourceLink>
+    </div>
+    <div className="framework-group framework-diagnostic">
+     <ParameterUsage status="diagnostic"/>
+     <ParameterTable caption={T.ia_integration_detail}><thead>{optionHeaders()}</thead><tbody><tr><th scope="row">{T.ia_integration}</th>{F.tariffs.map((option:Data)=><td key={option.key}>{percent(F.workload.ia.integration_pct[option.key])}</td>)}</tr></tbody></ParameterTable>
+     <p><MethodText>{T.ia_integration_note}</MethodText></p><SourceLink path={F.sources.gains}>{T.gains_source}</SourceLink>
+    </div>
+    {replacedMeans.length>0&&<div className="framework-prose-group framework-diagnostic"><h3>{T.other_replaced_title}</h3>
+     <p><MethodText>{T.other_replaced_note}</MethodText></p>{means(replacedMeans)}
+    </div>}
+   </ParameterSection></>);
+ if(detail)return <div className="essential-page core-method-page framework-page framework-detail">{dossierNav}<DossierSheet view={detail}><ol className="core-method-sections">{detail==='tarifs'?tariffDetail:diagnosticDetail}</ol><a className="text-button" href="#parametres">← {T.back_to_summary}</a></DossierSheet></div>;
+ return <div className="essential-page core-method-page framework-page">
+  {dossierNav}<DossierSheet view="summary">
+  <nav className="core-method-navigation" aria-label={T.navigation_label}>
+   <h2>{T.navigation_label}</h2><ol>{families.filter(family=>family.id!=='diagnostics').map(family=><li key={family.id}><button type="button" aria-controls={sectionId(family.id)} onClick={()=>goTo(family.id)}>{family.title}</button></li>)}</ol>
+  </nav>
+  <section className="core-method-introduction" aria-labelledby="framework-intro-title">
+   <div className="core-method-principle"><h2 id="framework-intro-title">{T.intro_title}</h2><p><MethodText>{T.intro_text}</MethodText></p></div>
+   <p className="framework-reference"><MethodText>{T.reference_note}</MethodText></p>
+   <div className="framework-retained-choices"><h3>{T.choices_title}</h3><ul className="core-method-bullets">{T.choices.map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ul></div>
+   <p className="framework-reference framework-reading-key"><strong>{T.usage_title} : </strong><MethodText>{T.usage_note}</MethodText></p>
+  </section>
+  <ol className="core-method-sections">
+   <ParameterSection id="gains" title={T.ia_title} lead={T.ia_note}>
+    <ApplicationHypothesis id="productivity"/>
+
+    <div className="framework-group">
+     <p><MethodText>{T.ia_maintenance_note}</MethodText></p>
+     <ParameterTable caption={T.ia_maintenance_detail}><thead>{optionHeaders()}</thead><tbody>
+      {F.workload.maintenance_ia[F.tariffs[0].key].map((activity:Data)=><tr key={activity.id}><th scope="row">{activity.label}</th>
+       {F.tariffs.map((option:Data)=>{const row=F.workload.maintenance_ia[option.key].find((entry:Data)=>entry.id===activity.id);
+        return <td key={option.key}>{row.traitement==='estimation'?percent(row.taux_pct):<><strong className="framework-treatment">{T.ia_treatments[row.traitement]}</strong><small>{T.ia_diagnostic} : {percent(row.taux_pct)}</small></>}</td>;
+       })}
+      </tr>)}
+     </tbody></ParameterTable>
+     {F.sources.annual_gains.some((row:Data)=>!isModelDataReference(row.path))&&<div className="framework-reading-sources"><h3>{T.annual_gains_sources}</h3><ProofLinks items={F.sources.annual_gains.map((row:Data)=>({path:row.path,title:F.tariffs.find((option:Data)=>option.key===row.key).name}))}/></div>}
+    </div>
+   </ParameterSection>
+
+   <ParameterSection id="tarifs" title={T.tariffs_title} lead={T.tariffs_note}>
+    <ParameterTable caption={T.tariffs_caption}><thead><tr><th scope="col">{T.tariff_profile}</th>{F.tariffs.map((option:Data)=><th scope="col" key={option.key}>{option.name}</th>)}</tr></thead><tbody>{roles.map(role=><tr key={role.label}><th scope="row">{role.label}</th>{F.tariffs.map((option:Data)=><td key={option.key}>{dailyRate(price(option,role.key).value)}</td>)}</tr>)}</tbody></ParameterTable>
+    <a className="text-button" href="#parametres?detail=tarifs">{T.tariff_details_link} →</a>
    </ParameterSection>
 
    <ParameterSection id="pilotage" title={T.pilotage_title} lead={T.pilotage_note}>
@@ -237,18 +258,9 @@ export function FrameworkPage(){
     <p><MethodText>{T.activity_scope}</MethodText></p>
     <SourceLink path={F.sources.allocation}>{T.allocation_source}</SourceLink>
    </ParameterSection>
-   <ParameterSection id="diagnostics" title={T.diagnostics_title} lead={T.diagnostics_note}>
-    <div className="framework-group framework-diagnostic">
-     <ParameterUsage status="diagnostic"/>
-     <ParameterTable caption={T.ia_integration_detail}><thead>{optionHeaders()}</thead><tbody><tr><th scope="row">{T.ia_integration}</th>{F.tariffs.map((option:Data)=><td key={option.key}>{percent(F.workload.ia.integration_pct[option.key])}</td>)}</tr></tbody></ParameterTable>
-     <p><MethodText>{T.ia_integration_note}</MethodText></p><SourceLink path={F.sources.gains}>{T.gains_source}</SourceLink>
-    </div>
-    {replacedMeans.length>0&&<div className="framework-prose-group framework-diagnostic"><h3>{T.other_replaced_title}</h3>
-     <p><MethodText>{T.other_replaced_note}</MethodText></p>{means(replacedMeans)}
-    </div>}
-   </ParameterSection>
   </ol>
   <div className="framework-links">{T.method_links.map((link:Data)=><a key={link.href} href={link.href}>{link.label}</a>)}<a className="text-button" href="#simuler">{T.simulate_action} →</a></div>
   <a className="text-button essential-structure-next" href="#evaluation-core">{T.next} →</a>
+  </DossierSheet>
  </div>;
 }

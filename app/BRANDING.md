@@ -27,3 +27,21 @@ Contrastes des principales paires : blanc / vert profond **7,18:1**, encre / ver
 
 
 Sur la page Modèle, les structures de coût utilisent trois familles franches : vert FLOW `#236159` pour les réalisations Beaumanoir des couches hautes, orange contrasté `#C24F00` pour le Core System et ses licences, bleu profond `#234D6B` pour les moyens techniques. L’exploitation transverse reste gris ardoise `#45525A`. Les bandeaux de titre et les rappels dans les phases portent du texte et des pictogrammes blancs, sans fond pastel. Les corps des blocs restent blancs ; les couleurs ne sont pas de grands aplats sur toute la hauteur. Les titres des sept couches sont gras, soulignés par un séparateur, avec un filet supérieur dans la couleur de leur famille. Les phases reprennent l’ordre vertical des couches, puis les colonnes du schéma ; les structures transverses viennent en dernier. Les licences restent groupées même si leur contrat inclut des services techniques : la couleur ne change pas leur couverture métier.
+
+
+## Repères éditeurs dans le dossier Synvance
+
+À la demande du 30 octobre 2026, les comparaisons Synvance et les fiches utilisent deux logos originaux locaux, sans recoloration ni déformation. Le symbole Microsoft est extrait du SVG publié dans [Atlas Design / Site header](https://microsoft.github.io/atlas-design/components/site-header.html) ; le logo SAP en dégradé provient du [site officiel de support](https://support.sap.com/content/dam/support/sap-logo.svg). Ils restent secondaires à l’identité FLOW et accompagnés des noms Microsoft et SAP. Les offres de 2025 restent les preuves commerciales ; ces repères graphiques n’établissent aucune couverture fonctionnelle.
+
+| Asset | SHA-256 |
+| --- | --- |
+| `public/assets/microsoft-original.svg` | `bf4c4b9f052157d304cc30f52daebcad6a4fda034edeb415cdd81f8cc1a1c2a8` |
+| `public/assets/sap-original.svg` | `4146d5df8fc04673049281dfd85569324a49e4ba68968acfbe125a126c93800a` |
+
+Les accents sont déclarés dans `source/reperes-synvance.yaml#reading/publishers` : orange Microsoft `#F25022` issu de son symbole, bleu SAP `#0070F2` issu de sa [palette officielle](https://www.sap.com/design-system/digital/foundations/identity/color/). Ils servent aux filets et en-têtes, avec texte encre sur fond clair. Microsoft reste à gauche, SAP à droite ; sur les vues étroites, chaque critère garde les deux propositions adjacentes et identifiées. Les logos ne portent aucun état de validation. Les couleurs des séries économiques globales restent distinctes de ces accents documentaires.
+
+## Intercalaires des dossiers
+
+Les dossiers Repères Synvance, Fondamentaux, Hypothèses retenues, Étude de marché et Préparer la réalisation utilisent des intercalaires reliés à une feuille blanche. Les fiches produit utilisent la même apparence en conservant leur navigation clavier par onglets. L’intercalaire ouvert est blanc avec texte encre, icône de dossier ouvert, accent orange et relief de 6 px ; les autres gardent un fond vert pâle et une icône de dossier fermé. Cette surface documentaire constitue une exception à la sélection vert profond des menus généraux. Le survol soulève légèrement un intercalaire ; les changements de rubrique accompagnent le contenu d’un mouvement de 7 px en 180 ms. Aucun mouvement en boucle ; transitions et animation sont désactivées avec `prefers-reduced-motion`. Sur mobile, les quatre rubriques restent visibles avec des libellés courts issus de la même source. Les séparateurs doublonnant la feuille, les titres et les espacements sont retirés.
+
+`src/Dossier.tsx` et `src/dossier.css` portent ce langage commun. Les libellés et regroupements sont dans `config/application.yaml#essential/dossiers`, sauf les rubriques Synvance qui gardent leur propriétaire. Les pages de méthode conservent leurs sommaires verticaux. Chaque rubrique de dossier se lit en continu ; les horizons et filtres restent des sélecteurs.

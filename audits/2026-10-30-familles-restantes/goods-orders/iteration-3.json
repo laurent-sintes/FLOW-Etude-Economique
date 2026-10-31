@@ -1,0 +1,2007 @@
+{
+  "family": "ba-goods-processing-order-management",
+  "slug": "goods-orders",
+  "iteration": 3,
+  "status": "candidat_conditionnel_non_adopte",
+  "scope": [
+    {
+      "id": "BC-059",
+      "native_id": "service-order-picking",
+      "source": {
+        "name": "Picking Order",
+        "definition": "Porter les demandes de prélèvement confiées aux exécutants, leurs exigences de quantité et de référence, leurs engagements et les manquants constatés.",
+        "scope": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nPréciser les biens à prélever, les quantités, le lieu et l’échéance demandés ; tenir la prise en charge, les changements et le reste de prestation à traiter. Les constats proviennent du tracking et les écarts qualifiés du rapprochement. L’exécutant organise les emplacements, parcours et opérateurs. Aucun prélèvement ne réaffecte de lui-même les ressources d’une autre commande. La prestation peut appartenir à un ordre composite de préparation sans perdre ses exigences propres.\n\nExemple fictif : Sur 100 pièces demandées, 96 sont prélevées : tenir la suite des quatre manquantes sans confondre le reliquat de prestation avec celui de la commande.\n\nLa prestation est décrite dans le [Service Catalog](model:D14) ; le [Service Order](glossary:TER066) en porte les exigences et engagements individuels auprès du [Service Provider](glossary:TER088).\n\nPorter les exigences de préparation commune lorsque des ordres sont libérés ensemble pour une commande ou un client. Conserver les quantités et engagements propres de chaque ordre ; le regroupement décidé par [Fulfilment](glossary:TER085) ne prescrit pas les vagues, parcours ou opérateurs internes.",
+        "finality": "Tenir les exigences et engagements de la prestation et expliquer ses suites.",
+        "nature": "action",
+        "market_comparisons": [
+          {
+            "vendor": "SAP",
+            "product": "Warehouse Order",
+            "element_name": "Warehouse Order",
+            "element_type": "Lot de travail interne",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Regroupe des tâches d’entrepôt ou postes d’inventaire dans un travail exécutable par un opérateur.",
+            "differences": "Le Warehouse Order SAP est un lot opérateur ; Oracle confie pick-pack-ship ensemble. Picking Order nomme ici une capacité de gestion de prestation, sans imposer un document amont par tâche.",
+            "flow_position": "Porter les demandes de prélèvement confiées aux exécutants, leurs exigences de quantité et de référence, leurs engagements et les manquants constatés. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Warehouse Order",
+            "source_url": "https://help.sap.com/saphelp_ewm700_ehp02/helpdata/en/65/cccb53ad377114e10000000a174cb4/content.htm?no_cache=true",
+            "source_version": "Documentation EWM 7.0 EHP2 ; preuve historique de sémantique",
+            "source_locator": "Definition ; Use ; Example",
+            "consulted_on": "2026-09-23",
+            "evidence_limits": "Maille interne WMS ; faux équivalent d’un ordre de prestation confié par FLOW. Pas de revendication de dernière version.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM660",
+              "CMP273",
+              "U682"
+            ],
+            "concept_name": "Warehouse Order",
+            "scope_summary": "Regroupe des tâches d’entrepôt ou postes d’inventaire dans un travail exécutable par un opérateur.",
+            "approach_summary": "Gérer les demandes de prélèvement confiées aux exécutants, leurs exigences de quantité et de référence, leurs engagements et les suites des manquants constatés.",
+            "term_choice": "Picking Order : nom FLOW ; le terme natif et son périmètre restent ceux de la source.",
+            "definition_choice": "Appui de Warehouse Order : Regroupe des tâches d’entrepôt ou postes d’inventaire dans un travail exécutable par un opérateur. Limite de reprise dans FLOW : Le Warehouse Order SAP est un lot opérateur ; Oracle confie pick-pack-ship ensemble. Picking Order nomme ici une capacité de gestion de prestation, sans imposer un document amont par tâche."
+          },
+          {
+            "vendor": "Oracle",
+            "product": "Shipment Request and Shipment Confirmation Processes for External Systems Integration",
+            "element_name": "Shipment Request / Shipment Confirmation",
+            "element_type": "Échanges amont-exécutant",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Une demande au WMS ou 3PL est suivie du pick, pack et ship, puis d’une confirmation de réalisation.",
+            "differences": "Le Warehouse Order SAP est un lot opérateur ; Oracle confie pick-pack-ship ensemble. Picking Order nomme ici une capacité de gestion de prestation, sans imposer un document amont par tâche.",
+            "flow_position": "Porter les demandes de prélèvement confiées aux exécutants, leurs exigences de quantité et de référence, leurs engagements et les manquants constatés. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Shipment Request and Shipment Confirmation Processes for External Systems Integration",
+            "source_url": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/25d/faims/shipment-request-and-shipment-confirmation-processes-for.html",
+            "source_version": "Fusion Cloud SCM 25D",
+            "source_locator": "Explanation of callouts, étapes 1 à 3",
+            "consulted_on": "2026-09-23",
+            "evidence_limits": "Contexte sortant ; ne décrit pas un ordre individuel obligatoire par opération ni tout le cycle d’annulation.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM659",
+              "CMP273",
+              "U682"
+            ],
+            "concept_name": "Shipment Request / Shipment Confirmation",
+            "scope_summary": "Une demande au WMS ou 3PL est suivie du pick, pack et ship, puis d’une confirmation de réalisation.",
+            "approach_summary": "Gérer les demandes de prélèvement confiées aux exécutants, leurs exigences de quantité et de référence, leurs engagements et les suites des manquants constatés.",
+            "term_choice": "Picking Order : nom FLOW ; le terme natif et son périmètre restent ceux de la source.",
+            "definition_choice": "Appui de Shipment Request / Shipment Confirmation : Une demande au WMS ou 3PL est suivie du pick, pack et ship, puis d’une confirmation de réalisation. Limite de reprise dans FLOW : Le Warehouse Order SAP est un lot opérateur ; Oracle confie pick-pack-ship ensemble. Picking Order nomme ici une capacité de gestion de prestation, sans imposer un document amont par tâche."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Analyzing SAP S/4HANA Cloud Public Edition, Warehouse Management",
+            "concept_name": "Analyzing SAP S/4HANA Cloud Public Edition, Warehouse Management",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "L’intégration WMS échange données maîtres, demandes entrantes et sortantes et retours de réalisation ; le monitoring expose l’activité.",
+            "approach_summary": "Rapprochement avec Picking Order : L’intégration WMS échange données maîtres, demandes entrantes et sortantes et retours de réalisation ; le monitoring expose l’activité.",
+            "similarities": "L’intégration WMS échange données maîtres, demandes entrantes et sortantes et retours de réalisation ; le monitoring expose l’activité.",
+            "differences": "FLOW sépare captation Integration, connaissance Visibility et ordres de prestation ; la documentation WMS ne prescrit pas ces capacités comme taxonomie native.",
+            "flow_position": "Porter les demandes de prélèvement confiées aux exécutants, leurs exigences de quantité et de référence, leurs engagements et les manquants constatés. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Analyzing SAP S/4HANA Cloud Public Edition, Warehouse Management",
+            "source_url": "https://learning.sap.com/courses/implementing-sap-s-4hana-cloud-public-edition-warehouse-management/understanding-sap-s-4hana-cloud-public-edition-warehouse-management_ff02ecf3-9fe0-499d-b96d-8cc0f7f66900",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Analyzing SAP S/4HANA Cloud Public Edition, Warehouse Management — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. FLOW sépare captation Integration, connaissance Visibility et ordres de prestation ; la documentation WMS ne prescrit pas ces capacités comme taxonomie native.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM800"
+            ],
+            "term_choice": "Le nom Picking Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "L’intégration WMS échange données maîtres, demandes entrantes et sortantes et retours de réalisation ; le monitoring expose l’activité. Frontière conservée : FLOW sépare captation Integration, connaissance Visibility et ordres de prestation ; la documentation WMS ne prescrit pas ces capacités comme taxonomie native."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Microsoft Dynamics 365 — application indiquée par la source",
+            "element_name": "Control warehouse work by using work templates and location directives",
+            "concept_name": "Control warehouse work by using work templates and location directives",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Le travail d’entrepôt distingue instructions de prélèvement et de dépôt, avec quantités et lieux concernés.",
+            "approach_summary": "Rapprochement avec Picking Order : Le travail d’entrepôt distingue instructions de prélèvement et de dépôt, avec quantités et lieux concernés.",
+            "similarities": "Le travail d’entrepôt distingue instructions de prélèvement et de dépôt, avec quantités et lieux concernés.",
+            "differences": "FLOW porte une demande et un résultat de prestation ; les lignes de travail exécutables ne définissent pas seules la capacité métier.",
+            "flow_position": "Porter les demandes de prélèvement confiées aux exécutants, leurs exigences de quantité et de référence, leurs engagements et les manquants constatés. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Control warehouse work by using work templates and location directives - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/control-warehouse-location-directives",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Control warehouse work by using work templates and location directives - Supply Chain Management | Dynamics 365 | Microsoft Learn — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. FLOW porte une demande et un résultat de prestation ; les lignes de travail exécutables ne définissent pas seules la capacité métier.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM823"
+            ],
+            "term_choice": "Le nom Picking Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Le travail d’entrepôt distingue instructions de prélèvement et de dépôt, avec quantités et lieux concernés. Frontière conservée : FLOW porte une demande et un résultat de prestation ; les lignes de travail exécutables ne définissent pas seules la capacité métier."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Porter les demandes de prélèvement confiées aux exécutants, leurs exigences de quantité et de référence, leurs engagements et les manquants constatés.",
+          "flow_scope": "Porter les demandes de prélèvement confiées aux exécutants, leurs exigences de quantité et de référence, leurs engagements et les manquants constatés.",
+          "flow_approach": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nPréciser les biens à prélever, les quantités, le lieu et l’échéance demandés ; tenir la prise en charge, les changements et le reste de prestation à traiter. Les constats proviennent du tracking et les écarts qualifiés du rapprochement. L’exécutant organise les emplacements, parcours et opérateurs. Aucun prélèvement ne réaffecte de lui-même les ressources d’une autre commande. La prestation peut appartenir à un ordre composite de préparation sans perdre ses exigences propres.\n\nExemple fictif : Sur 100 pièces demandées, 96 sont prélevées : tenir la suite des quatre manquantes sans confondre le reliquat de prestation avec celui de la commande.\n\nLa prestation est décrite dans le [Service Catalog](model:D14) ; le [Service Order](glossary:TER066) en porte les exigences et engagements individuels auprès du [Service Provider](glossary:TER088).\n\nPorter les exigences de préparation commune lorsque des ordres sont libérés ensemble pour une commande ou un client. Conserver les quantités et engagements propres de chaque ordre ; le regroupement décidé par [Fulfilment](glossary:TER085) ne prescrit pas les vagues, parcours ou opérateurs internes.",
+          "synthesis": [
+            "Le Warehouse Order SAP est un lot opérateur ; Oracle confie pick-pack-ship ensemble. Picking Order nomme ici une capacité de gestion de prestation, sans imposer un document amont par tâche."
+          ],
+          "examples": [
+            {
+              "title": "Exemple fictif",
+              "situation": "Sur 100 pièces demandées, 96 sont prélevées : tenir la suite des quatre manquantes sans confondre le reliquat de prestation avec celui de la commande.",
+              "outcome": "Gérer les demandes de prélèvement confiées aux exécutants, leurs exigences de quantité et de référence, leurs engagements et les suites des manquants constatés.",
+              "lesson": "Illustration de la frontière FLOW, sans preuve de réalisation installée.",
+              "source_refs": [
+                "ELM660",
+                "U682"
+              ],
+              "source_title": "Warehouse Order",
+              "source_url": "https://help.sap.com/saphelp_ewm700_ehp02/helpdata/en/65/cccb53ad377114e10000000a174cb4/content.htm?no_cache=true"
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "id": "BC-059.01",
+          "resultat": "Porter les références et quantités à prélever"
+        },
+        {
+          "id": "BC-059.02",
+          "resultat": "Tenir engagements et changements"
+        },
+        {
+          "id": "BC-059.03",
+          "resultat": "Rapprocher prélèvements et manquants"
+        }
+      ],
+      "boundary": "Ne gère pas les déplacements des opérateurs du WMS."
+    },
+    {
+      "id": "BC-060",
+      "native_id": "service-order-packing",
+      "source": {
+        "name": "Packing Order",
+        "definition": "Porter les demandes de conditionnement et de reconditionnement confiées aux exécutants, leurs exigences, engagements et résultats.",
+        "scope": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nConditionnement initial, Repacking, pliage, mise sur cintre, présentation cadeau.\n\nLe reconditionnement est une modalité du même [Packing Order](model:service-order-packing).\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Passer un lot de vêtements pliés sur cintres, sans changer la composition des articles.\n\nPorter la prestation de reconditionnement confiée, en précisant la transformation attendue du conditionnement et en conservant les écarts signalés.\n\nModifier un conditionnement existant est une modalité du même [Packing Order](model:service-order-packing), sans créer deux demandes pour la même prestation. Les consignes réutilisables relèvent de [Packaging Specification](model:packaging-specification) ; les exigences et engagements individuels sont tenus dans l’ordre. Le tracking et le rapprochement fournissent les constats et écarts ; l’exécutant réalise le geste physique.\n\nExemple fictif : Reconditionner un lot déjà emballé selon une nouvelle consigne ; distinguer quantité traitée et quantité conforme.\n\nLe reconditionnement relève de [Packing Order](model:service-order-packing). La mise sur cintre, le changement de cintre et le retour à une présentation pliée relèvent du conditionnement, sans changer la composition d’un kit.\n\nPorter les exigences de conditionnement commun, par exemple préparer les biens compatibles d’une commande B2B sur une palette lorsque cela est réalisable. La libération simultanée des ordres ne garantit pas ce résultat ; tenir la consigne, la prise en charge et le résultat effectif. L’exécutant conserve la palettisation détaillée.\n\nRéférencer la version de [Packaging Specification](model:packaging-specification) et les matières de [Packaging Material Reference](model:packaging-material-reference) lorsqu’elles sont nécessaires. Le [Service Catalog](model:D14) décrit la prestation offerte ; la spécification décrit son résultat de conditionnement. Conserver séparément exigences particulières et résultat annoncé. Exemple fictif : demander 120 pièces par cartons de douze ; les dix cartons annoncés ne prouvent ni la réception de 120 pièces ni leur conformité à destination.",
+        "finality": "Tenir les exigences et engagements de la prestation et expliquer ses suites.",
+        "nature": "action",
+        "market_comparisons": [
+          {
+            "vendor": "Ryder",
+            "product": "E-Commerce Services — Value Added Services",
+            "element_name": "E-Commerce Services — Value Added Services",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Liste détaillée des préparations textile et prestations e-commerce.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de conditionnement et de reconditionnement confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "E-Commerce Services — Value Added Services",
+            "source_url": "https://www.ryder.com/en-us/e-commerce/value-added-services",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "E-commerce Value-Added Services; Apparel Value-Added Services",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM669",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Packing Order",
+            "scope_summary": "Conditionnement initial, Repacking, pliage, mise sur cintre, présentation cadeau.",
+            "approach_summary": "Tenir les demandes de conditionnement et de reconditionnement confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Packing Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de E-Commerce Services — Value Added Services : Liste détaillée des préparations textile et prestations e-commerce. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          },
+          {
+            "vendor": "Bleckmann",
+            "product": "Value Added Services",
+            "element_name": "Value Added Services",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Contrôle, remise en état, personnalisation et photographie aux côtés du packing.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de conditionnement et de reconditionnement confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Value Added Services",
+            "source_url": "https://www.bleckmann.com/solutions/logistics-fulfilment/value-added-services",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "A complete range; Reconditioning; Personalisation; In-house photo studio",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM670",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Packing Order",
+            "scope_summary": "Conditionnement initial, Repacking, pliage, mise sur cintre, présentation cadeau.",
+            "approach_summary": "Tenir les demandes de conditionnement et de reconditionnement confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Packing Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de Value Added Services : Contrôle, remise en état, personnalisation et photographie aux côtés du packing. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Microsoft Dynamics 365 — application indiquée par la source",
+            "element_name": "Packing work for packing outbound containers and processing shipments",
+            "concept_name": "Packing work for packing outbound containers and processing shipments",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Le packing work organise le conditionnement des conteneurs et la progression des expéditions.",
+            "approach_summary": "Rapprochement avec Packing Order : Le packing work organise le conditionnement des conteneurs et la progression des expéditions.",
+            "similarities": "Le packing work organise le conditionnement des conteneurs et la progression des expéditions.",
+            "differences": "La maille de travail WMS ne constitue pas à elle seule un contrat de service ; FLOW conserve Packing Order et ses exigences de résultat.",
+            "flow_position": "Porter les demandes de conditionnement et de reconditionnement confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Packing work for packing outbound containers and processing shipments - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/packing-work",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Packing work for packing outbound containers and processing shipments - Supply Chain Management | Dynamics 365 | Microsoft Learn — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. La maille de travail WMS ne constitue pas à elle seule un contrat de service ; FLOW conserve Packing Order et ses exigences de résultat.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM656"
+            ],
+            "term_choice": "Le nom Packing Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Le packing work organise le conditionnement des conteneurs et la progression des expéditions. Frontière conservée : La maille de travail WMS ne constitue pas à elle seule un contrat de service ; FLOW conserve Packing Order et ses exigences de résultat."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Integrating into Warehouse Processes",
+            "concept_name": "Integrating into Warehouse Processes",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "L’intégration TM-EWM transmet les exigences aux opérations de picking, packing et chargement et remonte progression et écarts.",
+            "approach_summary": "Rapprochement avec Packing Order : L’intégration TM-EWM transmet les exigences aux opérations de picking, packing et chargement et remonte progression et écarts.",
+            "similarities": "L’intégration TM-EWM transmet les exigences aux opérations de picking, packing et chargement et remonte progression et écarts.",
+            "differences": "Le processus produit associe orchestration et exécution ; FLOW garde les ordres de prestation et leur coordination distincts des gestes physiques. Les limites multi-arrêts du scénario natif sont conservées.",
+            "flow_position": "Porter les demandes de conditionnement et de reconditionnement confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Integrating into Warehouse Processes",
+            "source_url": "https://learning.sap.com/courses/business-processes-in-sap-s-4hana-transportation-management/integrating-into-warehouse-processes_a60ea8b3-d0d8-4c89-be2f-7a4a912240c4",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Integrating into Warehouse Processes — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Le processus produit associe orchestration et exécution ; FLOW garde les ordres de prestation et leur coordination distincts des gestes physiques. Les limites multi-arrêts du scénario natif sont conservées.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM827"
+            ],
+            "term_choice": "Le nom Packing Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "L’intégration TM-EWM transmet les exigences aux opérations de picking, packing et chargement et remonte progression et écarts. Frontière conservée : Le processus produit associe orchestration et exécution ; FLOW garde les ordres de prestation et leur coordination distincts des gestes physiques. Les limites multi-arrêts du scénario natif sont conservées."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA Cloud Public Edition",
+            "element_name": "Packaging material and packing instruction",
+            "concept_name": "Packaging material and packing instruction",
+            "element_type": "Objet ou mécanisme documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "SAP distingue les matières de conditionnement et les consignes décrivant produits, quantités et matières.",
+            "differences": "FLOW décrit les références utiles à la demande de prestation ; le paramétrage et le calcul détaillé de préparation restent chez la logistique.",
+            "flow_position": "Séparer matière de conditionnement, spécification réutilisable et unité logistique réellement préparée ou reçue.",
+            "scope_summary": "SAP distingue les matières de conditionnement et les consignes décrivant produits, quantités et matières.",
+            "approach_summary": "Séparer matière de conditionnement, spécification réutilisable et unité logistique réellement préparée ou reçue.",
+            "source_title": "Maintaining Packaging Information",
+            "source_url": "https://learning.sap.com/courses/implementing-sap-s-4hana-cloud-public-edition-warehouse-management/maintaining-packaging-information_d0d86e60-5eb5-4b2f-9ad8-1277f3fc3dd1",
+            "source_version": "Documentation évolutive ; périmètre du produit et des sections cités, version globale non présumée.",
+            "consulted_on": "2026-10-07",
+            "source_locator": "Packaging Material ; Packing Instruction",
+            "evidence_limits": "FLOW décrit les références utiles à la demande de prestation ; le paramétrage et le calcul détaillé de préparation restent chez la logistique. Aucun consensus de taxonomie ni réalisation Beaumanoir déduit.",
+            "status": "proposed",
+            "source_refs": [
+              "U890",
+              "U891"
+            ],
+            "term_choice": "Nom et maille FLOW ; les sources appuient la distinction, sans imposer ce regroupement.",
+            "definition_choice": "Séparer matière de conditionnement, spécification réutilisable et unité logistique réellement préparée ou reçue."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Supply Chain Management",
+            "element_name": "Container types and packing profiles",
+            "concept_name": "Container types and packing profiles",
+            "element_type": "Objet ou mécanisme documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Dynamics distingue les types de contenants, les profils de packing et les containers physiques.",
+            "differences": "Ces objets produits ne constituent pas une équivalence exacte avec Packaging Specification ni une taxonomie métier commune.",
+            "flow_position": "Séparer matière de conditionnement, spécification réutilisable et unité logistique réellement préparée ou reçue.",
+            "scope_summary": "Dynamics distingue les types de contenants, les profils de packing et les containers physiques.",
+            "approach_summary": "Séparer matière de conditionnement, spécification réutilisable et unité logistique réellement préparée ou reçue.",
+            "source_title": "Pack containers for shipment",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/packing-containers",
+            "source_version": "Documentation évolutive ; périmètre du produit et des sections cités, version globale non présumée.",
+            "consulted_on": "2026-10-07",
+            "source_locator": "Containers ; Set up container types ; Set up packing profiles",
+            "evidence_limits": "Ces objets produits ne constituent pas une équivalence exacte avec Packaging Specification ni une taxonomie métier commune. Aucun consensus de taxonomie ni réalisation Beaumanoir déduit.",
+            "status": "proposed",
+            "source_refs": [
+              "U890",
+              "U891"
+            ],
+            "term_choice": "Nom et maille FLOW ; les sources appuient la distinction, sans imposer ce regroupement.",
+            "definition_choice": "Séparer matière de conditionnement, spécification réutilisable et unité logistique réellement préparée ou reçue."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Porter les demandes de conditionnement et de reconditionnement confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_scope": "Porter les demandes de conditionnement et de reconditionnement confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_approach": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nConditionnement initial, Repacking, pliage, mise sur cintre, présentation cadeau.\n\nLe reconditionnement est une modalité du même [Packing Order](model:service-order-packing).\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Passer un lot de vêtements pliés sur cintres, sans changer la composition des articles.\n\nPorter la prestation de reconditionnement confiée, en précisant la transformation attendue du conditionnement et en conservant les écarts signalés.\n\nModifier un conditionnement existant est une modalité du même [Packing Order](model:service-order-packing), sans créer deux demandes pour la même prestation. Les consignes réutilisables relèvent de [Packaging Specification](model:packaging-specification) ; les exigences et engagements individuels sont tenus dans l’ordre. Le tracking et le rapprochement fournissent les constats et écarts ; l’exécutant réalise le geste physique.\n\nExemple fictif : Reconditionner un lot déjà emballé selon une nouvelle consigne ; distinguer quantité traitée et quantité conforme.\n\nLe reconditionnement relève de [Packing Order](model:service-order-packing). La mise sur cintre, le changement de cintre et le retour à une présentation pliée relèvent du conditionnement, sans changer la composition d’un kit.\n\nPorter les exigences de conditionnement commun, par exemple préparer les biens compatibles d’une commande B2B sur une palette lorsque cela est réalisable. La libération simultanée des ordres ne garantit pas ce résultat ; tenir la consigne, la prise en charge et le résultat effectif. L’exécutant conserve la palettisation détaillée.\n\nRéférencer la version de [Packaging Specification](model:packaging-specification) et les matières de [Packaging Material Reference](model:packaging-material-reference) lorsqu’elles sont nécessaires. Le [Service Catalog](model:D14) décrit la prestation offerte ; la spécification décrit son résultat de conditionnement. Conserver séparément exigences particulières et résultat annoncé. Exemple fictif : demander 120 pièces par cartons de douze ; les dix cartons annoncés ne prouvent ni la réception de 120 pièces ni leur conformité à destination.",
+          "synthesis": [
+            "Le reconditionnement est une modalité du même [Packing Order](model:service-order-packing).",
+            "Séparer matière de conditionnement, spécification réutilisable et unité logistique réellement préparée ou reçue."
+          ],
+          "examples": [
+            {
+              "title": "Exemple fictif fashion",
+              "situation": "Passer un lot de vêtements pliés sur cintres, sans changer la composition des articles.",
+              "outcome": "Résultat et écarts conservés dans la demande.",
+              "lesson": "Illustration sans preuve installée.",
+              "source_refs": [
+                "ELM669",
+                "U707"
+              ],
+              "source_title": "E-Commerce Services — Value Added Services",
+              "source_url": "https://www.ryder.com/en-us/e-commerce/value-added-services"
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "id": "BC-060.01",
+          "resultat": "Porter les exigences de conditionnement"
+        },
+        {
+          "id": "BC-060.02",
+          "resultat": "Suivre conditionnement et reconditionnement"
+        },
+        {
+          "id": "BC-060.03",
+          "resultat": "Rapprocher résultats et unités concernées"
+        }
+      ],
+      "boundary": "Ne calcule pas le placement physique optimal des objets dans un colis."
+    },
+    {
+      "id": "BC-061",
+      "native_id": "service-order-cross-docking",
+      "source": {
+        "name": "Cross-Docking Order",
+        "definition": "Porter les demandes de transit confiées aux exécutants et les engagements de passage des marchandises reçues vers les départs prévus.",
+        "scope": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nTenir les arrivées et sorties concernées, les quantités, fenêtres attendues, prises en charge et changements de prestation. [Order Backlog Management](glossary:TER269) arbitre les affectations partagées avec l’appui du plan commun ; [Fulfilment](glossary:TER085) coordonne le passage et les adaptations locales. Une arrivée tardive ou un départ manqué produit des faits et suites explicites, sans réaffectation implicite d’autres commandes. L’instruction peut être autonome ou liée aux ordres entrants et sortants ; le cross-docking évite le stockage conventionnel sans imposer le même parcours à toutes les unités.\n\nExemple fictif : Un lot attendu doit rejoindre un départ magasin ; le retard d’arrivée exige une suite de prestation et un arbitrage si la promesse est affectée.\n\nLa prestation est décrite dans le [Service Catalog](model:D14) ; le [Service Order](glossary:TER066) en porte les exigences et engagements individuels auprès du [Service Provider](glossary:TER088).",
+        "finality": "Tenir les exigences et engagements de la prestation et expliquer ses suites.",
+        "nature": "action",
+        "market_comparisons": [
+          {
+            "vendor": "Microsoft",
+            "product": "Planned cross docking",
+            "element_name": "Cross docking",
+            "element_type": "Processus et travail WMS",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Lien entre arrivées et sorties ; création du travail de passage vers la sortie. Des demandes cross-dock sont portées par les lignes des Shipment Orders en mode WMS autonome.",
+            "differences": "Les documents Microsoft étayent les demandes liées aux entrées/sorties ; ils ne prouvent ni un Cross-Docking Order universel ni la frontière Matching/Fulfilment de FLOW. Deux documents du même éditeur ne constituent pas un consensus.",
+            "flow_position": "Porter les demandes de transit confiées aux exécutants et les engagements de passage des marchandises reçues vers les départs prévus. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Planned cross docking",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/planned-cross-docking",
+            "source_version": "Documentation évolutive, version globale non figée",
+            "source_locator": "Introduction ; Process the cross-docking ; note finale WMS only mode",
+            "consulted_on": "2026-09-23",
+            "evidence_limits": "Le produit combine marquage, affectation et exécution ; ne détermine pas la frontière Matching/Fulfilment de FLOW.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM657",
+              "CMP273",
+              "U682"
+            ],
+            "concept_name": "Cross docking",
+            "scope_summary": "Lien entre arrivées et sorties ; création du travail de passage vers la sortie. Des demandes cross-dock sont portées par les lignes des Shipment Orders en mode WMS autonome.",
+            "approach_summary": "Gérer les demandes de transit confiées aux exécutants et les engagements de passage des marchandises reçues vers les départs prévus.",
+            "term_choice": "Cross-Docking Order : nom FLOW ; le terme natif et son périmètre restent ceux de la source.",
+            "definition_choice": "Appui de Cross docking : Lien entre arrivées et sorties ; création du travail de passage vers la sortie. Des demandes cross-dock sont portées par les lignes des Shipment Orders en mode WMS autonome. Limite de reprise dans FLOW : Les documents Microsoft étayent les demandes liées aux entrées/sorties ; ils ne prouvent ni un Cross-Docking Order universel ni la frontière Matching/Fulfilment de FLOW. Deux documents du même éditeur ne constituent pas un consensus."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Warehouse management only mode overview",
+            "element_name": "Inbound Shipment Order / Outbound Shipment Order",
+            "element_type": "Documents et frontière produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Documents logistiques séparés des commandes générales amont ; fonctions WMS autonomes.",
+            "differences": "Les documents Microsoft étayent les demandes liées aux entrées/sorties ; ils ne prouvent ni un Cross-Docking Order universel ni la frontière Matching/Fulfilment de FLOW. Deux documents du même éditeur ne constituent pas un consensus.",
+            "flow_position": "Porter les demandes de transit confiées aux exécutants et les engagements de passage des marchandises reçues vers les départs prévus. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Warehouse management only mode overview",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/wms-only-mode-overview",
+            "source_version": "Documentation évolutive ; mise à jour affichée 2025-11-20",
+            "source_locator": "Introduction ; Unsupported processes",
+            "consulted_on": "2026-09-23",
+            "evidence_limits": "Périmètre entrepôt ; restrictions retours, production et transport. Ne prescrit aucun sous-domaine FLOW.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM133",
+              "CMP273",
+              "U682"
+            ],
+            "concept_name": "Inbound Shipment Order / Outbound Shipment Order",
+            "scope_summary": "Documents logistiques séparés des commandes générales amont ; fonctions WMS autonomes.",
+            "approach_summary": "Gérer les demandes de transit confiées aux exécutants et les engagements de passage des marchandises reçues vers les départs prévus.",
+            "term_choice": "Cross-Docking Order : nom FLOW ; le terme natif et son périmètre restent ceux de la source.",
+            "definition_choice": "Appui de Inbound Shipment Order / Outbound Shipment Order : Documents logistiques séparés des commandes générales amont ; fonctions WMS autonomes. Limite de reprise dans FLOW : Les documents Microsoft étayent les demandes liées aux entrées/sorties ; ils ne prouvent ni un Cross-Docking Order universel ni la frontière Matching/Fulfilment de FLOW. Deux documents du même éditeur ne constituent pas un consensus."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Setting Up Cross-Docking",
+            "concept_name": "Setting Up Cross-Docking",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Le cross-docking relie besoins entrants et sortants pour un transit sans stockage intermédiaire normal.",
+            "approach_summary": "Rapprochement avec Cross-Docking Order : Le cross-docking relie besoins entrants et sortants pour un transit sans stockage intermédiaire normal.",
+            "similarities": "Le cross-docking relie besoins entrants et sortants pour un transit sans stockage intermédiaire normal.",
+            "differences": "Le mécanisme d’exécution EWM étaye la prestation, pas l’existence native d’un ordre autonome portant toutes les exigences FLOW.",
+            "flow_position": "Porter les demandes de transit confiées aux exécutants et les engagements de passage des marchandises reçues vers les départs prévus. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Setting Up Cross-Docking",
+            "source_url": "https://learning.sap.com/courses/advanced-customizing-in-sap-s-4hana-ewm/setting-up-cross-docking",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Setting Up Cross-Docking — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Le mécanisme d’exécution EWM étaye la prestation, pas l’existence native d’un ordre autonome portant toutes les exigences FLOW.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM815"
+            ],
+            "term_choice": "Le nom Cross-Docking Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Le cross-docking relie besoins entrants et sortants pour un transit sans stockage intermédiaire normal. Frontière conservée : Le mécanisme d’exécution EWM étaye la prestation, pas l’existence native d’un ordre autonome portant toutes les exigences FLOW."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Porter les demandes de transit confiées aux exécutants et les engagements de passage des marchandises reçues vers les départs prévus.",
+          "flow_scope": "Porter les demandes de transit confiées aux exécutants et les engagements de passage des marchandises reçues vers les départs prévus.",
+          "flow_approach": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nTenir les arrivées et sorties concernées, les quantités, fenêtres attendues, prises en charge et changements de prestation. [Order Backlog Management](glossary:TER269) arbitre les affectations partagées avec l’appui du plan commun ; [Fulfilment](glossary:TER085) coordonne le passage et les adaptations locales. Une arrivée tardive ou un départ manqué produit des faits et suites explicites, sans réaffectation implicite d’autres commandes. L’instruction peut être autonome ou liée aux ordres entrants et sortants ; le cross-docking évite le stockage conventionnel sans imposer le même parcours à toutes les unités.\n\nExemple fictif : Un lot attendu doit rejoindre un départ magasin ; le retard d’arrivée exige une suite de prestation et un arbitrage si la promesse est affectée.\n\nLa prestation est décrite dans le [Service Catalog](model:D14) ; le [Service Order](glossary:TER066) en porte les exigences et engagements individuels auprès du [Service Provider](glossary:TER088).",
+          "synthesis": [
+            "Les documents Microsoft étayent les demandes liées aux entrées/sorties ; ils ne prouvent ni un Cross-Docking Order universel ni la frontière Matching/Fulfilment de FLOW. Deux documents du même éditeur ne constituent pas un consensus."
+          ],
+          "examples": [
+            {
+              "title": "Exemple fictif",
+              "situation": "Un lot attendu doit rejoindre un départ magasin ; le retard d’arrivée exige une suite de prestation et un arbitrage si la promesse est affectée.",
+              "outcome": "Gérer les demandes de transit confiées aux exécutants et les engagements de passage des marchandises reçues vers les départs prévus.",
+              "lesson": "Illustration de la frontière FLOW, sans preuve de réalisation installée.",
+              "source_refs": [
+                "ELM657",
+                "U682"
+              ],
+              "source_title": "Planned cross docking",
+              "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/planned-cross-docking"
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "id": "BC-061.01",
+          "resultat": "Lier marchandises reçues et départs prévus"
+        },
+        {
+          "id": "BC-061.02",
+          "resultat": "Tenir les engagements de passage"
+        },
+        {
+          "id": "BC-061.03",
+          "resultat": "Qualifier retards et écarts de transit"
+        }
+      ],
+      "boundary": "Ne reconstruit pas l’ordonnancement du quai."
+    },
+    {
+      "id": "BC-062",
+      "native_id": "service-order-labeling",
+      "source": {
+        "name": "Labeling Order",
+        "definition": "Porter les demandes de marquage et d’étiquetage confiées aux exécutants, leurs exigences, engagements et résultats.",
+        "scope": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nÉtiquetage et réétiquetage, RFID et pose d’antivols ; information, identification ou protection attendue.\n\nRegroupe des variantes ; pas un ordre distinct pour chaque technologie.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Réétiqueter 200 vestes selon le tarif accepté et vérifier la version appliquée.\n\nQualifier et suivre la prestation d’étiquetage ou de réétiquetage confiée, en tenant la spécification attendue et la conformité du résultat communiqué.\n\nLa conformité porte sur l’information appliquée et sa version, pas seulement sur une quantité traitée. Les références des consignes relèvent du catalogue ; les exigences et engagements individuels sont tenus dans l’ordre. Le tracking et le rapprochement fournissent les constats et écarts ; l’exécutant réalise le geste physique.\n\nExemple fictif : Un changement d’étiquette exige la version attendue pour le lot concerné ; une confirmation de traitement ne suffit pas si elle concerne une autre version.\n\nL’étiquetage et le réétiquetage relèvent de [Labeling Order](model:service-order-labeling). La consigne distingue version précédente, version cible et conformité du réétiquetage.",
+        "finality": "Tenir les exigences et engagements de la prestation et expliquer ses suites.",
+        "nature": "action",
+        "market_comparisons": [
+          {
+            "vendor": "Ryder",
+            "product": "E-Commerce Services — Value Added Services",
+            "element_name": "E-Commerce Services — Value Added Services",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Liste détaillée des préparations textile et prestations e-commerce.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de marquage et d’étiquetage confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "E-Commerce Services — Value Added Services",
+            "source_url": "https://www.ryder.com/en-us/e-commerce/value-added-services",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "E-commerce Value-Added Services; Apparel Value-Added Services",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM669",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Labeling Order",
+            "scope_summary": "Étiquetage et réétiquetage, RFID et pose d’antivols ; information, identification ou protection attendue.",
+            "approach_summary": "Tenir les demandes de marquage et d’étiquetage confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Labeling Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de E-Commerce Services — Value Added Services : Liste détaillée des préparations textile et prestations e-commerce. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          },
+          {
+            "vendor": "Advanced Supply Chain",
+            "product": "RFID",
+            "element_name": "RFID",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Pose, encodage, association des données et vérification de lecture des étiquettes.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de marquage et d’étiquetage confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "RFID",
+            "source_url": "https://advancedsupplychain.com/rfid/",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "Our Comprehensive RFID Labelling Solutions",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM676",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Labeling Order",
+            "scope_summary": "Étiquetage et réétiquetage, RFID et pose d’antivols ; information, identification ou protection attendue.",
+            "approach_summary": "Tenir les demandes de marquage et d’étiquetage confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Labeling Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de RFID : Pose, encodage, association des données et vérification de lecture des étiquettes. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA Fashion",
+            "source_title": "Explaining VAS",
+            "source_url": "https://learning.sap.com/courses/exploring-fashion-functions-and-business-processes-in-sap-s-4hana-for-fashion-and-vertical-business/explaining-vas_f2561ed9-da50-493e-8d2f-b68d3c46ee05",
+            "source_locator": "Étiquetage, emballage et instructions attachées aux documents",
+            "source_version": "Documentation en ligne consultée le 2026-10-06",
+            "consulted_on": "2026-10-06",
+            "element_name": "Explaining VAS",
+            "concept_name": "Explaining VAS",
+            "element_type": "Fonction produit documentée",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Porter les instructions d’étiquetage des biens.",
+            "differences": "SAP les rattache aux documents commerciaux ; FLOW tient un engagement de prestation distinct.",
+            "flow_position": "Porter les demandes de marquage et d’étiquetage confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "definition_choice": "Tenir les demandes de marquage et d’étiquetage confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Labeling Order désigne le périmètre propre à FLOW, sans équivalence de taxonomie revendiquée.",
+            "scope_summary": "Porter les instructions d’étiquetage des biens.",
+            "approach_summary": "SAP les rattache aux documents commerciaux ; FLOW tient un engagement de prestation distinct.",
+            "evidence_limits": "Appui limité au passage indiqué ; ne démontre ni couverture complète du périmètre ni réalisation installée chez Beaumanoir.",
+            "status": "proposed",
+            "source_refs": [
+              "U853"
+            ]
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Porter les demandes de marquage et d’étiquetage confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_scope": "Porter les demandes de marquage et d’étiquetage confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_approach": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nÉtiquetage et réétiquetage, RFID et pose d’antivols ; information, identification ou protection attendue.\n\nRegroupe des variantes ; pas un ordre distinct pour chaque technologie.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Réétiqueter 200 vestes selon le tarif accepté et vérifier la version appliquée.\n\nQualifier et suivre la prestation d’étiquetage ou de réétiquetage confiée, en tenant la spécification attendue et la conformité du résultat communiqué.\n\nLa conformité porte sur l’information appliquée et sa version, pas seulement sur une quantité traitée. Les références des consignes relèvent du catalogue ; les exigences et engagements individuels sont tenus dans l’ordre. Le tracking et le rapprochement fournissent les constats et écarts ; l’exécutant réalise le geste physique.\n\nExemple fictif : Un changement d’étiquette exige la version attendue pour le lot concerné ; une confirmation de traitement ne suffit pas si elle concerne une autre version.\n\nL’étiquetage et le réétiquetage relèvent de [Labeling Order](model:service-order-labeling). La consigne distingue version précédente, version cible et conformité du réétiquetage.",
+          "synthesis": [
+            "Regroupe des variantes ; pas un ordre distinct pour chaque technologie."
+          ],
+          "examples": [
+            {
+              "title": "Exemple fictif fashion",
+              "situation": "Réétiqueter 200 vestes selon le tarif accepté et vérifier la version appliquée.",
+              "outcome": "Résultat et écarts conservés dans la demande.",
+              "lesson": "Illustration sans preuve installée.",
+              "source_refs": [
+                "ELM669",
+                "U707"
+              ],
+              "source_title": "E-Commerce Services — Value Added Services",
+              "source_url": "https://www.ryder.com/en-us/e-commerce/value-added-services"
+            }
+          ]
+        },
+        "market_gaps": [
+          {
+            "family": "microsoft_dynamics",
+            "reason": "Le cycle générique d’ordre de service ne documente pas les exigences et résultats d’un étiquetage textile. Appui requis encore à établir pour cette famille produit. Réexamen U1021 : La génération d’étiquettes Microsoft ne prouve pas le cycle d’une prestation textile avec exigences, engagement et résultats.",
+            "investigated_urls": [
+              "https://learn.microsoft.com/en-us/dynamics365/supply-chain/service-management/service-orders"
+            ],
+            "source_refs": [
+              "U853",
+              "U1020",
+              "U1021"
+            ]
+          }
+        ]
+      },
+      "functions": [
+        {
+          "id": "BC-062.01",
+          "resultat": "Porter les exigences de marquage ou étiquetage"
+        },
+        {
+          "id": "BC-062.02",
+          "resultat": "Suivre engagements et résultats"
+        },
+        {
+          "id": "BC-062.03",
+          "resultat": "Qualifier les non-conformités"
+        }
+      ],
+      "boundary": "Les imprimantes et gestes d’étiquetage restent chez l’exécutant."
+    },
+    {
+      "id": "BC-063",
+      "native_id": "service-order-kitting",
+      "source": {
+        "name": "Kitting Order",
+        "definition": "Porter les demandes de constitution, séparation et recomposition d’ensembles confiées aux exécutants, leurs exigences, engagements et résultats.",
+        "scope": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nConstitution, séparation et recomposition d’ensembles ou assortiments spécifiés.\n\nKitting / Dekitting regroupés ; ne décide pas des affectations de stock aux magasins.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Défaire des assortiments tailles/couleurs et constituer les ensembles spécifiés.",
+        "finality": "Tenir les exigences et engagements de la prestation et expliquer ses suites.",
+        "nature": "action",
+        "market_comparisons": [
+          {
+            "vendor": "Advanced Supply Chain",
+            "product": "Value Added Services in Logistics & Warehousing",
+            "element_name": "Value Added Services in Logistics & Warehousing",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Finition textile, recomposition des assortiments, contrôles et retouches. Publication du 31 juillet 2025.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de constitution, séparation et recomposition d’ensembles confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Value Added Services in Logistics & Warehousing",
+            "source_url": "https://advancedsupplychain.com/latest/value-added-services-in-logistics-warehousing/",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "Garment Finishing; Packing; Labelling; Quality Control; Returns and Repairs",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM668",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Kitting Order",
+            "scope_summary": "Constitution, séparation et recomposition d’ensembles ou assortiments spécifiés.",
+            "approach_summary": "Tenir les demandes de constitution, séparation et recomposition d’ensembles confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Kitting Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de Value Added Services in Logistics & Warehousing : Finition textile, recomposition des assortiments, contrôles et retouches. Publication du 31 juillet 2025. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          },
+          {
+            "vendor": "Oracle",
+            "product": "Oracle Warehouse Management User’s Guide — Overview",
+            "element_name": "Oracle Warehouse Management User’s Guide — Overview",
+            "element_type": "Documentation WMS",
+            "relationship": "Recouvrement partiel",
+            "similarities": "EBS 12.2 : kitting/dekitting et étiquetage ; reverse logistics séparée incluant remise en état et recyclage.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de constitution, séparation et recomposition d’ensembles confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Oracle Warehouse Management User’s Guide — Overview",
+            "source_url": "https://docs.oracle.com/cd/E26401_01/doc.122/e48830/T211976T317761.htm",
+            "source_version": "EBS 12.2",
+            "source_locator": "Oracle Warehouse Management Value Added Services; Reverse Logistics",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM680",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Kitting Order",
+            "scope_summary": "Constitution, séparation et recomposition d’ensembles ou assortiments spécifiés.",
+            "approach_summary": "Tenir les demandes de constitution, séparation et recomposition d’ensembles confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Kitting Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de Oracle Warehouse Management User’s Guide — Overview : EBS 12.2 : kitting/dekitting et étiquetage ; reverse logistics séparée incluant remise en état et recyclage. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Performing Value-Added Services (VAS)",
+            "concept_name": "Performing Value-Added Services (VAS)",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Les VAS orders encadrent le kitting et les consommations de composants associées.",
+            "approach_summary": "Rapprochement avec Kitting Order : Les VAS orders encadrent le kitting et les consommations de composants associées.",
+            "similarities": "Les VAS orders encadrent le kitting et les consommations de composants associées.",
+            "differences": "Appui au kitting ; le dekitting n’est pas démontré ici. FLOW garde ses familles spécialisées, sans réintroduire une capacité générique Value-Added Service Order.",
+            "flow_position": "Porter les demandes de constitution, séparation et recomposition d’ensembles confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Performing Value-Added Services (VAS)",
+            "source_url": "https://learning.sap.com/courses/exploring-business-processes-for-supply-chain-execution-in-sap-s-4hana-cloud-private-edition/performing-value-added-services-vas-",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Performing Value-Added Services (VAS) — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Appui au kitting ; le dekitting n’est pas démontré ici. FLOW garde ses familles spécialisées, sans réintroduire une capacité générique Value-Added Service Order.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM795"
+            ],
+            "term_choice": "Le nom Kitting Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Les VAS orders encadrent le kitting et les consommations de composants associées. Frontière conservée : Appui au kitting ; le dekitting n’est pas démontré ici. FLOW garde ses familles spécialisées, sans réintroduire une capacité générique Value-Added Service Order."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Microsoft Dynamics 365 — application indiquée par la source",
+            "element_name": "Process kit assembly and disassembly orders",
+            "concept_name": "Process kit assembly and disassembly orders",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Des ordres distincts encadrent l’assemblage et le désassemblage de kits et mettent à jour les quantités.",
+            "approach_summary": "Rapprochement avec Kitting Order : Des ordres distincts encadrent l’assemblage et le désassemblage de kits et mettent à jour les quantités.",
+            "similarities": "Des ordres distincts encadrent l’assemblage et le désassemblage de kits et mettent à jour les quantités.",
+            "differences": "FLOW réunit kitting et dekitting dans une famille ; il ne reprend pas automatiquement la décomposition des écrans Commerce.",
+            "flow_position": "Porter les demandes de constitution, séparation et recomposition d’ensembles confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Process kit assembly and disassembly orders - Commerce | Dynamics 365 | Microsoft Learn",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/commerce/process-kit-assembly-and-disassembly-orders",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Process kit assembly and disassembly orders - Commerce | Dynamics 365 | Microsoft Learn — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. FLOW réunit kitting et dekitting dans une famille ; il ne reprend pas automatiquement la décomposition des écrans Commerce.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM803"
+            ],
+            "term_choice": "Le nom Kitting Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Des ordres distincts encadrent l’assemblage et le désassemblage de kits et mettent à jour les quantités. Frontière conservée : FLOW réunit kitting et dekitting dans une famille ; il ne reprend pas automatiquement la décomposition des écrans Commerce."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Porter les demandes de constitution, séparation et recomposition d’ensembles confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_scope": "Porter les demandes de constitution, séparation et recomposition d’ensembles confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_approach": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nConstitution, séparation et recomposition d’ensembles ou assortiments spécifiés.\n\nKitting / Dekitting regroupés ; ne décide pas des affectations de stock aux magasins.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Défaire des assortiments tailles/couleurs et constituer les ensembles spécifiés.",
+          "synthesis": [
+            "Kitting / Dekitting regroupés ; ne décide pas des affectations de stock aux magasins."
+          ],
+          "examples": [
+            {
+              "title": "Exemple fictif fashion",
+              "situation": "Défaire des assortiments tailles/couleurs et constituer les ensembles spécifiés.",
+              "outcome": "Résultat et écarts conservés dans la demande.",
+              "lesson": "Illustration sans preuve installée.",
+              "source_refs": [
+                "ELM668",
+                "U707"
+              ],
+              "source_title": "Value Added Services in Logistics & Warehousing",
+              "source_url": "https://advancedsupplychain.com/latest/value-added-services-in-logistics-warehousing/"
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "id": "BC-063.01",
+          "resultat": "Porter les exigences de constitution ou séparation d’ensembles"
+        },
+        {
+          "id": "BC-063.02",
+          "resultat": "Suivre les biens entrants et résultats"
+        },
+        {
+          "id": "BC-063.03",
+          "resultat": "Qualifier les écarts de composition"
+        }
+      ],
+      "boundary": "Ne développe pas une GPAO ni le pilotage des postes de travail."
+    },
+    {
+      "id": "BC-064",
+      "native_id": "service-order-garment-finishing",
+      "source": {
+        "name": "Garment Finishing Order",
+        "definition": "Porter les demandes de finition d’aspect des vêtements confiées aux exécutants, leurs exigences, engagements et résultats.",
+        "scope": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nFinition d’aspect textile : repassage, défroissage, remise en forme.\n\nSe distingue du support de présentation et du nettoyage.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Défroisser des chemises et signaler les pièces dont l’aspect reste non conforme.",
+        "finality": "Tenir les exigences et engagements de la prestation et expliquer ses suites.",
+        "nature": "action",
+        "market_comparisons": [
+          {
+            "vendor": "Advanced Supply Chain",
+            "product": "Value Added Services in Logistics & Warehousing",
+            "element_name": "Value Added Services in Logistics & Warehousing",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Finition textile, recomposition des assortiments, contrôles et retouches. Publication du 31 juillet 2025.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de finition d’aspect des vêtements confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Value Added Services in Logistics & Warehousing",
+            "source_url": "https://advancedsupplychain.com/latest/value-added-services-in-logistics-warehousing/",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "Garment Finishing; Packing; Labelling; Quality Control; Returns and Repairs",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM668",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Garment Finishing Order",
+            "scope_summary": "Finition d’aspect textile : repassage, défroissage, remise en forme.",
+            "approach_summary": "Tenir les demandes de finition d’aspect des vêtements confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Garment Finishing Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de Value Added Services in Logistics & Warehousing : Finition textile, recomposition des assortiments, contrôles et retouches. Publication du 31 juillet 2025. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          },
+          {
+            "vendor": "Bleckmann",
+            "product": "Value Added Services",
+            "element_name": "Value Added Services",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Contrôle, remise en état, personnalisation et photographie aux côtés du packing.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de finition d’aspect des vêtements confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Value Added Services",
+            "source_url": "https://www.bleckmann.com/solutions/logistics-fulfilment/value-added-services",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "A complete range; Reconditioning; Personalisation; In-house photo studio",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM670",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Garment Finishing Order",
+            "scope_summary": "Finition d’aspect textile : repassage, défroissage, remise en forme.",
+            "approach_summary": "Tenir les demandes de finition d’aspect des vêtements confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Garment Finishing Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de Value Added Services : Contrôle, remise en état, personnalisation et photographie aux côtés du packing. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Porter les demandes de finition d’aspect des vêtements confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_scope": "Porter les demandes de finition d’aspect des vêtements confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_approach": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nFinition d’aspect textile : repassage, défroissage, remise en forme.\n\nSe distingue du support de présentation et du nettoyage.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Défroisser des chemises et signaler les pièces dont l’aspect reste non conforme.",
+          "synthesis": [
+            "Se distingue du support de présentation et du nettoyage."
+          ],
+          "examples": [
+            {
+              "title": "Exemple fictif fashion",
+              "situation": "Défroisser des chemises et signaler les pièces dont l’aspect reste non conforme.",
+              "outcome": "Résultat et écarts conservés dans la demande.",
+              "lesson": "Illustration sans preuve installée.",
+              "source_refs": [
+                "ELM668",
+                "U707"
+              ],
+              "source_title": "Value Added Services in Logistics & Warehousing",
+              "source_url": "https://advancedsupplychain.com/latest/value-added-services-in-logistics-warehousing/"
+            }
+          ]
+        },
+        "market_gaps": [
+          {
+            "family": "microsoft_dynamics",
+            "reason": "Les prestations génériques et instructions d’étiquetage ou d’emballage ne documentent pas le cycle spécifique de finition des vêtements. Appui requis encore à établir pour cette famille produit. Réexamen U1021 : Les prestations génériques et opérations d’entrepôt ne prouvent pas le cycle complet d’une finition textile.",
+            "investigated_urls": [
+              "https://learn.microsoft.com/en-us/dynamics365/supply-chain/service-management/service-orders"
+            ],
+            "source_refs": [
+              "U853",
+              "U1020",
+              "U1021"
+            ]
+          },
+          {
+            "family": "sap_s4hana",
+            "reason": "Les prestations génériques et instructions d’étiquetage ou d’emballage ne documentent pas le cycle spécifique de finition des vêtements. Appui requis encore à établir pour cette famille produit. Réexamen U1021 : Les prestations génériques et opérations d’entrepôt ne prouvent pas le cycle complet d’une finition textile.",
+            "investigated_urls": [
+              "https://learning.sap.com/courses/exploring-fashion-functions-and-business-processes-in-sap-s-4hana-for-fashion-and-vertical-business/explaining-vas_f2561ed9-da50-493e-8d2f-b68d3c46ee05"
+            ],
+            "source_refs": [
+              "U853",
+              "U1020",
+              "U1021"
+            ]
+          }
+        ]
+      },
+      "functions": [
+        {
+          "id": "BC-064.01",
+          "resultat": "Porter les exigences de finition d’aspect"
+        },
+        {
+          "id": "BC-064.02",
+          "resultat": "Suivre engagements et résultats"
+        },
+        {
+          "id": "BC-064.03",
+          "resultat": "Qualifier la conformité obtenue"
+        }
+      ],
+      "boundary": "Ne décrit pas les procédés industriels de finition."
+    },
+    {
+      "id": "BC-065",
+      "native_id": "service-order-cleaning",
+      "source": {
+        "name": "Cleaning Order",
+        "definition": "Porter les demandes de nettoyage des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats.",
+        "scope": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nNettoyage et détachage des vêtements, chaussures et accessoires.\n\nRésultat de propreté ; techniques au catalogue.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Détacher des chaussures retournées et distinguer les résultats complets et partiels.",
+        "finality": "Tenir les exigences et engagements de la prestation et expliquer ses suites.",
+        "nature": "action",
+        "market_comparisons": [
+          {
+            "vendor": "CEVA",
+            "product": "Logistics solutions for online returns",
+            "element_name": "Logistics solutions for online returns",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Grading, remise en état, réparation et préparation des retours.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de nettoyage des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Logistics solutions for online returns",
+            "source_url": "https://www.cevalogistics.com/en/your-industry/e-commerce/logistics-solutions-for-online-returns",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "OUR SERVICES; WHAT MAKES US DIFFERENT",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM667",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Cleaning Order",
+            "scope_summary": "Nettoyage et détachage des vêtements, chaussures et accessoires.",
+            "approach_summary": "Tenir les demandes de nettoyage des articles fashion confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Cleaning Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de Logistics solutions for online returns : Grading, remise en état, réparation et préparation des retours. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          },
+          {
+            "vendor": "Advanced Supply Chain",
+            "product": "Garment Cleaning",
+            "element_name": "Garment Cleaning",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Nettoyage ciblé, défroissage et traitement des odeurs proposés par le prestataire.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de nettoyage des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Garment Cleaning",
+            "source_url": "https://www.advancedsupplychain.com/value-added-services/garment-cleaning/",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "Spot Cleaning; Garment Finishing; Ozone Cleaning",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM675",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Cleaning Order",
+            "scope_summary": "Nettoyage et détachage des vêtements, chaussures et accessoires.",
+            "approach_summary": "Tenir les demandes de nettoyage des articles fashion confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Cleaning Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de Garment Cleaning : Nettoyage ciblé, défroissage et traitement des odeurs proposés par le prestataire. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Porter les demandes de nettoyage des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_scope": "Porter les demandes de nettoyage des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_approach": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nNettoyage et détachage des vêtements, chaussures et accessoires.\n\nRésultat de propreté ; techniques au catalogue.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Détacher des chaussures retournées et distinguer les résultats complets et partiels.",
+          "synthesis": [
+            "Résultat de propreté ; techniques au catalogue."
+          ],
+          "examples": [
+            {
+              "title": "Exemple fictif fashion",
+              "situation": "Détacher des chaussures retournées et distinguer les résultats complets et partiels.",
+              "outcome": "Résultat et écarts conservés dans la demande.",
+              "lesson": "Illustration sans preuve installée.",
+              "source_refs": [
+                "ELM667",
+                "U707"
+              ],
+              "source_title": "Logistics solutions for online returns",
+              "source_url": "https://www.cevalogistics.com/en/your-industry/e-commerce/logistics-solutions-for-online-returns"
+            }
+          ]
+        },
+        "market_gaps": [
+          {
+            "family": "microsoft_dynamics",
+            "reason": "Les prestations génériques et instructions d’étiquetage ou d’emballage ne documentent pas le nettoyage textile, ses exigences et son résultat attendu. Appui requis encore à établir pour cette famille produit. Réexamen U1021 : Une opération générique de service ne suffit pas à établir le cycle de nettoyage textile à cette maille.",
+            "investigated_urls": [
+              "https://learn.microsoft.com/en-us/dynamics365/supply-chain/service-management/service-orders"
+            ],
+            "source_refs": [
+              "U853",
+              "U1020",
+              "U1021"
+            ]
+          },
+          {
+            "family": "sap_s4hana",
+            "reason": "Les prestations génériques et instructions d’étiquetage ou d’emballage ne documentent pas le nettoyage textile, ses exigences et son résultat attendu. Appui requis encore à établir pour cette famille produit. Réexamen U1021 : Une opération générique de service ne suffit pas à établir le cycle de nettoyage textile à cette maille.",
+            "investigated_urls": [
+              "https://learning.sap.com/courses/exploring-fashion-functions-and-business-processes-in-sap-s-4hana-for-fashion-and-vertical-business/explaining-vas_f2561ed9-da50-493e-8d2f-b68d3c46ee05"
+            ],
+            "source_refs": [
+              "U853",
+              "U1020",
+              "U1021"
+            ]
+          }
+        ]
+      },
+      "functions": [
+        {
+          "id": "BC-065.01",
+          "resultat": "Porter les exigences de nettoyage"
+        },
+        {
+          "id": "BC-065.02",
+          "resultat": "Suivre les biens confiés et les résultats"
+        },
+        {
+          "id": "BC-065.03",
+          "resultat": "Qualifier les écarts et suites attendues"
+        }
+      ],
+      "boundary": "Ne pilote pas les équipements de nettoyage."
+    },
+    {
+      "id": "BC-066",
+      "native_id": "service-order-repair-alteration",
+      "source": {
+        "name": "Repair & Alteration Order",
+        "definition": "Porter les demandes de réparation et de retouche des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats.",
+        "scope": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nCorrection de défauts et retouches confiées sur vêtements, chaussures et accessoires.\n\nDistinguer restauration et modification demandée dans les exigences.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Remplacer des boutons sur un lot de manteaux selon les retouches autorisées.",
+        "finality": "Tenir les exigences et engagements de la prestation et expliquer ses suites.",
+        "nature": "action",
+        "market_comparisons": [
+          {
+            "vendor": "Ryder",
+            "product": "E-Commerce Services — Value Added Services",
+            "element_name": "E-Commerce Services — Value Added Services",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Liste détaillée des préparations textile et prestations e-commerce.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de réparation et de retouche des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "E-Commerce Services — Value Added Services",
+            "source_url": "https://www.ryder.com/en-us/e-commerce/value-added-services",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "E-commerce Value-Added Services; Apparel Value-Added Services",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM669",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Repair & Alteration Order",
+            "scope_summary": "Correction de défauts et retouches confiées sur articles fashion.",
+            "approach_summary": "Tenir les demandes de réparation et de retouche des articles fashion confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Repair & Alteration Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de E-Commerce Services — Value Added Services : Liste détaillée des préparations textile et prestations e-commerce. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          },
+          {
+            "vendor": "Bleckmann",
+            "product": "RESCUE: Circular Fashion Made Simple & Profitable",
+            "element_name": "RESCUE: Circular Fashion Made Simple & Profitable",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Réparations de couture, boutons et fermetures ; tri préalable selon réparabilité.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de réparation et de retouche des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "RESCUE: Circular Fashion Made Simple & Profitable",
+            "source_url": "https://www.bleckmann.com/resources/maximising-the-value-of-apparel-with-rescue-programme",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "So, how does the process work in practice?",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM677",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Repair & Alteration Order",
+            "scope_summary": "Correction de défauts et retouches confiées sur articles fashion.",
+            "approach_summary": "Tenir les demandes de réparation et de retouche des articles fashion confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Repair & Alteration Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de RESCUE: Circular Fashion Made Simple & Profitable : Réparations de couture, boutons et fermetures ; tri préalable selon réparabilité. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Microsoft Dynamics 365 — application indiquée par la source",
+            "element_name": "Repair management",
+            "concept_name": "Repair management",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Les lignes de réparation décrivent symptômes, diagnostic et résultat de remise en état.",
+            "approach_summary": "Rapprochement avec Repair & Alteration Order : Les lignes de réparation décrivent symptômes, diagnostic et résultat de remise en état.",
+            "similarities": "Les lignes de réparation décrivent symptômes, diagnostic et résultat de remise en état.",
+            "differences": "Le parcours de réparation ne prouve pas toutes les retouches fashion ; aucune spécialisation vêtement native n’est affirmée.",
+            "flow_position": "Porter les demandes de réparation et de retouche des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Repair management - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/service-management/repair-management",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Repair management - Supply Chain Management | Dynamics 365 | Microsoft Learn — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Le parcours de réparation ne prouve pas toutes les retouches fashion ; aucune spécialisation vêtement native n’est affirmée.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM818"
+            ],
+            "term_choice": "Le nom Repair & Alteration Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Les lignes de réparation décrivent symptômes, diagnostic et résultat de remise en état. Frontière conservée : Le parcours de réparation ne prouve pas toutes les retouches fashion ; aucune spécialisation vêtement native n’est affirmée."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Porter les demandes de réparation et de retouche des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_scope": "Porter les demandes de réparation et de retouche des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_approach": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nCorrection de défauts et retouches confiées sur vêtements, chaussures et accessoires.\n\nDistinguer restauration et modification demandée dans les exigences.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Remplacer des boutons sur un lot de manteaux selon les retouches autorisées.",
+          "synthesis": [
+            "Distinguer restauration et modification demandée dans les exigences."
+          ],
+          "examples": [
+            {
+              "title": "Exemple fictif fashion",
+              "situation": "Remplacer des boutons sur un lot de manteaux selon les retouches autorisées.",
+              "outcome": "Résultat et écarts conservés dans la demande.",
+              "lesson": "Illustration sans preuve installée.",
+              "source_refs": [
+                "ELM669",
+                "U707"
+              ],
+              "source_title": "E-Commerce Services — Value Added Services",
+              "source_url": "https://www.ryder.com/en-us/e-commerce/value-added-services"
+            }
+          ]
+        },
+        "market_gaps": [
+          {
+            "family": "sap_s4hana",
+            "reason": "Le traitement des retours et la réparation sont abordés ; le passage examiné ne suffit pas à établir précisément Repair & Alteration Order et ses limites dans FLOW. Appui requis encore à établir pour cette famille produit. Réexamen U1021 : Les sources S/4HANA consultées ne prouvent pas le cycle complet de réparation et retouche textile.",
+            "investigated_urls": [
+              "https://learning.sap.com/courses/functions-innovations-in-sap-s-4hana-sales/managing-customer-returns_f224d287-07ad-41fe-9897-2eb2ee4b33dc"
+            ],
+            "source_refs": [
+              "U853",
+              "U1020",
+              "U1021"
+            ]
+          }
+        ]
+      },
+      "functions": [
+        {
+          "id": "BC-066.01",
+          "resultat": "Porter réparation et retouche demandées"
+        },
+        {
+          "id": "BC-066.02",
+          "resultat": "Maintenir la filiation des biens confiés"
+        },
+        {
+          "id": "BC-066.03",
+          "resultat": "Suivre résultat et restitution"
+        }
+      ],
+      "boundary": "Le diagnostic technique de réparation reste chez l’exécutant."
+    },
+    {
+      "id": "BC-067",
+      "native_id": "service-order-personalization",
+      "source": {
+        "name": "Personalization Order",
+        "definition": "Porter les demandes de personnalisation des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats.",
+        "scope": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nPersonnalisation du produit : broderie, monogramme, gravure sur accessoires.\n\nLa carte cadeau jointe relève de la présentation, pas d’une transformation du produit.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Broder les initiales demandées sur les articles désignés.",
+        "finality": "Tenir les exigences et engagements de la prestation et expliquer ses suites.",
+        "nature": "action",
+        "market_comparisons": [
+          {
+            "vendor": "Bleckmann",
+            "product": "Value Added Services",
+            "element_name": "Value Added Services",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Contrôle, remise en état, personnalisation et photographie aux côtés du packing.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de personnalisation des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Value Added Services",
+            "source_url": "https://www.bleckmann.com/solutions/logistics-fulfilment/value-added-services",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "A complete range; Reconditioning; Personalisation; In-house photo studio",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM670",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Personalization Order",
+            "scope_summary": "Personnalisation du produit : broderie, monogramme, gravure sur accessoires.",
+            "approach_summary": "Tenir les demandes de personnalisation des articles fashion confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Personalization Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de Value Added Services : Contrôle, remise en état, personnalisation et photographie aux côtés du packing. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          },
+          {
+            "vendor": "GXO",
+            "product": "Fashion and apparel",
+            "element_name": "Fashion and apparel",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Broderie, cadeaux, kits et présentation de marque.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes de personnalisation des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Fashion and apparel",
+            "source_url": "https://gxo.com/industries/fashion-apparel/",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "Value-added services; We make it personal",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM671",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Personalization Order",
+            "scope_summary": "Personnalisation du produit : broderie, monogramme, gravure sur accessoires.",
+            "approach_summary": "Tenir les demandes de personnalisation des articles fashion confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Personalization Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de Fashion and apparel : Broderie, cadeaux, kits et présentation de marque. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Porter les demandes de personnalisation des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_scope": "Porter les demandes de personnalisation des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_approach": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nPersonnalisation du produit : broderie, monogramme, gravure sur accessoires.\n\nLa carte cadeau jointe relève de la présentation, pas d’une transformation du produit.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Broder les initiales demandées sur les articles désignés.",
+          "synthesis": [
+            "La carte cadeau jointe relève de la présentation, pas d’une transformation du produit."
+          ],
+          "examples": [
+            {
+              "title": "Exemple fictif fashion",
+              "situation": "Broder les initiales demandées sur les articles désignés.",
+              "outcome": "Résultat et écarts conservés dans la demande.",
+              "lesson": "Illustration sans preuve installée.",
+              "source_refs": [
+                "ELM670",
+                "U707"
+              ],
+              "source_title": "Value Added Services",
+              "source_url": "https://www.bleckmann.com/solutions/logistics-fulfilment/value-added-services"
+            }
+          ]
+        },
+        "market_gaps": [
+          {
+            "family": "microsoft_dynamics",
+            "reason": "Les prestations génériques et instructions d’étiquetage ou d’emballage ne suffisent pas à établir un cycle de personnalisation des biens. Appui requis encore à établir pour cette famille produit. Réexamen U1021 : Les prestations génériques d’entrepôt ne prouvent pas le cycle de personnalisation textile à cette maille.",
+            "investigated_urls": [
+              "https://learn.microsoft.com/en-us/dynamics365/supply-chain/service-management/service-orders"
+            ],
+            "source_refs": [
+              "U853",
+              "U1020",
+              "U1021"
+            ]
+          },
+          {
+            "family": "sap_s4hana",
+            "reason": "Les prestations génériques et instructions d’étiquetage ou d’emballage ne suffisent pas à établir un cycle de personnalisation des biens. Appui requis encore à établir pour cette famille produit. Réexamen U1021 : Les prestations génériques d’entrepôt ne prouvent pas le cycle de personnalisation textile à cette maille.",
+            "investigated_urls": [
+              "https://learning.sap.com/courses/exploring-fashion-functions-and-business-processes-in-sap-s-4hana-for-fashion-and-vertical-business/explaining-vas_f2561ed9-da50-493e-8d2f-b68d3c46ee05"
+            ],
+            "source_refs": [
+              "U853",
+              "U1020",
+              "U1021"
+            ]
+          }
+        ]
+      },
+      "functions": [
+        {
+          "id": "BC-067.01",
+          "resultat": "Porter les spécifications de personnalisation"
+        },
+        {
+          "id": "BC-067.02",
+          "resultat": "Lier la demande au bien concerné"
+        },
+        {
+          "id": "BC-067.03",
+          "resultat": "Suivre réalisation et non-conformité"
+        }
+      ],
+      "boundary": "Ne crée pas un studio graphique ni les procédés de fabrication."
+    },
+    {
+      "id": "BC-068",
+      "native_id": "service-order-inspection",
+      "source": {
+        "name": "Inspection Order",
+        "definition": "Porter les demandes d’inspection des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats.",
+        "scope": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nInspection autonome, contrôle de conformité et classement d’état des articles.\n\nLe contrôle intégré à une autre prestation reste dans cette prestation ; le constat ne décide pas du devenir du stock.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Examiner un lot retourné et livrer un constat d’état sans décider de sa destination.",
+        "finality": "Tenir les exigences et engagements de la prestation et expliquer ses suites.",
+        "nature": "action",
+        "market_comparisons": [
+          {
+            "vendor": "CEVA",
+            "product": "Logistics solutions for online returns",
+            "element_name": "Logistics solutions for online returns",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Grading, remise en état, réparation et préparation des retours.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes d’inspection des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Logistics solutions for online returns",
+            "source_url": "https://www.cevalogistics.com/en/your-industry/e-commerce/logistics-solutions-for-online-returns",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "OUR SERVICES; WHAT MAKES US DIFFERENT",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM667",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Inspection Order",
+            "scope_summary": "Inspection autonome, contrôle de conformité et classement d’état des articles.",
+            "approach_summary": "Tenir les demandes de inspection des articles fashion confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Inspection Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de Logistics solutions for online returns : Grading, remise en état, réparation et préparation des retours. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          },
+          {
+            "vendor": "Bleckmann",
+            "product": "Value Added Services",
+            "element_name": "Value Added Services",
+            "element_type": "Publication primaire de prestataire",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Contrôle, remise en état, personnalisation et photographie aux côtés du packing.",
+            "differences": "Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir.",
+            "flow_position": "Porter les demandes d’inspection des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Value Added Services",
+            "source_url": "https://www.bleckmann.com/solutions/logistics-fulfilment/value-added-services",
+            "source_version": "Page évolutive ; édition non indiquée",
+            "source_locator": "A complete range; Reconditioning; Personalisation; In-house photo studio",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Offre ou documentation du fournisseur ; pas une nomenclature normative, ni une preuve de réalisation Beaumanoir. Synthèse et lien uniquement.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM670",
+              "CMP278",
+              "U707"
+            ],
+            "concept_name": "Inspection Order",
+            "scope_summary": "Inspection autonome, contrôle de conformité et classement d’état des articles.",
+            "approach_summary": "Tenir les demandes de inspection des articles fashion confiées aux exécutants, leurs exigences, engagements et suites des résultats.",
+            "term_choice": "Inspection Order : composition de nom FLOW pour une famille documentée par le marché.",
+            "definition_choice": "Appui de Value Added Services : Contrôle, remise en état, personnalisation et photographie aux côtés du packing. Limite de reprise dans FLOW : Le prestataire décrit des opérations ; FLOW tient la demande et les engagements de cette famille. Ni taxonomie universelle des Orders ni preuve de réalisation Beaumanoir."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Managing Customer Returns",
+            "concept_name": "Managing Customer Returns",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Le retour client articule inspection, décision de suite et traitement ou restitution au client.",
+            "approach_summary": "Rapprochement avec Inspection Order : Le retour client articule inspection, décision de suite et traitement ou restitution au client.",
+            "similarities": "Le retour client articule inspection, décision de suite et traitement ou restitution au client.",
+            "differences": "L’inspection de retour est une partie de la famille Inspection Order ; ce parcours ne démontre pas une optimisation financière de la récupération de valeur.",
+            "flow_position": "Porter les demandes d’inspection des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Managing Customer Returns",
+            "source_url": "https://learning.sap.com/courses/functions-innovations-in-sap-s-4hana-sales/managing-customer-returns_f224d287-07ad-41fe-9897-2eb2ee4b33dc",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Managing Customer Returns — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. L’inspection de retour est une partie de la famille Inspection Order ; ce parcours ne démontre pas une optimisation financière de la récupération de valeur.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM455"
+            ],
+            "term_choice": "Le nom Inspection Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Le retour client articule inspection, décision de suite et traitement ou restitution au client. Frontière conservée : L’inspection de retour est une partie de la famille Inspection Order ; ce parcours ne démontre pas une optimisation financière de la récupération de valeur."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Microsoft Dynamics 365 — application indiquée par la source",
+            "element_name": "Quality management for warehouse processes",
+            "concept_name": "Quality management for warehouse processes",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Les quality orders organisent contrôles et suites logistiques selon leurs résultats.",
+            "approach_summary": "Rapprochement avec Inspection Order : Les quality orders organisent contrôles et suites logistiques selon leurs résultats.",
+            "similarities": "Les quality orders organisent contrôles et suites logistiques selon leurs résultats.",
+            "differences": "Le produit exécute les contrôles ; FLOW porte la demande, les critères attendus et le résultat de la prestation.",
+            "flow_position": "Porter les demandes d’inspection des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Quality management for warehouse processes - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/inventory/quality-management-for-warehouses-processes",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Quality management for warehouse processes - Supply Chain Management | Dynamics 365 | Microsoft Learn — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Le produit exécute les contrôles ; FLOW porte la demande, les critères attendus et le résultat de la prestation.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM802"
+            ],
+            "term_choice": "Le nom Inspection Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Les quality orders organisent contrôles et suites logistiques selon leurs résultats. Frontière conservée : Le produit exécute les contrôles ; FLOW porte la demande, les critères attendus et le résultat de la prestation."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Porter les demandes d’inspection des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_scope": "Porter les demandes d’inspection des vêtements, chaussures et accessoires confiées aux exécutants, leurs exigences, engagements et résultats.",
+          "flow_approach": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nInspection autonome, contrôle de conformité et classement d’état des articles.\n\nLe contrôle intégré à une autre prestation reste dans cette prestation ; le constat ne décide pas du devenir du stock.\n\nPréciser articles, quantités, consignes, résultat attendu et échéance ; conserver acceptation, modifications et écarts reçus.\n\nExemple fictif : Examiner un lot retourné et livrer un constat d’état sans décider de sa destination.",
+          "synthesis": [
+            "Le contrôle intégré à une autre prestation reste dans cette prestation ; le constat ne décide pas du devenir du stock."
+          ],
+          "examples": [
+            {
+              "title": "Exemple fictif fashion",
+              "situation": "Examiner un lot retourné et livrer un constat d’état sans décider de sa destination.",
+              "outcome": "Résultat et écarts conservés dans la demande.",
+              "lesson": "Illustration sans preuve installée.",
+              "source_refs": [
+                "ELM667",
+                "U707"
+              ],
+              "source_title": "Logistics solutions for online returns",
+              "source_url": "https://www.cevalogistics.com/en/your-industry/e-commerce/logistics-solutions-for-online-returns"
+            }
+          ]
+        }
+      },
+      "functions": [
+        {
+          "id": "BC-068.01",
+          "resultat": "Porter les exigences d’inspection"
+        },
+        {
+          "id": "BC-068.02",
+          "resultat": "Collecter résultats et preuves"
+        },
+        {
+          "id": "BC-068.03",
+          "resultat": "Suivre conclusions et écarts"
+        }
+      ],
+      "boundary": "Ne remplace pas l’expertise technique de l’inspecteur."
+    },
+    {
+      "id": "BC-069",
+      "native_id": "service-order-receiving",
+      "source": {
+        "name": "Receiving Order",
+        "definition": "Porter les demandes de réception de marchandises confiées aux exécutants, leurs quantités et conditions attendues, leurs engagements et les résultats des réceptions partielles, refusées ou non conformes.",
+        "scope": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nPorter l’origine attendue, les articles et quantités, le lieu, les créneaux, les consignes de prise en charge et les preuves attendues. Suivre acceptation, révisions, annulation, réception partielle et clôture avec le reste à réaliser. Une annonce d’arrivée ou un document ne prouve pas la réception.\n\nUne demande de réception peut être liée à un [Purchase Order](glossary:TER070), [Transfer Order](glossary:TER071), [Return Order](glossary:TER072) ou apport consigné ; elle ne remplace pas leurs engagements. Le prestataire reçoit physiquement et organise ses tâches internes. Une inspection autonome peut être confiée à [Inspection Order](model:service-order-inspection) ; un contrôle intégré demeure dans la réception. [Receiving Order](model:service-order-receiving) ne décide pas du devenir d’un retour et ne garantit pas que le stock est vendable.\n\n[Fulfilment Orchestration](model:D06) coordonne les prestations. [Operations Tracking](glossary:TER179) capte leur résultat et Service Reconciliation qualifie l’écart ; [Receiving Order](model:service-order-receiving) tient le solde de sa prestation. Inventory Tracking et [Inventory Ledger](glossary:TER056) prennent en compte les faits de stock reconnus. L’instruction de réception ne crée ni mouvement, ni changement automatique de propriété, ni nouvel achat.\n\nCréer cet [Order](glossary:TER012) lorsqu’une réception est explicitement confiée et suivie comme prestation. Recevoir seulement une notification ne justifie pas un ordre artificiel. Aucune famille supplémentaire de rangement ou de stockage ni réalisation Beaumanoir n’est déduite.\n\nPorter le conditionnement attendu et la version de [Packaging Specification](model:packaging-specification) utile à la réception. Conserver les [Handling Units](glossary:TER189) annoncées et reçues avec identifiants, contenu et écarts, sans transformer l’annonce en fait de stock. Exemple fictif : neuf cartons de douze pièces et un carton de dix font 118 pièces reçues face à 120 annoncées ; la cause de l’écart reste à établir.",
+        "nature": "action",
+        "market_comparisons": [
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Supply Chain Management — Warehouse management only mode",
+            "element_name": "Inbound shipment order",
+            "concept_name": "Inbound shipment order",
+            "element_type": "Document logistique et parcours produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Les demandes logistiques entrantes sont distinctes des commandes commerciales amont.",
+            "differences": "Le produit tient des documents et réalise des opérations WMS ; FLOW porte la demande de prestation et laisse les tâches à l’exécutant. Deux documents Microsoft ne prouvent pas un consensus.",
+            "flow_position": "Porter les demandes de réception de marchandises confiées aux exécutants, leurs quantités et conditions attendues, leurs engagements et les résultats des réceptions partielles, refusées ou non conformes. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Warehouse management only mode overview",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/wms-only-mode-overview",
+            "source_version": "Documentation évolutive ; édition globale non figée",
+            "source_locator": "Introduction ; Handle all orders and financial processing in an external system",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Texte primaire consulté ; pas preuve de déploiement ni famille Receiving Order native universelle.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM133",
+              "U771",
+              "CMP306"
+            ],
+            "scope_summary": "Les demandes logistiques entrantes sont distinctes des commandes commerciales amont.",
+            "approach_summary": "Distinguer demande entrante et résultat communiqué.",
+            "term_choice": "Receiving Order est un nom FLOW pour l’engagement de réception confié ; Microsoft utilise Inbound shipment order.",
+            "definition_choice": "La séparation entre commande amont, demande logistique et retour de réception justifie de tenir cette prestation sans absorber achat, exécution WMS ou registre de stock."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Microsoft Dynamics 365 — application indiquée par la source",
+            "element_name": "Exchange data between systems",
+            "concept_name": "Exchange data between systems",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Les échanges avec les systèmes externes comprennent données maîtres, demandes d’entrepôt et retours d’exécution.",
+            "approach_summary": "Rapprochement avec Receiving Order : Les échanges avec les systèmes externes comprennent données maîtres, demandes d’entrepôt et retours d’exécution.",
+            "similarities": "Les échanges avec les systèmes externes comprennent données maîtres, demandes d’entrepôt et retours d’exécution.",
+            "differences": "Un contrat d’interface documente les informations échangées ; il ne prescrit pas les domaines fournisseurs Commerce, Finance et Design du modèle FLOW.",
+            "flow_position": "Porter les demandes de réception de marchandises confiées aux exécutants, leurs quantités et conditions attendues, leurs engagements et les résultats des réceptions partielles, refusées ou non conformes. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Exchange data between systems - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/wms-only-mode-exchange-data",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Exchange data between systems - Supply Chain Management | Dynamics 365 | Microsoft Learn — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Un contrat d’interface documente les informations échangées ; il ne prescrit pas les domaines fournisseurs Commerce, Finance et Design du modèle FLOW.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM445",
+              "U771",
+              "CMP306",
+              "U774",
+              "CMP307",
+              "ELM281"
+            ],
+            "term_choice": "Le nom Receiving Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Les échanges avec les systèmes externes comprennent données maîtres, demandes d’entrepôt et retours d’exécution. Frontière conservée : Un contrat d’interface documente les informations échangées ; il ne prescrit pas les domaines fournisseurs Commerce, Finance et Design du modèle FLOW."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Processing a Goods Receipt in SAP EWM",
+            "concept_name": "Processing a Goods Receipt in SAP EWM",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "La livraison entrante encadre la réception EWM et l’enregistrement de son résultat.",
+            "approach_summary": "Rapprochement avec Receiving Order : La livraison entrante encadre la réception EWM et l’enregistrement de son résultat.",
+            "similarities": "La livraison entrante encadre la réception EWM et l’enregistrement de son résultat.",
+            "differences": "FLOW distingue demande de prestation, réalisation physique et reconnaissance du stock ; la maille Receiving Order est un choix métier local.",
+            "flow_position": "Porter les demandes de réception de marchandises confiées aux exécutants, leurs quantités et conditions attendues, leurs engagements et les résultats des réceptions partielles, refusées ou non conformes. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Processing a Goods Receipt in SAP EWM",
+            "source_url": "https://learning.sap.com/courses/exploring-business-processes-in-sap-ewm-for-sap-s-4hana-cloud-private-edition/processing-a-goods-receipt-in-sap-ewm",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Processing a Goods Receipt in SAP EWM — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. FLOW distingue demande de prestation, réalisation physique et reconnaissance du stock ; la maille Receiving Order est un choix métier local.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM796"
+            ],
+            "term_choice": "Le nom Receiving Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "La livraison entrante encadre la réception EWM et l’enregistrement de son résultat. Frontière conservée : FLOW distingue demande de prestation, réalisation physique et reconnaissance du stock ; la maille Receiving Order est un choix métier local."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA Cloud Public Edition",
+            "element_name": "Packaging material and packing instruction",
+            "concept_name": "Packaging material and packing instruction",
+            "element_type": "Objet ou mécanisme documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "SAP distingue les matières de conditionnement et les consignes décrivant produits, quantités et matières.",
+            "differences": "FLOW décrit les références utiles à la demande de prestation ; le paramétrage et le calcul détaillé de préparation restent chez la logistique.",
+            "flow_position": "Séparer matière de conditionnement, spécification réutilisable et unité logistique réellement préparée ou reçue.",
+            "scope_summary": "SAP distingue les matières de conditionnement et les consignes décrivant produits, quantités et matières.",
+            "approach_summary": "Séparer matière de conditionnement, spécification réutilisable et unité logistique réellement préparée ou reçue.",
+            "source_title": "Maintaining Packaging Information",
+            "source_url": "https://learning.sap.com/courses/implementing-sap-s-4hana-cloud-public-edition-warehouse-management/maintaining-packaging-information_d0d86e60-5eb5-4b2f-9ad8-1277f3fc3dd1",
+            "source_version": "Documentation évolutive ; périmètre du produit et des sections cités, version globale non présumée.",
+            "consulted_on": "2026-10-07",
+            "source_locator": "Packaging Material ; Packing Instruction",
+            "evidence_limits": "FLOW décrit les références utiles à la demande de prestation ; le paramétrage et le calcul détaillé de préparation restent chez la logistique. Aucun consensus de taxonomie ni réalisation Beaumanoir déduit.",
+            "status": "proposed",
+            "source_refs": [
+              "U890",
+              "U891"
+            ],
+            "term_choice": "Nom et maille FLOW ; les sources appuient la distinction, sans imposer ce regroupement.",
+            "definition_choice": "Séparer matière de conditionnement, spécification réutilisable et unité logistique réellement préparée ou reçue."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Dynamics 365 Supply Chain Management",
+            "element_name": "Container types and packing profiles",
+            "concept_name": "Container types and packing profiles",
+            "element_type": "Objet ou mécanisme documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Dynamics distingue les types de contenants, les profils de packing et les containers physiques.",
+            "differences": "Ces objets produits ne constituent pas une équivalence exacte avec Packaging Specification ni une taxonomie métier commune.",
+            "flow_position": "Séparer matière de conditionnement, spécification réutilisable et unité logistique réellement préparée ou reçue.",
+            "scope_summary": "Dynamics distingue les types de contenants, les profils de packing et les containers physiques.",
+            "approach_summary": "Séparer matière de conditionnement, spécification réutilisable et unité logistique réellement préparée ou reçue.",
+            "source_title": "Pack containers for shipment",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/warehousing/packing-containers",
+            "source_version": "Documentation évolutive ; périmètre du produit et des sections cités, version globale non présumée.",
+            "consulted_on": "2026-10-07",
+            "source_locator": "Containers ; Set up container types ; Set up packing profiles",
+            "evidence_limits": "Ces objets produits ne constituent pas une équivalence exacte avec Packaging Specification ni une taxonomie métier commune. Aucun consensus de taxonomie ni réalisation Beaumanoir déduit.",
+            "status": "proposed",
+            "source_refs": [
+              "U890",
+              "U891"
+            ],
+            "term_choice": "Nom et maille FLOW ; les sources appuient la distinction, sans imposer ce regroupement.",
+            "definition_choice": "Séparer matière de conditionnement, spécification réutilisable et unité logistique réellement préparée ou reçue."
+          }
+        ],
+        "finality": "Savoir ce qui doit être réceptionné, ce qui l’a été et ce qui reste à traiter."
+      },
+      "functions": [
+        {
+          "id": "BC-069.01",
+          "resultat": "Porter quantités et conditions attendues"
+        },
+        {
+          "id": "BC-069.02",
+          "resultat": "Rapprocher réceptions et engagements"
+        },
+        {
+          "id": "BC-069.03",
+          "resultat": "Traiter refus et non-conformités et reliquats"
+        }
+      ],
+      "boundary": "Ne tient pas la procédure opératoire de réception du WMS."
+    },
+    {
+      "id": "BC-070",
+      "native_id": "service-order-scrapping",
+      "source": {
+        "name": "Scrapping Order",
+        "definition": "Porter une demande de mise au rebut de biens, ses autorisations, quantités, consignes et preuves attendues jusqu’à son résultat reconnu.",
+        "scope": "Tenir la commande, ses exigences, ses engagements et ses résultats selon le [contrat commun des commandes de traitement des biens](model:ba-goods-processing-order-management#scope). Le workflow pilote son suivi ; le prestataire réalise la prestation. La commande conserve ses règles de validité sans choisir elle-même son parcours.\n\nUn [Scrapping Order](glossary:TER104) permet de confier et suivre la mise au rebut comme prestation logistique identifiable. Préciser les biens, quantités, autorisations, consignes de traitement et preuves exigées. L’[Order](glossary:TER012) conserve le réalisé, le reliquat et les écarts ; une clôture partielle doit être explicitement autorisée. Le traitement peut être exécuté par un prestataire externe et durer dans le temps.\n\n[Inventory Disposition Decision](model:D05.i) détermine le devenir autorisé ; l’[Order](glossary:TER012) ne décide pas de détruire au seul motif d’un écart de stock. [Fulfilment Coordination](model:D06.d) coordonne la prestation ; [Operations Tracking](model:D07.d) reçoit les faits d’exécution et [Service Reconciliation](model:D07.c) les rapproche de l’attendu. [Inventory Tracking](model:D01.f) et [Inventory Ledger](model:D01.g) intègrent et conservent les effets reconnus sur le stock. Une instruction ou une écriture comptable ne prouve pas une destruction physique.\n\nLe comportement Scrapping de [Return Order](glossary:TER072) continue à porter l’issue du retour et ses obligations ; [Scrapping Order](glossary:TER104) porte la prestation confiée, liée au retour lorsqu’il existe. Le rebut peut aussi concerner un stock abîmé hors retour. Aucune extension automatique aux dons, déstockages commerciaux ou à toutes les filières de recyclage.\n\nExemple fictif : vingt vestes sont autorisées au rebut. Le prestataire prouve le traitement de dix-huit ; deux restent en attente. L’[Order](glossary:TER012) conserve ce solde tant qu’une autre clôture n’est pas autorisée. Aucun comportement supplémentaire n’est créé pour chaque motif de rebut.",
+        "nature": "action",
+        "market_comparisons": [
+          {
+            "vendor": "Microsoft",
+            "product": "Microsoft Dynamics 365",
+            "element_name": "Quarantine orders - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "concept_name": "Quarantine orders - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "element_type": "Mécanisme métier documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Le parcours de quarantaine permet une sortie au rebut distincte de la remise en stock.",
+            "differences": "Le parcours produit étaye la demande, le traitement et la sortie au rebut ; Scrapping Order est la maille de prestation FLOW, pas un nom natif commun. La restriction Microsoft des quarantine orders aux retours de vente en WMS ne limite pas le périmètre métier FLOW démontré aussi par le cas SAP hors retour.",
+            "flow_position": "Porter une demande de mise au rebut de biens, ses autorisations, quantités, consignes et preuves attendues jusqu’à son résultat reconnu. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Quarantine orders - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/inventory/quarantine-orders",
+            "source_version": "Documentation évolutive ; version globale non présumée.",
+            "source_locator": "Quarantine order scrap ; quarantine order statuses",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Avec les processus WMS, la page limite ce parcours de quarantine order aux retours de vente ; ne pas généraliser sa disponibilité native. Le parcours produit étaye la demande, le traitement et la sortie au rebut ; Scrapping Order est la maille de prestation FLOW, pas un nom natif commun. La restriction Microsoft des quarantine orders aux retours de vente en WMS ne limite pas le périmètre métier FLOW démontré aussi par le cas SAP hors retour.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM835",
+              "U775",
+              "U777"
+            ],
+            "scope_summary": "Le parcours de quarantaine permet une sortie au rebut distincte de la remise en stock.",
+            "approach_summary": "Appui à la responsabilité décrite, avec les frontières FLOW explicitées.",
+            "term_choice": "Scrapping Order nomme la responsabilité FLOW ; la source ne prouve ni appellation native identique ni consensus de nomenclature.",
+            "definition_choice": "Le parcours de quarantaine permet une sortie au rebut distincte de la remise en stock. Frontière FLOW : Le parcours produit étaye la demande, le traitement et la sortie au rebut ; Scrapping Order est la maille de prestation FLOW, pas un nom natif commun. La restriction Microsoft des quarantine orders aux retours de vente en WMS ne limite pas le périmètre métier FLOW démontré aussi par le cas SAP hors retour."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA",
+            "element_name": "Carrying out Warehouse Ad Hoc Goods Issue",
+            "concept_name": "Carrying out Warehouse Ad Hoc Goods Issue",
+            "element_type": "Mécanisme métier documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "La mise au rebut mobilise une demande de changement, un travail de déplacement vers la zone prévue, puis une sortie reconnue.",
+            "differences": "Le parcours produit étaye la demande, le traitement et la sortie au rebut ; Scrapping Order est la maille de prestation FLOW, pas un nom natif commun. La restriction Microsoft des quarantine orders aux retours de vente en WMS ne limite pas le périmètre métier FLOW démontré aussi par le cas SAP hors retour.",
+            "flow_position": "Porter une demande de mise au rebut de biens, ses autorisations, quantités, consignes et preuves attendues jusqu’à son résultat reconnu. Le pilotage appartient aux tâches du workflow, distinctes de la commande et des opérations internes du prestataire.",
+            "source_title": "Carrying out Warehouse Ad Hoc Goods Issue",
+            "source_url": "https://learning.sap.com/courses/implementing-sap-s-4hana-cloud-public-edition-warehouse-management/carrying-out-warehouse-ad-hoc-goods-issue_e15b00c8-2b28-4341-9cdc-7da58ded5b89",
+            "source_version": "Documentation évolutive ; version globale non présumée.",
+            "source_locator": "Warehouse Ad Hoc Goods Issue ; scrapping",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Une écriture de sortie ne prouve pas une destruction ; le document ne définit pas un ordre de service externe universel. Le parcours produit étaye la demande, le traitement et la sortie au rebut ; Scrapping Order est la maille de prestation FLOW, pas un nom natif commun. La restriction Microsoft des quarantine orders aux retours de vente en WMS ne limite pas le périmètre métier FLOW démontré aussi par le cas SAP hors retour.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM833",
+              "U775",
+              "U777"
+            ],
+            "scope_summary": "La mise au rebut mobilise une demande de changement, un travail de déplacement vers la zone prévue, puis une sortie reconnue.",
+            "approach_summary": "Appui à la responsabilité décrite, avec les frontières FLOW explicitées.",
+            "term_choice": "Scrapping Order nomme la responsabilité FLOW ; la source ne prouve ni appellation native identique ni consensus de nomenclature.",
+            "definition_choice": "La mise au rebut mobilise une demande de changement, un travail de déplacement vers la zone prévue, puis une sortie reconnue. Frontière FLOW : Le parcours produit étaye la demande, le traitement et la sortie au rebut ; Scrapping Order est la maille de prestation FLOW, pas un nom natif commun. La restriction Microsoft des quarantine orders aux retours de vente en WMS ne limite pas le périmètre métier FLOW démontré aussi par le cas SAP hors retour."
+          }
+        ],
+        "finality": "Suivre une mise au rebut autorisée jusqu’à sa preuve et au traitement du solde."
+      },
+      "functions": [
+        {
+          "id": "BC-070.01",
+          "resultat": "Porter l’autorisation de rebut"
+        },
+        {
+          "id": "BC-070.02",
+          "resultat": "Confier quantités et consignes"
+        },
+        {
+          "id": "BC-070.03",
+          "resultat": "Reconnaître résultat et preuve de destruction"
+        }
+      ],
+      "boundary": "La criticité du rebut n’implique pas un algorithme complexe."
+    }
+  ],
+  "native_estimates": [
+    {
+      "id": "erpnext",
+      "native_analogue_units": 1355,
+      "base_equivalent_units": 542.0,
+      "complement_equivalent_units": 874.2500000000001,
+      "equivalent_units": 1416.25,
+      "common_analogy_jh": 38.410848514996516,
+      "complement_marginal_jh": 72.0436628730448,
+      "jh": 110.45451138804131,
+      "rounded_jh": 110,
+      "not_observed_effort": true
+    },
+    {
+      "id": "odoo",
+      "native_analogue_units": 1833,
+      "base_equivalent_units": 733.2,
+      "complement_equivalent_units": 1438.15,
+      "equivalent_units": 2171.3500000000004,
+      "common_analogy_jh": 53.55006728219157,
+      "complement_marginal_jh": 123.16626247661821,
+      "jh": 176.7163297588098,
+      "rounded_jh": 180,
+      "not_observed_effort": true
+    },
+    {
+      "id": "tryton",
+      "native_analogue_units": 1517,
+      "base_equivalent_units": 606.8000000000001,
+      "complement_equivalent_units": 1221.35,
+      "equivalent_units": 1828.15,
+      "common_analogy_jh": 43.49006946056545,
+      "complement_marginal_jh": 102.76444876360449,
+      "jh": 146.25451822416994,
+      "rounded_jh": 150,
+      "not_observed_effort": true
+    },
+    {
+      "id": "axelor",
+      "native_analogue_units": 873,
+      "base_equivalent_units": 349.20000000000005,
+      "complement_equivalent_units": 851.1500000000001,
+      "equivalent_units": 1200.3500000000001,
+      "common_analogy_jh": 23.686103459204702,
+      "complement_marginal_jh": 68.39908468398207,
+      "jh": 92.08518814318677,
+      "rounded_jh": 90,
+      "not_observed_effort": true
+    }
+  ],
+  "proposed_java_jh": 90,
+  "diagnostic_java_jh": 92.08518814318677,
+  "diagnostic_rounded_jh": 90,
+  "roles": [
+    {
+      "id": "coordination",
+      "label": "Pilotage de l’équipe produit",
+      "jh": 10
+    },
+    {
+      "id": "analyse_produit",
+      "label": "Analyse métier et fonctionnelle",
+      "jh": 9
+    },
+    {
+      "id": "architecture",
+      "label": "Architecture et conception technique",
+      "jh": 8
+    },
+    {
+      "id": "dev_java",
+      "label": "Développement Java et tests développeur",
+      "jh": 33
+    },
+    {
+      "id": "dev_frontend",
+      "label": "Développement interface et tests développeur",
+      "jh": 5
+    },
+    {
+      "id": "qa",
+      "label": "QA et qualification indépendante",
+      "jh": 13
+    },
+    {
+      "id": "plateforme",
+      "label": "Plateforme / DevOps et mise en service",
+      "jh": 8
+    },
+    {
+      "id": "ux",
+      "label": "UX et ergonomie",
+      "jh": 2
+    },
+    {
+      "id": "securite",
+      "label": "Expertise et revue de sécurité",
+      "jh": 2
+    }
+  ],
+  "roles_status": "Répartition du diagnostic total par activités publiées COCOMO et clés d’organisation Stock proposées ; pas charge observée ni adoption.",
+  "activities": [
+    {
+      "id": "management",
+      "label": "Gestion du projet logiciel",
+      "jh": 9.915254237288137,
+      "percent_by_phase": [
+        14,
+        12,
+        10,
+        14
+      ],
+      "weights": {
+        "coordination": 1
+      }
+    },
+    {
+      "id": "environment",
+      "label": "Environnement et gestion de configuration",
+      "jh": 5.277966101694916,
+      "percent_by_phase": [
+        10,
+        8,
+        5,
+        5
+      ],
+      "weights": {
+        "plateforme": 0.8,
+        "dev_java": 0.2
+      }
+    },
+    {
+      "id": "requirements",
+      "label": "Analyse et exigences",
+      "jh": 10.03728813559322,
+      "percent_by_phase": [
+        38,
+        18,
+        8,
+        4
+      ],
+      "weights": {
+        "analyse_produit": 0.9,
+        "architecture": 0.1
+      }
+    },
+    {
+      "id": "design",
+      "label": "Conception et architecture",
+      "jh": 17.1,
+      "percent_by_phase": [
+        19,
+        36,
+        16,
+        4
+      ],
+      "weights": {
+        "architecture": 0.4,
+        "dev_java": 0.4,
+        "dev_frontend": 0.05,
+        "ux": 0.1,
+        "securite": 0.05
+      }
+    },
+    {
+      "id": "implementation",
+      "label": "Réalisation et tests unitaires",
+      "jh": 24.193220338983053,
+      "percent_by_phase": [
+        8,
+        13,
+        34,
+        19
+      ],
+      "weights": {
+        "dev_java": 0.85,
+        "dev_frontend": 0.15
+      }
+    },
+    {
+      "id": "assessment",
+      "label": "Évaluation, vérification et validation",
+      "jh": 18.30508474576271,
+      "percent_by_phase": [
+        8,
+        10,
+        24,
+        24
+      ],
+      "weights": {
+        "qa": 0.7,
+        "dev_java": 0.2,
+        "dev_frontend": 0.05,
+        "securite": 0.05
+      }
+    },
+    {
+      "id": "deployment",
+      "label": "Préparation du déploiement",
+      "jh": 5.171186440677966,
+      "percent_by_phase": [
+        3,
+        3,
+        3,
+        30
+      ],
+      "weights": {
+        "plateforme": 0.7,
+        "dev_java": 0.2,
+        "coordination": 0.1
+      }
+    }
+  ],
+  "activity_source_ref": "audits/2026-10-30-master-data-calcul/repartitions-sources.json#cocomo",
+  "delay": {
+    "calculated_months": 6.839886509980637,
+    "rounded_months": 7,
+    "status": "Délai local nominal du diagnostic ; pas engagement ni calendrier global. Dépend des mécanismes des autres familles."
+  },
+  "functional_control": {
+    "CFP": 27,
+    "jh": 77.14285714285714,
+    "gap_jh": -14.94233100032963,
+    "gap_pct": -16.226638943382763,
+    "denominator": 92.08518814318677,
+    "not_confidence": true
+  },
+  "measured_change": {
+    "java_units_iteration_2": 188,
+    "java_units_iteration_3": 873,
+    "jh_iteration_2": 39.003561758443404,
+    "jh_iteration_3": 92.08518814318677,
+    "additional_source_files": 1,
+    "resolved_direct_calls": 1,
+    "remaining_delegations": 0
+  },
+  "limits": [
+    "Réutiliser le cycle Order, puis financer une bibliothèque de douze contrats de prestation et leurs écarts spécifiques ; pas douze moteurs de cycle de vie.",
+    "Les parts de pertinence et de nouveau code sont des hypothèses non calibrées.",
+    "Le composant natif peut rester plus large que le périmètre Flow ; les quatre chiffres ne sont ni des charges historiques ni des validations indépendantes.",
+    "Un même code peut servir d’analogue à plusieurs familles ; cela ne prouve pas à lui seul un mécanisme Flow commun ni un financement distinct.",
+    "Le comptage COSMIC est proposé, sans revue humaine ni preuve d’exhaustivité."
+  ],
+  "cumulative": {
+    "adopted_jh": 1940,
+    "newly_adopted_jh": 0,
+    "capabilities_reviewed": 70,
+    "total_capabilities": 88,
+    "reviewed_pct": 79.54545454545455
+  },
+  "next_iteration_worthwhile": true,
+  "next_iteration_reason": "Audit transversal demandé : vérifier les mécanismes communs, l’exhaustivité fonctionnelle et les analogues non appariés avant une nouvelle adoption.",
+  "lineage": {
+    "iteration_1_sha256": "509a4b290aa3c1b9cda7527a9748be8e8dc7ee347807ede65a866c29d0d88e2a",
+    "analysis_1_sha256": "d5340112640e650f784942c2241123f660236cd6d3b97d46565b5f9486bcc698",
+    "iteration_2_sha256": "82362233ee176b34bb984502eb1c95ce3de10d3b3f643c9aaca1095774b80a56",
+    "analysis_2_sha256": "2a15cb688125b89533bac7975c1e75550ed5c73f55d75deb55a5a869a048b680",
+    "inputs_3_sha256": "5f9655d2cc701c3cb1e41a9fad3228d3a2fb82e8ed0bb3cca9e611437871f085"
+  }
+}

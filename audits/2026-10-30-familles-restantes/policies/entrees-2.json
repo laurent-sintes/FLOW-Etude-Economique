@@ -1,0 +1,4946 @@
+{
+  "family": "ba-protection-policies",
+  "iteration": 2,
+  "analysis_ref": "analyse-1.json",
+  "capabilities": [
+    "BC-008"
+  ],
+  "cocomo": {
+    "A": 2.94,
+    "B": 0.91,
+    "SF_sum": 18.97,
+    "C": 3.67,
+    "D": 0.28,
+    "month_hours": 152,
+    "day_hours": 7,
+    "effort_phase_factor": 1.18,
+    "schedule_phase_factor": 1.25,
+    "other_EM": 1,
+    "SCED": 1,
+    "REVL": 0,
+    "source": "https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf",
+    "source_locations": "Équation 4 et tables 6, 36, 57, 63 ; autres paramètres conservés nominaux.",
+    "activity_distribution_ref": "../2026-10-30-master-data-calcul/repartitions-sources.json#cocomo"
+  },
+  "native_reference_banks": {
+    "erpnext": 183,
+    "odoo": 342,
+    "tryton": 9,
+    "axelor": 50
+  },
+  "source_selection": [
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._check_company_consistency",
+      "start": 115,
+      "end": 124,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          117,
+          117,
+          12,
+          33
+        ],
+        [
+          "For",
+          116,
+          124,
+          8,
+          18
+        ],
+        [
+          "FunctionDef",
+          115,
+          124,
+          4,
+          18
+        ],
+        [
+          "If",
+          118,
+          124,
+          12,
+          18
+        ],
+        [
+          "Raise",
+          119,
+          124,
+          16,
+          18
+        ]
+      ],
+      "source": "    def _check_company_consistency(self):\n        for rule in self:\n            route = rule.route_id\n            if route.company_id and route.company_id not in rule.company_id.parent_ids:\n                raise ValidationError(_(\n                    \"Rule %(rule)s belongs to %(rule_company)s while the route belongs to %(route_company)s.\",\n                    rule=rule.display_name,\n                    rule_company=rule.company_id.display_name,\n                    route_company=route.company_id.display_name,\n                ))"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._onchange_picking_type",
+      "start": 127,
+      "end": 133,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          132,
+          132,
+          8,
+          78
+        ],
+        [
+          "Assign",
+          133,
+          133,
+          8,
+          80
+        ],
+        [
+          "FunctionDef",
+          127,
+          133,
+          4,
+          80
+        ]
+      ],
+      "source": "    def _onchange_picking_type(self):\n        \"\"\" Modify locations to the default picking type's locations source and\n        destination.\n        Enable the delay alert if the picking type is a delivery\n        \"\"\"\n        self.location_src_id = self.picking_type_id.default_location_src_id.id\n        self.location_dest_id = self.picking_type_id.default_location_dest_id.id"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._onchange_route",
+      "start": 136,
+      "end": 141,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          139,
+          139,
+          12,
+          54
+        ],
+        [
+          "Assign",
+          141,
+          141,
+          12,
+          40
+        ],
+        [
+          "FunctionDef",
+          136,
+          141,
+          4,
+          40
+        ],
+        [
+          "If",
+          138,
+          139,
+          8,
+          54
+        ],
+        [
+          "If",
+          140,
+          141,
+          8,
+          40
+        ]
+      ],
+      "source": "    def _onchange_route(self):\n        \"\"\" Ensure that the rule's company is the same than the route's company. \"\"\"\n        if self.route_id.company_id:\n            self.company_id = self.route_id.company_id\n        if self.picking_type_id.warehouse_id.company_id != self.route_id.company_id:\n            self.picking_type_id = False"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._get_message_values",
+      "start": 143,
+      "end": 152,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          148,
+          148,
+          8,
+          99
+        ],
+        [
+          "Assign",
+          149,
+          149,
+          8,
+          111
+        ],
+        [
+          "Assign",
+          150,
+          150,
+          8,
+          187
+        ],
+        [
+          "Assign",
+          151,
+          151,
+          8,
+          93
+        ],
+        [
+          "FunctionDef",
+          143,
+          152,
+          4,
+          65
+        ],
+        [
+          "Return",
+          152,
+          152,
+          8,
+          65
+        ]
+      ],
+      "source": "    def _get_message_values(self):\n        \"\"\" Return the source, destination and picking_type applied on a stock\n        rule. The purpose of this function is to avoid code duplication in\n        _get_message_dict functions since it often requires those data.\n        \"\"\"\n        source = self.location_src_id and self.location_src_id.display_name or _('Source Location')\n        destination = self.location_dest_id and self.location_dest_id.display_name or _('Destination Location')\n        direct_destination = self.picking_type_id and self.picking_type_id.default_location_dest_id != self.location_dest_id and self.picking_type_id.default_location_dest_id.display_name\n        operation = self.picking_type_id and self.picking_type_id.name or _('Operation Type')\n        return source, destination, direct_destination, operation"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._get_message_dict",
+      "start": 154,
+      "end": 185,
+      "program_units": 13,
+      "nodes": [
+        [
+          "Assign",
+          160,
+          160,
+          8,
+          25
+        ],
+        [
+          "Assign",
+          161,
+          161,
+          8,
+          87
+        ],
+        [
+          "Assign",
+          163,
+          163,
+          12,
+          23
+        ],
+        [
+          "Assign",
+          165,
+          165,
+          16,
+          203
+        ],
+        [
+          "Assign",
+          170,
+          184,
+          12,
+          13
+        ],
+        [
+          "AugAssign",
+          167,
+          167,
+          16,
+          117
+        ],
+        [
+          "AugAssign",
+          169,
+          169,
+          16,
+          163
+        ],
+        [
+          "FunctionDef",
+          154,
+          185,
+          4,
+          27
+        ],
+        [
+          "If",
+          162,
+          184,
+          8,
+          13
+        ],
+        [
+          "If",
+          164,
+          165,
+          12,
+          203
+        ],
+        [
+          "If",
+          166,
+          167,
+          12,
+          117
+        ],
+        [
+          "If",
+          168,
+          169,
+          12,
+          163
+        ],
+        [
+          "Return",
+          185,
+          185,
+          8,
+          27
+        ]
+      ],
+      "source": "    def _get_message_dict(self):\n        \"\"\" Return a dict with the different possible message used for the\n        rule message. It should return one message for each stock.rule action\n        (except push and pull). This function is override in mrp and\n        purchase_stock in order to complete the dictionary.\n        \"\"\"\n        message_dict = {}\n        source, destination, direct_destination, operation = self._get_message_values()\n        if self.action in ('push', 'pull', 'pull_push'):\n            suffix = \"\"\n            if self.action in ('pull', 'pull_push') and direct_destination and not self.location_dest_from_rule:\n                suffix = _(\"<br>The products will be moved towards <b>%(destination)s</b>, <br/> as specified from <b>%(operation)s</b> destination.\", destination=direct_destination, operation=operation)\n            if self.procure_method == 'make_to_order' and self.location_src_id:\n                suffix += _(\"<br>A need is created in <b>%s</b> and a rule will be triggered to fulfill it.\", source)\n            if self.procure_method == 'mts_else_mto' and self.location_src_id:\n                suffix += _(\"<br>If the products are not available in <b>%s</b>, a rule will be triggered to bring the missing quantity in this location.\", source)\n            message_dict = {\n                'pull': _(\n                    'When products are needed in <b>%(destination)s</b>, <br> <b>%(operation)s</b> are created from <b>%(source_location)s</b> to fulfill the need. %(suffix)s',\n                    destination=destination,\n                    operation=operation,\n                    source_location=source,\n                    suffix=suffix,\n                ),\n                'push': _(\n                    'When products arrive in <b>%(source_location)s</b>, <br> <b>%(operation)s</b> are created to send them to <b>%(destination)s</b>.',\n                    source_location=source,\n                    operation=operation,\n                    destination=destination,\n                ),\n            }\n        return message_dict"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._compute_action_message",
+      "start": 188,
+      "end": 199,
+      "program_units": 9,
+      "nodes": [
+        [
+          "Assign",
+          192,
+          192,
+          8,
+          62
+        ],
+        [
+          "Assign",
+          194,
+          194,
+          12,
+          51
+        ],
+        [
+          "Assign",
+          195,
+          195,
+          12,
+          87
+        ],
+        [
+          "Assign",
+          197,
+          197,
+          16,
+          84
+        ],
+        [
+          "Assign",
+          198,
+          198,
+          12,
+          39
+        ],
+        [
+          "Assign",
+          199,
+          199,
+          8,
+          49
+        ],
+        [
+          "For",
+          193,
+          198,
+          8,
+          39
+        ],
+        [
+          "FunctionDef",
+          188,
+          199,
+          4,
+          49
+        ],
+        [
+          "If",
+          196,
+          197,
+          12,
+          84
+        ]
+      ],
+      "source": "    def _compute_action_message(self):\n        \"\"\" Generate dynamicaly a message that describe the rule purpose to the\n        end user.\n        \"\"\"\n        action_rules = self.filtered(lambda rule: rule.action)\n        for rule in action_rules:\n            message_dict = rule._get_message_dict()\n            message = message_dict.get(rule.action) and message_dict[rule.action] or \"\"\n            if rule.action == 'pull_push':\n                message = message_dict['pull'] + \"<br/><br/>\" + message_dict['push']\n            rule.rule_message = message\n        (self - action_rules).rule_message = None"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._compute_picking_type_code_domain",
+      "start": 202,
+      "end": 203,
+      "program_units": 2,
+      "nodes": [
+        [
+          "Assign",
+          203,
+          203,
+          8,
+          42
+        ],
+        [
+          "FunctionDef",
+          202,
+          203,
+          4,
+          42
+        ]
+      ],
+      "source": "    def _compute_picking_type_code_domain(self):\n        self.picking_type_code_domain = []"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._create_mto_rule_if_not_exist",
+      "start": 205,
+      "end": 214,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          206,
+          212,
+          8,
+          19
+        ],
+        [
+          "Expr",
+          214,
+          214,
+          12,
+          47
+        ],
+        [
+          "FunctionDef",
+          205,
+          214,
+          4,
+          47
+        ],
+        [
+          "If",
+          213,
+          214,
+          8,
+          47
+        ]
+      ],
+      "source": "    def _create_mto_rule_if_not_exist(self, vals):\n        route_exists = self.env['stock.rule'].search_count([\n            ('route_id', '=', vals.get('route_id', False)),\n            ('location_src_id', '=', vals.get('location_src_id', False)),\n            ('location_dest_id', '=', vals.get('location_dest_id', False)),\n            ('picking_type_id', '=', vals.get('picking_type_id', False)),\n            ('procure_method', '=', vals.get('procure_method', False)),\n        ], limit=1)\n        if not route_exists:\n            self.env['stock.rule'].create(vals)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._get_push_new_date",
+      "start": 216,
+      "end": 224,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          216,
+          224,
+          4,
+          84
+        ],
+        [
+          "Return",
+          224,
+          224,
+          8,
+          84
+        ]
+      ],
+      "source": "    def _get_push_new_date(self, move):\n        \"\"\" Get the new date for a push rule.\n\n        :param move: The stock move being processed\n        :type move: stock.move\n        :return: The new date as a string\n        :rtype: str\n        \"\"\"\n        return fields.Datetime.to_string(move.date + relativedelta(days=self.delay))"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._push_prepare_move_copy_values",
+      "start": 226,
+      "end": 259,
+      "program_units": 17,
+      "nodes": [
+        [
+          "Assign",
+          227,
+          227,
+          8,
+          39
+        ],
+        [
+          "Assign",
+          229,
+          229,
+          12,
+          150
+        ],
+        [
+          "Assign",
+          230,
+          230,
+          8,
+          33
+        ],
+        [
+          "Assign",
+          231,
+          231,
+          8,
+          45
+        ],
+        [
+          "Assign",
+          232,
+          232,
+          8,
+          51
+        ],
+        [
+          "Assign",
+          234,
+          234,
+          12,
+          58
+        ],
+        [
+          "Assign",
+          236,
+          236,
+          12,
+          70
+        ],
+        [
+          "Assign",
+          238,
+          238,
+          12,
+          69
+        ],
+        [
+          "Assign",
+          240,
+          240,
+          12,
+          81
+        ],
+        [
+          "Assign",
+          241,
+          258,
+          8,
+          9
+        ],
+        [
+          "FunctionDef",
+          226,
+          259,
+          4,
+          28
+        ],
+        [
+          "If",
+          228,
+          229,
+          8,
+          150
+        ],
+        [
+          "If",
+          233,
+          234,
+          8,
+          58
+        ],
+        [
+          "If",
+          235,
+          236,
+          8,
+          70
+        ],
+        [
+          "If",
+          237,
+          240,
+          8,
+          81
+        ],
+        [
+          "If",
+          239,
+          240,
+          8,
+          81
+        ],
+        [
+          "Return",
+          259,
+          259,
+          8,
+          28
+        ]
+      ],
+      "source": "    def _push_prepare_move_copy_values(self, move_to_copy):\n        company_id = self.company_id.id\n        if not company_id:\n            company_id = self.sudo().warehouse_id and self.sudo().warehouse_id.company_id.id or self.sudo().picking_type_id.warehouse_id.company_id.id\n        final_location_id = False\n        location_id = self.location_src_id.id\n        location_dest_id = self.location_dest_id.id\n        if move_to_copy.location_dest_id and move_to_copy.location_dest_id._child_of(self.location_src_id):\n            location_id = move_to_copy.location_dest_id.id\n        if move_to_copy.forecasted_location_id and not move_to_copy.location_dest_id._child_of(move_to_copy.forecasted_location_id):\n            final_location_id = move_to_copy.forecasted_location_id.id\n        if move_to_copy.forecasted_location_id and move_to_copy.forecasted_location_id._child_of(self.location_dest_id):\n            location_dest_id = move_to_copy.forecasted_location_id.id\n        elif move_to_copy.partner_id and self.location_dest_id.usage == 'customer':\n            location_dest_id = move_to_copy.partner_id.property_stock_customer.id\n        new_move_vals = {\n            'origin': move_to_copy.origin or move_to_copy.picking_id.name or \"/\",\n            'location_id': location_id,\n            'location_dest_id': location_dest_id,\n            'forecasted_location_id': final_location_id,\n            'rule_id': self.id,\n            'date': self._get_push_new_date(move_to_copy),\n            'date_deadline': move_to_copy.date_deadline,\n            'company_id': company_id,\n            'picking_id': False,\n            'picking_type_id': self.picking_type_id.id,\n            'propagate_cancel': self.propagate_cancel,\n            'warehouse_id': self.warehouse_id.id or move_to_copy.location_dest_id.warehouse_id.id,\n            'procure_method': 'make_to_order',\n            'move_orig_ids': [Command.link(move_to_copy.id)],\n            'move_dest_ids': [Command.link(move_dest.id) for move_dest in move_to_copy.move_dest_ids],\n            'partner_id': self.partner_address_id.id or move_to_copy.partner_id.id,\n        }\n        return new_move_vals"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._run_pull",
+      "start": 262,
+      "end": 290,
+      "program_units": 18,
+      "nodes": [
+        [
+          "Assign",
+          263,
+          263,
+          8,
+          51
+        ],
+        [
+          "Assign",
+          271,
+          271,
+          16,
+          83
+        ],
+        [
+          "Assign",
+          275,
+          275,
+          8,
+          114
+        ],
+        [
+          "Assign",
+          277,
+          277,
+          12,
+          48
+        ],
+        [
+          "Assign",
+          279,
+          279,
+          16,
+          48
+        ],
+        [
+          "Assign",
+          281,
+          281,
+          12,
+          67
+        ],
+        [
+          "Assign",
+          282,
+          282,
+          12,
+          58
+        ],
+        [
+          "Assign",
+          287,
+          287,
+          12,
+          95
+        ],
+        [
+          "Expr",
+          283,
+          283,
+          12,
+          82
+        ],
+        [
+          "Expr",
+          289,
+          289,
+          12,
+          35
+        ],
+        [
+          "For",
+          269,
+          272,
+          8,
+          64
+        ],
+        [
+          "For",
+          276,
+          283,
+          8,
+          82
+        ],
+        [
+          "For",
+          285,
+          289,
+          8,
+          35
+        ],
+        [
+          "FunctionDef",
+          262,
+          290,
+          4,
+          19
+        ],
+        [
+          "If",
+          270,
+          272,
+          12,
+          64
+        ],
+        [
+          "If",
+          278,
+          279,
+          12,
+          48
+        ],
+        [
+          "Raise",
+          272,
+          272,
+          16,
+          64
+        ],
+        [
+          "Return",
+          290,
+          290,
+          8,
+          19
+        ]
+      ],
+      "source": "    def _run_pull(self, procurements):\n        moves_values_by_company = defaultdict(list)\n\n        # To handle the `mts_else_mto` procure method, we do a preliminary loop to\n        # isolate the products we would need to read the forecasted quantity,\n        # in order to to batch the read. We also make a sanitary check on the\n        # `location_src_id` field.\n        for procurement, rule in procurements:\n            if not rule.location_src_id:\n                msg = _('No source location defined on stock rule: %s!', rule.name)\n                raise ProcurementException([(procurement, msg)])\n\n        # Prepare the move values, adapt the `procure_method` if needed.\n        procurements = sorted(procurements, key=lambda proc: proc[0].uom_id.compare(proc[0].product_qty, 0.0) > 0)\n        for procurement, rule in procurements:\n            procure_method = rule.procure_method\n            if rule.procure_method == 'mts_else_mto':\n                procure_method = 'make_to_stock'\n\n            move_values = rule._get_stock_move_values(*procurement)\n            move_values['procure_method'] = procure_method\n            moves_values_by_company[procurement.company_id.id].append(move_values)\n\n        for company_id, moves_values in moves_values_by_company.items():\n            # create the move as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)\n            moves = self.env['stock.move'].sudo().with_company(company_id).create(moves_values)\n            # Since action_confirm launch following procurement_group we should activate it.\n            moves._action_confirm()\n        return True"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._get_custom_move_fields",
+      "start": 292,
+      "end": 296,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          292,
+          296,
+          4,
+          17
+        ],
+        [
+          "Return",
+          296,
+          296,
+          8,
+          17
+        ]
+      ],
+      "source": "    def _get_custom_move_fields(self):\n        \"\"\" The purpose of this method is to be override in order to easily add\n        fields from procurement 'values' argument to move data.\n        \"\"\"\n        return []"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._get_stock_move_values",
+      "start": 298,
+      "end": 363,
+      "program_units": 25,
+      "nodes": [
+        [
+          "Assign",
+          305,
+          307,
+          8,
+          9
+        ],
+        [
+          "Assign",
+          308,
+          308,
+          8,
+          157
+        ],
+        [
+          "Assign",
+          309,
+          309,
+          8,
+          79
+        ],
+        [
+          "Assign",
+          312,
+          312,
+          8,
+          30
+        ],
+        [
+          "Assign",
+          314,
+          314,
+          8,
+          106
+        ],
+        [
+          "Assign",
+          318,
+          318,
+          12,
+          47
+        ],
+        [
+          "Assign",
+          321,
+          321,
+          20,
+          81
+        ],
+        [
+          "Assign",
+          323,
+          323,
+          24,
+          45
+        ],
+        [
+          "Assign",
+          324,
+          324,
+          16,
+          113
+        ],
+        [
+          "Assign",
+          327,
+          327,
+          8,
+          38
+        ],
+        [
+          "Assign",
+          331,
+          331,
+          12,
+          38
+        ],
+        [
+          "Assign",
+          333,
+          356,
+          8,
+          9
+        ],
+        [
+          "Assign",
+          358,
+          358,
+          12,
+          70
+        ],
+        [
+          "Assign",
+          361,
+          361,
+          16,
+          37
+        ],
+        [
+          "Assign",
+          362,
+          362,
+          16,
+          95
+        ],
+        [
+          "For",
+          359,
+          362,
+          8,
+          95
+        ],
+        [
+          "FunctionDef",
+          298,
+          363,
+          4,
+          26
+        ],
+        [
+          "If",
+          317,
+          324,
+          8,
+          113
+        ],
+        [
+          "If",
+          319,
+          324,
+          12,
+          113
+        ],
+        [
+          "If",
+          320,
+          323,
+          16,
+          45
+        ],
+        [
+          "If",
+          322,
+          323,
+          20,
+          45
+        ],
+        [
+          "If",
+          330,
+          331,
+          8,
+          38
+        ],
+        [
+          "If",
+          357,
+          358,
+          8,
+          70
+        ],
+        [
+          "If",
+          360,
+          362,
+          12,
+          95
+        ],
+        [
+          "Return",
+          363,
+          363,
+          8,
+          26
+        ]
+      ],
+      "source": "    def _get_stock_move_values(self, product_id, product_qty, uom_id, location_dest_id, name, origin, company_id, values):\n        ''' Returns a dictionary of values that will be used to create a stock move from a procurement.\n        This function assumes that the given procurement has a rule (action == 'pull' or 'pull_push') set on it.\n\n        :rtype: dictionary\n        '''\n\n        date_scheduled = fields.Datetime.to_string(\n            fields.Datetime.from_string(values['date_planned']) - relativedelta(days=self.delay or 0)\n        )\n        date_deadline = values.get('date_deadline') and (fields.Datetime.to_datetime(values['date_deadline']) - relativedelta(days=self.delay or 0)) or False\n        partner = self.partner_address_id.id or values.get('partner_id', False)\n        # it is possible that we've already got some move done, so check for the done qty and create\n        # a new move with the correct qty\n        qty_left = product_qty\n\n        move_dest_ids = values.get('move_dest_ids') and [(4, x.id) for x in values['move_dest_ids']] or []\n\n        # when create chained moves for inter-warehouse transfers, set the warehouses as partners\n        if move_dest_ids:\n            move_dest = values['move_dest_ids']\n            if location_dest_id == company_id.internal_transit_location_id:\n                if not partner:\n                    partners = move_dest.location_dest_id.warehouse_id.partner_id\n                    if len(partners) == 1:\n                        partner = partners.id\n                move_dest.partner_id = self.location_src_id.warehouse_id.partner_id or self.company_id.partner_id\n\n        # Set partner as `values` to avoid being overwritten in _get_custom_move_fields\n        values['partner_id'] = partner\n\n        # If the quantity is negative the move should be considered as a refund\n        if uom_id.compare(product_qty, 0.0) < 0:\n            values['to_refund'] = True\n\n        move_values = {\n            'company_id': self.company_id.id or self.location_src_id.company_id.id or self.location_dest_id.company_id.id or company_id.id,\n            'product_id': product_id.id,\n            'uom_id': uom_id.id,\n            'product_uom_qty': qty_left,\n            'partner_id': partner,\n            'location_id': self.location_src_id.id,\n            'forecasted_location_id': location_dest_id.id,\n            'move_dest_ids': move_dest_ids,\n            'rule_id': self.id,\n            'reference_ids': [Command.set(values.get('reference_ids', self.env['stock.reference']).ids)],\n            'procure_method': self.procure_method,\n            'origin': origin,\n            'picking_type_id': self.picking_type_id.id,\n            'procurement_values': self._serialize_procurement_values(values),\n            'route_ids': [Command.clear()] + [Command.link(route.id) for route in values.get('route_ids', [])],\n            'never_product_template_attribute_value_ids': values.get('never_product_template_attribute_value_ids'),\n            'warehouse_id': self.warehouse_id.id,\n            'date': date_scheduled,\n            'date_deadline': date_deadline,\n            'propagate_cancel': self.propagate_cancel,\n            'priority': values.get('priority', \"0\"),\n            'orderpoint_id': values.get('orderpoint_id') and values['orderpoint_id'].id,\n        }\n        if self.location_dest_from_rule:\n            move_values['location_dest_id'] = self.location_dest_id.id\n        for field in self._get_custom_move_fields():\n            if field in values:\n                value = values[field]\n                move_values[field] = value.id if isinstance(value, models.BaseModel) else value\n        return move_values"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._serialize_procurement_values",
+      "start": 365,
+      "end": 386,
+      "program_units": 11,
+      "nodes": [
+        [
+          "Assign",
+          376,
+          376,
+          8,
+          23
+        ],
+        [
+          "Assign",
+          379,
+          379,
+          16,
+          43
+        ],
+        [
+          "Assign",
+          381,
+          381,
+          16,
+          51
+        ],
+        [
+          "Assign",
+          383,
+          383,
+          16,
+          138
+        ],
+        [
+          "Assign",
+          385,
+          385,
+          16,
+          39
+        ],
+        [
+          "For",
+          377,
+          385,
+          8,
+          39
+        ],
+        [
+          "FunctionDef",
+          365,
+          386,
+          4,
+          25
+        ],
+        [
+          "If",
+          378,
+          385,
+          12,
+          39
+        ],
+        [
+          "If",
+          380,
+          385,
+          12,
+          39
+        ],
+        [
+          "If",
+          382,
+          385,
+          12,
+          39
+        ],
+        [
+          "Return",
+          386,
+          386,
+          8,
+          25
+        ]
+      ],
+      "source": "    def _serialize_procurement_values(self, values):\n        \"\"\"Helper method to serialize procurement values for storage.\n\n        This method handles the serialization of different types of values:\n        - BaseModel instances are converted to their IDs\n        - Datetime and Date fields are converted to strings\n        - Other values are kept as is\n\n        :param values: Dictionary of procurement values\n        :return: Dictionary with serialized values\n        \"\"\"\n        serialized = {}\n        for key, value in values.items():\n            if isinstance(value, models.BaseModel):\n                serialized[key] = value.ids\n            elif isinstance(value, (datetime.datetime, datetime.date)):\n                serialized[key] = value.isoformat()\n            elif isinstance(value, (fields.Datetime, fields.Date)):\n                serialized[key] = fields.Datetime.to_string(value) if isinstance(value, fields.Datetime) else fields.Date.to_string(value)\n            else:\n                serialized[key] = value\n        return serialized"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._get_lead_days",
+      "start": 388,
+      "end": 419,
+      "program_units": 18,
+      "nodes": [
+        [
+          "Assign",
+          398,
+          398,
+          8,
+          22
+        ],
+        [
+          "Assign",
+          399,
+          399,
+          8,
+          35
+        ],
+        [
+          "Assign",
+          400,
+          400,
+          8,
+          30
+        ],
+        [
+          "Assign",
+          402,
+          402,
+          8,
+          95
+        ],
+        [
+          "Assign",
+          406,
+          409,
+          16,
+          17
+        ],
+        [
+          "Assign",
+          411,
+          411,
+          8,
+          87
+        ],
+        [
+          "Assign",
+          414,
+          414,
+          8,
+          87
+        ],
+        [
+          "AugAssign",
+          404,
+          404,
+          12,
+          72
+        ],
+        [
+          "AugAssign",
+          416,
+          416,
+          12,
+          57
+        ],
+        [
+          "Expr",
+          418,
+          418,
+          16,
+          98
+        ],
+        [
+          "FunctionDef",
+          388,
+          419,
+          4,
+          40
+        ],
+        [
+          "If",
+          403,
+          409,
+          8,
+          17
+        ],
+        [
+          "If",
+          405,
+          409,
+          12,
+          17
+        ],
+        [
+          "If",
+          412,
+          413,
+          8,
+          44
+        ],
+        [
+          "If",
+          415,
+          418,
+          8,
+          98
+        ],
+        [
+          "If",
+          417,
+          418,
+          12,
+          98
+        ],
+        [
+          "Return",
+          413,
+          413,
+          12,
+          44
+        ],
+        [
+          "Return",
+          419,
+          419,
+          8,
+          40
+        ]
+      ],
+      "source": "    def _get_lead_days(self, product, bypass_delay_description=False, **values):\n        \"\"\"Returns the cumulative delay and its description encountered by a\n        procurement going through the rules in `self`.\n\n        :param product: the product of the procurement\n        :type product: :class:`~odoo.addons.product.models.product.ProductProduct`\n        :return: the cumulative delay and cumulative delay's description\n        :rtype: tuple[defaultdict(float), list[str, str]]\n        \"\"\"\n        # FIXME : ensure one product or make the method work with multiple products\n        _ = self.env._\n        delays = defaultdict(float)\n        delay_description = []\n        # Check if the rules have lead time\n        delaying_rules = self.filtered(lambda r: r.action in ['pull', 'pull_push'] and r.delay)\n        if delaying_rules:\n            delays['total_delay'] += sum(delaying_rules.mapped('delay'))\n            if not bypass_delay_description:\n                delay_description = [\n                    (_('Delay on %s', rule.name), _('+ %d days', rule.delay))\n                    for rule in delaying_rules\n                ]\n        # Check if there's a horizon set\n        bypass_global_horizon_days = self.env.context.get('bypass_global_horizon_days')\n        if bypass_global_horizon_days:\n            return delays, delay_description\n        global_horizon_days = self.env['stock.warehouse.orderpoint'].get_horizon_days()\n        if global_horizon_days:\n            delays['horizon_time'] += global_horizon_days\n            if not bypass_delay_description:\n                delay_description.append((_('Time Horizon'), _('+ %d days', global_horizon_days)))\n        return delays, delay_description"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._skip_procurement",
+      "start": 422,
+      "end": 423,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          422,
+          423,
+          4,
+          108
+        ],
+        [
+          "Return",
+          423,
+          423,
+          8,
+          108
+        ]
+      ],
+      "source": "    def _skip_procurement(self, procurement):\n        return procurement.product_id.type != \"consu\" or procurement.uom_id.is_zero(procurement.product_qty)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule.run",
+      "start": 426,
+      "end": 479,
+      "program_units": 31,
+      "nodes": [
+        [
+          "Assign",
+          444,
+          444,
+          16,
+          56
+        ],
+        [
+          "Assign",
+          448,
+          448,
+          8,
+          42
+        ],
+        [
+          "Assign",
+          449,
+          449,
+          8,
+          31
+        ],
+        [
+          "Assign",
+          456,
+          456,
+          12,
+          102
+        ],
+        [
+          "Assign",
+          458,
+          459,
+          16,
+          111
+        ],
+        [
+          "Assign",
+          462,
+          462,
+          16,
+          78
+        ],
+        [
+          "AugAssign",
+          473,
+          473,
+          20,
+          66
+        ],
+        [
+          "Continue",
+          455,
+          455,
+          16,
+          24
+        ],
+        [
+          "Expr",
+          451,
+          451,
+          12,
+          91
+        ],
+        [
+          "Expr",
+          452,
+          452,
+          12,
+          58
+        ],
+        [
+          "Expr",
+          453,
+          453,
+          12,
+          129
+        ],
+        [
+          "Expr",
+          460,
+          460,
+          16,
+          63
+        ],
+        [
+          "Expr",
+          463,
+          463,
+          16,
+          66
+        ],
+        [
+          "Expr",
+          466,
+          466,
+          12,
+          47
+        ],
+        [
+          "Expr",
+          471,
+          471,
+          20,
+          85
+        ],
+        [
+          "Expr",
+          475,
+          475,
+          16,
+          99
+        ],
+        [
+          "Expr",
+          478,
+          478,
+          12,
+          47
+        ],
+        [
+          "For",
+          450,
+          463,
+          8,
+          66
+        ],
+        [
+          "For",
+          468,
+          475,
+          8,
+          99
+        ],
+        [
+          "FunctionDef",
+          426,
+          479,
+          4,
+          19
+        ],
+        [
+          "FunctionDef",
+          442,
+          447,
+          8,
+          62
+        ],
+        [
+          "If",
+          443,
+          447,
+          12,
+          62
+        ],
+        [
+          "If",
+          454,
+          455,
+          12,
+          24
+        ],
+        [
+          "If",
+          457,
+          463,
+          12,
+          66
+        ],
+        [
+          "If",
+          465,
+          466,
+          8,
+          47
+        ],
+        [
+          "If",
+          469,
+          475,
+          12,
+          99
+        ],
+        [
+          "If",
+          477,
+          478,
+          8,
+          47
+        ],
+        [
+          "Raise",
+          445,
+          445,
+          16,
+          50
+        ],
+        [
+          "Raise",
+          447,
+          447,
+          16,
+          62
+        ],
+        [
+          "Return",
+          479,
+          479,
+          8,
+          19
+        ],
+        [
+          "Try",
+          470,
+          473,
+          16,
+          66
+        ]
+      ],
+      "source": "    def run(self, procurements, raise_user_error=True):\n        \"\"\"Fulfil `procurements` with the help of stock rules.\n\n        Procurements are needs of products at a certain location. To fulfil\n        these needs, we need to create some sort of documents (`stock.move`\n        by default, but extensions of `_run_` methods allow to create every\n        type of documents).\n\n        :param procurements: the description of the procurement\n        :type procurements: list of `~odoo.addons.stock.models.stock_rule.ProcurementGroup.Procurement`\n        :param raise_user_error: will raise either an UserError or a ProcurementException\n        :type raise_user_error: boolan, optional\n        :raises UserError: if `raise_user_error` is True and a procurement isn't fulfillable\n        :raises ProcurementException: if `raise_user_error` is False and a procurement isn't fulfillable\n        \"\"\"\n\n        def raise_exception(procurement_errors):\n            if raise_user_error:\n                dummy, errors = zip(*procurement_errors)\n                raise UserError('\\n'.join(errors))\n            else:\n                raise ProcurementException(procurement_errors)\n        actions_to_run = defaultdict(list)\n        procurement_errors = []\n        for procurement in procurements:\n            procurement.values.setdefault('company_id', procurement.location_id.company_id)\n            procurement.values.setdefault('priority', '0')\n            procurement.values.setdefault('date_planned', procurement.values.get('date_planned', False) or fields.Datetime.now())\n            if self._skip_procurement(procurement):\n                continue\n            rule = self._get_rule(procurement.product_id, procurement.location_id, procurement.values)\n            if not rule:\n                error = _('No rule has been found to replenish \"%(product)s\" in \"%(location)s\".\\nVerify the routes configuration on the product.',\n                    product=procurement.product_id.display_name, location=procurement.location_id.display_name)\n                procurement_errors.append((procurement, error))\n            else:\n                action = 'pull' if rule.action == 'pull_push' else rule.action\n                actions_to_run[action].append((procurement, rule))\n\n        if procurement_errors:\n            raise_exception(procurement_errors)\n\n        for action, procurements in actions_to_run.items():\n            if hasattr(self.env['stock.rule'], '_run_%s' % action):\n                try:\n                    getattr(self.env['stock.rule'], '_run_%s' % action)(procurements)\n                except ProcurementException as e:\n                    procurement_errors += e.procurement_exceptions\n            else:\n                _logger.error(\"The method _run_%s doesn't exist on the procurement rules\" % action)\n\n        if procurement_errors:\n            raise_exception(procurement_errors)\n        return True"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._search_rule_for_warehouses",
+      "start": 482,
+      "end": 511,
+      "program_units": 24,
+      "nodes": [
+        [
+          "Assign",
+          483,
+          483,
+          8,
+          31
+        ],
+        [
+          "Assign",
+          486,
+          486,
+          8,
+          31
+        ],
+        [
+          "Assign",
+          490,
+          490,
+          12,
+          73
+        ],
+        [
+          "Assign",
+          494,
+          494,
+          12,
+          95
+        ],
+        [
+          "Assign",
+          498,
+          503,
+          8,
+          9
+        ],
+        [
+          "Assign",
+          504,
+          504,
+          8,
+          44
+        ],
+        [
+          "Assign",
+          506,
+          506,
+          12,
+          28
+        ],
+        [
+          "Assign",
+          508,
+          508,
+          16,
+          38
+        ],
+        [
+          "Assign",
+          510,
+          510,
+          12,
+          129
+        ],
+        [
+          "AugAssign",
+          485,
+          485,
+          12,
+          79
+        ],
+        [
+          "AugAssign",
+          488,
+          488,
+          12,
+          49
+        ],
+        [
+          "AugAssign",
+          491,
+          491,
+          12,
+          56
+        ],
+        [
+          "AugAssign",
+          492,
+          492,
+          8,
+          96
+        ],
+        [
+          "AugAssign",
+          495,
+          495,
+          12,
+          89
+        ],
+        [
+          "AugAssign",
+          497,
+          497,
+          12,
+          69
+        ],
+        [
+          "For",
+          505,
+          510,
+          8,
+          129
+        ],
+        [
+          "FunctionDef",
+          482,
+          511,
+          4,
+          24
+        ],
+        [
+          "If",
+          484,
+          485,
+          8,
+          79
+        ],
+        [
+          "If",
+          487,
+          488,
+          8,
+          49
+        ],
+        [
+          "If",
+          489,
+          491,
+          8,
+          56
+        ],
+        [
+          "If",
+          493,
+          495,
+          8,
+          89
+        ],
+        [
+          "If",
+          496,
+          497,
+          8,
+          69
+        ],
+        [
+          "If",
+          507,
+          508,
+          12,
+          38
+        ],
+        [
+          "Return",
+          511,
+          511,
+          8,
+          24
+        ]
+      ],
+      "source": "    def _search_rule_for_warehouses(self, route_ids, packaging_uom_id, product_id, warehouse_ids, company_id, domain):\n        domain = Domain(domain)\n        if warehouse_ids:\n            domain &= Domain('warehouse_id', 'in', [False, *warehouse_ids.ids])\n        valid_route_ids = set()\n        if route_ids:\n            valid_route_ids |= set(route_ids.ids)\n        if packaging_uom_id:\n            packaging_routes = packaging_uom_id.package_type_id.route_ids\n            valid_route_ids |= set(packaging_routes.ids)\n        valid_route_ids |= set((product_id.route_ids | product_id.categ_id.total_route_ids).ids)\n        if warehouse_ids:\n            filter_function = partial(self._filter_warehouse_routes, product_id, warehouse_ids)\n            valid_route_ids |= set(warehouse_ids.route_ids.filtered(filter_function).ids)\n        if valid_route_ids:\n            domain &= Domain('route_id', 'in', list(valid_route_ids))\n        res = self.env[\"stock.rule\"].sudo()._read_group(  # sudo() needed for cross company warehouse usage\n            domain,\n            groupby=[\"location_dest_id\", \"warehouse_id\", \"route_id\"],\n            aggregates=[\"id:recordset\"],\n            order=\"route_sequence:min, sequence:min\",\n        )\n        rule_dict = defaultdict(OrderedDict)\n        for group in res:\n            rules = group[3]\n            if filtered_rules := rules.filtered(lambda r: company_id and r.company_id == company_id):\n                rules = filtered_rules\n\n            rule_dict[group[0].id, group[2].id][group[1].id] = rules.sorted(lambda rule: (rule.route_sequence, rule.sequence))[0]\n        return rule_dict"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._filter_warehouse_routes",
+      "start": 513,
+      "end": 514,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          513,
+          514,
+          4,
+          20
+        ],
+        [
+          "Return",
+          514,
+          514,
+          8,
+          20
+        ]
+      ],
+      "source": "    def _filter_warehouse_routes(self, product, warehouses, route):\n        return route"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._search_rule",
+      "start": 516,
+      "end": 543,
+      "program_units": 24,
+      "nodes": [
+        [
+          "Assign",
+          521,
+          521,
+          8,
+          37
+        ],
+        [
+          "Assign",
+          522,
+          522,
+          8,
+          36
+        ],
+        [
+          "Assign",
+          523,
+          523,
+          8,
+          31
+        ],
+        [
+          "Assign",
+          526,
+          526,
+          8,
+          38
+        ],
+        [
+          "Assign",
+          528,
+          528,
+          12,
+          122
+        ],
+        [
+          "Assign",
+          530,
+          530,
+          12,
+          73
+        ],
+        [
+          "Assign",
+          532,
+          532,
+          16,
+          133
+        ],
+        [
+          "Assign",
+          534,
+          534,
+          12,
+          87
+        ],
+        [
+          "Assign",
+          536,
+          536,
+          16,
+          131
+        ],
+        [
+          "Assign",
+          538,
+          538,
+          12,
+          53
+        ],
+        [
+          "Assign",
+          540,
+          540,
+          16,
+          133
+        ],
+        [
+          "Assign",
+          542,
+          542,
+          12,
+          80
+        ],
+        [
+          "AugAssign",
+          525,
+          525,
+          12,
+          76
+        ],
+        [
+          "FunctionDef",
+          516,
+          543,
+          4,
+          18
+        ],
+        [
+          "If",
+          524,
+          525,
+          8,
+          76
+        ],
+        [
+          "If",
+          527,
+          528,
+          8,
+          122
+        ],
+        [
+          "If",
+          529,
+          532,
+          8,
+          133
+        ],
+        [
+          "If",
+          531,
+          532,
+          12,
+          133
+        ],
+        [
+          "If",
+          533,
+          536,
+          8,
+          131
+        ],
+        [
+          "If",
+          535,
+          536,
+          12,
+          131
+        ],
+        [
+          "If",
+          537,
+          542,
+          8,
+          80
+        ],
+        [
+          "If",
+          539,
+          540,
+          12,
+          133
+        ],
+        [
+          "If",
+          541,
+          542,
+          8,
+          80
+        ],
+        [
+          "Return",
+          543,
+          543,
+          8,
+          18
+        ]
+      ],
+      "source": "    def _search_rule(self, route_ids, packaging_uom_id, product_id, warehouse_id, domain):\n        \"\"\" First find a rule among the ones defined on the procurement\n        group, then try on the routes defined for the product, finally fallback\n        on the default behavior\n        \"\"\"\n        Rule = self.env['stock.rule']\n        res = self.env['stock.rule']\n        domain = Domain(domain)\n        if warehouse_id:\n            domain &= Domain('warehouse_id', 'in', [False, warehouse_id.id])\n        domain = domain.optimize(Rule)\n        if route_ids:\n            res = Rule.search(Domain('route_id', 'in', route_ids.ids) & domain, order='route_sequence, sequence', limit=1)\n        if not res and packaging_uom_id:\n            packaging_routes = packaging_uom_id.package_type_id.route_ids\n            if packaging_routes:\n                res = Rule.search(Domain('route_id', 'in', packaging_routes.ids) & domain, order='route_sequence, sequence', limit=1)\n        if not res:\n            product_routes = product_id.route_ids | product_id.categ_id.total_route_ids\n            if product_routes:\n                res = Rule.search(Domain('route_id', 'in', product_routes.ids) & domain, order='route_sequence, sequence', limit=1)\n        if not res and warehouse_id:\n            warehouse_routes = warehouse_id.route_ids\n            if warehouse_routes:\n                res = Rule.search(Domain('route_id', 'in', warehouse_routes.ids) & domain, order='route_sequence, sequence', limit=1)\n        elif not res and not warehouse_id:\n            res = Rule.search(domain, order='route_sequence, sequence', limit=1)\n        return res"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._get_rule",
+      "start": 546,
+      "end": 622,
+      "program_units": 49,
+      "nodes": [
+        [
+          "Assign",
+          550,
+          550,
+          8,
+          39
+        ],
+        [
+          "Assign",
+          553,
+          553,
+          8,
+          31
+        ],
+        [
+          "Assign",
+          557,
+          557,
+          8,
+          57
+        ],
+        [
+          "Assign",
+          558,
+          558,
+          8,
+          90
+        ],
+        [
+          "Assign",
+          559,
+          559,
+          8,
+          96
+        ],
+        [
+          "Assign",
+          561,
+          568,
+          8,
+          9
+        ],
+        [
+          "Assign",
+          571,
+          571,
+          12,
+          41
+        ],
+        [
+          "Assign",
+          573,
+          573,
+          16,
+          76
+        ],
+        [
+          "Assign",
+          577,
+          577,
+          20,
+          57
+        ],
+        [
+          "Assign",
+          579,
+          579,
+          20,
+          56
+        ],
+        [
+          "Assign",
+          580,
+          580,
+          20,
+          50
+        ],
+        [
+          "Assign",
+          586,
+          586,
+          12,
+          40
+        ],
+        [
+          "Assign",
+          588,
+          588,
+          16,
+          88
+        ],
+        [
+          "Assign",
+          590,
+          590,
+          16,
+          121
+        ],
+        [
+          "Assign",
+          592,
+          592,
+          16,
+          137
+        ],
+        [
+          "Assign",
+          594,
+          594,
+          16,
+          101
+        ],
+        [
+          "Assign",
+          597,
+          597,
+          8,
+          30
+        ],
+        [
+          "Assign",
+          600,
+          600,
+          8,
+          43
+        ],
+        [
+          "Assign",
+          602,
+          602,
+          12,
+          42
+        ],
+        [
+          "Assign",
+          606,
+          606,
+          16,
+          110
+        ],
+        [
+          "Assign",
+          608,
+          608,
+          16,
+          50
+        ],
+        [
+          "Assign",
+          610,
+          617,
+          16,
+          17
+        ],
+        [
+          "Assign",
+          621,
+          621,
+          16,
+          47
+        ],
+        [
+          "AugAssign",
+          556,
+          556,
+          12,
+          50
+        ],
+        [
+          "AugAssign",
+          607,
+          607,
+          16,
+          58
+        ],
+        [
+          "Break",
+          582,
+          582,
+          20,
+          25
+        ],
+        [
+          "Break",
+          619,
+          619,
+          20,
+          25
+        ],
+        [
+          "Continue",
+          575,
+          575,
+          20,
+          28
+        ],
+        [
+          "For",
+          572,
+          582,
+          12,
+          25
+        ],
+        [
+          "For",
+          609,
+          621,
+          12,
+          47
+        ],
+        [
+          "FunctionDef",
+          546,
+          622,
+          4,
+          21
+        ],
+        [
+          "FunctionDef",
+          570,
+          583,
+          8,
+          23
+        ],
+        [
+          "FunctionDef",
+          585,
+          595,
+          8,
+          22
+        ],
+        [
+          "If",
+          551,
+          552,
+          8,
+          25
+        ],
+        [
+          "If",
+          574,
+          575,
+          16,
+          28
+        ],
+        [
+          "If",
+          576,
+          580,
+          16,
+          50
+        ],
+        [
+          "If",
+          581,
+          582,
+          16,
+          25
+        ],
+        [
+          "If",
+          587,
+          588,
+          12,
+          88
+        ],
+        [
+          "If",
+          589,
+          590,
+          12,
+          121
+        ],
+        [
+          "If",
+          591,
+          592,
+          12,
+          137
+        ],
+        [
+          "If",
+          593,
+          594,
+          12,
+          101
+        ],
+        [
+          "If",
+          603,
+          608,
+          12,
+          50
+        ],
+        [
+          "If",
+          618,
+          619,
+          16,
+          25
+        ],
+        [
+          "Return",
+          552,
+          552,
+          12,
+          25
+        ],
+        [
+          "Return",
+          583,
+          583,
+          12,
+          23
+        ],
+        [
+          "Return",
+          595,
+          595,
+          12,
+          22
+        ],
+        [
+          "Return",
+          622,
+          622,
+          8,
+          21
+        ],
+        [
+          "While",
+          555,
+          556,
+          8,
+          50
+        ],
+        [
+          "While",
+          601,
+          621,
+          8,
+          47
+        ]
+      ],
+      "source": "    def _get_rule(self, product_id, location_id, values):\n        \"\"\" Find a pull rule for the location_id, fallback on the parent\n        locations if it could not be found.\n        \"\"\"\n        result = self.env['stock.rule']\n        if not location_id:\n            return result\n        locations = location_id\n        # Get the location hierarchy, starting from location_id up to its root location.\n        while locations[-1].location_id:\n            locations |= locations[-1].location_id\n        domain = self._get_rule_domain(locations, values)\n        routes_with_no_warehouse = self.env['stock.route']._get_routes_with_no_warehouse()\n        routes = (values.get('route_ids') or self.env['stock.route']) | routes_with_no_warehouse\n        # Get a mapping (location_id, route_id) -> warehouse_id -> rule_id\n        rule_dict = self._search_rule_for_warehouses(\n            routes,\n            values.get(\"packaging_uom_id\", False),\n            product_id,\n            values.get(\"warehouse_id\", locations.warehouse_id),\n            values.get(\"company_id\", False),\n            domain,\n        )\n\n        def extract_rule(rule_dict, route_ids, warehouse_id, location_dest_id):\n            rule = self.env['stock.rule']\n            for route_id in sorted(route_ids, key=lambda r: (r not in product_id.route_ids, r.sequence)):\n                sub_dict = rule_dict.get((location_dest_id.id, route_id.id))\n                if not sub_dict:\n                    continue\n                if not warehouse_id:\n                    rule = sub_dict[next(iter(sub_dict))]\n                else:\n                    rule = sub_dict.get(warehouse_id.id)\n                    rule = rule or sub_dict[False]\n                if rule:\n                    break\n            return rule\n\n        def get_rule_for_routes(rule_dict, route_ids, packaging_uom_id, product_id, warehouse_id, location_dest_id):\n            res = self.env['stock.rule']\n            if route_ids:\n                res = extract_rule(rule_dict, route_ids, warehouse_id, location_dest_id)\n            if not res and packaging_uom_id:\n                res = extract_rule(rule_dict, packaging_uom_id.package_type_id.route_ids, warehouse_id, location_dest_id)\n            if not res:\n                res = extract_rule(rule_dict, product_id.route_ids | product_id.categ_id.total_route_ids, warehouse_id, location_dest_id)\n            if not res and warehouse_id:\n                res = extract_rule(rule_dict, warehouse_id.route_ids, warehouse_id, location_dest_id)\n            return res\n\n        location = location_id\n        # Go through the location hierarchy again, this time breaking at the first valid stock.rule found\n        # in rules_by_location.\n        inter_comp_location_checked = False\n        while (not result) and location:\n            candidate_locations = location\n            if not inter_comp_location_checked and self._check_intercomp_location(location):\n                # Add the intercomp location to candidate_locations as the intercomp domain was added\n                # above in the call to _get_rule_domain.\n                inter_comp_location = self.env.ref('stock.stock_location_customers', raise_if_not_found=False)\n                candidate_locations |= inter_comp_location\n                inter_comp_location_checked = True\n            for candidate_location in candidate_locations:\n                result = get_rule_for_routes(\n                    rule_dict,\n                    routes,\n                    values.get(\"packaging_uom_id\", self.env['uom.uom']),\n                    product_id,\n                    values.get(\"warehouse_id\", candidate_location.warehouse_id),\n                    candidate_location,\n                )\n                if result:\n                    break\n            else:\n                location = location.location_id\n        return result"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._check_intercomp_location",
+      "start": 625,
+      "end": 628,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          627,
+          627,
+          12,
+          110
+        ],
+        [
+          "FunctionDef",
+          625,
+          628,
+          4,
+          82
+        ],
+        [
+          "If",
+          626,
+          628,
+          8,
+          82
+        ],
+        [
+          "Return",
+          628,
+          628,
+          12,
+          82
+        ]
+      ],
+      "source": "    def _check_intercomp_location(self, locations):\n        if locations.filtered(lambda location: location.usage == 'transit'):\n            inter_comp_location = self.env.ref('stock.stock_location_inter_company', raise_if_not_found=False)\n            return inter_comp_location and inter_comp_location.id in locations.ids"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._get_rule_domain",
+      "start": 631,
+      "end": 647,
+      "program_units": 12,
+      "nodes": [
+        [
+          "Assign",
+          632,
+          632,
+          8,
+          36
+        ],
+        [
+          "Assign",
+          637,
+          637,
+          8,
+          96
+        ],
+        [
+          "Assign",
+          642,
+          642,
+          12,
+          59
+        ],
+        [
+          "Assign",
+          645,
+          645,
+          12,
+          109
+        ],
+        [
+          "AugAssign",
+          644,
+          644,
+          16,
+          70
+        ],
+        [
+          "AugAssign",
+          646,
+          646,
+          12,
+          44
+        ],
+        [
+          "Expr",
+          636,
+          636,
+          12,
+          108
+        ],
+        [
+          "FunctionDef",
+          631,
+          647,
+          4,
+          21
+        ],
+        [
+          "If",
+          635,
+          636,
+          8,
+          108
+        ],
+        [
+          "If",
+          641,
+          646,
+          8,
+          44
+        ],
+        [
+          "If",
+          643,
+          644,
+          12,
+          70
+        ],
+        [
+          "Return",
+          647,
+          647,
+          8,
+          21
+        ]
+      ],
+      "source": "    def _get_rule_domain(self, locations, values):\n        location_ids = locations.ids\n        # If the method is called to find rules towards the Inter-company location, also add the 'Customer' location in the domain.\n        # This is to avoid having to duplicate every rules that deliver to Customer to have the Inter-company part.\n        if self._check_intercomp_location(locations):\n            location_ids.append(self.env.ref('stock.stock_location_customers', raise_if_not_found=False).id)\n        domain = Domain('location_dest_id', 'in', location_ids) & Domain('action', '!=', 'push')\n        # In case the method is called by the superuser, we need to restrict the rules to the\n        # ones of the company. This is not useful as a regular user since there is a record\n        # rule to filter out the rules based on the company.\n        if self.env.su and values.get('company_id'):\n            company_ids = set(values.get('company_id').ids)\n            if values.get('route_ids'):\n                company_ids |= set(values['route_ids'].company_id.ids)\n            domain_company = ['|', ('company_id', '=', False), ('company_id', 'child_of', list(company_ids))]\n            domain &= Domain(domain_company)\n        return domain"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._get_push_rule",
+      "start": 650,
+      "end": 667,
+      "program_units": 17,
+      "nodes": [
+        [
+          "Assign",
+          652,
+          652,
+          8,
+          37
+        ],
+        [
+          "Assign",
+          653,
+          653,
+          8,
+          35
+        ],
+        [
+          "Assign",
+          654,
+          654,
+          8,
+          36
+        ],
+        [
+          "Assign",
+          655,
+          655,
+          8,
+          48
+        ],
+        [
+          "Assign",
+          657,
+          657,
+          12,
+          112
+        ],
+        [
+          "Assign",
+          660,
+          660,
+          12,
+          99
+        ],
+        [
+          "Assign",
+          661,
+          661,
+          12,
+          34
+        ],
+        [
+          "Assign",
+          665,
+          665,
+          16,
+          103
+        ],
+        [
+          "Assign",
+          666,
+          666,
+          12,
+          43
+        ],
+        [
+          "AugAssign",
+          659,
+          659,
+          16,
+          46
+        ],
+        [
+          "AugAssign",
+          662,
+          662,
+          12,
+          63
+        ],
+        [
+          "Expr",
+          664,
+          664,
+          16,
+          49
+        ],
+        [
+          "FunctionDef",
+          650,
+          667,
+          4,
+          19
+        ],
+        [
+          "If",
+          658,
+          659,
+          12,
+          46
+        ],
+        [
+          "Return",
+          667,
+          667,
+          8,
+          19
+        ],
+        [
+          "While",
+          656,
+          666,
+          8,
+          43
+        ],
+        [
+          "While",
+          663,
+          665,
+          12,
+          103
+        ]
+      ],
+      "source": "    def _get_push_rule(self, move, location_dest_id, route_ids, warehouse_id, extra_domain=None):\n        \"\"\"Find a push rule for the location_dest_id, with a fallback to the parent locations if none could be found.\"\"\"\n        rule = self.env['stock.rule']\n        location = location_dest_id\n        product_id = move.product_id\n        packaging_uom_id = move.packaging_uom_id\n        while (not rule) and location:\n            domain = Domain('location_src_id', '=', location.id) & Domain('action', 'in', ('push', 'pull_push'))\n            if extra_domain:\n                domain &= Domain(extra_domain)\n            rule = self._search_rule(route_ids, packaging_uom_id, product_id, warehouse_id, domain)\n            excluded_rule_ids = []\n            domain &= Domain('id', 'not in', excluded_rule_ids)\n            while rule and rule.push_domain and not move.filtered_domain(literal_eval(rule.push_domain)):\n                excluded_rule_ids.append(rule.id)\n                rule = self._search_rule(route_ids, packaging_uom_id, product_id, warehouse_id, domain)\n            location = location.location_id\n        return rule"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._get_moves_to_assign_domain",
+      "start": 670,
+      "end": 678,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          670,
+          678,
+          4,
+          10
+        ],
+        [
+          "Return",
+          671,
+          678,
+          8,
+          10
+        ]
+      ],
+      "source": "    def _get_moves_to_assign_domain(self, company_id):\n        return Domain([\n            ('company_id', '=?', company_id),\n            ('state', 'in', ['confirmed', 'partially_available']),\n            ('product_uom_qty', '!=', 0.0),\n            '|',\n                ('reservation_date', '<=', fields.Date.today()),\n                ('picking_type_id.reservation_method', '=', 'at_confirm'),\n        ])"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._run_scheduler_tasks",
+      "start": 681,
+      "end": 713,
+      "program_units": 22,
+      "nodes": [
+        [
+          "Assign",
+          686,
+          686,
+          8,
+          67
+        ],
+        [
+          "Assign",
+          687,
+          687,
+          8,
+          75
+        ],
+        [
+          "Assign",
+          697,
+          697,
+          8,
+          61
+        ],
+        [
+          "Assign",
+          698,
+          699,
+          8,
+          70
+        ],
+        [
+          "Expr",
+          683,
+          683,
+          12,
+          93
+        ],
+        [
+          "Expr",
+          688,
+          688,
+          8,
+          59
+        ],
+        [
+          "Expr",
+          689,
+          689,
+          8,
+          51
+        ],
+        [
+          "Expr",
+          692,
+          692,
+          12,
+          51
+        ],
+        [
+          "Expr",
+          694,
+          694,
+          8,
+          132
+        ],
+        [
+          "Expr",
+          701,
+          701,
+          12,
+          78
+        ],
+        [
+          "Expr",
+          703,
+          703,
+          16,
+          36
+        ],
+        [
+          "Expr",
+          704,
+          704,
+          16,
+          96
+        ],
+        [
+          "Expr",
+          707,
+          707,
+          12,
+          51
+        ],
+        [
+          "Expr",
+          710,
+          710,
+          8,
+          46
+        ],
+        [
+          "Expr",
+          713,
+          713,
+          12,
+          51
+        ],
+        [
+          "For",
+          700,
+          704,
+          8,
+          96
+        ],
+        [
+          "FunctionDef",
+          681,
+          713,
+          4,
+          51
+        ],
+        [
+          "If",
+          682,
+          683,
+          8,
+          93
+        ],
+        [
+          "If",
+          691,
+          692,
+          8,
+          51
+        ],
+        [
+          "If",
+          702,
+          704,
+          12,
+          96
+        ],
+        [
+          "If",
+          706,
+          707,
+          8,
+          51
+        ],
+        [
+          "If",
+          712,
+          713,
+          8,
+          51
+        ]
+      ],
+      "source": "    def _run_scheduler_tasks(self, use_new_cursor=False, company_id=False):\n        if use_new_cursor:\n            self.env['ir.cron']._commit_progress(remaining=self._get_scheduler_tasks_to_do())\n\n        # Minimum stock rules\n        domain = self._get_orderpoint_domain(company_id=company_id)\n        orderpoints = self.env['stock.warehouse.orderpoint'].search(domain)\n        orderpoints.sudo()._compute_qty_to_order_computed()\n        orderpoints.sudo()._compute_deadline_date()\n\n        if use_new_cursor:\n            self.env['ir.cron']._commit_progress(1)\n\n        orderpoints.sudo()._procure_orderpoint_confirm(use_new_cursor=use_new_cursor, company_id=company_id, raise_user_error=False)\n\n        # Search all confirmed stock_moves and try to assign them\n        domain = self._get_moves_to_assign_domain(company_id)\n        moves_to_assign = self.env['stock.move'].search(domain, limit=None,\n            order='reservation_date, priority desc, date asc, id asc')\n        for moves_chunk in split_every(1000, moves_to_assign.ids):\n            self.env['stock.move'].browse(moves_chunk).sudo()._action_assign()\n            if use_new_cursor:\n                self.env.cr.commit()\n                _logger.info(\"A batch of %d moves are assigned and committed\", len(moves_chunk))\n\n        if use_new_cursor:\n            self.env['ir.cron']._commit_progress(1)\n\n        # Merge duplicated quants\n        self.env['stock.quant']._quant_tasks()\n\n        if use_new_cursor:\n            self.env['ir.cron']._commit_progress(1)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._get_scheduler_tasks_to_do",
+      "start": 716,
+      "end": 719,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          716,
+          719,
+          4,
+          16
+        ],
+        [
+          "Return",
+          719,
+          719,
+          8,
+          16
+        ]
+      ],
+      "source": "    def _get_scheduler_tasks_to_do(self):\n        \"\"\" Number of task to be executed by the stock scheduler. This number will be given in log\n        message to know how many tasks succeeded.\"\"\"\n        return 3"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule.run_scheduler",
+      "start": 722,
+      "end": 731,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Expr",
+          727,
+          727,
+          12,
+          91
+        ],
+        [
+          "Expr",
+          729,
+          729,
+          12,
+          72
+        ],
+        [
+          "FunctionDef",
+          722,
+          731,
+          4,
+          17
+        ],
+        [
+          "Raise",
+          730,
+          730,
+          12,
+          17
+        ],
+        [
+          "Return",
+          731,
+          731,
+          8,
+          17
+        ],
+        [
+          "Try",
+          726,
+          730,
+          8,
+          17
+        ]
+      ],
+      "source": "    def run_scheduler(self, use_new_cursor=False, company_id=False):\n        \"\"\" Call the scheduler in order to check the running procurements (super method), to check the minimum stock rules\n        and the availability of moves. This function is intended to be run for all the companies at the same time, so\n        we run functions as SUPERUSER to avoid intercompanies and access rights issues. \"\"\"\n        try:\n            self._run_scheduler_tasks(use_new_cursor=use_new_cursor, company_id=company_id)\n        except Exception:\n            _logger.error(\"Error during stock scheduler\", exc_info=True)\n            raise\n        return {}"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "name": "StockRule._get_orderpoint_domain",
+      "start": 734,
+      "end": 738,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          735,
+          735,
+          8,
+          77
+        ],
+        [
+          "AugAssign",
+          737,
+          737,
+          12,
+          55
+        ],
+        [
+          "FunctionDef",
+          734,
+          738,
+          4,
+          21
+        ],
+        [
+          "If",
+          736,
+          737,
+          8,
+          55
+        ],
+        [
+          "Return",
+          738,
+          738,
+          8,
+          21
+        ]
+      ],
+      "source": "    def _get_orderpoint_domain(self, company_id=False):\n        domain = [('trigger', '=', 'auto'), ('product_id.active', '=', True)]\n        if company_id:\n            domain += [('company_id', '=', company_id)]\n        return domain"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock_supply/order_point.py",
+      "sha256": "e1f458cafb1f92a1d2e8b7ef58f8782d19212f0ed98286549f7eb49445c1cce7",
+      "name": "OrderPoint.warehouse_location",
+      "start": 200,
+      "end": 202,
+      "program_units": 3,
+      "nodes": [
+        [
+          "FunctionDef",
+          200,
+          202,
+          4,
+          32
+        ],
+        [
+          "If",
+          201,
+          202,
+          8,
+          32
+        ],
+        [
+          "Return",
+          202,
+          202,
+          12,
+          32
+        ]
+      ],
+      "source": "    def warehouse_location(self):\n        if self.type == 'purchase':\n            return self.location"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/stock_supply/order_point.py",
+      "sha256": "e1f458cafb1f92a1d2e8b7ef58f8782d19212f0ed98286549f7eb49445c1cce7",
+      "name": "OrderPoint.supply_stock",
+      "start": 229,
+      "end": 234,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          230,
+          230,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          231,
+          231,
+          8,
+          61
+        ],
+        [
+          "Assign",
+          232,
+          232,
+          8,
+          47
+        ],
+        [
+          "Expr",
+          233,
+          233,
+          8,
+          54
+        ],
+        [
+          "Expr",
+          234,
+          234,
+          8,
+          38
+        ],
+        [
+          "FunctionDef",
+          229,
+          234,
+          4,
+          38
+        ]
+      ],
+      "source": "    def supply_stock(cls):\n        pool = Pool()\n        StockSupply = pool.get('stock.supply', type='wizard')\n        session_id, _, _ = StockSupply.create()\n        StockSupply.execute(session_id, {}, 'create_')\n        StockSupply.delete(session_id)"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/StockRulesSupplychainServiceImpl.java",
+      "sha256": "b2edce13b5844ca6a5704f33544c2d8b679fde8fef1f5e795124f3c652a33866",
+      "name": "processNonCompliantStockLocationLine",
+      "start": 102,
+      "end": 166,
+      "program_units": 22,
+      "nodes": [
+        [
+          "expression_statement",
+          111,
+          111,
+          6,
+          46
+        ],
+        [
+          "expression_statement",
+          154,
+          156,
+          6,
+          82
+        ],
+        [
+          "expression_statement",
+          158,
+          158,
+          6,
+          63
+        ],
+        [
+          "expression_statement",
+          160,
+          160,
+          6,
+          44
+        ],
+        [
+          "expression_statement",
+          163,
+          163,
+          8,
+          43
+        ],
+        [
+          "if_statement",
+          106,
+          108,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          110,
+          113,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          117,
+          123,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          132,
+          165,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          162,
+          164,
+          6,
+          7
+        ],
+        [
+          "local_variable_declaration",
+          115,
+          115,
+          4,
+          71
+        ],
+        [
+          "local_variable_declaration",
+          125,
+          125,
+          4,
+          53
+        ],
+        [
+          "local_variable_declaration",
+          127,
+          127,
+          4,
+          65
+        ],
+        [
+          "local_variable_declaration",
+          128,
+          129,
+          4,
+          86
+        ],
+        [
+          "local_variable_declaration",
+          130,
+          130,
+          4,
+          66
+        ],
+        [
+          "local_variable_declaration",
+          134,
+          134,
+          6,
+          51
+        ],
+        [
+          "local_variable_declaration",
+          135,
+          135,
+          6,
+          61
+        ],
+        [
+          "local_variable_declaration",
+          136,
+          152,
+          6,
+          25
+        ],
+        [
+          "method_declaration",
+          102,
+          166,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          107,
+          107,
+          6,
+          13
+        ],
+        [
+          "return_statement",
+          112,
+          112,
+          6,
+          13
+        ],
+        [
+          "return_statement",
+          122,
+          122,
+          6,
+          13
+        ]
+      ],
+      "source": "  @Override\n  public void processNonCompliantStockLocationLine(\n      StockRules stockRules, StockLocationLine stockLocationLine) throws AxelorException {\n\n    if (stockRules == null) {\n      return;\n    }\n\n    if (stockRules.getOrderAlertSelect().equals(StockRulesRepository.ORDER_ALERT_ALERT)) {\n      this.generateAndSendMessage(stockRules);\n      return;\n    }\n\n    StockLocation stockLocation = stockLocationLine.getStockLocation();\n\n    if (stockLocation == null\n        || !appSupplychainService.isApp(\"supplychain\")\n        || !stockRules\n            .getOrderAlertSelect()\n            .equals(StockRulesRepository.ORDER_ALERT_PURCHASE_ORDER)) {\n      return;\n    }\n\n    Product product = stockLocationLine.getProduct();\n\n    BigDecimal minReorderQty = getDefaultSupplierMinQty(product);\n    BigDecimal qtyToOrder =\n        stockRulesService.getQtyToOrder(stockLocationLine, stockRules, minReorderQty);\n    Partner supplierPartner = product.getDefaultSupplierPartner();\n\n    if (supplierPartner != null) {\n\n      Company company = stockLocation.getCompany();\n      LocalDate today = appBaseService.getTodayDate(company);\n      PurchaseOrder purchaseOrder =\n          purchaseOrderRepo.save(\n              purchaseOrderCreateSupplychainService.createPurchaseOrder(\n                  AuthUtils.getUser(),\n                  company,\n                  null,\n                  supplierPartner.getCurrency(),\n                  today.plusDays(supplierPartner.getDeliveryDelay()),\n                  stockRules.getName(),\n                  null,\n                  stockLocation,\n                  today,\n                  partnerPriceListService.getDefaultPriceList(\n                      supplierPartner, PriceListRepository.TYPE_PURCHASE),\n                  supplierPartner,\n                  null,\n                  null));\n\n      purchaseOrder.addPurchaseOrderLineListItem(\n          purchaseOrderLineService.createPurchaseOrderLine(\n              purchaseOrder, product, null, null, qtyToOrder, product.getUnit()));\n\n      purchaseOrderService.computePurchaseOrder(purchaseOrder);\n\n      purchaseOrderRepo.save(purchaseOrder);\n\n      if (stockRules.getAlert()) {\n        generateAndSendMessage(stockRules);\n      }\n    }\n  }"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "sha256": "69f808c11aae247388556cecb4604c601c7413c3c050bd16a912ee7175a694fe",
+      "name": "PutawayRule.validate",
+      "start": 43,
+      "end": 48,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Expr",
+          44,
+          44,
+          2,
+          32
+        ],
+        [
+          "Expr",
+          45,
+          45,
+          2,
+          39
+        ],
+        [
+          "Expr",
+          46,
+          46,
+          2,
+          27
+        ],
+        [
+          "Expr",
+          47,
+          47,
+          2,
+          26
+        ],
+        [
+          "Expr",
+          48,
+          48,
+          2,
+          26
+        ],
+        [
+          "FunctionDef",
+          43,
+          48,
+          1,
+          26
+        ]
+      ],
+      "source": "\tdef validate(self):\n\t\tself.validate_duplicate_rule()\n\t\tself.validate_warehouse_and_company()\n\t\tself.set_stock_capacity()\n\t\tself.validate_capacity()\n\t\tself.validate_priority()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "sha256": "69f808c11aae247388556cecb4604c601c7413c3c050bd16a912ee7175a694fe",
+      "name": "PutawayRule.validate_duplicate_rule",
+      "start": 50,
+      "end": 60,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          51,
+          53,
+          2,
+          3
+        ],
+        [
+          "Expr",
+          55,
+          60,
+          3,
+          4
+        ],
+        [
+          "FunctionDef",
+          50,
+          60,
+          1,
+          4
+        ],
+        [
+          "If",
+          54,
+          60,
+          2,
+          4
+        ]
+      ],
+      "source": "\tdef validate_duplicate_rule(self):\n\t\texisting_rule = frappe.db.exists(\n\t\t\t\"Putaway Rule\", {\"item_code\": self.item_code, \"warehouse\": self.warehouse}\n\t\t)\n\t\tif existing_rule and existing_rule != self.name:\n\t\t\tfrappe.throw(\n\t\t\t\t_(\"Putaway Rule already exists for Item {0} in Warehouse {1}.\").format(\n\t\t\t\t\tfrappe.bold(self.item_code), frappe.bold(self.warehouse)\n\t\t\t\t),\n\t\t\t\ttitle=_(\"Duplicate\"),\n\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "sha256": "69f808c11aae247388556cecb4604c601c7413c3c050bd16a912ee7175a694fe",
+      "name": "PutawayRule.validate_priority",
+      "start": 62,
+      "end": 64,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          64,
+          64,
+          3,
+          84
+        ],
+        [
+          "FunctionDef",
+          62,
+          64,
+          1,
+          84
+        ],
+        [
+          "If",
+          63,
+          64,
+          2,
+          84
+        ]
+      ],
+      "source": "\tdef validate_priority(self):\n\t\tif self.priority < 1:\n\t\t\tfrappe.throw(_(\"Priority cannot be lesser than 1.\"), title=_(\"Invalid Priority\"))"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "sha256": "69f808c11aae247388556cecb4604c601c7413c3c050bd16a912ee7175a694fe",
+      "name": "PutawayRule.validate_warehouse_and_company",
+      "start": 66,
+      "end": 87,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Assign",
+          67,
+          69,
+          2,
+          3
+        ],
+        [
+          "Expr",
+          71,
+          76,
+          3,
+          4
+        ],
+        [
+          "Expr",
+          79,
+          79,
+          3,
+          87
+        ],
+        [
+          "Expr",
+          82,
+          87,
+          3,
+          4
+        ],
+        [
+          "FunctionDef",
+          66,
+          87,
+          1,
+          4
+        ],
+        [
+          "If",
+          70,
+          76,
+          2,
+          4
+        ],
+        [
+          "If",
+          78,
+          79,
+          2,
+          87
+        ],
+        [
+          "If",
+          81,
+          87,
+          2,
+          4
+        ]
+      ],
+      "source": "\tdef validate_warehouse_and_company(self):\n\t\tcompany, is_group, disabled = frappe.db.get_value(\n\t\t\t\"Warehouse\", self.warehouse, [\"company\", \"is_group\", \"disabled\"]\n\t\t)\n\t\tif (is_group or disabled) and not self.disable:\n\t\t\tfrappe.throw(\n\t\t\t\t_(\"Warehouse {0} must be an enabled warehouse that is not a group.\").format(\n\t\t\t\t\tfrappe.bold(self.warehouse)\n\t\t\t\t),\n\t\t\t\ttitle=_(\"Invalid Warehouse\"),\n\t\t\t)\n\n\t\tif not self.disable and not frappe.get_cached_value(\"Item\", self.item_code, \"is_stock_item\"):\n\t\t\tfrappe.throw(_(\"Item {0} is not a stock item.\").format(frappe.bold(self.item_code)))\n\n\t\tif company != self.company:\n\t\t\tfrappe.throw(\n\t\t\t\t_(\"Warehouse {0} does not belong to Company {1}.\").format(\n\t\t\t\t\tfrappe.bold(self.warehouse), frappe.bold(self.company)\n\t\t\t\t),\n\t\t\t\ttitle=_(\"Invalid Warehouse\"),\n\t\t\t)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "sha256": "69f808c11aae247388556cecb4604c601c7413c3c050bd16a912ee7175a694fe",
+      "name": "PutawayRule.validate_capacity",
+      "start": 89,
+      "end": 102,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Assign",
+          90,
+          90,
+          2,
+          70
+        ],
+        [
+          "Assign",
+          91,
+          91,
+          2,
+          77
+        ],
+        [
+          "Expr",
+          94,
+          99,
+          3,
+          4
+        ],
+        [
+          "Expr",
+          102,
+          102,
+          3,
+          73
+        ],
+        [
+          "FunctionDef",
+          89,
+          102,
+          1,
+          73
+        ],
+        [
+          "If",
+          93,
+          99,
+          2,
+          4
+        ],
+        [
+          "If",
+          101,
+          102,
+          2,
+          73
+        ]
+      ],
+      "source": "\tdef validate_capacity(self):\n\t\tstock_uom = frappe.db.get_value(\"Item\", self.item_code, \"stock_uom\")\n\t\tbalance_qty = _get_stock_balance(self.item_code, self.warehouse, nowdate())\n\n\t\tif flt(self.stock_capacity) < flt(balance_qty):\n\t\t\tfrappe.throw(\n\t\t\t\t_(\n\t\t\t\t\t\"Warehouse Capacity for Item '{0}' must be greater than the existing stock level of {1} {2}.\"\n\t\t\t\t).format(self.item_code, frappe.bold(balance_qty), stock_uom),\n\t\t\t\ttitle=_(\"Insufficient Capacity\"),\n\t\t\t)\n\n\t\tif not self.capacity:\n\t\t\tfrappe.throw(_(\"Capacity must be greater than 0\"), title=_(\"Invalid\"))"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "sha256": "69f808c11aae247388556cecb4604c601c7413c3c050bd16a912ee7175a694fe",
+      "name": "PutawayRule.set_stock_capacity",
+      "start": 104,
+      "end": 108,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          105,
+          105,
+          2,
+          79
+        ],
+        [
+          "Assign",
+          106,
+          106,
+          2,
+          39
+        ],
+        [
+          "Assign",
+          107,
+          107,
+          2,
+          104
+        ],
+        [
+          "Assign",
+          108,
+          108,
+          2,
+          72
+        ],
+        [
+          "FunctionDef",
+          104,
+          108,
+          1,
+          72
+        ]
+      ],
+      "source": "\tdef set_stock_capacity(self):\n\t\tself.stock_uom = frappe.get_cached_value(\"Item\", self.item_code, \"stock_uom\")\n\t\tself.uom = self.uom or self.stock_uom\n\t\tself.conversion_factor = get_conversion_factor(self.item_code, self.uom).get(\"conversion_factor\") or 1\n\t\tself.stock_capacity = flt(self.conversion_factor) * flt(self.capacity)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "sha256": "69f808c11aae247388556cecb4604c601c7413c3c050bd16a912ee7175a694fe",
+      "name": "apply_putaway_rule",
+      "start": 128,
+      "end": 146,
+      "program_units": 10,
+      "nodes": [
+        [
+          "Assign",
+          138,
+          140,
+          1,
+          2
+        ],
+        [
+          "Expr",
+          136,
+          136,
+          2,
+          11
+        ],
+        [
+          "Expr",
+          137,
+          137,
+          1,
+          52
+        ],
+        [
+          "Expr",
+          142,
+          142,
+          2,
+          11
+        ],
+        [
+          "FunctionDef",
+          128,
+          146,
+          0,
+          67
+        ],
+        [
+          "If",
+          135,
+          136,
+          1,
+          11
+        ],
+        [
+          "If",
+          141,
+          142,
+          1,
+          11
+        ],
+        [
+          "If",
+          143,
+          144,
+          1,
+          8
+        ],
+        [
+          "Return",
+          144,
+          144,
+          2,
+          8
+        ],
+        [
+          "Return",
+          146,
+          146,
+          1,
+          67
+        ]
+      ],
+      "source": "def apply_putaway_rule(\n\tdoctype: str,\n\titems: InstanceOf[list] | str,\n\tcompany: str,\n\tsync: str | bool | None = None,\n\tpurpose: str | None = None,\n):\n\tif doctype not in (\"Purchase Receipt\", \"Stock Entry\"):\n\t\t_refuse()\n\tfrappe.has_permission(doctype, \"write\", throw=True)\n\tallowed_companies = get_allowed_docs_for_doctype(\n\t\tget_user_permissions(frappe.session.user).get(\"Company\", []), doctype\n\t)\n\tif allowed_companies and company not in allowed_companies:\n\t\t_refuse()\n\tif not frappe.has_permission(\"Item\", \"read\"):\n\t\treturn\n\n\treturn _apply_putaway_rule(doctype, items, company, sync, purpose)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "sha256": "69f808c11aae247388556cecb4604c601c7413c3c050bd16a912ee7175a694fe",
+      "name": "_apply_putaway_rule",
+      "start": 156,
+      "end": 268,
+      "program_units": 54,
+      "nodes": [
+        [
+          "Assign",
+          173,
+          173,
+          2,
+          27
+        ],
+        [
+          "Assign",
+          175,
+          175,
+          1,
+          46
+        ],
+        [
+          "Assign",
+          176,
+          176,
+          1,
+          21
+        ],
+        [
+          "Assign",
+          180,
+          180,
+          3,
+          28
+        ],
+        [
+          "Assign",
+          182,
+          182,
+          2,
+          44
+        ],
+        [
+          "Assign",
+          183,
+          183,
+          2,
+          17
+        ],
+        [
+          "Assign",
+          185,
+          185,
+          3,
+          53
+        ],
+        [
+          "Assign",
+          187,
+          187,
+          2,
+          89
+        ],
+        [
+          "Assign",
+          188,
+          188,
+          2,
+          56
+        ],
+        [
+          "Assign",
+          189,
+          189,
+          2,
+          58
+        ],
+        [
+          "Assign",
+          190,
+          190,
+          2,
+          93
+        ],
+        [
+          "Assign",
+          193,
+          200,
+          3,
+          4
+        ],
+        [
+          "Assign",
+          204,
+          204,
+          3,
+          74
+        ],
+        [
+          "Assign",
+          205,
+          205,
+          2,
+          88
+        ],
+        [
+          "Assign",
+          208,
+          212,
+          3,
+          4
+        ],
+        [
+          "Assign",
+          218,
+          220,
+          4,
+          5
+        ],
+        [
+          "Assign",
+          223,
+          223,
+          2,
+          22
+        ],
+        [
+          "Assign",
+          226,
+          228,
+          4,
+          5
+        ],
+        [
+          "Assign",
+          229,
+          229,
+          4,
+          68
+        ],
+        [
+          "Assign",
+          232,
+          232,
+          5,
+          45
+        ],
+        [
+          "Assign",
+          233,
+          233,
+          5,
+          69
+        ],
+        [
+          "Assign",
+          238,
+          246,
+          4,
+          5
+        ],
+        [
+          "Assign",
+          247,
+          247,
+          4,
+          25
+        ],
+        [
+          "Assign",
+          264,
+          264,
+          2,
+          26
+        ],
+        [
+          "AugAssign",
+          249,
+          249,
+          4,
+          46
+        ],
+        [
+          "AugAssign",
+          250,
+          250,
+          4,
+          34
+        ],
+        [
+          "AugAssign",
+          251,
+          251,
+          4,
+          47
+        ],
+        [
+          "Break",
+          254,
+          254,
+          5,
+          10
+        ],
+        [
+          "Continue",
+          201,
+          201,
+          3,
+          11
+        ],
+        [
+          "Continue",
+          221,
+          221,
+          3,
+          11
+        ],
+        [
+          "Continue",
+          236,
+          236,
+          5,
+          13
+        ],
+        [
+          "Expr",
+          216,
+          216,
+          4,
+          58
+        ],
+        [
+          "Expr",
+          258,
+          258,
+          3,
+          62
+        ],
+        [
+          "Expr",
+          261,
+          261,
+          2,
+          54
+        ],
+        [
+          "Expr",
+          265,
+          265,
+          2,
+          58
+        ],
+        [
+          "For",
+          178,
+          258,
+          1,
+          62
+        ],
+        [
+          "For",
+          224,
+          254,
+          2,
+          10
+        ],
+        [
+          "FunctionDef",
+          156,
+          268,
+          0,
+          14
+        ],
+        [
+          "If",
+          172,
+          173,
+          1,
+          27
+        ],
+        [
+          "If",
+          179,
+          180,
+          2,
+          28
+        ],
+        [
+          "If",
+          184,
+          185,
+          2,
+          53
+        ],
+        [
+          "If",
+          192,
+          201,
+          2,
+          11
+        ],
+        [
+          "If",
+          203,
+          204,
+          2,
+          74
+        ],
+        [
+          "If",
+          207,
+          221,
+          2,
+          11
+        ],
+        [
+          "If",
+          214,
+          220,
+          3,
+          5
+        ],
+        [
+          "If",
+          225,
+          254,
+          3,
+          10
+        ],
+        [
+          "If",
+          231,
+          233,
+          4,
+          69
+        ],
+        [
+          "If",
+          235,
+          236,
+          4,
+          13
+        ],
+        [
+          "If",
+          253,
+          254,
+          4,
+          10
+        ],
+        [
+          "If",
+          257,
+          258,
+          2,
+          62
+        ],
+        [
+          "If",
+          260,
+          261,
+          1,
+          54
+        ],
+        [
+          "If",
+          263,
+          265,
+          1,
+          58
+        ],
+        [
+          "If",
+          267,
+          268,
+          1,
+          14
+        ],
+        [
+          "Return",
+          268,
+          268,
+          2,
+          14
+        ]
+      ],
+      "source": "def _apply_putaway_rule(\n\tdoctype: str,\n\titems: InstanceOf[list] | str,\n\tcompany: str,\n\tsync: str | bool | None = None,\n\tpurpose: str | None = None,\n):\n\t\"\"\"Applies Putaway Rule on line items.\n\n\titems: List of Purchase Receipt/Stock Entry Items, updated in place.\n\tInstanceOf preserves the caller's list during argument validation.\n\tcompany: Company in the Purchase Receipt/Stock Entry\n\tdoctype: Doctype to apply rule on\n\tpurpose: Purpose of Stock Entry\n\tsync (optional): Sync with client side only for client side calls\n\t\"\"\"\n\tif isinstance(items, str):\n\t\titems = json.loads(items)\n\n\titems_not_accomodated, updated_table = [], []\n\titem_wise_rules = {}\n\n\tfor item in items:\n\t\tif isinstance(item, dict):\n\t\t\titem = frappe._dict(item)\n\n\t\tsource_warehouse = item.get(\"s_warehouse\")\n\t\tserial_nos = []\n\t\tif item.get(\"serial_no\"):\n\t\t\tserial_nos = get_serial_nos(item.get(\"serial_no\"))\n\n\t\titem.conversion_factor = flt(item.conversion_factor) or get_row_conversion_factor(item)\n\t\tpending_qty, item_code = flt(item.qty), item.item_code\n\t\tpending_stock_qty = pending_qty * item.conversion_factor\n\t\tuom_must_be_whole_number = frappe.get_cached_value(\"UOM\", item.uom, \"must_be_whole_number\")\n\n\t\tif not pending_qty or not item_code:\n\t\t\tupdated_table = add_row(\n\t\t\t\titem,\n\t\t\t\tpending_qty,\n\t\t\t\tsource_warehouse or item.warehouse,\n\t\t\t\tupdated_table,\n\t\t\t\tserial_nos=serial_nos,\n\t\t\t\tkeep_rejected=True,\n\t\t\t)\n\t\t\tcontinue\n\n\t\tif item_code not in item_wise_rules:\n\t\t\titem_wise_rules[item_code] = get_item_putaway_rules(item_code, company)\n\t\tat_capacity, rules = select_vacant_rules(item_wise_rules[item_code], source_warehouse)\n\n\t\tif not rules:\n\t\t\twarehouse = (\n\t\t\t\t(source_warehouse or item.get(\"warehouse\"))\n\t\t\t\tif not item.get(\"t_warehouse\")\n\t\t\t\telse item.get(\"t_warehouse\")\n\t\t\t)\n\n\t\t\tif at_capacity:\n\t\t\t\t# rules available, but no free space\n\t\t\t\titems_not_accomodated.append([item_code, pending_qty])\n\t\t\telse:\n\t\t\t\tupdated_table = add_row(\n\t\t\t\t\titem, pending_qty, warehouse, updated_table, serial_nos=serial_nos, keep_rejected=True\n\t\t\t\t)\n\t\t\tcontinue\n\n\t\tkeep_rejected = True\n\t\tfor rule in rules:\n\t\t\tif pending_stock_qty > 0 and rule.free_space:\n\t\t\t\tstock_qty_to_allocate = (\n\t\t\t\t\tflt(rule.free_space) if pending_stock_qty >= flt(rule.free_space) else pending_stock_qty\n\t\t\t\t)\n\t\t\t\tqty_to_allocate = stock_qty_to_allocate / item.conversion_factor\n\n\t\t\t\tif uom_must_be_whole_number:\n\t\t\t\t\tqty_to_allocate = floor(qty_to_allocate)\n\t\t\t\t\tstock_qty_to_allocate = qty_to_allocate * item.conversion_factor\n\n\t\t\t\tif not qty_to_allocate:\n\t\t\t\t\tcontinue\n\n\t\t\t\tupdated_table = add_row(\n\t\t\t\t\titem,\n\t\t\t\t\tqty_to_allocate,\n\t\t\t\t\trule.warehouse,\n\t\t\t\t\tupdated_table,\n\t\t\t\t\trule.name,\n\t\t\t\t\tserial_nos=serial_nos,\n\t\t\t\t\tkeep_rejected=keep_rejected,\n\t\t\t\t)\n\t\t\t\tkeep_rejected = False\n\n\t\t\t\tpending_stock_qty -= stock_qty_to_allocate\n\t\t\t\tpending_qty -= qty_to_allocate\n\t\t\t\trule[\"free_space\"] -= stock_qty_to_allocate\n\n\t\t\t\tif pending_stock_qty <= 0:\n\t\t\t\t\tbreak\n\n\t\t# if pending qty after applying all rules, add row without warehouse\n\t\tif pending_stock_qty > 0:\n\t\t\titems_not_accomodated.append([item.item_code, pending_qty])\n\n\tif items_not_accomodated:\n\t\tshow_unassigned_items_message(items_not_accomodated)\n\n\tif updated_table and _items_changed(items, updated_table, doctype):\n\t\titems[:] = updated_table\n\t\tfrappe.msgprint(_(\"Applied putaway rules.\"), alert=True)\n\n\tif sync and json.loads(sync):  # sync with client side\n\t\treturn items"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "sha256": "69f808c11aae247388556cecb4604c601c7413c3c050bd16a912ee7175a694fe",
+      "name": "get_ordered_putaway_rules",
+      "start": 311,
+      "end": 313,
+      "program_units": 2,
+      "nodes": [
+        [
+          "FunctionDef",
+          311,
+          313,
+          0,
+          89
+        ],
+        [
+          "Return",
+          313,
+          313,
+          1,
+          89
+        ]
+      ],
+      "source": "def get_ordered_putaway_rules(item_code, company, source_warehouse=None):\n\t\"\"\"Returns an ordered list of putaway rules to apply on an item.\"\"\"\n\treturn select_vacant_rules(get_item_putaway_rules(item_code, company), source_warehouse)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "sha256": "69f808c11aae247388556cecb4604c601c7413c3c050bd16a912ee7175a694fe",
+      "name": "get_item_putaway_rules",
+      "start": 316,
+      "end": 327,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          317,
+          322,
+          1,
+          2
+        ],
+        [
+          "Assign",
+          324,
+          324,
+          2,
+          77
+        ],
+        [
+          "Assign",
+          325,
+          325,
+          2,
+          74
+        ],
+        [
+          "For",
+          323,
+          325,
+          1,
+          74
+        ],
+        [
+          "FunctionDef",
+          316,
+          327,
+          0,
+          13
+        ],
+        [
+          "Return",
+          327,
+          327,
+          1,
+          13
+        ]
+      ],
+      "source": "def get_item_putaway_rules(item_code, company):\n\trules = frappe.get_all(\n\t\t\"Putaway Rule\",\n\t\tfields=[\"name\", \"item_code\", \"stock_capacity\", \"priority\", \"warehouse\"],\n\t\tfilters={\"item_code\": item_code, \"company\": company, \"disable\": 0},\n\t\torder_by=\"priority asc, capacity desc\",\n\t)\n\tfor rule in rules:\n\t\tbalance_qty = _get_stock_balance(rule.item_code, rule.warehouse, nowdate())\n\t\trule[\"free_space\"] = max(flt(rule.stock_capacity) - flt(balance_qty), 0)\n\n\treturn rules"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "sha256": "69f808c11aae247388556cecb4604c601c7413c3c050bd16a912ee7175a694fe",
+      "name": "select_vacant_rules",
+      "start": 330,
+      "end": 339,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Assign",
+          331,
+          331,
+          1,
+          71
+        ],
+        [
+          "Assign",
+          335,
+          335,
+          1,
+          63
+        ],
+        [
+          "FunctionDef",
+          330,
+          339,
+          0,
+          87
+        ],
+        [
+          "If",
+          332,
+          333,
+          1,
+          20
+        ],
+        [
+          "If",
+          336,
+          337,
+          1,
+          19
+        ],
+        [
+          "Return",
+          333,
+          333,
+          2,
+          20
+        ],
+        [
+          "Return",
+          337,
+          337,
+          2,
+          19
+        ],
+        [
+          "Return",
+          339,
+          339,
+          1,
+          87
+        ]
+      ],
+      "source": "def select_vacant_rules(rules, source_warehouse=None):\n\trules = [rule for rule in rules if rule.warehouse != source_warehouse]\n\tif not rules:\n\t\treturn False, None\n\n\tvacant_rules = [rule for rule in rules if rule.free_space > 0]\n\tif not vacant_rules:\n\t\treturn True, None\n\n\treturn False, sorted(vacant_rules, key=lambda rule: (rule.priority, -rule.free_space))"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/reorder_item.py",
+      "sha256": "e14ae8b4f4cd8ae05ad22bc1a6cbb2cbc5d1da2e107bed67e4943ea126a61003",
+      "name": "reorder_item",
+      "start": 16,
+      "end": 23,
+      "program_units": 5,
+      "nodes": [
+        [
+          "FunctionDef",
+          16,
+          23,
+          0,
+          24
+        ],
+        [
+          "If",
+          19,
+          20,
+          1,
+          8
+        ],
+        [
+          "If",
+          22,
+          23,
+          1,
+          24
+        ],
+        [
+          "Return",
+          20,
+          20,
+          2,
+          8
+        ],
+        [
+          "Return",
+          23,
+          23,
+          2,
+          24
+        ]
+      ],
+      "source": "def reorder_item():\n\t\"\"\"Reorder item if stock reaches reorder level\"\"\"\n\t# if initial setup not completed, return\n\tif not (frappe.db.a_row_exists(\"Company\") and frappe.db.a_row_exists(\"Fiscal Year\")):\n\t\treturn\n\n\tif cint(frappe.db.get_single_value(\"Stock Settings\", \"auto_indent\")):\n\t\treturn _reorder_item()"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/reorder_item.py",
+      "sha256": "e14ae8b4f4cd8ae05ad22bc1a6cbb2cbc5d1da2e107bed67e4943ea126a61003",
+      "name": "_reorder_item",
+      "start": 26,
+      "end": 111,
+      "program_units": 31,
+      "nodes": [
+        [
+          "Assign",
+          27,
+          27,
+          1,
+          94
+        ],
+        [
+          "Assign",
+          28,
+          33,
+          1,
+          2
+        ],
+        [
+          "Assign",
+          34,
+          36,
+          1,
+          2
+        ],
+        [
+          "Assign",
+          38,
+          38,
+          1,
+          44
+        ],
+        [
+          "Assign",
+          43,
+          43,
+          1,
+          83
+        ],
+        [
+          "Assign",
+          47,
+          47,
+          3,
+          32
+        ],
+        [
+          "Assign",
+          53,
+          53,
+          2,
+          43
+        ],
+        [
+          "Assign",
+          54,
+          54,
+          2,
+          39
+        ],
+        [
+          "Assign",
+          58,
+          60,
+          3,
+          4
+        ],
+        [
+          "Assign",
+          62,
+          62,
+          3,
+          100
+        ],
+        [
+          "Assign",
+          64,
+          64,
+          2,
+          36
+        ],
+        [
+          "Assign",
+          69,
+          69,
+          3,
+          71
+        ],
+        [
+          "AugAssign",
+          67,
+          67,
+          4,
+          48
+        ],
+        [
+          "Continue",
+          86,
+          86,
+          4,
+          12
+        ],
+        [
+          "Expr",
+          71,
+          81,
+          3,
+          4
+        ],
+        [
+          "Expr",
+          88,
+          108,
+          3,
+          4
+        ],
+        [
+          "For",
+          83,
+          108,
+          1,
+          4
+        ],
+        [
+          "For",
+          84,
+          108,
+          2,
+          4
+        ],
+        [
+          "FunctionDef",
+          26,
+          111,
+          0,
+          51
+        ],
+        [
+          "FunctionDef",
+          45,
+          81,
+          1,
+          4
+        ],
+        [
+          "If",
+          40,
+          41,
+          1,
+          8
+        ],
+        [
+          "If",
+          46,
+          47,
+          2,
+          32
+        ],
+        [
+          "If",
+          49,
+          51,
+          2,
+          9
+        ],
+        [
+          "If",
+          57,
+          62,
+          2,
+          100
+        ],
+        [
+          "If",
+          65,
+          81,
+          2,
+          4
+        ],
+        [
+          "If",
+          66,
+          67,
+          3,
+          48
+        ],
+        [
+          "If",
+          85,
+          86,
+          3,
+          12
+        ],
+        [
+          "If",
+          110,
+          111,
+          1,
+          51
+        ],
+        [
+          "Return",
+          41,
+          41,
+          2,
+          8
+        ],
+        [
+          "Return",
+          51,
+          51,
+          3,
+          9
+        ],
+        [
+          "Return",
+          111,
+          111,
+          2,
+          51
+        ]
+      ],
+      "source": "def _reorder_item():\n\tmaterial_requests = {\"Purchase\": {}, \"Transfer\": {}, \"Material Issue\": {}, \"Manufacture\": {}}\n\twarehouse_company = frappe._dict(\n\t\tfrappe.db.sql(\n\t\t\t\"\"\"select name, company from `tabWarehouse`\n\t\twhere disabled=0\"\"\"\n\t\t)\n\t)\n\tdefault_company = (\n\t\terpnext.get_default_company() or frappe.db.sql(\"\"\"select name from tabCompany limit 1\"\"\")[0][0]\n\t)\n\n\titems_to_consider = get_items_for_reorder()\n\n\tif not items_to_consider:\n\t\treturn\n\n\titem_warehouse_projected_qty = get_item_warehouse_projected_qty(items_to_consider)\n\n\tdef add_to_material_request(**kwargs):\n\t\tif isinstance(kwargs, dict):\n\t\t\tkwargs = frappe._dict(kwargs)\n\n\t\tif kwargs.warehouse not in warehouse_company:\n\t\t\t# a disabled warehouse\n\t\t\treturn\n\n\t\treorder_level = flt(kwargs.reorder_level)\n\t\treorder_qty = flt(kwargs.reorder_qty)\n\n\t\t# projected_qty will be 0 if Bin does not exist\n\t\tif kwargs.warehouse_group:\n\t\t\tprojected_qty = flt(\n\t\t\t\titem_warehouse_projected_qty.get(kwargs.item_code, {}).get(kwargs.warehouse_group)\n\t\t\t)\n\t\telse:\n\t\t\tprojected_qty = flt(item_warehouse_projected_qty.get(kwargs.item_code, {}).get(kwargs.warehouse))\n\n\t\toriginal_reorder_qty = reorder_qty\n\t\tif (reorder_level or reorder_qty) and projected_qty <= reorder_level:\n\t\t\tif projected_qty + reorder_qty <= reorder_level:\n\t\t\t\treorder_qty += reorder_level - projected_qty\n\n\t\t\tcompany = warehouse_company.get(kwargs.warehouse) or default_company\n\n\t\t\tmaterial_requests[kwargs.material_request_type].setdefault(company, []).append(\n\t\t\t\t{\n\t\t\t\t\t\"item_code\": kwargs.item_code,\n\t\t\t\t\t\"warehouse\": kwargs.warehouse,\n\t\t\t\t\t\"reorder_qty\": reorder_qty,\n\t\t\t\t\t\"item_details\": kwargs.item_details,\n\t\t\t\t\t\"projected_on_hand\": projected_qty,\n\t\t\t\t\t\"reorder_level\": reorder_level,\n\t\t\t\t\t\"original_reorder_qty\": original_reorder_qty,\n\t\t\t\t}\n\t\t\t)\n\n\tfor item_code, reorder_levels in items_to_consider.items():\n\t\tfor d in reorder_levels:\n\t\t\tif d.has_variants:\n\t\t\t\tcontinue\n\n\t\t\tadd_to_material_request(\n\t\t\t\titem_code=item_code,\n\t\t\t\twarehouse=d.warehouse,\n\t\t\t\treorder_level=d.warehouse_reorder_level,\n\t\t\t\treorder_qty=d.warehouse_reorder_qty,\n\t\t\t\tmaterial_request_type=d.material_request_type,\n\t\t\t\twarehouse_group=d.warehouse_group,\n\t\t\t\titem_details=frappe._dict(\n\t\t\t\t\t{\n\t\t\t\t\t\t\"item_code\": item_code,\n\t\t\t\t\t\t\"name\": item_code,\n\t\t\t\t\t\t\"item_name\": d.item_name,\n\t\t\t\t\t\t\"item_group\": d.item_group,\n\t\t\t\t\t\t\"brand\": d.brand,\n\t\t\t\t\t\t\"description\": d.description,\n\t\t\t\t\t\t\"stock_uom\": d.stock_uom,\n\t\t\t\t\t\t\"purchase_uom\": d.purchase_uom,\n\t\t\t\t\t\t\"lead_time_days\": d.lead_time_days,\n\t\t\t\t\t}\n\t\t\t\t),\n\t\t\t)\n\n\tif material_requests:\n\t\treturn create_material_request(material_requests)"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/reorder_item.py",
+      "sha256": "e14ae8b4f4cd8ae05ad22bc1a6cbb2cbc5d1da2e107bed67e4943ea126a61003",
+      "name": "get_items_for_reorder",
+      "start": 114,
+      "end": 157,
+      "program_units": 10,
+      "nodes": [
+        [
+          "Assign",
+          115,
+          115,
+          1,
+          50
+        ],
+        [
+          "Assign",
+          116,
+          116,
+          1,
+          39
+        ],
+        [
+          "Assign",
+          118,
+          148,
+          1,
+          2
+        ],
+        [
+          "Assign",
+          150,
+          150,
+          1,
+          31
+        ],
+        [
+          "Assign",
+          151,
+          151,
+          1,
+          36
+        ],
+        [
+          "Assign",
+          155,
+          155,
+          1,
+          69
+        ],
+        [
+          "Expr",
+          153,
+          153,
+          2,
+          51
+        ],
+        [
+          "For",
+          152,
+          153,
+          1,
+          51
+        ],
+        [
+          "FunctionDef",
+          114,
+          157,
+          0,
+          24
+        ],
+        [
+          "Return",
+          157,
+          157,
+          1,
+          24
+        ]
+      ],
+      "source": "def get_items_for_reorder() -> dict[str, list]:\n\treorder_table = frappe.qb.DocType(\"Item Reorder\")\n\titem_table = frappe.qb.DocType(\"Item\")\n\n\tquery = (\n\t\tfrappe.qb.from_(reorder_table)\n\t\t.inner_join(item_table)\n\t\t.on(reorder_table.parent == item_table.name)\n\t\t.select(\n\t\t\treorder_table.warehouse,\n\t\t\treorder_table.warehouse_group,\n\t\t\treorder_table.material_request_type,\n\t\t\treorder_table.warehouse_reorder_level,\n\t\t\treorder_table.warehouse_reorder_qty,\n\t\t\titem_table.name,\n\t\t\titem_table.stock_uom,\n\t\t\titem_table.purchase_uom,\n\t\t\titem_table.description,\n\t\t\titem_table.item_name,\n\t\t\titem_table.item_group,\n\t\t\titem_table.brand,\n\t\t\titem_table.variant_of,\n\t\t\titem_table.has_variants,\n\t\t\titem_table.lead_time_days,\n\t\t)\n\t\t.where(\n\t\t\t(item_table.disabled == 0)\n\t\t\t& (item_table.is_stock_item == 1)\n\t\t\t& (\n\t\t\t\t(item_table.end_of_life.isnull())\n\t\t\t\t| (item_table.end_of_life > nowdate())\n\t\t\t\t| (item_table.end_of_life == \"0000-00-00\")\n\t\t\t)\n\t\t)\n\t)\n\n\tdata = query.run(as_dict=True)\n\titemwise_reorder = frappe._dict({})\n\tfor d in data:\n\t\titemwise_reorder.setdefault(d.name, []).append(d)\n\n\titemwise_reorder = get_reorder_levels_for_variants(itemwise_reorder)\n\n\treturn itemwise_reorder"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/reorder_item.py",
+      "sha256": "e14ae8b4f4cd8ae05ad22bc1a6cbb2cbc5d1da2e107bed67e4943ea126a61003",
+      "name": "get_reorder_levels_for_variants",
+      "start": 160,
+      "end": 186,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Assign",
+          161,
+          161,
+          1,
+          39
+        ],
+        [
+          "Assign",
+          163,
+          179,
+          1,
+          2
+        ],
+        [
+          "Assign",
+          181,
+          181,
+          1,
+          40
+        ],
+        [
+          "Expr",
+          184,
+          184,
+          3,
+          93
+        ],
+        [
+          "For",
+          182,
+          184,
+          1,
+          93
+        ],
+        [
+          "FunctionDef",
+          160,
+          186,
+          0,
+          24
+        ],
+        [
+          "If",
+          183,
+          184,
+          2,
+          93
+        ],
+        [
+          "Return",
+          186,
+          186,
+          1,
+          24
+        ]
+      ],
+      "source": "def get_reorder_levels_for_variants(itemwise_reorder):\n\titem_table = frappe.qb.DocType(\"Item\")\n\n\tquery = (\n\t\tfrappe.qb.from_(item_table)\n\t\t.select(\n\t\t\titem_table.name,\n\t\t\titem_table.variant_of,\n\t\t)\n\t\t.where(\n\t\t\t(item_table.disabled == 0)\n\t\t\t& (item_table.is_stock_item == 1)\n\t\t\t& (\n\t\t\t\t(item_table.end_of_life.isnull())\n\t\t\t\t| (item_table.end_of_life > nowdate())\n\t\t\t\t| (item_table.end_of_life == \"0000-00-00\")\n\t\t\t)\n\t\t\t& (item_table.variant_of.notnull())\n\t\t)\n\t)\n\n\tvariants_item = query.run(as_dict=True)\n\tfor row in variants_item:\n\t\tif not itemwise_reorder.get(row.name) and itemwise_reorder.get(row.variant_of):\n\t\t\titemwise_reorder.setdefault(row.name, []).extend(itemwise_reorder.get(row.variant_of, []))\n\n\treturn itemwise_reorder"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/stock/reorder_item.py",
+      "sha256": "e14ae8b4f4cd8ae05ad22bc1a6cbb2cbc5d1da2e107bed67e4943ea126a61003",
+      "name": "get_item_warehouse_projected_qty",
+      "start": 189,
+      "end": 220,
+      "program_units": 16,
+      "nodes": [
+        [
+          "Assign",
+          190,
+          190,
+          1,
+          34
+        ],
+        [
+          "Assign",
+          191,
+          191,
+          1,
+          51
+        ],
+        [
+          "Assign",
+          193,
+          195,
+          1,
+          2
+        ],
+        [
+          "Assign",
+          209,
+          209,
+          3,
+          74
+        ],
+        [
+          "Assign",
+          211,
+          211,
+          2,
+          56
+        ],
+        [
+          "Assign",
+          215,
+          215,
+          4,
+          97
+        ],
+        [
+          "Assign",
+          218,
+          218,
+          3,
+          64
+        ],
+        [
+          "AugAssign",
+          217,
+          217,
+          4,
+          83
+        ],
+        [
+          "Expr",
+          206,
+          206,
+          3,
+          57
+        ],
+        [
+          "For",
+          197,
+          218,
+          1,
+          64
+        ],
+        [
+          "FunctionDef",
+          189,
+          220,
+          0,
+          36
+        ],
+        [
+          "If",
+          205,
+          206,
+          2,
+          57
+        ],
+        [
+          "If",
+          208,
+          209,
+          2,
+          74
+        ],
+        [
+          "If",
+          214,
+          217,
+          3,
+          83
+        ],
+        [
+          "Return",
+          220,
+          220,
+          1,
+          36
+        ],
+        [
+          "While",
+          213,
+          218,
+          2,
+          64
+        ]
+      ],
+      "source": "def get_item_warehouse_projected_qty(items_to_consider):\n\titem_warehouse_projected_qty = {}\n\titems_to_consider = list(items_to_consider.keys())\n\n\twarehouse_parent_map = frappe._dict(\n\t\tfrappe.get_all(\"Warehouse\", fields=[\"name\", \"parent_warehouse\"], as_list=True)\n\t)\n\n\tfor item_code, warehouse, projected_qty in frappe.db.sql(\n\t\t\"\"\"select item_code, warehouse, projected_qty\n\t\tfrom tabBin where item_code in ({})\n\t\t\tand (warehouse != '' and warehouse is not null)\"\"\".format(\n\t\t\t\", \".join([\"%s\"] * len(items_to_consider))\n\t\t),\n\t\titems_to_consider,\n\t):\n\t\tif item_code not in item_warehouse_projected_qty:\n\t\t\titem_warehouse_projected_qty.setdefault(item_code, {})\n\n\t\tif warehouse not in item_warehouse_projected_qty.get(item_code):\n\t\t\titem_warehouse_projected_qty[item_code][warehouse] = flt(projected_qty)\n\n\t\tparent_warehouse = warehouse_parent_map.get(warehouse)\n\n\t\twhile parent_warehouse:\n\t\t\tif not item_warehouse_projected_qty.get(item_code, {}).get(parent_warehouse):\n\t\t\t\titem_warehouse_projected_qty.setdefault(item_code, {})[parent_warehouse] = flt(projected_qty)\n\t\t\telse:\n\t\t\t\titem_warehouse_projected_qty[item_code][parent_warehouse] += flt(projected_qty)\n\t\t\tparent_warehouse = warehouse_parent_map.get(parent_warehouse)\n\n\treturn item_warehouse_projected_qty"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockRulesServiceImpl.java",
+      "sha256": "7ac27992a23eca49251f460baffe7a9600b461cb66694a1c8d8c02c58c967ed8",
+      "name": "useMinStockRules",
+      "start": 98,
+      "end": 120,
+      "program_units": 12,
+      "nodes": [
+        [
+          "if_statement",
+          110,
+          118,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          111,
+          113,
+          6,
+          7
+        ],
+        [
+          "if_statement",
+          114,
+          118,
+          11,
+          5
+        ],
+        [
+          "if_statement",
+          115,
+          117,
+          6,
+          7
+        ],
+        [
+          "local_variable_declaration",
+          102,
+          104,
+          4,
+          68
+        ],
+        [
+          "local_variable_declaration",
+          105,
+          105,
+          4,
+          46
+        ],
+        [
+          "local_variable_declaration",
+          106,
+          106,
+          4,
+          46
+        ],
+        [
+          "local_variable_declaration",
+          108,
+          108,
+          4,
+          47
+        ],
+        [
+          "method_declaration",
+          98,
+          120,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          112,
+          112,
+          8,
+          20
+        ],
+        [
+          "return_statement",
+          116,
+          116,
+          8,
+          20
+        ],
+        [
+          "return_statement",
+          119,
+          119,
+          4,
+          17
+        ]
+      ],
+      "source": "  @Override\n  public boolean useMinStockRules(\n      StockLocationLine stockLocationLine, StockRules stockRules, int type) {\n\n    Pair<BigDecimal, BigDecimal> qtyPair =\n        getCurrentQtySumAndFutureQtySumOfProductInStockLocationAndItsContainedStockLocations(\n            stockRules.getStockLocation(), stockRules.getProduct());\n    BigDecimal currentQty = qtyPair.getLeft();\n    BigDecimal futureQty = qtyPair.getRight();\n\n    BigDecimal minQty = stockRules.getMinQty();\n\n    if (type == StockRulesRepository.TYPE_CURRENT) {\n      if (currentQty.compareTo(minQty) < 0) {\n        return true;\n      }\n    } else if (type == StockRulesRepository.TYPE_FUTURE) {\n      if (futureQty.compareTo(minQty) < 0) {\n        return true;\n      }\n    }\n    return false;\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockRulesServiceImpl.java",
+      "sha256": "7ac27992a23eca49251f460baffe7a9600b461cb66694a1c8d8c02c58c967ed8",
+      "name": "getStockRules",
+      "start": 122,
+      "end": 169,
+      "program_units": 16,
+      "nodes": [
+        [
+          "break_statement",
+          145,
+          145,
+          10,
+          16
+        ],
+        [
+          "break_statement",
+          164,
+          164,
+          10,
+          16
+        ],
+        [
+          "enhanced_for_statement",
+          135,
+          147,
+          6,
+          7
+        ],
+        [
+          "enhanced_for_statement",
+          153,
+          166,
+          6,
+          7
+        ],
+        [
+          "expression_statement",
+          136,
+          143,
+          8,
+          28
+        ],
+        [
+          "expression_statement",
+          154,
+          162,
+          8,
+          28
+        ],
+        [
+          "if_statement",
+          130,
+          167,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          144,
+          146,
+          8,
+          9
+        ],
+        [
+          "if_statement",
+          148,
+          167,
+          11,
+          5
+        ],
+        [
+          "if_statement",
+          163,
+          165,
+          8,
+          9
+        ],
+        [
+          "local_variable_declaration",
+          125,
+          127,
+          4,
+          27
+        ],
+        [
+          "local_variable_declaration",
+          129,
+          129,
+          4,
+          33
+        ],
+        [
+          "local_variable_declaration",
+          131,
+          132,
+          6,
+          115
+        ],
+        [
+          "local_variable_declaration",
+          149,
+          150,
+          6,
+          143
+        ],
+        [
+          "method_declaration",
+          122,
+          169,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          168,
+          168,
+          4,
+          22
+        ]
+      ],
+      "source": "  @Override\n  public StockRules getStockRules(\n      Product product, StockLocation stockLocation, int type, int useCase) {\n    Set<Long> stockLocationIds =\n        stockLocationService.getLocationAndAllParentLocationsIdsOrderedFromTheClosestToTheFurthest(\n            stockLocation);\n\n    StockRules stockRules = null;\n    if (useCase == StockRulesRepository.USE_CASE_USED_FOR_MRP) {\n      String filter =\n          \"self.product = :product AND self.stockLocation.id = :stockLocationId AND self.useCaseSelect = :useCase\";\n      /* We use this for statement and not a query with `in List` in it so that we can get the\n      first stockRule that is the closest to the stockLocation given in the parameter.*/\n      for (Long stockLocationId : stockLocationIds) {\n        stockRules =\n            stockRuleRepo\n                .all()\n                .filter(filter)\n                .bind(\"product\", product)\n                .bind(\"stockLocationId\", stockLocationId)\n                .bind(\"useCase\", useCase)\n                .fetchOne();\n        if (stockRules != null) {\n          break;\n        }\n      }\n    } else if (useCase == StockRulesRepository.USE_CASE_STOCK_CONTROL) {\n      String filter =\n          \"self.product = :product AND self.stockLocation.id = :stockLocationId AND self.useCaseSelect = :useCase AND self.typeSelect = :type\";\n      /* We use this for statement and not a query with `in List` in it so that we can get the\n      first stockRule that is the closest to the stockLocation given in the parameter.*/\n      for (Long stockLocationId : stockLocationIds) {\n        stockRules =\n            stockRuleRepo\n                .all()\n                .filter(filter)\n                .bind(\"product\", product)\n                .bind(\"stockLocationId\", stockLocationId)\n                .bind(\"useCase\", useCase)\n                .bind(\"type\", type)\n                .fetchOne();\n        if (stockRules != null) {\n          break;\n        }\n      }\n    }\n    return stockRules;\n  }"
+    }
+  ],
+  "source_files": [
+    {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_rule.py",
+      "root_path": "tmp/odoo20-audit/addons/stock/models/stock_rule.py",
+      "sha256": "82f3726ccff5c1c9b020ae276fd6044c62b02b9ef09340d4f7b461a1bf011bc5",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/stock/models/stock_rule.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 399,
+        "declarative_units": 0,
+        "physical_lines": 738,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-16-preuves.json",
+      "prior_observed": "Recherche de règles par routes, entrepôts et ordre de priorité.",
+      "prior_limit": "Analogie de sélection contextualisée. Version immuable, activation atomique et explication FLOW restent à construire."
+    },
+    {
+      "repo": "tryton",
+      "path": "modules/stock_supply/order_point.py",
+      "root_path": "tmp/tryton-code-audit-2026-10-28/modules/stock_supply/order_point.py",
+      "sha256": "e1f458cafb1f92a1d2e8b7ef58f8782d19212f0ed98286549f7eb49445c1cce7",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock_supply/order_point.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 82,
+        "declarative_units": 0,
+        "physical_lines": 234,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-16-preuves.json",
+      "prior_observed": "Politique par produit et localisation, minimum/cible soumis à contraintes.",
+      "prior_limit": "Analogie de schéma typé et cohérence numérique ; pas preuve d'un moteur universel de politiques de satisfaction."
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/StockRulesSupplychainServiceImpl.java",
+      "root_path": "tmp/oss-audit-axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/StockRulesSupplychainServiceImpl.java",
+      "sha256": "b2edce13b5844ca6a5704f33544c2d8b679fde8fef1f5e795124f3c652a33866",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/StockRulesSupplychainServiceImpl.java",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 109,
+        "declarative_units": 0,
+        "physical_lines": 236,
+        "details": {
+          "convention": "Arbre syntaxique : instructions et déclarations ; JSX compté séparément"
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-16-preuves.json",
+      "prior_observed": "Règles de stock distinguant alerte et demande d'achat selon configuration.",
+      "prior_limit": "Ne pas confondre politique gouvernée et action consommatrice ; activation versionnée à réaliser pour FLOW."
+    },
+    {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "root_path": "tmp/master-data-native-23/erpnext/erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "sha256": "69f808c11aae247388556cecb4604c601c7413c3c050bd16a912ee7175a694fe",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/doctype/putaway_rule/putaway_rule.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 188,
+        "declarative_units": 0,
+        "physical_lines": 403,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 20,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    },
+    {
+      "repo": "erpnext",
+      "path": "erpnext/stock/reorder_item.py",
+      "root_path": "tmp/master-data-native-23/erpnext/erpnext/stock/reorder_item.py",
+      "sha256": "e14ae8b4f4cd8ae05ad22bc1a6cbb2cbc5d1da2e107bed67e4943ea126a61003",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/reorder_item.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 161,
+        "declarative_units": 0,
+        "physical_lines": 417,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockRulesServiceImpl.java",
+      "root_path": "tmp/oss-audit-axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockRulesServiceImpl.java",
+      "sha256": "7ac27992a23eca49251f460baffe7a9600b461cb66694a1c8d8c02c58c967ed8",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "pinned_blob_verified": true,
+      "path_resolved_by_unique_filename": false,
+      "whole_file": {
+        "program_units": 69,
+        "declarative_units": 0,
+        "physical_lines": 208,
+        "details": {
+          "convention": "Arbre syntaxique : instructions et déclarations ; JSX compté séparément"
+        }
+      }
+    }
+  ],
+  "attribution": 0.65,
+  "attribution_basis": "Part d’analogie retenue après exclusion supposée des responsabilités natives hors périmètre ; pas proportion observée. Les sources portent des règles de stock et des seuils ; elles ne montrent pas un référentiel immuable de politiques de satisfaction et son activation.",
+  "new_complement_fraction": 0.5,
+  "new_complement_basis": "Séparer l’édition/activation/explication de la politique de son exécution par les calculateurs ; utiliser le vrai service de règles Java plutôt que rechercher seulement les noms contenant rule.",
+  "schemas": [
+    {
+      "name": "FulfilmentPolicy",
+      "fields": [
+        "scope",
+        "version",
+        "effectiveFrom",
+        "effectiveUntil",
+        "criteria",
+        "authority",
+        "status"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    },
+    {
+      "name": "PolicyActivation",
+      "fields": [
+        "policy",
+        "version",
+        "checks",
+        "decision",
+        "at",
+        "reason"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    },
+    {
+      "name": "PolicyExplanation",
+      "fields": [
+        "policy",
+        "context",
+        "criteriaApplied",
+        "decision",
+        "limits"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    }
+  ],
+  "template_source": "audits/2026-10-30-propriete-stock-calcul-02/inputs.json#schema_templates",
+  "scaffold_source": "audits/2026-10-30-propriete-stock-calcul-02/inputs.json#new_module_scaffolding",
+  "reuse": "Services génériques Master Data, Stock et Propriété du stock déjà financés ; autres mécanismes communs de la campagne à réconcilier. Le code natif sert de règle de taille, ce n’est pas une facture historique.",
+  "no_extra_AI": true,
+  "no_generic_rebuild": true,
+  "logical_code_not_calibrated_to_physical_SLOC": true
+}

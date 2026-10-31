@@ -11,7 +11,7 @@ DOSSIER_SOURCE = 'source/capacite-realisation.yaml'
 ERROR = 'ERR_DELIVERY_READINESS'
 ATLAS = 'https://laurent-sintes.github.io/Urbanisation-SCM/'
 ROUTES = {'#vision', '#modele', '#marche', '#synvance', '#conditions-realisation',
-          '#capacite-realisation', '#perimetre-retenu'}
+          '#capacite-realisation', '#cartographie', '#modele?section=scope'}
 
 
 def obj(properties):
@@ -32,24 +32,26 @@ BLOCK = dict(oneOf=[obj(dict(kind=dict(enum=['paragraphs', 'bullets']), items=TE
     obj(dict(kind=dict(const='table'), caption=TEXT, columns=TEXTS, rows=array(TEXTS))),
     obj(dict(kind=dict(const='links'), items=array(LINK)))])
 METHOD_SCHEMA = obj(dict(version=dict(const=1), id=dict(const='conditions-realisation'),
-    principle=TITLE_TEXT, notice=TITLE_TEXT, navigation_label=TEXT,
+    principle=TITLE_TEXT, notice=TITLE_TEXT, navigation_label=TEXT, result_label=TEXT,
     criteria=array(obj(dict(id=ID, title=TEXT, lead=TEXT, expected=TEXT, blocks=array(BLOCK)))), next=LINK))
 STATES = ('a_constituer', 'a_confirmer', 'a_demontrer')
 DOSSIER_SCHEMA = obj(dict(version=dict(const=1), id=dict(const='capacite-realisation'), date=TEXT,
-    principle=TITLE_TEXT, notice=TITLE_TEXT, navigation_label=TEXT,
+    principle=TITLE_TEXT, notice=TITLE_TEXT, navigation_label=TEXT, method_link=LINK,
     context=obj(dict(source=TEXT, status=dict(const='rapporte'), text=TEXT)),
     labels=obj(dict(states=obj({key: TEXT for key in STATES}),
         proof_states=obj({key: TEXT for key in ('disponible', 'attendue')}),
         role_columns=dict(type='array', items=TEXT, minItems=3, maxItems=3),
+        proof_columns=dict(type='array', items=TEXT, minItems=3, maxItems=3),
         partner_columns=dict(type='array', items=TEXT, minItems=2, maxItems=2),
         **{key: TEXT for key in ('proof_label', 'validation_label', 'proceed_label', 'reconsider_label',
-             'risk_label', 'action_label', 'available_label', 'gate_label', 'capability_label')})),
+             'risk_label', 'action_label', 'available_label', 'gate_label', 'capability_label',
+             'review_date', 'available_summary', 'expected_summary', 'validation_suffix', 'proof_access', 'actor_label', 'partner_requirement')})),
     sections=obj({key: obj(dict(title=TEXT, lead=TEXT)) for key in ('organisation', 'points-chauds', 'partenaire', 'jalons')}),
     scope=obj(dict(id=dict(const='perimetre'), title=TEXT, introduction=TEXT, note=TEXT, link=LINK,
         labels=obj({key: TEXT for key in ('search', 'results', 'boundary', 'native_reference', 'back_label', 'capture_date', 'version',
             'navigation_title', 'hierarchy_summary', 'open_capabilities', 'back_to_navigation', 'capability_count', 'capability_count_one',
             'results_one', 'no_results', 'subdomain', 'business_area')}))),
-    proofs=array(obj(dict(id=ID, title=TEXT, status=dict(enum=['disponible', 'attendue']),
+    proofs=array(obj(dict(id=ID, title=TEXT, short_title=TEXT, status=dict(enum=['disponible', 'attendue']),
         kind=dict(enum=['document_entree', 'reference_partenaire', 'preuve_realisation']),
         source_ref=dict(type=['string', 'null']), href=dict(type=['string', 'null']), detail=TEXT))),
     roles=array(obj(dict(id=ID, title=TEXT, actor=TEXT, validation_owner=TEXT,
@@ -110,6 +112,7 @@ def compile_delivery(method, dossier, complexity, snapshot, decision, glossary, 
 
     link(method['next']['href'])
     link(dossier['next']['href'])
+    link(dossier['method_link']['href'])
     for criterion in criteria.values():
         for block in criterion['blocks']:
             if block['kind'] == 'links':
@@ -165,54 +168,13 @@ def compile_delivery(method, dossier, complexity, snapshot, decision, glossary, 
 
     method_page = page(method)
     method_page.update(examples=[], sections=[dict(id=row['id'], title=row['title'], lead=row['lead'],
-        blocks=[*row['blocks'], dict(kind='callout', title=dossier['labels']['proof_label'], text=row['expected'])])
+        blocks=[*row['blocks'], dict(kind='callout', title=method['result_label'], text=row['expected'])])
         for row in method['criteria']])
     result = page(dossier)
-    result.update(examples=[], sections=[])
-    labels = dossier['labels']
-
-    def proof_text(key):
-        proof = proofs[key]
-        return f"{proof['title']} — {labels['proof_states'][proof['status']]}"
-
-    def proof_list(keys):
-        return ' / '.join(proof_text(key) for key in keys)
-
-    def line(label, text):
-        return f'**{label} :** {text}'
-
-    def section(key, blocks):
-        result['sections'].append(dict(id=key, **dossier['sections'][key], blocks=blocks))
-
-    section('organisation', [dict(kind='paragraphs', items=[dossier['context']['text'], dossier['context']['source']]),
-        dict(kind='table', caption=dossier['sections']['organisation']['title'], columns=labels['role_columns'], rows=[
-            [role['title'], role['actor'] + ' ' + line(labels['validation_label'], role['validation_owner']),
-             '**' + labels['states'][role['status']] + '**. ' + proof_list(role['proof_refs'])]
-            for role in dossier['roles']])])
-    hotspot_blocks = []
-    for hotspot in dossier['hotspots']:
-        actor = roles[hotspot['role_ref']]
-        hotspot_blocks.extend([
-            dict(kind='callout', title=hotspot['title'], text=line(labels['risk_label'], hotspot['risk'])),
-            dict(kind='paragraphs', items=[line(labels['action_label'], hotspot['action']),
-                line(labels['available_label'], proof_list(hotspot['available_refs'])),
-                line(labels['proof_label'], proof_list(hotspot['expected_refs'])),
-                line(labels['gate_label'], gates[hotspot['gate_ref']]['title'] + '. ' + actor['actor'])]),
-            dict(kind='links', items=[dict(href=ATLAS + '#/sheet?' + urlencode({'node': key}),
-                label=labels['capability_label'] + ' : ' + capabilities[key]['capacite']['nom']) for key in hotspot['capability_refs']])])
-    hotspot_blocks.append(dict(kind='links', items=[dict(href='#perimetre-retenu', label=dossier['scope']['title']),
-        dict(href='#synvance', label=proofs['synvance']['title'])]))
-    section('points-chauds', hotspot_blocks)
-    section('partenaire', [dict(kind='table', caption=dossier['sections']['partenaire']['title'], columns=labels['partner_columns'],
-        rows=[[question['title'], '**' + labels['proof_states'][proofs[question['proof_ref']]['status']] + '**. ' +
-               proofs[question['proof_ref']]['detail']] for question in dossier['partner']])])
-    gate_blocks = []
-    for gate in dossier['gates']:
-        gate_blocks.extend([dict(kind='callout', title=gate['title'], text='**' + labels['states'][gate['status']] + '**. ' + gate['expected']),
-            dict(kind='bullets', items=[line(labels['proof_label'], proof_list(gate['proof_refs'])),
-                 line(labels['validation_label'], gate['validation_owner']), line(labels['proceed_label'], gate['proceed']),
-                 line(labels['reconsider_label'], gate['reconsider'])])])
-    section('jalons', gate_blocks)
+    result.update(examples=[], sections=[dict(id=key, **value, blocks=[]) for key, value in dossier['sections'].items()])
+    # One documentary register; relations keep IDs rather than repeating proof text.
+    for key in ('date', 'context', 'labels', 'method_link', 'roles', 'hotspots', 'partner', 'gates', 'proofs'):
+        result[key] = deepcopy(dossier[key])
     scope = deepcopy(dossier['scope'])
     scope['source'] = dict(path=complexity['source'], date=snapshot['date_capture'],
         version=snapshot['provenance']['version'], revision=snapshot['provenance']['sha256'])

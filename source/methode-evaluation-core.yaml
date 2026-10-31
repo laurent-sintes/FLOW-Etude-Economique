@@ -1,90 +1,55 @@
 schema_version: 1
 id: core-evaluation-opportunity
 principle:
-  title: Estimer un investissement à partir de logiciels comparables
-  text: La cartographie délimite le périmètre de la {{notion.core_system}}. L’estimation rapproche ce besoin de
-    fonctions et de mécanismes observables dans les produits du marché, réutilisation comprise. **[COCOMO II](#glossaire?term=cocomo_ii)
-    et COSMIC associé à ISBSG constituent deux voies de calcul à confronter.** Il s’agit d’une étude d’opportunité,
-    sans engagement de réalisation au forfait.
+  title: Des preuves à une estimation retenue
+  text: '**Pour {{notion.core_system}} : périmètre → mesures et hypothèses → taille → effort → comparaison → décision.**
+    COCOMO II et COSMIC × ISBSG constituent deux voies distinctes. Le calcul prépare une décision d’opportunité,
+    avec ses limites et ses preuves.'
 notice:
   status_ref: core
 tooling:
   label: Automatisation
-  title: Une analyse traçable, assistée par un skill
+  title: Un calcul reproductible depuis ses preuves
   skill: flow-evaluer-core-system
-  text: Le skill prépare les mesures, références, hypothèses et calculs reproductibles. L’assistance IA ne constitue
-    ni une mesure de charge historique ni une revue humaine. Les simulations consomment uniquement la base retenue
-    dans le modèle.
+  text: Le skill prépare mesures et hypothèses. Le moteur reconstruit les tailles, vérifie les liens et reproduit
+    les décisions. L’assistance IA ne constitue ni une charge historique observée ni une revue humaine.
 navigation_label: Les cinq étapes de l’estimation
 sections:
 - id: delimiter-perimetre
-  title: Définir le périmètre et le niveau d’évaluation
-  lead: '**La cartographie décrit le besoin ; elle ne calcule pas la charge.** Le bon niveau d’évaluation dépend
-    de la qualité des références disponibles.'
+  title: Définir l’unité et les activités couvertes
+  lead: '**La cartographie délimite le besoin ; elle ne calcule pas les JH.**'
   blocks:
   - kind: bullets
     items:
-    - Conserver la hiérarchie Domaine / Sous-domaine / Business Area / Business Capacity et les identifiants natifs.
-      Choisir une unité métier assez large pour observer un ensemble cohérent de mécanismes.
-    - Définir fonctions communes, exigences de service, exclusions et compléments FLOW. Les règles propres au Groupe
-      relèvent essentiellement de l’intégration ; seuls les mécanismes génériques nécessaires appartiennent au produit.
-    - La carte d’entrée décrit le périmètre. La qualification économique des difficultés et des références appartient
-      au dossier d’estimation. Aucun niveau ordinal de complexité ne se convertit en JH.
-  - kind: paragraphs
-    items:
-    - '**Résultat : un périmètre comparable, sans exiger une spécification exhaustive des cas d’usage.** L’essai
-      compare plusieurs niveaux de regroupement et documente ce qui devient plus ou moins certain.'
-  - kind: paragraphs
-    items:
-    - Chaque calcul est lié à une unité métier, une stack, une version de la capture native et un périmètre d’activités.
-      Une modification de ces éléments exige une nouvelle qualification du calcul ; elle ne réaffecte pas automatiquement
-      une estimation existante.
+    - 'Conserver les noms, identifiants et frontières de la capture native. Choisir une unité cohérente : capacité,
+      Business Area ou ensemble métier justifiable.'
+    - Déclarer fonctions communes, compléments FLOW, exclusions et garanties attendues. Les adaptations propres
+      au Groupe relèvent de l’intégration.
+    - Lier le calcul à son unité, sa stack, sa version de périmètre et ses activités. Une nouvelle frontière exige
+      de requalifier le calcul.
+    - Pour des composants fortement liés, sommer leurs tailles et appliquer COCOMO une seule fois à l’unité cohérente.
+      Une allocation entre familles ne crée pas des estimations indépendantes par capacité.
+  - kind: callout
+    title: Compléter le périmètre du produit professionnel
+    text: Le référentiel des capacités est un entrant métier immuable. Il ne décrit pas tous les outils d’administration,
+      de robustesse et de sécurité. Inventorier séparément ces fonctions dans fonctions-produit-core.yaml, les rapprocher
+      des quatre suites et du financement existant. Séparer runtime et outils métier des compléments IT ; ne pas
+      convertir la répartition des rôles en répartition fonctionnelle. Une fonction non chiffrée reste inconnue,
+      sans budget nul présumé.
 - id: observer-fonctions
-  title: Construire quatre références natives, réutilisation comprise
-  lead: '**Pour Master Data : ERPNext avec Frappe, Odoo, Tryton, Axelor avec Open Platform.** Chaque référence conserve
-    son propre résultat.'
+  title: Préparer les tailles et la réutilisation
+  lead: '**Quatre références natives éclairent les travaux : ERPNext / Frappe, Odoo, Tryton et Axelor / Open Platform.**'
   blocks:
-  - kind: bullets
-    items:
-    - Figer versions ou commits, fichiers, empreintes, fonctions incluses et exclusions. Inspecter le code métier
-      avec les mécanismes génériques effectivement utilisés.
-    - Mesurer séparément le code à réaliser, à adapter et les services utilisés en l’état. Ne pas imputer la reconstruction
-      de tout le framework à une famille métier.
-    - Un mécanisme partagé a un propriétaire unique. Ses consommateurs financent seulement leurs raccordements et
-      adaptations. La taille de code mesurée n’est pas une charge historique observée.
-    - Comparer les services des frameworks à ceux de Spring avant toute transposition. Une équivalence documentée
-      évite une surcharge technique ; aucune prime de langage n’est appliquée automatiquement.
-  - kind: paragraphs
-    items:
-    - '**Résultat : quatre assiettes natives traçables sur un périmètre commun.** Une fonction non observée reste
-      inconnue ; son absence ne peut pas être déduite d’une exclusion du relevé.'
   - kind: reference_cards
     cards:
     - title: ERPNext / Frappe
       subtitle: Un ERP métier porté par un framework de documents
       fields:
-      - label: Technologies
+      - label: Socle observé
         items:
         - Python et JavaScript, métadonnées DocType en JSON, base MariaDB et services Redis/Valkey.
-        - Frappe fournit le socle applicatif. ERPNext porte les modules métier ; Insights est une application analytique
-          distincte.
-      - label: Périmètre
-        items:
-        - Référentiels, achats, ventes, stocks, fabrication et support. La sélection FLOW inclut aussi les mécanismes
-          transverses utilisés.
-      - label: Points forts pour la comparaison
-        items:
-        - Modèle de documents partagé, permissions, formulaires, API, événements et tâches de fond rendent le socle
-          réutilisable observable.
-        - Le découpage framework / ERP / analytique permet de distinguer mécanismes communs et fonctions métier.
-      - label: Clients et usages publiés
-        items:
-        - '**Chewy** : portail personnalisé de contrats de remises fournisseurs, approbations, révisions et audit.'
-        - '**Vodafone UK** : webshop et gestion des commandes SIM, validations et suivi logistique, selon l’intégrateur
-          Korecent.'
-      note: '**Portée des références :** éditions et versions déployées inconnues. Ces cas décrivent des applications
-        ciblées, sans démontrer le remplacement du cœur de {{notion.supply_chain_management}} de ces groupes ni
-        la parité FLOW.'
+      note: Référence de composants et de fonctions à rapprocher du périmètre FLOW. Les cas clients cités ne démontrent
+        pas sa couverture complète.
       sources:
       - label: Architecture Frappe
         href: https://docs.frappe.io/framework/user/en/basics/architecture
@@ -95,28 +60,11 @@ sections:
     - title: Odoo Community
       subtitle: Un ERP modulaire avec un socle et une interface intégrés
       fields:
-      - label: Technologies
+      - label: Socle observé
         items:
         - Python et PostgreSQL, modèles et ORM côté serveur, vues XML, interface JavaScript/Owl.
-      - label: Périmètre
-        items:
-        - Produits, achats, ventes, stocks, fabrication, réparation et automatisations dans les modules publics
-          retenus.
-        - Les modules Enterprise et les extensions OCA sont qualifiés séparément du code Community.
-      - label: Points forts pour la comparaison
-        items:
-        - Chaînes transactionnelles entre commandes, mouvements de stock et fabrication, sur un modèle de données
-          commun.
-        - Extensions par modules et héritage des modèles et vues, utiles pour examiner la réutilisation et ses dépendances.
-      - label: Clients et usages publiés
-        items:
-        - '**Aurora Multimarket** : Odoo Community pour la planification du personnel et les absences en magasins,
-          selon UBM Soft.'
-        - '**Toyota Material Handling France** : CRM, commandes, achats, fabrication, stocks et comptabilité dans
-          un cas publié par Odoo en 2017 ; édition non précisée.'
-      note: '**Portée des références :** Aurora atteste Community sur la gestion du personnel, hors du cœur opérationnel
-        FLOW. Le cas Toyota ne prouve ni Community ni l’usage actuel. Aucun des deux ne valide directement la sélection
-        de code mesurée.'
+      note: Référence de composants et de fonctions à rapprocher du périmètre FLOW. Les cas clients cités ne démontrent
+        pas sa couverture complète.
       sources:
       - label: Code public et composition Odoo Community
         href: https://github.com/odoo/odoo
@@ -127,26 +75,11 @@ sections:
     - title: Tryton
       subtitle: Un socle métier modulaire et un code ouvert inspectable
       fields:
-      - label: Technologies
+      - label: Socle observé
         items:
         - Serveur Python avec ORM, base PostgreSQL, client web Sao en JavaScript et vues XML.
-      - label: Périmètre
-        items:
-        - Tiers, produits, achats, ventes, stocks, approvisionnement, production, lots et qualité, selon les modules
-          sélectionnés.
-      - label: Points forts pour la comparaison
-        items:
-        - Modules métier et dépendances explicites, permettant d’isoler les mécanismes et leurs extensions.
-        - Mouvements de stock et opérations liées aux achats et ventes inspectables dans un même dépôt.
-      - label: Clients et usages publiés
-        items:
-        - '**Mifarma** : intégration du webshop, approvisionnement, préparation en entrepôt et échanges avec les
-          logisticiens.'
-        - '**Coppernic** : achats, ventes, stocks et production avec sous-traitance ; des fonctions complémentaires
-          ont été développées pour les besoins spécifiques.'
-      note: '**Portée des références :** cas publiés par le projet Tryton, sans version ni date de déploiement précisée.
-        Les adaptations décrites ne sont pas toutes du standard. Les dépendances Finance de certains modules restent
-        à traiter dans une reconstruction limitée à FLOW.'
+      note: Référence de composants et de fonctions à rapprocher du périmètre FLOW. Les cas clients cités ne démontrent
+        pas sa couverture complète.
       sources:
       - label: Documentation des modules Tryton
         href: https://docs.tryton.org/
@@ -157,26 +90,12 @@ sections:
     - title: Axelor / Open Platform
       subtitle: Un socle Java et des applications métier configurables
       fields:
-      - label: Technologies
+      - label: Socle observé
         items:
         - Java, persistance Hibernate, modèles et vues XML, scripts Groovy et API REST ; client React/TypeScript
           pour la version de plateforme étudiée.
-        - Open Platform fournit le framework ; Open Suite fournit les applications métier.
-      - label: Périmètre
-        items:
-        - Référentiels, achats, ventes, stocks, production, interventions et helpdesk dans les modules retenus.
-      - label: Points forts pour la comparaison
-        items:
-        - Proximité avec l’écosystème Java envisagé pour FLOW et mécanismes génériques explicites dans la plateforme.
-        - Articulation entre code et déclarations XML, utile pour examiner ce qu’un framework évite de développer.
-      - label: Clients et usages publiés
-        items:
-        - '**Octopia, filiale de Cdiscount** : service de facturation automatisée des vendeurs tiers, raccordé aux
-          API de la marketplace.'
-        - '**Enercoop** : solution de gestion interne adaptée à ses besoins, selon les cas clients Axelor.'
-      note: '**Portée des références :** versions et éditions non précisées. Le cas Octopia porte sur la facturation,
-        hors reconstruction FLOW. Ces références ne démontrent pas un cœur de {{notion.supply_chain_management}}
-        équivalent à FLOW ; les composants commerciaux restent à distinguer du code ouvert étudié.'
+      note: Référence de composants et de fonctions à rapprocher du périmètre FLOW. Les cas clients cités ne démontrent
+        pas sa couverture complète.
       sources:
       - label: Code et architecture Axelor Open Platform
         href: https://github.com/axelor/axelor-open-platform
@@ -184,72 +103,61 @@ sections:
         href: https://axelor.com/fr/cas-client-cdiscount/
       - label: Cas clients Axelor, dont Enercoop
         href: https://axelor.com/our-case-studies/
-  - kind: paragraphs
+  - kind: table
+    caption: Deux préparations selon les preuves disponibles
+    columns:
+    - Préparation
+    - Traitement
+    rows:
+    - - Réutilisation native et compléments
+      - Séparer code neuf, patrimoine réutilisé et adaptations. Pondérer le déclaratif et conserver les hypothèses
+        d’assimilation.
+    - - Composants mixtes et analogies de modules
+      - Déduire le patrimoine déjà financé, attribuer une part supposée au métier et conserver un plancher mesuré.
+        Dimensionner les nouveaux modules par analogie, puis ajouter modèles, vues et configurations.
+  - kind: formula
+    rule_ref: component_attribution
+  - kind: formula
+    rule_ref: module_analogy
+  - kind: formula
+    rule_ref: equivalent_size
+  - kind: bullets
     items:
-    - Sources des encarts consultées le 30 octobre 2026. Les technologies et périmètres synthétisent les fiches
-      de marché de l’étude ; les cas clients sont attribués à leur éditeur, au projet ou à l’intégrateur qui les
-      publie. **Les points forts décrivent leur intérêt comme références de comparaison ; ils ne constituent pas
-      un classement ni un choix de solution.**
-  - kind: paragraphs
+    - Figer versions, fichiers, comptages et empreintes. Une part de pertinence ou une fraction de module reste
+      supposée, même si son calcul est reproductible.
+    - Un mécanisme partagé a un propriétaire de financement. Le consommateur finance ses raccordements et adaptations
+      ; le framework entier n’est pas reconstruit pour chaque famille.
+  - kind: links
     items:
-    - Le moteur recompose les tailles depuis les mesures de fichiers enregistrées et vérifie leurs empreintes documentaires.
-      Il applique la réutilisation, compte les compléments distincts puis recalcule les mouvements COSMIC. Les mesures
-      de code et les analogies restent distinctes des charges réellement observées.
-    - Le registre des mécanismes désigne l’unité qui finance chaque travail partagé. Une unité consommatrice référence
-      ce financement et dimensionne séparément ses adaptations. Le cumul des décisions adoptées ne constitue pas
-      une estimation COCOMO intégrée de l’ensemble du Core System.
-    - Pour Master Data, les références natives incluent encore la création et l’édition directe de fiches, alors
-      que le contrat FLOW privilégie admission, consultation et administration. Cet écart n’est pas isolé en taille.
-      Les activités sont rapprochées par convention et les garanties de service ne sont pas appariées à la population
-      ISBSG ; la comparaison reste partielle.
+    - href: '#etude-marche'
+      label: Consulter les fiches et preuves des références de marché
 - id: former-lots
-  title: Calculer les charges et aligner les activités
-  lead: '**COCOMO calcule un effort à partir d’une taille. COSMIC mesure une taille fonctionnelle ; ISBSG fournit
-    une référence de productivité.** Ce ne sont pas trois estimations indépendantes.'
+  title: Calculer et confronter les deux voies
+  lead: '**COCOMO estime l’effort ; COSMIC mesure les fonctions ; ISBSG apporte une référence de productivité.**'
   blocks:
   - kind: reference_cards
     cards:
     - title: COCOMO II
       subtitle: Modéliser un effort et un délai de développement
       fields:
-      - label: Nature du référentiel
+      - label: Rôle dans le calcul
         items:
-        - Constructive Cost Model II, issu des travaux de Barry Boehm et de l’USC. Le modèle adapte le niveau de
-          détail aux informations disponibles sur le projet.
-      - label: Entrées et sorties
-        items:
-        - Taille logique équivalente, réutilisation, facteurs d’échelle et multiplicateurs liés au produit, à l’équipe
-          et à l’environnement.
-        - Effort en mois-personnes et délai modélisé, avec leurs conventions de phase ; l’effort est ensuite converti
-          en JH.
-      - label: Apport pour FLOW
-        items:
-        - Expliciter l’effet de la taille, de la réutilisation et des conditions de réalisation sur une hypothèse
-          de reconstruction.
-      note: '**Limite :** un comptage physique de lignes OSS ne suffit pas à produire une estimation COCOMO II calibrée.
-        Le total modélisé ne correspond pas automatiquement aux seuls JH développeur et ne mesure pas le coût historique
-        du logiciel.'
+        - Relie la taille logique équivalente aux conditions du produit, de l’équipe et de l’environnement. Produit
+          un effort et un délai modélisés, avec leurs phases.
+      note: Le total COCOMO couvre les activités déclarées, au-delà du seul développement. Il ne mesure pas le temps
+        historique de l’OSS.
       sources:
       - label: Présentation et référence COCOMO II — Boehm CSSE
         href: https://boehmcsse.org/tools/cocomo-ii/
     - title: COSMIC
       subtitle: Mesurer la taille fonctionnelle indépendamment du langage
       fields:
-      - label: Nature du référentiel
+      - label: Rôle dans le calcul
         items:
-        - Méthode de mesure de taille fonctionnelle normalisée par ISO/IEC 19761 ; manuel COSMIC version 5 comme
-          référence de lecture.
-      - label: Entrées et sorties
-        items:
-        - Exigences fonctionnelles, frontière du logiciel, utilisateurs fonctionnels, processus et groupes de données.
-        - Entrées, sorties, lectures et écritures sont les quatre types de mouvements. Chaque mouvement compté vaut
-          un point de fonction COSMIC, ou CFP.
-      - label: Apport pour FLOW
-        items:
-        - Comparer les fonctions sur une assiette indépendante du code et confronter leur taille à une productivité
-          documentée.
-      note: '**Limite :** COSMIC mesure une taille, sans produire seul des JH. La difficulté d’un algorithme ou
-        une exigence non fonctionnelle ne se traduit pas automatiquement par des CFP supplémentaires.'
+        - Compte les mouvements fonctionnels de données E / R / W / X. Chaque mouvement vaut un CFP ; les contraintes
+          internes ne créent pas automatiquement des points.
+      note: COSMIC mesure une taille fonctionnelle. Une référence de productivité est nécessaire pour obtenir des
+        JH.
       sources:
       - label: Manuel de mesure COSMIC — version 5
         href: https://cosmic-sizing.org/measurement-manual/
@@ -258,115 +166,80 @@ sections:
     - title: ISBSG
       subtitle: Confronter l’estimation à des projets observés
       fields:
-      - label: Nature du référentiel
+      - label: Rôle dans le calcul
         items:
-        - International Software Benchmarking Standards Group, organisme qui collecte et qualifie des données de
-          projets logiciels. Sa base Development & Enhancement documente notamment tailles, efforts, durées et activités.
-      - label: Entrées et sorties
-        items:
-        - Une cohorte sélectionnée selon la méthode de mesure, le type de développement, la technologie, la taille,
-          les activités couvertes et la qualité des données.
-        - Des repères de productivité, par exemple des heures par CFP pour une cohorte COSMIC, ainsi que leur dispersion
-          lorsqu’elle est disponible.
-      - label: Apport pour FLOW
-        items:
-        - Transformer une taille fonctionnelle en effort de comparaison et vérifier sa plausibilité sur une population
-          de projets explicitement décrite.
-      note: '**Limite :** une moyenne de base n’est pas une productivité universelle. Les points IFPUG et COSMIC
-        ne sont pas interchangeables sans justification ; la cohorte et les activités doivent correspondre à l’assiette
-        FLOW. ISBSG n’est pas une troisième voie de calcul indépendante de COSMIC.'
+        - 'Fournit des observations de productivité à rapprocher d’une mesure COSMIC : population, activités et
+          conventions horaires doivent être comparables.'
+      note: ISBSG complète la voie COSMIC ; la productivité retenue reste une hypothèse de transposition à FLOW.
       sources:
       - label: Base Development & Enhancement — ISBSG
         href: https://www.isbsg.org/development-and-enhancement-data/
       - label: Questionnaires et collecte par méthode de mesure
         href: https://www.isbsg.org/submit-data/
-  - kind: paragraphs
-    items:
-    - 'Sources méthodologiques consultées le 30 octobre 2026. **Dans cette étude : COCOMO II fournit un effort modélisé
-      ; COSMIC mesure les fonctions ; ISBSG apporte les observations de productivité à rapprocher de cette mesure.**
-      Les formules ci-dessous décrivent la méthode ; leur présence ne signifie pas qu’une nouvelle estimation a
-      été retenue.'
-  - kind: table
-    caption: Deux voies de calcul, des hypothèses visibles
-    columns:
-    - Voie
-    - Entrées et limites
-    rows:
-    - - COCOMO II
-      - Taille logique équivalente, traitement de la réutilisation, facteurs d’échelle et multiplicateurs d’effort
-        documentés. Le résultat est modélisé, sans observation du temps réellement passé sur l’OSS.
-    - - COSMIC × ISBSG
-      - Mouvements de données fonctionnels comptés en CFP, puis heures par CFP issues d’un échantillon dont le périmètre
-        et les activités sont explicités. Les règles complexes ne créent pas automatiquement des CFP supplémentaires.
   - kind: formula
     rule_ref: cocomo_effort
   - kind: formula
     rule_ref: cosmic_effort
   - kind: paragraphs
     items:
-    - Les coefficients COCOMO, conventions horaires et traitements de phase doivent être enregistrés avec leur référence
-      et leur version dans chaque calcul. La réutilisation ne reçoit pas une seconde remise après son intégration
-      à la taille équivalente.
-    - 'Pour le pilote Master Data, le facteur de taille ISBSG de 0,8 est retiré : facteur 1 retenu par décision
-      d’étude, car ce composant appartient à un projet plus grand. La référence de 20 h/CFP reste une hypothèse
-      de comparaison, sans calibration FLOW et sans généralisation automatique aux autres familles.'
-    - '**Avant comparaison, aligner les fonctions et les activités : analyse, conception, développement, tests développeur,
-      QA et activités transverses.** Conserver les répartitions d’effort des publications avec leur page et leur
-      assiette. Ne pas ajouter une activité déjà couverte, ni assimiler le total COCOMO à des JH développeur.'
-- id: etablir-charge
-  title: Chiffrer les compléments FLOW et expliquer les écarts
-  lead: '**Présenter quatre chiffres et leur décomposition : périmètre commun, compléments FLOW, total.** Le total
-    de référence n’est pas choisi automatiquement.'
-  blocks:
-  - kind: bullets
-    items:
-    - 'Pour chaque complément : exigence FLOW, fonction analogue inspectée, volume proposé, formule et financement
-      du mécanisme commun. Séparer les mesures de code des hypothèses de volume.'
-    - Vérifier les différences fonctionnelles, les comptages de taille, les opérations génériques déjà couvertes,
-      les activités projet et la pertinence de la productivité ISBSG avant d’expliquer l’écart entre les méthodes.
-    - Un même complément hypothétique appliqué aux quatre OSS ne donne pas quatre confirmations indépendantes. Ne
-      pas forcer la convergence par un coefficient sans preuve.
-    - Présenter les JH par rôle à partir d’une correspondance explicite entre activités et rôles. Conserver les
-      répartitions publiées ; qualifier séparément toute clé de répartition proposée.
+    - 'Présenter pour chaque OSS la base commune, les compléments FLOW et le total. COCOMO est non linéaire : les
+      compléments se lisent par différence entre le total et la base commune.'
   - kind: formula
-    rule_ref: economic_total
+    rule_ref: nonlinear_complements
+  - kind: bullets
+    items:
+    - Enregistrer coefficients, conventions horaires et phases. Ne pas appliquer une seconde remise pour la réutilisation
+      déjà intégrée à la taille.
+    - Aligner fonctions, activités et garanties avant d’interpréter les écarts. La productivité ISBSG et sa transposition
+      restent à qualifier pour chaque famille.
+    - 'Conserver les écarts de périmètre : fonctions natives excédentaires, activités rapprochées par convention,
+      garanties de service non appariées.'
+- id: etablir-charge
+  title: Adopter une référence et ventiler les rôles
+  lead: '**La décision désigne une référence et un pas d’arrondi ; le moteur les reproduit.**'
+  blocks:
   - kind: paragraphs
     items:
-    - '**Une somme d’efforts n’est pas un délai.** Conserver séparément le délai produit par COCOMO, avec sa formule
-      TDEV, ses coefficients et phases couvertes. L’organisation, la disponibilité des rôles et les dépendances
-      déterminent ensuite un calendrier de réalisation. Une durée proposée par l’IA ne sert pas de base au calcul
-      des JH.'
-    - La ventilation des charges doit préserver le total, les activités incluses et les mécanismes partagés. Les
-      gains de productivité et provisions du modèle économique ne s’appliquent qu’après cette correspondance, sans
-      réduction globale de toutes les activités ni doublon de QA.
+    - Les quatre résultats natifs et la comparaison COSMIC restent visibles. Leur moyenne ne remplace pas la décision.
+      Les écarts utilisent la référence non arrondie ; la base financée conserve l’arrondi adopté.
+  - kind: formula
+    rule_ref: retained_rounding
+  - kind: formula
+    rule_ref: role_allocation
+  - kind: paragraphs
+    items:
+    - Les répartitions d’activités publiées et les clés proposées entre activités et rôles restent distinctes. L’allocation
+      et ses arrondis conservent exactement les JH adoptés. QA, architecture et pilotage local déjà inclus ne sont
+      pas ajoutés à nouveau.
+  - kind: formula
+    rule_ref: cocomo_schedule
+  - kind: paragraphs
+    items:
+    - Le délai calculé concerne la famille et ses phases déclarées. Le calendrier global dépend aussi des disponibilités,
+      dépendances et déploiements. Les délais locaux ne s’additionnent pas.
+  - kind: links
+    items:
+    - href: '#calcul-net'
+      label: Valoriser les JH retenus par rôle
 - id: qualifier-incertitude
-  title: Qualifier le résultat et décider de l’itération suivante
-  lead: '**La convergence des chiffres ne suffit pas à prouver leur exactitude.** Les hypothèses communes et les
-    lacunes doivent rester visibles.'
+  title: Qualifier les limites et décider de la suite
+  lead: '**L’alignement numérique ne mesure pas la confiance.**'
   blocks:
   - kind: bullets
     items:
-    - Décrire l’alignement par les écarts en JH et en pourcentage (estimation plus basse ou plus haute) à une référence
-      non arrondie, puis la dispersion des références comparables. Nommer le dénominateur. Ces indicateurs ne constituent
-      pas un score de confiance. L’incertitude probabiliste reste inconnue sans méthode et preuves adaptées.
-    - Donner le cumul des capacités étudiées, sans doublon, rapporté au périmètre total. Distinguer couverture documentaire,
-      périmètre chiffré et périmètre assez étayé pour une décision d’opportunité.
-    - 'À chaque itération : dire ce qui a progressé, ce qui reste incertain et quelle investigation pourrait réellement
-      améliorer la décision. Si aucune nouvelle preuve exploitable n’est attendue, proposer l’arrêt ou un changement
-      d’approche.'
-    - Adopter une estimation dans la base active seulement après décision explicite. Un total incomplet est signalé
-      comme tel ; un montant à réestimer n’est pas un coût nul. Les simulations et calendriers sont ensuite réconciliés.
-  - kind: paragraphs
-    items:
-    - '**Résultat attendu : des charges par unité métier et par rôle, une provenance calculable et un délai distinct.**
-      COCOMO II est la référence principale retenue ; COSMIC × ISBSG reste une comparaison indépendante, sans moyenne
-      forcée entre les méthodes. Les estimations adoptées et leur périmètre sont enregistrés dans estimations-core-retenues.yaml.
-      Les autres capacités restent à réestimer ; consulter le statut courant.'
+    - Décrire les écarts en JH et pourcentage à la référence non arrondie, puis la dispersion. Les hypothèses communes
+      peuvent rapprocher les résultats ; elles ne fournissent pas des validations indépendantes.
+    - Distinguer mesure, hypothèse, calcul, adoption et revue humaine. Aucune probabilité de dépassement ni fourchette
+      statistique n’est déduite des seuls écarts.
+    - Consolider les décisions adoptées après déduplication des financements. Ce cumul n’est pas une estimation
+      COCOMO intégrée de tout le Core System.
+    - Rapporter les capacités étudiées et retenues au périmètre total. Dire ce qui reste à instruire et quelle preuve
+      pourrait améliorer la décision ; les inconnues ne valent pas zéro.
   - kind: links
     items:
     - href: '#evaluation-core'
-      label: Consulter les évaluations économiques et leur statut
+      label: Consulter les décisions, leur couverture et leurs réserves
 examples: []
 next:
   href: '#calcul-net'
-  label: Vérifier les activités, les gains et la valorisation des JH
+  label: Passer des efforts retenus au budget

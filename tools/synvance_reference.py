@@ -24,11 +24,35 @@ def _array(items, minimum=1):
 TEXT = dict(type='string', minLength=1, pattern=r'\S')
 ID = dict(type='string', pattern='^[a-z][a-z0-9-]*$')
 PROOFS = dict(type='array', minItems=1, uniqueItems=True, items=TEXT)
+SOURCE_CELL = _object(dict(status=TEXT, scope=TEXT,
+    entries=_array(_object(dict(row_ref=TEXT, label=TEXT)), 0),
+    proof_refs=dict(type='array', uniqueItems=True, items=TEXT)))
+PRODUCT_URLS = ['https://help.sap.com/docs/SAP_Order_Management_for_Sourcing_and_Availability/b1914f5958b54a148b2b7580550ef9a5/f06cbc74f4c34a9e8e3a74adb8d6d0b9.html', 'https://help.sap.com/doc/08442b9d2cd744f7aecc1e08080c26f3/SHIP/en-US/FSD_SAP_OMSA.pdf', 'https://learning.sap.com/courses/exploring-sap-order-management-foundation-and-sourcing-availability/explaining-the-concept-of-order-submit-and-order-orchestration', 'https://learn.microsoft.com/en-us/dynamics365/commerce/dom', 'https://learn.microsoft.com/en-us/dynamics365/commerce/dev-itpro/commerce-architecture', 'https://learn.microsoft.com/en-us/dynamics365/commerce/dom-processing', 'https://learn.microsoft.com/en-us/dynamics365/commerce/dom-limitations']
 SCHEMA = _object(dict(
     version=dict(const=1), id=dict(const='reperes-synvance'), title=TEXT, navigation=TEXT, introduction=TEXT,
+    reading=_object(dict(navigation=TEXT, pages=_array(_object(dict(id=dict(enum=['overview','business','oms','costs']),label=TEXT,short_label=TEXT,description=TEXT))),
+        evidence_title=TEXT,evidence_intro=TEXT,piece_labels=_object({key:TEXT for key in ('demande','besoins','microsoft','sap','copil','questionnaire_microsoft','questionnaire_sap')}),
+        publishers=_array(_object(dict(id=dict(enum=list(PROVIDERS)),name=TEXT,role=TEXT,asset=dict(enum=['assets/microsoft-original.svg','assets/sap-original.svg']),accent=dict(type='string',pattern='^#[0-9A-Fa-f]{6}$')))),
+        details_title=TEXT,documents_link=TEXT,business_oms_link=TEXT,cost_navigation=TEXT,acquired_title=TEXT,acquired_text=TEXT,acquired_link=TEXT,architecture_status=TEXT)),
     labels=_object({key: TEXT for key in ('amount', 'period', 'status', 'scope', 'source', 'year',
         'annual_amount', 'price_year', 'open', 'download_pdf', 'download_xlsx',
         'back_to_overview', 'provider_navigation', 'overview_link', 'reading_note', 'provider_note')}),
+    brief=_object(dict(title=TEXT, introduction=TEXT,
+        questions=_array(_object(dict(id=ID, question=TEXT, answer=TEXT, proof_refs=PROOFS))),
+        highlights=_object(dict(title=TEXT, items=_array(TEXT), proof_refs=PROOFS)))),
+    business=_object(dict(title=TEXT, introduction=TEXT,
+        architectures=_array(_object(dict(id=dict(enum=['backbone','suite']),title=TEXT, text=TEXT, systems=_array(TEXT)))), architecture_note=TEXT,
+        architecture_proof_refs=PROOFS,
+        pattern_reading=_object(dict(title=TEXT,note=TEXT,undetermined_label=TEXT,providers=_array(_object(dict(id=dict(enum=list(PROVIDERS)),pattern_ref=dict(type=['string','null']),summary=TEXT,scope=TEXT,proof_refs=PROOFS))))),
+        oms=_object(dict(title=TEXT, introduction=TEXT, conclusion=TEXT, note=TEXT, proof_refs=PROOFS,open_points_title=TEXT,open_points=_array(TEXT),
+            labels=_object({key:TEXT for key in ('criterion','microsoft','sap','decision')}),
+            rows=_array(_object(dict(id=ID, criterion=TEXT, microsoft=TEXT, sap=TEXT, decision=TEXT, proof_refs=PROOFS))),
+            product_sources=_array(_object(dict(label=TEXT, href=dict(enum=PRODUCT_URLS)))))),
+        comparison_title=TEXT, comparison_note=TEXT,
+        labels=_object({key: TEXT for key in ('topic', 'request', 'microsoft', 'sap')}),
+        axes=_array(_object(dict(id=ID, topic=TEXT, request=TEXT, microsoft=TEXT, sap=TEXT, proof_refs=PROOFS))),
+        others_title=TEXT, others_introduction=TEXT,
+        others=_array(_object(dict(id=ID, title=TEXT, text=TEXT, proof_refs=PROOFS))))),
     overview=_object(dict(title=TEXT, introduction=TEXT, warning=TEXT,
         inputs=_array(_object(dict(piece_ref=TEXT, label=TEXT, text=TEXT))),
         proposals_title=TEXT, proposals_introduction=TEXT, cards=_array(_object(dict(
@@ -45,6 +69,16 @@ SCHEMA = _object(dict(
             annual=_object(dict(intro=TEXT, rows=_array(_object(dict(id=ID, label=TEXT,
                 post_ref=TEXT, period=TEXT, scope=TEXT, proof_refs=PROOFS)))))
         ))))),
+    costs=_object(dict(title=TEXT, introduction=TEXT,
+        labels=_object({key:TEXT for key in ('structure', 'microsoft', 'sap', 'scope', 'year', 'price_year', 'amount', 'total', 'years', 'horizon', 'bundled', 'model_amount', 'source_amount', 'initial', 'annual', 'annual_total', 'selection', 'integration', 'integration_additions', 'service_start', 'month', 'source_detail', 'source_note', 'model_note')}),
+        sources_title=TEXT, sources_note=TEXT,
+        rows=_array(_object(dict(structure_ref=TEXT, model_scope=TEXT,
+            model_display=dict(enum=['amount','bundled']), comparison=TEXT,
+            microsoft=SOURCE_CELL, sap=SOURCE_CELL))),
+        bridge_title=TEXT, bridge_note=TEXT,
+        annual_rows=_array(_object(dict(id=TEXT, label=TEXT))),
+        model_title=TEXT, model_note=TEXT, model_limit=TEXT,
+        model_links=_array(_object(dict(href=dict(enum=['#parametres','#se-projeter','#comparer']), label=TEXT))))),
     documents=_object(dict(title=TEXT, introduction=TEXT)),
     usage=_object(dict(title=TEXT, introduction=TEXT, paragraphs=_array(TEXT), links=_array(_object(dict(
         href=dict(enum=['#vision', '#marche', '#etude-marche', '#evaluation-core']), label=TEXT, text=TEXT)))))
@@ -68,12 +102,15 @@ def index(rows, path):
     return values
 
 
-def compile_synvance_reference(editorial, guide, prices, annual, glossary, document_path):
+def compile_synvance_reference(editorial, guide, prices, annual, glossary, document_path,
+                               architecture, baseline, economic_evaluations):
     """Project only recorded offer amounts, keeping originals and source periods distinct."""
     errors = sorted(Draft202012Validator(SCHEMA).iter_errors(editorial), key=lambda e: str(e.path))
     if errors:
         raise ValueError(ERROR + ':editorial:' + str(list(errors[0].path)) + ':' + errors[0].message)
     require([row['id'] for row in editorial['synthesis']['providers']] == list(PROVIDERS), 'provider order')
+    require([item['id'] for item in editorial['reading']['pages']] == ['overview','business','oms','costs'], 'reading page order')
+    require([item['id'] for item in editorial['reading']['publishers']] == list(PROVIDERS), 'publisher identity order')
     require(set(prices) == set(annual) == set(PROVIDERS), 'source providers')
     validate_glossary_literals(editorial, glossary, path=SOURCE)
     result = resolve_text_tree(deepcopy(editorial), glossary, path=SOURCE)
@@ -108,7 +145,27 @@ def compile_synvance_reference(editorial, guide, prices, annual, glossary, docum
     def proofs(refs):
         require(set(refs) <= set(passages), 'unknown proof')
         return [dict(path=passages[key]['path'], label=pieces[passages[key]['piece_ref']]['titre'],
-            location=passages[key]['location']) for key in refs]
+            location=passages[key]['location'],
+            short_label=result['reading']['piece_labels'][passages[key]['piece_ref']] +
+                (' · p. ' + str(passages[key]['page']) if passages[key]['page'] else '')) for key in refs]
+
+    business = result['business']
+    patterns=index(business['architectures'], 'business/architectures')
+    require(list(patterns)==['backbone','suite'], 'architecture pattern order')
+    require([p['id'] for p in business['pattern_reading']['providers']]==list(PROVIDERS), 'pattern provider order')
+    for provider in business['pattern_reading']['providers']:
+        require(provider['pattern_ref'] is None or provider['pattern_ref'] in patterns, 'unknown architecture pattern')
+        provider['proofs']=proofs(provider.pop('proof_refs'))
+    index(business['axes'], 'business/axes')
+    index(business['others'], 'business/others')
+    business['architecture_proofs'] = proofs(business.pop('architecture_proof_refs'))
+    index(business['oms']['rows'], 'business/oms/rows')
+    for item in [*business['axes'], *business['others'], business['oms'], *business['oms']['rows']]:
+        item['proofs'] = proofs(item.pop('proof_refs'))
+
+    index(result['brief']['questions'], 'brief/questions')
+    for item in [*result['brief']['questions'], result['brief']['highlights']]:
+        item['proofs'] = proofs(item.pop('proof_refs'))
 
     for provider in result['synthesis']['providers']:
         slug = provider['id']
@@ -173,12 +230,84 @@ def compile_synvance_reference(editorial, guide, prices, annual, glossary, docum
         card['highlights'] = [dict(deepcopy(rows[item['row_ref']]), label=item['label'])
             for item in card['highlights']]
         card['href'] = '#synvance-' + card['id']
+    costs = result['costs']
+    structures = index(architecture['cost_structures'], 'architecture/cost_structures')
+    nature_refs = [ref for structure in structures.values() for ref in structure['cost_nature_refs']]
+    require(len(nature_refs) == len(set(nature_refs)), 'duplicate model nature allocation')
+    rows = costs['rows']
+    ids = [row['structure_ref'] for row in rows]
+    require(len(ids) == len(set(ids)) and set(ids) == set(structures), 'cost structure coverage')
+    annual_seen = {slug: [] for slug in PROVIDERS}
+    for row in rows:
+        structure = structures[row['structure_ref']]
+        row['title'] = glossary['notions'][structure['notion']]['libelle']
+        row['nature_refs'] = deepcopy(structure['cost_nature_refs'])
+        for slug in PROVIDERS:
+            cell = row[slug]
+            attached = proofs(cell.pop('proof_refs'))
+            for entry in cell['entries']:
+                section, identifier = entry.pop('row_ref').split('/', 1)
+                require(section in ('integration','annual'), 'unknown source comparison section')
+                source_rows = index(providers[slug][section]['rows'], slug + '/' + section)
+                require(identifier in source_rows, 'unknown source comparison row:' + slug + '/' + identifier)
+                source = source_rows[identifier]
+                entry.update(kind=section, source_id=identifier, period=source['period'])
+                if section == 'integration':
+                    entry['amount_eur'] = source['amount_eur']
+                    entry['reading_role'] = source['reading_role']
+                else:
+                    entry['amounts'] = deepcopy(source['amounts'])
+                    entry['source_year'] = source['source_year']
+                    annual_seen[slug].append(identifier)
+                attached.extend(deepcopy(source['proofs']))
+            cell['proofs'] = list({(proof['path'],proof['location']):proof for proof in attached}.values())
+    for slug in PROVIDERS:
+        require(len(annual_seen[slug]) == len(set(annual_seen[slug])) and
+            set(annual_seen[slug]) == {row['id'] for row in providers[slug]['annual']['rows']},
+            'source annual comparison coverage:' + slug)
+    options = {row['stack']:row for row in baseline['options'] if row['stack'] in PROVIDERS}
+    retained = {row['stack']:row for row in economic_evaluations['options'] if row['stack'] in PROVIDERS}
+    require(set(options) == set(retained) == set(PROVIDERS), 'model provider coverage')
+    horizons = [row['years'] for row in options[PROVIDERS[0]]['horizons']]
+    require(horizons and len(horizons) == len(set(horizons)) and all(
+        [row['years'] for row in options[slug]['horizons']] == horizons for slug in PROVIDERS), 'model common horizons')
+    require([row['id'] for row in costs['annual_rows']] == list(retained[PROVIDERS[0]]['annual']['items']),
+            'retained annual item coverage')
+    bridge = []
+    for slug in PROVIDERS:
+        option = options[slug]
+        source_total = next(row['amount_eur'] for row in providers[slug]['integration']['rows']
+                            if row['id'] == ('total-copil' if slug == 'microsoft' else 'somme-lots'))
+        bridge.append(dict(id=slug, selection_eur=option['selection_buy'], integration_eur=option['integration'],
+            source_integration_eur=source_total,
+            integration_additions_eur=float(Decimal(str(option['integration']))-Decimal(str(source_total))),
+            annual=deepcopy(retained[slug]['annual']), service_start_month=option['service_start_month']))
+    compiled_horizons = []
+    for position, years in enumerate(horizons):
+        horizon = dict(years=years, rows=[], totals={}, service_years={})
+        for slug in PROVIDERS:
+            source = options[slug]['horizons'][position]
+            horizon['totals'][slug] = source['totals']['total']
+            horizon['service_years'][slug] = source['service_years']
+            expected = {ref for structure in structures.values() for ref in structure['cost_nature_refs']}
+            require(set(source['cost_natures']) == expected, 'model nature coverage:' + slug)
+        for row in rows:
+            amounts = {slug:float(sum((Decimal(str(options[slug]['horizons'][position]['cost_natures'][ref]))
+                for ref in row['nature_refs']), Decimal(0))) for slug in PROVIDERS}
+            horizon['rows'].append(dict(id=row['structure_ref'], title=row['title'],
+                scope=row['model_scope'], display=row['model_display'], amounts=amounts))
+        for slug in PROVIDERS:
+            total = sum((Decimal(str(row['amounts'][slug])) for row in horizon['rows']), Decimal(0))
+            require(abs(total-Decimal(str(horizon['totals'][slug]))) < Decimal('0.005'), 'model total reconciliation:' + slug)
+        compiled_horizons.append(horizon)
+    costs['model'] = dict(horizons=compiled_horizons, bridge=bridge, model_version=baseline['model_version'])
     return result
 
 
-def build_synvance_reference(guide, glossary, document_path):
+def build_synvance_reference(guide, glossary, document_path, baseline, architecture, economic_evaluations):
     prices = {slug: read(ROOT / f'source/chiffrage/chiffrage-{slug}.yaml')['integration']['prix_rfi']
               for slug in PROVIDERS}
     annual = {slug: read(ROOT / f'source/maintenance/maintenance-{slug}.yaml')['valorisation_annuelle']
               for slug in PROVIDERS}
-    return compile_synvance_reference(read(ROOT / SOURCE), guide, prices, annual, glossary, document_path)
+    return compile_synvance_reference(read(ROOT / SOURCE), guide, prices, annual, glossary, document_path,
+                                      architecture, baseline, economic_evaluations)

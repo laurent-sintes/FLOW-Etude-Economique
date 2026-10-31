@@ -57,7 +57,7 @@ def validate(document=None):
 
 
 def dependencies():
-    files = {SOURCE, SCHEMA, META, META_SCHEMA, 'tools/retained_core.py', 'tools/estimation_calculation.py', INPUTS, INPUT_SCHEMA, 'tools/estimation_inputs.py', 'tools/estimation_preparation.py'}
+    files = {SOURCE, SCHEMA, META, META_SCHEMA, 'tools/retained_core.py', 'tools/estimation_calculation.py', INPUTS, INPUT_SCHEMA, 'tools/estimation_inputs.py', 'tools/estimation_preparation.py', 'tools/estimation_stock.py', 'tools/estimation_ownership.py', 'tools/estimation_components.py', 'tools/estimation_professional.py'}
     files.update(registry()['proofs'])
     for unit in validate()['units']:
         files.add(unit['provenance']['path'])
@@ -66,9 +66,12 @@ def dependencies():
     return files
 
 
+@scoped_model
 def value_units(slug, legacy_features, tooling):
     units = []
-    for original in validate()['units']:
+    retained = validate()['units']
+    owner_labels = {u['id']:u['label'] for u in retained}
+    for original in retained:
         if original['stack'] != slug:
             continue
         unit = deepcopy(original)
@@ -77,7 +80,9 @@ def value_units(slug, legacy_features, tooling):
         unit['alignment'] = computed['alignment']
         unit['activities'] = computed['activities']
         unit['activity_source'] = computed['activity_source']
-        for key in ('trace','funding','consolidation'): unit[key] = computed[key]
+        for key in ('trace','funding','consolidation'): unit[key] = deepcopy(computed[key])
+        for mechanism in unit['funding']:
+            mechanism['funding_owner_label'] = owner_labels[mechanism['funding_owner']]
         # No active legacy charge can coexist with a retained family for its capabilities.
         members = {c['id'] for c in unit['capabilities']}
         for feature in legacy_features:

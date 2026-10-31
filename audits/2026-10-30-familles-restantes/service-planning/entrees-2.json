@@ -1,0 +1,5074 @@
+{
+  "family": "ba-service-planning",
+  "iteration": 2,
+  "analysis_ref": "analyse-1.json",
+  "capabilities": [
+    "BC-049",
+    "BC-050",
+    "BC-051",
+    "BC-052"
+  ],
+  "cocomo": {
+    "A": 2.94,
+    "B": 0.91,
+    "SF_sum": 18.97,
+    "C": 3.67,
+    "D": 0.28,
+    "month_hours": 152,
+    "day_hours": 7,
+    "effort_phase_factor": 1.18,
+    "schedule_phase_factor": 1.25,
+    "other_EM": 1,
+    "SCED": 1,
+    "REVL": 0,
+    "source": "https://www.rose-hulman.edu/class/csse/csse372/201310/Homework/CII_modelman2000.pdf",
+    "source_locations": "Équation 4 et tables 6, 36, 57, 63 ; autres paramètres conservés nominaux.",
+    "activity_distribution_ref": "../2026-10-30-master-data-calcul/repartitions-sources.json#cocomo"
+  },
+  "native_reference_banks": {
+    "erpnext": 6,
+    "odoo": 499,
+    "tryton": 3,
+    "axelor": 96
+  },
+  "source_selection": [
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar.copy_data",
+      "start": 46,
+      "end": 54,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Assign",
+          47,
+          47,
+          8,
+          54
+        ],
+        [
+          "Expr",
+          52,
+          52,
+          16,
+          72
+        ],
+        [
+          "Expr",
+          53,
+          53,
+          16,
+          74
+        ],
+        [
+          "For",
+          48,
+          53,
+          8,
+          74
+        ],
+        [
+          "FunctionDef",
+          46,
+          54,
+          4,
+          24
+        ],
+        [
+          "If",
+          51,
+          53,
+          12,
+          74
+        ],
+        [
+          "Return",
+          54,
+          54,
+          8,
+          24
+        ]
+      ],
+      "source": "    def copy_data(self, default=None):\n        vals_list = super().copy_data(default=default)\n        for calendar, vals in zip(self, vals_list):\n            # the rates of a fixed calendar are computed from its attendances, those of the other\n            # calendars are set by the user: they are kept on the copy\n            if vals.get('calendar_type', calendar.calendar_type) != 'fixed':\n                vals.setdefault('days_per_week', calendar.days_per_week)\n                vals.setdefault('hours_per_week', calendar.hours_per_week)\n        return vals_list"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._is_flexible",
+      "start": 105,
+      "end": 110,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          109,
+          109,
+          8,
+          25
+        ],
+        [
+          "FunctionDef",
+          105,
+          110,
+          4,
+          48
+        ],
+        [
+          "Return",
+          110,
+          110,
+          8,
+          48
+        ]
+      ],
+      "source": "    def _is_flexible(self):\n        \"\"\" Return whether this calendar is flexible, i.e. of type ``undefined``: it has no\n        attendance lines and the resource may work whenever it wants, optionally up to the\n        ``hours_per_week`` / ``hours_per_day`` targets (see :meth:`_is_fully_flexible`). \"\"\"\n        self.ensure_one()\n        return self.calendar_type == 'undefined'"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._is_fully_flexible",
+      "start": 112,
+      "end": 117,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          116,
+          116,
+          8,
+          25
+        ],
+        [
+          "FunctionDef",
+          112,
+          117,
+          4,
+          89
+        ],
+        [
+          "Return",
+          117,
+          117,
+          8,
+          89
+        ]
+      ],
+      "source": "    def _is_fully_flexible(self):\n        \"\"\" Return whether this calendar is flexible (see :meth:`_is_flexible`) and has no\n        hours target either (``hours_per_week`` and ``hours_per_day`` both zero). A fully\n        flexible resource is considered working during the whole requested period. \"\"\"\n        self.ensure_one()\n        return self._is_flexible() and not self.hours_per_week and not self.hours_per_day"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._get_attendances_to_unlink",
+      "start": 119,
+      "end": 136,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Assign",
+          132,
+          132,
+          12,
+          86
+        ],
+        [
+          "FunctionDef",
+          119,
+          136,
+          4,
+          54
+        ],
+        [
+          "FunctionDef",
+          131,
+          135,
+          8,
+          93
+        ],
+        [
+          "If",
+          133,
+          134,
+          12,
+          27
+        ],
+        [
+          "Return",
+          134,
+          134,
+          16,
+          27
+        ],
+        [
+          "Return",
+          135,
+          135,
+          12,
+          93
+        ],
+        [
+          "Return",
+          136,
+          136,
+          8,
+          54
+        ]
+      ],
+      "source": "    def _get_attendances_to_unlink(self, next_calendar_type=None):\n        \"\"\" Return the attendances that do not fit the calendar's ``calendar_type`` (or\n        ``next_calendar_type`` when given), and must be dropped:\n\n        - ``fixed``: attendances with a date (fixed calendars use undated weekly lines);\n        - ``undefined``: every attendance (flexible calendars have no predefined slots);\n        - ``variable``: attendances without a date (variable calendars use dated lines).\n\n        Called after every ``create``/``write`` of calendars.\n\n        :rtype: ``resource.calendar.attendance`` recordset\n        \"\"\"\n        def to_unlink(attendance):\n            calendar_type = next_calendar_type or attendance.calendar_id.calendar_type\n            if calendar_type == 'undefined':\n                return True\n            return bool(attendance.date) if calendar_type == 'fixed' else not attendance.date\n        return self.attendance_ids.filtered(to_unlink)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._convert_single_occurrence_recurrencies",
+      "start": 138,
+      "end": 153,
+      "program_units": 14,
+      "nodes": [
+        [
+          "Assign",
+          143,
+          143,
+          12,
+          68
+        ],
+        [
+          "Assign",
+          144,
+          144,
+          12,
+          79
+        ],
+        [
+          "Assign",
+          145,
+          145,
+          12,
+          38
+        ],
+        [
+          "Assign",
+          152,
+          152,
+          8,
+          90
+        ],
+        [
+          "AugAssign",
+          149,
+          149,
+          16,
+          32
+        ],
+        [
+          "Expr",
+          153,
+          153,
+          8,
+          95
+        ],
+        [
+          "FunctionDef",
+          138,
+          153,
+          4,
+          95
+        ],
+        [
+          "FunctionDef",
+          140,
+          150,
+          8,
+          23
+        ],
+        [
+          "If",
+          141,
+          142,
+          12,
+          28
+        ],
+        [
+          "If",
+          147,
+          148,
+          16,
+          32
+        ],
+        [
+          "Return",
+          142,
+          142,
+          16,
+          28
+        ],
+        [
+          "Return",
+          148,
+          148,
+          20,
+          32
+        ],
+        [
+          "Return",
+          150,
+          150,
+          12,
+          23
+        ],
+        [
+          "While",
+          146,
+          149,
+          12,
+          32
+        ]
+      ],
+      "source": "    def _convert_single_occurrence_recurrencies(self):\n        \"\"\"Convert recurrent attendances with only one visible occurrence into ad-hoc attendances.\"\"\"\n        def _has_single_remaining_occurrence(att):\n            if not att.recurrency or not att.date or att.recurrency_end_type == 'forever':\n                return False\n            excluded = set(att.recurrency_excluded_occurences or [])\n            delta = timedelta(**{att.recurrency_type: att.recurrency_interval})\n            current = att.date + delta\n            while current <= att.recurrency_until:\n                if fields.Date.to_string(current) not in excluded:\n                    return False\n                current += delta\n            return True\n\n        single_occurrence = self.attendance_ids.filtered(_has_single_remaining_occurrence)\n        single_occurrence.write({'recurrency': False, 'recurrency_excluded_occurences': False})"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._clean_excluded_occurrences",
+      "start": 155,
+      "end": 178,
+      "program_units": 18,
+      "nodes": [
+        [
+          "Assign",
+          163,
+          163,
+          12,
+          54
+        ],
+        [
+          "Assign",
+          164,
+          164,
+          12,
+          117
+        ],
+        [
+          "Assign",
+          165,
+          165,
+          12,
+          24
+        ],
+        [
+          "Assign",
+          166,
+          166,
+          12,
+          24
+        ],
+        [
+          "Assign",
+          170,
+          170,
+          16,
+          72
+        ],
+        [
+          "Assign",
+          178,
+          178,
+          16,
+          60
+        ],
+        [
+          "Continue",
+          169,
+          169,
+          20,
+          28
+        ],
+        [
+          "Continue",
+          172,
+          172,
+          20,
+          28
+        ],
+        [
+          "Continue",
+          174,
+          174,
+          20,
+          28
+        ],
+        [
+          "Expr",
+          175,
+          175,
+          16,
+          27
+        ],
+        [
+          "Expr",
+          176,
+          176,
+          16,
+          33
+        ],
+        [
+          "For",
+          162,
+          178,
+          8,
+          60
+        ],
+        [
+          "For",
+          167,
+          176,
+          12,
+          33
+        ],
+        [
+          "FunctionDef",
+          155,
+          178,
+          4,
+          60
+        ],
+        [
+          "If",
+          168,
+          169,
+          16,
+          28
+        ],
+        [
+          "If",
+          171,
+          172,
+          16,
+          28
+        ],
+        [
+          "If",
+          173,
+          174,
+          16,
+          28
+        ],
+        [
+          "If",
+          177,
+          178,
+          12,
+          60
+        ]
+      ],
+      "source": "    def _clean_excluded_occurrences(self):\n        \"\"\"Remove stale or duplicate entries from ``recurrency_excluded_occurences``.\n\n        Removes dates before the attendance start, dates past ``recurrency_until``,\n        dates that don't fall on a valid recurrency occurrence, and duplicates —\n        in a single pass per attendance.\n        \"\"\"\n        for att in self.attendance_ids.filtered(lambda a: a.recurrency and a.recurrency_excluded_occurences and a.date):\n            date_str = fields.Date.to_string(att.date)\n            until_str = fields.Date.to_string(att.recurrency_until) if att.recurrency_end_type != 'forever' else None\n            seen = set()\n            cleaned = []\n            for d in att.recurrency_excluded_occurences:\n                if d < date_str or (until_str and d > until_str) or d in seen:\n                    continue\n                diff_days = (fields.Date.from_string(d) - att.date).days\n                if att.recurrency_type == 'days' and diff_days % att.recurrency_interval:\n                    continue\n                if att.recurrency_type == 'weeks' and (diff_days % 7 or (diff_days // 7) % att.recurrency_interval):\n                    continue\n                seen.add(d)\n                cleaned.append(d)\n            if cleaned != att.recurrency_excluded_occurences:\n                att.recurrency_excluded_occurences = cleaned"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._calendar_clean_up",
+      "start": 180,
+      "end": 188,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          185,
+          185,
+          8,
+          43
+        ],
+        [
+          "Expr",
+          186,
+          186,
+          8,
+          55
+        ],
+        [
+          "Expr",
+          187,
+          187,
+          8,
+          47
+        ],
+        [
+          "Expr",
+          188,
+          188,
+          8,
+          59
+        ],
+        [
+          "FunctionDef",
+          180,
+          188,
+          4,
+          59
+        ]
+      ],
+      "source": "    def _calendar_clean_up(self):\n        \"\"\"Clean up the attendances of the calendars in ``self`` (all calendars when\n        ``self`` is empty): drop lines not matching the calendar type, clean excluded\n        occurrences and turn recurrences with a single remaining occurrence into\n        one-off attendances.\"\"\"\n        calendars = self or self.search([])\n        calendars._get_attendances_to_unlink().unlink()\n        calendars._clean_excluded_occurrences()\n        calendars._convert_single_occurrence_recurrencies()"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._compute_full_time_required_hours",
+      "start": 195,
+      "end": 202,
+      "program_units": 7,
+      "nodes": [
+        [
+          "Assign",
+          198,
+          198,
+          16,
+          97
+        ],
+        [
+          "Assign",
+          200,
+          200,
+          16,
+          107
+        ],
+        [
+          "Assign",
+          202,
+          202,
+          16,
+          75
+        ],
+        [
+          "For",
+          196,
+          202,
+          8,
+          75
+        ],
+        [
+          "FunctionDef",
+          195,
+          202,
+          4,
+          75
+        ],
+        [
+          "If",
+          197,
+          202,
+          12,
+          75
+        ],
+        [
+          "If",
+          199,
+          202,
+          12,
+          75
+        ]
+      ],
+      "source": "    def _compute_full_time_required_hours(self):\n        for calendar in self:\n            if calendar.reference_calendar_id:\n                calendar.full_time_required_hours = calendar.reference_calendar_id.hours_per_week\n            elif calendar.company_id.resource_calendar_id:\n                calendar.full_time_required_hours = calendar.company_id.resource_calendar_id.hours_per_week\n            else:\n                calendar.full_time_required_hours = calendar.hours_per_week"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._compute_attendance_ids",
+      "start": 205,
+      "end": 209,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          207,
+          207,
+          12,
+          102
+        ],
+        [
+          "Assign",
+          209,
+          209,
+          16,
+          99
+        ],
+        [
+          "For",
+          206,
+          209,
+          8,
+          99
+        ],
+        [
+          "FunctionDef",
+          205,
+          209,
+          4,
+          99
+        ],
+        [
+          "If",
+          208,
+          209,
+          12,
+          99
+        ]
+      ],
+      "source": "    def _compute_attendance_ids(self):\n        for calendar in self:\n            calendar_changed = calendar._origin and calendar._origin.company_id != calendar.company_id\n            if (not calendar.id or calendar_changed) and calendar.calendar_type == \"fixed\" and not calendar.attendance_ids:\n                calendar.attendance_ids = calendar._get_default_attendance_ids(calendar.company_id)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._compute_global_leave_ids",
+      "start": 212,
+      "end": 217,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          214,
+          217,
+          12,
+          14
+        ],
+        [
+          "For",
+          213,
+          217,
+          8,
+          14
+        ],
+        [
+          "FunctionDef",
+          212,
+          217,
+          4,
+          14
+        ]
+      ],
+      "source": "    def _compute_global_leave_ids(self):\n        for calendar in self.filtered(lambda c: not c._origin or c._origin.company_id != c.company_id):\n            calendar.update({\n                'global_leave_ids': [(5, 0, 0)] + [\n                    (0, 0, leave._copy_leave_vals()) for leave in calendar.company_id.resource_calendar_id.global_leave_ids],\n            })"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._compute_days_per_week",
+      "start": 220,
+      "end": 227,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          226,
+          226,
+          12,
+          89
+        ],
+        [
+          "Assign",
+          227,
+          227,
+          12,
+          78
+        ],
+        [
+          "Continue",
+          225,
+          225,
+          16,
+          24
+        ],
+        [
+          "For",
+          221,
+          227,
+          8,
+          78
+        ],
+        [
+          "FunctionDef",
+          220,
+          227,
+          4,
+          78
+        ],
+        [
+          "If",
+          224,
+          225,
+          12,
+          24
+        ]
+      ],
+      "source": "    def _compute_days_per_week(self):\n        for calendar in self:\n            # variable/undefined calendars don't have a reliable attendance pattern to derive\n            # this from (undefined calendars have none at all); the user sets it directly instead.\n            if calendar.calendar_type != 'fixed':\n                continue\n            attendances = calendar.attendance_ids.filtered(lambda a: a._is_work_period())\n            calendar.days_per_week = len(set(attendances.mapped('dayofweek')))"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._compute_hours_per_day",
+      "start": 230,
+      "end": 232,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          232,
+          232,
+          12,
+          118
+        ],
+        [
+          "For",
+          231,
+          232,
+          8,
+          118
+        ],
+        [
+          "FunctionDef",
+          230,
+          232,
+          4,
+          118
+        ]
+      ],
+      "source": "    def _compute_hours_per_day(self):\n        for calendar in self:\n            calendar.hours_per_day = calendar.hours_per_week / calendar.days_per_week if calendar.days_per_week else 0"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._compute_hours_per_week",
+      "start": 235,
+      "end": 242,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          241,
+          241,
+          12,
+          89
+        ],
+        [
+          "Assign",
+          242,
+          242,
+          12,
+          79
+        ],
+        [
+          "Continue",
+          240,
+          240,
+          16,
+          24
+        ],
+        [
+          "For",
+          237,
+          242,
+          8,
+          79
+        ],
+        [
+          "FunctionDef",
+          235,
+          242,
+          4,
+          79
+        ],
+        [
+          "If",
+          239,
+          240,
+          12,
+          24
+        ]
+      ],
+      "source": "    def _compute_hours_per_week(self):\n        \"\"\" Compute the average hours per week \"\"\"\n        for calendar in self:\n            # see _compute_days_per_week: variable/undefined calendars are set directly by the user\n            if calendar.calendar_type != 'fixed':\n                continue\n            attendances = calendar.attendance_ids.filtered(lambda a: a._is_work_period())\n            calendar.hours_per_week = sum(attendances.mapped('duration_hours'))"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._compute_work_resources_count",
+      "start": 244,
+      "end": 250,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          245,
+          248,
+          8,
+          36
+        ],
+        [
+          "Assign",
+          250,
+          250,
+          12,
+          83
+        ],
+        [
+          "For",
+          249,
+          250,
+          8,
+          83
+        ],
+        [
+          "FunctionDef",
+          244,
+          250,
+          4,
+          83
+        ]
+      ],
+      "source": "    def _compute_work_resources_count(self):\n        resources_per_calendar = dict(self.env['resource.resource']._read_group(\n            domain=[('calendar_id', 'in', self.ids)],\n            groupby=['calendar_id'],\n            aggregates=['__count']))\n        for calendar in self:\n            calendar.work_resources_count = resources_per_calendar.get(calendar, 0)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._verify_hours",
+      "start": 253,
+      "end": 261,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Continue",
+          257,
+          257,
+          16,
+          24
+        ],
+        [
+          "For",
+          254,
+          261,
+          8,
+          100
+        ],
+        [
+          "FunctionDef",
+          253,
+          261,
+          4,
+          100
+        ],
+        [
+          "If",
+          256,
+          257,
+          12,
+          24
+        ],
+        [
+          "If",
+          258,
+          259,
+          12,
+          94
+        ],
+        [
+          "If",
+          260,
+          261,
+          12,
+          100
+        ],
+        [
+          "Raise",
+          259,
+          259,
+          16,
+          94
+        ],
+        [
+          "Raise",
+          261,
+          261,
+          16,
+          100
+        ]
+      ],
+      "source": "    def _verify_hours(self):\n        for calendar in self:\n            # fixed calendars derive these from their attendance lines, always valid by construction\n            if calendar.calendar_type == 'fixed':\n                continue\n            if calendar.hours_per_week < 0 or calendar.hours_per_week > 168:\n                raise ValidationError(self.env._(\"Hours per week must be between 0 and 168.\"))\n            if calendar.hours_per_day < 0 or calendar.hours_per_day > 24:\n                raise ValidationError(self.env._(\"Average hours per day must be between 0 and 24.\"))"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._compute_is_fulltime",
+      "start": 264,
+      "end": 266,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          266,
+          266,
+          12,
+          116
+        ],
+        [
+          "For",
+          265,
+          266,
+          8,
+          116
+        ],
+        [
+          "FunctionDef",
+          264,
+          266,
+          4,
+          116
+        ]
+      ],
+      "source": "    def _compute_is_fulltime(self):\n        for calendar in self:\n            calendar.is_fulltime = float_compare(calendar.full_time_required_hours, calendar.hours_per_week, 3) == 0"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._compute_work_time_rate",
+      "start": 269,
+      "end": 274,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          272,
+          272,
+          16,
+          101
+        ],
+        [
+          "Assign",
+          274,
+          274,
+          16,
+          45
+        ],
+        [
+          "For",
+          270,
+          274,
+          8,
+          45
+        ],
+        [
+          "FunctionDef",
+          269,
+          274,
+          4,
+          45
+        ],
+        [
+          "If",
+          271,
+          274,
+          12,
+          45
+        ]
+      ],
+      "source": "    def _compute_work_time_rate(self):\n        for calendar in self:\n            if calendar.full_time_required_hours:\n                calendar.work_time_rate = calendar.hours_per_week / calendar.full_time_required_hours\n            else:\n                calendar.work_time_rate = 1.0"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar.is_calendar_referenced",
+      "start": 276,
+      "end": 291,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Assign",
+          280,
+          286,
+          8,
+          10
+        ],
+        [
+          "Assign",
+          288,
+          288,
+          12,
+          100
+        ],
+        [
+          "Expr",
+          279,
+          279,
+          8,
+          25
+        ],
+        [
+          "For",
+          287,
+          290,
+          8,
+          27
+        ],
+        [
+          "FunctionDef",
+          276,
+          291,
+          4,
+          20
+        ],
+        [
+          "If",
+          289,
+          290,
+          12,
+          27
+        ],
+        [
+          "Return",
+          290,
+          290,
+          16,
+          27
+        ],
+        [
+          "Return",
+          291,
+          291,
+          8,
+          20
+        ]
+      ],
+      "source": "    def is_calendar_referenced(self):\n        \"\"\" Return whether any stored many2one field of a non-abstract model (other than\n        the ``resource.calendar*`` models) points to this calendar. Searches as superuser. \"\"\"\n        self.ensure_one()\n        relations = self.env['ir.model.fields'].sudo().search([\n            ('ttype', '=', 'many2one'),\n            ('store', '=', True),\n            ('model', 'not ilike', 'resource.calendar'),\n            ('model_id.abstract', '=', False),\n            ('relation', '=', \"resource.calendar\")\n        ])\n        for field in relations:\n            count = self.env[field.model].sudo().search_count([(field.name, '=', self.id)], limit=1)\n            if count:\n                return True\n        return False"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar.create",
+      "start": 298,
+      "end": 301,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          299,
+          299,
+          8,
+          45
+        ],
+        [
+          "Expr",
+          300,
+          300,
+          8,
+          55
+        ],
+        [
+          "FunctionDef",
+          298,
+          301,
+          4,
+          24
+        ],
+        [
+          "Return",
+          301,
+          301,
+          8,
+          24
+        ]
+      ],
+      "source": "    def create(self, vals_list):\n        calendars = super().create(vals_list)\n        calendars._get_attendances_to_unlink().unlink()\n        return calendars"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar.write",
+      "start": 303,
+      "end": 306,
+      "program_units": 4,
+      "nodes": [
+        [
+          "Assign",
+          304,
+          304,
+          8,
+          33
+        ],
+        [
+          "Expr",
+          305,
+          305,
+          8,
+          50
+        ],
+        [
+          "FunctionDef",
+          303,
+          306,
+          4,
+          18
+        ],
+        [
+          "Return",
+          306,
+          306,
+          8,
+          18
+        ]
+      ],
+      "source": "    def write(self, vals):\n        res = super().write(vals)\n        self._get_attendances_to_unlink().unlink()\n        return res"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._attendance_intervals_batch",
+      "start": 312,
+      "end": 514,
+      "program_units": 108,
+      "nodes": [
+        [
+          "Assert",
+          349,
+          349,
+          8,
+          48
+        ],
+        [
+          "Assign",
+          356,
+          356,
+          12,
+          79
+        ],
+        [
+          "Assign",
+          358,
+          358,
+          8,
+          40
+        ],
+        [
+          "Assign",
+          359,
+          359,
+          8,
+          36
+        ],
+        [
+          "Assign",
+          360,
+          363,
+          8,
+          9
+        ],
+        [
+          "Assign",
+          366,
+          366,
+          12,
+          55
+        ],
+        [
+          "Assign",
+          367,
+          367,
+          12,
+          52
+        ],
+        [
+          "Assign",
+          369,
+          369,
+          8,
+          46
+        ],
+        [
+          "Assign",
+          371,
+          371,
+          12,
+          135
+        ],
+        [
+          "Assign",
+          373,
+          373,
+          12,
+          95
+        ],
+        [
+          "Assign",
+          376,
+          376,
+          8,
+          24
+        ],
+        [
+          "Assign",
+          379,
+          379,
+          12,
+          87
+        ],
+        [
+          "Assign",
+          380,
+          380,
+          12,
+          58
+        ],
+        [
+          "Assign",
+          382,
+          382,
+          16,
+          90
+        ],
+        [
+          "Assign",
+          383,
+          383,
+          16,
+          41
+        ],
+        [
+          "Assign",
+          384,
+          384,
+          16,
+          56
+        ],
+        [
+          "Assign",
+          386,
+          386,
+          20,
+          107
+        ],
+        [
+          "Assign",
+          389,
+          389,
+          20,
+          66
+        ],
+        [
+          "Assign",
+          390,
+          390,
+          20,
+          78
+        ],
+        [
+          "Assign",
+          391,
+          391,
+          20,
+          74
+        ],
+        [
+          "Assign",
+          397,
+          397,
+          20,
+          103
+        ],
+        [
+          "Assign",
+          398,
+          398,
+          20,
+          101
+        ],
+        [
+          "Assign",
+          401,
+          401,
+          20,
+          89
+        ],
+        [
+          "Assign",
+          402,
+          402,
+          20,
+          85
+        ],
+        [
+          "Assign",
+          409,
+          415,
+          8,
+          9
+        ],
+        [
+          "Assign",
+          416,
+          416,
+          8,
+          39
+        ],
+        [
+          "Assign",
+          418,
+          418,
+          12,
+          35
+        ],
+        [
+          "Assign",
+          419,
+          419,
+          12,
+          88
+        ],
+        [
+          "Assign",
+          421,
+          421,
+          12,
+          62
+        ],
+        [
+          "Assign",
+          422,
+          422,
+          12,
+          52
+        ],
+        [
+          "Assign",
+          423,
+          423,
+          12,
+          48
+        ],
+        [
+          "Assign",
+          427,
+          427,
+          20,
+          79
+        ],
+        [
+          "Assign",
+          429,
+          429,
+          20,
+          142
+        ],
+        [
+          "Assign",
+          432,
+          432,
+          16,
+          99
+        ],
+        [
+          "Assign",
+          433,
+          433,
+          16,
+          68
+        ],
+        [
+          "Assign",
+          434,
+          434,
+          16,
+          66
+        ],
+        [
+          "Assign",
+          435,
+          435,
+          16,
+          62
+        ],
+        [
+          "Assign",
+          436,
+          436,
+          16,
+          101
+        ],
+        [
+          "Assign",
+          437,
+          437,
+          16,
+          76
+        ],
+        [
+          "Assign",
+          445,
+          445,
+          20,
+          70
+        ],
+        [
+          "Assign",
+          446,
+          448,
+          20,
+          22
+        ],
+        [
+          "Assign",
+          449,
+          449,
+          20,
+          139
+        ],
+        [
+          "Assign",
+          454,
+          454,
+          20,
+          47
+        ],
+        [
+          "Assign",
+          455,
+          455,
+          20,
+          83
+        ],
+        [
+          "Assign",
+          456,
+          456,
+          20,
+          52
+        ],
+        [
+          "Assign",
+          458,
+          458,
+          20,
+          61
+        ],
+        [
+          "Assign",
+          459,
+          459,
+          20,
+          53
+        ],
+        [
+          "Assign",
+          461,
+          461,
+          20,
+          34
+        ],
+        [
+          "Assign",
+          462,
+          462,
+          20,
+          50
+        ],
+        [
+          "Assign",
+          465,
+          465,
+          24,
+          83
+        ],
+        [
+          "Assign",
+          467,
+          467,
+          24,
+          71
+        ],
+        [
+          "Assign",
+          468,
+          468,
+          24,
+          69
+        ],
+        [
+          "Assign",
+          471,
+          471,
+          28,
+          78
+        ],
+        [
+          "Assign",
+          472,
+          472,
+          28,
+          103
+        ],
+        [
+          "Assign",
+          474,
+          474,
+          28,
+          43
+        ],
+        [
+          "Assign",
+          476,
+          476,
+          24,
+          88
+        ],
+        [
+          "Assign",
+          477,
+          477,
+          24,
+          106
+        ],
+        [
+          "Assign",
+          479,
+          479,
+          24,
+          48
+        ],
+        [
+          "Assign",
+          482,
+          482,
+          32,
+          94
+        ],
+        [
+          "Assign",
+          483,
+          483,
+          32,
+          92
+        ],
+        [
+          "Assign",
+          484,
+          484,
+          32,
+          81
+        ],
+        [
+          "Assign",
+          485,
+          485,
+          32,
+          75
+        ],
+        [
+          "Assign",
+          486,
+          486,
+          32,
+          148
+        ],
+        [
+          "Assign",
+          490,
+          490,
+          32,
+          96
+        ],
+        [
+          "Assign",
+          491,
+          491,
+          32,
+          91
+        ],
+        [
+          "Assign",
+          492,
+          492,
+          32,
+          89
+        ],
+        [
+          "Assign",
+          495,
+          495,
+          36,
+          65
+        ],
+        [
+          "Assign",
+          496,
+          496,
+          36,
+          91
+        ],
+        [
+          "Assign",
+          498,
+          498,
+          36,
+          61
+        ],
+        [
+          "Assign",
+          499,
+          499,
+          36,
+          91
+        ],
+        [
+          "Assign",
+          501,
+          503,
+          32,
+          34
+        ],
+        [
+          "Assign",
+          511,
+          511,
+          20,
+          98
+        ],
+        [
+          "Assign",
+          513,
+          513,
+          20,
+          71
+        ],
+        [
+          "AugAssign",
+          387,
+          387,
+          20,
+          59
+        ],
+        [
+          "AugAssign",
+          487,
+          487,
+          32,
+          65
+        ],
+        [
+          "AugAssign",
+          507,
+          507,
+          28,
+          60
+        ],
+        [
+          "AugAssign",
+          509,
+          509,
+          24,
+          62
+        ],
+        [
+          "Continue",
+          393,
+          393,
+          16,
+          24
+        ],
+        [
+          "Expr",
+          351,
+          351,
+          12,
+          29
+        ],
+        [
+          "Expr",
+          392,
+          392,
+          20,
+          63
+        ],
+        [
+          "Expr",
+          399,
+          399,
+          20,
+          70
+        ],
+        [
+          "Expr",
+          403,
+          403,
+          20,
+          70
+        ],
+        [
+          "Expr",
+          505,
+          505,
+          32,
+          90
+        ],
+        [
+          "For",
+          365,
+          367,
+          8,
+          52
+        ],
+        [
+          "For",
+          377,
+          403,
+          8,
+          70
+        ],
+        [
+          "For",
+          385,
+          387,
+          16,
+          59
+        ],
+        [
+          "For",
+          388,
+          392,
+          16,
+          63
+        ],
+        [
+          "For",
+          395,
+          403,
+          12,
+          70
+        ],
+        [
+          "For",
+          417,
+          513,
+          8,
+          71
+        ],
+        [
+          "For",
+          425,
+          513,
+          12,
+          71
+        ],
+        [
+          "FunctionDef",
+          312,
+          514,
+          4,
+          37
+        ],
+        [
+          "If",
+          350,
+          353,
+          8,
+          110
+        ],
+        [
+          "If",
+          352,
+          353,
+          8,
+          110
+        ],
+        [
+          "If",
+          355,
+          356,
+          8,
+          79
+        ],
+        [
+          "If",
+          370,
+          373,
+          8,
+          95
+        ],
+        [
+          "If",
+          381,
+          393,
+          12,
+          24
+        ],
+        [
+          "If",
+          396,
+          403,
+          16,
+          70
+        ],
+        [
+          "If",
+          426,
+          429,
+          16,
+          142
+        ],
+        [
+          "If",
+          438,
+          513,
+          16,
+          71
+        ],
+        [
+          "If",
+          450,
+          513,
+          16,
+          71
+        ],
+        [
+          "If",
+          470,
+          474,
+          24,
+          43
+        ],
+        [
+          "If",
+          481,
+          505,
+          28,
+          90
+        ],
+        [
+          "If",
+          494,
+          499,
+          32,
+          91
+        ],
+        [
+          "If",
+          497,
+          499,
+          32,
+          91
+        ],
+        [
+          "Raise",
+          353,
+          353,
+          12,
+          110
+        ],
+        [
+          "Return",
+          514,
+          514,
+          8,
+          37
+        ],
+        [
+          "While",
+          464,
+          509,
+          20,
+          62
+        ],
+        [
+          "While",
+          480,
+          507,
+          24,
+          60
+        ]
+      ],
+      "source": "    def _attendance_intervals_batch(self, start_dt, end_dt, resources_per_tz=None, domain=None):\n        \"\"\" Return the theoretical work intervals generated by the attendance lines of this\n        calendar between ``start_dt`` and ``end_dt``, leaves NOT deducted.\n\n        Each interval is clipped to ``[start_dt, end_dt]``, expressed in the timezone of the\n        resource (attendance hours are local times) and carries its single attendance record\n        as payload (``keep_distinct=True``: two adjacent attendances stay two intervals).\n        Duration-based attendances (no ``hour_from``/``hour_to``) are placed contiguously,\n        centered on 12:00.\n\n        Flexible resources get synthetic intervals instead, based on the calendar returned\n        by ``resource._get_calendar_data_at`` (the resource's own calendar, or the employee's\n        version calendar with ``hr``), not on ``self``:\n\n        - fully flexible: a single interval covering the whole period;\n        - flexible with hours targets: one interval per day of at most ``hours_per_day``,\n          centered on 12:00, until ``hours_per_week`` is reached in each 7-day block counted\n          from ``start_dt`` (not calendar weeks).\n\n        Their payload is a new (unsaved) attendance holding only ``duration_hours``.\n\n        ``self`` holds at most one calendar. It may be empty when ``resources_per_tz`` is\n        given, but then only flexible resources get intervals.\n\n        :param datetime start_dt: timezone-aware start of the period\n        :param datetime end_dt: timezone-aware end of the period\n        :param dict resources_per_tz: ``{ZoneInfo: resource.resource recordset}``, as returned\n            by ``resources._get_resources_per_tz()``. Defaults to no resource, in the timezone\n            of ``start_dt``.\n        :param domain: optional domain on ``resource.calendar.attendance`` restricting the\n            attendances used. When given, the flexible handling above is skipped.\n        :return: ``{resource_id: Intervals}`` for every resource of ``resources_per_tz``, plus\n            the key ``False`` (calendar-level, no resource) when ``self`` is set. With several\n            timezones, the ``False`` entry is expressed in the last timezone of\n            ``resources_per_tz``.\n        :rtype: dict\n        \"\"\"\n        assert start_dt.tzinfo and end_dt.tzinfo\n        if self:\n            self.ensure_one()\n        elif not resources_per_tz:\n            raise UserError(self.env._(\"You cannot compute the intervals without a calendar on no resource.\"))\n\n        if not resources_per_tz:\n            resources_per_tz = {start_dt.tzinfo: self.env['resource.resource']}\n\n        start = start_dt.astimezone(UTC)\n        end = end_dt.astimezone(UTC)\n        bounds_per_tz = {\n            tz: (start_dt.astimezone(tz), end_dt.astimezone(tz))\n            for tz in resources_per_tz\n        }\n        # Use the outer bounds from the requested timezones\n        for low, high in bounds_per_tz.values():\n            start = min(start, low.replace(tzinfo=UTC))\n            end = max(end, high.replace(tzinfo=UTC))\n\n        domain = Domain(domain or Domain.TRUE)\n        if self:\n            attendances_per_day = self._get_attendances_by_date(start.date(), end.date(), domain | Domain('duration_based', '=', True))\n        else:\n            attendances_per_day = defaultdict(lambda: self.env['resource.calendar.attendance'])\n\n        # Generate once with utc as timezone\n        base_result = []\n        for day, all_attendances in attendances_per_day.items():\n            # If all attendance lines are duration based, compute correct intervals\n            all_duration_based_attendances = all_attendances.filtered('duration_based')\n            attendances = all_attendances.filtered(domain)\n            if all(att.duration_based for att in attendances):\n                total_hours = sum(all_duration_based_attendances.mapped('duration_hours'))\n                hours_per_attendance = {}\n                current_hour_from = 12 - total_hours / 2\n                for att in all_duration_based_attendances:\n                    hours_per_attendance[att] = (current_hour_from, current_hour_from + att.duration_hours)\n                    current_hour_from += att.duration_hours\n                for att in attendances:\n                    hour_from, hour_to = hours_per_attendance[att]\n                    day_from = datetime.combine(day, float_to_time(hour_from))\n                    day_to = datetime.combine(day, float_to_time(hour_to))\n                    base_result.append((day_from, day_to, att))\n                continue\n\n            for attendance in attendances:\n                if attendance.duration_based:\n                    day_from = datetime.combine(day, float_to_time(12 - attendance.duration_hours / 2))\n                    day_to = datetime.combine(day, float_to_time(12 + attendance.duration_hours / 2))\n                    base_result.append((day_from, day_to, attendance))\n                else:\n                    day_from = datetime.combine(day, float_to_time(attendance.hour_from))\n                    day_to = datetime.combine(day, float_to_time(attendance.hour_to))\n                    base_result.append((day_from, day_to, attendance))\n\n        # Copy the result localized once per necessary timezone\n        # Strictly speaking comparing start_dt < time or start_dt.astimezone(tz) < time\n        # should always yield the same result. however while working with dates it is easier\n        # if all dates have the same format\n        result_per_tz = {\n            tz: [(max(bounds_per_tz[tz][0], val[0].replace(tzinfo=tz)),\n                min(bounds_per_tz[tz][1], val[1].replace(tzinfo=tz)),\n                val[2])\n                    for val in base_result]\n            for tz in resources_per_tz\n        }\n        result_per_resource_id = dict()\n        for tz, tz_resources in resources_per_tz.items():\n            res = result_per_tz[tz]\n            calendar_data_by_resource = tz_resources._get_calendar_data_at(start_dt, tz)\n\n            res_intervals = Intervals(res, keep_distinct=True)\n            start_datetime = start_dt.astimezone(tz)\n            end_datetime = end_dt.astimezone(tz)\n\n            for resource in chain(tz_resources, (self.env['resource.resource'],) if self else ()):\n                if resource:\n                    calendar_data = calendar_data_by_resource.get(resource, {})\n                else:\n                    calendar_data = {'resource_calendar_id': self, 'hours_per_week': self.hours_per_week, 'hours_per_day': self.hours_per_day}\n                # resource_calendar_id is always set: it's required on both resource.resource and\n                # hr.version nowadays, and the fake/falsy resource above is given self's own calendar.\n                calendar = calendar_data.get('resource_calendar_id', self.env['resource.calendar'])\n                hours_per_week = calendar_data.get('hours_per_week')\n                hours_per_day = calendar_data.get('hours_per_day')\n                calendar_is_flexible = calendar._is_flexible()\n                is_fully_flexible = calendar_is_flexible and not hours_per_week and not hours_per_day\n                is_flexible = calendar_is_flexible and not is_fully_flexible\n                if not domain and is_fully_flexible:\n                    # A domain is only provided in extensions of `_work_intervals_batch` so when a domain is present,\n                    # we should use the standard attendance intervals rather than the flexible employee special handling.\n                    # This prevents a scenario where `_work_intervals_batch` calls this method twice and returns the same\n                    # value, causing the them to cancel out.\n                    #\n                    # If the resource is fully flexible, return the whole period from start_dt to end_dt with a dummy attendance\n                    hours = (end_dt - start_dt).total_seconds() / 3600\n                    dummy_attendance = self.env['resource.calendar.attendance'].new({\n                        'duration_hours': hours,\n                    })\n                    result_per_resource_id[resource.id] = Intervals([(start_datetime, end_datetime, dummy_attendance)], keep_distinct=True)\n                elif not domain and is_flexible:\n                    # For flexible Calendars, we create intervals to fill in the weekly intervals with the average daily hours\n                    # until the full time required hours are met. This gives us the most correct approximation when looking at a daily\n                    # and weekly range for time offs and overtime calculations and work entry generation\n                    start_date = start_datetime\n                    end_datetime_adjusted = end_datetime - relativedelta(seconds=1)\n                    end_date = end_datetime_adjusted\n\n                    full_time_required_hours = hours_per_week\n                    max_hours_per_day = hours_per_day\n\n                    intervals = []\n                    current_start_day = start_date\n\n                    while current_start_day <= end_date:\n                        current_end_of_week = current_start_day + timedelta(days=6)\n\n                        week_start = max(current_start_day, start_date)\n                        week_end = min(current_end_of_week, end_date)\n\n                        if current_start_day < start_date:\n                            prior_days = (start_date - current_start_day).days\n                            prior_hours = min(full_time_required_hours, max_hours_per_day * prior_days)\n                        else:\n                            prior_hours = 0\n\n                        remaining_hours = max(0, full_time_required_hours - prior_hours)\n                        remaining_hours = min(remaining_hours, (end_dt - start_dt).total_seconds() / 3600)\n\n                        current_day = week_start\n                        while current_day <= week_end:\n                            if remaining_hours > 0:\n                                day_start = datetime.combine(current_day, time.min, tzinfo=tz)\n                                day_end = datetime.combine(current_day, time.max, tzinfo=tz)\n                                day_period_start = max(start_datetime, day_start)\n                                day_period_end = min(end_datetime, day_end)\n                                allocate_hours = min(max_hours_per_day, remaining_hours, (day_period_end - day_period_start).total_seconds() / 3600)\n                                remaining_hours -= allocate_hours\n\n                                # Create interval centered at 12:00 PM\n                                midpoint = datetime.combine(current_day, time(12, 0), tzinfo=tz)\n                                start_time = midpoint - timedelta(hours=allocate_hours / 2)\n                                end_time = midpoint + timedelta(hours=allocate_hours / 2)\n\n                                if start_time < day_period_start:\n                                    start_time = day_period_start\n                                    end_time = start_time + timedelta(hours=allocate_hours)\n                                elif end_time > day_period_end:\n                                    end_time = day_period_end\n                                    start_time = end_time - timedelta(hours=allocate_hours)\n\n                                dummy_attendance = self.env['resource.calendar.attendance'].new({\n                                    'duration_hours': allocate_hours,\n                                })\n\n                                intervals.append((start_time, end_time, dummy_attendance))\n\n                            current_day += timedelta(days=1)\n\n                        current_start_day += timedelta(days=7)\n\n                    result_per_resource_id[resource.id] = Intervals(intervals, keep_distinct=True)\n                else:\n                    result_per_resource_id[resource.id] = res_intervals\n        return result_per_resource_id"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._handle_flexible_leave_interval",
+      "start": 516,
+      "end": 530,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          527,
+          527,
+          8,
+          23
+        ],
+        [
+          "Assign",
+          528,
+          528,
+          8,
+          63
+        ],
+        [
+          "Assign",
+          529,
+          529,
+          8,
+          63
+        ],
+        [
+          "FunctionDef",
+          516,
+          530,
+          4,
+          23
+        ],
+        [
+          "Return",
+          530,
+          530,
+          8,
+          23
+        ]
+      ],
+      "source": "    def _handle_flexible_leave_interval(self, dt0, dt1, leave):\n        \"\"\" Hook adapting the bounds of a resource-specific leave of a flexible resource.\n        By default, the leave is extended to whole days: from 00:00 on the day of ``dt0`` to\n        23:59:59.999999 on the day of ``dt1``, in their timezone.\n\n        :param datetime dt0: leave start, localized in the resource timezone\n        :param datetime dt1: leave end, localized in the resource timezone\n        :param leave: the ``resource.calendar.leaves`` record\n        :return: the adapted ``(dt0, dt1)``\n        :rtype: tuple\n        \"\"\"\n        tz = dt0.tzinfo  # Get the timezone information from dt0\n        dt0 = datetime.combine(dt0.date(), time.min, tzinfo=tz)\n        dt1 = datetime.combine(dt1.date(), time.max, tzinfo=tz)\n        return dt0, dt1"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._leave_intervals",
+      "start": 532,
+      "end": 543,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          541,
+          541,
+          12,
+          52
+        ],
+        [
+          "Assign",
+          542,
+          542,
+          8,
+          59
+        ],
+        [
+          "FunctionDef",
+          532,
+          543,
+          4,
+          123
+        ],
+        [
+          "If",
+          540,
+          541,
+          8,
+          52
+        ],
+        [
+          "Return",
+          543,
+          543,
+          8,
+          123
+        ]
+      ],
+      "source": "    def _leave_intervals(self, start_dt, end_dt, resource=None, domain=None, tz=None):\n        \"\"\" Single-resource shortcut of :meth:`_leave_intervals_batch`.\n\n        :param resource: a ``resource.resource`` record, or ``None`` / empty for the\n            calendar-level leaves (global leaves only, in the timezone of ``start_dt``)\n        :param tz: unused, kept for compatibility; the resource timezone is used\n        :rtype: :class:`~odoo.tools.intervals.Intervals`\n        \"\"\"\n        if resource is None:\n            resource = self.env['resource.resource']\n        resources_per_tz = resource._get_resources_per_tz()\n        return self._leave_intervals_batch(start_dt, end_dt, resources_per_tz=resources_per_tz, domain=domain)[resource.id]"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._leave_intervals_batch",
+      "start": 545,
+      "end": 618,
+      "program_units": 40,
+      "nodes": [
+        [
+          "Assert",
+          567,
+          567,
+          8,
+          48
+        ],
+        [
+          "Assign",
+          570,
+          570,
+          12,
+          51
+        ],
+        [
+          "Assign",
+          572,
+          572,
+          12,
+          73
+        ],
+        [
+          "Assign",
+          574,
+          574,
+          8,
+          29
+        ],
+        [
+          "Assign",
+          577,
+          577,
+          12,
+          99
+        ],
+        [
+          "Assign",
+          584,
+          588,
+          8,
+          9
+        ],
+        [
+          "Assign",
+          591,
+          591,
+          8,
+          34
+        ],
+        [
+          "Assign",
+          592,
+          592,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          593,
+          593,
+          8,
+          72
+        ],
+        [
+          "Assign",
+          595,
+          595,
+          12,
+          46
+        ],
+        [
+          "Assign",
+          596,
+          596,
+          12,
+          44
+        ],
+        [
+          "Assign",
+          597,
+          597,
+          12,
+          45
+        ],
+        [
+          "Assign",
+          598,
+          598,
+          12,
+          41
+        ],
+        [
+          "Assign",
+          604,
+          604,
+          24,
+          54
+        ],
+        [
+          "Assign",
+          606,
+          606,
+          24,
+          55
+        ],
+        [
+          "Assign",
+          607,
+          607,
+          24,
+          54
+        ],
+        [
+          "Assign",
+          609,
+          609,
+          24,
+          50
+        ],
+        [
+          "Assign",
+          611,
+          611,
+          24,
+          51
+        ],
+        [
+          "Assign",
+          612,
+          612,
+          24,
+          50
+        ],
+        [
+          "Assign",
+          613,
+          613,
+          20,
+          56
+        ],
+        [
+          "Assign",
+          614,
+          614,
+          20,
+          54
+        ],
+        [
+          "Assign",
+          616,
+          616,
+          24,
+          88
+        ],
+        [
+          "AugAssign",
+          580,
+          580,
+          16,
+          47
+        ],
+        [
+          "Continue",
+          602,
+          602,
+          24,
+          32
+        ],
+        [
+          "Expr",
+          576,
+          576,
+          12,
+          60
+        ],
+        [
+          "Expr",
+          617,
+          617,
+          20,
+          87
+        ],
+        [
+          "For",
+          579,
+          580,
+          12,
+          47
+        ],
+        [
+          "For",
+          594,
+          617,
+          8,
+          87
+        ],
+        [
+          "For",
+          599,
+          617,
+          12,
+          87
+        ],
+        [
+          "For",
+          600,
+          617,
+          16,
+          87
+        ],
+        [
+          "FunctionDef",
+          545,
+          618,
+          4,
+          89
+        ],
+        [
+          "If",
+          569,
+          570,
+          8,
+          51
+        ],
+        [
+          "If",
+          571,
+          572,
+          8,
+          73
+        ],
+        [
+          "If",
+          575,
+          577,
+          8,
+          99
+        ],
+        [
+          "If",
+          578,
+          580,
+          8,
+          47
+        ],
+        [
+          "If",
+          601,
+          602,
+          20,
+          32
+        ],
+        [
+          "If",
+          603,
+          607,
+          20,
+          54
+        ],
+        [
+          "If",
+          608,
+          612,
+          20,
+          50
+        ],
+        [
+          "If",
+          615,
+          616,
+          20,
+          88
+        ],
+        [
+          "Return",
+          618,
+          618,
+          8,
+          89
+        ]
+      ],
+      "source": "    def _leave_intervals_batch(self, start_dt, end_dt, resources_per_tz=None, domain=None):\n        \"\"\" Return the leave intervals (``resource.calendar.leaves``) overlapping the period,\n        clipped to ``[start_dt, end_dt]`` and expressed in the timezone of each resource.\n\n        A resource gets its own leaves plus the global leaves (no ``resource_id``) of its\n        company; the calendar-level entry (key ``False``) only gets global leaves. When\n        ``self`` is set, only leaves of this calendar or without calendar are considered.\n        Leaves of flexible resources go through :meth:`_handle_flexible_leave_interval`\n        (whole days by default). Overlapping leaves are merged, the payload being the union\n        of the leave records.\n\n        :param datetime start_dt: timezone-aware start of the period\n        :param datetime end_dt: timezone-aware end of the period\n        :param dict resources_per_tz: ``{ZoneInfo: resource.resource recordset}``, see\n            :meth:`_attendance_intervals_batch`\n        :param list domain: domain (as a list) on ``resource.calendar.leaves``. ``None``\n            means ``[('count_as', '=', 'absence')]``; any other value, even ``[]``, replaces\n            that default, so leaves counted as working time are then included.\n        :return: ``{resource_id: Intervals}`` for every resource of ``resources_per_tz``, plus\n            the key ``False`` when ``self`` is set or ``resources_per_tz`` is empty\n        :rtype: dict\n        \"\"\"\n        assert start_dt.tzinfo and end_dt.tzinfo\n\n        if domain is None:\n            domain = [('count_as', '=', 'absence')]\n        if self:\n            domain = domain + [('calendar_id', 'in', [False] + self.ids)]\n\n        all_resources = set()\n        if not resources_per_tz or self:\n            all_resources.add(self.env['resource.resource'])\n            resources_per_tz = resources_per_tz or {start_dt.tzinfo: self.env['resource.resource']}\n        if resources_per_tz:\n            for _, resources in resources_per_tz.items():\n                all_resources |= set(resources)\n\n        # for the computation, express all datetimes in UTC\n        # Public leave don't have a resource_id\n        domain = domain + [\n            ('resource_id', 'in', [False] + [r.id for r in all_resources]),\n            ('date_from', '<=', end_dt.astimezone(UTC).replace(tzinfo=None)),\n            ('date_to', '>=', start_dt.astimezone(UTC).replace(tzinfo=None)),\n        ]\n\n        # retrieve leave intervals in (start_dt, end_dt)\n        result = defaultdict(list)\n        tz_dates = {}\n        all_leaves = self.env['resource.calendar.leaves'].search(domain)\n        for leave in all_leaves:\n            leave_resource = leave.resource_id\n            leave_company = leave.company_id\n            leave_date_from = leave.date_from\n            leave_date_to = leave.date_to\n            for tz, resources in resources_per_tz.items():\n                for resource in chain(resources, (self.env['resource.resource'],) if self else ()):\n                    if leave_resource.id not in [False, resource.id] or (not leave_resource and resource and resource.company_id != leave_company):\n                        continue\n                    if (tz, start_dt) in tz_dates:\n                        start = tz_dates[tz, start_dt]\n                    else:\n                        start = start_dt.astimezone(tz)\n                        tz_dates[tz, start_dt] = start\n                    if (tz, end_dt) in tz_dates:\n                        end = tz_dates[tz, end_dt]\n                    else:\n                        end = end_dt.astimezone(tz)\n                        tz_dates[tz, end_dt] = end\n                    dt0 = leave_date_from.astimezone(tz)\n                    dt1 = leave_date_to.astimezone(tz)\n                    if leave_resource and leave_resource._is_flexible():\n                        dt0, dt1 = self._handle_flexible_leave_interval(dt0, dt1, leave)\n                    result[resource.id].append((max(start, dt0), min(end, dt1), leave))\n        return {r.id: Intervals(result[r.id], keep_distinct=True) for r in all_resources}"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._work_intervals_batch",
+      "start": 620,
+      "end": 653,
+      "program_units": 12,
+      "nodes": [
+        [
+          "Assign",
+          638,
+          638,
+          8,
+          29
+        ],
+        [
+          "Assign",
+          645,
+          645,
+          8,
+          99
+        ],
+        [
+          "Assign",
+          647,
+          647,
+          12,
+          101
+        ],
+        [
+          "AugAssign",
+          643,
+          643,
+          16,
+          47
+        ],
+        [
+          "Expr",
+          640,
+          640,
+          12,
+          60
+        ],
+        [
+          "For",
+          642,
+          643,
+          12,
+          47
+        ],
+        [
+          "FunctionDef",
+          620,
+          653,
+          4,
+          9
+        ],
+        [
+          "If",
+          639,
+          640,
+          8,
+          60
+        ],
+        [
+          "If",
+          641,
+          643,
+          8,
+          47
+        ],
+        [
+          "If",
+          646,
+          650,
+          8,
+          13
+        ],
+        [
+          "Return",
+          648,
+          650,
+          12,
+          13
+        ],
+        [
+          "Return",
+          651,
+          653,
+          8,
+          9
+        ]
+      ],
+      "source": "    def _work_intervals_batch(self, start_dt, end_dt, resources_per_tz=None, domain=None, compute_leaves=True):\n        \"\"\" Return the effective work intervals: attendance intervals minus leave intervals.\n        This is the method to use (and the one to override, as ``hr_work_entry`` does) to\n        know when resources actually work.\n\n        :param datetime start_dt: timezone-aware start of the period\n        :param datetime end_dt: timezone-aware end of the period\n        :param dict resources_per_tz: ``{ZoneInfo: resource.resource recordset}``, see\n            :meth:`_attendance_intervals_batch`\n        :param list domain: leave domain passed to :meth:`_leave_intervals_batch` (``None``\n            means leaves counted as absence). It does not filter attendances.\n        :param bool compute_leaves: when ``False``, leaves are not deducted and the result\n            equals :meth:`_attendance_intervals_batch`\n        :return: ``{resource_id: Intervals}``, with the key ``False`` for the calendar-level\n            result when ``self`` is set or ``resources_per_tz`` is empty. Intervals are\n            expressed in each resource's timezone and carry attendance records.\n        :rtype: dict\n        \"\"\"\n        all_resources = set()\n        if not resources_per_tz or self:\n            all_resources.add(self.env['resource.resource'])\n        if resources_per_tz:\n            for _, resources in resources_per_tz.items():\n                all_resources |= set(resources)\n\n        attendance_intervals = self._attendance_intervals_batch(start_dt, end_dt, resources_per_tz)\n        if compute_leaves:\n            leave_intervals = self._leave_intervals_batch(start_dt, end_dt, resources_per_tz, domain)\n            return {\n                r.id: (attendance_intervals[r.id] - leave_intervals[r.id]) for r in all_resources\n            }\n        return {\n            r.id: attendance_intervals[r.id] for r in all_resources\n        }"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._unavailable_intervals",
+      "start": 655,
+      "end": 668,
+      "program_units": 5,
+      "nodes": [
+        [
+          "Assign",
+          664,
+          664,
+          12,
+          52
+        ],
+        [
+          "Assign",
+          665,
+          665,
+          8,
+          59
+        ],
+        [
+          "FunctionDef",
+          655,
+          668,
+          4,
+          39
+        ],
+        [
+          "If",
+          663,
+          664,
+          8,
+          52
+        ],
+        [
+          "Return",
+          666,
+          668,
+          8,
+          39
+        ]
+      ],
+      "source": "    def _unavailable_intervals(self, start_dt, end_dt, resource=None, domain=None, tz=None):\n        \"\"\" Single-resource shortcut of :meth:`_unavailable_intervals_batch`.\n\n        :param resource: a ``resource.resource`` record, or ``None`` / empty for the\n            calendar-level result\n        :param tz: unused, kept for compatibility\n        :return: ``Intervals`` in UTC, empty for a flexible resource without leave\n        \"\"\"\n        if resource is None:\n            resource = self.env['resource.resource']\n        resources_per_tz = resource._get_resources_per_tz()\n        return self._unavailable_intervals_batch(\n            start_dt, end_dt, resources_per_tz=resources_per_tz, domain=domain,\n        ).get(resource.id, Intervals())"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._unavailable_intervals_batch",
+      "start": 670,
+      "end": 720,
+      "program_units": 25,
+      "nodes": [
+        [
+          "Assign",
+          688,
+          688,
+          8,
+          29
+        ],
+        [
+          "Assign",
+          694,
+          694,
+          8,
+          105
+        ],
+        [
+          "Assign",
+          695,
+          695,
+          8,
+          21
+        ],
+        [
+          "Assign",
+          696,
+          696,
+          8,
+          19
+        ],
+        [
+          "Assign",
+          700,
+          700,
+          20,
+          100
+        ],
+        [
+          "Assign",
+          702,
+          705,
+          20,
+          22
+        ],
+        [
+          "Assign",
+          707,
+          707,
+          12,
+          66
+        ],
+        [
+          "Assign",
+          708,
+          708,
+          12,
+          35
+        ],
+        [
+          "Assign",
+          712,
+          712,
+          12,
+          62
+        ],
+        [
+          "Assign",
+          713,
+          717,
+          12,
+          15
+        ],
+        [
+          "Assign",
+          719,
+          719,
+          12,
+          72
+        ],
+        [
+          "AugAssign",
+          693,
+          693,
+          16,
+          47
+        ],
+        [
+          "Continue",
+          706,
+          706,
+          16,
+          24
+        ],
+        [
+          "Expr",
+          690,
+          690,
+          12,
+          60
+        ],
+        [
+          "Expr",
+          710,
+          710,
+          16,
+          94
+        ],
+        [
+          "For",
+          692,
+          693,
+          12,
+          47
+        ],
+        [
+          "For",
+          697,
+          719,
+          8,
+          72
+        ],
+        [
+          "For",
+          709,
+          710,
+          12,
+          94
+        ],
+        [
+          "FunctionDef",
+          670,
+          720,
+          4,
+          21
+        ],
+        [
+          "If",
+          689,
+          690,
+          8,
+          60
+        ],
+        [
+          "If",
+          691,
+          693,
+          8,
+          47
+        ],
+        [
+          "If",
+          698,
+          706,
+          12,
+          24
+        ],
+        [
+          "If",
+          699,
+          700,
+          16,
+          100
+        ],
+        [
+          "If",
+          701,
+          705,
+          16,
+          22
+        ],
+        [
+          "Return",
+          720,
+          720,
+          8,
+          21
+        ]
+      ],
+      "source": "    def _unavailable_intervals_batch(self, start_dt, end_dt, resources_per_tz=None, domain=None):\n        \"\"\" Return the periods during which resources do not work: the complement of\n        :meth:`_work_intervals_batch` within ``[start_dt, end_dt]``, expressed in UTC (used by\n        Gantt views to grey out unavailable time).\n\n        For a flexible resource (according to its own calendar), only its leaves are\n        unavailable, and the resource has no key at all when it has no leave (callers treat\n        that absence as \"no unavailability\").\n\n        :param datetime start_dt: timezone-aware start of the period\n        :param datetime end_dt: timezone-aware end of the period\n        :param dict resources_per_tz: ``{ZoneInfo: resource.resource recordset}``, see\n            :meth:`_attendance_intervals_batch`\n        :param list domain: leave domain, see :meth:`_leave_intervals_batch`\n        :return: ``{resource_id: Intervals}`` in UTC, with the key ``False`` when ``self`` is\n            set or ``resources_per_tz`` is empty\n        :rtype: dict\n        \"\"\"\n        all_resources = set()\n        if not resources_per_tz or self:\n            all_resources.add(self.env['resource.resource'])\n        if resources_per_tz:\n            for _, resources in resources_per_tz.items():\n                all_resources |= set(resources)\n        resources_work_intervals = self._work_intervals_batch(start_dt, end_dt, resources_per_tz, domain)\n        leaves = None\n        result = {}\n        for resource in all_resources:\n            if resource and resource._is_flexible():\n                if leaves is None:\n                    leaves = self._leave_intervals_batch(start_dt, end_dt, resources_per_tz, domain)\n                if res_leaves := leaves[resource.id]:\n                    result[resource.id] = Intervals([\n                        (start.astimezone(UTC), stop.astimezone(UTC), meta)\n                        for start, stop, meta in res_leaves\n                    ])\n                continue\n            work_intervals = resources_work_intervals[resource.id]\n            utc_work_intervals = []\n            for (start, stop, meta) in work_intervals:\n                utc_work_intervals.append((start.astimezone(UTC), stop.astimezone(UTC), meta))\n\n            utc_work_intervals = Intervals(utc_work_intervals)\n            full_interval_UTC = Intervals([(\n                start_dt.astimezone(UTC),\n                end_dt.astimezone(UTC),\n                self.env['resource.calendar'],\n            )])\n\n            result[resource.id] = full_interval_UTC - utc_work_intervals\n        return result"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._get_attendance_intervals_days_data",
+      "start": 722,
+      "end": 772,
+      "program_units": 20,
+      "nodes": [
+        [
+          "Assign",
+          743,
+          743,
+          8,
+          38
+        ],
+        [
+          "Assign",
+          744,
+          744,
+          8,
+          37
+        ],
+        [
+          "Assign",
+          751,
+          751,
+          12,
+          29
+        ],
+        [
+          "Assign",
+          753,
+          753,
+          16,
+          122
+        ],
+        [
+          "Assign",
+          754,
+          754,
+          16,
+          51
+        ],
+        [
+          "Assign",
+          756,
+          756,
+          16,
+          35
+        ],
+        [
+          "Assign",
+          758,
+          758,
+          8,
+          83
+        ],
+        [
+          "Assign",
+          761,
+          761,
+          16,
+          73
+        ],
+        [
+          "Assign",
+          765,
+          765,
+          16,
+          104
+        ],
+        [
+          "Assign",
+          766,
+          766,
+          16,
+          78
+        ],
+        [
+          "AugAssign",
+          755,
+          755,
+          16,
+          91
+        ],
+        [
+          "AugAssign",
+          762,
+          762,
+          16,
+          78
+        ],
+        [
+          "Expr",
+          742,
+          742,
+          12,
+          29
+        ],
+        [
+          "For",
+          745,
+          756,
+          8,
+          35
+        ],
+        [
+          "For",
+          759,
+          766,
+          8,
+          78
+        ],
+        [
+          "FunctionDef",
+          722,
+          772,
+          4,
+          9
+        ],
+        [
+          "If",
+          741,
+          742,
+          8,
+          29
+        ],
+        [
+          "If",
+          760,
+          766,
+          12,
+          78
+        ],
+        [
+          "Return",
+          768,
+          772,
+          8,
+          9
+        ],
+        [
+          "While",
+          752,
+          756,
+          12,
+          35
+        ]
+      ],
+      "source": "    def _get_attendance_intervals_days_data(self, attendance_intervals):\n        \"\"\" Convert work intervals (typically the output of :meth:`_work_intervals_batch`\n        for one resource) into a duration in days and hours.\n\n        Intervals are split per calendar day (in their own timezone). For each day:\n\n        - if this calendar has duration-based attendances on that day, the day counts for\n          ``hours / sum(their duration_hours)`` (proportional);\n        - otherwise it counts for 0.5 day if its hours are at most 3/4 of\n          :meth:`_get_reference_hours_per_day`, else for 1 day.\n\n        The payload of the intervals is ignored. ``self`` may be empty: then any day with\n        hours counts as 1.\n\n        :param attendance_intervals: iterable of ``(start, stop, records)`` with\n            timezone-aware datetimes, e.g. an :class:`~odoo.tools.intervals.Intervals`\n        :return: ``{'days': float, 'hours': float}``, days rounded to 0.001\n        :rtype: dict\n        \"\"\"\n        if self:\n            self.ensure_one()\n        day_hours = defaultdict(float)\n        day_days = defaultdict(float)\n        for start, stop, _ in attendance_intervals:\n            # If the interval covers only a part of the original attendance, we\n            # take durations in days proportionally to what is left of the interval.\n            # an interval synthesized for a fully flexible calendar can span several\n            # calendar days at once: split it at midnight so each day gets its own\n            # bucket (no empty bucket for an interval ending at midnight)\n            day_start = start\n            while day_start < stop:\n                next_day_start = datetime.combine(day_start.date() + timedelta(days=1), time.min, tzinfo=day_start.tzinfo)\n                day_end = min(stop, next_day_start)\n                day_hours[day_start.date()] += (day_end - day_start).total_seconds() / 3600\n                day_start = day_end\n\n        duration_based_attendances = self.attendance_ids.filtered('duration_based')\n        for day, hours in day_hours.items():\n            if attendances := duration_based_attendances._filter_by_date(day):\n                hours_per_day = sum(attendances.mapped('duration_hours'))\n                day_days[day] += hours / hours_per_day if hours_per_day else 0\n            else:\n                # A day is only a full one above 3 / 4 of the theoretical day, below that it is half a day.\n                reference_hours = self._get_reference_hours_per_day(day) if self else self.hours_per_day\n                day_days[day] = 0.5 if hours <= reference_hours * 3 / 4 else 1\n\n        return {\n            # Round the number of days to the closest thousandth of a day.\n            'days': float_round(sum(day_days[day] for day in day_days), precision_rounding=0.001),\n            'hours': sum(day_hours.values()),\n        }"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._get_reference_hours_per_day",
+      "start": 774,
+      "end": 784,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Expr",
+          783,
+          783,
+          8,
+          25
+        ],
+        [
+          "FunctionDef",
+          774,
+          784,
+          4,
+          33
+        ],
+        [
+          "Return",
+          784,
+          784,
+          8,
+          33
+        ]
+      ],
+      "source": "    def _get_reference_hours_per_day(self, day):\n        \"\"\" Return the number of hours ``day`` is theoretically made of, used as the full-day\n        reference by :meth:`_get_attendance_intervals_days_data`. Defaults to the calendar's\n        average ``hours_per_day``; overridden by ``hr_work_entry`` to include attendances\n        counted as absence.\n\n        :param date day: the day to evaluate\n        :rtype: float\n        \"\"\"\n        self.ensure_one()\n        return self.hours_per_day"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._get_closest_work_time",
+      "start": 786,
+      "end": 830,
+      "program_units": 18,
+      "nodes": [
+        [
+          "Assign",
+          808,
+          808,
+          8,
+          47
+        ],
+        [
+          "Assign",
+          810,
+          810,
+          12,
+          52
+        ],
+        [
+          "Assign",
+          815,
+          815,
+          8,
+          40
+        ],
+        [
+          "Assign",
+          818,
+          818,
+          12,
+          72
+        ],
+        [
+          "Assign",
+          819,
+          819,
+          12,
+          78
+        ],
+        [
+          "Assign",
+          821,
+          821,
+          12,
+          49
+        ],
+        [
+          "Assign",
+          825,
+          825,
+          8,
+          59
+        ],
+        [
+          "Assign",
+          826,
+          829,
+          8,
+          9
+        ],
+        [
+          "FunctionDef",
+          786,
+          830,
+          4,
+          73
+        ],
+        [
+          "FunctionDef",
+          805,
+          806,
+          8,
+          50
+        ],
+        [
+          "If",
+          809,
+          810,
+          8,
+          52
+        ],
+        [
+          "If",
+          812,
+          813,
+          8,
+          84
+        ],
+        [
+          "If",
+          817,
+          821,
+          8,
+          49
+        ],
+        [
+          "If",
+          823,
+          824,
+          8,
+          23
+        ],
+        [
+          "Raise",
+          813,
+          813,
+          12,
+          84
+        ],
+        [
+          "Return",
+          806,
+          806,
+          12,
+          50
+        ],
+        [
+          "Return",
+          824,
+          824,
+          12,
+          23
+        ],
+        [
+          "Return",
+          830,
+          830,
+          8,
+          73
+        ]
+      ],
+      "source": "    def _get_closest_work_time(self, dt, match_end=False, resource=None, search_range=None, compute_leaves=True):\n        \"\"\" Return the work interval boundary closest to ``dt`` within the search range: the\n        closest interval start, or the closest interval end when ``match_end`` is set.\n\n        Work intervals come from :meth:`_work_intervals_batch` for ``resource``, in the\n        resource timezone. Without resource, the calendar-level intervals are used and the\n        attendance hours are interpreted in UTC.\n\n        :param datetime dt: timezone-aware reference datetime\n        :param bool match_end: look for interval ends instead of interval starts\n        :param resource: ``resource.resource`` record, or ``None``\n        :param search_range: ``(start, end)`` timezone-aware datetimes; defaults to the whole\n            day of ``dt`` in the resource timezone\n        :param bool compute_leaves: deduct leaves from the work intervals\n        :return: the closest boundary (in the resource timezone), or ``None`` if ``dt`` is\n            outside the search range or there is no work interval in it\n        :rtype: datetime | None\n        :raises ValueError: if ``dt`` or ``search_range`` are naive\n        \"\"\"\n        def interval_dt(interval):\n            return interval[1 if match_end else 0]\n\n        tz = resource.tz if resource else 'UTC'\n        if resource is None:\n            resource = self.env['resource.resource']\n\n        if not dt.tzinfo or (search_range and not (search_range[0].tzinfo and search_range[1].tzinfo)):\n            raise ValueError(self.env._('Provided datetimes needs to be timezoned'))\n\n        dt = dt.astimezone(ZoneInfo(tz))\n\n        if not search_range:\n            range_start = dt + relativedelta(hour=0, minute=0, second=0)\n            range_end = dt + relativedelta(days=1, hour=0, minute=0, second=0)\n        else:\n            range_start, range_end = search_range\n\n        if not range_start <= dt <= range_end:\n            return None\n        resources_per_tz = resource._get_resources_per_tz()\n        work_intervals = sorted(\n            self._work_intervals_batch(range_start, range_end, resources_per_tz, compute_leaves=compute_leaves)[resource.id],\n            key=lambda i: abs(interval_dt(i) - dt),\n        )\n        return interval_dt(work_intervals[0]) if work_intervals else None"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._get_unusual_days",
+      "start": 832,
+      "end": 868,
+      "program_units": 18,
+      "nodes": [
+        [
+          "Assign",
+          854,
+          854,
+          12,
+          51
+        ],
+        [
+          "Assign",
+          856,
+          856,
+          12,
+          47
+        ],
+        [
+          "Assign",
+          858,
+          858,
+          8,
+          47
+        ],
+        [
+          "Assign",
+          862,
+          862,
+          12,
+          154
+        ],
+        [
+          "Assign",
+          863,
+          863,
+          12,
+          25
+        ],
+        [
+          "Assign",
+          867,
+          867,
+          8,
+          105
+        ],
+        [
+          "AugAssign",
+          860,
+          860,
+          12,
+          68
+        ],
+        [
+          "Expr",
+          852,
+          852,
+          12,
+          29
+        ],
+        [
+          "Expr",
+          865,
+          865,
+          16,
+          127
+        ],
+        [
+          "For",
+          864,
+          865,
+          12,
+          127
+        ],
+        [
+          "FunctionDef",
+          832,
+          868,
+          4,
+          125
+        ],
+        [
+          "If",
+          851,
+          852,
+          8,
+          29
+        ],
+        [
+          "If",
+          853,
+          854,
+          8,
+          51
+        ],
+        [
+          "If",
+          855,
+          856,
+          8,
+          47
+        ],
+        [
+          "If",
+          859,
+          860,
+          8,
+          68
+        ],
+        [
+          "If",
+          861,
+          866,
+          8,
+          125
+        ],
+        [
+          "Return",
+          866,
+          866,
+          12,
+          125
+        ],
+        [
+          "Return",
+          868,
+          868,
+          8,
+          125
+        ]
+      ],
+      "source": "    def _get_unusual_days(self, start_dt, end_dt, company_id=False, resource=None):\n        \"\"\" Tell, for each day between ``start_dt`` and ``end_dt``, whether it is an\n        \"unusual\" day, i.e. a day without work (weekend, public holiday...). Used by calendar\n        and date picker widgets to grey out days.\n\n        Days are evaluated with the calendar-level work intervals (global leaves deducted),\n        in the timezone of ``start_dt``.\n        For a flexible ``resource``, a day is unusual only if the resource has a leave on it.\n        Only leaves counted as absence are considered: a leave counted as working time\n        (e.g. a training) does not make a day unusual.\n\n        :param datetime start_dt: start of the period; naive means UTC\n        :param datetime end_dt: end of the period (its day included); naive means UTC\n        :param company_id: optional ``res.company`` record restricting the leaves to that\n            company or to no company\n        :param resource: optional ``resource.resource`` record, only used for flexible ones\n        :return: ``{'YYYY-MM-DD': bool}``, ``True`` for unusual days\n        :rtype: dict\n        \"\"\"\n        if self:\n            self.ensure_one()\n        if not start_dt.tzinfo:\n            start_dt = start_dt.replace(tzinfo=UTC)\n        if not end_dt.tzinfo:\n            end_dt = end_dt.replace(tzinfo=UTC)\n\n        domain = [('count_as', '=', 'absence')]\n        if company_id:\n            domain += [('company_id', 'in', (company_id.id, False))]\n        if resource and resource._is_flexible():\n            leave_intervals = self._leave_intervals_batch(start_dt, end_dt, domain=domain, resources_per_tz=resource._get_resources_per_tz())[resource.id]\n            works = set()\n            for start_int, end_int, _ in leave_intervals:\n                works.update(start_int.date() + timedelta(days=i) for i in range((end_int.date() - start_int.date()).days + 1))\n            return {fields.Date.to_string(day.date()): (day.date() in works) for day in rrule(DAILY, start_dt, until=end_dt)}\n        works = {d[0].date() for d in self._work_intervals_batch(start_dt, end_dt, domain=domain)[False]}\n        return {fields.Date.to_string(day.date()): (day.date() not in works) for day in rrule(DAILY, start_dt, until=end_dt)}"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar.get_work_hours_count",
+      "start": 888,
+      "end": 933,
+      "program_units": 17,
+      "nodes": [
+        [
+          "Assert",
+          908,
+          908,
+          8,
+          41
+        ],
+        [
+          "Assert",
+          909,
+          909,
+          8,
+          39
+        ],
+        [
+          "Assign",
+          911,
+          911,
+          8,
+          42
+        ],
+        [
+          "Assign",
+          915,
+          915,
+          12,
+          63
+        ],
+        [
+          "Assign",
+          917,
+          917,
+          12,
+          59
+        ],
+        [
+          "Assign",
+          921,
+          921,
+          12,
+          46
+        ],
+        [
+          "Assign",
+          923,
+          923,
+          12,
+          42
+        ],
+        [
+          "Assign",
+          926,
+          926,
+          12,
+          90
+        ],
+        [
+          "Assign",
+          928,
+          928,
+          12,
+          81
+        ],
+        [
+          "Expr",
+          905,
+          905,
+          8,
+          25
+        ],
+        [
+          "FunctionDef",
+          888,
+          933,
+          4,
+          9
+        ],
+        [
+          "If",
+          914,
+          915,
+          8,
+          63
+        ],
+        [
+          "If",
+          916,
+          917,
+          8,
+          59
+        ],
+        [
+          "If",
+          920,
+          921,
+          8,
+          46
+        ],
+        [
+          "If",
+          922,
+          923,
+          8,
+          42
+        ],
+        [
+          "If",
+          925,
+          928,
+          8,
+          81
+        ],
+        [
+          "Return",
+          930,
+          933,
+          8,
+          9
+        ]
+      ],
+      "source": "    def get_work_hours_count(self, start_dt, end_dt, compute_leaves=True, domain=None):\n        \"\"\" Return the number of calendar-level work hours between two dates or datetimes\n        (no resource: only global leaves are deducted).\n\n        Attendance hours are interpreted in the timezone of ``start_dt`` after conversion:\n        dates and naive datetimes are put in the company timezone, aware datetimes keep\n        their own timezone.\n\n        :param start_dt: ``date`` (from 00:00 in the company timezone) or ``datetime``\n            (naive means UTC)\n        :param end_dt: ``date`` (until 23:59:59.999999 in the company timezone) or\n            ``datetime`` (naive means UTC)\n        :param bool compute_leaves: deduct global leaves\n        :param list domain: leave domain, ``None`` means ``[('count_as', '=', 'absence')]``,\n            see :meth:`_leave_intervals_batch`\n        :rtype: float\n        \"\"\"\n        self.ensure_one()\n\n        # datetime is also an instance of date\n        assert isinstance(start_dt, date)\n        assert isinstance(end_dt, date)\n\n        tz = ZoneInfo(self.env.company.tz)\n\n        # convert to datetime if object passed is date\n        if not isinstance(start_dt, datetime):\n            start_dt = datetime.combine(start_dt, time.min, tz)\n        if not isinstance(end_dt, datetime):\n            end_dt = datetime.combine(end_dt, time.max, tz)\n\n        # Set timezone in company tz if no timezone is explicitly given\n        if not start_dt.tzinfo:\n            start_dt = start_dt.astimezone(tz)\n        if not end_dt.tzinfo:\n            end_dt = end_dt.astimezone(tz)\n\n        if compute_leaves:\n            intervals = self._work_intervals_batch(start_dt, end_dt, domain=domain)[False]\n        else:\n            intervals = self._attendance_intervals_batch(start_dt, end_dt)[False]\n\n        return sum(\n            (stop - start).total_seconds() / 3600\n            for start, stop, meta in intervals\n        )"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar.get_work_duration_data",
+      "start": 935,
+      "end": 962,
+      "program_units": 8,
+      "nodes": [
+        [
+          "Assign",
+          953,
+          953,
+          8,
+          48
+        ],
+        [
+          "Assign",
+          954,
+          954,
+          8,
+          44
+        ],
+        [
+          "Assign",
+          958,
+          958,
+          12,
+          100
+        ],
+        [
+          "Assign",
+          960,
+          960,
+          12,
+          106
+        ],
+        [
+          "Expr",
+          951,
+          951,
+          8,
+          25
+        ],
+        [
+          "FunctionDef",
+          935,
+          962,
+          4,
+          66
+        ],
+        [
+          "If",
+          957,
+          960,
+          8,
+          106
+        ],
+        [
+          "Return",
+          962,
+          962,
+          8,
+          66
+        ]
+      ],
+      "source": "    def get_work_duration_data(self, from_datetime, to_datetime, compute_leaves=True, domain=None):\n        \"\"\" Return the calendar-level working duration of a period, in days and hours, only\n        based on this calendar (no resource: only global leaves are deducted). Days are\n        computed by :meth:`_get_attendance_intervals_days_data`.\n\n        Attendance hours are interpreted in the timezone of ``from_datetime`` (UTC if naive).\n\n        :param datetime from_datetime: start of the period, naive means UTC\n        :param datetime to_datetime: end of the period, naive means UTC\n        :param bool compute_leaves: deduct global leaves\n        :param list domain: with ``compute_leaves``, the leave domain (``None`` means\n            ``[('count_as', '=', 'absence')]``); without it, a domain on\n            ``resource.calendar.attendance`` filtering the attendances\n        :return: ``{'days': float, 'hours': float}``\n        :rtype: dict\n        \"\"\"\n        self.ensure_one()\n        # naive datetimes are made explicit in UTC\n        from_datetime = localized(from_datetime)\n        to_datetime = localized(to_datetime)\n\n        # actual hours per day\n        if compute_leaves:\n            intervals = self._work_intervals_batch(from_datetime, to_datetime, domain=domain)[False]\n        else:\n            intervals = self._attendance_intervals_batch(from_datetime, to_datetime, domain=domain)[False]\n\n        return self._get_attendance_intervals_days_data(intervals)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar.plan_hours",
+      "start": 964,
+      "end": 1017,
+      "program_units": 31,
+      "nodes": [
+        [
+          "Assign",
+          983,
+          983,
+          8,
+          43
+        ],
+        [
+          "Assign",
+          984,
+          984,
+          8,
+          94
+        ],
+        [
+          "Assign",
+          987,
+          987,
+          12,
+          52
+        ],
+        [
+          "Assign",
+          991,
+          991,
+          12,
+          63
+        ],
+        [
+          "Assign",
+          992,
+          992,
+          12,
+          113
+        ],
+        [
+          "Assign",
+          993,
+          993,
+          12,
+          37
+        ],
+        [
+          "Assign",
+          995,
+          995,
+          12,
+          60
+        ],
+        [
+          "Assign",
+          996,
+          996,
+          12,
+          31
+        ],
+        [
+          "Assign",
+          999,
+          999,
+          12,
+          38
+        ],
+        [
+          "Assign",
+          1001,
+          1001,
+          16,
+          39
+        ],
+        [
+          "Assign",
+          1003,
+          1003,
+          20,
+          74
+        ],
+        [
+          "Assign",
+          1008,
+          1008,
+          8,
+          26
+        ],
+        [
+          "Assign",
+          1009,
+          1009,
+          8,
+          34
+        ],
+        [
+          "Assign",
+          1011,
+          1011,
+          12,
+          35
+        ],
+        [
+          "Assign",
+          1013,
+          1013,
+          16,
+          70
+        ],
+        [
+          "AugAssign",
+          1006,
+          1006,
+          20,
+          43
+        ],
+        [
+          "AugAssign",
+          1016,
+          1016,
+          16,
+          39
+        ],
+        [
+          "For",
+          1000,
+          1006,
+          12,
+          43
+        ],
+        [
+          "For",
+          1002,
+          1006,
+          16,
+          43
+        ],
+        [
+          "For",
+          1010,
+          1016,
+          8,
+          39
+        ],
+        [
+          "For",
+          1012,
+          1016,
+          12,
+          39
+        ],
+        [
+          "FunctionDef",
+          964,
+          1017,
+          4,
+          20
+        ],
+        [
+          "If",
+          986,
+          987,
+          8,
+          52
+        ],
+        [
+          "If",
+          990,
+          996,
+          8,
+          31
+        ],
+        [
+          "If",
+          998,
+          1007,
+          8,
+          24
+        ],
+        [
+          "If",
+          1004,
+          1005,
+          20,
+          69
+        ],
+        [
+          "If",
+          1014,
+          1015,
+          16,
+          64
+        ],
+        [
+          "Return",
+          1005,
+          1005,
+          24,
+          69
+        ],
+        [
+          "Return",
+          1007,
+          1007,
+          12,
+          24
+        ],
+        [
+          "Return",
+          1015,
+          1015,
+          20,
+          64
+        ],
+        [
+          "Return",
+          1017,
+          1017,
+          8,
+          20
+        ]
+      ],
+      "source": "    def plan_hours(self, hours, day_dt, compute_leaves=False, domain=None, resource=None):\n        \"\"\" Return the datetime reached after working ``hours`` hours from ``day_dt`` according\n        to this calendar (going backwards if ``hours`` is negative). With ``hours=0``, return\n        ``day_dt`` if it is within work time, else the start of the next work interval.\n\n        Computation happens in the timezone of ``resource`` (company timezone without\n        resource), by windows of 14 days, for at most 100 windows.\n\n        :param float hours: number of work hours to plan, negative to plan backwards\n        :param datetime day_dt: starting point; naive means UTC\n        :param bool compute_leaves: deduct leaves (those of ``resource`` and global ones);\n            without it, the calendar-level attendances are used and ``resource`` only gives\n            the timezone\n        :param list domain: leave domain, see :meth:`_leave_intervals_batch`\n        :param resource: optional ``resource.resource`` record\n        :return: the resulting datetime, in the timezone of ``day_dt`` (naive UTC if\n            ``day_dt`` is naive), or ``False`` if not found within the search range\n        :rtype: datetime | bool\n        \"\"\"\n        revert = to_timezone(day_dt.tzinfo)\n        day_dt = day_dt.astimezone(ZoneInfo(resource.tz if resource else self.env.company.tz))\n\n        if resource is None:\n            resource = self.env['resource.resource']\n\n        # which method to use for retrieving intervals\n        if compute_leaves:\n            resources_per_tz = resource._get_resources_per_tz()\n            get_intervals = partial(self._work_intervals_batch, domain=domain, resources_per_tz=resources_per_tz)\n            resource_id = resource.id\n        else:\n            get_intervals = self._attendance_intervals_batch\n            resource_id = False\n\n        if hours >= 0:\n            delta = timedelta(days=14)\n            for n in range(100):\n                dt = day_dt + delta * n\n                for start, stop, _meta in get_intervals(dt, dt + delta)[resource_id]:\n                    interval_hours = (stop - start).total_seconds() / 3600\n                    if hours <= interval_hours:\n                        return revert(start + timedelta(hours=hours))\n                    hours -= interval_hours\n            return False\n        hours = abs(hours)\n        delta = timedelta(days=14)\n        for n in range(100):\n            dt = day_dt - delta * n\n            for start, stop, _meta in reversed(get_intervals(dt - delta, dt)[resource_id]):\n                interval_hours = (stop - start).total_seconds() / 3600\n                if hours <= interval_hours:\n                    return revert(stop - timedelta(hours=hours))\n                hours -= interval_hours\n        return False"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar.plan_days",
+      "start": 1019,
+      "end": 1071,
+      "program_units": 28,
+      "nodes": [
+        [
+          "Assign",
+          1039,
+          1039,
+          8,
+          43
+        ],
+        [
+          "Assign",
+          1040,
+          1040,
+          8,
+          65
+        ],
+        [
+          "Assign",
+          1044,
+          1044,
+          12,
+          78
+        ],
+        [
+          "Assign",
+          1046,
+          1046,
+          12,
+          60
+        ],
+        [
+          "Assign",
+          1049,
+          1049,
+          12,
+          25
+        ],
+        [
+          "Assign",
+          1050,
+          1050,
+          12,
+          38
+        ],
+        [
+          "Assign",
+          1052,
+          1052,
+          16,
+          39
+        ],
+        [
+          "Assign",
+          1060,
+          1060,
+          12,
+          28
+        ],
+        [
+          "Assign",
+          1061,
+          1061,
+          12,
+          25
+        ],
+        [
+          "Assign",
+          1062,
+          1062,
+          12,
+          38
+        ],
+        [
+          "Assign",
+          1064,
+          1064,
+          16,
+          39
+        ],
+        [
+          "Expr",
+          1054,
+          1054,
+          20,
+          43
+        ],
+        [
+          "Expr",
+          1066,
+          1066,
+          20,
+          43
+        ],
+        [
+          "For",
+          1051,
+          1056,
+          12,
+          43
+        ],
+        [
+          "For",
+          1053,
+          1056,
+          16,
+          43
+        ],
+        [
+          "For",
+          1063,
+          1068,
+          12,
+          44
+        ],
+        [
+          "For",
+          1065,
+          1068,
+          16,
+          44
+        ],
+        [
+          "FunctionDef",
+          1019,
+          1071,
+          4,
+          29
+        ],
+        [
+          "If",
+          1043,
+          1046,
+          8,
+          60
+        ],
+        [
+          "If",
+          1048,
+          1057,
+          8,
+          24
+        ],
+        [
+          "If",
+          1055,
+          1056,
+          20,
+          43
+        ],
+        [
+          "If",
+          1059,
+          1069,
+          8,
+          24
+        ],
+        [
+          "If",
+          1067,
+          1068,
+          20,
+          44
+        ],
+        [
+          "Return",
+          1056,
+          1056,
+          24,
+          43
+        ],
+        [
+          "Return",
+          1057,
+          1057,
+          12,
+          24
+        ],
+        [
+          "Return",
+          1068,
+          1068,
+          24,
+          44
+        ],
+        [
+          "Return",
+          1069,
+          1069,
+          12,
+          24
+        ],
+        [
+          "Return",
+          1071,
+          1071,
+          8,
+          29
+        ]
+      ],
+      "source": "    def plan_days(self, days, day_dt, compute_leaves=False, domain=None):\n        \"\"\" Return the end of the first work interval of the ``days``-th work day counted\n        from ``day_dt`` (the day of ``day_dt`` included if it has work time after\n        ``day_dt``), or, for a negative ``days``, the start of the last work interval of the\n        ``abs(days)``-th work day counted backwards. ``days=0`` returns ``day_dt``.\n\n        Beware: with several attendances per day (e.g. a lunch break), the result is the end\n        of the morning attendance of the last day, not the end of that day.\n\n        Calendar-level only (no resource, only global leaves), computed in the company\n        timezone by windows of 14 days, for at most 100 windows.\n\n        :param int days: number of work days to plan, negative to plan backwards\n        :param datetime day_dt: starting point; naive means UTC\n        :param bool compute_leaves: deduct global leaves\n        :param list domain: leave domain, see :meth:`_leave_intervals_batch`\n        :return: the resulting datetime, in the timezone of ``day_dt`` (naive UTC if\n            ``day_dt`` is naive), or ``False`` if not found within the search range\n        :rtype: datetime | bool\n        \"\"\"\n        revert = to_timezone(day_dt.tzinfo)\n        day_dt = day_dt.astimezone(ZoneInfo(self.env.company.tz))\n\n        # which method to use for retrieving intervals\n        if compute_leaves:\n            get_intervals = partial(self._work_intervals_batch, domain=domain)\n        else:\n            get_intervals = self._attendance_intervals_batch\n\n        if days > 0:\n            found = set()\n            delta = timedelta(days=14)\n            for n in range(100):\n                dt = day_dt + delta * n\n                for start, stop, _meta in get_intervals(dt, dt + delta)[False]:\n                    found.add(start.date())\n                    if len(found) == days:\n                        return revert(stop)\n            return False\n\n        if days < 0:\n            days = abs(days)\n            found = set()\n            delta = timedelta(days=14)\n            for n in range(100):\n                dt = day_dt - delta * n\n                for start, _stop, _meta in reversed(get_intervals(dt - delta, dt)[False]):\n                    found.add(start.date())\n                    if len(found) == days:\n                        return revert(start)\n            return False\n\n        return revert(day_dt)"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._works_on_date",
+      "start": 1073,
+      "end": 1084,
+      "program_units": 4,
+      "nodes": [
+        [
+          "FunctionDef",
+          1073,
+          1084,
+          4,
+          93
+        ],
+        [
+          "If",
+          1082,
+          1083,
+          8,
+          23
+        ],
+        [
+          "Return",
+          1083,
+          1083,
+          12,
+          23
+        ],
+        [
+          "Return",
+          1084,
+          1084,
+          8,
+          93
+        ]
+      ],
+      "source": "    def _works_on_date(self, date):\n        \"\"\" Return whether this calendar has a work attendance (see\n        ``resource.calendar.attendance._is_work_period``) on ``date``. Always ``True`` for\n        flexible calendars. Leaves are not considered.\n\n        :param date date: the day to check\n        :rtype: bool\n        \"\"\"\n        # a flexible calendar has no predefined slots to check a specific date against\n        if self._is_flexible():\n            return True\n        return bool(self.attendance_ids._filter_by_date(date, lambda a: a._is_work_period()))"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar._get_attendances_by_date",
+      "start": 1086,
+      "end": 1132,
+      "program_units": 15,
+      "nodes": [
+        [
+          "Assign",
+          1103,
+          1103,
+          8,
+          78
+        ],
+        [
+          "Assign",
+          1105,
+          1105,
+          8,
+          53
+        ],
+        [
+          "Assign",
+          1106,
+          1110,
+          8,
+          10
+        ],
+        [
+          "Assign",
+          1111,
+          1115,
+          8,
+          10
+        ],
+        [
+          "Assign",
+          1116,
+          1124,
+          8,
+          10
+        ],
+        [
+          "Assign",
+          1125,
+          1125,
+          8,
+          92
+        ],
+        [
+          "Assign",
+          1126,
+          1126,
+          8,
+          66
+        ],
+        [
+          "Assign",
+          1127,
+          1127,
+          8,
+          107
+        ],
+        [
+          "Assign",
+          1129,
+          1129,
+          12,
+          109
+        ],
+        [
+          "AugAssign",
+          1130,
+          1130,
+          12,
+          118
+        ],
+        [
+          "AugAssign",
+          1131,
+          1131,
+          12,
+          83
+        ],
+        [
+          "Expr",
+          1102,
+          1102,
+          8,
+          25
+        ],
+        [
+          "For",
+          1128,
+          1131,
+          8,
+          83
+        ],
+        [
+          "FunctionDef",
+          1086,
+          1132,
+          4,
+          21
+        ],
+        [
+          "Return",
+          1132,
+          1132,
+          8,
+          21
+        ]
+      ],
+      "source": "    def _get_attendances_by_date(self, date_from, date_to, domain=None):\n        \"\"\" Return the attendances of this calendar applying on each day of the period.\n\n        - Undated attendances (``fixed`` calendars) apply on every day matching their\n          ``dayofweek``.\n        - Dated attendances (``variable`` calendars) apply on their ``date`` and, when\n          recurring, on every occurrence of their recurrence rule up to\n          ``recurrency_until``, except excluded occurrences.\n\n        :param date date_from: first day of the period (included)\n        :param date date_to: last day of the period (included)\n        :param domain: optional domain on ``resource.calendar.attendance``\n        :return: ``{date: resource.calendar.attendance recordset}`` with one key per day of\n            the period, possibly mapped to an empty recordset (a ``defaultdict``)\n        :rtype: dict\n        \"\"\"\n        self.ensure_one()\n        result = defaultdict(lambda: self.env['resource.calendar.attendance'])\n\n        domain_fixed = Domain([('date', '=', False)])\n        domain_variable_recurrency = Domain([\n            ('recurrency', '=', True),\n            ('date', '<=', date_to),\n            ('recurrency_until', '>=', date_from),\n        ])\n        domain_variable_adhoc = Domain([\n            ('recurrency', '=', False),\n            ('date', '>=', date_from),\n            ('date', '<=', date_to),\n        ])\n        domain_to_fetch = Domain.AND([\n            domain or Domain.TRUE,\n            Domain.OR([\n                domain_fixed,\n                domain_variable_recurrency,\n                domain_variable_adhoc,\n            ]),\n            Domain('calendar_id', '=', self.id),\n        ])\n        attendances = self.env[\"resource.calendar.attendance\"].search_fetch(domain_to_fetch)\n        recurrent_attendances = attendances.filtered(\"recurrency\")\n        ad_hoc_attendances = (attendances - recurrent_attendances).grouped(lambda a: a.date or a.dayofweek)\n        for day in rrule(DAILY, date_from, until=date_to):\n            result[day.date()] = ad_hoc_attendances.get(day.date(), self.env['resource.calendar.attendance'])\n            result[day.date()] += ad_hoc_attendances.get(str(day.weekday()), self.env['resource.calendar.attendance'])\n            result[day.date()] += recurrent_attendances._filter_by_date(day.date())\n        return result"
+    },
+    {
+      "repo": "odoo",
+      "product": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "name": "ResourceCalendar.get_attendances",
+      "start": 1134,
+      "end": 1160,
+      "program_units": 14,
+      "nodes": [
+        [
+          "Assign",
+          1147,
+          1147,
+          8,
+          54
+        ],
+        [
+          "Assign",
+          1148,
+          1148,
+          8,
+          50
+        ],
+        [
+          "Assign",
+          1149,
+          1149,
+          8,
+          88
+        ],
+        [
+          "Assign",
+          1150,
+          1150,
+          8,
+          92
+        ],
+        [
+          "Assign",
+          1152,
+          1152,
+          12,
+          88
+        ],
+        [
+          "Assign",
+          1157,
+          1157,
+          20,
+          49
+        ],
+        [
+          "Assign",
+          1158,
+          1158,
+          20,
+          50
+        ],
+        [
+          "Assign",
+          1159,
+          1159,
+          20,
+          72
+        ],
+        [
+          "Expr",
+          1155,
+          1155,
+          20,
+          91
+        ],
+        [
+          "For",
+          1151,
+          1159,
+          8,
+          72
+        ],
+        [
+          "For",
+          1153,
+          1159,
+          12,
+          72
+        ],
+        [
+          "FunctionDef",
+          1134,
+          1160,
+          4,
+          51
+        ],
+        [
+          "If",
+          1154,
+          1159,
+          16,
+          72
+        ],
+        [
+          "Return",
+          1160,
+          1160,
+          8,
+          51
+        ]
+      ],
+      "source": "    def get_attendances(self, date_from, date_to, fields_to_fetch, domain=None):\n        \"\"\" Public (RPC) variant of :meth:`_get_attendances_by_date` used by the calendar\n        editor: return each attendance occurring in the period once, read with\n        ``fields_to_fetch``.\n\n        :param date_from: first day, as a ``date`` or a ``'YYYY-MM-DD'`` string\n        :param date_to: last day, as a ``date`` or a ``'YYYY-MM-DD'`` string\n        :param list fields_to_fetch: field names to read\n        :param domain: optional domain on ``resource.calendar.attendance``\n        :return: list of dicts with the read values, plus ``'date'`` (first occurrence in\n            the period) and ``'other_dates'`` (list of the next occurrences)\n        :rtype: list\n        \"\"\"\n        date_from = fields.Date.from_string(date_from)\n        date_to = fields.Date.from_string(date_to)\n        attendances_per_date = self._get_attendances_by_date(date_from, date_to, domain)\n        formatted_attendances = defaultdict(self.env[\"resource.calendar.attendance\"].browse)\n        for att_date, attendances in attendances_per_date.items():\n            new_formatted_attendances = attendances._read_format(fnames=fields_to_fetch)\n            for attendance in new_formatted_attendances:\n                if formatted_attendances[attendance['id']]:\n                    formatted_attendances[attendance['id']]['other_dates'].append(att_date)\n                else:\n                    attendance['date'] = att_date\n                    attendance['other_dates'] = []\n                    formatted_attendances[attendance['id']] = attendance\n        return list(formatted_attendances.values())"
+    },
+    {
+      "repo": "tryton",
+      "product": "tryton",
+      "path": "modules/production_work/work.py",
+      "sha256": "83a615a4eac21ddfd561564c1bb8728ed2a6b3c6040336cec14b8ae7194e6302",
+      "name": "WorkCycle.set_duration",
+      "start": 408,
+      "end": 410,
+      "program_units": 3,
+      "nodes": [
+        [
+          "Assign",
+          410,
+          410,
+          12,
+          55
+        ],
+        [
+          "FunctionDef",
+          408,
+          410,
+          4,
+          55
+        ],
+        [
+          "If",
+          409,
+          410,
+          8,
+          55
+        ]
+      ],
+      "source": "    def set_duration(self, now):\n        if self.duration is None:\n            self.duration = now - self.last_modified_at"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "sha256": "63a3a1a85d3f563cd9bdfaa4f8b5fb1f8b4294dd0050b6427bd368e78705712e",
+      "name": "findDayPlanningOrClosed",
+      "start": 71,
+      "end": 78,
+      "program_units": 6,
+      "nodes": [
+        [
+          "expression_statement",
+          74,
+          74,
+          6,
+          38
+        ],
+        [
+          "expression_statement",
+          75,
+          75,
+          6,
+          52
+        ],
+        [
+          "if_statement",
+          73,
+          76,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          72,
+          72,
+          4,
+          90
+        ],
+        [
+          "method_declaration",
+          71,
+          78,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          77,
+          77,
+          4,
+          23
+        ]
+      ],
+      "source": "  protected DayPlanning findDayPlanningOrClosed(WeeklyPlanning weeklyPlanning, LocalDate date) {\n    DayPlanning dayPlanning = weeklyPlanningService.findDayPlanning(weeklyPlanning, date);\n    if (dayPlanning == null) {\n      dayPlanning = new DayPlanning();\n      dayPlanning.setWeeklyPlanning(weeklyPlanning);\n    }\n    return dayPlanning;\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "sha256": "63a3a1a85d3f563cd9bdfaa4f8b5fb1f8b4294dd0050b6427bd368e78705712e",
+      "name": "getClosestAvailableTimeSlotFrom",
+      "start": 80,
+      "end": 96,
+      "program_units": 2,
+      "nodes": [
+        [
+          "method_declaration",
+          80,
+          96,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          88,
+          95,
+          4,
+          11
+        ]
+      ],
+      "source": "  @Override\n  public MachineTimeSlot getClosestAvailableTimeSlotFrom(\n      Machine machine,\n      LocalDateTime startDateT,\n      LocalDateTime endDateT,\n      OperationOrder operationOrder)\n      throws AxelorException {\n\n    return getClosestAvailableTimeSlotFrom(\n        machine,\n        startDateT,\n        endDateT,\n        operationOrder,\n        DurationHelper.getSecondsDuration(Duration.between(startDateT, endDateT)),\n        false,\n        0);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "sha256": "63a3a1a85d3f563cd9bdfaa4f8b5fb1f8b4294dd0050b6427bd368e78705712e",
+      "name": "getClosestTimeSlotFrom",
+      "start": 98,
+      "end": 114,
+      "program_units": 2,
+      "nodes": [
+        [
+          "method_declaration",
+          98,
+          114,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          106,
+          113,
+          4,
+          11
+        ]
+      ],
+      "source": "  @Override\n  public MachineTimeSlot getClosestTimeSlotFrom(\n      Machine machine,\n      LocalDateTime startDateT,\n      LocalDateTime endDateT,\n      OperationOrder operationOrder)\n      throws AxelorException {\n\n    return getClosestAvailableTimeSlotFrom(\n        machine,\n        startDateT,\n        endDateT,\n        operationOrder,\n        DurationHelper.getSecondsDuration(Duration.between(startDateT, endDateT)),\n        true,\n        0);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "sha256": "63a3a1a85d3f563cd9bdfaa4f8b5fb1f8b4294dd0050b6427bd368e78705712e",
+      "name": "getClosestAvailableTimeSlotFrom",
+      "start": 116,
+      "end": 226,
+      "program_units": 30,
+      "nodes": [
+        [
+          "do_statement",
+          180,
+          206,
+          6,
+          61
+        ],
+        [
+          "expression_statement",
+          164,
+          164,
+          6,
+          58
+        ],
+        [
+          "expression_statement",
+          165,
+          165,
+          6,
+          71
+        ],
+        [
+          "expression_statement",
+          170,
+          176,
+          6,
+          21
+        ],
+        [
+          "expression_statement",
+          186,
+          190,
+          8,
+          53
+        ],
+        [
+          "expression_statement",
+          193,
+          193,
+          8,
+          69
+        ],
+        [
+          "expression_statement",
+          196,
+          202,
+          8,
+          23
+        ],
+        [
+          "expression_statement",
+          204,
+          204,
+          8,
+          18
+        ],
+        [
+          "expression_statement",
+          216,
+          216,
+          6,
+          37
+        ],
+        [
+          "expression_statement",
+          217,
+          217,
+          6,
+          33
+        ],
+        [
+          "if_statement",
+          135,
+          148,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          150,
+          218,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          157,
+          162,
+          6,
+          7
+        ],
+        [
+          "if_statement",
+          208,
+          212,
+          6,
+          7
+        ],
+        [
+          "if_statement",
+          220,
+          222,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          127,
+          127,
+          4,
+          71
+        ],
+        [
+          "local_variable_declaration",
+          131,
+          131,
+          4,
+          76
+        ],
+        [
+          "local_variable_declaration",
+          132,
+          132,
+          4,
+          43
+        ],
+        [
+          "local_variable_declaration",
+          133,
+          133,
+          4,
+          41
+        ],
+        [
+          "local_variable_declaration",
+          152,
+          153,
+          6,
+          89
+        ],
+        [
+          "local_variable_declaration",
+          154,
+          155,
+          6,
+          83
+        ],
+        [
+          "local_variable_declaration",
+          178,
+          178,
+          6,
+          30
+        ],
+        [
+          "local_variable_declaration",
+          179,
+          179,
+          6,
+          22
+        ],
+        [
+          "local_variable_declaration",
+          182,
+          184,
+          8,
+          65
+        ],
+        [
+          "method_declaration",
+          116,
+          226,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          140,
+          147,
+          6,
+          18
+        ],
+        [
+          "return_statement",
+          221,
+          221,
+          6,
+          69
+        ],
+        [
+          "return_statement",
+          224,
+          225,
+          4,
+          94
+        ],
+        [
+          "throw_statement",
+          158,
+          161,
+          8,
+          38
+        ],
+        [
+          "throw_statement",
+          209,
+          211,
+          8,
+          71
+        ]
+      ],
+      "source": "  @SuppressWarnings(\"unchecked\")\n  protected MachineTimeSlot getClosestAvailableTimeSlotFrom(\n      Machine machine,\n      LocalDateTime startDateT,\n      LocalDateTime endDateT,\n      OperationOrder operationOrder,\n      long initialDuration,\n      boolean ignoreConcurrency,\n      int loopNb)\n      throws AxelorException {\n\n    EventsPlanning planning = machine.getPublicHolidayEventsPlanning();\n\n    // If startDate is not available because of planning\n    // Then we try for the next day\n    LocalDateTime nextDayDateT = startDateT.plusDays(1).with(LocalTime.MIN);\n    LocalDateTime plannedStartDateT = null;\n    LocalDateTime plannedEndDateT = null;\n\n    if (planning != null\n        && planning.getEventsPlanningLineList() != null\n        && planning.getEventsPlanningLineList().stream()\n            .anyMatch(epl -> epl.getDate().equals(startDateT.toLocalDate()))) {\n\n      return getClosestAvailableTimeSlotFrom(\n          machine,\n          nextDayDateT,\n          nextDayDateT.plusSeconds(initialDuration),\n          operationOrder,\n          initialDuration,\n          ignoreConcurrency,\n          loopNb);\n    }\n\n    if (machine.getWeeklyPlanning() != null) {\n      // Planning on date at startDateT\n      DayPlanning dayPlanning =\n          findDayPlanningOrClosed(machine.getWeeklyPlanning(), startDateT.toLocalDate());\n      Optional<LocalDateTime> allowedStartDateTPeriodAt =\n          dayPlanningService.getAllowedStartDateTPeriodAt(dayPlanning, startDateT);\n\n      if (allowedStartDateTPeriodAt.isEmpty()) {\n        throw new AxelorException(\n            TraceBackRepository.CATEGORY_CONFIGURATION_ERROR,\n            I18n.get(ProductionExceptionMessage.OPERATION_ORDER_NO_PERIOD_FOUND_FOR_PLAN_DATES),\n            operationOrder.getName());\n      }\n\n      plannedStartDateT = allowedStartDateTPeriodAt.get();\n      plannedEndDateT = plannedStartDateT.plusSeconds(initialDuration);\n\n      // Must end in a existing period. The end date may have jumped onto a\n      // different calendar day than startDateT, so its DayPlanning must be\n      // looked up again instead of reusing the one resolved for startDateT.\n      plannedEndDateT =\n          dayPlanningService\n              .getAllowedStartDateTPeriodAt(\n                  findDayPlanningOrClosed(\n                      machine.getWeeklyPlanning(), plannedEndDateT.toLocalDate()),\n                  plannedEndDateT)\n              .get();\n      // Void duration is time where machine is not used (not in any period)\n      long remainingTime = 0l;\n      int counter = 0;\n      do {\n\n        long voidDuration =\n            dayPlanningService.computeVoidDurationBetween(\n                dayPlanning, plannedStartDateT, plannedEndDateT);\n\n        remainingTime =\n            initialDuration\n                - DurationHelper.getSecondsDuration(\n                    Duration.between(plannedStartDateT, plannedEndDateT)\n                        .minusSeconds(voidDuration));\n\n        // So the time 'spent' must be reported\n        plannedEndDateT = plannedEndDateT.plusSeconds(remainingTime);\n\n        // And of course it must end in a existing period, resolved for its own day.\n        plannedEndDateT =\n            dayPlanningService\n                .getAllowedStartDateTPeriodAt(\n                    findDayPlanningOrClosed(\n                        machine.getWeeklyPlanning(), plannedEndDateT.toLocalDate()),\n                    plannedEndDateT)\n                .get();\n\n        counter++;\n\n      } while (remainingTime > 0 && counter < MAX_LOOP_CALL);\n\n      if (counter == MAX_LOOP_CALL) {\n        throw new AxelorException(\n            TraceBackRepository.CATEGORY_INCONSISTENCY,\n            ProductionExceptionMessage.TOO_MANY_CALL_GETTING_END_DATE);\n      }\n\n    } else {\n      // The machine does not have weekly planning so dates are ok for now.\n      plannedStartDateT = startDateT;\n      plannedEndDateT = endDateT;\n    }\n\n    if (ignoreConcurrency) {\n      return new MachineTimeSlot(plannedStartDateT, plannedEndDateT);\n    }\n\n    return getClosestAvailableMachineTimeSlot(\n        machine, operationOrder, initialDuration, plannedStartDateT, plannedEndDateT, loopNb);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "sha256": "63a3a1a85d3f563cd9bdfaa4f8b5fb1f8b4294dd0050b6427bd368e78705712e",
+      "name": "getClosestAvailableMachineTimeSlot",
+      "start": 228,
+      "end": 296,
+      "program_units": 11,
+      "nodes": [
+        [
+          "if_statement",
+          243,
+          248,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          272,
+          295,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          277,
+          283,
+          6,
+          7
+        ],
+        [
+          "local_variable_declaration",
+          236,
+          239,
+          4,
+          24
+        ],
+        [
+          "local_variable_declaration",
+          250,
+          270,
+          4,
+          21
+        ],
+        [
+          "local_variable_declaration",
+          275,
+          275,
+          6,
+          75
+        ],
+        [
+          "method_declaration",
+          228,
+          296,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          273,
+          273,
+          6,
+          69
+        ],
+        [
+          "return_statement",
+          285,
+          294,
+          6,
+          22
+        ],
+        [
+          "throw_statement",
+          244,
+          247,
+          6,
+          36
+        ],
+        [
+          "throw_statement",
+          278,
+          282,
+          8,
+          38
+        ]
+      ],
+      "source": "  protected MachineTimeSlot getClosestAvailableMachineTimeSlot(\n      Machine machine,\n      OperationOrder operationOrder,\n      long initialDuration,\n      LocalDateTime plannedStartDateT,\n      LocalDateTime plannedEndDateT,\n      int loopNb)\n      throws AxelorException {\n    long timeBeforeNextOperation =\n        Optional.ofNullable(operationOrder.getWorkCenter())\n            .map(WorkCenter::getTimeBeforeNextOperation)\n            .orElse(0l);\n    // Must check if dates are occupied by other operation orders\n    // The first one of the list will be the last to finish\n\n    if (loopNb >= MAX_RECURSIVE_CALL) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          ProductionExceptionMessage.TOO_MANY_CALL_GETTING_TIME_SLOT,\n          operationOrder.getName());\n    }\n\n    List<OperationOrder> concurrentOperationOrders =\n        operationOrderRepository\n            .all()\n            .filter(\n                \"self.machine = :machine\"\n                    + \" AND ((self.plannedStartDateT <= :startDate AND self.plannedEndDateT > :startDateWithTime)\"\n                    + \" OR (self.plannedStartDateT <= :endDate AND self.plannedEndDateT > :endDateWithTime)\"\n                    + \" OR (self.plannedStartDateT >= :startDate AND self.plannedEndDateT <= :endDateWithTime))\"\n                    + \" AND (self.manufOrder.statusSelect != :cancelled AND self.manufOrder.statusSelect != :finished)\"\n                    + \" AND self.id != :operationOrderId\"\n                    + \" AND self.outsourcing = false\")\n            .bind(\"startDate\", plannedStartDateT)\n            .bind(\"endDate\", plannedEndDateT)\n            .bind(\"startDateWithTime\", plannedStartDateT.minusSeconds(timeBeforeNextOperation))\n            .bind(\"endDateWithTime\", plannedEndDateT.minusSeconds(timeBeforeNextOperation))\n            .bind(\"machine\", machine)\n            .bind(\"cancelled\", ManufOrderRepository.STATUS_CANCELED)\n            .bind(\"finished\", ManufOrderRepository.STATUS_FINISHED)\n            .bind(\"operationOrderId\", operationOrder.getId())\n            .order(\"-plannedEndDateT\")\n            .fetch();\n\n    if (concurrentOperationOrders.isEmpty()) {\n      return new MachineTimeSlot(plannedStartDateT, plannedEndDateT);\n    } else {\n      OperationOrder lastOperationOrder = concurrentOperationOrders.get(0);\n\n      if (timeBeforeNextOperation == 0 && initialDuration == 0) {\n        throw new AxelorException(\n            TraceBackRepository.CATEGORY_INCONSISTENCY,\n            I18n.get(\n                ProductionExceptionMessage.MANUF_ORDER_CANT_COMPUTE_NEXT_SLOT_WITH_CURRENT_CONFIG),\n            operationOrder.getName());\n      }\n\n      return getClosestAvailableTimeSlotFrom(\n          machine,\n          lastOperationOrder.getPlannedEndDateT().plusSeconds(timeBeforeNextOperation),\n          lastOperationOrder\n              .getPlannedEndDateT()\n              .plusSeconds(timeBeforeNextOperation + initialDuration),\n          operationOrder,\n          initialDuration,\n          false,\n          loopNb + 1);\n    }\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "sha256": "63a3a1a85d3f563cd9bdfaa4f8b5fb1f8b4294dd0050b6427bd368e78705712e",
+      "name": "getFurthestAvailableTimeSlotFrom",
+      "start": 298,
+      "end": 314,
+      "program_units": 2,
+      "nodes": [
+        [
+          "method_declaration",
+          298,
+          314,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          306,
+          313,
+          4,
+          11
+        ]
+      ],
+      "source": "  @Override\n  public MachineTimeSlot getFurthestAvailableTimeSlotFrom(\n      Machine machine,\n      LocalDateTime startDateT,\n      LocalDateTime endDateT,\n      OperationOrder operationOrder)\n      throws AxelorException {\n\n    return getFurthestAvailableTimeSlotFrom(\n        machine,\n        startDateT,\n        endDateT,\n        operationOrder,\n        DurationHelper.getSecondsDuration(Duration.between(startDateT, endDateT)),\n        false,\n        0);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "sha256": "63a3a1a85d3f563cd9bdfaa4f8b5fb1f8b4294dd0050b6427bd368e78705712e",
+      "name": "getFurthestTimeSlotFrom",
+      "start": 316,
+      "end": 332,
+      "program_units": 2,
+      "nodes": [
+        [
+          "method_declaration",
+          316,
+          332,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          324,
+          331,
+          4,
+          11
+        ]
+      ],
+      "source": "  @Override\n  public MachineTimeSlot getFurthestTimeSlotFrom(\n      Machine machine,\n      LocalDateTime startDateT,\n      LocalDateTime endDateT,\n      OperationOrder operationOrder)\n      throws AxelorException {\n\n    return getFurthestAvailableTimeSlotFrom(\n        machine,\n        startDateT,\n        endDateT,\n        operationOrder,\n        DurationHelper.getSecondsDuration(Duration.between(startDateT, endDateT)),\n        true,\n        0);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "sha256": "63a3a1a85d3f563cd9bdfaa4f8b5fb1f8b4294dd0050b6427bd368e78705712e",
+      "name": "getFurthestAvailableTimeSlotFrom",
+      "start": 334,
+      "end": 443,
+      "program_units": 30,
+      "nodes": [
+        [
+          "do_statement",
+          400,
+          424,
+          6,
+          61
+        ],
+        [
+          "expression_statement",
+          383,
+          383,
+          6,
+          54
+        ],
+        [
+          "expression_statement",
+          384,
+          384,
+          6,
+          72
+        ],
+        [
+          "expression_statement",
+          389,
+          395,
+          6,
+          21
+        ],
+        [
+          "expression_statement",
+          406,
+          410,
+          8,
+          53
+        ],
+        [
+          "expression_statement",
+          412,
+          412,
+          8,
+          74
+        ],
+        [
+          "expression_statement",
+          415,
+          421,
+          8,
+          23
+        ],
+        [
+          "expression_statement",
+          423,
+          423,
+          8,
+          18
+        ],
+        [
+          "expression_statement",
+          434,
+          434,
+          6,
+          37
+        ],
+        [
+          "expression_statement",
+          435,
+          435,
+          6,
+          33
+        ],
+        [
+          "if_statement",
+          347,
+          364,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          369,
+          436,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          376,
+          381,
+          6,
+          7
+        ],
+        [
+          "if_statement",
+          426,
+          430,
+          6,
+          7
+        ],
+        [
+          "if_statement",
+          438,
+          440,
+          4,
+          5
+        ],
+        [
+          "local_variable_declaration",
+          345,
+          345,
+          4,
+          71
+        ],
+        [
+          "local_variable_declaration",
+          354,
+          354,
+          6,
+          80
+        ],
+        [
+          "local_variable_declaration",
+          366,
+          366,
+          4,
+          43
+        ],
+        [
+          "local_variable_declaration",
+          367,
+          367,
+          4,
+          41
+        ],
+        [
+          "local_variable_declaration",
+          371,
+          372,
+          6,
+          87
+        ],
+        [
+          "local_variable_declaration",
+          373,
+          374,
+          6,
+          79
+        ],
+        [
+          "local_variable_declaration",
+          398,
+          398,
+          6,
+          30
+        ],
+        [
+          "local_variable_declaration",
+          399,
+          399,
+          6,
+          22
+        ],
+        [
+          "local_variable_declaration",
+          402,
+          404,
+          8,
+          65
+        ],
+        [
+          "method_declaration",
+          334,
+          443,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          356,
+          363,
+          6,
+          18
+        ],
+        [
+          "return_statement",
+          439,
+          439,
+          6,
+          69
+        ],
+        [
+          "return_statement",
+          441,
+          442,
+          4,
+          94
+        ],
+        [
+          "throw_statement",
+          377,
+          380,
+          8,
+          38
+        ],
+        [
+          "throw_statement",
+          427,
+          429,
+          8,
+          73
+        ]
+      ],
+      "source": "  @SuppressWarnings(\"unchecked\")\n  protected MachineTimeSlot getFurthestAvailableTimeSlotFrom(\n      Machine machine,\n      LocalDateTime startDateT,\n      LocalDateTime endDateT,\n      OperationOrder operationOrder,\n      long initialDuration,\n      boolean ignoreConcurrency,\n      int loopNb)\n      throws AxelorException {\n\n    EventsPlanning planning = machine.getPublicHolidayEventsPlanning();\n\n    if (planning != null\n        && planning.getEventsPlanningLineList() != null\n        && planning.getEventsPlanningLineList().stream()\n            .anyMatch(epl -> epl.getDate().equals(endDateT.toLocalDate()))) {\n\n      // If endDate is not available because of planning\n      // Then we try for the previous day\n      LocalDateTime previousDayDateT = endDateT.plusDays(1).with(LocalTime.MIN);\n\n      return getFurthestAvailableTimeSlotFrom(\n          machine,\n          previousDayDateT.minusSeconds(initialDuration),\n          previousDayDateT,\n          operationOrder,\n          initialDuration,\n          ignoreConcurrency,\n          loopNb);\n    }\n\n    LocalDateTime plannedStartDateT = null;\n    LocalDateTime plannedEndDateT = null;\n\n    if (machine.getWeeklyPlanning() != null) {\n      // Planning on date at endDateT\n      DayPlanning dayPlanning =\n          findDayPlanningOrClosed(machine.getWeeklyPlanning(), endDateT.toLocalDate());\n      Optional<LocalDateTime> allowedEndDateTPeriodAt =\n          dayPlanningService.getAllowedEndDateTPeriodAt(dayPlanning, endDateT);\n\n      if (allowedEndDateTPeriodAt.isEmpty()) {\n        throw new AxelorException(\n            TraceBackRepository.CATEGORY_CONFIGURATION_ERROR,\n            I18n.get(ProductionExceptionMessage.OPERATION_ORDER_NO_PERIOD_FOUND_FOR_PLAN_DATES),\n            operationOrder.getName());\n      }\n\n      plannedEndDateT = allowedEndDateTPeriodAt.get();\n      plannedStartDateT = plannedEndDateT.minusSeconds(initialDuration);\n\n      // Must start in an existing period. The start date may have jumped onto a\n      // different calendar day than endDateT, so its DayPlanning must be looked\n      // up again instead of reusing the one resolved for endDateT.\n      plannedStartDateT =\n          dayPlanningService\n              .getAllowedEndDateTPeriodAt(\n                  findDayPlanningOrClosed(\n                      machine.getWeeklyPlanning(), plannedStartDateT.toLocalDate()),\n                  plannedStartDateT)\n              .get();\n      // Void duration is time when machine is not used (not in any period)\n\n      long remainingTime = 0l;\n      int counter = 0;\n      do {\n\n        long voidDuration =\n            dayPlanningService.computeVoidDurationBetween(\n                dayPlanning, plannedStartDateT, plannedEndDateT);\n\n        remainingTime =\n            initialDuration\n                - DurationHelper.getSecondsDuration(\n                    Duration.between(plannedStartDateT, plannedEndDateT)\n                        .minusSeconds(voidDuration));\n        // So the time 'spent' must be reported\n        plannedStartDateT = plannedStartDateT.minusSeconds(remainingTime);\n\n        // And of course it must start also in an existing period, resolved for its own day.\n        plannedStartDateT =\n            dayPlanningService\n                .getAllowedEndDateTPeriodAt(\n                    findDayPlanningOrClosed(\n                        machine.getWeeklyPlanning(), plannedStartDateT.toLocalDate()),\n                    plannedStartDateT)\n                .get();\n\n        counter++;\n      } while (remainingTime > 0 && counter < MAX_LOOP_CALL);\n\n      if (counter == MAX_LOOP_CALL) {\n        throw new AxelorException(\n            TraceBackRepository.CATEGORY_INCONSISTENCY,\n            ProductionExceptionMessage.TOO_MANY_CALL_GETTING_START_DATE);\n      }\n\n    } else {\n      // The machine does not have weekly planning so dates are ok for now.\n      plannedStartDateT = startDateT;\n      plannedEndDateT = endDateT;\n    }\n\n    if (ignoreConcurrency) {\n      return new MachineTimeSlot(plannedStartDateT, plannedEndDateT);\n    }\n    return getFurthestAvailableMachineTimeSlot(\n        machine, operationOrder, initialDuration, plannedStartDateT, plannedEndDateT, loopNb);\n  }"
+    },
+    {
+      "repo": "axelor",
+      "product": "axelor",
+      "path": "axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "sha256": "63a3a1a85d3f563cd9bdfaa4f8b5fb1f8b4294dd0050b6427bd368e78705712e",
+      "name": "getFurthestAvailableMachineTimeSlot",
+      "start": 445,
+      "end": 513,
+      "program_units": 11,
+      "nodes": [
+        [
+          "if_statement",
+          454,
+          459,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          488,
+          512,
+          4,
+          5
+        ],
+        [
+          "if_statement",
+          494,
+          500,
+          6,
+          7
+        ],
+        [
+          "local_variable_declaration",
+          460,
+          463,
+          4,
+          24
+        ],
+        [
+          "local_variable_declaration",
+          466,
+          486,
+          4,
+          21
+        ],
+        [
+          "local_variable_declaration",
+          491,
+          491,
+          6,
+          76
+        ],
+        [
+          "method_declaration",
+          445,
+          513,
+          2,
+          3
+        ],
+        [
+          "return_statement",
+          489,
+          489,
+          6,
+          69
+        ],
+        [
+          "return_statement",
+          502,
+          511,
+          6,
+          22
+        ],
+        [
+          "throw_statement",
+          455,
+          458,
+          6,
+          36
+        ],
+        [
+          "throw_statement",
+          495,
+          499,
+          8,
+          38
+        ]
+      ],
+      "source": "  protected MachineTimeSlot getFurthestAvailableMachineTimeSlot(\n      Machine machine,\n      OperationOrder operationOrder,\n      long initialDuration,\n      LocalDateTime plannedStartDateT,\n      LocalDateTime plannedEndDateT,\n      int loopNb)\n      throws AxelorException {\n\n    if (loopNb >= MAX_RECURSIVE_CALL) {\n      throw new AxelorException(\n          TraceBackRepository.CATEGORY_INCONSISTENCY,\n          ProductionExceptionMessage.TOO_MANY_CALL_GETTING_TIME_SLOT,\n          operationOrder.getName());\n    }\n    long timeBeforeNextOperation =\n        Optional.ofNullable(operationOrder.getWorkCenter())\n            .map(WorkCenter::getTimeBeforeNextOperation)\n            .orElse(0l);\n    // Must check if dates are occupied by other operation orders\n    // The first one of the list will be the first to start\n    List<OperationOrder> concurrentOperationOrders =\n        operationOrderRepository\n            .all()\n            .filter(\n                \"self.machine = :machine\"\n                    + \" AND ((self.plannedStartDateT <= :startDate AND self.plannedEndDateT > :startDateWithTime)\"\n                    + \" OR (self.plannedStartDateT < :endDate AND self.plannedEndDateT > :endDateWithTime)\"\n                    + \" OR (self.plannedStartDateT >= :startDate AND self.plannedEndDateT <= :endDateWithTime))\"\n                    + \" AND (self.manufOrder.statusSelect != :cancelled AND self.manufOrder.statusSelect != :finished)\"\n                    + \" AND self.id != :operationOrderId\"\n                    + \" AND self.outsourcing = false\")\n            .bind(\"startDate\", plannedStartDateT)\n            .bind(\"endDate\", plannedEndDateT)\n            .bind(\"startDateWithTime\", plannedStartDateT.minusSeconds(timeBeforeNextOperation))\n            .bind(\"endDateWithTime\", plannedEndDateT.minusSeconds(timeBeforeNextOperation))\n            .bind(\"machine\", machine)\n            .bind(\"cancelled\", ManufOrderRepository.STATUS_CANCELED)\n            .bind(\"finished\", ManufOrderRepository.STATUS_FINISHED)\n            .bind(\"operationOrderId\", operationOrder.getId())\n            .order(\"plannedStartDateT\")\n            .fetch();\n\n    if (concurrentOperationOrders.isEmpty()) {\n      return new MachineTimeSlot(plannedStartDateT, plannedEndDateT);\n    } else {\n      OperationOrder firstOperationOrder = concurrentOperationOrders.get(0);\n\n      // Can not compute next slot with concurrency if these values are 0\n      if (timeBeforeNextOperation == 0 && initialDuration == 0) {\n        throw new AxelorException(\n            TraceBackRepository.CATEGORY_INCONSISTENCY,\n            I18n.get(\n                ProductionExceptionMessage.MANUF_ORDER_CANT_COMPUTE_NEXT_SLOT_WITH_CURRENT_CONFIG),\n            operationOrder.getName());\n      }\n\n      return getFurthestAvailableTimeSlotFrom(\n          machine,\n          firstOperationOrder\n              .getPlannedStartDateT()\n              .minusSeconds(initialDuration + timeBeforeNextOperation),\n          firstOperationOrder.getPlannedStartDateT().minusSeconds(timeBeforeNextOperation),\n          operationOrder,\n          initialDuration,\n          false,\n          loopNb + 1);\n    }\n  }"
+    },
+    {
+      "repo": "erpnext",
+      "product": "erpnext",
+      "path": "erpnext/manufacturing/doctype/workstation/workstation.py",
+      "sha256": "f0598d0cfc5110a7cbd23c3f3deaf4774fc9b6d03ea1c85bb3e6012d1efe3372",
+      "name": "get_time_logs",
+      "start": 379,
+      "end": 399,
+      "program_units": 6,
+      "nodes": [
+        [
+          "Assign",
+          380,
+          380,
+          1,
+          15
+        ],
+        [
+          "Assign",
+          382,
+          394,
+          1,
+          2
+        ],
+        [
+          "Expr",
+          397,
+          397,
+          2,
+          50
+        ],
+        [
+          "For",
+          396,
+          397,
+          1,
+          50
+        ],
+        [
+          "FunctionDef",
+          379,
+          399,
+          0,
+          17
+        ],
+        [
+          "Return",
+          399,
+          399,
+          1,
+          17
+        ]
+      ],
+      "source": "def get_time_logs(job_cards):\n\ttime_logs = {}\n\n\tdata = frappe.get_all(\n\t\t\"Job Card Time Log\",\n\t\tfields=[\n\t\t\t\"parent\",\n\t\t\t\"name\",\n\t\t\t\"employee\",\n\t\t\t\"from_time\",\n\t\t\t\"to_time\",\n\t\t\t\"time_in_mins\",\n\t\t],\n\t\tfilters={\"parent\": [\"in\", job_cards], \"parentfield\": \"time_logs\"},\n\t\torder_by=\"parent, idx\",\n\t)\n\n\tfor row in data:\n\t\ttime_logs.setdefault(row.parent, []).append(row)\n\n\treturn time_logs"
+    }
+  ],
+  "source_files": [
+    {
+      "repo": "odoo",
+      "path": "addons/resource/models/resource_calendar.py",
+      "root_path": "tmp/odoo20-audit/addons/resource/models/resource_calendar.py",
+      "sha256": "c02320c01e6b73ac411dc057af2afebc0bf19d60ba9b956b6b80cbda791771ff",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "url": "https://github.com/odoo/odoo/blob/299075f17026b830a9755f3c43f3e83143995946/addons/resource/models/resource_calendar.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 542,
+        "declarative_units": 0,
+        "physical_lines": 1160,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-16-preuves.json",
+      "prior_observed": "Intervalles effectifs calculés par soustraction des absences, avec fuseaux.",
+      "prior_limit": "Analogie de calendrier. Un horaire interne ne prouve ni capacité externe disponible ni engagement du prestataire."
+    },
+    {
+      "repo": "tryton",
+      "path": "modules/production_work/work.py",
+      "root_path": "tmp/tryton-code-audit-2026-10-28/modules/production_work/work.py",
+      "sha256": "83a615a4eac21ddfd561564c1bb8728ed2a6b3c6040336cec14b8ae7194e6302",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/production_work/work.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 197,
+        "declarative_units": 0,
+        "physical_lines": 420,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 0,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-16-preuves.json",
+      "prior_observed": "Centres de charge rattachés à société/entrepôt, catégorie et coût horaire/cycle.",
+      "prior_limit": "Analogie des dimensions et unités ; pas de contrat de déclaration externe ou fraîcheur prouvé ici."
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "root_path": "tmp/oss-audit-axelor/axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "sha256": "63a3a1a85d3f563cd9bdfaa4f8b5fb1f8b4294dd0050b6427bd368e78705712e",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "url": "https://github.com/axelor/axelor-open-suite/blob/e7cbea53bae88d2540f59a70b09bf0f326f1022e/axelor-production/src/main/java/com/axelor/apps/production/service/machine/MachineServiceImpl.java",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 130,
+        "declarative_units": 0,
+        "physical_lines": 514,
+        "details": {
+          "convention": "Arbre syntaxique : instructions et déclarations ; JSX compté séparément"
+        }
+      },
+      "prior_evidence": "audits/2026-10-30-couverture-core/iteration-16-preuves.json",
+      "prior_observed": "Calendrier machine absent traité fermé et recherche de créneau disponible.",
+      "prior_limit": "Montre le risque du défaut calendaire. FLOW doit distinguer fermé explicite et capacité externe inconnue."
+    },
+    {
+      "repo": "erpnext",
+      "path": "erpnext/manufacturing/doctype/workstation/workstation.py",
+      "root_path": "tmp/master-data-native-23/erpnext/erpnext/manufacturing/doctype/workstation/workstation.py",
+      "sha256": "f0598d0cfc5110a7cbd23c3f3deaf4774fc9b6d03ea1c85bb3e6012d1efe3372",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/manufacturing/doctype/workstation/workstation.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 234,
+        "declarative_units": 0,
+        "physical_lines": 587,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 29,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    },
+    {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "root_path": "tmp/master-data-native-23/erpnext/erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "sha256": "95da2da558526cba54f858ae90f47b6238520d43e967c64664f2c77774baa9e6",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/doctype/delivery_trip/delivery_trip.py",
+      "pinned_blob_verified": true,
+      "whole_file": {
+        "program_units": 265,
+        "declarative_units": 0,
+        "physical_lines": 604,
+        "details": {
+          "convention": "AST Python : instructions, déclarations et imports ; docstrings et blocs typés auto-générés exclus",
+          "generated_lines_excluded": 26,
+          "python314_except_normalizations": 0
+        }
+      },
+      "prior_evidence": null,
+      "prior_observed": null,
+      "prior_limit": null
+    }
+  ],
+  "attribution": 0.6,
+  "attribution_basis": "Part d’analogie retenue après exclusion supposée des responsabilités natives hors périmètre ; pas proportion observée. Les calendriers machine prouvent des créneaux mais pas la capacité de tout prestataire ni un plan de transport complet.",
+  "new_complement_fraction": 0.65,
+  "new_complement_basis": "Distinguer capacité reçue, besoin de prestation, choix du service et plan de transport ; ne pas construire un TMS d’exécutant.",
+  "schemas": [
+    {
+      "name": "CapacityOffer",
+      "fields": [
+        "provider",
+        "kind",
+        "scope",
+        "period",
+        "quantity",
+        "unit",
+        "version",
+        "limits"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    },
+    {
+      "name": "ServiceRequirement",
+      "fields": [
+        "demand",
+        "kind",
+        "quantity",
+        "places",
+        "dates",
+        "conditions"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    },
+    {
+      "name": "ServiceSelection",
+      "fields": [
+        "requirement",
+        "offer",
+        "cost",
+        "date",
+        "authority",
+        "reason"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    },
+    {
+      "name": "TransportPlan",
+      "fields": [
+        "requirements",
+        "stops",
+        "quantities",
+        "windows",
+        "capacity",
+        "version",
+        "limits"
+      ],
+      "hypothesis": "Structure proposée du module ; ne constitue pas une spécification approuvée."
+    }
+  ],
+  "template_source": "audits/2026-10-30-propriete-stock-calcul-02/inputs.json#schema_templates",
+  "scaffold_source": "audits/2026-10-30-propriete-stock-calcul-02/inputs.json#new_module_scaffolding",
+  "reuse": "Services génériques Master Data, Stock et Propriété du stock déjà financés ; autres mécanismes communs de la campagne à réconcilier. Le code natif sert de règle de taille, ce n’est pas une facture historique.",
+  "no_extra_AI": true,
+  "no_generic_rebuild": true,
+  "logical_code_not_calibrated_to_physical_SLOC": true
+}

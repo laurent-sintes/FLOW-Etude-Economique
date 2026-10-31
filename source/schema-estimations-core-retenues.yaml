@@ -26,7 +26,7 @@ properties:
           minLength: 1
         capabilities:
           type: array
-          minItems: 1
+          minItems: 0
           items:
             type: object
             properties:
@@ -224,6 +224,13 @@ properties:
           required:
           - id
           additionalProperties: false
+        professional_functions:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
       required:
       - id
       - stack
@@ -247,6 +254,14 @@ properties:
       - no_extra_coordination
       - calculation
       additionalProperties: false
+      allOf:
+      - if:
+          properties:
+            capabilities:
+              maxItems: 0
+        then:
+          required:
+          - professional_functions
 required:
 - version
 - units

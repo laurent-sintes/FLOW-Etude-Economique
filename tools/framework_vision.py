@@ -26,14 +26,14 @@ PROOF_LEVEL = _object(dict(id=IDENTIFIER, title=TEXT, text=TEXT, href=TEXT, labe
 SCHEMA = _object(dict(
     version=dict(const=1), id=dict(const='framework-vision'),
     opening=TITLE_TEXT,
-    adaptation=_object(dict(title=TEXT, text=TEXT, href=dict(const='#leviers'), label=TEXT)),
+    adaptation=_object(dict(title=TEXT, text=TEXT, href=dict(const='#simuler'), label=TEXT,
+        reference_link=_object(dict(href=dict(const='#parametres'), label=TEXT)))),
     approach=_object(dict(title=TEXT, steps=dict(type='array', minItems=1,
         items=_object(dict(id=IDENTIFIER, title=TEXT, text=TEXT))),
         matrix=_object(dict(caption=TEXT, activity_label=TEXT, make_label=TEXT, buy_label=TEXT,
             rows=dict(type='array', minItems=2, maxItems=2, items=MATRIX_ROW), notes=PARAGRAPHS)))),
     evidence=_object(dict(title=TEXT, items=dict(type='array', minItems=1,
         items=_object(dict(id=IDENTIFIER, title=TEXT, text=TEXT, href=TEXT, label=TEXT))))),
-    dimensions=_object(dict(title=TEXT, items=dict(type='array', minItems=1, items=TITLE_TEXT))),
     confidence=_object(dict(title=TEXT, text=TEXT,
         levels=dict(type='array', minItems=4, maxItems=4, items=PROOF_LEVEL),
         links=dict(type='array', minItems=1, items=READING_LINK), limits_title=TEXT,
@@ -61,7 +61,6 @@ def compile_vision(document, glossary, routes, documents):
     for rows, key, location in ((document['approach']['steps'], 'id', 'approach.steps'),
                                 (document['evidence']['items'], 'id', 'evidence.items'),
                                 (document['evidence']['items'], 'href', 'evidence.items'),
-                                (document['dimensions']['items'], 'title', 'dimensions.items'),
                                 (document['confidence']['links'], 'href', 'confidence.links'),
                                 (document['next']['links'], 'href', 'next.links')):
         values = [row[key] for row in rows]
@@ -70,7 +69,9 @@ def compile_vision(document, glossary, routes, documents):
 
     allowed = {'#' + route for route in routes} | {
         path for path in documents if path.startswith(('source/', 'sources/'))}
-    for link in [document['adaptation'], *document['evidence']['items'],
+    if 'modele' in routes:
+        allowed.add('#modele?section=scope')
+    for link in [document['adaptation'], document['adaptation']['reference_link'], *document['evidence']['items'],
                  *document['confidence']['levels'], *document['confidence']['links'], *document['next']['links']]:
         if link['href'] not in allowed:
             raise ValueError(f'{ERROR}:{SOURCE}:unknown reading link:{link["href"]}')

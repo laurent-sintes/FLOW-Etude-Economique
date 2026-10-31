@@ -1,0 +1,122 @@
+{
+  "components": [
+    {
+      "id": "K1",
+      "label": "Registre et effets des mouvements",
+      "capabilities": [
+        "BC-009",
+        "BC-010"
+      ],
+      "common_outcome": "Enregistrer un mouvement ou delta reconnu, son origine et sa date d’effet, et produire la quantité courante corrigée.",
+      "common_boundary": "Identités produit/lieu/unité déjà disponibles ; faits connus, pas de mouvements inventés. Le protocole d’admission externe, la double date et les corrections liées Flow restent des compléments.",
+      "processes": [
+        "S01",
+        "S02",
+        "S03",
+        "S04"
+      ],
+      "dependencies": [
+        "master-data-common-domain",
+        "java-spring-framework-services"
+      ],
+      "contract_CFP": 39,
+      "CFP_meaning": "Répartition du contrat proposé Flow, pas preuve que ces CFP sont fournis par chaque OSS."
+    },
+    {
+      "id": "K2",
+      "label": "Positions et apports attendus connus",
+      "capabilities": [
+        "BC-011"
+      ],
+      "common_outcome": "Calculer une quantité courante ou à date et une position issue des mouvements planifiés déjà connus.",
+      "common_boundary": "Une projection de quantité ne vaut ni promesse ni décision d’allocation. Les sources restent maîtres des commandes/plans ; leur création n’est pas reconstruite.",
+      "processes": [
+        "S05",
+        "S06",
+        "S07"
+      ],
+      "dependencies": [
+        "K1",
+        "K4",
+        "master-data-common-domain"
+      ],
+      "contract_CFP": 26,
+      "CFP_meaning": "Répartition du contrat proposé Flow, pas preuve que ces CFP sont fournis par chaque OSS."
+    },
+    {
+      "id": "K3",
+      "label": "Comptages et ajustements",
+      "capabilities": [
+        "BC-013"
+      ],
+      "common_outcome": "Comparer quantité attendue et comptage, puis générer un ajustement autorisé.",
+      "common_boundary": "Pas de WMS mobile, orchestration de tournée ou moteur de valorisation. Les protocoles et rapprochements temporels Flow restent explicites.",
+      "processes": [
+        "S08",
+        "S09",
+        "S10",
+        "S11",
+        "S12"
+      ],
+      "dependencies": [
+        "K1",
+        "K2",
+        "master-data-protection"
+      ],
+      "contract_CFP": 46,
+      "CFP_meaning": "Répartition du contrat proposé Flow, pas preuve que ces CFP sont fournis par chaque OSS."
+    },
+    {
+      "id": "K4",
+      "label": "Engagements de quantité",
+      "capabilities": [
+        "BC-018"
+      ],
+      "common_outcome": "Contrôler le disponible, modifier une quantité réservée et protéger les écritures concurrentes dans une transaction.",
+      "common_boundary": "Pas de choix optimal de ressource, routage ou allocation commerciale. Quantité/portion demandées fournies ; expiration et rejeu métier Flow à adapter.",
+      "processes": [
+        "S13",
+        "S14",
+        "S15",
+        "S16"
+      ],
+      "dependencies": [
+        "K1",
+        "K2",
+        "java-spring-framework-services"
+      ],
+      "contract_CFP": 27,
+      "CFP_meaning": "Répartition du contrat proposé Flow, pas preuve que ces CFP sont fournis par chaque OSS."
+    },
+    {
+      "id": "K5",
+      "label": "Contrats de fourniture aux autres fonctions",
+      "capabilities": [
+        "BC-012",
+        "BC-016",
+        "BC-017"
+      ],
+      "common_outcome": null,
+      "common_boundary": "Contrats Flow de planification, Finance et constats produit. Pas quatre implémentations natives équivalentes revendiquées ; aucune comptabilité générale, aucun PLM.",
+      "processes": [
+        "S17",
+        "S18",
+        "S19",
+        "S20",
+        "S21"
+      ],
+      "dependencies": [
+        "K1",
+        "K2",
+        "master-data-admission",
+        "master-data-versions"
+      ],
+      "contract_CFP": 31,
+      "CFP_meaning": "Répartition du contrat proposé Flow, pas preuve que ces CFP sont fournis par chaque OSS."
+    }
+  ],
+  "unit": "Business Area Inventory State Management",
+  "economic_unit_policy": "Les composants partagent état et services. Union des tailles avant toute application de COCOMO ; pas somme de quatre chiffrages autonomes.",
+  "framework_policy": "Mécanismes Master Data à propriétaire unique ; appels et adaptations Stock spécifiques à conserver.",
+  "scope_is_not_reduced_to_common_subset": true
+}

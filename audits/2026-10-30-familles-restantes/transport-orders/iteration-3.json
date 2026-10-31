@@ -1,0 +1,573 @@
+{
+  "family": "ba-transport-order-management",
+  "slug": "transport-orders",
+  "iteration": 3,
+  "status": "candidat_conditionnel_non_adopte",
+  "scope": [
+    {
+      "id": "BC-071",
+      "native_id": "service-order-transport",
+      "source": {
+        "name": "Transport Order",
+        "definition": "Porter les demandes de déplacement de marchandises, leurs quantités, origine et destination, contraintes de collecte et de livraison, conditions de transport, engagements acceptés et suites des écarts.",
+        "scope": "Tenir les exigences de la prestation de transport confiée, ses conditions acceptées, leurs modifications et les suites à donner aux écarts. Un [Service Order](glossary:TER066) de transport peut être composé avec les prestations de prélèvement et de conditionnement. [Fulfilment Orchestration](model:D06) coordonne l’ensemble ; le transporteur organise ses moyens et ses opérations internes. Les choix d’exécutant et d’adaptation restent dans les responsabilités existantes de [Fulfilment](glossary:TER085). Les constats de suivi et le rapprochement des résultats alimentent la tenue de l’ordre.\n\nUne seule famille couvre les demandes de transport ; le mode, le transporteur et le type de trajet ne créent pas systématiquement de nouvelles capacités. Le [Service Catalog](model:D14) décrit les offres, variantes et conditions de service. L’engagement de prestation auprès du [Service Provider](glossary:TER088) reste distinct de la promesse de la commande portée par [Order Management](model:D04).\n\nExemple fictif : après préparation et emballage de 100 cartons, confier leur déplacement de l’entrepôt vers un magasin avec une fenêtre de collecte et une fenêtre de livraison. Un retard de collecte entraîne une suite de prestation et, si nécessaire, une adaptation coordonnée par [Fulfilment](glossary:TER085) ; il ne modifie pas automatiquement la promesse client.\n\n[Transport Plan Decision](model:transport-plan-decision) construit ou révise les chargements et parcours confiés, en préservant les engagements et les affectations. Cette décision ne se confond ni avec le choix de prestation ou prestataire, ni avec le moment de libération des ordres, ni avec les engagements portés par [Transport Order](model:service-order-transport).",
+        "finality": "Tenir une demande de déplacement et ses engagements en cohérence avec les autres prestations logistiques.",
+        "nature": "action",
+        "market_comparisons": [
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA Transportation Management",
+            "element_name": "Transportation Order",
+            "element_type": "Objet ou interface de produit TMS",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Une demande crée, modifie ou annule un ordre de transport de différentes catégories, notamment freight order et freight booking.",
+            "differences": "SAP distingue des catégories de documents et Oracle distingue demande à transporter et expéditions planifiées. FLOW porte la gestion de la prestation confiée et ses engagements ; orchestration, choix des moyens et gestes physiques restent distincts.",
+            "flow_position": "Porter les demandes de déplacement de marchandises, leurs quantités, origine et destination, contraintes de collecte et de livraison, conditions de transport, engagements acceptés et suites des écarts.",
+            "source_title": "Maintain Generic Transportation Order",
+            "source_url": "https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/733c8b37b3f546a1b08750e8aeabb887/9740cb5147dd9d55e10000000a423f68.html",
+            "source_version": "2025 FPS01 (février 2026)",
+            "source_locator": "Definition ; Business Context and Use",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Texte primaire indexé consulté le 24 septembre 2026 ; ouverture directe sans corps. Opération de service et catégories SAP, pas équivalence de capacité ni découpage FLOW.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM683",
+              "CMP275",
+              "U698"
+            ],
+            "concept_name": "Transportation Order",
+            "scope_summary": "Une demande crée, modifie ou annule un ordre de transport de différentes catégories, notamment freight order et freight booking.",
+            "approach_summary": "Porter les demandes de déplacement de marchandises, leurs quantités, origine et destination, contraintes de collecte et de livraison, conditions de transport, engagements acceptés et suites des écarts.",
+            "term_choice": "Transport Order est le nom de la famille FLOW adopté U698 ; Transportation Order et l’autorisation de prise en charge sont les termes natifs comparés, sans nomenclature universelle revendiquée.",
+            "definition_choice": "Distinguer les exigences et engagements de déplacement des décisions de coordination et de la réalisation du transport."
+          },
+          {
+            "vendor": "Oracle",
+            "product": "Oracle Transportation Management",
+            "element_name": "Order Release",
+            "element_type": "Objet ou interface de produit TMS",
+            "relationship": "Recouvrement partiel",
+            "similarities": "La demande contient des unités ou lignes à transporter, les lieux et dates, ainsi que des contraintes utilisées pour planifier les expéditions.",
+            "differences": "SAP distingue des catégories de documents et Oracle distingue demande à transporter et expéditions planifiées. FLOW porte la gestion de la prestation confiée et ses engagements ; orchestration, choix des moyens et gestes physiques restent distincts.",
+            "flow_position": "Porter les demandes de déplacement de marchandises, leurs quantités, origine et destination, contraintes de collecte et de livraison, conditions de transport, engagements acceptés et suites des écarts.",
+            "source_title": "Order Release",
+            "source_url": "https://docs.oracle.com/en/cloud/saas/transportation/25c/otmol/planning/order_manager/or_edit.htm",
+            "source_version": "25C",
+            "source_locator": "Introduction ; Adding Order Releases, fenêtres de collecte/livraison et origine/destination",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Texte primaire ouvert et lu le 24 septembre 2026. L’Order Release exprime la demande de transport ; ne prouve pas à lui seul un engagement de transporteur ni une correspondance un pour un avec les shipments.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM684",
+              "CMP275",
+              "U698"
+            ],
+            "concept_name": "Order Release",
+            "scope_summary": "La demande contient des unités ou lignes à transporter, les lieux et dates, ainsi que des contraintes utilisées pour planifier les expéditions.",
+            "approach_summary": "Porter les demandes de déplacement de marchandises, leurs quantités, origine et destination, contraintes de collecte et de livraison, conditions de transport, engagements acceptés et suites des écarts.",
+            "term_choice": "Transport Order est le nom de la famille FLOW adopté U698 ; Transportation Order et l’autorisation de prise en charge sont les termes natifs comparés, sans nomenclature universelle revendiquée.",
+            "definition_choice": "Distinguer les exigences et engagements de déplacement des décisions de coordination et de la réalisation du transport."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Managing Freight Orders and Freight Bookings",
+            "concept_name": "Managing Freight Orders and Freight Bookings",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Freight orders et bookings portent étapes, transporteurs, dates, échanges de statut et documents de transport.",
+            "approach_summary": "Rapprochement avec Transport Order : Freight orders et bookings portent étapes, transporteurs, dates, échanges de statut et documents de transport.",
+            "similarities": "Freight orders et bookings portent étapes, transporteurs, dates, échanges de statut et documents de transport.",
+            "differences": "Les ordres de transport du cours SAP éclairent la tenue des exigences et états de [Transport Order](model:service-order-transport), sans imposer le cycle complet ni un catalogue universel d’ordres FLOW. Les documents requis appartiennent à la prestation ; leur génération technique ne crée pas une capacité métier autonome.",
+            "flow_position": "FLOW conserve le périmètre métier de Transport Order. Les ordres de transport du cours SAP éclairent la tenue des exigences et états de [Transport Order](model:service-order-transport), sans imposer le cycle complet ni un catalogue universel d’ordres FLOW. Les documents requis appartiennent à la prestation ; leur génération technique ne crée pas une capacité métier autonome.",
+            "source_title": "Managing Freight Orders and Freight Bookings",
+            "source_url": "https://learning.sap.com/courses/implementing-sap-s-4hana-cloud-public-edition-transportation-management/managing-freight-orders-and-freight-bookings_a83a6371-2f56-4fa2-8e12-ae0aab3c74c2",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Managing Freight Orders and Freight Bookings — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Les ordres de transport du cours SAP éclairent la tenue des exigences et états de [Transport Order](model:service-order-transport), sans imposer le cycle complet ni un catalogue universel d’ordres FLOW. Les documents requis appartiennent à la prestation ; leur génération technique ne crée pas une capacité métier autonome.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM792"
+            ],
+            "term_choice": "Le nom Transport Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Freight orders et bookings portent étapes, transporteurs, dates, échanges de statut et documents de transport. Frontière conservée : Les ordres de transport du cours SAP éclairent la tenue des exigences et états de [Transport Order](model:service-order-transport), sans imposer le cycle complet ni un catalogue universel d’ordres FLOW. Les documents requis appartiennent à la prestation ; leur génération technique ne crée pas une capacité métier autonome."
+          },
+          {
+            "vendor": "Microsoft",
+            "product": "Microsoft Dynamics 365 — application indiquée par la source",
+            "element_name": "Plan freight transportation routes with multiple stops",
+            "concept_name": "Plan freight transportation routes with multiple stops",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Les routes de transport comportent arrêts, segments, hubs, transporteurs et horaires.",
+            "approach_summary": "Rapprochement avec Transport Order : Les routes de transport comportent arrêts, segments, hubs, transporteurs et horaires.",
+            "similarities": "Les routes de transport comportent arrêts, segments, hubs, transporteurs et horaires.",
+            "differences": "Une route planifiée n’est pas une preuve de booking confirmé ; plusieurs variantes FLOW peuvent coopérer dans un même trajet.",
+            "flow_position": "FLOW conserve le périmètre métier de Transport Order. Une route planifiée n’est pas une preuve de booking confirmé ; plusieurs variantes FLOW peuvent coopérer dans un même trajet.",
+            "source_title": "Plan freight transportation routes with multiple stops - Supply Chain Management | Dynamics 365 | Microsoft Learn",
+            "source_url": "https://learn.microsoft.com/en-us/dynamics365/supply-chain/transportation/plan-freight-transportation-routes-multiple-stops",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Plan freight transportation routes with multiple stops - Supply Chain Management | Dynamics 365 | Microsoft Learn — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Une route planifiée n’est pas une preuve de booking confirmé ; plusieurs variantes FLOW peuvent coopérer dans un même trajet.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM805"
+            ],
+            "term_choice": "Le nom Transport Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Les routes de transport comportent arrêts, segments, hubs, transporteurs et horaires. Frontière conservée : Une route planifiée n’est pas une preuve de booking confirmé ; plusieurs variantes FLOW peuvent coopérer dans un même trajet."
+          }
+        ],
+        "market_inspiration": {
+          "choice": "Une famille Transport Order indépendante des modes, cohérente avec les familles de Service Orders.",
+          "flow_scope": "Porter les demandes de déplacement de marchandises, leurs quantités, origine et destination, contraintes de collecte et de livraison, conditions de transport, engagements acceptés et suites des écarts.",
+          "flow_approach": "Distinguer la demande et les engagements de transport de la coordination d’ensemble et des opérations du transporteur.",
+          "synthesis": [
+            "Les documents TMS étayent la demande de déplacement ; leurs catégories et cardinalités ne sont pas imposées au modèle."
+          ],
+          "examples": [
+            {
+              "title": "Exemple fictif",
+              "situation": "Cent cartons préparés attendent une collecte pour un magasin.",
+              "outcome": "Tenir les fenêtres convenues et la suite d’un retard, en articulation avec Fulfilment.",
+              "lesson": "L’engagement de transport est distinct de la promesse commerciale ; aucune réalisation Beaumanoir déduite.",
+              "source_refs": [
+                "U698",
+                "ELM684"
+              ],
+              "source_title": "l’autorisation de prise en charge",
+              "source_url": "https://docs.oracle.com/en/cloud/saas/transportation/25c/otmol/planning/order_manager/or_edit.htm"
+            }
+          ]
+        },
+        "decomposition_rationale": "Distinguer les engagements par arrêt, par étape, par départ programmé et par conditions de remise. Ces variantes changent la manière de tenir exigences, acceptations, modifications et clôture de l’ordre ; elles ne détaillent ni boutons TMS ni gestes du transporteur. Elles sont terminales et combinables."
+      },
+      "functions": [
+        {
+          "id": "BC-071.01",
+          "resultat": "Porter quantités et lieux et conditions du déplacement"
+        },
+        {
+          "id": "BC-071.02",
+          "resultat": "Suivre engagements acceptés et modifications"
+        },
+        {
+          "id": "BC-071.03",
+          "resultat": "Qualifier les suites des écarts de transport"
+        }
+      ],
+      "boundary": "Ne gère pas la flotte ni le dispatch interne du transporteur."
+    },
+    {
+      "id": "BC-072",
+      "native_id": "service-order-transport-booking",
+      "source": {
+        "name": "Transport Booking Order",
+        "definition": "Gérer une demande autonome de réservation de capacité de transport, sa confirmation, ses changements et sa libération, avant ou indépendamment des instructions détaillées de déplacement.",
+        "scope": "Cette famille porte un engagement autonome de capacité de transport confié à un prestataire. Si le booking est seulement la prise en charge du même déplacement, rester dans [Transport Order](model:service-order-transport) et son cycle de vie.\n\nCapacité confirmée sur un service, départ ou période ; la confirmation ne prouve pas le déplacement des marchandises.\n\nUne [affectation de ressource à une demande](glossary:TER017), décidée par [Supply Assignment](model:D03.o), et une [réservation de stock](glossary:TER016), tenue par [Reservation](model:D02.c), ne constituent pas une réservation commerciale de capacité auprès d’un prestataire. Un accord-cadre de capacité relève des accords de référence ; ne pas le transformer automatiquement en [Order](glossary:TER012). Choix de l’offre et coordination des départs restent [Fulfilment](glossary:TER085) ; aucun lien un-à-un imposé entre booking et déplacements.\n\nExemple fictif : Réserver de la place pour un départ maritime de collection, puis préciser les lots effectivement expédiés.\n\nCette capacité cible ne prouve pas que ce service est déjà commandé ou réalisé chez Beaumanoir.\n\nLes documents nécessaires à la prestation font partie de ses exigences : contenu attendu, destinataires, disponibilité et résultat reconnu. Le workflow pilote leur obtention et leurs éventuelles reprises. La génération technique d’un document ne crée ni capacité métier autonome ni commande supplémentaire.",
+        "nature": "action",
+        "finality": "Tenir les exigences, engagements et résultats de la prestation confiée.",
+        "market_comparisons": [
+          {
+            "vendor": "SAP",
+            "product": "Sample Ocean Freight Process for Shippers (Outbound)",
+            "element_name": "Sample Ocean Freight Process for Shippers (Outbound)",
+            "element_type": "Processus, service ou documentation produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Le chargeur commence par une pré-réservation de capacité via un ocean freight booking.",
+            "differences": "La source décrit un service, un processus ou un produit ; FLOW porte les demandes et engagements. Le découpage en capacités et comportements est une adaptation, sans preuve installée Beaumanoir.",
+            "flow_position": "Gérer une demande autonome de réservation de capacité de transport, sa confirmation, ses changements et sa libération, avant ou indépendamment des instructions détaillées de déplacement.",
+            "source_title": "Sample Ocean Freight Process for Shippers (Outbound)",
+            "source_url": "https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/e3dc5400c1cc41d1bc0ae0e7fd9aa5a2/ca69ceb75dad454bad9bbeb25613b198.html?version=latest",
+            "source_version": "Version non établie dans le passage indexé",
+            "source_locator": "Introduction du processus chargeur",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Documentation produit ou offre publiée ; pas de preuve Beaumanoir ni de taxonomie universelle des capacités. Extraits/synthèses et liens, pas de reproduction substantielle.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM694",
+              "U709"
+            ],
+            "concept_name": "Transport Booking Order",
+            "scope_summary": "Gérer une demande autonome de réservation de capacité de transport, sa confirmation, ses changements et sa libération, avant ou indépendamment des instructions détaillées de déplacement.",
+            "approach_summary": "Gérer une demande autonome de réservation de capacité de transport, sa confirmation, ses changements et sa libération, avant ou indépendamment des instructions détaillées de déplacement.",
+            "term_choice": "Nom de la proposition FLOW validée dans la discussion ; pas de nomenclature universelle revendiquée.",
+            "definition_choice": "Appui de Sample Ocean Freight Process for Shippers (Outbound) : Le chargeur commence par une pré-réservation de capacité via un ocean freight booking. Limite de reprise dans FLOW : La source décrit un service, un processus ou un produit ; FLOW porte les demandes et engagements. Le découpage en capacités et comportements est une adaptation, sans preuve installée Beaumanoir."
+          },
+          {
+            "vendor": "DCSA",
+            "product": "Booking standard",
+            "element_name": "Booking standard",
+            "element_type": "Processus, service ou documentation produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Échanges de données et suivi du booking d’espace maritime ; distinction avec les Shipping Instructions.",
+            "differences": "La source décrit un service, un processus ou un produit ; FLOW porte les demandes et engagements. Le découpage en capacités et comportements est une adaptation, sans preuve installée Beaumanoir.",
+            "flow_position": "Gérer une demande autonome de réservation de capacité de transport, sa confirmation, ses changements et sa libération, avant ou indépendamment des instructions détaillées de déplacement.",
+            "source_title": "Booking standard",
+            "source_url": "https://dcsa.org/standards/booking",
+            "source_version": "Présentation publique évolutive ; version du standard non établie",
+            "source_locator": "The problem ; The solution",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Documentation produit ou offre publiée ; pas de preuve Beaumanoir ni de taxonomie universelle des capacités. Extraits/synthèses et liens, pas de reproduction substantielle.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM695",
+              "U709"
+            ],
+            "concept_name": "Transport Booking Order",
+            "scope_summary": "Gérer une demande autonome de réservation de capacité de transport, sa confirmation, ses changements et sa libération, avant ou indépendamment des instructions détaillées de déplacement.",
+            "approach_summary": "Gérer une demande autonome de réservation de capacité de transport, sa confirmation, ses changements et sa libération, avant ou indépendamment des instructions détaillées de déplacement.",
+            "term_choice": "Nom de la proposition FLOW validée dans la discussion ; pas de nomenclature universelle revendiquée.",
+            "definition_choice": "Appui de Booking standard : Échanges de données et suivi du booking d’espace maritime ; distinction avec les Shipping Instructions. Limite de reprise dans FLOW : La source décrit un service, un processus ou un produit ; FLOW porte les demandes et engagements. Le découpage en capacités et comportements est une adaptation, sans preuve installée Beaumanoir."
+          },
+          {
+            "vendor": "SAP",
+            "product": "Freight Booking – Confirm",
+            "element_name": "Freight Booking – Confirm",
+            "element_type": "Processus, service ou documentation produit",
+            "relationship": "Recouvrement partiel",
+            "similarities": "Confirmation de capacité et de service dans les périodes convenues sous condition de remise à temps des marchandises.",
+            "differences": "La source décrit un service, un processus ou un produit ; FLOW porte les demandes et engagements. Le découpage en capacités et comportements est une adaptation, sans preuve installée Beaumanoir.",
+            "flow_position": "Gérer une demande autonome de réservation de capacité de transport, sa confirmation, ses changements et sa libération, avant ou indépendamment des instructions détaillées de déplacement.",
+            "source_title": "Freight Booking – Confirm",
+            "source_url": "https://help.sap.com/docs/SAP_S4HANA_ON-PREMISE/2f36056ae9a044bba55bcbad204b7bc5/2ef80c370bc645c19fc266b746d3094f.html",
+            "source_version": "Version non établie dans le passage indexé",
+            "source_locator": "Service Nodes : TransportationOrderBooking ; BookingCapacity",
+            "consulted_on": "2026-09-24",
+            "evidence_limits": "Documentation produit ou offre publiée ; pas de preuve Beaumanoir ni de taxonomie universelle des capacités. Extraits/synthèses et liens, pas de reproduction substantielle.",
+            "status": "proposed",
+            "source_refs": [
+              "ELM696",
+              "U709"
+            ],
+            "concept_name": "Transport Booking Order",
+            "scope_summary": "Gérer une demande autonome de réservation de capacité de transport, sa confirmation, ses changements et sa libération, avant ou indépendamment des instructions détaillées de déplacement.",
+            "approach_summary": "Gérer une demande autonome de réservation de capacité de transport, sa confirmation, ses changements et sa libération, avant ou indépendamment des instructions détaillées de déplacement.",
+            "term_choice": "Nom de la proposition FLOW validée dans la discussion ; pas de nomenclature universelle revendiquée.",
+            "definition_choice": "Appui de Freight Booking – Confirm : Confirmation de capacité et de service dans les périodes convenues sous condition de remise à temps des marchandises. Limite de reprise dans FLOW : La source décrit un service, un processus ou un produit ; FLOW porte les demandes et engagements. Le découpage en capacités et comportements est une adaptation, sans preuve installée Beaumanoir."
+          },
+          {
+            "vendor": "SAP",
+            "product": "SAP S/4HANA — périmètre du cours cité",
+            "element_name": "Managing Freight Orders and Freight Bookings",
+            "concept_name": "Managing Freight Orders and Freight Bookings",
+            "element_type": "Mécanisme ou objet documenté dans un produit",
+            "relationship": "Recouvrement partiel",
+            "scope_summary": "Freight orders et bookings portent étapes, transporteurs, dates, échanges de statut et documents de transport.",
+            "approach_summary": "Rapprochement avec Transport Booking Order : Freight orders et bookings portent étapes, transporteurs, dates, échanges de statut et documents de transport.",
+            "similarities": "Freight orders et bookings portent étapes, transporteurs, dates, échanges de statut et documents de transport.",
+            "differences": "Les réservations de transport du cours SAP éclairent [Transport Booking Order](model:service-order-transport-booking), dans le cas d’un engagement autonome de capacité. Une confirmation de réservation ne prouve pas le déplacement réalisé. Les documents requis appartiennent à cette prestation ; leur génération technique ne crée pas une capacité métier autonome.",
+            "flow_position": "FLOW conserve le périmètre métier de Transport Booking Order. Les réservations de transport du cours SAP éclairent [Transport Booking Order](model:service-order-transport-booking), dans le cas d’un engagement autonome de capacité. Une confirmation de réservation ne prouve pas le déplacement réalisé. Les documents requis appartiennent à cette prestation ; leur génération technique ne crée pas une capacité métier autonome.",
+            "source_title": "Managing Freight Orders and Freight Bookings",
+            "source_url": "https://learning.sap.com/courses/implementing-sap-s-4hana-cloud-public-edition-transportation-management/managing-freight-orders-and-freight-bookings_a83a6371-2f56-4fa2-8e12-ae0aab3c74c2",
+            "source_version": "Documentation évolutive ; périmètre produit du cours ou de la page cité, version globale non présumée.",
+            "source_locator": "Managing Freight Orders and Freight Bookings — passages sur le mécanisme rapproché.",
+            "consulted_on": "2026-09-25",
+            "evidence_limits": "Passages primaires consultés. Correspondance partielle ; aucun consensus, équivalence complète ou déploiement Beaumanoir déduit. Les réservations de transport du cours SAP éclairent [Transport Booking Order](model:service-order-transport-booking), dans le cas d’un engagement autonome de capacité. Une confirmation de réservation ne prouve pas le déplacement réalisé. Les documents requis appartiennent à cette prestation ; leur génération technique ne crée pas une capacité métier autonome.",
+            "status": "proposed",
+            "source_refs": [
+              "U774",
+              "CMP307",
+              "ELM792"
+            ],
+            "term_choice": "Le nom Transport Booking Order reste celui du modèle FLOW ; la source étaye le rapprochement, pas nécessairement cette appellation ni sa maille.",
+            "definition_choice": "Freight orders et bookings portent étapes, transporteurs, dates, échanges de statut et documents de transport. Frontière conservée : Les réservations de transport du cours SAP éclairent [Transport Booking Order](model:service-order-transport-booking), dans le cas d’un engagement autonome de capacité. Une confirmation de réservation ne prouve pas le déplacement réalisé. Les documents requis appartiennent à cette prestation ; leur génération technique ne crée pas une capacité métier autonome."
+          }
+        ],
+        "market_gaps": [
+          {
+            "family": "microsoft_dynamics",
+            "reason": "La construction d’un chargement à partir des ordres ne démontre pas une réservation de capacité autonome avant les instructions de transport. Appui requis encore à établir pour cette famille produit. Réexamen U1021 : La planification de chargements ne prouve pas une demande autonome de réservation de capacité de transport préalable.",
+            "investigated_urls": [
+              "https://learn.microsoft.com/en-us/dynamics365/supply-chain/transportation/transportation-management-overview"
+            ],
+            "source_refs": [
+              "U853",
+              "U1020",
+              "U1021"
+            ]
+          }
+        ]
+      },
+      "functions": [
+        {
+          "id": "BC-072.01",
+          "resultat": "Demander une réservation autonome de capacité"
+        },
+        {
+          "id": "BC-072.02",
+          "resultat": "Suivre confirmation et changement"
+        },
+        {
+          "id": "BC-072.03",
+          "resultat": "Libérer la réservation selon les conditions"
+        }
+      ],
+      "boundary": "Une réservation de transport n’est pas un Transport Order détaillé."
+    }
+  ],
+  "native_estimates": [
+    {
+      "id": "erpnext",
+      "native_analogue_units": 359,
+      "base_equivalent_units": 179.5,
+      "complement_equivalent_units": 267.35,
+      "equivalent_units": 446.85,
+      "common_analogy_jh": 11.393825518440265,
+      "complement_marginal_jh": 19.670202955235823,
+      "jh": 31.06402847367609,
+      "rounded_jh": 30,
+      "not_observed_effort": true
+    },
+    {
+      "id": "odoo",
+      "native_analogue_units": 1040,
+      "base_equivalent_units": 520.0,
+      "complement_equivalent_units": 773.0,
+      "equivalent_units": 1293.0,
+      "common_analogy_jh": 36.699805503415206,
+      "complement_marginal_jh": 63.23109097105545,
+      "jh": 99.93089647447066,
+      "rounded_jh": 100,
+      "not_observed_effort": true
+    },
+    {
+      "id": "tryton",
+      "native_analogue_units": 89,
+      "base_equivalent_units": 44.5,
+      "complement_equivalent_units": 147.85,
+      "equivalent_units": 192.35,
+      "common_analogy_jh": 2.45796893479106,
+      "complement_marginal_jh": 9.835970455532985,
+      "jh": 12.293939390324045,
+      "rounded_jh": 10,
+      "not_observed_effort": true
+    },
+    {
+      "id": "axelor",
+      "native_analogue_units": 884,
+      "base_equivalent_units": 442.0,
+      "complement_equivalent_units": 660.6,
+      "equivalent_units": 1102.6,
+      "common_analogy_jh": 30.69345343344471,
+      "complement_marginal_jh": 53.179502130791526,
+      "jh": 83.87295556423624,
+      "rounded_jh": 80,
+      "not_observed_effort": true
+    }
+  ],
+  "proposed_java_jh": 80,
+  "diagnostic_java_jh": 83.87295556423624,
+  "diagnostic_rounded_jh": 80,
+  "roles": [
+    {
+      "id": "coordination",
+      "label": "Pilotage de l’équipe produit",
+      "jh": 9
+    },
+    {
+      "id": "analyse_produit",
+      "label": "Analyse métier et fonctionnelle",
+      "jh": 8
+    },
+    {
+      "id": "architecture",
+      "label": "Architecture et conception technique",
+      "jh": 7
+    },
+    {
+      "id": "dev_java",
+      "label": "Développement Java et tests développeur",
+      "jh": 29
+    },
+    {
+      "id": "dev_frontend",
+      "label": "Développement interface et tests développeur",
+      "jh": 5
+    },
+    {
+      "id": "qa",
+      "label": "QA et qualification indépendante",
+      "jh": 11
+    },
+    {
+      "id": "plateforme",
+      "label": "Plateforme / DevOps et mise en service",
+      "jh": 7
+    },
+    {
+      "id": "ux",
+      "label": "UX et ergonomie",
+      "jh": 2
+    },
+    {
+      "id": "securite",
+      "label": "Expertise et revue de sécurité",
+      "jh": 2
+    }
+  ],
+  "roles_status": "Répartition du diagnostic total par activités publiées COCOMO et clés d’organisation Stock proposées ; pas charge observée ni adoption.",
+  "activities": [
+    {
+      "id": "management",
+      "label": "Gestion du projet logiciel",
+      "jh": 8.8135593220339,
+      "percent_by_phase": [
+        14,
+        12,
+        10,
+        14
+      ],
+      "weights": {
+        "coordination": 1
+      }
+    },
+    {
+      "id": "environment",
+      "label": "Environnement et gestion de configuration",
+      "jh": 4.691525423728814,
+      "percent_by_phase": [
+        10,
+        8,
+        5,
+        5
+      ],
+      "weights": {
+        "plateforme": 0.8,
+        "dev_java": 0.2
+      }
+    },
+    {
+      "id": "requirements",
+      "label": "Analyse et exigences",
+      "jh": 8.922033898305084,
+      "percent_by_phase": [
+        38,
+        18,
+        8,
+        4
+      ],
+      "weights": {
+        "analyse_produit": 0.9,
+        "architecture": 0.1
+      }
+    },
+    {
+      "id": "design",
+      "label": "Conception et architecture",
+      "jh": 15.2,
+      "percent_by_phase": [
+        19,
+        36,
+        16,
+        4
+      ],
+      "weights": {
+        "architecture": 0.4,
+        "dev_java": 0.4,
+        "dev_frontend": 0.05,
+        "ux": 0.1,
+        "securite": 0.05
+      }
+    },
+    {
+      "id": "implementation",
+      "label": "Réalisation et tests unitaires",
+      "jh": 21.505084745762716,
+      "percent_by_phase": [
+        8,
+        13,
+        34,
+        19
+      ],
+      "weights": {
+        "dev_java": 0.85,
+        "dev_frontend": 0.15
+      }
+    },
+    {
+      "id": "assessment",
+      "label": "Évaluation, vérification et validation",
+      "jh": 16.271186440677965,
+      "percent_by_phase": [
+        8,
+        10,
+        24,
+        24
+      ],
+      "weights": {
+        "qa": 0.7,
+        "dev_java": 0.2,
+        "dev_frontend": 0.05,
+        "securite": 0.05
+      }
+    },
+    {
+      "id": "deployment",
+      "label": "Préparation du déploiement",
+      "jh": 4.596610169491525,
+      "percent_by_phase": [
+        3,
+        3,
+        3,
+        30
+      ],
+      "weights": {
+        "plateforme": 0.7,
+        "dev_java": 0.2,
+        "coordination": 0.1
+      }
+    }
+  ],
+  "activity_source_ref": "audits/2026-10-30-master-data-calcul/repartitions-sources.json#cocomo",
+  "delay": {
+    "calculated_months": 6.58848350260742,
+    "rounded_months": 7,
+    "status": "Délai local nominal du diagnostic ; pas engagement ni calendrier global. Dépend des mécanismes des autres familles."
+  },
+  "functional_control": {
+    "CFP": 31,
+    "jh": 88.57142857142857,
+    "gap_jh": 4.698473007192334,
+    "gap_pct": 5.601892738349835,
+    "denominator": 83.87295556423624,
+    "not_confidence": true
+  },
+  "measured_change": {
+    "java_units_iteration_2": 240,
+    "java_units_iteration_3": 884,
+    "jh_iteration_2": 24.642609819787797,
+    "jh_iteration_3": 83.87295556423624,
+    "additional_source_files": 1,
+    "resolved_direct_calls": 1,
+    "remaining_delegations": 0
+  },
+  "limits": [
+    "Créer le contrat de booking séparément des instructions de transport ; la flotte et le dispatch restent hors périmètre.",
+    "Les parts de pertinence et de nouveau code sont des hypothèses non calibrées.",
+    "Le composant natif peut rester plus large que le périmètre Flow ; les quatre chiffres ne sont ni des charges historiques ni des validations indépendantes.",
+    "Un même code peut servir d’analogue à plusieurs familles ; cela ne prouve pas à lui seul un mécanisme Flow commun ni un financement distinct.",
+    "Le comptage COSMIC est proposé, sans revue humaine ni preuve d’exhaustivité."
+  ],
+  "cumulative": {
+    "adopted_jh": 1940,
+    "newly_adopted_jh": 0,
+    "capabilities_reviewed": 72,
+    "total_capabilities": 88,
+    "reviewed_pct": 81.81818181818181
+  },
+  "next_iteration_worthwhile": true,
+  "next_iteration_reason": "Audit transversal demandé : vérifier les mécanismes communs, l’exhaustivité fonctionnelle et les analogues non appariés avant une nouvelle adoption.",
+  "lineage": {
+    "iteration_1_sha256": "05dca47f87a9c2de2a3926d2c42cac7960bdce65683b184527b0acc3b8eb064f",
+    "analysis_1_sha256": "b7e220475418faa5d42f80b6801a70130b3a2ff0feef5cc5bc12bd69e3652096",
+    "iteration_2_sha256": "c0c8d241efb78d94ec491a615f99a65018a864213f1cfe75ac1a274b341efeaf",
+    "analysis_2_sha256": "d62b9b447a108e095981a6ac4b59b1eaee06084c1371e1a74d1460158af43389",
+    "inputs_3_sha256": "9ed1c45392fac951b0c7d7ba960d476e70bca5b4c977d10e7ae3af7731696854"
+  }
+}

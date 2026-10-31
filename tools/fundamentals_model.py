@@ -211,7 +211,7 @@ def hydrate_fundamentals(ui, document):
     e = ui['essential']
     if e.get('fundamentals') != {'source': SOURCE}:
         fail('view', 'expected canonical fundamentals source')
-    if any(key in e for key in ('calendar_text', 'model_limit', 'model_workload', 'model_activities', 'model_reading',
+    if any(key in e for key in ('calendar_text', 'model_limit', 'model_workload', 'model_activities', 'model_reading', 'core_status_summary',
                               'model_concepts', 'model_choice', 'model_calendar', 'model_complexity_link')):
         fail('view', 'domain explanations cannot be overridden locally')
     if 'intro' in e['pages']['modele']:
@@ -219,6 +219,8 @@ def hydrate_fundamentals(ui, document):
     entities = {item['id']: item for item in document['entities']}
     result = deepcopy(ui)
     target = result['essential']
+    from evaluation_status import load_status
+    target['core_status_summary'] = load_status()['summary']
     target['model_reading'] = deepcopy(document['reading'])
     target['model_reading'].update({
         'scope': document['business_map']['scope_summary'],

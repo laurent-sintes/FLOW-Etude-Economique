@@ -1,0 +1,4452 @@
+{
+  "id": "tryton-reservation",
+  "product": "tryton",
+  "kind": "reservation",
+  "status": "dossier natif bout en bout aux frontières déclarées, pas équivalence Flow démontrée",
+  "pattern": "assign_try → verrouillage des mouvements avant lecture des quantités → choix/répartition → write/copy → transition assigned → commit ; rollback/retry sur conflit opérationnel.",
+  "native_stages": [
+    "assign_try identifie produits, lieux, entreprise, date",
+    "_assign_try_lock : SELECT FOR UPDATE NOWAIT, ou verrou de modèle selon backend",
+    "products_by_location avec stock_assign → répartition/split → write/copy/assign",
+    "Workflow → ModelSQL → dispatcher._dispatch : rollback/retry puis commit"
+  ],
+  "result": "Ordre verrou/lecture/écriture et reprise RPC identifiés. La politique de répartition est embarquée dans assign_try et doit être isolée pour comparer Flow.",
+  "gap": "Cache de période et préexistence des lignes verrouillables influencent le cas concurrent. La chaîne native ne démontre pas tout engagement externe rejouable.",
+  "unresolved": [
+    "Premier engagement/ensembles sans ligne commune et cache de période, dans le contexte d’appel exact.",
+    "Délimitation du split/choix de lieu et de la simple protection d’une quantité donnée."
+  ],
+  "files": [
+    {
+      "repo": "tryton",
+      "path": "modules/stock/move.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+      "git_object_sha256": "693db44e9d68ec11652bc850ba929a066c6a4e344f8fbd1ce4ac13f673420e49",
+      "source_url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/move.py",
+      "role": "stock_quantity",
+      "classification_basis": "traitement de quantité/état de stock observé dans la chaîne",
+      "methods": [
+        {
+          "name": "Move.assign_try",
+          "start": 1168,
+          "end": 1346,
+          "calls": [
+            "Date.today",
+            "Location.search",
+            "Pool",
+            "Product.products_by_location",
+            "Transaction",
+            "Transaction().set_context",
+            "Uom.compute_qty",
+            "child_locations.get",
+            "childs.insert",
+            "childs.remove",
+            "cls._assign_try_lock",
+            "cls.assign",
+            "cls.copy",
+            "cls.write",
+            "default_values",
+            "defaultdict",
+            "dict",
+            "get_key",
+            "get_value",
+            "get_values",
+            "getattr",
+            "isinstance",
+            "key.append",
+            "list",
+            "location_qties.append",
+            "match",
+            "move.pick_product",
+            "move.sort_quantities",
+            "move.unit.round",
+            "moves_to_copy.append",
+            "pbl.get",
+            "pbl.items",
+            "pool.get",
+            "set",
+            "set().union",
+            "to_assign.append",
+            "to_assign.extend",
+            "to_copy.items",
+            "to_copy[move].append",
+            "to_write.extend",
+            "tuple",
+            "v.keys",
+            "values.values",
+            "values[data['id']].get",
+            "vlist.pop",
+            "zip"
+          ],
+          "source_fragment": "    @classmethod\n    def assign_try(\n            cls, moves, with_childs=True, grouping=('product',), pblc=None):\n        '''\n        Try to assign moves.\n        It uses pblc as product by location by company if provided otherwise it\n        computes based on today.\n        It will split the moves to assign as much possible.\n        Return True if succeed or False if not.\n        '''\n        pool = Pool()\n        Product = pool.get('product.product')\n        Uom = pool.get('product.uom')\n        Date = pool.get('ir.date')\n        Location = pool.get('stock.location')\n\n        moves = [m for m in moves if m.state in {'draft', 'staging'}]\n        if not moves:\n            return True\n\n        if with_childs:\n            locations = Location.search([\n                    ('parent', 'child_of',\n                        [x.from_location.id for x in moves]),\n                    ])\n        else:\n            locations = list(set((m.from_location for m in moves)))\n        location_ids = [l.id for l in locations]\n        product_ids = list(set((m.product.id for m in moves)))\n        stock_date_end = Date.today()\n\n        if pblc is None:\n            pblc = {}\n            companies = {m.company for m in moves}\n            for company in companies:\n                with Transaction().set_context(company=company.id):\n                    stock_date_end = Date.today()\n\n                cls._assign_try_lock(\n                    product_ids, location_ids, [company.id],\n                    stock_date_end, grouping)\n\n                with Transaction().set_context(\n                        stock_date_end=stock_date_end,\n                        stock_assign=True,\n                        company=company.id):\n                    pblc[company.id] = Product.products_by_location(\n                        location_ids,\n                        grouping=grouping,\n                        grouping_filter=(product_ids,))\n\n        def get_key(move, location_id):\n            key = [location_id]\n            for field in grouping:\n                value = getattr(move, field)\n                if isinstance(value, Model):\n                    value = value.id\n                key.append(value)\n            return tuple(key)\n\n        def get_values(key, location_name):\n            yield location_name, key[0]\n            for field, value in zip(grouping, key[1:]):\n                if value is not None and '.' not in field:\n                    yield field, value\n\n        def match(key, pattern):\n            for k, p in zip(key, pattern):\n                if p is None or k == p:\n                    continue\n                else:\n                    return False\n            else:\n                return True\n\n        def default_values(values):\n            def get_value(name):\n                def get_default(data):\n                    return values[data['id']].get(name, data[name])\n                return get_default\n            default = {}\n            for name in set().union(*(v.keys() for v in values.values())):\n                default[name] = get_value(name)\n            return default\n\n        child_locations = {}\n        to_write = []\n        to_assign = []\n        to_copy = defaultdict(list)\n        success = True\n        for move in moves:\n            if move.state != 'draft':\n                if move.state == 'staging':\n                    success = False\n                continue\n            pbl = pblc[move.company.id]\n            # Keep location order for pick_product\n            if with_childs:\n                childs = child_locations.get(move.from_location)\n                if childs is None:\n                    childs = Location.search([\n                            ('parent', 'child_of', [move.from_location.id]),\n                            ('type', '!=', 'view'),\n                            ])\n                    child_locations[move.from_location] = childs\n            else:\n                childs = [move.from_location]\n            # Prevent picking from the destination location\n            try:\n                childs.remove(move.to_location)\n            except ValueError:\n                pass\n            # Try first to pick from source location\n            try:\n                childs.remove(move.from_location)\n                childs.insert(0, move.from_location)\n            except ValueError:\n                # from_location may be a view\n                pass\n            location_qties = []\n            for key, qty in pbl.items():\n                move_key = get_key(move, key[0])\n                if match(key, move_key):\n                    qty = Uom.compute_qty(\n                        move.product.default_uom, qty, move.unit,\n                        round=False)\n                    location_qties.append((key, qty))\n\n            location_qties = move.sort_quantities(\n                location_qties, childs, grouping)\n            to_pick = move.pick_product(location_qties)\n\n            picked_qties = 0.0\n            for _, qty in to_pick:\n                picked_qties += qty\n\n            if move.quantity - picked_qties >= move.unit.rounding:\n                success = False\n                first = False\n                values = {\n                    'quantity': move.unit.round(\n                        move.quantity - picked_qties),\n                    }\n                to_write.extend([[move], values])\n            else:\n                first = True\n            for key, qty in to_pick:\n                values = dict(get_values(key, 'from_location'))\n                values['quantity'] = move.unit.round(qty)\n                if first:\n                    to_write.extend([[move], values])\n                    to_assign.append(move)\n                    first = False\n                else:\n                    to_copy[move].append(values)\n\n                qty_default_uom = Uom.compute_qty(\n                    move.unit, qty, move.product.default_uom, round=False)\n\n                pbl[key] = pbl.get(key, 0.0) - qty_default_uom\n\n        with Transaction().set_context(_stock_move_split=True):\n            while to_copy:\n                moves_to_copy = []\n                values = {}\n                for move, vlist in list(to_copy.items()):\n                    if vlist:\n                        moves_to_copy.append(move)\n                        values[move.id] = vlist.pop(0)\n                    else:\n                        del to_copy[move]\n                to_assign.extend(cls.copy(\n                        moves_to_copy,\n                        default=default_values(values)))\n        if to_write:\n            cls.write(*to_write)\n        if to_assign:\n            cls.assign(to_assign)\n        return success",
+          "program_units": 118
+        },
+        {
+          "name": "Move._assign_try_lock",
+          "start": 1348,
+          "end": 1388,
+          "calls": [
+            "Coalesce",
+            "For",
+            "Literal",
+            "Period.get_cache",
+            "Period.search",
+            "Pool",
+            "Transaction",
+            "cls.__table__",
+            "cls.lock",
+            "connection.cursor",
+            "cursor.execute",
+            "database.has_select_for",
+            "fields.SQL_OPERATORS['in']",
+            "pool.get",
+            "table.product.in_",
+            "table.select"
+          ],
+          "source_fragment": "    @classmethod\n    def _assign_try_lock(\n            cls, product_ids, location_ids, company_ids, date, grouping):\n        \"\"\"Lock the database to prevent concurrent assignation\"\"\"\n        pool = Pool()\n        Period = pool.get('stock.period')\n        transaction = Transaction()\n        database = transaction.database\n        connection = transaction.connection\n\n        if database.has_select_for():\n            PeriodCache = Period.get_cache(grouping)\n            with connection.cursor() as cursor:\n                for company_id in company_ids:\n                    period = None\n                    if PeriodCache:\n                        periods = Period.search([\n                                ('date', '<', date),\n                                ('company', '=', company_id),\n                                ('state', '=', 'closed'),\n                                ], order=[('date', 'DESC')], limit=1)\n                        if periods:\n                            period, = periods\n                    table = cls.__table__()\n                    query = table.select(Literal(1),\n                        where=(fields.SQL_OPERATORS['in'](\n                                table.to_location, location_ids)\n                            | fields.SQL_OPERATORS['in'](\n                                table.from_location, location_ids))\n                        & table.product.in_(product_ids)\n                        & (table.company == company_id),\n                        for_=For('UPDATE', nowait=True))\n\n                    if period:\n                        query.where &= Coalesce(\n                            table.effective_date,\n                            table.planned_date,\n                            datetime.date.max) > period.date\n                    cursor.execute(*query)\n        else:\n            cls.lock()",
+          "program_units": 21
+        },
+        {
+          "name": "Move.assign",
+          "start": 875,
+          "end": 878,
+          "calls": [
+            "Workflow.transition",
+            "cls.check_origin"
+          ],
+          "source_fragment": "    @classmethod\n    @Workflow.transition('assigned')\n    def assign(cls, moves):\n        cls.check_origin(moves)",
+          "program_units": 2
+        },
+        {
+          "name": "Move.sort_quantities",
+          "start": 1129,
+          "end": 1136,
+          "calls": [
+            "enumerate",
+            "filter",
+            "sorted"
+          ],
+          "source_fragment": "    def sort_quantities(self, quantities, locations, grouping):\n        \"\"\"\n        Return the quantities ordered by pick preference which is the locations\n        order by default.\n        \"\"\"\n        locations = {l.id: i for i, l in enumerate(locations)}\n        quantities = filter(lambda x: x[0][0] in locations, quantities)\n        return sorted(quantities, key=lambda x: locations[x[0][0]])",
+          "program_units": 4
+        },
+        {
+          "name": "Move.pick_product",
+          "start": 1138,
+          "end": 1159,
+          "calls": [
+            "to_pick.append"
+          ],
+          "source_fragment": "    def pick_product(self, quantities):\n        \"\"\"\n        Pick the product across the keys. Naive (fast) implementation.\n        Return a list of tuple (key, quantity) for quantities that can be\n        picked.\n        \"\"\"\n        to_pick = []\n        needed_qty = self.quantity\n        for key, available_qty in quantities:\n            # Ignore available_qty when too small\n            if available_qty < self.unit.rounding:\n                continue\n            if needed_qty <= available_qty:\n                to_pick.append((key, needed_qty))\n                return to_pick\n            else:\n                to_pick.append((key, available_qty))\n                needed_qty -= available_qty\n        if default_location := self._default_pick_location:\n            to_pick.append(((default_location,), needed_qty))\n            return to_pick\n        return to_pick",
+          "program_units": 15
+        },
+        {
+          "name": "Move.check_period_closed",
+          "start": 725,
+          "end": 749,
+          "calls": [
+            "AccessError",
+            "Period.search",
+            "Pool",
+            "filter",
+            "gettext",
+            "groupby",
+            "pool.get"
+          ],
+          "source_fragment": "    @classmethod\n    @without_check_access\n    def check_period_closed(cls, moves, state=None):\n        pool = Pool()\n        Period = pool.get('stock.period')\n\n        def exclude_draft_staging(move):\n            return (state if state else move.state) not in {'draft', 'staging'}\n\n        for company, moves in groupby(\n                filter(exclude_draft_staging, moves), lambda m: m.company):\n            periods = Period.search([\n                    ('state', '=', 'closed'),\n                    ('company', '=', company.id),\n                    ], order=[('date', 'DESC')], limit=1)\n            if periods:\n                period, = periods\n                for move in moves:\n                    date = (move.effective_date if move.effective_date\n                        else move.planned_date)\n                    if date and date <= period.date:\n                        raise AccessError(\n                            gettext('stock.msg_move_modify_period_close',\n                                move=move.rec_name,\n                                period=period.rec_name))",
+          "program_units": 13
+        },
+        {
+          "name": "Move.check_modification",
+          "start": 1071,
+          "end": 1098,
+          "calls": [
+            "AccessError",
+            "cls.check_period_closed",
+            "gettext",
+            "super",
+            "super().check_modification",
+            "values.get",
+            "values.keys"
+          ],
+          "source_fragment": "    @classmethod\n    def check_modification(cls, mode, moves, values=None, external=False):\n        super().check_modification(\n            mode, moves, values=values, external=external)\n        if mode == 'create':\n            cls.check_period_closed(moves)\n        elif mode == 'write':\n            if values.keys() - cls._allow_modify_closed_period:\n                cls.check_period_closed(moves, state=values.get('state'))\n            if values.keys() & cls._deny_modify_assigned:\n                for move in moves:\n                    if move.state == 'assigned':\n                        raise AccessError(gettext(\n                                'stock.msg_move_modify_assigned',\n                                move=move.rec_name))\n            if values.keys() & cls._deny_modify_done_cancel:\n                for move in moves:\n                    if move.state in {'done', 'cancelled'}:\n                        raise AccessError(gettext(\n                                'stock.msg_move_modify_%s' % move.state,\n                                move=move.rec_name))\n        elif mode == 'delete':\n            for move in moves:\n                if (move.state not in {'staging', 'draft', 'cancelled'}\n                        and move.quantity):\n                    raise AccessError(gettext(\n                            'stock.msg_move_delete_draft_cancel',\n                            move=move.rec_name))",
+          "program_units": 19
+        },
+        {
+          "name": "Move.compute_quantities_query",
+          "start": 1390,
+          "end": 1750,
+          "calls": [
+            "(-Sum(move.internal_quantity)).as_",
+            "Case",
+            "Case((from_parent_location.flat_childs, from_location.id), else_=Null).as_",
+            "Case((from_parent_location.flat_childs, from_parent_location.id), else_=move.from_location).as_",
+            "Case((to_parent_location.flat_childs, to_location.id), else_=Null).as_",
+            "Case((to_parent_location.flat_childs, to_parent_location.id), else_=move.to_location).as_",
+            "Coalesce",
+            "Column",
+            "Column(period_cache, c).as_",
+            "Column(period_cache, key).as_",
+            "Column(query, key).as_",
+            "Date.today",
+            "Literal",
+            "Location.__table__",
+            "Move.__table__",
+            "Period.__table__",
+            "Period.get_cache",
+            "Period.search",
+            "PeriodCache.__table__",
+            "Pool",
+            "Product.__table__",
+            "Sum",
+            "Sum(move.internal_quantity).as_",
+            "Transaction",
+            "Union",
+            "User",
+            "ValueError",
+            "_location_children",
+            "any",
+            "cache_column.in_",
+            "cls.effective_date.sql_cast",
+            "column.as_",
+            "column.in_",
+            "context.get",
+            "field.startswith",
+            "fields.SQL_OPERATORS['in']",
+            "from_period.select",
+            "get_column",
+            "get_column(c, move).as_",
+            "get_column(key, move).as_",
+            "get_column_product",
+            "isinstance",
+            "len",
+            "list",
+            "move.from_location.as_",
+            "move.from_location.in_",
+            "move.join",
+            "move.join(from_location, condition=move.from_location == from_location.id).join",
+            "move.join(from_location, condition=move.from_location == from_location.id).join(from_parent_location, type_='LEFT', condition=from_location.parent == from_parent_location.id).join",
+            "move.join(from_location, condition=move.from_location == from_location.id).join(from_parent_location, type_='LEFT', condition=from_location.parent == from_parent_location.id).join(to_location, condition=move.to_location == to_location.id).join",
+            "move.join(product, condition=move.product == product.id).select",
+            "move.select",
+            "move.state.in_",
+            "move.to_location.as_",
+            "move.to_location.in_",
+            "move_with_parent.select",
+            "name.startswith",
+            "parent_location.id.as_",
+            "period_cache.internal_quantity.as_",
+            "period_cache.join",
+            "period_cache.join(location, condition=period_cache.location == location.id).join",
+            "period_cache.join(location, condition=period_cache.location == location.id).join(parent_location, type_='LEFT', condition=location.parent == parent_location.id).select",
+            "period_cache.join(product_cache, condition=period_cache.product == product_cache.id).join",
+            "period_cache.join(product_cache, condition=period_cache.product == product_cache.id).join(period_table, condition=(period_cache.period == period_table.id) & (period_table.company == company.id if company else Literal(True))).select",
+            "period_cache.location.as_",
+            "period_cache.location.in_",
+            "period_cache.select",
+            "pool.get",
+            "quantity.as_",
+            "query.location.as_",
+            "query.select",
+            "set",
+            "state_date_clause",
+            "transaction.context.copy",
+            "zip"
+          ],
+          "source_fragment": "    @classmethod\n    def compute_quantities_query(cls, location_ids, with_childs=False,\n            grouping=('product',), grouping_filter=None):\n        \"\"\"\n        Prepare a query object to compute for each location and product the\n        stock quantity in the default uom of the product.\n\n        The context with keys:\n            stock_date_end: if set the date of the stock computation.\n            stock_date_start: if set return the delta of the stock between the\n                two dates, (ignored if stock_date_end is missing).\n            stock_assign: if set compute also the assigned outgoing moves as\n                done at the stock_date_end except for delta which is at the\n                planned date.\n            forecast: if set compute the forecast quantity.\n            stock_destinations: A list of location ids. If set, restrict the\n                computation to moves from and to those locations.\n            stock_invert: if set invert the quantity.\n        If with_childs, it computes also for child locations.\n        grouping is a tuple of Move (or Product if prefixed by 'product.' or\n            'date') field names and defines how stock moves are grouped.\n        grouping_filter is a tuple of values, for the Move's field at the same\n            position in grouping tuple, used to filter which moves are used to\n            compute quantities. It must be None or have the same number of\n            elements than grouping. If no grouping_filter is provided it\n            returns quantities for all products.\n\n        The query return the location as first column, after the fields in\n            grouping, and the last column is the quantity.\n        \"\"\"\n        pool = Pool()\n        User = pool.get('res.user')\n        Location = pool.get('stock.location')\n        Date = pool.get('ir.date')\n        Period = pool.get('stock.period')\n        Move = pool.get('stock.move')\n        Product = pool.get('product.product')\n\n        move = Move.__table__()\n        today = Date.today()\n        transaction = Transaction()\n\n        if not location_ids:\n            return None\n        context = transaction.context.copy()\n\n        use_product = False\n        for field in grouping:\n            if field.startswith('product.'):\n                Model = Product\n                field = field[len('product.'):]\n                use_product = True\n            else:\n                Model = Move\n            if field not in Model._fields and field != 'date':\n                raise ValueError('\"%s\" has no field \"%s\"' % (Model, field))\n        assert grouping_filter is None or len(grouping_filter) <= len(grouping)\n        assert len(set(grouping)) == len(grouping)\n        assert ('stock_date_start' in context) if 'date' in grouping else True\n\n        company = User(transaction.user).company\n\n        def get_column(name, table):\n            if name == 'date' and isinstance(table, Table):\n                return cls.effective_date.sql_cast(\n                    Coalesce(\n                        table.effective_date,\n                        Case((move.state == 'assigned', today), else_=Null),\n                        table.planned_date))\n            else:\n                return Column(table, name)\n\n        def get_column_product(name, table, product):\n            if name.startswith('product.'):\n                column = Column(product, name[len('product.'):])\n            else:\n                column = Column(table, name)\n            return column.as_(name)\n\n        if use_product:\n            product = Product.__table__()\n            columns = ['id', 'state', 'effective_date', 'planned_date',\n            'internal_quantity', 'from_location', 'to_location', 'company']\n            columns += [\n                c for c in grouping if c not in columns and c != 'date']\n            columns = [get_column_product(c, move, product) for c in columns]\n            move = (move\n                .join(product, condition=move.product == product.id)\n                .select(*columns))\n\n        PeriodCache = Period.get_cache(grouping)\n        period = None\n        if PeriodCache:\n            period_cache = PeriodCache.__table__()\n            period_table = Period.__table__()\n            if use_product:\n                product_cache = Product.__table__()\n                columns = ['internal_quantity', 'period', 'location']\n                columns += [c for c in grouping if c not in columns]\n                columns = [\n                    get_column_product(c, period_cache, product_cache)\n                    for c in columns]\n                period_cache = (period_cache\n                    .join(product_cache,\n                        condition=(period_cache.product == product_cache.id))\n                    .join(period_table,\n                        condition=(period_cache.period == period_table.id)\n                        & ((period_table.company == company.id)\n                            if company else Literal(True)))\n                    .select(*columns))\n\n        if with_childs:\n            # Replace tables with union which replaces flat children locations\n            # by their parent location.\n            from_location = Location.__table__()\n            from_parent_location = Location.__table__()\n            to_location = Location.__table__()\n            to_parent_location = Location.__table__()\n            columns = ['id', 'state', 'effective_date', 'planned_date',\n                'internal_quantity', 'company']\n            columns += [c for c in grouping if c not in columns]\n            columns = [get_column(c, move).as_(c) for c in columns]\n\n            move_with_parent = (move\n                .join(from_location,\n                    condition=move.from_location == from_location.id)\n                .join(from_parent_location, type_='LEFT',\n                    condition=from_location.parent == from_parent_location.id)\n                .join(to_location,\n                    condition=move.to_location == to_location.id)\n                .join(to_parent_location, type_='LEFT',\n                    condition=to_location.parent == to_parent_location.id))\n\n            move = Union(\n                # Moves not linked to any flat location\n                move_with_parent.select(\n                    move.from_location.as_('from_location'),\n                    move.to_location.as_('to_location'),\n                    *columns,\n                    where=(Coalesce(from_parent_location.flat_childs, False)\n                        != Literal(True))\n                    & (Coalesce(to_parent_location.flat_childs, False)\n                        != Literal(True))),\n                # Append moves linked from/to flat locations to their parents\n                move_with_parent.select(\n                    Case(\n                        (from_parent_location.flat_childs,\n                            from_parent_location.id),\n                        else_=move.from_location).as_('from_location'),\n                    Case(\n                        (to_parent_location.flat_childs,\n                            to_parent_location.id),\n                        else_=move.to_location).as_('to_location'),\n                    *columns,\n                    where=(from_parent_location.flat_childs == Literal(True))\n                    | (to_parent_location.flat_childs == Literal(True))),\n                # Append moves linked to from/to flat locations only\n                move_with_parent.select(\n                    Case(\n                        (from_parent_location.flat_childs,\n                            from_location.id),\n                        else_=Null).as_('from_location'),\n                    Case(\n                        (to_parent_location.flat_childs,\n                            to_location.id),\n                        else_=Null).as_('to_location'),\n                    *columns,\n                    where=(from_parent_location.flat_childs == Literal(True))\n                    | (to_parent_location.flat_childs == Literal(True))),\n                all_=True)\n\n            if PeriodCache:\n                location = Location.__table__()\n                parent_location = Location.__table__()\n                columns = ['internal_quantity', 'period'] + list(grouping)\n                columns = [Column(period_cache, c).as_(c) for c in columns]\n                period_cache = Union(\n                    period_cache.select(\n                        period_cache.location.as_('location'),\n                        *columns),\n                    period_cache.join(location,\n                        condition=period_cache.location == location.id\n                        ).join(parent_location, type_='LEFT',\n                        condition=location.parent == parent_location.id\n                        ).select(\n                        parent_location.id.as_('location'),\n                        *columns,\n                        where=parent_location.flat_childs == Literal(True)),\n                    all_=True)\n\n        if not context.get('stock_date_end'):\n            context['stock_date_end'] = datetime.date.max\n\n        move_date = Coalesce(\n            move.effective_date,\n            Case((move.state == 'assigned', today), else_=Null),\n            move.planned_date)\n\n        # date end in the past or today: filter on state done\n        if (context['stock_date_end'] < today\n                or (context['stock_date_end'] == today\n                    and not context.get('forecast'))):\n\n            def state_date_clause(stock_assign):\n                return (move.state.in_(['done',\n                        'assigned' if stock_assign else 'done'])\n                    & (move_date <= context['stock_date_end']))\n            state_date_clause_in = state_date_clause(False)\n            state_date_clause_out = state_date_clause(\n                context.get('stock_assign'))\n        # future date end: filter move on state done and date\n        # before today, or on all state and date between today and\n        # date_end.\n        else:\n            def state_date_clause(stock_assign):\n                return ((move.state.in_(['done',\n                                'assigned' if stock_assign else 'done'])\n                        & (move_date <= today))\n                    | (move.state.in_(['done', 'assigned', 'draft'])\n                        & (Coalesce(move_date, datetime.date.max)\n                            <= context['stock_date_end'])\n                        & (Coalesce(move_date, datetime.date.max) >= today)\n                        ))\n            state_date_clause_in = state_date_clause(False)\n            state_date_clause_out = state_date_clause(\n                context.get('stock_assign'))\n\n        if context.get('stock_date_start'):\n            if context['stock_date_start'] > today:\n                def state_date_clause():\n                    return (move.state.in_(['done', 'assigned', 'draft'])\n                        & (Coalesce(move_date, datetime.date.max)\n                            >= context['stock_date_start'])\n                        )\n                state_date_clause_in &= state_date_clause()\n                state_date_clause_out &= state_date_clause()\n            else:\n                def state_date_clause(stock_assign):\n                    return ((\n                            move.state.in_(['done', 'assigned', 'draft'])\n                            & (Coalesce(move_date, datetime.date.max) >= today)\n                            )\n                        | (\n                            move.state.in_(['done',\n                                    'assigned' if stock_assign else 'done'])\n                            & (Coalesce(move_date, datetime.date.max)\n                                >= context['stock_date_start'])\n                            & (Coalesce(move_date, datetime.date.min) < today)\n                            )\n                        )\n                state_date_clause_in &= state_date_clause(False)\n                state_date_clause_out &= state_date_clause(\n                    context.get('stock_assign'))\n        elif PeriodCache:\n            periods = Period.search([\n                    ('date', '<=', context['stock_date_end']),\n                    ('state', '=', 'closed'),\n                    ('company', '=', company.id if company else -1),\n                    ], order=[('date', 'DESC')], limit=1)\n            if periods:\n                period, = periods\n\n                def state_date_clause():\n                    return (\n                        Coalesce(\n                            move.effective_date,\n                            move.planned_date,\n                            datetime.date.max) > period.date)\n                state_date_clause_in &= state_date_clause()\n                state_date_clause_out &= state_date_clause()\n\n        if with_childs:\n            location_query = _location_children(location_ids, query=True)\n        else:\n            location_query = location_ids[:]\n\n        if PeriodCache:\n            from_period = period_cache\n        where = where_period = Literal(True)\n        if grouping_filter and any(grouping_filter):\n            for fieldname, grouping_ids in zip(grouping, grouping_filter):\n                if not grouping_ids:\n                    continue\n                column = get_column(fieldname, move)\n                if PeriodCache:\n                    cache_column = Column(period_cache, fieldname)\n                if isinstance(grouping_ids[0], (int, float, Decimal)):\n                    where &= fields.SQL_OPERATORS['in'](column, grouping_ids)\n                    if PeriodCache:\n                        where_period &= fields.SQL_OPERATORS['in'](\n                            cache_column, grouping_ids)\n                else:\n                    where &= column.in_(grouping_ids)\n                    if PeriodCache:\n                        where_period &= cache_column.in_(grouping_ids)\n\n        if context.get('stock_destinations'):\n            destinations = context['stock_destinations']\n            dest_clause_from = move.from_location.in_(destinations)\n            dest_clause_to = move.to_location.in_(destinations)\n\n            if PeriodCache:\n                dest_clause_period = period_cache.location.in_(destinations)\n\n        else:\n            dest_clause_from = dest_clause_to = dest_clause_period = \\\n                Literal(True)\n\n        # The main select clause is a union between three similar subqueries.\n        # One that sums incoming moves towards locations, one that sums\n        # outgoing moves and one for the period cache.  UNION ALL is used\n        # because we already know that there will be no duplicates.\n        move_keys = [get_column(key, move).as_(key) for key in grouping]\n\n        if company:\n            company_clause = move.company == company.id\n        elif not transaction.user:\n            company_clause = Literal(True)\n        else:\n            company_clause = Literal(False)\n        query = move.select(move.to_location.as_('location'),\n            Sum(move.internal_quantity).as_('quantity'),\n            *move_keys,\n            where=state_date_clause_in\n            & where\n            & move.to_location.in_(location_query)\n            & company_clause\n            & dest_clause_from,\n            group_by=[move.to_location.as_('location')] + move_keys)\n        query = Union(query, move.select(move.from_location.as_('location'),\n                (-Sum(move.internal_quantity)).as_('quantity'),\n                *move_keys,\n                where=state_date_clause_out\n                & where\n                & move.from_location.in_(location_query)\n                & company_clause\n                & dest_clause_to,\n                group_by=[move.from_location.as_('location')] + move_keys),\n            all_=True)\n        if PeriodCache and period:\n            period_keys = [Column(period_cache, key).as_(key)\n                for key in grouping]\n            query = Union(query, from_period.select(\n                    period_cache.location.as_('location'),\n                    period_cache.internal_quantity.as_('quantity'),\n                    *period_keys,\n                    where=(period_cache.period == period.id)\n                    & where_period\n                    & period_cache.location.in_(location_query)\n                    & dest_clause_period),\n                all_=True)\n        query_keys = [Column(query, key).as_(key) for key in grouping]\n        quantity = Sum(query.quantity)\n        if context.get('stock_invert'):\n            quantity *= -1\n        columns = ([query.location.as_('location')]\n            + query_keys\n            + [quantity.as_('quantity')])\n        query = query.select(*columns,\n            group_by=[query.location.as_('location')] + query_keys)\n        return query",
+          "program_units": 144
+        },
+        {
+          "name": "Move.compute_quantities",
+          "start": 1752,
+          "end": 1858,
+          "calls": [
+            "Model.browse",
+            "Pool",
+            "Transaction",
+            "Transaction().connection.cursor",
+            "_location_children",
+            "cursor.execute",
+            "datetime.date.fromisoformat",
+            "defaultdict",
+            "dict",
+            "grouping.index",
+            "id_getter",
+            "ids.add",
+            "isinstance",
+            "keys.add",
+            "leafs.remove",
+            "len",
+            "list",
+            "locations.remove",
+            "next_leafs.remove",
+            "operator.itemgetter",
+            "parents.get",
+            "pool.get",
+            "quantities.items",
+            "quantities.keys",
+            "set",
+            "tuple",
+            "uom.round"
+          ],
+          "source_fragment": "    @classmethod\n    def compute_quantities(cls, query, location_ids, with_childs=False,\n            grouping=('product',), grouping_filter=None):\n        \"\"\"\n        Executes the supplied query to compute for each location and product\n        the stock quantity in the default uom of the product and rounded to\n        UoM's rounding digits.\n\n        See compute_quantites_query for params explanation.\n\n        Return a dictionary with location id and grouping as key\n            and quantity as value.\n        \"\"\"\n        pool = Pool()\n        Product = pool.get('product.product')\n        Template = pool.get('product.template')\n\n        assert query is not None, (\n            \"Query in Move.compute_quantities() can't be None\")\n        assert 'product' in grouping or 'product.template' in grouping\n\n        cursor = Transaction().connection.cursor()\n        cursor.execute(*query)\n\n        if 'product' in grouping:\n            id_name = 'product'\n            Model = Product\n        else:\n            id_name = 'product.template'\n            Model = Template\n        id_getter = operator.itemgetter(grouping.index(id_name) + 1)\n        ids = set()\n        quantities = defaultdict(float)\n        keys = set()\n        # We can do a quick loop without propagation if the request is for a\n        # single location because all the locations are children and we can sum\n        # them directly.\n        if len(location_ids) == 1:\n            location, = location_ids\n        for line in cursor:\n            if len(location_ids) > 1:\n                location = line[0]\n            key = list(line[1:-1])\n            if 'date' in grouping:\n                i = grouping.index('date')\n                if key[i] and not isinstance(key[i], datetime.date):\n                    key[i] = datetime.date.fromisoformat(key[i])\n            key = tuple(key)\n            quantity = line[-1]\n            quantities[(location,) + key] += quantity\n            ids.add(id_getter(line))\n            keys.add(key)\n\n        # Propagate quantities on from child locations to their parents\n        if with_childs and len(location_ids) > 1:\n            # Fetch all child locations\n            locations = _location_children(location_ids)\n            # Generate a set of locations without childs and a dict\n            # giving the parent of each location.\n            leafs = set([l.id for l in locations])\n            parents = {}\n            for location in locations:\n                parent = location.parent\n                if not parent or parent.flat_childs:\n                    continue\n                if parent.id in leafs:\n                    leafs.remove(parent.id)\n                # Group children under the common requested grand parent\n                # to skip unnecessary intermediary result\n                while parent:\n                    parents[location.id] = parent.id\n                    if parent.id in location_ids:\n                        break\n                    parent = parent.parent\n            locations = set((l.id for l in locations))\n            while leafs:\n                for leaf in leafs:\n                    locations.remove(leaf)\n                    if leaf not in parents:\n                        continue\n                    parent = parents[leaf]\n                    for key in keys:\n                        quantities[(parent, *key)] += quantities[(leaf, *key)]\n                next_leafs = set(locations)\n                for location in locations:\n                    parent = parents.get(location)\n                    if not parent:\n                        continue\n                    if parent in next_leafs and parent in locations:\n                        next_leafs.remove(parent)\n                leafs = next_leafs\n\n            # clean result\n            for key in list(quantities.keys()):\n                location = key[0]\n                if location not in location_ids:\n                    del quantities[key]\n\n        # Round quantities\n        default_uom = dict((p.id, p.default_uom) for p in\n            Model.browse(list(ids)))\n        for key, quantity in quantities.items():\n            location = key[0]\n            uom = default_uom[id_getter(key)]\n            quantities[key] = uom.round(quantity)\n\n        return quantities",
+          "program_units": 74
+        },
+        {
+          "name": "_location_children",
+          "start": 1861,
+          "end": 1884,
+          "calls": [
+            "Location.browse",
+            "Location.search",
+            "Pool",
+            "flat_location_ids.append",
+            "nested_location_ids.append",
+            "pool.get"
+          ],
+          "source_fragment": "def _location_children(location_ids, query=False):\n    \"Return children location without including flat children\"\n    pool = Pool()\n    Location = pool.get('stock.location')\n    nested_location_ids = []\n    flat_location_ids = []\n    for location in Location.browse(location_ids):\n        if location.flat_childs:\n            flat_location_ids.append(location.id)\n        else:\n            nested_location_ids.append(location.id)\n    if nested_location_ids:\n        return Location.search(['OR',\n                [\n                    ('parent', 'child_of', nested_location_ids),\n                    ('parent.flat_childs', '!=', True),\n                    ],\n                ('id', 'in', location_ids),\n                ], query=query, order=[])\n    else:\n        if query:\n            return flat_location_ids\n        else:\n            return Location.browse(flat_location_ids)",
+          "program_units": 14
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 1861,
+          "end": 1884
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 727,
+          "end": 749
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 877,
+          "end": 878
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1072,
+          "end": 1098
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1129,
+          "end": 1136
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1138,
+          "end": 1159
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1169,
+          "end": 1346
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1349,
+          "end": 1388
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1391,
+          "end": 1750
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1753,
+          "end": 1858
+        },
+        {
+          "kind": "Assign",
+          "start": 1863,
+          "end": 1863
+        },
+        {
+          "kind": "Assign",
+          "start": 1864,
+          "end": 1864
+        },
+        {
+          "kind": "Assign",
+          "start": 1865,
+          "end": 1865
+        },
+        {
+          "kind": "Assign",
+          "start": 1866,
+          "end": 1866
+        },
+        {
+          "kind": "For",
+          "start": 1867,
+          "end": 1871
+        },
+        {
+          "kind": "If",
+          "start": 1872,
+          "end": 1884
+        },
+        {
+          "kind": "Assign",
+          "start": 728,
+          "end": 728
+        },
+        {
+          "kind": "Assign",
+          "start": 729,
+          "end": 729
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 731,
+          "end": 732
+        },
+        {
+          "kind": "For",
+          "start": 734,
+          "end": 749
+        },
+        {
+          "kind": "Expr",
+          "start": 878,
+          "end": 878
+        },
+        {
+          "kind": "Expr",
+          "start": 1073,
+          "end": 1074
+        },
+        {
+          "kind": "If",
+          "start": 1075,
+          "end": 1098
+        },
+        {
+          "kind": "Assign",
+          "start": 1134,
+          "end": 1134
+        },
+        {
+          "kind": "Assign",
+          "start": 1135,
+          "end": 1135
+        },
+        {
+          "kind": "Return",
+          "start": 1136,
+          "end": 1136
+        },
+        {
+          "kind": "Assign",
+          "start": 1144,
+          "end": 1144
+        },
+        {
+          "kind": "Assign",
+          "start": 1145,
+          "end": 1145
+        },
+        {
+          "kind": "For",
+          "start": 1146,
+          "end": 1155
+        },
+        {
+          "kind": "If",
+          "start": 1156,
+          "end": 1158
+        },
+        {
+          "kind": "Return",
+          "start": 1159,
+          "end": 1159
+        },
+        {
+          "kind": "Assign",
+          "start": 1178,
+          "end": 1178
+        },
+        {
+          "kind": "Assign",
+          "start": 1179,
+          "end": 1179
+        },
+        {
+          "kind": "Assign",
+          "start": 1180,
+          "end": 1180
+        },
+        {
+          "kind": "Assign",
+          "start": 1181,
+          "end": 1181
+        },
+        {
+          "kind": "Assign",
+          "start": 1182,
+          "end": 1182
+        },
+        {
+          "kind": "Assign",
+          "start": 1184,
+          "end": 1184
+        },
+        {
+          "kind": "If",
+          "start": 1185,
+          "end": 1186
+        },
+        {
+          "kind": "If",
+          "start": 1188,
+          "end": 1194
+        },
+        {
+          "kind": "Assign",
+          "start": 1195,
+          "end": 1195
+        },
+        {
+          "kind": "Assign",
+          "start": 1196,
+          "end": 1196
+        },
+        {
+          "kind": "Assign",
+          "start": 1197,
+          "end": 1197
+        },
+        {
+          "kind": "If",
+          "start": 1199,
+          "end": 1217
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1219,
+          "end": 1226
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1228,
+          "end": 1232
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1234,
+          "end": 1241
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1243,
+          "end": 1251
+        },
+        {
+          "kind": "Assign",
+          "start": 1253,
+          "end": 1253
+        },
+        {
+          "kind": "Assign",
+          "start": 1254,
+          "end": 1254
+        },
+        {
+          "kind": "Assign",
+          "start": 1255,
+          "end": 1255
+        },
+        {
+          "kind": "Assign",
+          "start": 1256,
+          "end": 1256
+        },
+        {
+          "kind": "Assign",
+          "start": 1257,
+          "end": 1257
+        },
+        {
+          "kind": "For",
+          "start": 1258,
+          "end": 1327
+        },
+        {
+          "kind": "With",
+          "start": 1329,
+          "end": 1341
+        },
+        {
+          "kind": "If",
+          "start": 1342,
+          "end": 1343
+        },
+        {
+          "kind": "If",
+          "start": 1344,
+          "end": 1345
+        },
+        {
+          "kind": "Return",
+          "start": 1346,
+          "end": 1346
+        },
+        {
+          "kind": "Assign",
+          "start": 1352,
+          "end": 1352
+        },
+        {
+          "kind": "Assign",
+          "start": 1353,
+          "end": 1353
+        },
+        {
+          "kind": "Assign",
+          "start": 1354,
+          "end": 1354
+        },
+        {
+          "kind": "Assign",
+          "start": 1355,
+          "end": 1355
+        },
+        {
+          "kind": "Assign",
+          "start": 1356,
+          "end": 1356
+        },
+        {
+          "kind": "If",
+          "start": 1358,
+          "end": 1388
+        },
+        {
+          "kind": "Assign",
+          "start": 1420,
+          "end": 1420
+        },
+        {
+          "kind": "Assign",
+          "start": 1421,
+          "end": 1421
+        },
+        {
+          "kind": "Assign",
+          "start": 1422,
+          "end": 1422
+        },
+        {
+          "kind": "Assign",
+          "start": 1423,
+          "end": 1423
+        },
+        {
+          "kind": "Assign",
+          "start": 1424,
+          "end": 1424
+        },
+        {
+          "kind": "Assign",
+          "start": 1425,
+          "end": 1425
+        },
+        {
+          "kind": "Assign",
+          "start": 1426,
+          "end": 1426
+        },
+        {
+          "kind": "Assign",
+          "start": 1428,
+          "end": 1428
+        },
+        {
+          "kind": "Assign",
+          "start": 1429,
+          "end": 1429
+        },
+        {
+          "kind": "Assign",
+          "start": 1430,
+          "end": 1430
+        },
+        {
+          "kind": "If",
+          "start": 1432,
+          "end": 1433
+        },
+        {
+          "kind": "Assign",
+          "start": 1434,
+          "end": 1434
+        },
+        {
+          "kind": "Assign",
+          "start": 1436,
+          "end": 1436
+        },
+        {
+          "kind": "For",
+          "start": 1437,
+          "end": 1445
+        },
+        {
+          "kind": "Assert",
+          "start": 1446,
+          "end": 1446
+        },
+        {
+          "kind": "Assert",
+          "start": 1447,
+          "end": 1447
+        },
+        {
+          "kind": "Assert",
+          "start": 1448,
+          "end": 1448
+        },
+        {
+          "kind": "Assign",
+          "start": 1450,
+          "end": 1450
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1452,
+          "end": 1460
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1462,
+          "end": 1467
+        },
+        {
+          "kind": "If",
+          "start": 1469,
+          "end": 1478
+        },
+        {
+          "kind": "Assign",
+          "start": 1480,
+          "end": 1480
+        },
+        {
+          "kind": "Assign",
+          "start": 1481,
+          "end": 1481
+        },
+        {
+          "kind": "If",
+          "start": 1482,
+          "end": 1499
+        },
+        {
+          "kind": "If",
+          "start": 1501,
+          "end": 1578
+        },
+        {
+          "kind": "If",
+          "start": 1580,
+          "end": 1581
+        },
+        {
+          "kind": "Assign",
+          "start": 1583,
+          "end": 1586
+        },
+        {
+          "kind": "If",
+          "start": 1589,
+          "end": 1615
+        },
+        {
+          "kind": "If",
+          "start": 1617,
+          "end": 1659
+        },
+        {
+          "kind": "If",
+          "start": 1661,
+          "end": 1664
+        },
+        {
+          "kind": "If",
+          "start": 1666,
+          "end": 1667
+        },
+        {
+          "kind": "Assign",
+          "start": 1668,
+          "end": 1668
+        },
+        {
+          "kind": "If",
+          "start": 1669,
+          "end": 1684
+        },
+        {
+          "kind": "If",
+          "start": 1686,
+          "end": 1696
+        },
+        {
+          "kind": "Assign",
+          "start": 1702,
+          "end": 1702
+        },
+        {
+          "kind": "If",
+          "start": 1704,
+          "end": 1709
+        },
+        {
+          "kind": "Assign",
+          "start": 1710,
+          "end": 1718
+        },
+        {
+          "kind": "Assign",
+          "start": 1719,
+          "end": 1728
+        },
+        {
+          "kind": "If",
+          "start": 1729,
+          "end": 1740
+        },
+        {
+          "kind": "Assign",
+          "start": 1741,
+          "end": 1741
+        },
+        {
+          "kind": "Assign",
+          "start": 1742,
+          "end": 1742
+        },
+        {
+          "kind": "If",
+          "start": 1743,
+          "end": 1744
+        },
+        {
+          "kind": "Assign",
+          "start": 1745,
+          "end": 1747
+        },
+        {
+          "kind": "Assign",
+          "start": 1748,
+          "end": 1749
+        },
+        {
+          "kind": "Return",
+          "start": 1750,
+          "end": 1750
+        },
+        {
+          "kind": "Assign",
+          "start": 1765,
+          "end": 1765
+        },
+        {
+          "kind": "Assign",
+          "start": 1766,
+          "end": 1766
+        },
+        {
+          "kind": "Assign",
+          "start": 1767,
+          "end": 1767
+        },
+        {
+          "kind": "Assert",
+          "start": 1769,
+          "end": 1770
+        },
+        {
+          "kind": "Assert",
+          "start": 1771,
+          "end": 1771
+        },
+        {
+          "kind": "Assign",
+          "start": 1773,
+          "end": 1773
+        },
+        {
+          "kind": "Expr",
+          "start": 1774,
+          "end": 1774
+        },
+        {
+          "kind": "If",
+          "start": 1776,
+          "end": 1781
+        },
+        {
+          "kind": "Assign",
+          "start": 1782,
+          "end": 1782
+        },
+        {
+          "kind": "Assign",
+          "start": 1783,
+          "end": 1783
+        },
+        {
+          "kind": "Assign",
+          "start": 1784,
+          "end": 1784
+        },
+        {
+          "kind": "Assign",
+          "start": 1785,
+          "end": 1785
+        },
+        {
+          "kind": "If",
+          "start": 1789,
+          "end": 1790
+        },
+        {
+          "kind": "For",
+          "start": 1791,
+          "end": 1803
+        },
+        {
+          "kind": "If",
+          "start": 1806,
+          "end": 1848
+        },
+        {
+          "kind": "Assign",
+          "start": 1851,
+          "end": 1852
+        },
+        {
+          "kind": "For",
+          "start": 1853,
+          "end": 1856
+        },
+        {
+          "kind": "Return",
+          "start": 1858,
+          "end": 1858
+        },
+        {
+          "kind": "If",
+          "start": 1868,
+          "end": 1871
+        },
+        {
+          "kind": "Return",
+          "start": 1873,
+          "end": 1879
+        },
+        {
+          "kind": "If",
+          "start": 1881,
+          "end": 1884
+        },
+        {
+          "kind": "Return",
+          "start": 732,
+          "end": 732
+        },
+        {
+          "kind": "Assign",
+          "start": 736,
+          "end": 739
+        },
+        {
+          "kind": "If",
+          "start": 740,
+          "end": 749
+        },
+        {
+          "kind": "Expr",
+          "start": 1076,
+          "end": 1076
+        },
+        {
+          "kind": "If",
+          "start": 1077,
+          "end": 1098
+        },
+        {
+          "kind": "If",
+          "start": 1148,
+          "end": 1149
+        },
+        {
+          "kind": "If",
+          "start": 1150,
+          "end": 1155
+        },
+        {
+          "kind": "Expr",
+          "start": 1157,
+          "end": 1157
+        },
+        {
+          "kind": "Return",
+          "start": 1158,
+          "end": 1158
+        },
+        {
+          "kind": "Return",
+          "start": 1186,
+          "end": 1186
+        },
+        {
+          "kind": "Assign",
+          "start": 1189,
+          "end": 1192
+        },
+        {
+          "kind": "Assign",
+          "start": 1194,
+          "end": 1194
+        },
+        {
+          "kind": "Assign",
+          "start": 1200,
+          "end": 1200
+        },
+        {
+          "kind": "Assign",
+          "start": 1201,
+          "end": 1201
+        },
+        {
+          "kind": "For",
+          "start": 1202,
+          "end": 1217
+        },
+        {
+          "kind": "Assign",
+          "start": 1220,
+          "end": 1220
+        },
+        {
+          "kind": "For",
+          "start": 1221,
+          "end": 1225
+        },
+        {
+          "kind": "Return",
+          "start": 1226,
+          "end": 1226
+        },
+        {
+          "kind": "Expr",
+          "start": 1229,
+          "end": 1229
+        },
+        {
+          "kind": "For",
+          "start": 1230,
+          "end": 1232
+        },
+        {
+          "kind": "For",
+          "start": 1235,
+          "end": 1241
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1244,
+          "end": 1247
+        },
+        {
+          "kind": "Assign",
+          "start": 1248,
+          "end": 1248
+        },
+        {
+          "kind": "For",
+          "start": 1249,
+          "end": 1250
+        },
+        {
+          "kind": "Return",
+          "start": 1251,
+          "end": 1251
+        },
+        {
+          "kind": "If",
+          "start": 1259,
+          "end": 1262
+        },
+        {
+          "kind": "Assign",
+          "start": 1263,
+          "end": 1263
+        },
+        {
+          "kind": "If",
+          "start": 1265,
+          "end": 1274
+        },
+        {
+          "kind": "Try",
+          "start": 1276,
+          "end": 1279
+        },
+        {
+          "kind": "Try",
+          "start": 1281,
+          "end": 1286
+        },
+        {
+          "kind": "Assign",
+          "start": 1287,
+          "end": 1287
+        },
+        {
+          "kind": "For",
+          "start": 1288,
+          "end": 1294
+        },
+        {
+          "kind": "Assign",
+          "start": 1296,
+          "end": 1297
+        },
+        {
+          "kind": "Assign",
+          "start": 1298,
+          "end": 1298
+        },
+        {
+          "kind": "Assign",
+          "start": 1300,
+          "end": 1300
+        },
+        {
+          "kind": "For",
+          "start": 1301,
+          "end": 1302
+        },
+        {
+          "kind": "If",
+          "start": 1304,
+          "end": 1313
+        },
+        {
+          "kind": "For",
+          "start": 1314,
+          "end": 1327
+        },
+        {
+          "kind": "While",
+          "start": 1330,
+          "end": 1341
+        },
+        {
+          "kind": "Expr",
+          "start": 1343,
+          "end": 1343
+        },
+        {
+          "kind": "Expr",
+          "start": 1345,
+          "end": 1345
+        },
+        {
+          "kind": "Assign",
+          "start": 1359,
+          "end": 1359
+        },
+        {
+          "kind": "With",
+          "start": 1360,
+          "end": 1386
+        },
+        {
+          "kind": "Expr",
+          "start": 1388,
+          "end": 1388
+        },
+        {
+          "kind": "Return",
+          "start": 1433,
+          "end": 1433
+        },
+        {
+          "kind": "If",
+          "start": 1438,
+          "end": 1443
+        },
+        {
+          "kind": "If",
+          "start": 1444,
+          "end": 1445
+        },
+        {
+          "kind": "If",
+          "start": 1453,
+          "end": 1460
+        },
+        {
+          "kind": "If",
+          "start": 1463,
+          "end": 1466
+        },
+        {
+          "kind": "Return",
+          "start": 1467,
+          "end": 1467
+        },
+        {
+          "kind": "Assign",
+          "start": 1470,
+          "end": 1470
+        },
+        {
+          "kind": "Assign",
+          "start": 1471,
+          "end": 1472
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1473,
+          "end": 1474
+        },
+        {
+          "kind": "Assign",
+          "start": 1475,
+          "end": 1475
+        },
+        {
+          "kind": "Assign",
+          "start": 1476,
+          "end": 1478
+        },
+        {
+          "kind": "Assign",
+          "start": 1483,
+          "end": 1483
+        },
+        {
+          "kind": "Assign",
+          "start": 1484,
+          "end": 1484
+        },
+        {
+          "kind": "If",
+          "start": 1485,
+          "end": 1499
+        },
+        {
+          "kind": "Assign",
+          "start": 1504,
+          "end": 1504
+        },
+        {
+          "kind": "Assign",
+          "start": 1505,
+          "end": 1505
+        },
+        {
+          "kind": "Assign",
+          "start": 1506,
+          "end": 1506
+        },
+        {
+          "kind": "Assign",
+          "start": 1507,
+          "end": 1507
+        },
+        {
+          "kind": "Assign",
+          "start": 1508,
+          "end": 1509
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1510,
+          "end": 1510
+        },
+        {
+          "kind": "Assign",
+          "start": 1511,
+          "end": 1511
+        },
+        {
+          "kind": "Assign",
+          "start": 1513,
+          "end": 1521
+        },
+        {
+          "kind": "Assign",
+          "start": 1523,
+          "end": 1559
+        },
+        {
+          "kind": "If",
+          "start": 1561,
+          "end": 1578
+        },
+        {
+          "kind": "Assign",
+          "start": 1581,
+          "end": 1581
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1593,
+          "end": 1596
+        },
+        {
+          "kind": "Assign",
+          "start": 1597,
+          "end": 1597
+        },
+        {
+          "kind": "Assign",
+          "start": 1598,
+          "end": 1599
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1604,
+          "end": 1612
+        },
+        {
+          "kind": "Assign",
+          "start": 1613,
+          "end": 1613
+        },
+        {
+          "kind": "Assign",
+          "start": 1614,
+          "end": 1615
+        },
+        {
+          "kind": "If",
+          "start": 1618,
+          "end": 1642
+        },
+        {
+          "kind": "If",
+          "start": 1643,
+          "end": 1659
+        },
+        {
+          "kind": "Assign",
+          "start": 1662,
+          "end": 1662
+        },
+        {
+          "kind": "Assign",
+          "start": 1664,
+          "end": 1664
+        },
+        {
+          "kind": "Assign",
+          "start": 1667,
+          "end": 1667
+        },
+        {
+          "kind": "For",
+          "start": 1670,
+          "end": 1684
+        },
+        {
+          "kind": "Assign",
+          "start": 1687,
+          "end": 1687
+        },
+        {
+          "kind": "Assign",
+          "start": 1688,
+          "end": 1688
+        },
+        {
+          "kind": "Assign",
+          "start": 1689,
+          "end": 1689
+        },
+        {
+          "kind": "If",
+          "start": 1691,
+          "end": 1692
+        },
+        {
+          "kind": "Assign",
+          "start": 1695,
+          "end": 1696
+        },
+        {
+          "kind": "Assign",
+          "start": 1705,
+          "end": 1705
+        },
+        {
+          "kind": "If",
+          "start": 1706,
+          "end": 1709
+        },
+        {
+          "kind": "Assign",
+          "start": 1730,
+          "end": 1731
+        },
+        {
+          "kind": "Assign",
+          "start": 1732,
+          "end": 1740
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1744,
+          "end": 1744
+        },
+        {
+          "kind": "Assign",
+          "start": 1777,
+          "end": 1777
+        },
+        {
+          "kind": "Assign",
+          "start": 1778,
+          "end": 1778
+        },
+        {
+          "kind": "Assign",
+          "start": 1780,
+          "end": 1780
+        },
+        {
+          "kind": "Assign",
+          "start": 1781,
+          "end": 1781
+        },
+        {
+          "kind": "Assign",
+          "start": 1790,
+          "end": 1790
+        },
+        {
+          "kind": "If",
+          "start": 1792,
+          "end": 1793
+        },
+        {
+          "kind": "Assign",
+          "start": 1794,
+          "end": 1794
+        },
+        {
+          "kind": "If",
+          "start": 1795,
+          "end": 1798
+        },
+        {
+          "kind": "Assign",
+          "start": 1799,
+          "end": 1799
+        },
+        {
+          "kind": "Assign",
+          "start": 1800,
+          "end": 1800
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1801,
+          "end": 1801
+        },
+        {
+          "kind": "Expr",
+          "start": 1802,
+          "end": 1802
+        },
+        {
+          "kind": "Expr",
+          "start": 1803,
+          "end": 1803
+        },
+        {
+          "kind": "Assign",
+          "start": 1808,
+          "end": 1808
+        },
+        {
+          "kind": "Assign",
+          "start": 1811,
+          "end": 1811
+        },
+        {
+          "kind": "Assign",
+          "start": 1812,
+          "end": 1812
+        },
+        {
+          "kind": "For",
+          "start": 1813,
+          "end": 1825
+        },
+        {
+          "kind": "Assign",
+          "start": 1826,
+          "end": 1826
+        },
+        {
+          "kind": "While",
+          "start": 1827,
+          "end": 1842
+        },
+        {
+          "kind": "For",
+          "start": 1845,
+          "end": 1848
+        },
+        {
+          "kind": "Assign",
+          "start": 1854,
+          "end": 1854
+        },
+        {
+          "kind": "Assign",
+          "start": 1855,
+          "end": 1855
+        },
+        {
+          "kind": "Assign",
+          "start": 1856,
+          "end": 1856
+        },
+        {
+          "kind": "Expr",
+          "start": 1869,
+          "end": 1869
+        },
+        {
+          "kind": "Expr",
+          "start": 1871,
+          "end": 1871
+        },
+        {
+          "kind": "Return",
+          "start": 1882,
+          "end": 1882
+        },
+        {
+          "kind": "Return",
+          "start": 1884,
+          "end": 1884
+        },
+        {
+          "kind": "Assign",
+          "start": 741,
+          "end": 741
+        },
+        {
+          "kind": "For",
+          "start": 742,
+          "end": 749
+        },
+        {
+          "kind": "If",
+          "start": 1078,
+          "end": 1079
+        },
+        {
+          "kind": "If",
+          "start": 1080,
+          "end": 1085
+        },
+        {
+          "kind": "If",
+          "start": 1086,
+          "end": 1091
+        },
+        {
+          "kind": "If",
+          "start": 1092,
+          "end": 1098
+        },
+        {
+          "kind": "Continue",
+          "start": 1149,
+          "end": 1149
+        },
+        {
+          "kind": "Expr",
+          "start": 1151,
+          "end": 1151
+        },
+        {
+          "kind": "Return",
+          "start": 1152,
+          "end": 1152
+        },
+        {
+          "kind": "Expr",
+          "start": 1154,
+          "end": 1154
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1155,
+          "end": 1155
+        },
+        {
+          "kind": "With",
+          "start": 1203,
+          "end": 1204
+        },
+        {
+          "kind": "Expr",
+          "start": 1206,
+          "end": 1208
+        },
+        {
+          "kind": "With",
+          "start": 1210,
+          "end": 1217
+        },
+        {
+          "kind": "Assign",
+          "start": 1222,
+          "end": 1222
+        },
+        {
+          "kind": "If",
+          "start": 1223,
+          "end": 1224
+        },
+        {
+          "kind": "Expr",
+          "start": 1225,
+          "end": 1225
+        },
+        {
+          "kind": "If",
+          "start": 1231,
+          "end": 1232
+        },
+        {
+          "kind": "If",
+          "start": 1236,
+          "end": 1239
+        },
+        {
+          "kind": "Return",
+          "start": 1241,
+          "end": 1241
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1245,
+          "end": 1246
+        },
+        {
+          "kind": "Return",
+          "start": 1247,
+          "end": 1247
+        },
+        {
+          "kind": "Assign",
+          "start": 1250,
+          "end": 1250
+        },
+        {
+          "kind": "If",
+          "start": 1260,
+          "end": 1261
+        },
+        {
+          "kind": "Continue",
+          "start": 1262,
+          "end": 1262
+        },
+        {
+          "kind": "Assign",
+          "start": 1266,
+          "end": 1266
+        },
+        {
+          "kind": "If",
+          "start": 1267,
+          "end": 1272
+        },
+        {
+          "kind": "Assign",
+          "start": 1274,
+          "end": 1274
+        },
+        {
+          "kind": "Expr",
+          "start": 1277,
+          "end": 1277
+        },
+        {
+          "kind": "Expr",
+          "start": 1282,
+          "end": 1282
+        },
+        {
+          "kind": "Expr",
+          "start": 1283,
+          "end": 1283
+        },
+        {
+          "kind": "Assign",
+          "start": 1289,
+          "end": 1289
+        },
+        {
+          "kind": "If",
+          "start": 1290,
+          "end": 1294
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1302,
+          "end": 1302
+        },
+        {
+          "kind": "Assign",
+          "start": 1305,
+          "end": 1305
+        },
+        {
+          "kind": "Assign",
+          "start": 1306,
+          "end": 1306
+        },
+        {
+          "kind": "Assign",
+          "start": 1307,
+          "end": 1310
+        },
+        {
+          "kind": "Expr",
+          "start": 1311,
+          "end": 1311
+        },
+        {
+          "kind": "Assign",
+          "start": 1313,
+          "end": 1313
+        },
+        {
+          "kind": "Assign",
+          "start": 1315,
+          "end": 1315
+        },
+        {
+          "kind": "Assign",
+          "start": 1316,
+          "end": 1316
+        },
+        {
+          "kind": "If",
+          "start": 1317,
+          "end": 1322
+        },
+        {
+          "kind": "Assign",
+          "start": 1324,
+          "end": 1325
+        },
+        {
+          "kind": "Assign",
+          "start": 1327,
+          "end": 1327
+        },
+        {
+          "kind": "Assign",
+          "start": 1331,
+          "end": 1331
+        },
+        {
+          "kind": "Assign",
+          "start": 1332,
+          "end": 1332
+        },
+        {
+          "kind": "For",
+          "start": 1333,
+          "end": 1338
+        },
+        {
+          "kind": "Expr",
+          "start": 1339,
+          "end": 1341
+        },
+        {
+          "kind": "For",
+          "start": 1361,
+          "end": 1386
+        },
+        {
+          "kind": "Assign",
+          "start": 1439,
+          "end": 1439
+        },
+        {
+          "kind": "Assign",
+          "start": 1440,
+          "end": 1440
+        },
+        {
+          "kind": "Assign",
+          "start": 1441,
+          "end": 1441
+        },
+        {
+          "kind": "Assign",
+          "start": 1443,
+          "end": 1443
+        },
+        {
+          "kind": "Raise",
+          "start": 1445,
+          "end": 1445
+        },
+        {
+          "kind": "Return",
+          "start": 1454,
+          "end": 1458
+        },
+        {
+          "kind": "Return",
+          "start": 1460,
+          "end": 1460
+        },
+        {
+          "kind": "Assign",
+          "start": 1464,
+          "end": 1464
+        },
+        {
+          "kind": "Assign",
+          "start": 1466,
+          "end": 1466
+        },
+        {
+          "kind": "Assign",
+          "start": 1486,
+          "end": 1486
+        },
+        {
+          "kind": "Assign",
+          "start": 1487,
+          "end": 1487
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1488,
+          "end": 1488
+        },
+        {
+          "kind": "Assign",
+          "start": 1489,
+          "end": 1491
+        },
+        {
+          "kind": "Assign",
+          "start": 1492,
+          "end": 1499
+        },
+        {
+          "kind": "Assign",
+          "start": 1562,
+          "end": 1562
+        },
+        {
+          "kind": "Assign",
+          "start": 1563,
+          "end": 1563
+        },
+        {
+          "kind": "Assign",
+          "start": 1564,
+          "end": 1564
+        },
+        {
+          "kind": "Assign",
+          "start": 1565,
+          "end": 1565
+        },
+        {
+          "kind": "Assign",
+          "start": 1566,
+          "end": 1578
+        },
+        {
+          "kind": "Return",
+          "start": 1594,
+          "end": 1596
+        },
+        {
+          "kind": "Return",
+          "start": 1605,
+          "end": 1612
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1619,
+          "end": 1623
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1624,
+          "end": 1624
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1625,
+          "end": 1625
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1627,
+          "end": 1639
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1640,
+          "end": 1640
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1641,
+          "end": 1642
+        },
+        {
+          "kind": "Assign",
+          "start": 1644,
+          "end": 1648
+        },
+        {
+          "kind": "If",
+          "start": 1649,
+          "end": 1659
+        },
+        {
+          "kind": "If",
+          "start": 1671,
+          "end": 1672
+        },
+        {
+          "kind": "Assign",
+          "start": 1673,
+          "end": 1673
+        },
+        {
+          "kind": "If",
+          "start": 1674,
+          "end": 1675
+        },
+        {
+          "kind": "If",
+          "start": 1676,
+          "end": 1684
+        },
+        {
+          "kind": "Assign",
+          "start": 1692,
+          "end": 1692
+        },
+        {
+          "kind": "Assign",
+          "start": 1707,
+          "end": 1707
+        },
+        {
+          "kind": "Assign",
+          "start": 1709,
+          "end": 1709
+        },
+        {
+          "kind": "Assign",
+          "start": 1793,
+          "end": 1793
+        },
+        {
+          "kind": "Assign",
+          "start": 1796,
+          "end": 1796
+        },
+        {
+          "kind": "If",
+          "start": 1797,
+          "end": 1798
+        },
+        {
+          "kind": "Assign",
+          "start": 1814,
+          "end": 1814
+        },
+        {
+          "kind": "If",
+          "start": 1815,
+          "end": 1816
+        },
+        {
+          "kind": "If",
+          "start": 1817,
+          "end": 1818
+        },
+        {
+          "kind": "While",
+          "start": 1821,
+          "end": 1825
+        },
+        {
+          "kind": "For",
+          "start": 1828,
+          "end": 1834
+        },
+        {
+          "kind": "Assign",
+          "start": 1835,
+          "end": 1835
+        },
+        {
+          "kind": "For",
+          "start": 1836,
+          "end": 1841
+        },
+        {
+          "kind": "Assign",
+          "start": 1842,
+          "end": 1842
+        },
+        {
+          "kind": "Assign",
+          "start": 1846,
+          "end": 1846
+        },
+        {
+          "kind": "If",
+          "start": 1847,
+          "end": 1848
+        },
+        {
+          "kind": "Assign",
+          "start": 743,
+          "end": 744
+        },
+        {
+          "kind": "If",
+          "start": 745,
+          "end": 749
+        },
+        {
+          "kind": "Expr",
+          "start": 1079,
+          "end": 1079
+        },
+        {
+          "kind": "For",
+          "start": 1081,
+          "end": 1085
+        },
+        {
+          "kind": "For",
+          "start": 1087,
+          "end": 1091
+        },
+        {
+          "kind": "For",
+          "start": 1093,
+          "end": 1098
+        },
+        {
+          "kind": "Assign",
+          "start": 1204,
+          "end": 1204
+        },
+        {
+          "kind": "Assign",
+          "start": 1214,
+          "end": 1217
+        },
+        {
+          "kind": "Assign",
+          "start": 1224,
+          "end": 1224
+        },
+        {
+          "kind": "Expr",
+          "start": 1232,
+          "end": 1232
+        },
+        {
+          "kind": "Continue",
+          "start": 1237,
+          "end": 1237
+        },
+        {
+          "kind": "Return",
+          "start": 1239,
+          "end": 1239
+        },
+        {
+          "kind": "Return",
+          "start": 1246,
+          "end": 1246
+        },
+        {
+          "kind": "Assign",
+          "start": 1261,
+          "end": 1261
+        },
+        {
+          "kind": "Assign",
+          "start": 1268,
+          "end": 1271
+        },
+        {
+          "kind": "Assign",
+          "start": 1272,
+          "end": 1272
+        },
+        {
+          "kind": "Pass",
+          "start": 1279,
+          "end": 1279
+        },
+        {
+          "kind": "Pass",
+          "start": 1286,
+          "end": 1286
+        },
+        {
+          "kind": "Assign",
+          "start": 1291,
+          "end": 1293
+        },
+        {
+          "kind": "Expr",
+          "start": 1294,
+          "end": 1294
+        },
+        {
+          "kind": "Expr",
+          "start": 1318,
+          "end": 1318
+        },
+        {
+          "kind": "Expr",
+          "start": 1319,
+          "end": 1319
+        },
+        {
+          "kind": "Assign",
+          "start": 1320,
+          "end": 1320
+        },
+        {
+          "kind": "Expr",
+          "start": 1322,
+          "end": 1322
+        },
+        {
+          "kind": "If",
+          "start": 1334,
+          "end": 1338
+        },
+        {
+          "kind": "Assign",
+          "start": 1362,
+          "end": 1362
+        },
+        {
+          "kind": "If",
+          "start": 1363,
+          "end": 1370
+        },
+        {
+          "kind": "Assign",
+          "start": 1371,
+          "end": 1371
+        },
+        {
+          "kind": "Assign",
+          "start": 1372,
+          "end": 1379
+        },
+        {
+          "kind": "If",
+          "start": 1381,
+          "end": 1385
+        },
+        {
+          "kind": "Expr",
+          "start": 1386,
+          "end": 1386
+        },
+        {
+          "kind": "Return",
+          "start": 1620,
+          "end": 1623
+        },
+        {
+          "kind": "Return",
+          "start": 1628,
+          "end": 1639
+        },
+        {
+          "kind": "Assign",
+          "start": 1650,
+          "end": 1650
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1652,
+          "end": 1657
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1658,
+          "end": 1658
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1659,
+          "end": 1659
+        },
+        {
+          "kind": "Continue",
+          "start": 1672,
+          "end": 1672
+        },
+        {
+          "kind": "Assign",
+          "start": 1675,
+          "end": 1675
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1677,
+          "end": 1677
+        },
+        {
+          "kind": "If",
+          "start": 1678,
+          "end": 1680
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1682,
+          "end": 1682
+        },
+        {
+          "kind": "If",
+          "start": 1683,
+          "end": 1684
+        },
+        {
+          "kind": "Assign",
+          "start": 1798,
+          "end": 1798
+        },
+        {
+          "kind": "Continue",
+          "start": 1816,
+          "end": 1816
+        },
+        {
+          "kind": "Expr",
+          "start": 1818,
+          "end": 1818
+        },
+        {
+          "kind": "Assign",
+          "start": 1822,
+          "end": 1822
+        },
+        {
+          "kind": "If",
+          "start": 1823,
+          "end": 1824
+        },
+        {
+          "kind": "Assign",
+          "start": 1825,
+          "end": 1825
+        },
+        {
+          "kind": "Expr",
+          "start": 1829,
+          "end": 1829
+        },
+        {
+          "kind": "If",
+          "start": 1830,
+          "end": 1831
+        },
+        {
+          "kind": "Assign",
+          "start": 1832,
+          "end": 1832
+        },
+        {
+          "kind": "For",
+          "start": 1833,
+          "end": 1834
+        },
+        {
+          "kind": "Assign",
+          "start": 1837,
+          "end": 1837
+        },
+        {
+          "kind": "If",
+          "start": 1838,
+          "end": 1839
+        },
+        {
+          "kind": "If",
+          "start": 1840,
+          "end": 1841
+        },
+        {
+          "kind": "Delete",
+          "start": 1848,
+          "end": 1848
+        },
+        {
+          "kind": "Raise",
+          "start": 746,
+          "end": 749
+        },
+        {
+          "kind": "If",
+          "start": 1082,
+          "end": 1085
+        },
+        {
+          "kind": "If",
+          "start": 1088,
+          "end": 1091
+        },
+        {
+          "kind": "If",
+          "start": 1094,
+          "end": 1098
+        },
+        {
+          "kind": "Expr",
+          "start": 1335,
+          "end": 1335
+        },
+        {
+          "kind": "Assign",
+          "start": 1336,
+          "end": 1336
+        },
+        {
+          "kind": "Delete",
+          "start": 1338,
+          "end": 1338
+        },
+        {
+          "kind": "Assign",
+          "start": 1364,
+          "end": 1368
+        },
+        {
+          "kind": "If",
+          "start": 1369,
+          "end": 1370
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1382,
+          "end": 1385
+        },
+        {
+          "kind": "Return",
+          "start": 1653,
+          "end": 1657
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1679,
+          "end": 1680
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1684,
+          "end": 1684
+        },
+        {
+          "kind": "Break",
+          "start": 1824,
+          "end": 1824
+        },
+        {
+          "kind": "Continue",
+          "start": 1831,
+          "end": 1831
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1834,
+          "end": 1834
+        },
+        {
+          "kind": "Continue",
+          "start": 1839,
+          "end": 1839
+        },
+        {
+          "kind": "Expr",
+          "start": 1841,
+          "end": 1841
+        },
+        {
+          "kind": "Raise",
+          "start": 1083,
+          "end": 1085
+        },
+        {
+          "kind": "Raise",
+          "start": 1089,
+          "end": 1091
+        },
+        {
+          "kind": "Raise",
+          "start": 1096,
+          "end": 1098
+        },
+        {
+          "kind": "Assign",
+          "start": 1370,
+          "end": 1370
+        }
+      ],
+      "program_units": 424,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "tryton",
+      "path": "modules/stock/product.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "c7e75d110acbe92fdaaf0da3449db19e3695c18cd6933e5687decd4c8c374d13",
+      "git_object_sha256": "b9989b9c475ba057b9c007caad92dab1c92a5f1b232e8898c4233e5c2e8378e5",
+      "source_url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/modules/stock/product.py",
+      "role": "stock_quantity",
+      "classification_basis": "traitement de quantité/état de stock observé dans la chaîne",
+      "methods": [
+        {
+          "name": "Product.products_by_location",
+          "start": 284,
+          "end": 333,
+          "calls": [
+            "Location.browse",
+            "Move.compute_quantities",
+            "Move.compute_quantities_query",
+            "Pool",
+            "Transaction",
+            "Transaction().context.get",
+            "list",
+            "location_ids.add",
+            "location_ids.remove",
+            "pool.get",
+            "quantities.keys",
+            "set",
+            "storage_to_remove.add",
+            "wh_to_add.items"
+          ],
+          "source_fragment": "    @classmethod\n    def products_by_location(cls, location_ids,\n            with_childs=False, grouping=('product',), grouping_filter=None):\n        \"\"\"\n        Compute for each location and product the stock quantity in the default\n        uom of the product.\n\n        The context with keys:\n            stock_skip_warehouse: if set, quantities on a warehouse are no more\n                quantities of all child locations but quantities of the storage\n                zone.\n\n        Return a dictionary with location id and grouping as key\n                and quantity as value.\n        \"\"\"\n        pool = Pool()\n        Location = pool.get('stock.location')\n        Move = pool.get('stock.move')\n\n        # Skip warehouse location in favor of their storage location\n        # to compute quantities. Keep track of which ids to remove\n        # and to add after the query.\n        storage_to_remove = set()\n        wh_to_add = {}\n        if Transaction().context.get('stock_skip_warehouse'):\n            location_ids = set(location_ids)\n            for location in Location.browse(list(location_ids)):\n                if location.type == 'warehouse':\n                    location_ids.remove(location.id)\n                    if location.storage_location.id not in location_ids:\n                        storage_to_remove.add(location.storage_location.id)\n                    location_ids.add(location.storage_location.id)\n                    wh_to_add[location.id] = location.storage_location.id\n            location_ids = list(location_ids)\n\n        query = Move.compute_quantities_query(location_ids, with_childs,\n            grouping=grouping, grouping_filter=grouping_filter)\n        if query is None:\n            return {}\n        quantities = Move.compute_quantities(query, location_ids, with_childs,\n            grouping=grouping, grouping_filter=grouping_filter)\n\n        if wh_to_add:\n            for wh, storage in wh_to_add.items():\n                for key in list(quantities.keys()):\n                    if key[0] == storage:\n                        quantities[(wh,) + key[1:]] = quantities[key]\n                        if storage in storage_to_remove:\n                            del quantities[key]\n        return quantities",
+          "program_units": 28
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 285,
+          "end": 333
+        },
+        {
+          "kind": "Assign",
+          "start": 299,
+          "end": 299
+        },
+        {
+          "kind": "Assign",
+          "start": 300,
+          "end": 300
+        },
+        {
+          "kind": "Assign",
+          "start": 301,
+          "end": 301
+        },
+        {
+          "kind": "Assign",
+          "start": 306,
+          "end": 306
+        },
+        {
+          "kind": "Assign",
+          "start": 307,
+          "end": 307
+        },
+        {
+          "kind": "If",
+          "start": 308,
+          "end": 317
+        },
+        {
+          "kind": "Assign",
+          "start": 319,
+          "end": 320
+        },
+        {
+          "kind": "If",
+          "start": 321,
+          "end": 322
+        },
+        {
+          "kind": "Assign",
+          "start": 323,
+          "end": 324
+        },
+        {
+          "kind": "If",
+          "start": 326,
+          "end": 332
+        },
+        {
+          "kind": "Return",
+          "start": 333,
+          "end": 333
+        },
+        {
+          "kind": "Assign",
+          "start": 309,
+          "end": 309
+        },
+        {
+          "kind": "For",
+          "start": 310,
+          "end": 316
+        },
+        {
+          "kind": "Assign",
+          "start": 317,
+          "end": 317
+        },
+        {
+          "kind": "Return",
+          "start": 322,
+          "end": 322
+        },
+        {
+          "kind": "For",
+          "start": 327,
+          "end": 332
+        },
+        {
+          "kind": "If",
+          "start": 311,
+          "end": 316
+        },
+        {
+          "kind": "For",
+          "start": 328,
+          "end": 332
+        },
+        {
+          "kind": "Expr",
+          "start": 312,
+          "end": 312
+        },
+        {
+          "kind": "If",
+          "start": 313,
+          "end": 314
+        },
+        {
+          "kind": "Expr",
+          "start": 315,
+          "end": 315
+        },
+        {
+          "kind": "Assign",
+          "start": 316,
+          "end": 316
+        },
+        {
+          "kind": "If",
+          "start": 329,
+          "end": 332
+        },
+        {
+          "kind": "Expr",
+          "start": 314,
+          "end": 314
+        },
+        {
+          "kind": "Assign",
+          "start": 330,
+          "end": 330
+        },
+        {
+          "kind": "If",
+          "start": 331,
+          "end": 332
+        },
+        {
+          "kind": "Delete",
+          "start": 332,
+          "end": 332
+        }
+      ],
+      "program_units": 28,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "tryton",
+      "path": "trytond/trytond/model/workflow.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "d25258838d578f46a09356783f8483fc6151a4f6a25efdfe542388b7e22fc528",
+      "git_object_sha256": "92f8dc6e734b83bde49b4e912a57972476eb9c07a7fae0939e39c3961b597840",
+      "source_url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/model/workflow.py",
+      "role": "framework_reused",
+      "classification_basis": "Le décorateur effectue la transition d’état par le modèle SQL.",
+      "methods": [
+        {
+          "name": "Workflow.transition",
+          "start": 19,
+          "end": 52,
+          "calls": [
+            "OrderedDict",
+            "cls.log",
+            "cls.write",
+            "filtered.append",
+            "func",
+            "getattr",
+            "len",
+            "list",
+            "set",
+            "to_update.keys",
+            "wraps"
+          ],
+          "source_fragment": "    @staticmethod\n    def transition(state):\n        def check_transition(func):\n            @wraps(func)\n            def wrapper(cls, records, *args, **kwargs):\n                filtered = []\n                to_update = OrderedDict()\n\n                assert len(records) == len(set(records)), \"Duplicate records\"\n\n                for record in records:\n                    current_state = getattr(record, cls._transition_state)\n                    transition = (current_state, state)\n                    if transition in cls._transitions:\n                        filtered.append(record)\n                        if current_state != state:\n                            to_update[record] = current_state\n\n                result = func(cls, filtered, *args, **kwargs)\n                if to_update:\n                    for record in list(to_update.keys()):\n                        current_state = getattr(record, cls._transition_state)\n                        if current_state != to_update[record]:\n                            del to_update[record]\n                    to_update = list(to_update)\n                    cls.write(to_update, {\n                            cls._transition_state: state,\n                            })\n                    cls.log(\n                        to_update, 'transition',\n                        f'{cls._transition_state}:{state}')\n                return result\n            return wrapper\n        return check_transition",
+          "program_units": 25
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 20,
+          "end": 52
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 21,
+          "end": 51
+        },
+        {
+          "kind": "Return",
+          "start": 52,
+          "end": 52
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 23,
+          "end": 50
+        },
+        {
+          "kind": "Return",
+          "start": 51,
+          "end": 51
+        },
+        {
+          "kind": "Assign",
+          "start": 24,
+          "end": 24
+        },
+        {
+          "kind": "Assign",
+          "start": 25,
+          "end": 25
+        },
+        {
+          "kind": "Assert",
+          "start": 27,
+          "end": 27
+        },
+        {
+          "kind": "For",
+          "start": 29,
+          "end": 35
+        },
+        {
+          "kind": "Assign",
+          "start": 37,
+          "end": 37
+        },
+        {
+          "kind": "If",
+          "start": 38,
+          "end": 49
+        },
+        {
+          "kind": "Return",
+          "start": 50,
+          "end": 50
+        },
+        {
+          "kind": "Assign",
+          "start": 30,
+          "end": 30
+        },
+        {
+          "kind": "Assign",
+          "start": 31,
+          "end": 31
+        },
+        {
+          "kind": "If",
+          "start": 32,
+          "end": 35
+        },
+        {
+          "kind": "For",
+          "start": 39,
+          "end": 42
+        },
+        {
+          "kind": "Assign",
+          "start": 43,
+          "end": 43
+        },
+        {
+          "kind": "Expr",
+          "start": 44,
+          "end": 46
+        },
+        {
+          "kind": "Expr",
+          "start": 47,
+          "end": 49
+        },
+        {
+          "kind": "Expr",
+          "start": 33,
+          "end": 33
+        },
+        {
+          "kind": "If",
+          "start": 34,
+          "end": 35
+        },
+        {
+          "kind": "Assign",
+          "start": 40,
+          "end": 40
+        },
+        {
+          "kind": "If",
+          "start": 41,
+          "end": 42
+        },
+        {
+          "kind": "Assign",
+          "start": 35,
+          "end": 35
+        },
+        {
+          "kind": "Delete",
+          "start": 42,
+          "end": 42
+        }
+      ],
+      "program_units": 25,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": "java-spring-framework-services",
+      "funding_owner": "master-data-java-spring",
+      "stock_additional_generic_framework_units": 0
+    },
+    {
+      "repo": "tryton",
+      "path": "trytond/trytond/model/modelsql.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "a2f56ec7a10066aa4d1eb49430e1ea0f19091e53ebaae2e3ed011c03e410d31c",
+      "git_object_sha256": "63046b8efe7bfa61a2a6bc2b08171d0161869cb4783d0eb74ce7a92c785ef879",
+      "source_url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/model/modelsql.py",
+      "role": "framework_reused",
+      "classification_basis": "Écritures et verrou de table du framework, non refacturés comme développement Stock.",
+      "methods": [
+        {
+          "name": "ModelSQL.create",
+          "start": 1003,
+          "end": 1183,
+          "calls": [
+            "Column",
+            "CurrentTimestamp",
+            "Pool",
+            "Transaction",
+            "Translation.set_ids",
+            "args.extend",
+            "cls.__check_domain_rule",
+            "cls.__table__",
+            "cls._after_create",
+            "cls._before_create",
+            "cls._clean_defaults",
+            "cls._fields.items",
+            "cls._insert_history",
+            "cls._set_path",
+            "cls._update_mptt",
+            "cls.browse",
+            "cls.default_get",
+            "cols.append",
+            "current_column_names.append",
+            "current_columns.append",
+            "current_values.append",
+            "cursor.execute",
+            "db_insert",
+            "default.append",
+            "default_values.update",
+            "defaults_cache.update",
+            "dict",
+            "enumerate",
+            "field.set",
+            "field.sql_format",
+            "fields_to_set.setdefault",
+            "getattr",
+            "grouped_slice",
+            "hasattr",
+            "ids.append",
+            "isinstance",
+            "iter",
+            "len",
+            "list",
+            "new_ids.extend",
+            "pool.get",
+            "raise_func",
+            "repeat",
+            "set",
+            "sorted",
+            "table.insert",
+            "to_insert.append",
+            "to_insert.clear",
+            "transaction.connection.cursor",
+            "transaction.database.has_multirow_insert",
+            "transaction.database.has_returning",
+            "transaction.database.lastid",
+            "transaction.database.nextid",
+            "transaction.new_transaction",
+            "translation_values.items",
+            "translation_values.setdefault",
+            "translations.keys",
+            "translations.values",
+            "tuple",
+            "val.append",
+            "values.items",
+            "values.keys",
+            "values.update",
+            "zip"
+          ],
+          "source_fragment": "    @classmethod\n    @no_table_query\n    def create(cls, vlist):\n        transaction = Transaction()\n        cursor = transaction.connection.cursor(row_factory=backend.scalar_row)\n        pool = Pool()\n        Translation = pool.get('ir.translation')\n\n        vlist_orig = vlist\n        vlist = cls._before_create(vlist)\n\n        table = cls.__table__()\n        modified_fields = set()\n        defaults_cache = {}  # Store already computed default values\n        missing_defaults = {}  # Store missing default values by schema\n        new_ids = []\n\n        def db_insert(columns, vlist, column_names):\n            if transaction.database.has_multirow_insert():\n                vlist = (\n                    s for s in grouped_slice(\n                        vlist,\n                        backend.MAX_QUERY_PARAMS // (len(columns) + 1)))\n            else:\n                vlist = ([v] for v in vlist)\n\n            for values in vlist:\n                values = list(values)\n                cols = list(columns)\n                try:\n                    if len(values) > 1:\n                        ids = transaction.database.nextid(\n                            transaction.connection, cls._table,\n                            count=len(values))\n                        if ids is not None:\n                            assert len(ids) == len(values)\n                            cols.append(table.id)\n                            for val, id in zip(values, ids):\n                                val.append(id)\n                            cursor.execute(*table.insert(cols, values))\n                            yield from ids\n                            continue\n                    for i, val in enumerate(values):\n                        if transaction.database.has_returning():\n                            cursor.execute(*table.insert(\n                                    cols, [val], [table.id]))\n                            yield from cursor\n                        else:\n                            id_new = transaction.database.nextid(\n                                transaction.connection, cls._table)\n                            if id_new:\n                                if i == 0:\n                                    cols.append(table.id)\n                                val.append(id_new)\n                                cursor.execute(*table.insert(cols, [val]))\n                            else:\n                                cursor.execute(*table.insert(cols, [val]))\n                                id_new = transaction.database.lastid(cursor)\n                            yield id_new\n                except (\n                        backend.DatabaseIntegrityError,\n                        backend.DatabaseDataError\n                        ) as exception:\n                    if isinstance(exception, backend.DatabaseIntegrityError):\n                        raise_func = cls.__raise_integrity_error\n                    elif isinstance(exception, backend.DatabaseDataError):\n                        raise_func = cls.__raise_data_error\n                    with transaction.new_transaction():\n                        for value in values:\n                            skip = len(['create_uid', 'create_date'])\n                            recomposed = dict(zip(column_names, value[skip:]))\n                            raise_func(\n                                exception, recomposed, transaction=transaction)\n                        raise\n\n        to_insert = []\n        previous_columns = [table.create_uid, table.create_date]\n        previous_column_names = []\n\n        for values in vlist:\n            # Clean values\n            for key in ('create_uid', 'create_date',\n                    'write_uid', 'write_date', 'id'):\n                if key in values:\n                    del values[key]\n            modified_fields |= values.keys()\n\n            # Get default values\n            values_schema = tuple(sorted(values))\n            if values_schema not in missing_defaults:\n                default = []\n                missing_defaults[values_schema] = default_values = {}\n                for fname, field in cls._fields.items():\n                    if fname in values:\n                        continue\n                    if fname in [\n                            'create_uid', 'create_date',\n                            'write_uid', 'write_date', 'id']:\n                        continue\n                    if isinstance(field, fields.Function) and not field.setter:\n                        continue\n                    if fname in defaults_cache:\n                        default_values[fname] = defaults_cache[fname]\n                    else:\n                        default.append(fname)\n\n                if default:\n                    defaults = cls.default_get(default, with_rec_name=False)\n                    default_values.update(cls._clean_defaults(defaults))\n                    defaults_cache.update(default_values)\n            values.update(missing_defaults[values_schema])\n\n            current_column_names = []\n            current_columns = [table.create_uid, table.create_date]\n            current_values = [transaction.user, CurrentTimestamp()]\n\n            # Insert record\n            for fname, value in sorted(values.items()):\n                field = cls._fields[fname]\n                if not hasattr(field, 'set'):\n                    current_columns.append(Column(table, fname))\n                    current_values.append(field.sql_format(value))\n                    current_column_names.append(fname)\n\n            if current_column_names != previous_column_names:\n                if to_insert:\n                    new_ids.extend(db_insert(\n                            previous_columns, to_insert,\n                            previous_column_names))\n                    to_insert.clear()\n                previous_columns = current_columns\n                previous_column_names = current_column_names\n            to_insert.append(current_values)\n        else:\n            if to_insert:\n                new_ids.extend(db_insert(\n                        current_columns, to_insert, current_column_names))\n\n        # Update path before fields_to_set which could create children\n        if cls._path_fields:\n            field_names = list(sorted(cls._path_fields))\n            cls._set_path(field_names, repeat(new_ids, len(field_names)))\n        # Update mptt before fields_to_set which could create children\n        if cls._mptt_fields:\n            field_names = list(sorted(cls._mptt_fields))\n            cls._update_mptt(field_names, repeat(new_ids, len(field_names)))\n\n        translation_values = {}\n        fields_to_set = {}\n        for values, new_id in zip(vlist, new_ids):\n            for fname, value in values.items():\n                field = cls._fields[fname]\n                if (getattr(field, 'translate', False)\n                        and not hasattr(field, 'set')):\n                    translation_values.setdefault(\n                        '%s,%s' % (cls.__name__, fname), {})[new_id] = (\n                            field.sql_format(value))\n                if hasattr(field, 'set'):\n                    args = fields_to_set.setdefault(fname, [])\n                    actions = iter(args)\n                    for ids, val in zip(actions, actions):\n                        if val == value:\n                            ids.append(new_id)\n                            break\n                    else:\n                        args.extend(([new_id], value))\n\n        if translation_values:\n            for name, translations in translation_values.items():\n                Translation.set_ids(name, 'model', Transaction().language,\n                    list(translations.keys()), list(translations.values()))\n\n        for fname in sorted(fields_to_set, key=cls.index_set_field):\n            fargs = fields_to_set[fname]\n            field = cls._fields[fname]\n            field.set(cls, fname, *fargs)\n\n        cls._insert_history(new_ids)\n\n        cls.__check_domain_rule(new_ids, 'create')\n        return cls.browse(cls._after_create(new_ids, vlist_orig))",
+          "program_units": 129
+        },
+        {
+          "name": "ModelSQL.write",
+          "start": 1516,
+          "end": 1610,
+          "calls": [
+            "Column",
+            "Config.get_language",
+            "CurrentTimestamp",
+            "Pool",
+            "Transaction",
+            "Transaction().new_transaction",
+            "Translation.set_ids",
+            "cls.__check_domain_rule",
+            "cls.__check_timestamp",
+            "cls.__raise_data_error",
+            "cls.__raise_integrity_error",
+            "cls.__table__",
+            "cls._after_write",
+            "cls._before_write",
+            "cls._insert_history",
+            "cls._update_mptt",
+            "cls._update_path",
+            "columns.append",
+            "cursor.execute",
+            "field.set",
+            "field.sql_format",
+            "fields.SQL_OPERATORS['in']",
+            "fields_to_set.setdefault",
+            "fields_to_set.setdefault(fname, []).extend",
+            "getattr",
+            "hasattr",
+            "isinstance",
+            "iter",
+            "len",
+            "list",
+            "pool.get",
+            "repeat",
+            "sorted",
+            "table.update",
+            "transaction.connection.cursor",
+            "update_values.append",
+            "values.copy",
+            "values.items",
+            "values.keys",
+            "zip"
+          ],
+          "source_fragment": "    @classmethod\n    @no_table_query\n    def write(cls, records, values, *args):\n        transaction = Transaction()\n        cursor = transaction.connection.cursor()\n        pool = Pool()\n        Translation = pool.get('ir.translation')\n        Config = pool.get('ir.configuration')\n\n        all_ids, field_names, on_write, trigger_eligibles, *args = (\n            cls._before_write(records, values, *args))\n\n        table = cls.__table__()\n\n        cls.__check_timestamp(all_ids)\n        cls.__check_domain_rule(all_ids, 'write')\n\n        fields_to_set = {}\n        actions = iter(args)\n        for records, values in zip(actions, actions):\n            if isinstance(records, BrowseList):\n                ids = records.ids\n            else:\n                ids = [r.id for r in records]\n            values = values.copy()\n\n            # Clean values\n            for key in ('create_uid', 'create_date',\n                    'write_uid', 'write_date', 'id'):\n                if key in values:\n                    del values[key]\n\n            columns = [table.write_uid, table.write_date]\n            update_values = [transaction.user, CurrentTimestamp()]\n            store_translation = Transaction().language == Config.get_language()\n            for fname, value in values.items():\n                field = cls._fields[fname]\n                if not hasattr(field, 'set'):\n                    if (not getattr(field, 'translate', False)\n                            or store_translation):\n                        columns.append(Column(table, fname))\n                        update_values.append(field.sql_format(value))\n\n            try:\n                cursor.execute(*table.update(\n                        columns, update_values,\n                        where=fields.SQL_OPERATORS['in'](table.id, ids)))\n            except (\n                    backend.DatabaseIntegrityError,\n                    backend.DatabaseDataError) as exception:\n                transaction = Transaction()\n                with Transaction().new_transaction():\n                    if isinstance(\n                            exception, backend.DatabaseIntegrityError):\n                        cls.__raise_integrity_error(\n                            exception, values, list(values.keys()),\n                            transaction=transaction)\n                    elif isinstance(exception, backend.DatabaseDataError):\n                        cls.__raise_data_error(\n                            exception, values, list(values.keys()),\n                            transaction=transaction)\n                    raise\n\n            for fname, value in values.items():\n                field = cls._fields[fname]\n                if (getattr(field, 'translate', False)\n                        and not hasattr(field, 'set')):\n                    Translation.set_ids(\n                        '%s,%s' % (cls.__name__, fname), 'model',\n                        transaction.language, ids,\n                        [field.sql_format(value)] * len(ids))\n                if hasattr(field, 'set'):\n                    fields_to_set.setdefault(fname, []).extend((ids, value))\n\n            path_fields = cls._path_fields & values.keys()\n            if path_fields:\n                cls._update_path(\n                    list(sorted(path_fields)), repeat(ids, len(path_fields)))\n\n            mptt_fields = cls._mptt_fields & values.keys()\n            if mptt_fields:\n                cls._update_mptt(\n                    list(sorted(mptt_fields)), repeat(ids, len(mptt_fields)),\n                    values)\n\n        for fname in sorted(fields_to_set, key=cls.index_set_field):\n            fargs = fields_to_set[fname]\n            field = cls._fields[fname]\n            field.set(cls, fname, *fargs)\n\n        cls._insert_history(all_ids)\n\n        cls.__check_domain_rule(all_ids, 'write')\n\n        cls._after_write(all_ids, field_names, on_write, trigger_eligibles)",
+          "program_units": 57
+        },
+        {
+          "name": "ModelSQL.lock",
+          "start": 2359,
+          "end": 2371,
+          "calls": [
+            "Transaction",
+            "isinstance",
+            "map",
+            "set",
+            "transaction.lock_records",
+            "transaction.lock_table"
+          ],
+          "source_fragment": "    @dualmethod\n    def lock(cls, records=None):\n        transaction = Transaction()\n        if records is not None:\n            if isinstance(records, BrowseList):\n                record_ids = set(records.ids)\n            else:\n                record_ids = set(map(int, records))\n            new_ids = set(transaction.create_records[cls.__name__])\n            ids = record_ids - new_ids\n            transaction.lock_records(cls._table, ids)\n        else:\n            transaction.lock_table(cls._table)",
+          "program_units": 10
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 1005,
+          "end": 1183
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1518,
+          "end": 1610
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 2360,
+          "end": 2371
+        },
+        {
+          "kind": "Assign",
+          "start": 1006,
+          "end": 1006
+        },
+        {
+          "kind": "Assign",
+          "start": 1007,
+          "end": 1007
+        },
+        {
+          "kind": "Assign",
+          "start": 1008,
+          "end": 1008
+        },
+        {
+          "kind": "Assign",
+          "start": 1009,
+          "end": 1009
+        },
+        {
+          "kind": "Assign",
+          "start": 1011,
+          "end": 1011
+        },
+        {
+          "kind": "Assign",
+          "start": 1012,
+          "end": 1012
+        },
+        {
+          "kind": "Assign",
+          "start": 1014,
+          "end": 1014
+        },
+        {
+          "kind": "Assign",
+          "start": 1015,
+          "end": 1015
+        },
+        {
+          "kind": "Assign",
+          "start": 1016,
+          "end": 1016
+        },
+        {
+          "kind": "Assign",
+          "start": 1017,
+          "end": 1017
+        },
+        {
+          "kind": "Assign",
+          "start": 1018,
+          "end": 1018
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1020,
+          "end": 1076
+        },
+        {
+          "kind": "Assign",
+          "start": 1078,
+          "end": 1078
+        },
+        {
+          "kind": "Assign",
+          "start": 1079,
+          "end": 1079
+        },
+        {
+          "kind": "Assign",
+          "start": 1080,
+          "end": 1080
+        },
+        {
+          "kind": "For",
+          "start": 1082,
+          "end": 1139
+        },
+        {
+          "kind": "If",
+          "start": 1142,
+          "end": 1144
+        },
+        {
+          "kind": "If",
+          "start": 1146,
+          "end": 1148
+        },
+        {
+          "kind": "Assign",
+          "start": 1150,
+          "end": 1150
+        },
+        {
+          "kind": "Assign",
+          "start": 1151,
+          "end": 1151
+        },
+        {
+          "kind": "For",
+          "start": 1152,
+          "end": 1168
+        },
+        {
+          "kind": "If",
+          "start": 1170,
+          "end": 1173
+        },
+        {
+          "kind": "For",
+          "start": 1175,
+          "end": 1178
+        },
+        {
+          "kind": "Expr",
+          "start": 1180,
+          "end": 1180
+        },
+        {
+          "kind": "Expr",
+          "start": 1182,
+          "end": 1182
+        },
+        {
+          "kind": "Return",
+          "start": 1183,
+          "end": 1183
+        },
+        {
+          "kind": "Assign",
+          "start": 1519,
+          "end": 1519
+        },
+        {
+          "kind": "Assign",
+          "start": 1520,
+          "end": 1520
+        },
+        {
+          "kind": "Assign",
+          "start": 1521,
+          "end": 1521
+        },
+        {
+          "kind": "Assign",
+          "start": 1522,
+          "end": 1522
+        },
+        {
+          "kind": "Assign",
+          "start": 1523,
+          "end": 1523
+        },
+        {
+          "kind": "Assign",
+          "start": 1525,
+          "end": 1526
+        },
+        {
+          "kind": "Assign",
+          "start": 1528,
+          "end": 1528
+        },
+        {
+          "kind": "Expr",
+          "start": 1530,
+          "end": 1530
+        },
+        {
+          "kind": "Expr",
+          "start": 1531,
+          "end": 1531
+        },
+        {
+          "kind": "Assign",
+          "start": 1533,
+          "end": 1533
+        },
+        {
+          "kind": "Assign",
+          "start": 1534,
+          "end": 1534
+        },
+        {
+          "kind": "For",
+          "start": 1535,
+          "end": 1599
+        },
+        {
+          "kind": "For",
+          "start": 1601,
+          "end": 1604
+        },
+        {
+          "kind": "Expr",
+          "start": 1606,
+          "end": 1606
+        },
+        {
+          "kind": "Expr",
+          "start": 1608,
+          "end": 1608
+        },
+        {
+          "kind": "Expr",
+          "start": 1610,
+          "end": 1610
+        },
+        {
+          "kind": "Assign",
+          "start": 2361,
+          "end": 2361
+        },
+        {
+          "kind": "If",
+          "start": 2362,
+          "end": 2371
+        },
+        {
+          "kind": "If",
+          "start": 1021,
+          "end": 1027
+        },
+        {
+          "kind": "For",
+          "start": 1029,
+          "end": 1076
+        },
+        {
+          "kind": "For",
+          "start": 1084,
+          "end": 1087
+        },
+        {
+          "kind": "AugAssign",
+          "start": 1088,
+          "end": 1088
+        },
+        {
+          "kind": "Assign",
+          "start": 1091,
+          "end": 1091
+        },
+        {
+          "kind": "If",
+          "start": 1092,
+          "end": 1112
+        },
+        {
+          "kind": "Expr",
+          "start": 1113,
+          "end": 1113
+        },
+        {
+          "kind": "Assign",
+          "start": 1115,
+          "end": 1115
+        },
+        {
+          "kind": "Assign",
+          "start": 1116,
+          "end": 1116
+        },
+        {
+          "kind": "Assign",
+          "start": 1117,
+          "end": 1117
+        },
+        {
+          "kind": "For",
+          "start": 1120,
+          "end": 1125
+        },
+        {
+          "kind": "If",
+          "start": 1127,
+          "end": 1134
+        },
+        {
+          "kind": "Expr",
+          "start": 1135,
+          "end": 1135
+        },
+        {
+          "kind": "If",
+          "start": 1137,
+          "end": 1139
+        },
+        {
+          "kind": "Assign",
+          "start": 1143,
+          "end": 1143
+        },
+        {
+          "kind": "Expr",
+          "start": 1144,
+          "end": 1144
+        },
+        {
+          "kind": "Assign",
+          "start": 1147,
+          "end": 1147
+        },
+        {
+          "kind": "Expr",
+          "start": 1148,
+          "end": 1148
+        },
+        {
+          "kind": "For",
+          "start": 1153,
+          "end": 1168
+        },
+        {
+          "kind": "For",
+          "start": 1171,
+          "end": 1173
+        },
+        {
+          "kind": "Assign",
+          "start": 1176,
+          "end": 1176
+        },
+        {
+          "kind": "Assign",
+          "start": 1177,
+          "end": 1177
+        },
+        {
+          "kind": "Expr",
+          "start": 1178,
+          "end": 1178
+        },
+        {
+          "kind": "If",
+          "start": 1536,
+          "end": 1539
+        },
+        {
+          "kind": "Assign",
+          "start": 1540,
+          "end": 1540
+        },
+        {
+          "kind": "For",
+          "start": 1543,
+          "end": 1546
+        },
+        {
+          "kind": "Assign",
+          "start": 1548,
+          "end": 1548
+        },
+        {
+          "kind": "Assign",
+          "start": 1549,
+          "end": 1549
+        },
+        {
+          "kind": "Assign",
+          "start": 1550,
+          "end": 1550
+        },
+        {
+          "kind": "For",
+          "start": 1551,
+          "end": 1557
+        },
+        {
+          "kind": "Try",
+          "start": 1559,
+          "end": 1577
+        },
+        {
+          "kind": "For",
+          "start": 1579,
+          "end": 1588
+        },
+        {
+          "kind": "Assign",
+          "start": 1590,
+          "end": 1590
+        },
+        {
+          "kind": "If",
+          "start": 1591,
+          "end": 1593
+        },
+        {
+          "kind": "Assign",
+          "start": 1595,
+          "end": 1595
+        },
+        {
+          "kind": "If",
+          "start": 1596,
+          "end": 1599
+        },
+        {
+          "kind": "Assign",
+          "start": 1602,
+          "end": 1602
+        },
+        {
+          "kind": "Assign",
+          "start": 1603,
+          "end": 1603
+        },
+        {
+          "kind": "Expr",
+          "start": 1604,
+          "end": 1604
+        },
+        {
+          "kind": "If",
+          "start": 2363,
+          "end": 2366
+        },
+        {
+          "kind": "Assign",
+          "start": 2367,
+          "end": 2367
+        },
+        {
+          "kind": "Assign",
+          "start": 2368,
+          "end": 2368
+        },
+        {
+          "kind": "Expr",
+          "start": 2369,
+          "end": 2369
+        },
+        {
+          "kind": "Expr",
+          "start": 2371,
+          "end": 2371
+        },
+        {
+          "kind": "Assign",
+          "start": 1022,
+          "end": 1025
+        },
+        {
+          "kind": "Assign",
+          "start": 1027,
+          "end": 1027
+        },
+        {
+          "kind": "Assign",
+          "start": 1030,
+          "end": 1030
+        },
+        {
+          "kind": "Assign",
+          "start": 1031,
+          "end": 1031
+        },
+        {
+          "kind": "Try",
+          "start": 1032,
+          "end": 1076
+        },
+        {
+          "kind": "If",
+          "start": 1086,
+          "end": 1087
+        },
+        {
+          "kind": "Assign",
+          "start": 1093,
+          "end": 1093
+        },
+        {
+          "kind": "Assign",
+          "start": 1094,
+          "end": 1094
+        },
+        {
+          "kind": "For",
+          "start": 1095,
+          "end": 1107
+        },
+        {
+          "kind": "If",
+          "start": 1109,
+          "end": 1112
+        },
+        {
+          "kind": "Assign",
+          "start": 1121,
+          "end": 1121
+        },
+        {
+          "kind": "If",
+          "start": 1122,
+          "end": 1125
+        },
+        {
+          "kind": "If",
+          "start": 1128,
+          "end": 1132
+        },
+        {
+          "kind": "Assign",
+          "start": 1133,
+          "end": 1133
+        },
+        {
+          "kind": "Assign",
+          "start": 1134,
+          "end": 1134
+        },
+        {
+          "kind": "Expr",
+          "start": 1138,
+          "end": 1139
+        },
+        {
+          "kind": "Assign",
+          "start": 1154,
+          "end": 1154
+        },
+        {
+          "kind": "If",
+          "start": 1155,
+          "end": 1159
+        },
+        {
+          "kind": "If",
+          "start": 1160,
+          "end": 1168
+        },
+        {
+          "kind": "Expr",
+          "start": 1172,
+          "end": 1173
+        },
+        {
+          "kind": "Assign",
+          "start": 1537,
+          "end": 1537
+        },
+        {
+          "kind": "Assign",
+          "start": 1539,
+          "end": 1539
+        },
+        {
+          "kind": "If",
+          "start": 1545,
+          "end": 1546
+        },
+        {
+          "kind": "Assign",
+          "start": 1552,
+          "end": 1552
+        },
+        {
+          "kind": "If",
+          "start": 1553,
+          "end": 1557
+        },
+        {
+          "kind": "Expr",
+          "start": 1560,
+          "end": 1562
+        },
+        {
+          "kind": "Assign",
+          "start": 1580,
+          "end": 1580
+        },
+        {
+          "kind": "If",
+          "start": 1581,
+          "end": 1586
+        },
+        {
+          "kind": "If",
+          "start": 1587,
+          "end": 1588
+        },
+        {
+          "kind": "Expr",
+          "start": 1592,
+          "end": 1593
+        },
+        {
+          "kind": "Expr",
+          "start": 1597,
+          "end": 1599
+        },
+        {
+          "kind": "Assign",
+          "start": 2364,
+          "end": 2364
+        },
+        {
+          "kind": "Assign",
+          "start": 2366,
+          "end": 2366
+        },
+        {
+          "kind": "If",
+          "start": 1033,
+          "end": 1044
+        },
+        {
+          "kind": "For",
+          "start": 1045,
+          "end": 1061
+        },
+        {
+          "kind": "Delete",
+          "start": 1087,
+          "end": 1087
+        },
+        {
+          "kind": "If",
+          "start": 1096,
+          "end": 1097
+        },
+        {
+          "kind": "If",
+          "start": 1098,
+          "end": 1101
+        },
+        {
+          "kind": "If",
+          "start": 1102,
+          "end": 1103
+        },
+        {
+          "kind": "If",
+          "start": 1104,
+          "end": 1107
+        },
+        {
+          "kind": "Assign",
+          "start": 1110,
+          "end": 1110
+        },
+        {
+          "kind": "Expr",
+          "start": 1111,
+          "end": 1111
+        },
+        {
+          "kind": "Expr",
+          "start": 1112,
+          "end": 1112
+        },
+        {
+          "kind": "Expr",
+          "start": 1123,
+          "end": 1123
+        },
+        {
+          "kind": "Expr",
+          "start": 1124,
+          "end": 1124
+        },
+        {
+          "kind": "Expr",
+          "start": 1125,
+          "end": 1125
+        },
+        {
+          "kind": "Expr",
+          "start": 1129,
+          "end": 1131
+        },
+        {
+          "kind": "Expr",
+          "start": 1132,
+          "end": 1132
+        },
+        {
+          "kind": "Assign",
+          "start": 1157,
+          "end": 1159
+        },
+        {
+          "kind": "Assign",
+          "start": 1161,
+          "end": 1161
+        },
+        {
+          "kind": "Assign",
+          "start": 1162,
+          "end": 1162
+        },
+        {
+          "kind": "For",
+          "start": 1163,
+          "end": 1168
+        },
+        {
+          "kind": "Delete",
+          "start": 1546,
+          "end": 1546
+        },
+        {
+          "kind": "If",
+          "start": 1554,
+          "end": 1557
+        },
+        {
+          "kind": "Assign",
+          "start": 1566,
+          "end": 1566
+        },
+        {
+          "kind": "With",
+          "start": 1567,
+          "end": 1577
+        },
+        {
+          "kind": "Expr",
+          "start": 1583,
+          "end": 1586
+        },
+        {
+          "kind": "Expr",
+          "start": 1588,
+          "end": 1588
+        },
+        {
+          "kind": "Assign",
+          "start": 1034,
+          "end": 1036
+        },
+        {
+          "kind": "If",
+          "start": 1037,
+          "end": 1044
+        },
+        {
+          "kind": "If",
+          "start": 1046,
+          "end": 1061
+        },
+        {
+          "kind": "If",
+          "start": 1066,
+          "end": 1069
+        },
+        {
+          "kind": "With",
+          "start": 1070,
+          "end": 1076
+        },
+        {
+          "kind": "Continue",
+          "start": 1097,
+          "end": 1097
+        },
+        {
+          "kind": "Continue",
+          "start": 1101,
+          "end": 1101
+        },
+        {
+          "kind": "Continue",
+          "start": 1103,
+          "end": 1103
+        },
+        {
+          "kind": "Assign",
+          "start": 1105,
+          "end": 1105
+        },
+        {
+          "kind": "Expr",
+          "start": 1107,
+          "end": 1107
+        },
+        {
+          "kind": "If",
+          "start": 1164,
+          "end": 1166
+        },
+        {
+          "kind": "Expr",
+          "start": 1168,
+          "end": 1168
+        },
+        {
+          "kind": "Expr",
+          "start": 1556,
+          "end": 1556
+        },
+        {
+          "kind": "Expr",
+          "start": 1557,
+          "end": 1557
+        },
+        {
+          "kind": "If",
+          "start": 1568,
+          "end": 1576
+        },
+        {
+          "kind": "Raise",
+          "start": 1577,
+          "end": 1577
+        },
+        {
+          "kind": "Assert",
+          "start": 1038,
+          "end": 1038
+        },
+        {
+          "kind": "Expr",
+          "start": 1039,
+          "end": 1039
+        },
+        {
+          "kind": "For",
+          "start": 1040,
+          "end": 1041
+        },
+        {
+          "kind": "Expr",
+          "start": 1042,
+          "end": 1042
+        },
+        {
+          "kind": "Expr",
+          "start": 1043,
+          "end": 1043
+        },
+        {
+          "kind": "Continue",
+          "start": 1044,
+          "end": 1044
+        },
+        {
+          "kind": "Expr",
+          "start": 1047,
+          "end": 1048
+        },
+        {
+          "kind": "Expr",
+          "start": 1049,
+          "end": 1049
+        },
+        {
+          "kind": "Assign",
+          "start": 1051,
+          "end": 1052
+        },
+        {
+          "kind": "If",
+          "start": 1053,
+          "end": 1060
+        },
+        {
+          "kind": "Expr",
+          "start": 1061,
+          "end": 1061
+        },
+        {
+          "kind": "Assign",
+          "start": 1067,
+          "end": 1067
+        },
+        {
+          "kind": "If",
+          "start": 1068,
+          "end": 1069
+        },
+        {
+          "kind": "For",
+          "start": 1071,
+          "end": 1075
+        },
+        {
+          "kind": "Raise",
+          "start": 1076,
+          "end": 1076
+        },
+        {
+          "kind": "Expr",
+          "start": 1165,
+          "end": 1165
+        },
+        {
+          "kind": "Break",
+          "start": 1166,
+          "end": 1166
+        },
+        {
+          "kind": "Expr",
+          "start": 1570,
+          "end": 1572
+        },
+        {
+          "kind": "If",
+          "start": 1573,
+          "end": 1576
+        },
+        {
+          "kind": "Expr",
+          "start": 1041,
+          "end": 1041
+        },
+        {
+          "kind": "If",
+          "start": 1054,
+          "end": 1055
+        },
+        {
+          "kind": "Expr",
+          "start": 1056,
+          "end": 1056
+        },
+        {
+          "kind": "Expr",
+          "start": 1057,
+          "end": 1057
+        },
+        {
+          "kind": "Expr",
+          "start": 1059,
+          "end": 1059
+        },
+        {
+          "kind": "Assign",
+          "start": 1060,
+          "end": 1060
+        },
+        {
+          "kind": "Assign",
+          "start": 1069,
+          "end": 1069
+        },
+        {
+          "kind": "Assign",
+          "start": 1072,
+          "end": 1072
+        },
+        {
+          "kind": "Assign",
+          "start": 1073,
+          "end": 1073
+        },
+        {
+          "kind": "Expr",
+          "start": 1074,
+          "end": 1075
+        },
+        {
+          "kind": "Expr",
+          "start": 1574,
+          "end": 1576
+        },
+        {
+          "kind": "Expr",
+          "start": 1055,
+          "end": 1055
+        }
+      ],
+      "program_units": 196,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": "java-spring-framework-services",
+      "funding_owner": "master-data-java-spring",
+      "stock_additional_generic_framework_units": 0
+    },
+    {
+      "repo": "tryton",
+      "path": "trytond/trytond/protocols/dispatcher.py",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "sha256": "a56daf31fa9a7b00e67a9d294f0cb3920ac94150edb9f8a5ac94e7e5dbc64fa7",
+      "git_object_sha256": "d1629ed42824e341eddefb0444ac0f4c2c40715e08e2c3eb88879c972746eed0",
+      "source_url": "https://github.com/tryton/tryton/blob/e011222dc305c431677e586706fd241dffe02236/trytond/trytond/protocols/dispatcher.py",
+      "role": "framework_reused",
+      "classification_basis": "Transaction RPC, rollback, retry configuré des erreurs opérationnelles et commit.",
+      "methods": [
+        {
+          "name": "_dispatch",
+          "start": 215,
+          "end": 337,
+          "calls": [
+            "Transaction",
+            "Transaction().start",
+            "abort",
+            "app.make_response",
+            "c_args.pop",
+            "config.getint",
+            "ctypes.c_ulong",
+            "ctypes.py_object",
+            "ctypes.pythonapi.PyThreadState_SetAsyncExc",
+            "duration",
+            "e.fix",
+            "e.result",
+            "format_args",
+            "get_object_method",
+            "getattr",
+            "hasattr",
+            "is_instance_method",
+            "isinstance",
+            "logger.debug",
+            "logger.exception",
+            "logger.info",
+            "logger.isEnabledFor",
+            "logger.warning",
+            "meth",
+            "response.headers.extend",
+            "rpc.cache.headers",
+            "rpc.convert",
+            "rpc.decorate",
+            "rpc.result",
+            "run_task",
+            "security.check_timeout",
+            "security.reset",
+            "threading.Timer",
+            "threading.get_ident",
+            "time.monotonic",
+            "time.sleep",
+            "timer.cancel",
+            "timer.start",
+            "transaction.commit",
+            "transaction.rollback",
+            "transaction.tasks.clear",
+            "transaction.tasks.pop",
+            "username.decode"
+          ],
+          "source_fragment": "@app.auth_required\n@with_pool\ndef _dispatch(request, pool, *args, **kwargs):\n    obj, method = get_object_method(request, pool)\n    if method in obj.__rpc__:\n        rpc = obj.__rpc__[method]\n    else:\n        abort(HTTPStatus.FORBIDDEN)\n\n    user = request.user_id\n    if request.session:\n        username = request.session.username\n        session = request.session.token\n    elif request.authorization:\n        username = request.authorization.username\n        session = None\n    if isinstance(username, bytes):\n        username = username.decode('utf-8')\n\n    if rpc.fresh_session and session:\n        context = {'_request': request.context}\n        if not security.check_timeout(\n                pool.database_name, user, session, context=context):\n            abort(HTTPStatus.UNAUTHORIZED)\n\n    log_message = '%s.%s%s from %s@%s%s in %i ms'\n    log_args = (\n        obj.__name__, method,\n        format_args(args, kwargs, logger.isEnabledFor(logging.DEBUG)),\n        username, request.remote_addr, request.path)\n\n    def raise_timeout(ident):\n        ctypes.pythonapi.PyThreadState_SetAsyncExc(\n            ctypes.c_ulong(ident), ctypes.py_object(TimeOutException))\n\n    def duration():\n        return (time.monotonic() - started) * 1000\n    started = time.monotonic()\n\n    retry = config.getint('database', 'retry')\n    count = 0\n    transaction_extras = {}\n    timer = None\n    while True:\n        if timer is not None:\n            timer.cancel()\n        if count:\n            time.sleep(0.02 * count)\n        with Transaction().start(\n                pool.database_name, user,\n                readonly=rpc.readonly, timeout=rpc.timeout,\n                **transaction_extras) as transaction:\n            if rpc.timeout:\n                timer = threading.Timer(\n                    rpc.timeout, raise_timeout, (threading.get_ident(),))\n                timer.start()\n            try:\n                try:\n                    (c_args, c_kwargs,\n                        transaction.context, transaction.timestamp) \\\n                        = rpc.convert(obj, *args, **kwargs)\n                    transaction.context['_request'] = request.context\n                    meth = rpc.decorate(getattr(obj, method))\n                    if (rpc.instantiate is None\n                            or not is_instance_method(obj, method)):\n                        result = rpc.result(meth(*c_args, **c_kwargs))\n                    else:\n                        assert rpc.instantiate == 0\n                        inst = c_args.pop(0)\n                        if hasattr(inst, method):\n                            result = rpc.result(\n                                meth(inst, *c_args, **c_kwargs))\n                        else:\n                            result = [rpc.result(meth(i, *c_args, **c_kwargs))\n                                for i in inst]\n                finally:\n                    if timer is not None:\n                        timer.cancel()\n            except TransactionError as e:\n                transaction.rollback()\n                transaction.tasks.clear()\n                e.fix(transaction_extras)\n                continue\n            except (backend.DatabaseTimeoutError, TimeOutException):\n                logger.warning(\n                    log_message, *log_args, duration(), exc_info=True)\n                abort(HTTPStatus.GATEWAY_TIMEOUT)\n            except backend.DatabaseOperationalError:\n                if count < retry and not rpc.readonly:\n                    transaction.rollback()\n                    transaction.tasks.clear()\n                    count += 1\n                    logger.debug(\"Retry: %i\", count)\n                    continue\n                logger.exception(log_message, *log_args, duration())\n                raise\n            except RPCReturnException as e:\n                transaction.rollback()\n                transaction.tasks.clear()\n                result = e.result()\n            except (ConcurrencyException, UserError, UserWarning,\n                    LoginException):\n                logger.info(\n                    log_message, *log_args, duration(),\n                    exc_info=logger.isEnabledFor(logging.DEBUG))\n                raise\n            except Exception:\n                logger.exception(log_message, *log_args, duration())\n                raise\n            # Need to commit to unlock SQLite database\n            transaction.commit()\n        while transaction.tasks:\n            task_id = transaction.tasks.pop()\n            run_task(pool, task_id)\n        if session:\n            context = {'_request': request.context}\n            security.reset(pool.database_name, session, context=context)\n        logger.info(log_message, *log_args, duration())\n        logger.debug('Result: %r', result)\n        response = app.make_response(request, result)\n        if rpc.readonly and rpc.cache:\n            response.headers.extend(rpc.cache.headers())\n        return response",
+          "program_units": 86
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 217,
+          "end": 337
+        },
+        {
+          "kind": "Assign",
+          "start": 218,
+          "end": 218
+        },
+        {
+          "kind": "If",
+          "start": 219,
+          "end": 222
+        },
+        {
+          "kind": "Assign",
+          "start": 224,
+          "end": 224
+        },
+        {
+          "kind": "If",
+          "start": 225,
+          "end": 230
+        },
+        {
+          "kind": "If",
+          "start": 231,
+          "end": 232
+        },
+        {
+          "kind": "If",
+          "start": 234,
+          "end": 238
+        },
+        {
+          "kind": "Assign",
+          "start": 240,
+          "end": 240
+        },
+        {
+          "kind": "Assign",
+          "start": 241,
+          "end": 244
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 246,
+          "end": 248
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 250,
+          "end": 251
+        },
+        {
+          "kind": "Assign",
+          "start": 252,
+          "end": 252
+        },
+        {
+          "kind": "Assign",
+          "start": 254,
+          "end": 254
+        },
+        {
+          "kind": "Assign",
+          "start": 255,
+          "end": 255
+        },
+        {
+          "kind": "Assign",
+          "start": 256,
+          "end": 256
+        },
+        {
+          "kind": "Assign",
+          "start": 257,
+          "end": 257
+        },
+        {
+          "kind": "While",
+          "start": 258,
+          "end": 337
+        },
+        {
+          "kind": "Assign",
+          "start": 220,
+          "end": 220
+        },
+        {
+          "kind": "Expr",
+          "start": 222,
+          "end": 222
+        },
+        {
+          "kind": "Assign",
+          "start": 226,
+          "end": 226
+        },
+        {
+          "kind": "Assign",
+          "start": 227,
+          "end": 227
+        },
+        {
+          "kind": "If",
+          "start": 228,
+          "end": 230
+        },
+        {
+          "kind": "Assign",
+          "start": 232,
+          "end": 232
+        },
+        {
+          "kind": "Assign",
+          "start": 235,
+          "end": 235
+        },
+        {
+          "kind": "If",
+          "start": 236,
+          "end": 238
+        },
+        {
+          "kind": "Expr",
+          "start": 247,
+          "end": 248
+        },
+        {
+          "kind": "Return",
+          "start": 251,
+          "end": 251
+        },
+        {
+          "kind": "If",
+          "start": 259,
+          "end": 260
+        },
+        {
+          "kind": "If",
+          "start": 261,
+          "end": 262
+        },
+        {
+          "kind": "With",
+          "start": 263,
+          "end": 325
+        },
+        {
+          "kind": "While",
+          "start": 326,
+          "end": 328
+        },
+        {
+          "kind": "If",
+          "start": 329,
+          "end": 331
+        },
+        {
+          "kind": "Expr",
+          "start": 332,
+          "end": 332
+        },
+        {
+          "kind": "Expr",
+          "start": 333,
+          "end": 333
+        },
+        {
+          "kind": "Assign",
+          "start": 334,
+          "end": 334
+        },
+        {
+          "kind": "If",
+          "start": 335,
+          "end": 336
+        },
+        {
+          "kind": "Return",
+          "start": 337,
+          "end": 337
+        },
+        {
+          "kind": "Assign",
+          "start": 229,
+          "end": 229
+        },
+        {
+          "kind": "Assign",
+          "start": 230,
+          "end": 230
+        },
+        {
+          "kind": "Expr",
+          "start": 238,
+          "end": 238
+        },
+        {
+          "kind": "Expr",
+          "start": 260,
+          "end": 260
+        },
+        {
+          "kind": "Expr",
+          "start": 262,
+          "end": 262
+        },
+        {
+          "kind": "If",
+          "start": 267,
+          "end": 270
+        },
+        {
+          "kind": "Try",
+          "start": 271,
+          "end": 323
+        },
+        {
+          "kind": "Expr",
+          "start": 325,
+          "end": 325
+        },
+        {
+          "kind": "Assign",
+          "start": 327,
+          "end": 327
+        },
+        {
+          "kind": "Expr",
+          "start": 328,
+          "end": 328
+        },
+        {
+          "kind": "Assign",
+          "start": 330,
+          "end": 330
+        },
+        {
+          "kind": "Expr",
+          "start": 331,
+          "end": 331
+        },
+        {
+          "kind": "Expr",
+          "start": 336,
+          "end": 336
+        },
+        {
+          "kind": "Assign",
+          "start": 268,
+          "end": 269
+        },
+        {
+          "kind": "Expr",
+          "start": 270,
+          "end": 270
+        },
+        {
+          "kind": "Try",
+          "start": 272,
+          "end": 292
+        },
+        {
+          "kind": "Assign",
+          "start": 273,
+          "end": 275
+        },
+        {
+          "kind": "Assign",
+          "start": 276,
+          "end": 276
+        },
+        {
+          "kind": "Assign",
+          "start": 277,
+          "end": 277
+        },
+        {
+          "kind": "If",
+          "start": 278,
+          "end": 289
+        },
+        {
+          "kind": "If",
+          "start": 291,
+          "end": 292
+        },
+        {
+          "kind": "Expr",
+          "start": 294,
+          "end": 294
+        },
+        {
+          "kind": "Expr",
+          "start": 295,
+          "end": 295
+        },
+        {
+          "kind": "Expr",
+          "start": 296,
+          "end": 296
+        },
+        {
+          "kind": "Continue",
+          "start": 297,
+          "end": 297
+        },
+        {
+          "kind": "Expr",
+          "start": 299,
+          "end": 300
+        },
+        {
+          "kind": "Expr",
+          "start": 301,
+          "end": 301
+        },
+        {
+          "kind": "If",
+          "start": 303,
+          "end": 308
+        },
+        {
+          "kind": "Expr",
+          "start": 309,
+          "end": 309
+        },
+        {
+          "kind": "Raise",
+          "start": 310,
+          "end": 310
+        },
+        {
+          "kind": "Expr",
+          "start": 312,
+          "end": 312
+        },
+        {
+          "kind": "Expr",
+          "start": 313,
+          "end": 313
+        },
+        {
+          "kind": "Assign",
+          "start": 314,
+          "end": 314
+        },
+        {
+          "kind": "Expr",
+          "start": 317,
+          "end": 319
+        },
+        {
+          "kind": "Raise",
+          "start": 320,
+          "end": 320
+        },
+        {
+          "kind": "Expr",
+          "start": 322,
+          "end": 322
+        },
+        {
+          "kind": "Raise",
+          "start": 323,
+          "end": 323
+        },
+        {
+          "kind": "Assign",
+          "start": 280,
+          "end": 280
+        },
+        {
+          "kind": "Assert",
+          "start": 282,
+          "end": 282
+        },
+        {
+          "kind": "Assign",
+          "start": 283,
+          "end": 283
+        },
+        {
+          "kind": "If",
+          "start": 284,
+          "end": 289
+        },
+        {
+          "kind": "Expr",
+          "start": 292,
+          "end": 292
+        },
+        {
+          "kind": "Expr",
+          "start": 304,
+          "end": 304
+        },
+        {
+          "kind": "Expr",
+          "start": 305,
+          "end": 305
+        },
+        {
+          "kind": "AugAssign",
+          "start": 306,
+          "end": 306
+        },
+        {
+          "kind": "Expr",
+          "start": 307,
+          "end": 307
+        },
+        {
+          "kind": "Continue",
+          "start": 308,
+          "end": 308
+        },
+        {
+          "kind": "Assign",
+          "start": 285,
+          "end": 286
+        },
+        {
+          "kind": "Assign",
+          "start": 288,
+          "end": 289
+        }
+      ],
+      "program_units": 86,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": "java-spring-framework-services",
+      "funding_owner": "master-data-java-spring",
+      "stock_additional_generic_framework_units": 0
+    }
+  ],
+  "units_by_role": {
+    "stock_quantity": 452,
+    "coupled_native": 0,
+    "native_integration": 0,
+    "framework_reused": 307
+  },
+  "method_count": 16,
+  "runtime_executed": false,
+  "closure": {
+    "main_stages_traced": true,
+    "critical_transaction_boundary_identified": true,
+    "all_dynamic_hooks_and_installed_extensions_closed": false,
+    "mixed_native_responsibilities_present": false,
+    "complete_Flow_retroactivity_and_command_replay_equivalence": false
+  },
+  "effort": {
+    "receivable_jh": null,
+    "COCOMO_executed": false,
+    "reason": "Le dossier mesure les composants natifs et leurs dépendances, pas une assiette homogène neuve/réutilisée du mécanisme Flow complet. Un total de famille ou de projet autonome tiré de ces seules méthodes serait trompeur."
+  },
+  "standard_ports_not_counted_as_new_stock": [
+    "ORM/repositories et transactions natifs",
+    "lecture des identités produit/lieu/unité/partenaire existantes",
+    "injection et services de date/configuration/logs"
+  ],
+  "native_domain_ports_requiring_scope_resolution": [
+    "Premier engagement/ensembles sans ligne commune et cache de période, dans le contexte d’appel exact.",
+    "Délimitation du split/choix de lieu et de la simple protection d’une quantité donnée."
+  ]
+}

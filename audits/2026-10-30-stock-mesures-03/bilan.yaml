@@ -1,0 +1,128 @@
+id: stock-mesures-03
+status: mesures_partielles_et_chemins_principaux_documentes
+method_reference: source/fondamentaux.yaml#estimation_model
+results:
+  erpnext:
+    program_units: 388
+    declarative_units: 63
+    program_plus_declarative_at_weight_1: 451
+    source_files: 11
+    methods: 52
+    excluded_program_units: 0
+    mixed_methods_promoted: 2
+    remaining_mixed_method_entries: 16
+  odoo:
+    program_units: 486
+    declarative_units: 0
+    program_plus_declarative_at_weight_1: 486
+    source_files: 5
+    methods: 33
+    excluded_program_units: 0
+    mixed_methods_promoted: 1
+    remaining_mixed_method_entries: 5
+  tryton:
+    program_units: 696
+    declarative_units: 0
+    program_plus_declarative_at_weight_1: 696
+    source_files: 4
+    methods: 33
+    excluded_program_units: 0
+    mixed_methods_promoted: 2
+    remaining_mixed_method_entries: 3
+  axelor:
+    program_units: 345
+    declarative_units: 65
+    program_plus_declarative_at_weight_1: 410
+    source_files: 15
+    methods: 51
+    excluded_program_units: 28
+    mixed_methods_promoted: 7
+    remaining_mixed_method_entries: 17
+meaning: Les unités sont des instructions et déclarations syntaxiques sélectionnées. Elles ne sont ni des lignes
+  physiques ni des CFP, ni le nombre de fonctions métier. Le total programme + déclaratif emploie un poids 1 affiché
+  pour la lecture, sans calibration de productivité entre langages.
+critical_path_findings:
+- product: ERPNext / Frappe
+  write: Document métier vers sauvegarde Frappe et SQL, code générique partagé.
+  correction: Décalage des quantités futures, ordre date/création et borne au prochain inventaire identifiés.
+  concurrency: Requêtes for_update repérées, sérialisation complète non démontrée.
+- product: Odoo
+  write: Mise à jour du cache de champs puis flush et écriture SQL ; pas un appel direct write→SQL.
+  correction: Ajustement via un mouvement et synchronisation des quants.
+  concurrency: Verrou sur quants existants ; création et retries à qualifier.
+- product: Tryton
+  write: Transition de workflow vers ModelSQL.write ; ne pas assimiler le petit corps de assign à tout le comportement.
+  correction: Lignes d’inventaire vers mouvements correctifs ; Move.do financier non compté en totalité.
+  concurrency: Verrouillage de lignes ou de modèle dans le chemin natif d’affectation ; pas de test de contention.
+- product: Axelor
+  write: Mise à jour des quantités vers repository et JPA ; branches de réapprovisionnement exclues du comptage.
+  correction: Inventaire vers mouvements correctifs et actualisation des positions ; métadonnées de dernier inventaire
+    distinguées de la quantité actuelle.
+  concurrency: Transaction repérée ; verrou exclusif non établi dans les chemins examinés. Garantie ouverte, sans
+    conclure à une absence générale dans le produit.
+known_native_excess:
+- product: erpnext
+  path: erpnext/stock/doctype/bin/bin.py
+  symbol: update_qty
+  reason: Accès aux colonnes de solde et valeur dans le même objet ; aucune méthode de valorisation FIFO/LIFO ajoutée.
+- product: erpnext
+  path: erpnext/stock/doctype/bin/bin.py
+  symbol: get_last_sle_values
+  reason: Accès aux colonnes de solde et valeur dans le même objet ; aucune méthode de valorisation FIFO/LIFO ajoutée.
+- product: axelor
+  path: axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineHistoryServiceImpl.java
+  symbol: saveHistory
+  reason: Snapshot de prix natifs conservé dans la même construction de ligne historique ; pas moteur de valorisation.
+validation:
+  measured_products: 4
+  critical_paths_static: 12
+  evidence_nodes: 44
+  shared_platform_nodes_not_recharged: 16
+  selected_methods: 169
+  source_and_model_fields: 170
+  duplicate_counted_nodes: 0
+  overlapping_method_ranges: 0
+  excluded_program_nodes_counted: 0
+  active_source_files_unchanged: 120
+  runtime_concurrency_tests: false
+  new_family_jh: null
+progress:
+  stock_capabilities_framed: 8
+  stock_native_selections_measured: 4
+  stock_native_selections_total: 4
+  previous_selected_methods: 133
+  current_selected_methods: 169
+  previous_boundary_methods: 53
+  previously_boundary_methods_promoted: 12
+  remaining_boundary_method_entries: 41
+  new_capabilities_adopted: 0
+  stock_full_family_estimates: 0
+  campaign_capabilities_framed: 14
+  adopted_capabilities: 6
+  total_capabilities: 88
+  adopted_coverage_pct: 6.8
+  remaining_java_capabilities_to_estimate: 82
+  cumulative_adopted_gross_jh: 1500
+  master_data_months: 17
+uncertainty:
+  quantified: false
+  numeric_alignment_available: false
+  confidence_class: null
+  interpretation: Les incertitudes de rattachement des principaux appels ont diminué. L’incertitude sur l’effort
+    de la famille complète n’est pas encore quantifiée.
+not_yet_costable_reasons:
+- Les vues, permissions et imports/raccordements non retenus ne sont pas mesurés.
+- Des méthodes mixtes restent en frontière ; certaines contiennent le workflow natif excédentaire, d’autres des
+  dépendances à délimiter.
+- Le noyau observé ne couvre pas tous les faits externes, filiations/Handling Units, reprises, limites de connaissance
+  et garanties Flow.
+- Les contrats de fourniture Finance, planification et retour produit restent à dimensionner, à partir de références
+  et hypothèses bornées.
+- Le comptage COSMIC et la confrontation des activités ne sont pas encore réalisés pour cette famille.
+stock_family_gross_jh: null
+next_iteration:
+  worthwhile: true
+  objective: Compléter la mesure de la présentation et des dépendances métier retenues, puis dimensionner les compléments
+    Flow par analogies de code et construire le comptage COSMIC.
+  stop_rule: Ne pas refaire une inspection générale des mêmes fichiers. Toute nouvelle itération doit apporter des
+    composants mesurés ou un calcul de périmètre explicitement complet ; aucun coefficient ne compense une omission.

@@ -1,0 +1,102 @@
+{
+  "id": "stock-java-spring-consolidation-09",
+  "date": "2026-10-30",
+  "status": "proposition_pour_decision_non_adoptee",
+  "native_calculation": "audits/2026-10-30-stock-opportunite-08/results.json",
+  "selected_reference": "axelor",
+  "selection_rationale": "Référence Java native Axelor et équivalence de services de framework déjà posée pour Master Data. Pas moyenne des quatre produits, pas prime ni remise Spring. La proximité ERPNext/Tryton est un contrôle descriptif, pas une validation indépendante.",
+  "rounding_jh": 10,
+  "role_rounding_jh": 5,
+  "schedule_rounding_months": 1,
+  "allocation_status": "Hypothèses d’organisation pour cette proposition ; ni observations de temps OSS ni disponibilité confirmée.",
+  "activity_role_weights": {
+    "management": {
+      "coordination": 1
+    },
+    "environment": {
+      "plateforme": 0.8,
+      "dev_java": 0.2
+    },
+    "requirements": {
+      "analyse_produit": 0.9,
+      "architecture": 0.1
+    },
+    "design": {
+      "architecture": 0.4,
+      "dev_java": 0.4,
+      "dev_frontend": 0.05,
+      "ux": 0.1,
+      "securite": 0.05
+    },
+    "implementation": {
+      "dev_java": 0.85,
+      "dev_frontend": 0.15
+    },
+    "assessment": {
+      "qa": 0.7,
+      "dev_java": 0.2,
+      "dev_frontend": 0.05,
+      "securite": 0.05
+    },
+    "deployment": {
+      "plateforme": 0.7,
+      "dev_java": 0.2,
+      "coordination": 0.1
+    }
+  },
+  "mapping_rationales": {
+    "management": "Pilotage local de la famille Stock, pas pilotage du programme Groupe.",
+    "environment": "Configuration applicative, environnements et automatisation spécifiques Stock. Pas seconde construction du socle déjà financé en Master Data.",
+    "requirements": "Analyse des huit capacités Stock et de leurs contrats ; contribution de l’architecte aux exigences structurantes.",
+    "design": "Stock orienté services, cohérence des effets, historique, transactions et concurrence : davantage de conception Java que dans la clé Master Data. Interface de consultation, vérification et administration ; pas WMS terminal complet.",
+    "implementation": "85 % Java et 15 % interface : choix d’organisation au lieu de 75/25 en Master Data ; aucun changement du total COCOMO.",
+    "assessment": "70 % QA, 20 % Java, 5 % interface et 5 % sécurité. Qualification des corrections, conflits, replay et reprise ; tests développeur déjà dans la réalisation, sans double compte.",
+    "deployment": "Branchement, configuration et qualification de mise en service Stock ; mécanismes communs de livraison déjà financés."
+  },
+  "framework_assumption": "Persistance, transactions, verrouillage optimiste, sécurité, métadonnées, composants UI, admission générique et livraison disponibles via le patrimoine Master Data et des composants Spring équivalents. Aucun coût de reconstruction Axelor à financer ; travail spécifique Stock inclus. Une UI entièrement sur mesure, une réécriture du socle ou des garanties supérieures exigeraient une révision.",
+  "scope_capabilities": [
+    "BC-009",
+    "BC-010",
+    "BC-011",
+    "BC-012",
+    "BC-013",
+    "BC-016",
+    "BC-017",
+    "BC-018"
+  ],
+  "review_witnesses": [
+    {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_quant.py",
+      "name": "_run_least_packages_removal_strategy_astar",
+      "meaning": "Recherche A* pour choisir des colis à prélever ; excès d’exécution/optimisation dans un fichier utilisé globalement comme analogue de position."
+    },
+    {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_quant.py",
+      "name": "_apply_inventory",
+      "meaning": "Application d’un inventaire, pas simple fourniture d’une position."
+    },
+    {
+      "repo": "odoo",
+      "path": "addons/stock/models/product.py",
+      "name": "_compute_quantities_dict",
+      "meaning": "Calcul groupé de quantités présentes, attendues et historiques : comportement pertinent pour la position."
+    },
+    {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_location.py",
+      "name": "_get_putaway_strategy",
+      "meaning": "Stratégie de rangement d’entrepôt, présente dans le composant global ; pas une fonction de restitution de stock."
+    },
+    {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineFetchServiceImpl.java",
+      "name": "getAvailableStockForAProduct",
+      "meaning": "Composition d’une requête sur les positions actuelles/futures ; exemple du service Java plus ciblé."
+    }
+  ],
+  "review_policy": "Expliquer le désaccord avec les sources. Ne pas modifier les hypothèses gelées 08 ni ajuster les coefficients pour rapprocher les estimations. Les témoins ne démontrent pas que tout l’écart Odoo serait un excès.",
+  "control_policy": "169 CFP et 20 h/CFP conservés, facteur 1. Aucun taux déduit de COCOMO n’est réinjecté dans le contrôle. Activités globalement rapprochées mais populations, spécialistes et déploiement imparfaitement appariés.",
+  "decision_policy": "Proposer les JH, rôles et délai locaux sans adoption ni modification de l’application. Cumul proposé distinct du cumul retenu ; ne pas additionner les délais."
+}

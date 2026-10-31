@@ -43,9 +43,10 @@ class DeliveryReadinessTests(unittest.TestCase):
                     self.assertIn(block['kind'], ('paragraphs','bullets','table','links','callout'))
                     if block['kind'] == 'table':
                         self.assertTrue(all(len(row) == len(block['columns']) for row in block['rows']))
-        links = [item['href'] for section in dossier['sections'] for block in section['blocks']
-                 if block['kind'] == 'links' for item in block['items']]
-        self.assertIn('#perimetre-retenu', links)
+        links = [proof['href'] for proof in dossier['proofs'] if proof['href']]
+        self.assertEqual(dossier['method_link']['href'], '#conditions-realisation')
+        self.assertTrue(all(section['blocks'] == [] for section in dossier['sections']))
+        self.assertIn('#cartographie', links)
         self.assertIn('#synvance', links)
 
     def test_scope_is_derived_from_the_loaded_capture_and_preserves_native_ids(self):
@@ -92,8 +93,11 @@ class DeliveryReadinessTests(unittest.TestCase):
 
     def test_missing_partner_proofs_are_never_presented_as_available(self):
         _, dossier = self.compile()
-        partner = next(section for section in dossier['sections'] if section['id'] == 'partenaire')
-        self.assertTrue(all('Pièce à obtenir' in row[1] for row in partner['blocks'][0]['rows']))
+        proofs = {proof['id']: proof for proof in dossier['proofs']}
+        self.assertTrue(all(proofs[row['proof_ref']]['status'] == 'attendue' for row in dossier['partner']))
+        for key in ('roles', 'hotspots', 'gates', 'proofs', 'partner'):
+            self.assertEqual(dossier[key], self.dossier[key])
+        self.assertEqual(len(proofs), len(self.dossier['proofs']))
         for proof in self.dossier['proofs']:
             if proof['status'] == 'attendue':
                 self.assertIsNone(proof['source_ref'])

@@ -1,0 +1,1076 @@
+summary:
+  status: adopted_and_verified
+  total_jh: 4160
+  capabilities: 88
+  units: 9
+  previous_three_decisions_preserved: true
+  build_eur_ht: 2620030
+  other_four_options_and_all_horizons_preserved: true
+  integration_annual_and_global_calendar_preserved: true
+  simulation_contract_preserved: true
+  local_delays_not_summed: true
+  python_tests: 294
+  frontend: tests, types, content, build passed
+  validation_source_changes:
+  - tools/test_study_http.py
+  changed_test_module_replayed: true
+  browser_local:
+    passed: true
+    url: http://127.0.0.1:8766/
+    units: 9
+    rolesPerUnit: 9
+    totalJH: 4160
+    coveredCapabilities: 88
+    viewports:
+    - 1440
+    - 390
+    downloadBytes: 24608312
+    downloadEncoding: gzip
+    errors: []
+  browser_static:
+    passed: true
+    url: http://127.0.0.1:8791/FLOW-Etude-Economique/
+    units: 9
+    rolesPerUnit: 9
+    totalJH: 4160
+    coveredCapabilities: 88
+    viewports:
+    - 1440
+    - 390
+    downloadBytes: 24608312
+    downloadEncoding: identity
+    errors: []
+    pythonBrowserParity:
+    - reference
+    - make_build
+    - buy_integration
+    - annual_services
+    - calendar
+    - context_and_means
+    staleVersionRejected: true
+  global_roles:
+    coordination: 479
+    analyse_produit: 417
+    architecture: 362
+    dev_java: 1460
+    dev_frontend: 339
+    qa: 580
+    plateforme: 362
+    ux: 80
+    securite: 81
+  no_publish_or_git_push: true
+  server: http://127.0.0.1:8766
+units:
+- id: master-data-java-spring
+  label: Master Data Java/Spring
+  jh: 1500
+  months: 17
+  roles:
+  - id: coordination
+    label: Pilotage de l’équipe produit
+    jh: 170
+    rate_ref:
+      path: source/deploiement-groupe.yaml
+      pointer: pilotage.tarif_coordination_eur_jh
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: analyse_produit
+    label: Analyse métier et fonctionnelle
+    jh: 150
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: architecture
+    label: Architecture et conception technique
+    jh: 130
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: dev_java
+    label: Développement Java et tests développeur
+    jh: 480
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: dev_frontend
+    label: Développement interface et tests développeur
+    jh: 180
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: qa
+    label: QA et qualification indépendante
+    jh: 200
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.qa.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: plateforme
+    label: Plateforme / DevOps et mise en service
+    jh: 130
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: ux
+    label: UX et ergonomie
+    jh: 30
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  - id: securite
+    label: Expertise et revue de sécurité
+    jh: 30
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; à confirmer pour cette mission. Aucun devis
+      spécifique Master Data.
+  hypotheses:
+  - id: scope
+    hypothesis: Six capacités BC-002 à BC-007. Admission de contributions, consultation et administration ; pas
+      de création d’un PIM/MDM complet avec édition collaborative et workflows riches.
+    trigger: Ajout d’édition métier, validation multi-acteurs, fusion/dédoublonnage, recherche floue ou arbitrage
+      automatique de données.
+    effect: Hausse potentiellement importante. À l’inverse, isoler des fonctions natives non nécessaires à FLOW
+      peut réduire le périmètre commun. Effet non chiffré sans liste d’écarts.
+  - id: complements
+    hypothesis: 'Les compléments restent dimensionnés par analogie : 172 traitements, 313 champs et 42 modèles supplémentaires,
+      dont seules huit analogies de règle ont été affinées.'
+    trigger: Modification substantielle des versions, des règles d’autorité, des dépendances ou du protocole de
+      reprise.
+    effect: Une hausse isolée de 10 % de la taille complémentaire ajoute environ 90 JH dans le modèle. Ce n’est
+      ni une probabilité ni une marge à ajouter.
+  - id: reuse
+    hypothesis: Services comparables disponibles dans Spring, persistance, identité, import et composants UI ; base
+      de données, sauvegardes et chaîne de livraison disponibles.
+    trigger: Réécriture d’un mécanisme générique, intégration technique nettement plus difficile ou composants indisponibles.
+    effect: Hausse des JH et du délai. La réutilisation ne peut pas être remplacée par une remise forfaitaire ;
+      un mécanisme partagé garde un seul propriétaire de financement.
+  - id: service
+    hypothesis: 'Objectifs de comparaison S1 conservés : disponibilité 99,9 %, rétablissement après sinistre sous
+      8 h, perte de données cible au plus 4 h ; qualification d’un lot de 100 000 lignes en 30 min. Ils ne sont
+      pas démontrés.'
+    trigger: Exigences plus fortes, plusieurs régions actives, reprise automatique sans intervention, volumes très
+      supérieurs ou certification spécifique.
+    effect: Hausse possible de l’architecture, de la qualification et de la plateforme. Les achats et l’exploitation
+      récurrente restent hors des 1 500 JH.
+  - id: organization
+    hypothesis: Équipe maîtrisant Spring et les composants réutilisés, décideurs disponibles, environnements accessibles
+      et capacité moyenne voisine de cinq personnes à temps plein.
+    trigger: Équipe junior ou instable, attente de décisions, services partagés non disponibles, dépendances externes
+      bloquantes.
+    effect: Le délai de 17 mois devient fragile. À effort inchangé, quatre équivalents temps plein à 18 JH/mois
+      requièrent déjà 20.8 mois de capacité ; les dépendances peuvent ajouter du délai. Ce quotient n’est pas une
+      nouvelle prédiction COCOMO.
+- id: stock-java-spring
+  label: Stock Java/Spring
+  jh: 340
+  months: 10
+  roles:
+  - id: coordination
+    label: Pilotage de l’équipe produit
+    jh: 40
+    rate_ref:
+      path: source/deploiement-groupe.yaml
+      pointer: pilotage.tarif_coordination_eur_jh
+    rate_assumption: Tarif existant utilisé par analogie de profil ; aucun devis spécifique Stock. Les rôles ne
+      constituent pas neuf postes à plein temps.
+  - id: analyse_produit
+    label: Analyse métier et fonctionnelle
+    jh: 35
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; aucun devis spécifique Stock. Les rôles ne
+      constituent pas neuf postes à plein temps.
+  - id: architecture
+    label: Architecture et conception technique
+    jh: 30
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; aucun devis spécifique Stock. Les rôles ne
+      constituent pas neuf postes à plein temps.
+  - id: dev_java
+    label: Développement Java et tests développeur
+    jh: 125
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; aucun devis spécifique Stock. Les rôles ne
+      constituent pas neuf postes à plein temps.
+  - id: dev_frontend
+    label: Développement interface et tests développeur
+    jh: 20
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; aucun devis spécifique Stock. Les rôles ne
+      constituent pas neuf postes à plein temps.
+  - id: qa
+    label: QA et qualification indépendante
+    jh: 50
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.qa.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; aucun devis spécifique Stock. Les rôles ne
+      constituent pas neuf postes à plein temps.
+  - id: plateforme
+    label: Plateforme / DevOps et mise en service
+    jh: 30
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; aucun devis spécifique Stock. Les rôles ne
+      constituent pas neuf postes à plein temps.
+  - id: ux
+    label: UX et ergonomie
+    jh: 5
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; aucun devis spécifique Stock. Les rôles ne
+      constituent pas neuf postes à plein temps.
+  - id: securite
+    label: Expertise et revue de sécurité
+    jh: 5
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; aucun devis spécifique Stock. Les rôles ne
+      constituent pas neuf postes à plein temps.
+  hypotheses:
+  - id: source-attribution
+    hypothesis: La taille Stock est attribuée aux composants natifs mêlés à des fonctions hors périmètre, avec plancher
+      déjà mesuré et déduction du patrimoine Master Data.
+    trigger: Une part de code mixte sensiblement différente est nécessaire.
+    effect: 'Sensibilité isolée calculée : environ −106 / +111 JH autour des 339,02 JH non arrondis. Ni marge ni
+      intervalle de confiance.'
+  - id: flow-modules
+    hypothesis: Les sept compléments Flow restent aux fractions explicites des chaînes et composants natifs ; 17
+      structures et 124 champs nouveaux ou étendus.
+    trigger: Protocoles, contributions ou règles de commande plus riches que les analogies retenues.
+    effect: 'Variation conjointe des fractions des sept modules : environ −52 / +84 JH, sans modifier les schémas
+      ni cumuler d’autres sensibilités.'
+  - id: reuse
+    hypothesis: Persistance, transactions, verrouillage optimiste, sécurité, métadonnées, composants UI, admission
+      générique et livraison disponibles via le patrimoine Master Data et des composants Spring équivalents. Aucun
+      coût de reconstruction Axelor à financer ; travail spécifique Stock inclus. Une UI entièrement sur mesure,
+      une réécriture du socle ou des garanties supérieures exigeraient une révision.
+    trigger: Patrimoine Master Data indisponible ou reconstruction d’un service générique.
+    effect: Estimation à rouvrir. Les mécanismes communs gardent leur propriétaire Master Data ; aucun coût forfaitaire
+      de framework ajouté au Stock.
+  - id: ui
+    hypothesis: Composants de consultation, formulaires et administration réutilisables, sans interface WMS sur
+      mesure.
+    trigger: Poids des modèles et vues différent ou interface métier plus riche.
+    effect: 'Sensibilité du poids du déclaratif : environ −49 / +99 JH. Un parcours ajouté modifie le périmètre
+      et demande une nouvelle estimation.'
+  - id: architecture
+    hypothesis: Une base transactionnelle et un module Stock ; protection et reprise communes réutilisées, rapprochements
+      Stock spécifiques inclus.
+    trigger: Réservation distribuée, plusieurs régions actives ou engagement de débit, latence ou reprise plus exigeant.
+    effect: Effet non chiffré. Les objectifs Master Data ne démontrent pas les garanties du Stock ; revoir architecture
+      et qualification avant engagement.
+  - id: team
+    hypothesis: Équipe nominale maîtrisant Java/Spring et le patrimoine réutilisé, décision métier et experts disponibles.
+    trigger: Compétences ou disponibilité inférieures à l’hypothèse.
+    effect: 'Sensibilité isolée de capacité : environ −58 / +88 JH. Le délai dépend aussi des dépendances et de
+      l’affectation réelle des rôles.'
+  - id: comparison
+    hypothesis: COCOMO II reste la référence ; le contrôle COSMIC × ISBSG conserve 169 CFP et 20 h/CFP.
+    trigger: Nouvelles mesures de taille, de comptage ou référence de productivité applicable.
+    effect: Le contrôle reste à 482,86 JH, environ 42 % au-dessus de Java. Écart non réconcilié ; pas de moyenne
+      ni correction pour forcer l’accord.
+- id: inventory-ownership-java-spring
+  label: Propriété du stock Java/Spring
+  jh: 100
+  months: 7
+  roles:
+  - id: coordination
+    label: Pilotage de l’équipe produit
+    jh: 11
+    rate_ref:
+      path: source/deploiement-groupe.yaml
+      pointer: pilotage.tarif_coordination_eur_jh
+    rate_assumption: Tarif existant utilisé par analogie de profil ; pas de devis spécifique. Les rôles sont mutualisés,
+      sans neuf postes à plein temps.
+  - id: analyse_produit
+    label: Analyse métier et fonctionnelle
+    jh: 10
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; pas de devis spécifique. Les rôles sont mutualisés,
+      sans neuf postes à plein temps.
+  - id: architecture
+    label: Architecture et conception technique
+    jh: 9
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; pas de devis spécifique. Les rôles sont mutualisés,
+      sans neuf postes à plein temps.
+  - id: dev_java
+    label: Développement Java et tests développeur
+    jh: 37
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; pas de devis spécifique. Les rôles sont mutualisés,
+      sans neuf postes à plein temps.
+  - id: dev_frontend
+    label: Développement interface et tests développeur
+    jh: 6
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; pas de devis spécifique. Les rôles sont mutualisés,
+      sans neuf postes à plein temps.
+  - id: qa
+    label: QA et qualification indépendante
+    jh: 14
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.qa.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; pas de devis spécifique. Les rôles sont mutualisés,
+      sans neuf postes à plein temps.
+  - id: plateforme
+    label: Plateforme / DevOps et mise en service
+    jh: 9
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; pas de devis spécifique. Les rôles sont mutualisés,
+      sans neuf postes à plein temps.
+  - id: ux
+    label: UX et ergonomie
+    jh: 2
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; pas de devis spécifique. Les rôles sont mutualisés,
+      sans neuf postes à plein temps.
+  - id: securite
+    label: Expertise et revue de sécurité
+    jh: 2
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant utilisé par analogie de profil ; pas de devis spécifique. Les rôles sont mutualisés,
+      sans neuf postes à plein temps.
+  hypotheses:
+  - id: framework
+    hypothesis: Services équivalents à ceux employés dans les analogies Java disponibles dans Spring et dans le
+      patrimoine Master Data/Stock ; réutilisation de persistance, transactions, sécurité, admission, reprise et
+      livraison.
+    trigger: Nécessité démontrée de reconstruire un mécanisme générique non couvert par les familles retenues.
+    effect: Charge supplémentaire à dimensionner, inconnue aujourd'hui ; ni zéro implicite ni réduction Spring additionnelle.
+  - id: ledger
+    hypothesis: Un registre propre à la propriété est construit, avec parties, quantité, preuve, date d'effet, date
+      de connaissance et référence des corrections. Aucun historique Stock natif supposé équivalent.
+    trigger: Volumes de nouveau code de OWN-F04/F05 supérieurs aux fractions centrales de 1 et 0,75 chaîne de correction.
+    effect: 'Sensibilité isolée du registre et des deux dates : environ 78 à 135 JH pour la famille, contre 98,92
+      JH au point de calcul. Ni enveloppe budgétaire ni intervalle de confiance.'
+  - id: rules
+    hypothesis: Déclencheurs génériques consommation/vente, échéance et jalon reçu, avec conditions d'accord référencées
+      et actes éventuels ; pas de langage général de contrats ni de règles juridiques Beaumanoir.
+    trigger: Construction d'un moteur de clauses ou de décisions spécifiques du Groupe.
+    effect: Périmètre supplémentaire à isoler et à financer ; impact non mesuré.
+  - id: temporal
+    hypothesis: Lecture du registre de cette famille aux deux dates, correction expliquée et positions de propriété
+      ; pas de moteur temporel universel pour tout Flow, ni garantie nouvelle de temps de réponse sur volumétrie
+      non bornée.
+    trigger: Généralisation à d'autres familles ou nouvelles exigences de performance/historique.
+    effect: Dimensionnement à reprendre si ces garanties entrent dans le périmètre.
+  - id: team
+    hypothesis: Équipe ayant les compétences et l'expérience nominales retenues par COCOMO, avec rôles mutualisés
+      et services dépendants disponibles.
+    trigger: Capacité ou expérience inférieures, indisponibilités, dépendances non livrées.
+    effect: 'Sensibilité isolée PERS : environ −17 / +26 JH autour des 98,92 JH non arrondis. Disponibilité des
+      rôles et dépendances non confirmée.'
+  - id: comparison
+    hypothesis: COCOMO II reste la référence ; 80 CFP et 20 h/CFP restent le contrôle COSMIC × ISBSG.
+    trigger: Nouvelle mesure de taille ou donnée de productivité applicable.
+    effect: Le contrôle donne 228,57 JH, soit 129,66 JH et 131,08 % au-dessus des 98,92 JH Java. Désaccord conservé,
+      sans moyenne ni correction automatique.
+- id: supply-controls-java-spring
+  label: Politiques, éligibilité et devenir des biens Java/Spring
+  jh: 40
+  months: 5
+  roles:
+  - id: coordination
+    label: Pilotage de l’équipe produit
+    jh: 5
+    rate_ref:
+      path: source/deploiement-groupe.yaml
+      pointer: pilotage.tarif_coordination_eur_jh
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: analyse_produit
+    label: Analyse métier et fonctionnelle
+    jh: 4
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: architecture
+    label: Architecture et conception technique
+    jh: 3
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: dev_java
+    label: Développement Java et tests développeur
+    jh: 15
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: dev_frontend
+    label: Développement interface et tests développeur
+    jh: 2
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: qa
+    label: QA et qualification indépendante
+    jh: 6
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.qa.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: plateforme
+    label: Plateforme / DevOps et mise en service
+    jh: 3
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: ux
+    label: UX et ergonomie
+    jh: 1
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: securite
+    label: Expertise et revue de sécurité
+    jh: 1
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  hypotheses:
+  - id: reuse
+    hypothesis: Réutiliser le patrimoine adopté et les bibliothèques ; réaliser les adaptations et contrôles Flow.
+    trigger: Un mécanisme fourni manque ou une autre architecture est retenue.
+    effect: Requalifier les analogues et le financement ; aucun rabais forfaitaire supplémentaire.
+  - id: size
+    hypothesis: Modules, fractions et modèles issus des preuves figées de l’itération 8.
+    trigger: Un comportement distinct ou des contraintes changent significativement les volumes de code.
+    effect: Recalculer les tailles avant les JH ; aucune durée proposée ne sert d’entrée à l’effort.
+  - id: grouping
+    hypothesis: Une estimation COCOMO pour cet ensemble cohérent, puis allocation entre ses familles.
+    trigger: Le découpage produit ou les dépendances changent.
+    effect: Recalcul non linéaire au nouveau niveau ; ne pas additionner des fragments et leur ensemble.
+  - id: benchmark
+    hypothesis: Rendement COSMIC × ISBSG de 20 h/CFP non calibré à la réutilisation.
+    trigger: Un prototype ou un bilan réel comparable fournit une mesure de productivité.
+    effect: Réexaminer le contrôle ; les écarts actuels ne sont pas une précision prédictive.
+  - id: modules-eligibility
+    hypothesis: 'eligibility : 1 modules (restrictions et contrôle motivé), fraction 0.75 du composant de référence
+      par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-policies
+    hypothesis: 'policies : 1 modules (activation et explication des politiques), fraction 0.5 du composant de référence
+      par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-disposition
+    hypothesis: 'disposition : 1 modules (options et décision de devenir), fraction 0.75 du composant de référence
+      par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+- id: orders-java-spring
+  label: Gestion des commandes Java/Spring
+  jh: 170
+  months: 8
+  roles:
+  - id: coordination
+    label: Pilotage de l’équipe produit
+    jh: 20
+    rate_ref:
+      path: source/deploiement-groupe.yaml
+      pointer: pilotage.tarif_coordination_eur_jh
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: analyse_produit
+    label: Analyse métier et fonctionnelle
+    jh: 17
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: architecture
+    label: Architecture et conception technique
+    jh: 15
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: dev_java
+    label: Développement Java et tests développeur
+    jh: 63
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: dev_frontend
+    label: Développement interface et tests développeur
+    jh: 10
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: qa
+    label: QA et qualification indépendante
+    jh: 24
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.qa.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: plateforme
+    label: Plateforme / DevOps et mise en service
+    jh: 15
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: ux
+    label: UX et ergonomie
+    jh: 3
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: securite
+    label: Expertise et revue de sécurité
+    jh: 3
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  hypotheses:
+  - id: reuse
+    hypothesis: Réutiliser le patrimoine adopté et les bibliothèques ; réaliser les adaptations et contrôles Flow.
+    trigger: Un mécanisme fourni manque ou une autre architecture est retenue.
+    effect: Requalifier les analogues et le financement ; aucun rabais forfaitaire supplémentaire.
+  - id: size
+    hypothesis: Modules, fractions et modèles issus des preuves figées de l’itération 8.
+    trigger: Un comportement distinct ou des contraintes changent significativement les volumes de code.
+    effect: Recalculer les tailles avant les JH ; aucune durée proposée ne sert d’entrée à l’effort.
+  - id: grouping
+    hypothesis: Une estimation COCOMO pour cet ensemble cohérent, puis allocation entre ses familles.
+    trigger: Le découpage produit ou les dépendances changent.
+    effect: Recalcul non linéaire au nouveau niveau ; ne pas additionner des fragments et leur ensemble.
+  - id: benchmark
+    hypothesis: Rendement COSMIC × ISBSG de 20 h/CFP non calibré à la réutilisation.
+    trigger: Un prototype ou un bilan réel comparable fournit une mesure de productivité.
+    effect: Réexaminer le contrôle ; les écarts actuels ne sont pas une précision prédictive.
+  - id: modules-orders
+    hypothesis: 'orders : 3 modules (accords de consignation et reprises ; résolution des retours client/fournisseur
+      ; rapprochement des engagements et résultats), fraction 0.5 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+- id: master-plan-java-spring
+  label: Préparation et pilotage du Master Plan Java/Spring
+  jh: 350
+  months: 11
+  roles:
+  - id: coordination
+    label: Pilotage de l’équipe produit
+    jh: 41
+    rate_ref:
+      path: source/deploiement-groupe.yaml
+      pointer: pilotage.tarif_coordination_eur_jh
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: analyse_produit
+    label: Analyse métier et fonctionnelle
+    jh: 35
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: architecture
+    label: Architecture et conception technique
+    jh: 30
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: dev_java
+    label: Développement Java et tests développeur
+    jh: 129
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: dev_frontend
+    label: Développement interface et tests développeur
+    jh: 21
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: qa
+    label: QA et qualification indépendante
+    jh: 50
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.qa.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: plateforme
+    label: Plateforme / DevOps et mise en service
+    jh: 30
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: ux
+    label: UX et ergonomie
+    jh: 7
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: securite
+    label: Expertise et revue de sécurité
+    jh: 7
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  hypotheses:
+  - id: reuse
+    hypothesis: Réutiliser le patrimoine adopté et les bibliothèques ; réaliser les adaptations et contrôles Flow.
+    trigger: Un mécanisme fourni manque ou une autre architecture est retenue.
+    effect: Requalifier les analogues et le financement ; aucun rabais forfaitaire supplémentaire.
+  - id: size
+    hypothesis: Modules, fractions et modèles issus des preuves figées de l’itération 8.
+    trigger: Un comportement distinct ou des contraintes changent significativement les volumes de code.
+    effect: Recalculer les tailles avant les JH ; aucune durée proposée ne sert d’entrée à l’effort.
+  - id: grouping
+    hypothesis: Une estimation COCOMO pour cet ensemble cohérent, puis allocation entre ses familles.
+    trigger: Le découpage produit ou les dépendances changent.
+    effect: Recalcul non linéaire au nouveau niveau ; ne pas additionner des fragments et leur ensemble.
+  - id: benchmark
+    hypothesis: Rendement COSMIC × ISBSG de 20 h/CFP non calibré à la réutilisation.
+    trigger: Un prototype ou un bilan réel comparable fournit une mesure de productivité.
+    effect: Réexaminer le contrôle ; les écarts actuels ne sont pas une précision prédictive.
+  - id: modules-master-plan
+    hypothesis: 'master-plan : 3 modules (contributions qualifiées et contexte net ; calcul de couverture et application
+      contrôlée ; scénarios isolés et comparaison), fraction 0.6 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-plan-preparation
+    hypothesis: 'plan-preparation : 4 modules (qualification de prévision ; consommation sans double besoin ; projection
+      des apports ; rapprochement des plans), fraction 0.65 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+- id: supply-decisions-java-spring
+  label: Promesse, affectation et optimisation Supply Java/Spring
+  jh: 630
+  months: 13
+  roles:
+  - id: coordination
+    label: Pilotage de l’équipe produit
+    jh: 73
+    rate_ref:
+      path: source/deploiement-groupe.yaml
+      pointer: pilotage.tarif_coordination_eur_jh
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: analyse_produit
+    label: Analyse métier et fonctionnelle
+    jh: 63
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: architecture
+    label: Architecture et conception technique
+    jh: 55
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: dev_java
+    label: Développement Java et tests développeur
+    jh: 232
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: dev_frontend
+    label: Développement interface et tests développeur
+    jh: 38
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: qa
+    label: QA et qualification indépendante
+    jh: 90
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.qa.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: plateforme
+    label: Plateforme / DevOps et mise en service
+    jh: 55
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: ux
+    label: UX et ergonomie
+    jh: 12
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: securite
+    label: Expertise et revue de sécurité
+    jh: 12
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  hypotheses:
+  - id: reuse
+    hypothesis: Réutiliser le patrimoine adopté et les bibliothèques ; réaliser les adaptations et contrôles Flow.
+    trigger: Un mécanisme fourni manque ou une autre architecture est retenue.
+    effect: Requalifier les analogues et le financement ; aucun rabais forfaitaire supplémentaire.
+  - id: size
+    hypothesis: Modules, fractions et modèles issus des preuves figées de l’itération 8.
+    trigger: Un comportement distinct ou des contraintes changent significativement les volumes de code.
+    effect: Recalculer les tailles avant les JH ; aucune durée proposée ne sert d’entrée à l’effort.
+  - id: grouping
+    hypothesis: Une estimation COCOMO pour cet ensemble cohérent, puis allocation entre ses familles.
+    trigger: Le découpage produit ou les dépendances changent.
+    effect: Recalcul non linéaire au nouveau niveau ; ne pas additionner des fragments et leur ensemble.
+  - id: benchmark
+    hypothesis: Rendement COSMIC × ISBSG de 20 h/CFP non calibré à la réutilisation.
+    trigger: Un prototype ou un bilan réel comparable fournit une mesure de productivité.
+    effect: Réexaminer le contrôle ; les écarts actuels ne sont pas une précision prédictive.
+  - id: modules-backlog
+    hypothesis: 'backlog : 3 modules (priorisation ; affectation sous contraintes ; libération des livraisons),
+      fraction 0.6 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-optimization
+    hypothesis: 'optimization : 5 modules (cibles physiques ; protections logiques ; politique de réservation ;
+      réapprovisionnement ; redistribution), fraction 0.75 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-promising
+    hypothesis: 'promising : 3 modules (disponibilité promettable ; faisabilité matières/capacités ; valorisation
+      des possibilités), fraction 0.6 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-service-planning
+    hypothesis: 'service-planning : 3 modules (offres de capacité qualifiées ; sélection de service sous politique
+      ; ordonnancement des transports), fraction 0.65 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-coordination
+    hypothesis: 'coordination : 3 modules (dépendances de satisfaction ; adaptation des engagements ; libération
+      des services), fraction 0.65 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+- id: service-fulfilment-java-spring
+  label: Prestations et reconnaissance des résultats Java/Spring
+  jh: 690
+  months: 13
+  roles:
+  - id: coordination
+    label: Pilotage de l’équipe produit
+    jh: 80
+    rate_ref:
+      path: source/deploiement-groupe.yaml
+      pointer: pilotage.tarif_coordination_eur_jh
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: analyse_produit
+    label: Analyse métier et fonctionnelle
+    jh: 69
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: architecture
+    label: Architecture et conception technique
+    jh: 60
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: dev_java
+    label: Développement Java et tests développeur
+    jh: 254
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: dev_frontend
+    label: Développement interface et tests développeur
+    jh: 42
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: qa
+    label: QA et qualification indépendante
+    jh: 98
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.qa.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: plateforme
+    label: Plateforme / DevOps et mise en service
+    jh: 60
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: ux
+    label: UX et ergonomie
+    jh: 13
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: securite
+    label: Expertise et revue de sécurité
+    jh: 14
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  hypotheses:
+  - id: reuse
+    hypothesis: Réutiliser le patrimoine adopté et les bibliothèques ; réaliser les adaptations et contrôles Flow.
+    trigger: Un mécanisme fourni manque ou une autre architecture est retenue.
+    effect: Requalifier les analogues et le financement ; aucun rabais forfaitaire supplémentaire.
+  - id: size
+    hypothesis: Modules, fractions et modèles issus des preuves figées de l’itération 8.
+    trigger: Un comportement distinct ou des contraintes changent significativement les volumes de code.
+    effect: Recalculer les tailles avant les JH ; aucune durée proposée ne sert d’entrée à l’effort.
+  - id: grouping
+    hypothesis: Une estimation COCOMO pour cet ensemble cohérent, puis allocation entre ses familles.
+    trigger: Le découpage produit ou les dépendances changent.
+    effect: Recalcul non linéaire au nouveau niveau ; ne pas additionner des fragments et leur ensemble.
+  - id: benchmark
+    hypothesis: Rendement COSMIC × ISBSG de 20 h/CFP non calibré à la réutilisation.
+    trigger: Un prototype ou un bilan réel comparable fournit une mesure de productivité.
+    effect: Réexaminer le contrôle ; les écarts actuels ne sont pas une précision prédictive.
+  - id: modules-assurance
+    hypothesis: 'assurance : 2 modules (faits et corrections spécialisés ; vues de résultat et rapprochements typés),
+      fraction 0.6 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-goods-orders
+    hypothesis: 'goods-orders : 12 modules (service-order-picking-contract ; service-order-packing-contract ; service-order-cross-docking-contract
+      ; service-order-labeling-contract ; service-order-kitting-contract ; service-order-garment-finishing-contract
+      ; service-order-cleaning-contract ; service-order-repair-alteration-contract ; service-order-personalization-contract
+      ; service-order-inspection-contract ; service-order-receiving-contract ; service-order-scrapping-contract),
+      fraction 0.25 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-transport-orders
+    hypothesis: 'transport-orders : 2 modules (instructions de déplacement ; réservation autonome de capacité),
+      fraction 0.65 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-customs
+    hypothesis: 'customs : 1 modules (dossier de prestation douanière), fraction 0.8 du composant de référence par
+      module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-financial-services
+    hypothesis: 'financial-services : 2 modules (facture et avoir demandés/reconnus ; encaissement et remboursement
+      demandés/reconnus), fraction 0.45 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+- id: process-management-java-spring
+  label: Processus, travail humain et supervision Java/Spring
+  jh: 340
+  months: 10
+  roles:
+  - id: coordination
+    label: Pilotage de l’équipe produit
+    jh: 39
+    rate_ref:
+      path: source/deploiement-groupe.yaml
+      pointer: pilotage.tarif_coordination_eur_jh
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: analyse_produit
+    label: Analyse métier et fonctionnelle
+    jh: 34
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: architecture
+    label: Architecture et conception technique
+    jh: 30
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: dev_java
+    label: Développement Java et tests développeur
+    jh: 125
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: dev_frontend
+    label: Développement interface et tests développeur
+    jh: 20
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: qa
+    label: QA et qualification indépendante
+    jh: 48
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.qa.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: plateforme
+    label: Plateforme / DevOps et mise en service
+    jh: 30
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: ux
+    label: UX et ergonomie
+    jh: 7
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.expert.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  - id: securite
+    label: Expertise et revue de sécurité
+    jh: 7
+    rate_ref:
+      path: source/stacks/java-spring.yaml
+      pointer: interventions.tarifs.architecte.reference
+    rate_assumption: Tarif existant par analogie de profil ; compétence et devis à confirmer. Spécialités optimisation
+      ou moteur comprises dans les rôles concernés.
+  hypotheses:
+  - id: reuse
+    hypothesis: Réutiliser le patrimoine adopté et les bibliothèques ; réaliser les adaptations et contrôles Flow.
+    trigger: Un mécanisme fourni manque ou une autre architecture est retenue.
+    effect: Requalifier les analogues et le financement ; aucun rabais forfaitaire supplémentaire.
+  - id: size
+    hypothesis: Modules, fractions et modèles issus des preuves figées de l’itération 8.
+    trigger: Un comportement distinct ou des contraintes changent significativement les volumes de code.
+    effect: Recalculer les tailles avant les JH ; aucune durée proposée ne sert d’entrée à l’effort.
+  - id: grouping
+    hypothesis: Une estimation COCOMO pour cet ensemble cohérent, puis allocation entre ses familles.
+    trigger: Le découpage produit ou les dépendances changent.
+    effect: Recalcul non linéaire au nouveau niveau ; ne pas additionner des fragments et leur ensemble.
+  - id: benchmark
+    hypothesis: Rendement COSMIC × ISBSG de 20 h/CFP non calibré à la réutilisation.
+    trigger: Un prototype ou un bilan réel comparable fournit une mesure de productivité.
+    effect: Réexaminer le contrôle ; les écarts actuels ne sont pas une précision prédictive.
+  - id: modules-workflow
+    hypothesis: 'workflow : 2 modules (composition contextuelle ; réaction métier corrélée au moteur), fraction
+      0.8 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-human-work
+    hypothesis: 'human-work : 2 modules (formulaire/résultat contextualisé ; politique métier d’attribution), fraction
+      0.55 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-supervision
+    hypothesis: 'supervision : 1 modules (projection croisée des dossiers), fraction 0.75 du composant de référence
+      par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.
+  - id: modules-intelligence
+    hypothesis: 'intelligence : 2 modules (reconstitution et variantes de parcours ; indicateurs et vues Supply),
+      fraction 0.8 du composant de référence par module.'
+    trigger: Nombre ou taille des comportements nouveaux différents.
+    effect: Recalculer l’unité cohérente avec les nouveaux volumes.

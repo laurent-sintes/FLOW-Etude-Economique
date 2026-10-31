@@ -32,6 +32,7 @@ from application_framework import hydrate_application_framework
 from economic_reading import build_economic_evaluations
 from synvance_reference import build_synvance_reference
 from delivery_readiness import build_delivery_readiness
+from core_product_scope import build_core_product_scope, dependencies as core_product_dependencies
 
 
 class ScenarioError(ValueError):
@@ -114,7 +115,7 @@ class Study:
         assert manifest['version']==1
         paths=manifest['documents']
         assert all(isinstance(p,str) for p in paths) and len(paths)==len(set(paths))
-        files=set(paths)|set(self.data['empreintes'])
+        files=set(paths)|set(self.data['empreintes'])|core_product_dependencies()
         for path in files:
             file=(ROOT/path).resolve()
             assert file.is_relative_to(ROOT.resolve()) and file.is_file(), ('Missing publication document',path)
@@ -235,7 +236,9 @@ class Study:
         content['journey'] = build_sponsor_reading(content,self.baseline,self.glossary,self.document_path)
         content['framework'] = self._framework_content(stacks,content['calibration'])
         content['economic_evaluations'] = build_economic_evaluations(self.baseline, content, self.glossary, self.document_path)
-        content['synvance_reference'] = build_synvance_reference(content['guide'], self.glossary, self.document_path)
+        content['core_product_scope'] = build_core_product_scope(self.economic)
+        content['synvance_reference'] = build_synvance_reference(
+            content['guide'], self.glossary, self.document_path, self.baseline, self.architecture, content['economic_evaluations'])
         content['delivery_method'], content['delivery_readiness'] = build_delivery_readiness(
             content['complexity'], self.glossary, self.document_path)
         return content
@@ -533,7 +536,8 @@ class Study:
                  'synvance_reference':self.content['synvance_reference'],
                  'delivery_method':self.content['delivery_method'],
                  'delivery_readiness':self.content['delivery_readiness'],
-                 'core_evaluation':self._essential_core_evaluation()} if essential else pack_content(self.content) if compact else self.content
+                 'core_evaluation':self._essential_core_evaluation(unit_details=False),
+                 'core_product_scope':deepcopy(self.content['core_product_scope'])} if essential else pack_content(self.content) if compact else self.content
         return dict(ui=self.ui,glossary=self.glossary,baseline=self.baseline,content=content,
                     edition=self.edition,
                     model_version=self.version,simulation_contract=self.simulation_contract(),date=self.data['scenario']['date'])
@@ -552,7 +556,7 @@ class Study:
                     axes=[{key:axis[key] for key in ('id','titre','bc_refs','cible_flow','essai')}
                           for axis in frame['axes']])
 
-    def _essential_core_evaluation(self):
+    def _essential_core_evaluation(self, unit_details=True):
         baseline={row['stack']:row for row in self.baseline['options']}
         results=[]
         for row in self.economic['options']:
@@ -572,7 +576,7 @@ class Study:
             assert abs(row['synthese_eur_ht']['build_core']-baseline[slug]['build'])<0.01
             results.append(dict(stack=slug,name=baseline[slug]['name'],mode=baseline[slug]['mode'],
                                 ranges_jh=ranges,uncertainty_pct=uncertainty,
-                                units=deepcopy(row['core_units']),
+                                units=deepcopy(row['core_units']) if unit_details else [{key:deepcopy(unit[key]) for key in ('id','label','total_jh','months','capabilities')} for unit in row['core_units']],
                                 coverage=retained_coverage(row['core_units'], [r['id'] for r in self.content['complexity']['rows']]) if is_make else None,
                                 estimation_status=retained_coverage(row['core_units'], [r['id'] for r in self.content['complexity']['rows']])['status'] if is_make else 'not_applicable',
                                 build_eur_ht=row['synthese_eur_ht']['build_core']))

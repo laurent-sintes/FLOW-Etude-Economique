@@ -1,0 +1,3737 @@
+{
+  "id": "erpnext-reservation",
+  "product": "erpnext",
+  "kind": "reservation",
+  "status": "dossier natif bout en bout aux frontières déclarées, pas équivalence Flow démontrée",
+  "pattern": "Document de réservation → before_submit → quantité autorisée → agrégat des réservations FOR UPDATE → insertion/mise à jour → statut/Bin → commit ou rollback.",
+  "native_stages": [
+    "Construction de StockReservationEntry et validate",
+    "before_submit → validate_reservation_based_on_qty → validate_with_allowed_qty",
+    "Lecture SLE et agrégat réservé avec for_update",
+    "Persistance Frappe → on_submit/on_update → statut et Bin → réponse"
+  ],
+  "result": "Le verrou existe sur la requête d’agrégat, et la création concurrente du Bin a un savepoint et une unicité. Ce sont deux mécanismes distincts.",
+  "gap": "L’agrégat verrouillé ne suffit pas à établir le cas de la première réservation sans ligne commune ; la lecture du solde utilise get_previous_sle sans for_update par défaut.",
+  "unresolved": [
+    "Premier engagement et ensembles vides, selon moteur/isolation/index.",
+    "Sur PostgreSQL, SUM avec FOR UPDATE pose une restriction SQL à vérifier dans le chemin réellement déployé. Ne pas qualifier toutes les bases à partir de ce seul appel.",
+    "Aucun retry métier automatique attribué à Frappe dans application/sync_database inspectés."
+  ],
+  "files": [
+    {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "sha256": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+      "git_object_sha256": "a537567e68626212e40de3352733ac59751cb9f3861874ab3d8e7dbd35bae85d",
+      "source_url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+      "role": "stock_quantity",
+      "classification_basis": "traitement de quantité/état de stock observé dans la chaîne",
+      "methods": [
+        {
+          "name": "StockReservationEntry.validate",
+          "start": 77,
+          "end": 86,
+          "calls": [
+            "self.validate_amended_doc",
+            "self.validate_group_warehouse",
+            "self.validate_mandatory",
+            "self.validate_uom_is_integer",
+            "self.validate_voucher",
+            "validate_disabled_warehouse",
+            "validate_warehouse_company"
+          ],
+          "source_fragment": "\tdef validate(self) -> None:\n\t\tfrom erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company\n\n\t\tself.validate_amended_doc()\n\t\tself.validate_mandatory()\n\t\tself.validate_voucher()\n\t\tself.validate_group_warehouse()\n\t\tvalidate_disabled_warehouse(self.warehouse)\n\t\tvalidate_warehouse_company(self.warehouse, self.company)\n\t\tself.validate_uom_is_integer()",
+          "program_units": 9
+        },
+        {
+          "name": "StockReservationEntry.before_insert",
+          "start": 88,
+          "end": 89,
+          "calls": [],
+          "source_fragment": "\tdef before_insert(self) -> None:\n\t\tself.delivered_qty = self.consumed_qty = self.transferred_qty = 0",
+          "program_units": 2
+        },
+        {
+          "name": "StockReservationEntry.before_submit",
+          "start": 119,
+          "end": 123,
+          "calls": [
+            "self.auto_reserve_serial_and_batch",
+            "self.set_reservation_based_on",
+            "self.validate_reservation_based_on_qty",
+            "self.validate_reservation_based_on_serial_and_batch"
+          ],
+          "source_fragment": "\tdef before_submit(self) -> None:\n\t\tself.set_reservation_based_on()\n\t\tself.validate_reservation_based_on_qty()\n\t\tself.auto_reserve_serial_and_batch()\n\t\tself.validate_reservation_based_on_serial_and_batch()",
+          "program_units": 5
+        },
+        {
+          "name": "StockReservationEntry.on_submit",
+          "start": 125,
+          "end": 129,
+          "calls": [
+            "self.update_reserved_qty_in_pick_list",
+            "self.update_reserved_qty_in_voucher",
+            "self.update_reserved_stock_in_bin",
+            "self.update_status"
+          ],
+          "source_fragment": "\tdef on_submit(self) -> None:\n\t\tself.update_reserved_qty_in_voucher()\n\t\tself.update_reserved_qty_in_pick_list()\n\t\tself.update_status()\n\t\tself.update_reserved_stock_in_bin()",
+          "program_units": 5
+        },
+        {
+          "name": "StockReservationEntry.on_update_after_submit",
+          "start": 131,
+          "end": 140,
+          "calls": [
+            "self.can_be_updated",
+            "self.reload",
+            "self.set_reservation_based_on",
+            "self.update_reserved_qty_in_voucher",
+            "self.update_reserved_stock_in_bin",
+            "self.update_status",
+            "self.validate_reservation_based_on_qty",
+            "self.validate_reservation_based_on_serial_and_batch",
+            "self.validate_uom_is_integer"
+          ],
+          "source_fragment": "\tdef on_update_after_submit(self) -> None:\n\t\tself.can_be_updated()\n\t\tself.validate_uom_is_integer()\n\t\tself.set_reservation_based_on()\n\t\tself.validate_reservation_based_on_qty()\n\t\tself.validate_reservation_based_on_serial_and_batch()\n\t\tself.update_reserved_qty_in_voucher()\n\t\tself.update_status()\n\t\tself.update_reserved_stock_in_bin()\n\t\tself.reload()",
+          "program_units": 10
+        },
+        {
+          "name": "StockReservationEntry.on_cancel",
+          "start": 142,
+          "end": 147,
+          "calls": [
+            "self.update_reserved_qty_in_pick_list",
+            "self.update_reserved_qty_in_voucher",
+            "self.update_reserved_stock_in_bin",
+            "self.update_status",
+            "self.update_unreserved_qty_in_sre"
+          ],
+          "source_fragment": "\tdef on_cancel(self) -> None:\n\t\tself.update_reserved_qty_in_voucher()\n\t\tself.update_unreserved_qty_in_sre()\n\t\tself.update_reserved_qty_in_pick_list()\n\t\tself.update_status()\n\t\tself.update_reserved_stock_in_bin()",
+          "program_units": 6
+        },
+        {
+          "name": "StockReservationEntry.validate_voucher",
+          "start": 91,
+          "end": 113,
+          "calls": [
+            "_",
+            "_('Item {0} is not a row of {1} {2}.').format",
+            "_('Please enable {0} in the {1}.').format",
+            "_('{0} {1} must be submitted to reserve stock against it.').format",
+            "frappe.bold",
+            "frappe.db.get_value",
+            "frappe.get_single_value",
+            "frappe.throw",
+            "self.is_row_of_voucher"
+          ],
+          "source_fragment": "\tdef validate_voucher(self) -> None:\n\t\tif self.voucher_type == \"Sales Order\" and not frappe.get_single_value(\n\t\t\t\"Stock Settings\", \"enable_stock_reservation\"\n\t\t):\n\t\t\tfrappe.throw(\n\t\t\t\t_(\"Please enable {0} in the {1}.\").format(\n\t\t\t\t\tfrappe.bold(_(\"Stock Reservation\")), frappe.bold(_(\"Stock Settings\"))\n\t\t\t\t)\n\t\t\t)\n\n\t\tif frappe.db.get_value(self.voucher_type, self.voucher_no, \"docstatus\") != 1:\n\t\t\tfrappe.throw(\n\t\t\t\t_(\"{0} {1} must be submitted to reserve stock against it.\").format(\n\t\t\t\t\t_(self.voucher_type), frappe.bold(self.voucher_no)\n\t\t\t\t)\n\t\t\t)\n\n\t\tif self.voucher_type == \"Sales Order\" and not self.is_row_of_voucher():\n\t\t\tfrappe.throw(\n\t\t\t\t_(\"Item {0} is not a row of {1} {2}.\").format(\n\t\t\t\t\tfrappe.bold(self.item_code), _(self.voucher_type), frappe.bold(self.voucher_no)\n\t\t\t\t)\n\t\t\t)",
+          "program_units": 7
+        },
+        {
+          "name": "StockReservationEntry.is_row_of_voucher",
+          "start": 115,
+          "end": 117,
+          "calls": [
+            "bool",
+            "frappe.db.exists"
+          ],
+          "source_fragment": "\tdef is_row_of_voucher(self) -> bool:\n\t\tfilters = {\"name\": self.voucher_detail_no, \"parent\": self.voucher_no, \"item_code\": self.item_code}\n\t\treturn bool(frappe.db.exists(\"Sales Order Item\", filters) or frappe.db.exists(\"Packed Item\", filters))",
+          "program_units": 3
+        },
+        {
+          "name": "StockReservationEntry.validate_amended_doc",
+          "start": 333,
+          "end": 340,
+          "calls": [
+            "_",
+            "_('Cannot amend {0} {1}, please create a new one instead.').format",
+            "frappe.bold",
+            "frappe.throw"
+          ],
+          "source_fragment": "\tdef validate_amended_doc(self) -> None:\n\t\t\"\"\"Raises an exception if document is amended.\"\"\"\n\n\t\tif self.amended_from:\n\t\t\tmsg = _(\"Cannot amend {0} {1}, please create a new one instead.\").format(\n\t\t\t\tself.doctype, frappe.bold(self.amended_from)\n\t\t\t)\n\t\t\tfrappe.throw(msg)",
+          "program_units": 4
+        },
+        {
+          "name": "StockReservationEntry.validate_mandatory",
+          "start": 342,
+          "end": 360,
+          "calls": [
+            "_",
+            "_('{0} is required').format",
+            "frappe.throw",
+            "self.get",
+            "self.meta.get_label"
+          ],
+          "source_fragment": "\tdef validate_mandatory(self) -> None:\n\t\t\"\"\"Raises an exception if mandatory fields are not set.\"\"\"\n\n\t\tmandatory = [\n\t\t\t\"item_code\",\n\t\t\t\"warehouse\",\n\t\t\t\"voucher_type\",\n\t\t\t\"voucher_no\",\n\t\t\t\"voucher_detail_no\",\n\t\t\t\"available_qty\",\n\t\t\t\"voucher_qty\",\n\t\t\t\"stock_uom\",\n\t\t\t\"reserved_qty\",\n\t\t\t\"company\",\n\t\t]\n\t\tfor d in mandatory:\n\t\t\tif not self.get(d):\n\t\t\t\tmsg = _(\"{0} is required\").format(_(self.meta.get_label(d)))\n\t\t\t\tfrappe.throw(msg)",
+          "program_units": 6
+        },
+        {
+          "name": "StockReservationEntry.validate_group_warehouse",
+          "start": 362,
+          "end": 367,
+          "calls": [
+            "_",
+            "_('Stock cannot be reserved in group warehouse {0}.').format",
+            "frappe.bold",
+            "frappe.get_cached_value",
+            "frappe.throw"
+          ],
+          "source_fragment": "\tdef validate_group_warehouse(self) -> None:\n\t\t\"\"\"Raises an exception if `Warehouse` is a Group Warehouse.\"\"\"\n\n\t\tif frappe.get_cached_value(\"Warehouse\", self.warehouse, \"is_group\"):\n\t\t\tmsg = _(\"Stock cannot be reserved in group warehouse {0}.\").format(frappe.bold(self.warehouse))\n\t\t\tfrappe.throw(msg, title=_(\"Invalid Warehouse\"))",
+          "program_units": 4
+        },
+        {
+          "name": "StockReservationEntry.validate_uom_is_integer",
+          "start": 369,
+          "end": 381,
+          "calls": [
+            "_",
+            "_(\"Reserved Qty ({0}) cannot be a fraction. To allow this, disable '{1}' in UOM {3}.\").format",
+            "cint",
+            "flt",
+            "frappe.bold",
+            "frappe.db.get_value",
+            "frappe.throw",
+            "self.precision"
+          ],
+          "source_fragment": "\tdef validate_uom_is_integer(self) -> None:\n\t\t\"\"\"Validates `Reserved Qty` with Stock UOM.\"\"\"\n\n\t\tif cint(frappe.db.get_value(\"UOM\", self.stock_uom, \"must_be_whole_number\", cache=True)):\n\t\t\tif cint(self.reserved_qty) != flt(self.reserved_qty, self.precision(\"reserved_qty\")):\n\t\t\t\tmsg = _(\n\t\t\t\t\t\"Reserved Qty ({0}) cannot be a fraction. To allow this, disable '{1}' in UOM {3}.\"\n\t\t\t\t).format(\n\t\t\t\t\tflt(self.reserved_qty, self.precision(\"reserved_qty\")),\n\t\t\t\t\tfrappe.bold(_(\"Must be Whole Number\")),\n\t\t\t\t\tfrappe.bold(self.stock_uom),\n\t\t\t\t)\n\t\t\t\tfrappe.throw(msg)",
+          "program_units": 5
+        },
+        {
+          "name": "StockReservationEntry.set_reservation_based_on",
+          "start": 383,
+          "end": 389,
+          "calls": [
+            "self.db_set"
+          ],
+          "source_fragment": "\tdef set_reservation_based_on(self) -> None:\n\t\t\"\"\"Sets `Reservation Based On` based on `Has Serial No` and `Has Batch No`.\"\"\"\n\n\t\tif (self.reservation_based_on == \"Serial and Batch\") and (\n\t\t\tnot self.has_serial_no and not self.has_batch_no\n\t\t):\n\t\t\tself.db_set(\"reservation_based_on\", \"Qty\")",
+          "program_units": 3
+        },
+        {
+          "name": "StockReservationEntry.validate_reservation_based_on_qty",
+          "start": 391,
+          "end": 395,
+          "calls": [
+            "self.validate_with_allowed_qty"
+          ],
+          "source_fragment": "\tdef validate_reservation_based_on_qty(self) -> None:\n\t\t\"\"\"Validates `Reserved Qty` when `Reservation Based On` is `Qty`.\"\"\"\n\n\t\tif self.reservation_based_on == \"Qty\" and self.voucher_type != \"Subcontracting Inward Order\":\n\t\t\tself.validate_with_allowed_qty(self.reserved_qty)",
+          "program_units": 3
+        },
+        {
+          "name": "StockReservationEntry.validate_with_allowed_qty",
+          "start": 675,
+          "end": 739,
+          "calls": [
+            "'\\n\\t\\t\\t\\tCannot reserve more than Allowed Qty {} {} for Item {} against {} {}.<br /><br />\\n\\t\\t\\t\\tThe <b>Allowed Qty</b> is calculated as follows:<br />\\n\\t\\t\\t\\t<ul>\\n\\t\\t\\t\\t\\t<li>Actual Qty [Available Qty at Warehouse] = {}</li>\\n\\t\\t\\t\\t\\t<li>Reserved Stock [Ignore current SRE] = {}</li>\\n\\t\\t\\t\\t\\t<li>Available Qty To Reserve [Actual Qty - Reserved Stock] = {}</li>\\n\\t\\t\\t\\t\\t<li>Voucher Qty [Voucher Item Qty] = {}</li>\\n\\t\\t\\t\\t\\t<li>Delivered Qty [Qty delivered against the Voucher Item] = {}</li>\\n\\t\\t\\t\\t\\t<li>Total Reserved Qty [Qty reserved against the Voucher Item] = {}</li>\\n\\t\\t\\t\\t\\t<li>Allowed Qty [Minimum of (Available Qty To Reserve, (Voucher Qty - Delivered Qty - Total Reserved Qty))] = {}</li>\\n\\t\\t\\t\\t</ul>\\n\\t\\t\\t'.format",
+            "_",
+            "_('Item {0} is already reserved/delivered against Sales Order {1}.').format",
+            "_get_stock_balance",
+            "flt",
+            "frappe.bold",
+            "frappe.db.get_value",
+            "frappe.msgprint",
+            "frappe.throw",
+            "get_available_qty_to_reserve",
+            "min",
+            "self.cancel",
+            "self.db_set",
+            "self.get",
+            "self.get_total_reserved_qty",
+            "self.precision"
+          ],
+          "source_fragment": "\tdef validate_with_allowed_qty(self, qty_to_be_reserved: float) -> None:\n\t\t\"\"\"Validates `Reserved Qty` with `Max Reserved Qty`.\"\"\"\n\n\t\tself.db_set(\n\t\t\t\"available_qty\",\n\t\t\tget_available_qty_to_reserve(self.item_code, self.warehouse, ignore_sre=self.name),\n\t\t)\n\n\t\ttotal_reserved_qty = self.get_total_reserved_qty()\n\n\t\tvoucher_delivered_qty = 0\n\t\tif self.voucher_type == \"Sales Order\":\n\t\t\tdelivered_qty, conversion_factor = frappe.db.get_value(\n\t\t\t\t\"Sales Order Item\", self.voucher_detail_no, [\"delivered_qty\", \"conversion_factor\"]\n\t\t\t)\n\t\t\tvoucher_delivered_qty = flt(delivered_qty) * flt(conversion_factor)\n\n\t\tallowed_qty = min(self.available_qty, (self.voucher_qty - voucher_delivered_qty - total_reserved_qty))\n\t\tallowed_qty = flt(allowed_qty, self.precision(\"reserved_qty\"))\n\t\tqty_to_be_reserved = flt(qty_to_be_reserved, self.precision(\"reserved_qty\"))\n\n\t\tif self.get(\"_action\") != \"submit\" and self.voucher_type == \"Sales Order\" and allowed_qty <= 0:\n\t\t\tmsg = _(\"Item {0} is already reserved/delivered against Sales Order {1}.\").format(\n\t\t\t\tfrappe.bold(self.item_code), frappe.bold(self.voucher_no)\n\t\t\t)\n\n\t\t\tif self.docstatus == 1:\n\t\t\t\tself.cancel()\n\t\t\t\treturn frappe.msgprint(msg)\n\t\t\telse:\n\t\t\t\tfrappe.throw(msg)\n\n\t\tif qty_to_be_reserved > allowed_qty:\n\t\t\tactual_qty = _get_stock_balance(self.item_code, self.warehouse)\n\t\t\tmsg = \"\"\"\n\t\t\t\tCannot reserve more than Allowed Qty {} {} for Item {} against {} {}.<br /><br />\n\t\t\t\tThe <b>Allowed Qty</b> is calculated as follows:<br />\n\t\t\t\t<ul>\n\t\t\t\t\t<li>Actual Qty [Available Qty at Warehouse] = {}</li>\n\t\t\t\t\t<li>Reserved Stock [Ignore current SRE] = {}</li>\n\t\t\t\t\t<li>Available Qty To Reserve [Actual Qty - Reserved Stock] = {}</li>\n\t\t\t\t\t<li>Voucher Qty [Voucher Item Qty] = {}</li>\n\t\t\t\t\t<li>Delivered Qty [Qty delivered against the Voucher Item] = {}</li>\n\t\t\t\t\t<li>Total Reserved Qty [Qty reserved against the Voucher Item] = {}</li>\n\t\t\t\t\t<li>Allowed Qty [Minimum of (Available Qty To Reserve, (Voucher Qty - Delivered Qty - Total Reserved Qty))] = {}</li>\n\t\t\t\t</ul>\n\t\t\t\"\"\".format(\n\t\t\t\tfrappe.bold(allowed_qty),\n\t\t\t\tself.stock_uom,\n\t\t\t\tfrappe.bold(self.item_code),\n\t\t\t\tself.voucher_type,\n\t\t\t\tfrappe.bold(self.voucher_no),\n\t\t\t\tactual_qty,\n\t\t\t\tactual_qty - self.available_qty,\n\t\t\t\tself.available_qty,\n\t\t\t\tself.voucher_qty,\n\t\t\t\tvoucher_delivered_qty,\n\t\t\t\ttotal_reserved_qty,\n\t\t\t\tallowed_qty,\n\t\t\t)\n\t\t\tfrappe.throw(msg)\n\n\t\tif qty_to_be_reserved <= self.delivered_qty:\n\t\t\tmsg = _(\"Reserved Qty should be greater than Delivered Qty.\")\n\t\t\tfrappe.throw(msg)",
+          "program_units": 23
+        },
+        {
+          "name": "StockReservationEntry.get_total_reserved_qty",
+          "start": 741,
+          "end": 758,
+          "calls": [
+            "get_sre_reserved_qty_for_voucher_detail_no",
+            "self.get_row_reserved_qty"
+          ],
+          "source_fragment": "\tdef get_total_reserved_qty(self) -> float:\n\t\t\"\"\"Returns the qty other entries hold against the voucher row.\"\"\"\n\t\tif self.voucher_type in [\"Work Order\", \"Subcontracting Order\"] and not self.from_voucher_type:\n\t\t\treturn self.get_row_reserved_qty()\n\n\t\tfrom_voucher_detail_no = None\n\t\tif self.from_voucher_type in [\"Stock Entry\", \"Production Plan\"]:\n\t\t\tfrom_voucher_detail_no = self.from_voucher_detail_no\n\n\t\treturn get_sre_reserved_qty_for_voucher_detail_no(\n\t\t\tself.item_code,\n\t\t\tself.voucher_type,\n\t\t\tself.voucher_no,\n\t\t\tself.voucher_detail_no,\n\t\t\tignore_sre=self.name,\n\t\t\twarehouse=None if self.voucher_type == \"Sales Order\" else self.warehouse,\n\t\t\tfrom_voucher_detail_no=from_voucher_detail_no,\n\t\t)",
+          "program_units": 7
+        },
+        {
+          "name": "StockReservationEntry.get_row_reserved_qty",
+          "start": 760,
+          "end": 777,
+          "calls": [
+            "Sum",
+            "flt",
+            "frappe.qb.DocType",
+            "frappe.qb.from_",
+            "frappe.qb.from_(sre).select",
+            "frappe.qb.from_(sre).select(Sum(sre.reserved_qty - sre.transferred_qty - sre.delivered_qty)).where",
+            "frappe.qb.from_(sre).select(Sum(sre.reserved_qty - sre.transferred_qty - sre.delivered_qty)).where((sre.docstatus == 1) & (sre.name != self.name) & (sre.item_code == self.item_code) & (sre.voucher_type == self.voucher_type) & (sre.voucher_no == self.voucher_no) & (sre.voucher_detail_no == self.voucher_detail_no)).run"
+          ],
+          "source_fragment": "\tdef get_row_reserved_qty(self) -> float:\n\t\t\"\"\"Returns the qty reserved for the row in any warehouse. Transferred stock stays counted in\n\t\tthe entry it moved to, and consumed stock stays counted.\"\"\"\n\t\tsre = frappe.qb.DocType(\"Stock Reservation Entry\")\n\t\treserved_qty = (\n\t\t\tfrappe.qb.from_(sre)\n\t\t\t.select(Sum(sre.reserved_qty - sre.transferred_qty - sre.delivered_qty))\n\t\t\t.where(\n\t\t\t\t(sre.docstatus == 1)\n\t\t\t\t& (sre.name != self.name)\n\t\t\t\t& (sre.item_code == self.item_code)\n\t\t\t\t& (sre.voucher_type == self.voucher_type)\n\t\t\t\t& (sre.voucher_no == self.voucher_no)\n\t\t\t\t& (sre.voucher_detail_no == self.voucher_detail_no)\n\t\t\t)\n\t\t).run()\n\n\t\treturn flt(reserved_qty[0][0])",
+          "program_units": 4
+        },
+        {
+          "name": "StockReservationEntry.update_reserved_stock_in_bin",
+          "start": 643,
+          "end": 648,
+          "calls": [
+            "bin_doc.update_reserved_stock",
+            "frappe.get_cached_doc",
+            "get_or_make_bin"
+          ],
+          "source_fragment": "\tdef update_reserved_stock_in_bin(self) -> None:\n\t\t\"\"\"Updates `Reserved Stock` in Bin.\"\"\"\n\n\t\tbin_name = get_or_make_bin(self.item_code, self.warehouse)\n\t\tbin_doc = frappe.get_cached_doc(\"Bin\", bin_name)\n\t\tbin_doc.update_reserved_stock()",
+          "program_units": 4
+        },
+        {
+          "name": "StockReservationEntry.update_status",
+          "start": 650,
+          "end": 654,
+          "calls": [
+            "frappe.db.set_value",
+            "get_status"
+          ],
+          "source_fragment": "\tdef update_status(self, status: str | None = None, update_modified: bool = True) -> None:\n\t\t\"\"\"Updates status based on Voucher Qty, Reserved Qty and Delivered Qty.\"\"\"\n\t\tfrappe.db.set_value(\n\t\t\tself.doctype, self.name, \"status\", status or get_status(self), update_modified=update_modified\n\t\t)",
+          "program_units": 2
+        },
+        {
+          "name": "get_available_qty_to_reserve",
+          "start": 818,
+          "end": 857,
+          "calls": [
+            "Sum",
+            "_get_stock_balance",
+            "frappe.qb.DocType",
+            "frappe.qb.from_",
+            "frappe.qb.from_(sre).select",
+            "frappe.qb.from_(sre).select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty)).where",
+            "frappe.qb.from_(sre).select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty)).where((sre.docstatus == 1) & (sre.item_code == item_code) & (sre.warehouse == warehouse) & (sre.delivered_qty < sre.reserved_qty)).for_update",
+            "get_batch_qty",
+            "query.run",
+            "query.where"
+          ],
+          "source_fragment": "def get_available_qty_to_reserve(\n\titem_code: str, warehouse: str, batch_no: str | None = None, ignore_sre=None\n) -> float:\n\t\"\"\"Returns `Available Qty to Reserve (Actual Qty - Reserved Qty)` for Item, Warehouse and Batch combination.\"\"\"\n\n\tfrom erpnext.stock.doctype.batch.batch import get_batch_qty\n\n\tif batch_no:\n\t\treturn get_batch_qty(\n\t\t\titem_code=item_code,\n\t\t\twarehouse=warehouse,\n\t\t\tbatch_no=batch_no,\n\t\t\tignore_voucher_nos=[ignore_sre] if ignore_sre else None,\n\t\t)\n\n\tavailable_qty = _get_stock_balance(item_code, warehouse)\n\n\tif available_qty:\n\t\tsre = frappe.qb.DocType(\"Stock Reservation Entry\")\n\t\tquery = (\n\t\t\tfrappe.qb.from_(sre)\n\t\t\t.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))\n\t\t\t.where(\n\t\t\t\t(sre.docstatus == 1)\n\t\t\t\t& (sre.item_code == item_code)\n\t\t\t\t& (sre.warehouse == warehouse)\n\t\t\t\t& (sre.delivered_qty < sre.reserved_qty)\n\t\t\t)\n\t\t\t.for_update()\n\t\t)\n\n\t\tif ignore_sre:\n\t\t\tquery = query.where(sre.name != ignore_sre)\n\n\t\treserved_qty = query.run()[0][0] or 0.0\n\n\t\tif reserved_qty:\n\t\t\treturn available_qty - reserved_qty\n\n\treturn available_qty",
+          "program_units": 14
+        },
+        {
+          "name": "get_sre_reserved_qty_for_item_and_warehouse",
+          "start": 914,
+          "end": 934,
+          "calls": [
+            "Sum",
+            "Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty).as_",
+            "flt",
+            "frappe.qb.DocType",
+            "frappe.qb.from_",
+            "frappe.qb.from_(sre).select",
+            "frappe.qb.from_(sre).select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty).as_('reserved_qty')).where",
+            "frappe.qb.from_(sre).select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty).as_('reserved_qty')).where((sre.docstatus == 1) & (sre.item_code == item_code) & (sre.delivered_qty < sre.reserved_qty)).groupby",
+            "query.run",
+            "query.where"
+          ],
+          "source_fragment": "def get_sre_reserved_qty_for_item_and_warehouse(item_code: str, warehouse: str | None = None) -> float:\n\t\"\"\"Returns current `Reserved Qty` for Item and Warehouse combination.\"\"\"\n\n\tsre = frappe.qb.DocType(\"Stock Reservation Entry\")\n\tquery = (\n\t\tfrappe.qb.from_(sre)\n\t\t.select(\n\t\t\tSum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty).as_(\n\t\t\t\t\"reserved_qty\"\n\t\t\t)\n\t\t)\n\t\t.where((sre.docstatus == 1) & (sre.item_code == item_code) & (sre.delivered_qty < sre.reserved_qty))\n\t\t.groupby(sre.item_code, sre.warehouse)\n\t)\n\n\tif warehouse:\n\t\tquery = query.where(sre.warehouse == warehouse)\n\n\treserved_qty = query.run(as_list=True)\n\n\treturn flt(reserved_qty[0][0]) if reserved_qty else 0.0",
+          "program_units": 7
+        },
+        {
+          "name": "get_status",
+          "start": 2179,
+          "end": 2195,
+          "calls": [
+            "flt"
+          ],
+          "source_fragment": "def get_status(sre) -> str:\n\t\"\"\"Status of a reservation from its docstatus and quantities.\"\"\"\n\tif sre.docstatus == 2:\n\t\treturn \"Cancelled\"\n\tif sre.docstatus != 1:\n\t\treturn \"Draft\"\n\tif sre.transferred_qty:\n\t\treturn \"Partially Used\" if sre.transferred_qty < sre.reserved_qty else \"Closed\"\n\tif flt(sre.delivered_qty) + flt(sre.consumed_qty) >= flt(sre.reserved_qty):\n\t\treturn \"Delivered\"\n\tif sre.delivered_qty:\n\t\treturn \"Partially Delivered\"\n\tif sre.consumed_qty:\n\t\treturn \"Partially Used\"\n\tif sre.reserved_qty >= sre.voucher_qty:\n\t\treturn \"Reserved\"\n\treturn \"Partially Reserved\"",
+          "program_units": 16
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 818,
+          "end": 857
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 914,
+          "end": 934
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 2179,
+          "end": 2195
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 77,
+          "end": 86
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 88,
+          "end": 89
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 91,
+          "end": 113
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 115,
+          "end": 117
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 119,
+          "end": 123
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 125,
+          "end": 129
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 131,
+          "end": 140
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 142,
+          "end": 147
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 333,
+          "end": 340
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 342,
+          "end": 360
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 362,
+          "end": 367
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 369,
+          "end": 381
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 383,
+          "end": 389
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 391,
+          "end": 395
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 643,
+          "end": 648
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 650,
+          "end": 654
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 675,
+          "end": 739
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 741,
+          "end": 758
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 760,
+          "end": 777
+        },
+        {
+          "kind": "ImportFrom",
+          "start": 823,
+          "end": 823
+        },
+        {
+          "kind": "If",
+          "start": 825,
+          "end": 831
+        },
+        {
+          "kind": "Assign",
+          "start": 833,
+          "end": 833
+        },
+        {
+          "kind": "If",
+          "start": 835,
+          "end": 855
+        },
+        {
+          "kind": "Return",
+          "start": 857,
+          "end": 857
+        },
+        {
+          "kind": "Assign",
+          "start": 917,
+          "end": 917
+        },
+        {
+          "kind": "Assign",
+          "start": 918,
+          "end": 927
+        },
+        {
+          "kind": "If",
+          "start": 929,
+          "end": 930
+        },
+        {
+          "kind": "Assign",
+          "start": 932,
+          "end": 932
+        },
+        {
+          "kind": "Return",
+          "start": 934,
+          "end": 934
+        },
+        {
+          "kind": "If",
+          "start": 2181,
+          "end": 2182
+        },
+        {
+          "kind": "If",
+          "start": 2183,
+          "end": 2184
+        },
+        {
+          "kind": "If",
+          "start": 2185,
+          "end": 2186
+        },
+        {
+          "kind": "If",
+          "start": 2187,
+          "end": 2188
+        },
+        {
+          "kind": "If",
+          "start": 2189,
+          "end": 2190
+        },
+        {
+          "kind": "If",
+          "start": 2191,
+          "end": 2192
+        },
+        {
+          "kind": "If",
+          "start": 2193,
+          "end": 2194
+        },
+        {
+          "kind": "Return",
+          "start": 2195,
+          "end": 2195
+        },
+        {
+          "kind": "ImportFrom",
+          "start": 78,
+          "end": 78
+        },
+        {
+          "kind": "Expr",
+          "start": 80,
+          "end": 80
+        },
+        {
+          "kind": "Expr",
+          "start": 81,
+          "end": 81
+        },
+        {
+          "kind": "Expr",
+          "start": 82,
+          "end": 82
+        },
+        {
+          "kind": "Expr",
+          "start": 83,
+          "end": 83
+        },
+        {
+          "kind": "Expr",
+          "start": 84,
+          "end": 84
+        },
+        {
+          "kind": "Expr",
+          "start": 85,
+          "end": 85
+        },
+        {
+          "kind": "Expr",
+          "start": 86,
+          "end": 86
+        },
+        {
+          "kind": "Assign",
+          "start": 89,
+          "end": 89
+        },
+        {
+          "kind": "If",
+          "start": 92,
+          "end": 99
+        },
+        {
+          "kind": "If",
+          "start": 101,
+          "end": 106
+        },
+        {
+          "kind": "If",
+          "start": 108,
+          "end": 113
+        },
+        {
+          "kind": "Assign",
+          "start": 116,
+          "end": 116
+        },
+        {
+          "kind": "Return",
+          "start": 117,
+          "end": 117
+        },
+        {
+          "kind": "Expr",
+          "start": 120,
+          "end": 120
+        },
+        {
+          "kind": "Expr",
+          "start": 121,
+          "end": 121
+        },
+        {
+          "kind": "Expr",
+          "start": 122,
+          "end": 122
+        },
+        {
+          "kind": "Expr",
+          "start": 123,
+          "end": 123
+        },
+        {
+          "kind": "Expr",
+          "start": 126,
+          "end": 126
+        },
+        {
+          "kind": "Expr",
+          "start": 127,
+          "end": 127
+        },
+        {
+          "kind": "Expr",
+          "start": 128,
+          "end": 128
+        },
+        {
+          "kind": "Expr",
+          "start": 129,
+          "end": 129
+        },
+        {
+          "kind": "Expr",
+          "start": 132,
+          "end": 132
+        },
+        {
+          "kind": "Expr",
+          "start": 133,
+          "end": 133
+        },
+        {
+          "kind": "Expr",
+          "start": 134,
+          "end": 134
+        },
+        {
+          "kind": "Expr",
+          "start": 135,
+          "end": 135
+        },
+        {
+          "kind": "Expr",
+          "start": 136,
+          "end": 136
+        },
+        {
+          "kind": "Expr",
+          "start": 137,
+          "end": 137
+        },
+        {
+          "kind": "Expr",
+          "start": 138,
+          "end": 138
+        },
+        {
+          "kind": "Expr",
+          "start": 139,
+          "end": 139
+        },
+        {
+          "kind": "Expr",
+          "start": 140,
+          "end": 140
+        },
+        {
+          "kind": "Expr",
+          "start": 143,
+          "end": 143
+        },
+        {
+          "kind": "Expr",
+          "start": 144,
+          "end": 144
+        },
+        {
+          "kind": "Expr",
+          "start": 145,
+          "end": 145
+        },
+        {
+          "kind": "Expr",
+          "start": 146,
+          "end": 146
+        },
+        {
+          "kind": "Expr",
+          "start": 147,
+          "end": 147
+        },
+        {
+          "kind": "If",
+          "start": 336,
+          "end": 340
+        },
+        {
+          "kind": "Assign",
+          "start": 345,
+          "end": 356
+        },
+        {
+          "kind": "For",
+          "start": 357,
+          "end": 360
+        },
+        {
+          "kind": "If",
+          "start": 365,
+          "end": 367
+        },
+        {
+          "kind": "If",
+          "start": 372,
+          "end": 381
+        },
+        {
+          "kind": "If",
+          "start": 386,
+          "end": 389
+        },
+        {
+          "kind": "If",
+          "start": 394,
+          "end": 395
+        },
+        {
+          "kind": "Assign",
+          "start": 646,
+          "end": 646
+        },
+        {
+          "kind": "Assign",
+          "start": 647,
+          "end": 647
+        },
+        {
+          "kind": "Expr",
+          "start": 648,
+          "end": 648
+        },
+        {
+          "kind": "Expr",
+          "start": 652,
+          "end": 654
+        },
+        {
+          "kind": "Expr",
+          "start": 678,
+          "end": 681
+        },
+        {
+          "kind": "Assign",
+          "start": 683,
+          "end": 683
+        },
+        {
+          "kind": "Assign",
+          "start": 685,
+          "end": 685
+        },
+        {
+          "kind": "If",
+          "start": 686,
+          "end": 690
+        },
+        {
+          "kind": "Assign",
+          "start": 692,
+          "end": 692
+        },
+        {
+          "kind": "Assign",
+          "start": 693,
+          "end": 693
+        },
+        {
+          "kind": "Assign",
+          "start": 694,
+          "end": 694
+        },
+        {
+          "kind": "If",
+          "start": 696,
+          "end": 705
+        },
+        {
+          "kind": "If",
+          "start": 707,
+          "end": 735
+        },
+        {
+          "kind": "If",
+          "start": 737,
+          "end": 739
+        },
+        {
+          "kind": "If",
+          "start": 743,
+          "end": 744
+        },
+        {
+          "kind": "Assign",
+          "start": 746,
+          "end": 746
+        },
+        {
+          "kind": "If",
+          "start": 747,
+          "end": 748
+        },
+        {
+          "kind": "Return",
+          "start": 750,
+          "end": 758
+        },
+        {
+          "kind": "Assign",
+          "start": 763,
+          "end": 763
+        },
+        {
+          "kind": "Assign",
+          "start": 764,
+          "end": 775
+        },
+        {
+          "kind": "Return",
+          "start": 777,
+          "end": 777
+        },
+        {
+          "kind": "Return",
+          "start": 826,
+          "end": 831
+        },
+        {
+          "kind": "Assign",
+          "start": 836,
+          "end": 836
+        },
+        {
+          "kind": "Assign",
+          "start": 837,
+          "end": 847
+        },
+        {
+          "kind": "If",
+          "start": 849,
+          "end": 850
+        },
+        {
+          "kind": "Assign",
+          "start": 852,
+          "end": 852
+        },
+        {
+          "kind": "If",
+          "start": 854,
+          "end": 855
+        },
+        {
+          "kind": "Assign",
+          "start": 930,
+          "end": 930
+        },
+        {
+          "kind": "Return",
+          "start": 2182,
+          "end": 2182
+        },
+        {
+          "kind": "Return",
+          "start": 2184,
+          "end": 2184
+        },
+        {
+          "kind": "Return",
+          "start": 2186,
+          "end": 2186
+        },
+        {
+          "kind": "Return",
+          "start": 2188,
+          "end": 2188
+        },
+        {
+          "kind": "Return",
+          "start": 2190,
+          "end": 2190
+        },
+        {
+          "kind": "Return",
+          "start": 2192,
+          "end": 2192
+        },
+        {
+          "kind": "Return",
+          "start": 2194,
+          "end": 2194
+        },
+        {
+          "kind": "Expr",
+          "start": 95,
+          "end": 99
+        },
+        {
+          "kind": "Expr",
+          "start": 102,
+          "end": 106
+        },
+        {
+          "kind": "Expr",
+          "start": 109,
+          "end": 113
+        },
+        {
+          "kind": "Assign",
+          "start": 337,
+          "end": 339
+        },
+        {
+          "kind": "Expr",
+          "start": 340,
+          "end": 340
+        },
+        {
+          "kind": "If",
+          "start": 358,
+          "end": 360
+        },
+        {
+          "kind": "Assign",
+          "start": 366,
+          "end": 366
+        },
+        {
+          "kind": "Expr",
+          "start": 367,
+          "end": 367
+        },
+        {
+          "kind": "If",
+          "start": 373,
+          "end": 381
+        },
+        {
+          "kind": "Expr",
+          "start": 389,
+          "end": 389
+        },
+        {
+          "kind": "Expr",
+          "start": 395,
+          "end": 395
+        },
+        {
+          "kind": "Assign",
+          "start": 687,
+          "end": 689
+        },
+        {
+          "kind": "Assign",
+          "start": 690,
+          "end": 690
+        },
+        {
+          "kind": "Assign",
+          "start": 697,
+          "end": 699
+        },
+        {
+          "kind": "If",
+          "start": 701,
+          "end": 705
+        },
+        {
+          "kind": "Assign",
+          "start": 708,
+          "end": 708
+        },
+        {
+          "kind": "Assign",
+          "start": 709,
+          "end": 734
+        },
+        {
+          "kind": "Expr",
+          "start": 735,
+          "end": 735
+        },
+        {
+          "kind": "Assign",
+          "start": 738,
+          "end": 738
+        },
+        {
+          "kind": "Expr",
+          "start": 739,
+          "end": 739
+        },
+        {
+          "kind": "Return",
+          "start": 744,
+          "end": 744
+        },
+        {
+          "kind": "Assign",
+          "start": 748,
+          "end": 748
+        },
+        {
+          "kind": "Assign",
+          "start": 850,
+          "end": 850
+        },
+        {
+          "kind": "Return",
+          "start": 855,
+          "end": 855
+        },
+        {
+          "kind": "Assign",
+          "start": 359,
+          "end": 359
+        },
+        {
+          "kind": "Expr",
+          "start": 360,
+          "end": 360
+        },
+        {
+          "kind": "Assign",
+          "start": 374,
+          "end": 380
+        },
+        {
+          "kind": "Expr",
+          "start": 381,
+          "end": 381
+        },
+        {
+          "kind": "Expr",
+          "start": 702,
+          "end": 702
+        },
+        {
+          "kind": "Return",
+          "start": 703,
+          "end": 703
+        },
+        {
+          "kind": "Expr",
+          "start": 705,
+          "end": 705
+        }
+      ],
+      "program_units": 149,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "sha256": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+      "git_object_sha256": "a537567e68626212e40de3352733ac59751cb9f3861874ab3d8e7dbd35bae85d",
+      "source_url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+      "role": "native_integration",
+      "classification_basis": "Liens de commande, picking et construction sérialisée : contexte natif explicitement mesuré, hors engagement générique seul.",
+      "methods": [
+        {
+          "name": "StockReservationEntry.update_reserved_qty_in_voucher",
+          "start": 579,
+          "end": 615,
+          "calls": [
+            "Sum",
+            "frappe.db.exists",
+            "frappe.db.set_value",
+            "frappe.qb.DocType",
+            "frappe.qb.from_",
+            "frappe.qb.from_(sre).select",
+            "frappe.qb.from_(sre).select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty)).where",
+            "frappe.qb.from_(sre).select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty)).where((sre.docstatus == 1) & (sre.voucher_type == self.voucher_type) & (sre.voucher_no == self.voucher_no) & (sre.voucher_detail_no == self.voucher_detail_no)).run",
+            "{'Sales Order': 'Sales Order Item', 'Work Order': 'Work Order Item', 'Production Plan': 'Production Plan Sub Assembly Item', 'Subcontracting Order': 'Subcontracting Order Supplied Item'}.get"
+          ],
+          "source_fragment": "\tdef update_reserved_qty_in_voucher(\n\t\tself, reserved_qty_field: str = \"stock_reserved_qty\", update_modified: bool = True\n\t) -> None:\n\t\t\"\"\"Updates total reserved qty in the voucher.\"\"\"\n\n\t\titem_doctype = {\n\t\t\t\"Sales Order\": \"Sales Order Item\",\n\t\t\t\"Work Order\": \"Work Order Item\",\n\t\t\t\"Production Plan\": \"Production Plan Sub Assembly Item\",\n\t\t\t\"Subcontracting Order\": \"Subcontracting Order Supplied Item\",\n\t\t}.get(self.voucher_type, None)\n\n\t\tif item_doctype:\n\t\t\tsre = frappe.qb.DocType(\"Stock Reservation Entry\")\n\t\t\treserved_qty = (\n\t\t\t\tfrappe.qb.from_(sre)\n\t\t\t\t.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))\n\t\t\t\t.where(\n\t\t\t\t\t(sre.docstatus == 1)\n\t\t\t\t\t& (sre.voucher_type == self.voucher_type)\n\t\t\t\t\t& (sre.voucher_no == self.voucher_no)\n\t\t\t\t\t& (sre.voucher_detail_no == self.voucher_detail_no)\n\t\t\t\t)\n\t\t\t).run(as_list=True)[0][0] or 0\n\n\t\t\tif self.voucher_type == \"Production Plan\" and frappe.db.exists(\n\t\t\t\t\"Material Request Plan Item\", self.voucher_detail_no\n\t\t\t):\n\t\t\t\titem_doctype = \"Material Request Plan Item\"\n\n\t\t\tfrappe.db.set_value(\n\t\t\t\titem_doctype,\n\t\t\t\tself.voucher_detail_no,\n\t\t\t\treserved_qty_field,\n\t\t\t\treserved_qty,\n\t\t\t\tupdate_modified=update_modified,\n\t\t\t)",
+          "program_units": 8
+        },
+        {
+          "name": "StockReservationEntry.update_reserved_qty_in_pick_list",
+          "start": 617,
+          "end": 641,
+          "calls": [
+            "Sum",
+            "frappe.db.set_value",
+            "frappe.qb.DocType",
+            "frappe.qb.from_",
+            "frappe.qb.from_(sre).select",
+            "frappe.qb.from_(sre).select(Sum(sre.reserved_qty)).where",
+            "frappe.qb.from_(sre).select(Sum(sre.reserved_qty)).where((sre.docstatus == 1) & (sre.from_voucher_type == 'Pick List') & (sre.from_voucher_no == self.from_voucher_no) & (sre.from_voucher_detail_no == self.from_voucher_detail_no)).run"
+          ],
+          "source_fragment": "\tdef update_reserved_qty_in_pick_list(\n\t\tself, reserved_qty_field: str = \"stock_reserved_qty\", update_modified: bool = True\n\t) -> None:\n\t\t\"\"\"Updates total reserved qty in the Pick List.\"\"\"\n\n\t\tif self.from_voucher_type == \"Pick List\" and self.from_voucher_no and self.from_voucher_detail_no:\n\t\t\tsre = frappe.qb.DocType(\"Stock Reservation Entry\")\n\t\t\treserved_qty = (\n\t\t\t\tfrappe.qb.from_(sre)\n\t\t\t\t.select(Sum(sre.reserved_qty))\n\t\t\t\t.where(\n\t\t\t\t\t(sre.docstatus == 1)\n\t\t\t\t\t& (sre.from_voucher_type == \"Pick List\")\n\t\t\t\t\t& (sre.from_voucher_no == self.from_voucher_no)\n\t\t\t\t\t& (sre.from_voucher_detail_no == self.from_voucher_detail_no)\n\t\t\t\t)\n\t\t\t).run(as_list=True)[0][0] or 0\n\n\t\t\tfrappe.db.set_value(\n\t\t\t\t\"Pick List Item\",\n\t\t\t\tself.from_voucher_detail_no,\n\t\t\t\treserved_qty_field,\n\t\t\t\treserved_qty,\n\t\t\t\tupdate_modified=update_modified,\n\t\t\t)",
+          "program_units": 5
+        },
+        {
+          "name": "StockReservation.make_stock_reservation_entry",
+          "start": 1606,
+          "end": 1653,
+          "calls": [
+            "frappe.db.get_value",
+            "frappe.new_doc",
+            "row.batches.items",
+            "row.get",
+            "sre.append",
+            "sre.save",
+            "sre.set",
+            "sre.submit"
+          ],
+          "source_fragment": "\tdef make_stock_reservation_entry(self, row):\n\t\tfields = [\n\t\t\t\"item_code\",\n\t\t\t\"warehouse\",\n\t\t\t\"voucher_type\",\n\t\t\t\"voucher_no\",\n\t\t\t\"voucher_detail_no\",\n\t\t\t\"company\",\n\t\t\t\"stock_uom\",\n\t\t]\n\n\t\tsre = frappe.new_doc(\"Stock Reservation Entry\")\n\t\tsre.flags.ignore_permissions = True\n\t\tfor row_field in fields:\n\t\t\tsre.set(row_field, row.get(row_field))\n\n\t\tsre.available_qty = row.get(\"qty_to_reserve\")\n\t\tsre.reserved_qty = row.get(\"qty_to_reserve\")\n\t\tsre.voucher_qty = row.get(\"qty_to_reserve\")\n\n\t\tagainst_row = row.get(\"against_row\")\n\t\tsre.from_voucher_no = against_row.voucher_no\n\t\tsre.from_voucher_detail_no = against_row.voucher_detail_no\n\t\tsre.from_voucher_type = against_row.voucher_type\n\t\tsre.reservation_based_on = against_row.reservation_based_on\n\t\tsre.has_serial_no = against_row.has_serial_no\n\t\tsre.has_batch_no = against_row.has_batch_no\n\n\t\tif row.serial_nos:\n\t\t\tfor serial_no in row.serial_nos:\n\t\t\t\tbatch_no = None\n\t\t\t\tif row.batches:\n\t\t\t\t\tbatch_no = frappe.db.get_value(\"Serial No\", serial_no, \"batch_no\")\n\n\t\t\t\tsre.append(\n\t\t\t\t\t\"sb_entries\",\n\t\t\t\t\t{\"serial_no\": serial_no, \"warehouse\": row.warehouse, \"batch_no\": batch_no, \"qty\": 1},\n\t\t\t\t)\n\n\t\telif row.batches:\n\t\t\tfor batch_no, qty in row.batches.items():\n\t\t\t\tsre.append(\n\t\t\t\t\t\"sb_entries\",\n\t\t\t\t\t{\"batch_no\": batch_no, \"warehouse\": row.warehouse, \"qty\": qty},\n\t\t\t\t)\n\n\t\tsre.save()\n\t\tsre.submit()",
+          "program_units": 27
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 579,
+          "end": 615
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 617,
+          "end": 641
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1606,
+          "end": 1653
+        },
+        {
+          "kind": "Assign",
+          "start": 584,
+          "end": 589
+        },
+        {
+          "kind": "If",
+          "start": 591,
+          "end": 615
+        },
+        {
+          "kind": "If",
+          "start": 622,
+          "end": 641
+        },
+        {
+          "kind": "Assign",
+          "start": 1607,
+          "end": 1615
+        },
+        {
+          "kind": "Assign",
+          "start": 1617,
+          "end": 1617
+        },
+        {
+          "kind": "Assign",
+          "start": 1618,
+          "end": 1618
+        },
+        {
+          "kind": "For",
+          "start": 1619,
+          "end": 1620
+        },
+        {
+          "kind": "Assign",
+          "start": 1622,
+          "end": 1622
+        },
+        {
+          "kind": "Assign",
+          "start": 1623,
+          "end": 1623
+        },
+        {
+          "kind": "Assign",
+          "start": 1624,
+          "end": 1624
+        },
+        {
+          "kind": "Assign",
+          "start": 1626,
+          "end": 1626
+        },
+        {
+          "kind": "Assign",
+          "start": 1627,
+          "end": 1627
+        },
+        {
+          "kind": "Assign",
+          "start": 1628,
+          "end": 1628
+        },
+        {
+          "kind": "Assign",
+          "start": 1629,
+          "end": 1629
+        },
+        {
+          "kind": "Assign",
+          "start": 1630,
+          "end": 1630
+        },
+        {
+          "kind": "Assign",
+          "start": 1631,
+          "end": 1631
+        },
+        {
+          "kind": "Assign",
+          "start": 1632,
+          "end": 1632
+        },
+        {
+          "kind": "If",
+          "start": 1634,
+          "end": 1650
+        },
+        {
+          "kind": "Expr",
+          "start": 1652,
+          "end": 1652
+        },
+        {
+          "kind": "Expr",
+          "start": 1653,
+          "end": 1653
+        },
+        {
+          "kind": "Assign",
+          "start": 592,
+          "end": 592
+        },
+        {
+          "kind": "Assign",
+          "start": 593,
+          "end": 602
+        },
+        {
+          "kind": "If",
+          "start": 604,
+          "end": 607
+        },
+        {
+          "kind": "Expr",
+          "start": 609,
+          "end": 615
+        },
+        {
+          "kind": "Assign",
+          "start": 623,
+          "end": 623
+        },
+        {
+          "kind": "Assign",
+          "start": 624,
+          "end": 633
+        },
+        {
+          "kind": "Expr",
+          "start": 635,
+          "end": 641
+        },
+        {
+          "kind": "Expr",
+          "start": 1620,
+          "end": 1620
+        },
+        {
+          "kind": "For",
+          "start": 1635,
+          "end": 1643
+        },
+        {
+          "kind": "If",
+          "start": 1645,
+          "end": 1650
+        },
+        {
+          "kind": "Assign",
+          "start": 607,
+          "end": 607
+        },
+        {
+          "kind": "Assign",
+          "start": 1636,
+          "end": 1636
+        },
+        {
+          "kind": "If",
+          "start": 1637,
+          "end": 1638
+        },
+        {
+          "kind": "Expr",
+          "start": 1640,
+          "end": 1643
+        },
+        {
+          "kind": "For",
+          "start": 1646,
+          "end": 1650
+        },
+        {
+          "kind": "Assign",
+          "start": 1638,
+          "end": 1638
+        },
+        {
+          "kind": "Expr",
+          "start": 1647,
+          "end": 1650
+        }
+      ],
+      "program_units": 40,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "erpnext",
+      "path": "erpnext/stock/utils.py",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "sha256": "707a86ac487a9b428c3da1321f59fab6df395fa30647b6dd3cdb2b19b82955b8",
+      "git_object_sha256": "8fd21a9dbce490de079b98721e28266d4c20a77d1d65027bffb12aeecad9bb3d",
+      "source_url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/utils.py",
+      "role": "coupled_native",
+      "classification_basis": "Lecture de stock commune et branches optionnelles de valeur/séries ; création concurrente du Bin via savepoint/unicité.",
+      "methods": [
+        {
+          "name": "_get_stock_balance",
+          "start": 121,
+          "end": 192,
+          "calls": [
+            "'\\n'.join",
+            "_",
+            "_('{0} is not a valid {1} fieldname.').format",
+            "d.get",
+            "frappe._dict",
+            "frappe.bold",
+            "frappe.has_permission",
+            "frappe.throw",
+            "get_available_serial_nos",
+            "get_combine_datetime",
+            "get_inventory_dimensions",
+            "get_previous_sle",
+            "inventory_dimensions_dict.items",
+            "nowdate",
+            "nowtime"
+          ],
+          "source_fragment": "def _get_stock_balance(\n\titem_code,\n\twarehouse,\n\tposting_date=None,\n\tposting_time=None,\n\twith_valuation_rate=False,\n\twith_serial_no=False,\n\tinventory_dimensions_dict=None,\n):\n\t\"\"\"Returns stock balance quantity at given warehouse on given posting date or current date.\n\n\tIf `with_valuation_rate` is True, will return tuple (qty, rate)\"\"\"\n\n\tfrom erpnext.stock.stock_ledger import get_previous_sle\n\n\tfrappe.has_permission(\"Item\", \"read\", throw=True)\n\n\tif posting_date is None:\n\t\tposting_date = nowdate()\n\tif posting_time is None:\n\t\tposting_time = nowtime()\n\n\targs = {\n\t\t\"item_code\": item_code,\n\t\t\"warehouse\": warehouse,\n\t\t\"posting_date\": posting_date,\n\t\t\"posting_time\": posting_time,\n\t}\n\n\textra_cond = \"\"\n\n\tif inventory_dimensions_dict:\n\t\tinventory_dimensions_fieldname = [d.get(\"fieldname\") for d in get_inventory_dimensions()]\n\n\t\tfor field, value in inventory_dimensions_dict.items():\n\t\t\tif field not in inventory_dimensions_fieldname:\n\t\t\t\tfrappe.throw(\n\t\t\t\t\t_(\"{0} is not a valid {1} fieldname.\").format(\n\t\t\t\t\t\tfrappe.bold(field), frappe.bold(\"Inventory Dimension\")\n\t\t\t\t\t)\n\t\t\t\t)\n\t\t\targs[field] = value\n\t\t\textra_cond += f\" and {field} = %({field})s\"\n\n\tlast_entry = get_previous_sle(args, extra_cond=extra_cond)\n\n\tif with_valuation_rate:\n\t\tif with_serial_no:\n\t\t\tserial_no_details = get_available_serial_nos(\n\t\t\t\tfrappe._dict(\n\t\t\t\t\t{\n\t\t\t\t\t\t\"item_code\": item_code,\n\t\t\t\t\t\t\"warehouse\": warehouse,\n\t\t\t\t\t\t\"posting_datetime\": get_combine_datetime(posting_date, posting_time),\n\t\t\t\t\t\t\"ignore_warehouse\": 1,\n\t\t\t\t\t}\n\t\t\t\t)\n\t\t\t)\n\n\t\t\tserial_nos = \"\"\n\t\t\tif serial_no_details:\n\t\t\t\tserial_nos = \"\\n\".join(d.serial_no for d in serial_no_details)\n\n\t\t\treturn (\n\t\t\t\t(last_entry.qty_after_transaction, last_entry.valuation_rate, serial_nos)\n\t\t\t\tif last_entry\n\t\t\t\telse (0.0, 0.0, None)\n\t\t\t)\n\t\telse:\n\t\t\treturn (last_entry.qty_after_transaction, last_entry.valuation_rate) if last_entry else (0.0, 0.0)\n\telse:\n\t\treturn last_entry.qty_after_transaction if last_entry else 0.0",
+          "program_units": 26
+        },
+        {
+          "name": "get_or_make_bin",
+          "start": 252,
+          "end": 258,
+          "calls": [
+            "_create_bin",
+            "frappe.db.get_value"
+          ],
+          "source_fragment": "def get_or_make_bin(item_code: str, warehouse: str) -> str:\n\tbin_record = frappe.db.get_value(\"Bin\", {\"item_code\": item_code, \"warehouse\": warehouse})\n\n\tif not bin_record:\n\t\tbin_obj = _create_bin(item_code, warehouse)\n\t\tbin_record = bin_obj.name\n\treturn bin_record",
+          "program_units": 6
+        },
+        {
+          "name": "_create_bin",
+          "start": 261,
+          "end": 274,
+          "calls": [
+            "bin_obj.insert",
+            "frappe.db.rollback",
+            "frappe.db.savepoint",
+            "frappe.get_doc",
+            "frappe.get_last_doc"
+          ],
+          "source_fragment": "def _create_bin(item_code, warehouse):\n\t\"\"\"Create a bin and take care of concurrent inserts.\"\"\"\n\n\tbin_creation_savepoint = \"create_bin\"\n\ttry:\n\t\tfrappe.db.savepoint(bin_creation_savepoint)\n\t\tbin_obj = frappe.get_doc(doctype=\"Bin\", item_code=item_code, warehouse=warehouse)\n\t\tbin_obj.flags.ignore_permissions = 1\n\t\tbin_obj.insert()\n\texcept frappe.UniqueValidationError:\n\t\tfrappe.db.rollback(save_point=bin_creation_savepoint)  # preserve transaction in postgres\n\t\tbin_obj = frappe.get_last_doc(\"Bin\", {\"item_code\": item_code, \"warehouse\": warehouse})\n\n\treturn bin_obj",
+          "program_units": 10
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 121,
+          "end": 192
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 252,
+          "end": 258
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 261,
+          "end": 274
+        },
+        {
+          "kind": "ImportFrom",
+          "start": 134,
+          "end": 134
+        },
+        {
+          "kind": "Expr",
+          "start": 136,
+          "end": 136
+        },
+        {
+          "kind": "If",
+          "start": 138,
+          "end": 139
+        },
+        {
+          "kind": "If",
+          "start": 140,
+          "end": 141
+        },
+        {
+          "kind": "Assign",
+          "start": 143,
+          "end": 148
+        },
+        {
+          "kind": "Assign",
+          "start": 150,
+          "end": 150
+        },
+        {
+          "kind": "If",
+          "start": 152,
+          "end": 163
+        },
+        {
+          "kind": "Assign",
+          "start": 165,
+          "end": 165
+        },
+        {
+          "kind": "If",
+          "start": 167,
+          "end": 192
+        },
+        {
+          "kind": "Assign",
+          "start": 253,
+          "end": 253
+        },
+        {
+          "kind": "If",
+          "start": 255,
+          "end": 257
+        },
+        {
+          "kind": "Return",
+          "start": 258,
+          "end": 258
+        },
+        {
+          "kind": "Assign",
+          "start": 264,
+          "end": 264
+        },
+        {
+          "kind": "Try",
+          "start": 265,
+          "end": 272
+        },
+        {
+          "kind": "Return",
+          "start": 274,
+          "end": 274
+        },
+        {
+          "kind": "Assign",
+          "start": 139,
+          "end": 139
+        },
+        {
+          "kind": "Assign",
+          "start": 141,
+          "end": 141
+        },
+        {
+          "kind": "Assign",
+          "start": 153,
+          "end": 153
+        },
+        {
+          "kind": "For",
+          "start": 155,
+          "end": 163
+        },
+        {
+          "kind": "If",
+          "start": 168,
+          "end": 190
+        },
+        {
+          "kind": "Return",
+          "start": 192,
+          "end": 192
+        },
+        {
+          "kind": "Assign",
+          "start": 256,
+          "end": 256
+        },
+        {
+          "kind": "Assign",
+          "start": 257,
+          "end": 257
+        },
+        {
+          "kind": "Expr",
+          "start": 266,
+          "end": 266
+        },
+        {
+          "kind": "Assign",
+          "start": 267,
+          "end": 267
+        },
+        {
+          "kind": "Assign",
+          "start": 268,
+          "end": 268
+        },
+        {
+          "kind": "Expr",
+          "start": 269,
+          "end": 269
+        },
+        {
+          "kind": "If",
+          "start": 156,
+          "end": 161
+        },
+        {
+          "kind": "Assign",
+          "start": 162,
+          "end": 162
+        },
+        {
+          "kind": "AugAssign",
+          "start": 163,
+          "end": 163
+        },
+        {
+          "kind": "Assign",
+          "start": 169,
+          "end": 178
+        },
+        {
+          "kind": "Assign",
+          "start": 180,
+          "end": 180
+        },
+        {
+          "kind": "If",
+          "start": 181,
+          "end": 182
+        },
+        {
+          "kind": "Return",
+          "start": 184,
+          "end": 188
+        },
+        {
+          "kind": "Return",
+          "start": 190,
+          "end": 190
+        },
+        {
+          "kind": "Expr",
+          "start": 271,
+          "end": 271
+        },
+        {
+          "kind": "Assign",
+          "start": 272,
+          "end": 272
+        },
+        {
+          "kind": "Expr",
+          "start": 157,
+          "end": 161
+        },
+        {
+          "kind": "Assign",
+          "start": 182,
+          "end": 182
+        }
+      ],
+      "program_units": 42,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "erpnext",
+      "path": "erpnext/stock/stock_ledger.py",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+      "git_object_sha256": "3f38a558365bed2c630907bc9f28c7e6d4388d0db3148022426f77fb91962383",
+      "source_url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/stock_ledger.py",
+      "role": "stock_quantity",
+      "classification_basis": "traitement de quantité/état de stock observé dans la chaîne",
+      "methods": [
+        {
+          "name": "get_previous_sle",
+          "start": 2285,
+          "end": 2303,
+          "calls": [
+            "args.get",
+            "get_stock_ledger_entries"
+          ],
+          "source_fragment": "def get_previous_sle(args, for_update=False, extra_cond=None, for_report=False):\n\t\"\"\"\n\tget the last sle on or before the current time-bucket,\n\tto get actual qty before transaction, this function\n\tis called from various transaction like stock entry, reco etc\n\n\targs = {\n\t        \"item_code\": \"ABC\",\n\t        \"warehouse\": \"XYZ\",\n\t        \"posting_date\": \"2012-12-12\",\n\t        \"posting_time\": \"12:00\",\n\t        \"sle\": \"name of reference Stock Ledger Entry\"\n\t}\n\t\"\"\"\n\targs[\"name\"] = args.get(\"sle\", None) or \"\"\n\tsle = get_stock_ledger_entries(\n\t\targs, \"<=\", \"desc\", \"limit 1\", for_update=for_update, extra_cond=extra_cond, for_report=for_report\n\t)\n\treturn sle and sle[0] or {}",
+          "program_units": 4
+        },
+        {
+          "name": "get_stock_ledger_entries",
+          "start": 2306,
+          "end": 2396,
+          "calls": [
+            "' and\\n\\t\\t\\t(\\n\\t\\t\\t\\tserial_no = {}\\n\\t\\t\\t\\tor serial_no like {}\\n\\t\\t\\t\\tor serial_no like {}\\n\\t\\t\\t\\tor serial_no like {}\\n\\t\\t\\t)\\n\\t\\t'.format",
+            "', '.join",
+            "'\\n\\t\\tselect {select_fields}, posting_datetime as \"timestamp\"\\n\\t\\tfrom `tabStock Ledger Entry`\\n\\t\\twhere is_cancelled = 0\\n\\t\\t{conditions}\\n\\t\\torder by posting_datetime {order}, creation {order}\\n\\t\\t{limit} {for_update}'.format",
+            "frappe.db.escape",
+            "frappe.db.sql",
+            "get_combine_datetime",
+            "isinstance",
+            "previous_sle.get"
+          ],
+          "source_fragment": "def get_stock_ledger_entries(\n\tprevious_sle,\n\toperator=None,\n\torder=\"desc\",\n\tlimit=None,\n\tfor_update=False,\n\tdebug=False,\n\tcheck_serial_no=True,\n\textra_cond=None,\n\tfor_report=False,\n\tfields=None,\n):\n\t\"\"\"get stock ledger entries filtered by specific posting datetime conditions\"\"\"\n\tconditions = f\" and posting_datetime {operator} %(posting_datetime)s\"\n\n\tif item_code := previous_sle.get(\"item_code\"):\n\t\tif isinstance(item_code, list | tuple):\n\t\t\tconditions += \" and item_code in %(item_code)s\"\n\t\telse:\n\t\t\tconditions += \" and item_code = %(item_code)s\"\n\n\tif warehouse := previous_sle.get(\"warehouse\"):\n\t\tif isinstance(warehouse, list | tuple):\n\t\t\tconditions += \" and warehouse in %(warehouse)s\"\n\n\t\telse:\n\t\t\tconditions += \" and warehouse = %(warehouse)s\"\n\n\tif check_serial_no and previous_sle.get(\"serial_no\"):\n\t\t# conditions += \" and serial_no like {}\".format(frappe.db.escape('%{0}%'.format(previous_sle.get(\"serial_no\"))))\n\t\tserial_no = previous_sle.get(\"serial_no\")\n\t\tconditions += (\n\t\t\t\"\"\" and\n\t\t\t(\n\t\t\t\tserial_no = {}\n\t\t\t\tor serial_no like {}\n\t\t\t\tor serial_no like {}\n\t\t\t\tor serial_no like {}\n\t\t\t)\n\t\t\"\"\"\n\t\t).format(\n\t\t\tfrappe.db.escape(serial_no),\n\t\t\tfrappe.db.escape(f\"{serial_no}\\n%\"),\n\t\t\tfrappe.db.escape(f\"%\\n{serial_no}\"),\n\t\t\tfrappe.db.escape(f\"%\\n{serial_no}\\n%\"),\n\t\t)\n\n\tif not previous_sle.get(\"posting_datetime\"):\n\t\t# Derive only when the caller has not supplied the stored posting_datetime. Re-deriving it\n\t\t# would shift the boundary for rows whose stored value differs from posting_date + posting_time.\n\t\tif not previous_sle.get(\"posting_date\"):\n\t\t\tprevious_sle[\"posting_datetime\"] = \"1900-01-01 00:00:00\"\n\t\telse:\n\t\t\tposting_time = previous_sle.get(\"posting_time\")\n\t\t\tif not posting_time:\n\t\t\t\tposting_time = \"00:00:00\"\n\n\t\t\tprevious_sle[\"posting_datetime\"] = get_combine_datetime(\n\t\t\t\tprevious_sle[\"posting_date\"], posting_time\n\t\t\t)\n\n\tif operator in (\">\", \"<=\") and previous_sle.get(\"name\"):\n\t\tconditions += \" and name!=%(name)s\"\n\n\tif extra_cond:\n\t\tconditions += f\"{extra_cond}\"\n\n\tif for_report and previous_sle.get(\"project\"):\n\t\tconditions += \" and project = %(project)s\"\n\n\tselect_fields = \", \".join(f\"`{field}`\" for field in fields) if fields else \"*\"\n\n\t# nosemgrep\n\treturn frappe.db.sql(\n\t\t\"\"\"\n\t\tselect {select_fields}, posting_datetime as \"timestamp\"\n\t\tfrom `tabStock Ledger Entry`\n\t\twhere is_cancelled = 0\n\t\t{conditions}\n\t\torder by posting_datetime {order}, creation {order}\n\t\t{limit} {for_update}\"\"\".format(\n\t\t\tselect_fields=select_fields,\n\t\t\tconditions=conditions,\n\t\t\tlimit=limit or \"\",\n\t\t\tfor_update=for_update and \"for update\" or \"\",\n\t\t\torder=order,\n\t\t),\n\t\tprevious_sle,\n\t\tas_dict=1,\n\t\tdebug=debug,\n\t)",
+          "program_units": 28
+        },
+        {
+          "name": "get_prior_ledger_condition",
+          "start": 2428,
+          "end": 2434,
+          "calls": [],
+          "source_fragment": "def get_prior_ledger_condition(table, posting_datetime, creation):\n\t\"\"\"Restrict a ledger lookup to the entries that precede a voucher in ledger order.\"\"\"\n\tif creation:\n\t\treturn (table.posting_datetime < posting_datetime) | (\n\t\t\t(table.posting_datetime == posting_datetime) & (table.creation < creation)\n\t\t)\n\treturn table.posting_datetime <= posting_datetime",
+          "program_units": 4
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 2285,
+          "end": 2303
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 2306,
+          "end": 2396
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 2428,
+          "end": 2434
+        },
+        {
+          "kind": "Assign",
+          "start": 2299,
+          "end": 2299
+        },
+        {
+          "kind": "Assign",
+          "start": 2300,
+          "end": 2302
+        },
+        {
+          "kind": "Return",
+          "start": 2303,
+          "end": 2303
+        },
+        {
+          "kind": "Assign",
+          "start": 2319,
+          "end": 2319
+        },
+        {
+          "kind": "If",
+          "start": 2321,
+          "end": 2325
+        },
+        {
+          "kind": "If",
+          "start": 2327,
+          "end": 2332
+        },
+        {
+          "kind": "If",
+          "start": 2334,
+          "end": 2351
+        },
+        {
+          "kind": "If",
+          "start": 2353,
+          "end": 2365
+        },
+        {
+          "kind": "If",
+          "start": 2367,
+          "end": 2368
+        },
+        {
+          "kind": "If",
+          "start": 2370,
+          "end": 2371
+        },
+        {
+          "kind": "If",
+          "start": 2373,
+          "end": 2374
+        },
+        {
+          "kind": "Assign",
+          "start": 2376,
+          "end": 2376
+        },
+        {
+          "kind": "Return",
+          "start": 2379,
+          "end": 2396
+        },
+        {
+          "kind": "If",
+          "start": 2430,
+          "end": 2433
+        },
+        {
+          "kind": "Return",
+          "start": 2434,
+          "end": 2434
+        },
+        {
+          "kind": "If",
+          "start": 2322,
+          "end": 2325
+        },
+        {
+          "kind": "If",
+          "start": 2328,
+          "end": 2332
+        },
+        {
+          "kind": "Assign",
+          "start": 2336,
+          "end": 2336
+        },
+        {
+          "kind": "AugAssign",
+          "start": 2337,
+          "end": 2351
+        },
+        {
+          "kind": "If",
+          "start": 2356,
+          "end": 2365
+        },
+        {
+          "kind": "AugAssign",
+          "start": 2368,
+          "end": 2368
+        },
+        {
+          "kind": "AugAssign",
+          "start": 2371,
+          "end": 2371
+        },
+        {
+          "kind": "AugAssign",
+          "start": 2374,
+          "end": 2374
+        },
+        {
+          "kind": "Return",
+          "start": 2431,
+          "end": 2433
+        },
+        {
+          "kind": "AugAssign",
+          "start": 2323,
+          "end": 2323
+        },
+        {
+          "kind": "AugAssign",
+          "start": 2325,
+          "end": 2325
+        },
+        {
+          "kind": "AugAssign",
+          "start": 2329,
+          "end": 2329
+        },
+        {
+          "kind": "AugAssign",
+          "start": 2332,
+          "end": 2332
+        },
+        {
+          "kind": "Assign",
+          "start": 2357,
+          "end": 2357
+        },
+        {
+          "kind": "Assign",
+          "start": 2359,
+          "end": 2359
+        },
+        {
+          "kind": "If",
+          "start": 2360,
+          "end": 2361
+        },
+        {
+          "kind": "Assign",
+          "start": 2363,
+          "end": 2365
+        },
+        {
+          "kind": "Assign",
+          "start": 2361,
+          "end": 2361
+        }
+      ],
+      "program_units": 36,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/bin/bin.py",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "sha256": "37b7749583c62a7c727de801a97b844eb70e70ce85d59ae85bc97dbe5dda3a30",
+      "git_object_sha256": "887f58555e2154447e50184d017963bc1779ff2947996c239f04eaa37187c36c",
+      "source_url": "https://github.com/frappe/erpnext/blob/ade850bbd6a7412e9994a9637d2c5c713771632a/erpnext/stock/doctype/bin/bin.py",
+      "role": "stock_quantity",
+      "classification_basis": "traitement de quantité/état de stock observé dans la chaîne",
+      "methods": [
+        {
+          "name": "Bin.update_reserved_stock",
+          "start": 207,
+          "end": 216,
+          "calls": [
+            "flt",
+            "get_sre_reserved_qty_for_item_and_warehouse",
+            "self.db_set"
+          ],
+          "source_fragment": "\tdef update_reserved_stock(self):\n\t\t\"\"\"Update `Reserved Stock` on change in Reserved Qty of Stock Reservation Entry\"\"\"\n\n\t\tfrom erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (\n\t\t\tget_sre_reserved_qty_for_item_and_warehouse,\n\t\t)\n\n\t\treserved_stock = get_sre_reserved_qty_for_item_and_warehouse(self.item_code, self.warehouse)\n\n\t\tself.db_set(\"reserved_stock\", flt(reserved_stock), update_modified=True)",
+          "program_units": 4
+        },
+        {
+          "name": "on_doctype_update",
+          "start": 219,
+          "end": 220,
+          "calls": [
+            "frappe.db.add_unique"
+          ],
+          "source_fragment": "def on_doctype_update():\n\tfrappe.db.add_unique(\"Bin\", [\"item_code\", \"warehouse\"], constraint_name=\"unique_item_warehouse\")",
+          "program_units": 2
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 219,
+          "end": 220
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 207,
+          "end": 216
+        },
+        {
+          "kind": "Expr",
+          "start": 220,
+          "end": 220
+        },
+        {
+          "kind": "ImportFrom",
+          "start": 210,
+          "end": 212
+        },
+        {
+          "kind": "Assign",
+          "start": 214,
+          "end": 214
+        },
+        {
+          "kind": "Expr",
+          "start": 216,
+          "end": 216
+        }
+      ],
+      "program_units": 6,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": null,
+      "funding_owner": "stock-candidate",
+      "stock_additional_generic_framework_units": null
+    },
+    {
+      "repo": "frappe",
+      "path": "frappe/model/document.py",
+      "commit": "2fcb9397a1f1da353b21e53d2f97ec56653acd02",
+      "sha256": "467b5820abf3b65ff6e7862deec8ddcb3b3eaa1f829b3127371a6a8172f2cdda",
+      "git_object_sha256": "4c1bf95413517c7deed5ae2edd24a38cadf0e21869e0710c80ad62aaada459b3",
+      "source_url": "https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/model/document.py",
+      "role": "framework_reused",
+      "classification_basis": "Persistance, vérification de version du document et hooks ; propriétaire java-spring-framework-services dans la transposition.",
+      "methods": [
+        {
+          "name": "Document.submit",
+          "start": 1591,
+          "end": 1594,
+          "calls": [
+            "frappe.whitelist",
+            "self._submit"
+          ],
+          "source_fragment": "\t@frappe.whitelist()\n\tdef submit(self):\n\t\t\"\"\"Submit the document. Sets `docstatus` = 1, then saves.\"\"\"\n\t\treturn self._submit()",
+          "program_units": 2
+        },
+        {
+          "name": "Document._submit",
+          "start": 1572,
+          "end": 1575,
+          "calls": [
+            "self.save"
+          ],
+          "source_fragment": "\tdef _submit(self):\n\t\t\"\"\"Submit the document. Sets `docstatus` = 1, then saves.\"\"\"\n\t\tself.docstatus = DocStatus.SUBMITTED\n\t\treturn self.save()",
+          "program_units": 3
+        },
+        {
+          "name": "Document.save",
+          "start": 792,
+          "end": 794,
+          "calls": [
+            "self._save"
+          ],
+          "source_fragment": "\tdef save(self, *args, **kwargs) -> \"Self\":\n\t\t\"\"\"Wrapper for _save\"\"\"\n\t\treturn self._save(*args, **kwargs)",
+          "program_units": 2
+        },
+        {
+          "name": "Document._save",
+          "start": 796,
+          "end": 855,
+          "calls": [
+            "delattr",
+            "hasattr",
+            "self._restore_masked_fields_from_db",
+            "self._set_defaults",
+            "self._validate",
+            "self._validate_links",
+            "self.check_if_latest",
+            "self.check_if_locked",
+            "self.check_permission",
+            "self.db_update",
+            "self.get",
+            "self.get_valid_dict",
+            "self.insert",
+            "self.reset_computed_child_tables",
+            "self.run_before_save_methods",
+            "self.run_post_save_methods",
+            "self.set_docstatus",
+            "self.set_name_in_children",
+            "self.set_parent_in_children",
+            "self.set_user_and_timestamp",
+            "self.update_children",
+            "self.update_single",
+            "self.validate_higher_perm_levels",
+            "self.validate_update_after_submit"
+          ],
+          "source_fragment": "\tdef _save(self, ignore_permissions=None, ignore_version=None) -> \"Self\":\n\t\t\"\"\"Save the current document in the database in the **DocType**'s table or\n\t\t`tabSingles` (for single types).\n\n\t\tThis will check for user permissions and execute\n\t\t`validate` before updating, `on_update` after updating triggers.\n\n\t\t:param ignore_permissions: Do not check permissions if True.\n\t\t:param ignore_version: Do not save version if True.\"\"\"\n\t\tif self.flags.in_print:\n\t\t\treturn self\n\n\t\tself.flags.notifications_executed = []\n\n\t\tif ignore_permissions is not None:\n\t\t\tself.flags.ignore_permissions = ignore_permissions\n\n\t\tself.flags.ignore_version = frappe.in_test if ignore_version is None else ignore_version\n\n\t\tif self.get(\"__islocal\") or not self.get(\"name\"):\n\t\t\treturn self.insert()\n\n\t\tself.check_if_locked()\n\t\tself._set_defaults()\n\t\tself._restore_masked_fields_from_db()\n\t\tself.check_permission(\"write\", \"save\")\n\n\t\tself.set_user_and_timestamp()\n\t\tself.set_docstatus()\n\t\tself.check_if_latest()\n\t\tself.set_parent_in_children()\n\t\tself.set_name_in_children()\n\n\t\tself.validate_higher_perm_levels()\n\t\tself._validate_links()\n\t\tself.run_before_save_methods()\n\n\t\tif self._action != \"cancel\":\n\t\t\tself._validate()\n\n\t\tif self._action == \"update_after_submit\":\n\t\t\tself.validate_update_after_submit()\n\n\t\tself.set_docstatus()\n\n\t\t# parent\n\t\tif self.meta.issingle:\n\t\t\tself.update_single(self.get_valid_dict())\n\t\telse:\n\t\t\tself.db_update()\n\n\t\tself.update_children()\n\t\tself.reset_computed_child_tables()\n\t\tself.run_post_save_methods()\n\n\t\t# clear unsaved flag\n\t\tif hasattr(self, \"__unsaved\"):\n\t\t\tdelattr(self, \"__unsaved\")\n\n\t\treturn self",
+          "program_units": 35
+        },
+        {
+          "name": "Document.insert",
+          "start": 675,
+          "end": 764,
+          "calls": [
+            "_follow_document",
+            "d.db_insert",
+            "delattr",
+            "frappe.get_cached_value",
+            "getattr",
+            "hasattr",
+            "relink_mismatched_files",
+            "self._set_defaults",
+            "self._validate",
+            "self._validate_links",
+            "self.check_if_latest",
+            "self.check_permission",
+            "self.copy_attachments_from_amended_from",
+            "self.db_insert",
+            "self.get",
+            "self.get_all_children",
+            "self.get_valid_dict",
+            "self.reset_computed_child_tables",
+            "self.run_before_save_methods",
+            "self.run_method",
+            "self.run_post_save_methods",
+            "self.set",
+            "self.set_docstatus",
+            "self.set_new_name",
+            "self.set_parent_in_children",
+            "self.set_user_and_timestamp",
+            "self.update_single",
+            "self.validate_amended_from",
+            "self.validate_higher_perm_levels"
+          ],
+          "source_fragment": "\tdef insert(\n\t\tself,\n\t\tignore_permissions=None,\n\t\tignore_links=None,\n\t\tignore_if_duplicate=False,\n\t\tignore_mandatory=None,\n\t\tset_name=None,\n\t\tset_child_names=True,\n\t) -> \"Self\":\n\t\t\"\"\"Insert the document in the database (as a new document).\n\t\tThis will check for user permissions and execute `before_insert`,\n\t\t`validate`, `on_update`, `after_insert` methods if they are written.\n\n\t\t:param ignore_permissions: Do not check permissions if True.\n\t\t:param ignore_links: Do not check validity of links if True.\n\t\t:param ignore_if_duplicate: Do not raise error if a duplicate entry exists.\n\t\t:param ignore_mandatory: Do not check missing mandatory fields if True.\n\t\t:param set_name: Name to set for the document, if valid.\n\t\t:param set_child_names: Whether to set names for the child documents.\n\t\t\"\"\"\n\t\tif self.flags.in_print:\n\t\t\treturn self\n\n\t\tself.flags.notifications_executed = []\n\n\t\tif ignore_permissions is not None:\n\t\t\tself.flags.ignore_permissions = ignore_permissions\n\n\t\tif ignore_links is not None:\n\t\t\tself.flags.ignore_links = ignore_links\n\n\t\tif ignore_mandatory is not None:\n\t\t\tself.flags.ignore_mandatory = ignore_mandatory\n\n\t\tself.set(\"__islocal\", True)\n\n\t\tself._set_defaults()\n\t\tself.set_user_and_timestamp()\n\t\tself.set_docstatus()\n\t\tself.check_permission(\"create\")\n\t\tself.check_if_latest()\n\t\tself._validate_links()\n\t\tself.run_method(\"before_insert\")\n\t\tself.set_new_name(set_name=set_name, set_child_names=set_child_names)\n\t\tself.set_parent_in_children()\n\t\tself.validate_higher_perm_levels()\n\n\t\tself.flags.in_insert = True\n\t\tself.run_before_save_methods()\n\t\tself._validate()\n\t\tself.set_docstatus()\n\t\tself.flags.in_insert = False\n\n\t\t# run validate, on update etc.\n\n\t\t# parent\n\t\tif getattr(self.meta, \"issingle\", 0):\n\t\t\tself.update_single(self.get_valid_dict())\n\t\telse:\n\t\t\tself.db_insert(ignore_if_duplicate=ignore_if_duplicate)\n\n\t\t# children\n\t\tif not getattr(self.meta, \"is_virtual\", False):\n\t\t\tfor d in self.get_all_children():\n\t\t\t\td.db_insert()\n\n\t\tself.reset_computed_child_tables()\n\t\tself.run_method(\"after_insert\")\n\t\tself.flags.in_insert = True\n\n\t\tif self.get(\"amended_from\"):\n\t\t\tself.validate_amended_from()\n\t\t\tself.copy_attachments_from_amended_from()\n\n\t\trelink_mismatched_files(self)\n\t\tself.run_post_save_methods()\n\t\tself.flags.in_insert = False\n\n\t\t# delete __islocal\n\t\tif hasattr(self, \"__islocal\"):\n\t\t\tdelattr(self, \"__islocal\")\n\n\t\t# clear unsaved flag\n\t\tif hasattr(self, \"__unsaved\"):\n\t\t\tdelattr(self, \"__unsaved\")\n\n\t\tif not (frappe.flags.in_migrate or frappe.local.flags.in_install or frappe.flags.in_setup_wizard):\n\t\t\tif frappe.get_cached_value(\"User\", frappe.session.user, \"follow_created_documents\"):\n\t\t\t\t_follow_document(self.doctype, self.name, frappe.session.user)\n\t\treturn self",
+          "program_units": 49
+        },
+        {
+          "name": "Document.db_insert",
+          "start": 2740,
+          "end": 2814,
+          "calls": [
+            "', '.join",
+            "'INSERT INTO `tab{doctype}` ({columns})\\n\\t\\t\\t\\t\\tVALUES ({values}) {conflict_handler} {returning}'.format",
+            "_",
+            "_('{0} {1} already exists').format",
+            "d.values",
+            "frappe.DuplicateEntryError",
+            "frappe.bold",
+            "frappe.db.is_primary_key_violation",
+            "frappe.db.is_unique_key_violation",
+            "frappe.db.sql",
+            "frappe.msgprint",
+            "len",
+            "list",
+            "now",
+            "self._handle_hash_conflict",
+            "self.get_valid_dict",
+            "self.set",
+            "self.show_unique_validation_message",
+            "set_new_name"
+          ],
+          "source_fragment": "\tdef db_insert(self, ignore_if_duplicate=False):\n\t\t\"\"\"INSERT the document (with valid columns) in the database.\n\n\t\targs:\n\t\t        ignore_if_duplicate: ignore primary key collision\n\t\t                                        at database level (postgres)\n\t\t                                        in python (mariadb)\n\t\t\"\"\"\n\t\tif not self.name:\n\t\t\t# name will be set by document class in most cases\n\t\t\tset_new_name(self)\n\n\t\tconflict_handler = \"\"\n\t\treturning = \"\"\n\t\t# On postgres we can't implcitly ignore PK collision\n\t\t# So instruct pg to ignore `name` field conflicts\n\t\tif (\n\t\t\t(ignore_if_duplicate or self.meta.autoname == \"hash\")\n\t\t\tand frappe.db.db_type == \"postgres\"\n\t\t\tand (self.flags.retry_count or 0) < 5\n\t\t):\n\t\t\tconflict_handler = \"on conflict (name) do nothing\"\n\t\t\tif self.meta.autoname == \"hash\":\n\t\t\t\treturning = \"RETURNING name\"\n\n\t\tif not self.creation:\n\t\t\tself.creation = self.modified = now()\n\t\t\tself.owner = self.modified_by = frappe.session.user\n\n\t\t# if doctype is \"DocType\", don't insert null values as we don't know who is valid yet\n\t\td = self.get_valid_dict(\n\t\t\tconvert_dates_to_str=True,\n\t\t\tignore_nulls=self.doctype in DOCTYPES_FOR_DOCTYPE,\n\t\t\tignore_virtual=True,\n\t\t)\n\n\t\tcolumns = list(d)\n\t\ttry:\n\t\t\tname = frappe.db.sql(\n\t\t\t\t\"\"\"INSERT INTO `tab{doctype}` ({columns})\n\t\t\t\t\tVALUES ({values}) {conflict_handler} {returning}\"\"\".format(\n\t\t\t\t\tdoctype=self.doctype,\n\t\t\t\t\tcolumns=\", \".join(\"`\" + c + \"`\" for c in columns),\n\t\t\t\t\tvalues=\", \".join([\"%s\"] * len(columns)),\n\t\t\t\t\tconflict_handler=conflict_handler,\n\t\t\t\t\treturning=returning,\n\t\t\t\t),\n\t\t\t\tlist(d.values()),\n\t\t\t)\n\t\t\tif (\n\t\t\t\tfrappe.db.db_type == \"postgres\" and self.meta.autoname == \"hash\" and not name\n\t\t\t):  # To avoid a transaction block, we regen in try (pg specific)\n\t\t\t\treturn self._handle_hash_conflict()\n\t\texcept Exception as e:\n\t\t\tif frappe.db.is_primary_key_violation(e):\n\t\t\t\tif self.meta.autoname == \"hash\":\n\t\t\t\t\t# hash collision? try again\n\t\t\t\t\treturn self._handle_hash_conflict()\n\n\t\t\t\tif not ignore_if_duplicate:\n\t\t\t\t\tfrappe.msgprint(\n\t\t\t\t\t\t_(\"{0} {1} already exists\").format(_(self.doctype), frappe.bold(self.name)),\n\t\t\t\t\t\ttitle=_(\"Duplicate Name\"),\n\t\t\t\t\t\tindicator=\"red\",\n\t\t\t\t\t)\n\t\t\t\t\traise frappe.DuplicateEntryError(self.doctype, self.name, e)\n\n\t\t\telif frappe.db.is_unique_key_violation(e):\n\t\t\t\t# unique constraint\n\t\t\t\tself.show_unique_validation_message(e)\n\n\t\t\telse:\n\t\t\t\traise\n\n\t\tself.set(\"__islocal\", False)",
+          "program_units": 28
+        },
+        {
+          "name": "Document.db_update",
+          "start": 2816,
+          "end": 2859,
+          "calls": [
+            "', '.join",
+            "'UPDATE `tab{doctype}`\\n\\t\\t\\t\\tSET {values} WHERE `name`=%s'.format",
+            "_",
+            "_('The value of the field {0} is too long in the {1} document. To resolve this issue, please reduce the value length or change the {0} field Type to Long Text using customize form, and then try again.').format",
+            "column.group",
+            "cstr",
+            "d.values",
+            "frappe.bold",
+            "frappe.db.is_data_too_long",
+            "frappe.db.is_unique_key_violation",
+            "frappe.db.sql",
+            "frappe.throw",
+            "list",
+            "re.search",
+            "self.db_insert",
+            "self.get",
+            "self.get_label_from_fieldname",
+            "self.get_valid_dict",
+            "self.show_unique_validation_message"
+          ],
+          "source_fragment": "\tdef db_update(self):\n\t\tif self.get(\"__islocal\") or not self.name:\n\t\t\tself.db_insert()\n\t\t\treturn\n\n\t\td = self.get_valid_dict(\n\t\t\tconvert_dates_to_str=True,\n\t\t\tignore_nulls=self.doctype in DOCTYPES_FOR_DOCTYPE,\n\t\t\tignore_virtual=True,\n\t\t)\n\n\t\t# don't update name, as case might've been changed\n\t\tname = cstr(d[\"name\"])\n\t\tdel d[\"name\"]\n\n\t\tcolumns = list(d)\n\n\t\ttry:\n\t\t\tfrappe.db.sql(\n\t\t\t\t\"\"\"UPDATE `tab{doctype}`\n\t\t\t\tSET {values} WHERE `name`=%s\"\"\".format(\n\t\t\t\t\tdoctype=self.doctype, values=\", \".join(\"`\" + c + \"`=%s\" for c in columns)\n\t\t\t\t),\n\t\t\t\t[*list(d.values()), name],\n\t\t\t)\n\n\t\texcept Exception as e:\n\t\t\tif frappe.db.is_data_too_long(e):\n\t\t\t\tcolumn = re.search(r\"column\\s+'([^']+)'\", e.args[1])\n\t\t\t\tif column:\n\t\t\t\t\tlabel = self.get_label_from_fieldname(column.group(1))\n\n\t\t\t\t\t# data too long for column\n\t\t\t\t\tfrappe.throw(\n\t\t\t\t\t\t_(\n\t\t\t\t\t\t\t\"The value of the field {0} is too long in the {1} document. To resolve this issue, please reduce the value length or change the {0} field Type to Long Text using customize form, and then try again.\"\n\t\t\t\t\t\t).format(frappe.bold(label), frappe.bold(self.doctype)),\n\t\t\t\t\t\ttitle=_(\"Value Too Long\"),\n\t\t\t\t\t)\n\n\t\t\tif frappe.db.is_unique_key_violation(e):\n\t\t\t\tself.show_unique_validation_message(e)\n\t\t\telse:\n\t\t\t\traise",
+          "program_units": 18
+        },
+        {
+          "name": "Document.check_if_latest",
+          "start": 1330,
+          "end": 1361,
+          "calls": [
+            "_",
+            "frappe.msgprint",
+            "get_datetime",
+            "hasattr",
+            "self.check_docstatus_transition",
+            "self.load_doc_before_save"
+          ],
+          "source_fragment": "\tdef check_if_latest(self):\n\t\t\"\"\"Checks if `modified` timestamp provided by document being updated is same as the\n\t\t`modified` timestamp in the database. If there is a different, the document has been\n\t\tupdated in the database after the current copy was read. Will throw an error if\n\t\ttimestamps don't match.\n\n\t\tWill also validate document transitions (Save > Submit > Cancel) calling\n\t\t`self.check_docstatus_transition`.\"\"\"\n\n\t\tself.load_doc_before_save(raise_exception=True)\n\n\t\tif not hasattr(self, \"_action\"):\n\t\t\tself._action = \"save\"\n\n\t\tprevious = self._doc_before_save\n\t\t# previous is None for new document insert\n\t\tif not previous and self._action != \"discard\":\n\t\t\tself.check_docstatus_transition(0)\n\t\t\treturn\n\n\t\tprevious_modified = get_datetime(previous.modified) if previous.modified else None\n\t\toriginal_modified = get_datetime(self._original_modified) if self._original_modified else None\n\t\tif previous_modified != original_modified:\n\t\t\tfrappe.msgprint(\n\t\t\t\t_(f\"Error: {self.name} ({self.doctype}) has been modified after you have opened it\")\n\t\t\t\t+ (f\" ({previous.modified}, {self.modified}). \")\n\t\t\t\t+ _(\"Please refresh to get the latest document.\"),\n\t\t\t\traise_exception=frappe.TimestampMismatchError,\n\t\t\t)\n\n\t\tif not self.meta.issingle and self._action != \"discard\":\n\t\t\tself.check_docstatus_transition(previous.docstatus)",
+          "program_units": 14
+        },
+        {
+          "name": "Document.run_before_save_methods",
+          "start": 1636,
+          "end": 1666,
+          "calls": [
+            "self.reset_seen",
+            "self.run_method",
+            "self.set_title_field"
+          ],
+          "source_fragment": "\tdef run_before_save_methods(self):\n\t\t\"\"\"Run standard methods before\t`INSERT` or `UPDATE`. Standard Methods are:\n\n\t\t- `validate`, `before_save` for **Save**.\n\t\t- `validate`, `before_submit` for **Submit**.\n\t\t- `before_cancel` for **Cancel**\n\t\t- `before_update_after_submit` for **Update after Submit**\n\n\t\tWill also update title_field if set\"\"\"\n\n\t\tself.reset_seen()\n\n\t\t# before_validate method should be executed before ignoring validations\n\t\tif self._action in (\"save\", \"submit\"):\n\t\t\tself.run_method(\"before_validate\")\n\n\t\tif self.flags.ignore_validate:\n\t\t\treturn\n\n\t\tif self._action == \"save\":\n\t\t\tself.run_method(\"validate\")\n\t\t\tself.run_method(\"before_save\")\n\t\telif self._action == \"submit\":\n\t\t\tself.run_method(\"validate\")\n\t\t\tself.run_method(\"before_submit\")\n\t\telif self._action == \"cancel\":\n\t\t\tself.run_method(\"before_cancel\")\n\t\telif self._action == \"update_after_submit\":\n\t\t\tself.run_method(\"before_update_after_submit\")\n\n\t\tself.set_title_field()",
+          "program_units": 17
+        },
+        {
+          "name": "Document.run_post_save_methods",
+          "start": 1690,
+          "end": 1724,
+          "calls": [
+            "frappe.flags.currently_saving.remove",
+            "self.check_no_back_links_exist",
+            "self.clear_cache",
+            "self.flags.get",
+            "self.is_new",
+            "self.notify_update",
+            "self.run_method",
+            "self.save_version",
+            "update_global_search"
+          ],
+          "source_fragment": "\tdef run_post_save_methods(self):\n\t\t\"\"\"Run standard methods after `INSERT` or `UPDATE`. Standard Methods are:\n\n\t\t- `on_update` for **Save**.\n\t\t- `on_update`, `on_submit` for **Submit**.\n\t\t- `on_cancel` for **Cancel**\n\t\t- `update_after_submit` for **Update after Submit**\"\"\"\n\n\t\tif self._action == \"save\":\n\t\t\tself.run_method(\"on_update\")\n\t\telif self._action == \"submit\":\n\t\t\tself.run_method(\"on_update\")\n\t\t\tself.run_method(\"on_submit\")\n\t\telif self._action == \"cancel\":\n\t\t\tself.run_method(\"on_cancel\")\n\t\t\tself.check_no_back_links_exist()\n\t\telif self._action == \"update_after_submit\":\n\t\t\tself.run_method(\"on_update_after_submit\")\n\n\t\tif not (frappe.flags.in_import and self.is_new()):\n\t\t\tself.clear_cache()\n\n\t\tif self.flags.get(\"notify_update\", True):\n\t\t\tself.notify_update()\n\n\t\tfrom frappe.utils.global_search import update_global_search\n\n\t\tupdate_global_search(self)\n\n\t\tself.save_version()\n\n\t\tself.run_method(\"on_change\")\n\n\t\tif (self.doctype, self.name) in frappe.flags.currently_saving:\n\t\t\tfrappe.flags.currently_saving.remove((self.doctype, self.name))",
+          "program_units": 21
+        },
+        {
+          "name": "Document.run_method",
+          "start": 1489,
+          "end": 1511,
+          "calls": [
+            "Document.hook",
+            "Document.hook(fn)",
+            "Exception",
+            "callable",
+            "getattr",
+            "method.startswith",
+            "method_object",
+            "run_automations",
+            "run_server_script_for_doc_event",
+            "run_webhooks",
+            "self.run_notifications",
+            "str"
+          ],
+          "source_fragment": "\tdef run_method(self, method: str, *args, **kwargs):\n\t\t\"\"\"run standard triggers, plus those in hooks\"\"\"\n\n\t\tif method.startswith(\"_\"):\n\t\t\traise Exception(\"Run method is for hooks, avoid usage on internal methods\")\n\n\t\tdef fn(self, *args, **kwargs):\n\t\t\tmethod_object = getattr(self, method, None)\n\n\t\t\t# Cannot have a field with same name as method\n\t\t\t# If method found in __dict__, expect it to be callable\n\t\t\tif method in self.__dict__ or callable(method_object):\n\t\t\t\treturn method_object(*args, **kwargs)\n\n\t\tfn.__name__ = str(method)\n\t\tout = Document.hook(fn)(self, *args, **kwargs)\n\n\t\tself.run_notifications(method)\n\t\trun_webhooks(self, method)\n\t\trun_server_script_for_doc_event(self, method)\n\t\trun_automations(self, method)\n\n\t\treturn out",
+          "program_units": 14
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 675,
+          "end": 764
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 792,
+          "end": 794
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 796,
+          "end": 855
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1330,
+          "end": 1361
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1489,
+          "end": 1511
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1572,
+          "end": 1575
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1592,
+          "end": 1594
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1636,
+          "end": 1666
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1690,
+          "end": 1724
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 2740,
+          "end": 2814
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 2816,
+          "end": 2859
+        },
+        {
+          "kind": "If",
+          "start": 695,
+          "end": 696
+        },
+        {
+          "kind": "Assign",
+          "start": 698,
+          "end": 698
+        },
+        {
+          "kind": "If",
+          "start": 700,
+          "end": 701
+        },
+        {
+          "kind": "If",
+          "start": 703,
+          "end": 704
+        },
+        {
+          "kind": "If",
+          "start": 706,
+          "end": 707
+        },
+        {
+          "kind": "Expr",
+          "start": 709,
+          "end": 709
+        },
+        {
+          "kind": "Expr",
+          "start": 711,
+          "end": 711
+        },
+        {
+          "kind": "Expr",
+          "start": 712,
+          "end": 712
+        },
+        {
+          "kind": "Expr",
+          "start": 713,
+          "end": 713
+        },
+        {
+          "kind": "Expr",
+          "start": 714,
+          "end": 714
+        },
+        {
+          "kind": "Expr",
+          "start": 715,
+          "end": 715
+        },
+        {
+          "kind": "Expr",
+          "start": 716,
+          "end": 716
+        },
+        {
+          "kind": "Expr",
+          "start": 717,
+          "end": 717
+        },
+        {
+          "kind": "Expr",
+          "start": 718,
+          "end": 718
+        },
+        {
+          "kind": "Expr",
+          "start": 719,
+          "end": 719
+        },
+        {
+          "kind": "Expr",
+          "start": 720,
+          "end": 720
+        },
+        {
+          "kind": "Assign",
+          "start": 722,
+          "end": 722
+        },
+        {
+          "kind": "Expr",
+          "start": 723,
+          "end": 723
+        },
+        {
+          "kind": "Expr",
+          "start": 724,
+          "end": 724
+        },
+        {
+          "kind": "Expr",
+          "start": 725,
+          "end": 725
+        },
+        {
+          "kind": "Assign",
+          "start": 726,
+          "end": 726
+        },
+        {
+          "kind": "If",
+          "start": 731,
+          "end": 734
+        },
+        {
+          "kind": "If",
+          "start": 737,
+          "end": 739
+        },
+        {
+          "kind": "Expr",
+          "start": 741,
+          "end": 741
+        },
+        {
+          "kind": "Expr",
+          "start": 742,
+          "end": 742
+        },
+        {
+          "kind": "Assign",
+          "start": 743,
+          "end": 743
+        },
+        {
+          "kind": "If",
+          "start": 745,
+          "end": 747
+        },
+        {
+          "kind": "Expr",
+          "start": 749,
+          "end": 749
+        },
+        {
+          "kind": "Expr",
+          "start": 750,
+          "end": 750
+        },
+        {
+          "kind": "Assign",
+          "start": 751,
+          "end": 751
+        },
+        {
+          "kind": "If",
+          "start": 754,
+          "end": 755
+        },
+        {
+          "kind": "If",
+          "start": 758,
+          "end": 759
+        },
+        {
+          "kind": "If",
+          "start": 761,
+          "end": 763
+        },
+        {
+          "kind": "Return",
+          "start": 764,
+          "end": 764
+        },
+        {
+          "kind": "Return",
+          "start": 794,
+          "end": 794
+        },
+        {
+          "kind": "If",
+          "start": 805,
+          "end": 806
+        },
+        {
+          "kind": "Assign",
+          "start": 808,
+          "end": 808
+        },
+        {
+          "kind": "If",
+          "start": 810,
+          "end": 811
+        },
+        {
+          "kind": "Assign",
+          "start": 813,
+          "end": 813
+        },
+        {
+          "kind": "If",
+          "start": 815,
+          "end": 816
+        },
+        {
+          "kind": "Expr",
+          "start": 818,
+          "end": 818
+        },
+        {
+          "kind": "Expr",
+          "start": 819,
+          "end": 819
+        },
+        {
+          "kind": "Expr",
+          "start": 820,
+          "end": 820
+        },
+        {
+          "kind": "Expr",
+          "start": 821,
+          "end": 821
+        },
+        {
+          "kind": "Expr",
+          "start": 823,
+          "end": 823
+        },
+        {
+          "kind": "Expr",
+          "start": 824,
+          "end": 824
+        },
+        {
+          "kind": "Expr",
+          "start": 825,
+          "end": 825
+        },
+        {
+          "kind": "Expr",
+          "start": 826,
+          "end": 826
+        },
+        {
+          "kind": "Expr",
+          "start": 827,
+          "end": 827
+        },
+        {
+          "kind": "Expr",
+          "start": 829,
+          "end": 829
+        },
+        {
+          "kind": "Expr",
+          "start": 830,
+          "end": 830
+        },
+        {
+          "kind": "Expr",
+          "start": 831,
+          "end": 831
+        },
+        {
+          "kind": "If",
+          "start": 833,
+          "end": 834
+        },
+        {
+          "kind": "If",
+          "start": 836,
+          "end": 837
+        },
+        {
+          "kind": "Expr",
+          "start": 839,
+          "end": 839
+        },
+        {
+          "kind": "If",
+          "start": 842,
+          "end": 845
+        },
+        {
+          "kind": "Expr",
+          "start": 847,
+          "end": 847
+        },
+        {
+          "kind": "Expr",
+          "start": 848,
+          "end": 848
+        },
+        {
+          "kind": "Expr",
+          "start": 849,
+          "end": 849
+        },
+        {
+          "kind": "If",
+          "start": 852,
+          "end": 853
+        },
+        {
+          "kind": "Return",
+          "start": 855,
+          "end": 855
+        },
+        {
+          "kind": "Expr",
+          "start": 1339,
+          "end": 1339
+        },
+        {
+          "kind": "If",
+          "start": 1341,
+          "end": 1342
+        },
+        {
+          "kind": "Assign",
+          "start": 1344,
+          "end": 1344
+        },
+        {
+          "kind": "If",
+          "start": 1346,
+          "end": 1348
+        },
+        {
+          "kind": "Assign",
+          "start": 1350,
+          "end": 1350
+        },
+        {
+          "kind": "Assign",
+          "start": 1351,
+          "end": 1351
+        },
+        {
+          "kind": "If",
+          "start": 1352,
+          "end": 1358
+        },
+        {
+          "kind": "If",
+          "start": 1360,
+          "end": 1361
+        },
+        {
+          "kind": "If",
+          "start": 1492,
+          "end": 1493
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 1495,
+          "end": 1501
+        },
+        {
+          "kind": "Assign",
+          "start": 1503,
+          "end": 1503
+        },
+        {
+          "kind": "Assign",
+          "start": 1504,
+          "end": 1504
+        },
+        {
+          "kind": "Expr",
+          "start": 1506,
+          "end": 1506
+        },
+        {
+          "kind": "Expr",
+          "start": 1507,
+          "end": 1507
+        },
+        {
+          "kind": "Expr",
+          "start": 1508,
+          "end": 1508
+        },
+        {
+          "kind": "Expr",
+          "start": 1509,
+          "end": 1509
+        },
+        {
+          "kind": "Return",
+          "start": 1511,
+          "end": 1511
+        },
+        {
+          "kind": "Assign",
+          "start": 1574,
+          "end": 1574
+        },
+        {
+          "kind": "Return",
+          "start": 1575,
+          "end": 1575
+        },
+        {
+          "kind": "Return",
+          "start": 1594,
+          "end": 1594
+        },
+        {
+          "kind": "Expr",
+          "start": 1646,
+          "end": 1646
+        },
+        {
+          "kind": "If",
+          "start": 1649,
+          "end": 1650
+        },
+        {
+          "kind": "If",
+          "start": 1652,
+          "end": 1653
+        },
+        {
+          "kind": "If",
+          "start": 1655,
+          "end": 1664
+        },
+        {
+          "kind": "Expr",
+          "start": 1666,
+          "end": 1666
+        },
+        {
+          "kind": "If",
+          "start": 1698,
+          "end": 1707
+        },
+        {
+          "kind": "If",
+          "start": 1709,
+          "end": 1710
+        },
+        {
+          "kind": "If",
+          "start": 1712,
+          "end": 1713
+        },
+        {
+          "kind": "ImportFrom",
+          "start": 1715,
+          "end": 1715
+        },
+        {
+          "kind": "Expr",
+          "start": 1717,
+          "end": 1717
+        },
+        {
+          "kind": "Expr",
+          "start": 1719,
+          "end": 1719
+        },
+        {
+          "kind": "Expr",
+          "start": 1721,
+          "end": 1721
+        },
+        {
+          "kind": "If",
+          "start": 1723,
+          "end": 1724
+        },
+        {
+          "kind": "If",
+          "start": 2748,
+          "end": 2750
+        },
+        {
+          "kind": "Assign",
+          "start": 2752,
+          "end": 2752
+        },
+        {
+          "kind": "Assign",
+          "start": 2753,
+          "end": 2753
+        },
+        {
+          "kind": "If",
+          "start": 2756,
+          "end": 2763
+        },
+        {
+          "kind": "If",
+          "start": 2765,
+          "end": 2767
+        },
+        {
+          "kind": "Assign",
+          "start": 2770,
+          "end": 2774
+        },
+        {
+          "kind": "Assign",
+          "start": 2776,
+          "end": 2776
+        },
+        {
+          "kind": "Try",
+          "start": 2777,
+          "end": 2812
+        },
+        {
+          "kind": "Expr",
+          "start": 2814,
+          "end": 2814
+        },
+        {
+          "kind": "If",
+          "start": 2817,
+          "end": 2819
+        },
+        {
+          "kind": "Assign",
+          "start": 2821,
+          "end": 2825
+        },
+        {
+          "kind": "Assign",
+          "start": 2828,
+          "end": 2828
+        },
+        {
+          "kind": "Delete",
+          "start": 2829,
+          "end": 2829
+        },
+        {
+          "kind": "Assign",
+          "start": 2831,
+          "end": 2831
+        },
+        {
+          "kind": "Try",
+          "start": 2833,
+          "end": 2859
+        },
+        {
+          "kind": "Return",
+          "start": 696,
+          "end": 696
+        },
+        {
+          "kind": "Assign",
+          "start": 701,
+          "end": 701
+        },
+        {
+          "kind": "Assign",
+          "start": 704,
+          "end": 704
+        },
+        {
+          "kind": "Assign",
+          "start": 707,
+          "end": 707
+        },
+        {
+          "kind": "Expr",
+          "start": 732,
+          "end": 732
+        },
+        {
+          "kind": "Expr",
+          "start": 734,
+          "end": 734
+        },
+        {
+          "kind": "For",
+          "start": 738,
+          "end": 739
+        },
+        {
+          "kind": "Expr",
+          "start": 746,
+          "end": 746
+        },
+        {
+          "kind": "Expr",
+          "start": 747,
+          "end": 747
+        },
+        {
+          "kind": "Expr",
+          "start": 755,
+          "end": 755
+        },
+        {
+          "kind": "Expr",
+          "start": 759,
+          "end": 759
+        },
+        {
+          "kind": "If",
+          "start": 762,
+          "end": 763
+        },
+        {
+          "kind": "Return",
+          "start": 806,
+          "end": 806
+        },
+        {
+          "kind": "Assign",
+          "start": 811,
+          "end": 811
+        },
+        {
+          "kind": "Return",
+          "start": 816,
+          "end": 816
+        },
+        {
+          "kind": "Expr",
+          "start": 834,
+          "end": 834
+        },
+        {
+          "kind": "Expr",
+          "start": 837,
+          "end": 837
+        },
+        {
+          "kind": "Expr",
+          "start": 843,
+          "end": 843
+        },
+        {
+          "kind": "Expr",
+          "start": 845,
+          "end": 845
+        },
+        {
+          "kind": "Expr",
+          "start": 853,
+          "end": 853
+        },
+        {
+          "kind": "Assign",
+          "start": 1342,
+          "end": 1342
+        },
+        {
+          "kind": "Expr",
+          "start": 1347,
+          "end": 1347
+        },
+        {
+          "kind": "Return",
+          "start": 1348,
+          "end": 1348
+        },
+        {
+          "kind": "Expr",
+          "start": 1353,
+          "end": 1358
+        },
+        {
+          "kind": "Expr",
+          "start": 1361,
+          "end": 1361
+        },
+        {
+          "kind": "Raise",
+          "start": 1493,
+          "end": 1493
+        },
+        {
+          "kind": "Assign",
+          "start": 1496,
+          "end": 1496
+        },
+        {
+          "kind": "If",
+          "start": 1500,
+          "end": 1501
+        },
+        {
+          "kind": "Expr",
+          "start": 1650,
+          "end": 1650
+        },
+        {
+          "kind": "Return",
+          "start": 1653,
+          "end": 1653
+        },
+        {
+          "kind": "Expr",
+          "start": 1656,
+          "end": 1656
+        },
+        {
+          "kind": "Expr",
+          "start": 1657,
+          "end": 1657
+        },
+        {
+          "kind": "If",
+          "start": 1658,
+          "end": 1664
+        },
+        {
+          "kind": "Expr",
+          "start": 1699,
+          "end": 1699
+        },
+        {
+          "kind": "If",
+          "start": 1700,
+          "end": 1707
+        },
+        {
+          "kind": "Expr",
+          "start": 1710,
+          "end": 1710
+        },
+        {
+          "kind": "Expr",
+          "start": 1713,
+          "end": 1713
+        },
+        {
+          "kind": "Expr",
+          "start": 1724,
+          "end": 1724
+        },
+        {
+          "kind": "Expr",
+          "start": 2750,
+          "end": 2750
+        },
+        {
+          "kind": "Assign",
+          "start": 2761,
+          "end": 2761
+        },
+        {
+          "kind": "If",
+          "start": 2762,
+          "end": 2763
+        },
+        {
+          "kind": "Assign",
+          "start": 2766,
+          "end": 2766
+        },
+        {
+          "kind": "Assign",
+          "start": 2767,
+          "end": 2767
+        },
+        {
+          "kind": "Assign",
+          "start": 2778,
+          "end": 2788
+        },
+        {
+          "kind": "If",
+          "start": 2789,
+          "end": 2792
+        },
+        {
+          "kind": "Expr",
+          "start": 2818,
+          "end": 2818
+        },
+        {
+          "kind": "Return",
+          "start": 2819,
+          "end": 2819
+        },
+        {
+          "kind": "Expr",
+          "start": 2834,
+          "end": 2840
+        },
+        {
+          "kind": "Expr",
+          "start": 739,
+          "end": 739
+        },
+        {
+          "kind": "Expr",
+          "start": 763,
+          "end": 763
+        },
+        {
+          "kind": "Return",
+          "start": 1501,
+          "end": 1501
+        },
+        {
+          "kind": "Expr",
+          "start": 1659,
+          "end": 1659
+        },
+        {
+          "kind": "Expr",
+          "start": 1660,
+          "end": 1660
+        },
+        {
+          "kind": "If",
+          "start": 1661,
+          "end": 1664
+        },
+        {
+          "kind": "Expr",
+          "start": 1701,
+          "end": 1701
+        },
+        {
+          "kind": "Expr",
+          "start": 1702,
+          "end": 1702
+        },
+        {
+          "kind": "If",
+          "start": 1703,
+          "end": 1707
+        },
+        {
+          "kind": "Assign",
+          "start": 2763,
+          "end": 2763
+        },
+        {
+          "kind": "Return",
+          "start": 2792,
+          "end": 2792
+        },
+        {
+          "kind": "If",
+          "start": 2794,
+          "end": 2812
+        },
+        {
+          "kind": "If",
+          "start": 2843,
+          "end": 2854
+        },
+        {
+          "kind": "If",
+          "start": 2856,
+          "end": 2859
+        },
+        {
+          "kind": "Expr",
+          "start": 1662,
+          "end": 1662
+        },
+        {
+          "kind": "If",
+          "start": 1663,
+          "end": 1664
+        },
+        {
+          "kind": "Expr",
+          "start": 1704,
+          "end": 1704
+        },
+        {
+          "kind": "Expr",
+          "start": 1705,
+          "end": 1705
+        },
+        {
+          "kind": "If",
+          "start": 1706,
+          "end": 1707
+        },
+        {
+          "kind": "If",
+          "start": 2795,
+          "end": 2797
+        },
+        {
+          "kind": "If",
+          "start": 2799,
+          "end": 2805
+        },
+        {
+          "kind": "If",
+          "start": 2807,
+          "end": 2812
+        },
+        {
+          "kind": "Assign",
+          "start": 2844,
+          "end": 2844
+        },
+        {
+          "kind": "If",
+          "start": 2845,
+          "end": 2854
+        },
+        {
+          "kind": "Expr",
+          "start": 2857,
+          "end": 2857
+        },
+        {
+          "kind": "Raise",
+          "start": 2859,
+          "end": 2859
+        },
+        {
+          "kind": "Expr",
+          "start": 1664,
+          "end": 1664
+        },
+        {
+          "kind": "Expr",
+          "start": 1707,
+          "end": 1707
+        },
+        {
+          "kind": "Return",
+          "start": 2797,
+          "end": 2797
+        },
+        {
+          "kind": "Expr",
+          "start": 2800,
+          "end": 2804
+        },
+        {
+          "kind": "Raise",
+          "start": 2805,
+          "end": 2805
+        },
+        {
+          "kind": "Expr",
+          "start": 2809,
+          "end": 2809
+        },
+        {
+          "kind": "Raise",
+          "start": 2812,
+          "end": 2812
+        },
+        {
+          "kind": "Assign",
+          "start": 2846,
+          "end": 2846
+        },
+        {
+          "kind": "Expr",
+          "start": 2849,
+          "end": 2854
+        }
+      ],
+      "program_units": 203,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": "java-spring-framework-services",
+      "funding_owner": "master-data-java-spring",
+      "stock_additional_generic_framework_units": 0
+    },
+    {
+      "repo": "frappe",
+      "path": "frappe/app.py",
+      "commit": "2fcb9397a1f1da353b21e53d2f97ec56653acd02",
+      "sha256": "0aa5026b50159c2fbd5d138fb765f8cd871d13bca10bcacb135a03e3564017f5",
+      "git_object_sha256": "32619d8c38c580c013d2cd6c6fe36a1b72983a4b4e0ba8009424a6526f3779e0",
+      "source_url": "https://github.com/frappe/frappe/blob/2fcb9397a1f1da353b21e53d2f97ec56653acd02/frappe/app.py",
+      "role": "framework_reused",
+      "classification_basis": "Frontière HTTP : commit au succès, rollback en erreur, réponse ; pas de retry métier automatique attribué.",
+      "methods": [
+        {
+          "name": "application",
+          "start": 108,
+          "end": 178,
+          "calls": [
+            "Response",
+            "db.rollback",
+            "deprecation_warning",
+            "e.get_response",
+            "frappe.api.handle",
+            "frappe.get_doc",
+            "frappe.handler.handle",
+            "frappe.logger",
+            "frappe.logger().error",
+            "frappe.utils.response.build_response",
+            "frappe.utils.response.download_backup",
+            "frappe.utils.response.download_private_file",
+            "get_response",
+            "getattr",
+            "handle_exception",
+            "handle_wellknown",
+            "init_request",
+            "isinstance",
+            "log_request",
+            "process_response",
+            "request.path.startswith",
+            "run_after_request_hooks",
+            "sync_database",
+            "validate_auth"
+          ],
+          "source_fragment": "@after_response_wrapper\n@Request.application\ndef application(request: Request):\n\tresponse = None\n\n\ttry:\n\t\tinit_request(request)\n\n\t\tvalidate_auth()\n\n\t\tif request.method == \"OPTIONS\":\n\t\t\tresponse = Response()\n\n\t\telif frappe.form_dict.cmd:\n\t\t\tfrom frappe.deprecation_dumpster import deprecation_warning\n\n\t\t\tdeprecation_warning(\n\t\t\t\t\"unknown\",\n\t\t\t\t\"v17\",\n\t\t\t\tf\"{frappe.form_dict.cmd}: Sending `cmd` for RPC calls is deprecated, call REST API instead `/api/method/cmd`\",\n\t\t\t)\n\t\t\tfrappe.handler.handle()\n\t\t\tresponse = frappe.utils.response.build_response(\"json\")\n\n\t\telif request.path.startswith(\"/api/\"):\n\t\t\tresponse = frappe.api.handle(request)\n\n\t\telif request.path.startswith(\"/backups\"):\n\t\t\tresponse = frappe.utils.response.download_backup(request.path)\n\n\t\telif request.path.startswith(\"/private/files/\"):\n\t\t\tresponse = frappe.utils.response.download_private_file(request.path)\n\n\t\telif request.path == \"/.well-known/security.txt\" and request.method == \"GET\":\n\t\t\tif request.scheme != \"https\":\n\t\t\t\traise NotFound\n\t\t\tsecurity_settings = frappe.get_doc(\"Security Settings\")\n\t\t\tresponse = Response(security_settings.security_txt, content_type=\"text/plain\")\n\n\t\telif request.path.startswith(\"/.well-known/\") and request.method == \"GET\":\n\t\t\tresponse = handle_wellknown(request.path)\n\n\t\telif request.method in (\"GET\", \"HEAD\", \"POST\"):\n\t\t\tresponse = get_response()\n\n\t\telse:\n\t\t\traise NotFound\n\n\texcept Exception as e:\n\t\tresponse = e.get_response(request.environ) if isinstance(e, HTTPException) else handle_exception(e)\n\t\tif db := getattr(frappe.local, \"db\", None):\n\t\t\tdb.rollback(chain=True)\n\n\telse:\n\t\tsync_database()\n\n\tfinally:\n\t\t# Important note:\n\t\t# this function *must* always return a response, hence any exception thrown outside of\n\t\t# try..catch block like this finally block needs to be handled appropriately.\n\n\t\ttry:\n\t\t\trun_after_request_hooks(request, response)\n\t\texcept Exception:\n\t\t\t# We can not handle exceptions safely here.\n\t\t\tfrappe.logger().error(\"Failed to run after request hook\", exc_info=True)\n\n\tlog_request(request, response)\n\tprocess_response(response)\n\n\treturn response",
+          "program_units": 38
+        },
+        {
+          "name": "sync_database",
+          "start": 438,
+          "end": 452,
+          "calls": [
+            "db.commit",
+            "db.rollback",
+            "frappe.request.after_response.add",
+            "getattr"
+          ],
+          "source_fragment": "def sync_database():\n\tdb = getattr(frappe.local, \"db\", None)\n\tif not db:\n\t\t# db isn't initialized, can't commit or rollback\n\t\treturn\n\n\t# if HTTP method would change server state, commit if necessary\n\tif frappe.local.request.method in UNSAFE_HTTP_METHODS or frappe.local.flags.commit:\n\t\tdb.commit(chain=True)\n\telse:\n\t\tdb.rollback(chain=True)\n\n\t# update session\n\tif session := getattr(frappe.local, \"session_obj\", None):\n\t\tfrappe.request.after_response.add(session.update)",
+          "program_units": 9
+        },
+        {
+          "name": "handle_exception",
+          "start": 360,
+          "end": 435,
+          "calls": [
+            "ErrorPage",
+            "ErrorPage(http_status_code=http_status_code, title=_('Not Found'), message=_('The resource you are looking for is not available')).render",
+            "ErrorPage(http_status_code=http_status_code, title=_('Not Permitted'), message=_('You do not have enough permissions to complete the action')).render",
+            "ErrorPage(http_status_code=http_status_code, title=_('Server Error'), message=_('Uncaught Exception')).render",
+            "ErrorPage(http_status_code=http_status_code, title=_('Session Expired'), message=_('Your session has expired, please login again to continue.')).render",
+            "_",
+            "accept_header.startswith",
+            "error_response",
+            "frappe.conf.get",
+            "frappe.db.is_deadlocked",
+            "frappe.db.is_timedout",
+            "frappe.get_request_header",
+            "frappe.get_traceback",
+            "frappe.local.login_manager.clear_cookies",
+            "frappe.local.request.path.startswith",
+            "frappe.rate_limiter.respond",
+            "frappe.utils.response.handle_session_stopped",
+            "frappe.utils.response.report_error",
+            "getattr",
+            "hasattr",
+            "isinstance",
+            "log_error_snapshot",
+            "print"
+          ],
+          "source_fragment": "@handle_does_not_exist_error\ndef handle_exception(e):\n\tresponse = None\n\thttp_status_code = getattr(e, \"http_status_code\", 500)\n\taccept_header = frappe.get_request_header(\"Accept\") or \"\"\n\trespond_as_json = (\n\t\tfrappe.get_request_header(\"Accept\") and (frappe.local.is_ajax or \"application/json\" in accept_header)\n\t) or (frappe.local.request.path.startswith(\"/api/\") and not accept_header.startswith(\"text\"))\n\n\tif not frappe.session.user:\n\t\t# If session creation fails then user won't be unset. This causes a lot of code that\n\t\t# assumes presence of this to fail. Session creation fails => guest or expired login\n\t\t# usually.\n\t\tfrappe.session.user = \"Guest\"\n\n\tif getattr(frappe.local, \"mcp_request\", None):\n\t\tfrom frappe.mcp.transport import error_response\n\n\t\tresponse = error_response(e)\n\n\telif respond_as_json:\n\t\t# handle ajax responses first\n\t\t# if the request is ajax, send back the trace or error message\n\t\tresponse = frappe.utils.response.report_error(http_status_code)\n\n\telif isinstance(e, frappe.SessionStopped):\n\t\tresponse = frappe.utils.response.handle_session_stopped()\n\n\telif (\n\t\thttp_status_code == 500\n\t\tand (frappe.db and isinstance(e, frappe.db.InternalError))\n\t\tand (frappe.db and (frappe.db.is_deadlocked(e) or frappe.db.is_timedout(e)))\n\t):\n\t\thttp_status_code = 508\n\n\telif http_status_code == 401:\n\t\tresponse = ErrorPage(\n\t\t\thttp_status_code=http_status_code,\n\t\t\ttitle=_(\"Session Expired\"),\n\t\t\tmessage=_(\"Your session has expired, please login again to continue.\"),\n\t\t).render()\n\n\telif http_status_code == 403:\n\t\tresponse = ErrorPage(\n\t\t\thttp_status_code=http_status_code,\n\t\t\ttitle=_(\"Not Permitted\"),\n\t\t\tmessage=_(\"You do not have enough permissions to complete the action\"),\n\t\t).render()\n\n\telif http_status_code == 404:\n\t\tresponse = ErrorPage(\n\t\t\thttp_status_code=http_status_code,\n\t\t\ttitle=_(\"Not Found\"),\n\t\t\tmessage=_(\"The resource you are looking for is not available\"),\n\t\t).render()\n\n\telif http_status_code == 429:\n\t\tresponse = frappe.rate_limiter.respond()\n\n\telse:\n\t\tresponse = ErrorPage(\n\t\t\thttp_status_code=http_status_code, title=_(\"Server Error\"), message=_(\"Uncaught Exception\")\n\t\t).render()\n\n\tif e.__class__ == frappe.AuthenticationError:\n\t\tif hasattr(frappe.local, \"login_manager\"):\n\t\t\tfrappe.local.login_manager.clear_cookies()\n\n\tif http_status_code >= 500 or frappe.conf.developer_mode:\n\t\tlog_error_snapshot(e)\n\n\tif frappe.conf.get(\"developer_mode\") and not respond_as_json:\n\t\t# don't fail silently for non-json response errors\n\t\tprint(frappe.get_traceback())\n\n\treturn response",
+          "program_units": 33
+        }
+      ],
+      "counted_nodes": [
+        {
+          "kind": "FunctionDef",
+          "start": 110,
+          "end": 178
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 361,
+          "end": 435
+        },
+        {
+          "kind": "FunctionDef",
+          "start": 438,
+          "end": 452
+        },
+        {
+          "kind": "Assign",
+          "start": 111,
+          "end": 111
+        },
+        {
+          "kind": "Try",
+          "start": 113,
+          "end": 173
+        },
+        {
+          "kind": "Expr",
+          "start": 175,
+          "end": 175
+        },
+        {
+          "kind": "Expr",
+          "start": 176,
+          "end": 176
+        },
+        {
+          "kind": "Return",
+          "start": 178,
+          "end": 178
+        },
+        {
+          "kind": "Assign",
+          "start": 362,
+          "end": 362
+        },
+        {
+          "kind": "Assign",
+          "start": 363,
+          "end": 363
+        },
+        {
+          "kind": "Assign",
+          "start": 364,
+          "end": 364
+        },
+        {
+          "kind": "Assign",
+          "start": 365,
+          "end": 367
+        },
+        {
+          "kind": "If",
+          "start": 369,
+          "end": 373
+        },
+        {
+          "kind": "If",
+          "start": 375,
+          "end": 422
+        },
+        {
+          "kind": "If",
+          "start": 424,
+          "end": 426
+        },
+        {
+          "kind": "If",
+          "start": 428,
+          "end": 429
+        },
+        {
+          "kind": "If",
+          "start": 431,
+          "end": 433
+        },
+        {
+          "kind": "Return",
+          "start": 435,
+          "end": 435
+        },
+        {
+          "kind": "Assign",
+          "start": 439,
+          "end": 439
+        },
+        {
+          "kind": "If",
+          "start": 440,
+          "end": 442
+        },
+        {
+          "kind": "If",
+          "start": 445,
+          "end": 448
+        },
+        {
+          "kind": "If",
+          "start": 451,
+          "end": 452
+        },
+        {
+          "kind": "Expr",
+          "start": 114,
+          "end": 114
+        },
+        {
+          "kind": "Expr",
+          "start": 116,
+          "end": 116
+        },
+        {
+          "kind": "If",
+          "start": 118,
+          "end": 154
+        },
+        {
+          "kind": "Expr",
+          "start": 162,
+          "end": 162
+        },
+        {
+          "kind": "Try",
+          "start": 169,
+          "end": 173
+        },
+        {
+          "kind": "Assign",
+          "start": 373,
+          "end": 373
+        },
+        {
+          "kind": "ImportFrom",
+          "start": 376,
+          "end": 376
+        },
+        {
+          "kind": "Assign",
+          "start": 378,
+          "end": 378
+        },
+        {
+          "kind": "If",
+          "start": 380,
+          "end": 422
+        },
+        {
+          "kind": "If",
+          "start": 425,
+          "end": 426
+        },
+        {
+          "kind": "Expr",
+          "start": 429,
+          "end": 429
+        },
+        {
+          "kind": "Expr",
+          "start": 433,
+          "end": 433
+        },
+        {
+          "kind": "Return",
+          "start": 442,
+          "end": 442
+        },
+        {
+          "kind": "Expr",
+          "start": 446,
+          "end": 446
+        },
+        {
+          "kind": "Expr",
+          "start": 448,
+          "end": 448
+        },
+        {
+          "kind": "Expr",
+          "start": 452,
+          "end": 452
+        },
+        {
+          "kind": "Assign",
+          "start": 119,
+          "end": 119
+        },
+        {
+          "kind": "If",
+          "start": 121,
+          "end": 154
+        },
+        {
+          "kind": "Assign",
+          "start": 157,
+          "end": 157
+        },
+        {
+          "kind": "If",
+          "start": 158,
+          "end": 159
+        },
+        {
+          "kind": "Expr",
+          "start": 170,
+          "end": 170
+        },
+        {
+          "kind": "Assign",
+          "start": 383,
+          "end": 383
+        },
+        {
+          "kind": "If",
+          "start": 385,
+          "end": 422
+        },
+        {
+          "kind": "Expr",
+          "start": 426,
+          "end": 426
+        },
+        {
+          "kind": "ImportFrom",
+          "start": 122,
+          "end": 122
+        },
+        {
+          "kind": "Expr",
+          "start": 124,
+          "end": 128
+        },
+        {
+          "kind": "Expr",
+          "start": 129,
+          "end": 129
+        },
+        {
+          "kind": "Assign",
+          "start": 130,
+          "end": 130
+        },
+        {
+          "kind": "If",
+          "start": 132,
+          "end": 154
+        },
+        {
+          "kind": "Expr",
+          "start": 159,
+          "end": 159
+        },
+        {
+          "kind": "Expr",
+          "start": 173,
+          "end": 173
+        },
+        {
+          "kind": "Assign",
+          "start": 386,
+          "end": 386
+        },
+        {
+          "kind": "If",
+          "start": 388,
+          "end": 422
+        },
+        {
+          "kind": "Assign",
+          "start": 133,
+          "end": 133
+        },
+        {
+          "kind": "If",
+          "start": 135,
+          "end": 154
+        },
+        {
+          "kind": "Assign",
+          "start": 393,
+          "end": 393
+        },
+        {
+          "kind": "If",
+          "start": 395,
+          "end": 422
+        },
+        {
+          "kind": "Assign",
+          "start": 136,
+          "end": 136
+        },
+        {
+          "kind": "If",
+          "start": 138,
+          "end": 154
+        },
+        {
+          "kind": "Assign",
+          "start": 396,
+          "end": 400
+        },
+        {
+          "kind": "If",
+          "start": 402,
+          "end": 422
+        },
+        {
+          "kind": "Assign",
+          "start": 139,
+          "end": 139
+        },
+        {
+          "kind": "If",
+          "start": 141,
+          "end": 154
+        },
+        {
+          "kind": "Assign",
+          "start": 403,
+          "end": 407
+        },
+        {
+          "kind": "If",
+          "start": 409,
+          "end": 422
+        },
+        {
+          "kind": "If",
+          "start": 142,
+          "end": 143
+        },
+        {
+          "kind": "Assign",
+          "start": 144,
+          "end": 144
+        },
+        {
+          "kind": "Assign",
+          "start": 145,
+          "end": 145
+        },
+        {
+          "kind": "If",
+          "start": 147,
+          "end": 154
+        },
+        {
+          "kind": "Assign",
+          "start": 410,
+          "end": 414
+        },
+        {
+          "kind": "If",
+          "start": 416,
+          "end": 422
+        },
+        {
+          "kind": "Raise",
+          "start": 143,
+          "end": 143
+        },
+        {
+          "kind": "Assign",
+          "start": 148,
+          "end": 148
+        },
+        {
+          "kind": "If",
+          "start": 150,
+          "end": 154
+        },
+        {
+          "kind": "Assign",
+          "start": 417,
+          "end": 417
+        },
+        {
+          "kind": "Assign",
+          "start": 420,
+          "end": 422
+        },
+        {
+          "kind": "Assign",
+          "start": 151,
+          "end": 151
+        },
+        {
+          "kind": "Raise",
+          "start": 154,
+          "end": 154
+        }
+      ],
+      "program_units": 80,
+      "size_meaning": "instructions/déclarations de méthodes intégrales dans le dossier de chaîne, pas taille de famille ni SLOC certifiées",
+      "mechanism_ref": "java-spring-framework-services",
+      "funding_owner": "master-data-java-spring",
+      "stock_additional_generic_framework_units": 0
+    }
+  ],
+  "units_by_role": {
+    "stock_quantity": 191,
+    "coupled_native": 42,
+    "native_integration": 40,
+    "framework_reused": 283
+  },
+  "method_count": 47,
+  "runtime_executed": false,
+  "closure": {
+    "main_stages_traced": true,
+    "critical_transaction_boundary_identified": true,
+    "all_dynamic_hooks_and_installed_extensions_closed": false,
+    "mixed_native_responsibilities_present": true,
+    "complete_Flow_retroactivity_and_command_replay_equivalence": false
+  },
+  "effort": {
+    "receivable_jh": null,
+    "COCOMO_executed": false,
+    "reason": "Le dossier mesure les composants natifs et leurs dépendances, pas une assiette homogène neuve/réutilisée du mécanisme Flow complet. Un total de famille ou de projet autonome tiré de ces seules méthodes serait trompeur."
+  },
+  "standard_ports_not_counted_as_new_stock": [
+    "ORM/repositories et transactions natifs",
+    "lecture des identités produit/lieu/unité/partenaire existantes",
+    "injection et services de date/configuration/logs"
+  ],
+  "native_domain_ports_requiring_scope_resolution": [
+    "Premier engagement et ensembles vides, selon moteur/isolation/index.",
+    "Sur PostgreSQL, SUM avec FOR UPDATE pose une restriction SQL à vérifier dans le chemin réellement déployé. Ne pas qualifier toutes les bases à partir de ce seul appel.",
+    "Aucun retry métier automatique attribué à Frappe dans application/sync_database inspectés."
+  ]
+}

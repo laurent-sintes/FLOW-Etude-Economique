@@ -1,0 +1,978 @@
+{
+  "traces": [
+    {
+      "id": "erpnext-ecriture",
+      "product": "erpnext",
+      "kind": "ecriture",
+      "steps": [
+        "erpnext/erpnext/stock/stock_ledger.py#make_entry",
+        "frappe/frappe/model/document.py#Document.submit",
+        "frappe/frappe/model/document.py#Document._submit",
+        "frappe/frappe/model/document.py#Document.save",
+        "frappe/frappe/model/document.py#Document._save",
+        "frappe/frappe/model/document.py#Document.db_update"
+      ],
+      "status": "statique_chemin_et_frontieres_qualifies",
+      "conclusion": "Le document métier délègue la persistance au framework Frappe déjà qualifié.",
+      "limit": "Les hooks de validation/serial-batch et la transaction complète ne sont pas exécutés. Les paramètres de valorisation transmis ne sont pas un moteur financier.",
+      "runtime_executed": false
+    },
+    {
+      "id": "erpnext-correction",
+      "product": "erpnext",
+      "kind": "correction",
+      "steps": [
+        "erpnext/erpnext/stock/stock_ledger.py#update_qty_in_future_sle",
+        "erpnext/erpnext/stock/stock_ledger.py#get_stock_reco_qty_shift",
+        "erpnext/erpnext/stock/stock_ledger.py#get_next_stock_reco",
+        "erpnext/erpnext/stock/stock_ledger.py#validate_negative_qty_in_future_sle"
+      ],
+      "status": "statique_chemin_et_frontieres_qualifies",
+      "conclusion": "La correction de quantité se propage dans les écritures futures avec une borne au prochain inventaire.",
+      "limit": "Le recalcul financier séparé reste exclu. Le code natif ne démontre pas le contrat Flow complet de double date et de rejeu.",
+      "runtime_executed": false
+    },
+    {
+      "id": "erpnext-concurrence",
+      "product": "erpnext",
+      "kind": "concurrence",
+      "steps": [
+        "erpnext/erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py#get_available_qty_to_reserve",
+        "erpnext/erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py#StockReservationEntry.validate_with_allowed_qty",
+        "erpnext/erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py#StockReservationEntry.get_from_voucher_reservation_entries"
+      ],
+      "status": "statique_chemin_et_frontieres_qualifies",
+      "conclusion": "Requêtes de verrouillage explicites repérées dans le calcul et le transfert des réservations.",
+      "limit": "Pas de preuve de sérialisation complète du stock et des réservations, notamment premier enregistrement, ordre des verrous et retries.",
+      "runtime_executed": false
+    },
+    {
+      "id": "odoo-ecriture",
+      "product": "odoo",
+      "kind": "ecriture",
+      "steps": [
+        "odoo/addons/stock/models/stock_move_line.py#StockMoveLine._synchronize_quant",
+        "odoo/addons/stock/models/stock_quant.py#StockQuant._update_available_quantity",
+        "odoo/odoo/orm/models.py#write",
+        "odoo/odoo/orm/fields.py#Field.write",
+        "odoo/odoo/orm/models.py#flush_model",
+        "odoo/odoo/orm/models.py#_flush",
+        "odoo/odoo/orm/models.py#_write_multi"
+      ],
+      "status": "statique_chemin_et_frontieres_qualifies",
+      "conclusion": "Les champs sont modifiés en cache puis écrits lors du flush ORM ; ce chemin est distinct de la construction des opérations physiques.",
+      "limit": "Les extensions de modèle et triggers natifs ne sont pas exécutés ; seuls les traitements explicitement sélectionnés sont mesurés.",
+      "runtime_executed": false
+    },
+    {
+      "id": "odoo-correction",
+      "product": "odoo",
+      "kind": "correction",
+      "steps": [
+        "odoo/addons/stock/models/stock_quant.py#StockQuant._apply_inventory",
+        "odoo/addons/stock/models/stock_move.py#StockMove._action_done",
+        "odoo/addons/stock/models/stock_move_line.py#StockMoveLine._action_done",
+        "odoo/addons/stock/models/stock_move_line.py#StockMoveLine._synchronize_quant"
+      ],
+      "status": "statique_chemin_et_frontieres_qualifies",
+      "conclusion": "Un ajustement crée un mouvement qui synchronise les quantités ; le chemin appelant est distingué du noyau mesuré.",
+      "limit": "Le workflow complet, les emballages et déclencheurs d’affectation ne sont pas tous inclus ; pas d’équivalence automatique avec ingestion d’un fait externe.",
+      "runtime_executed": false
+    },
+    {
+      "id": "odoo-concurrence",
+      "product": "odoo",
+      "kind": "concurrence",
+      "steps": [
+        "odoo/addons/stock/models/stock_quant.py#StockQuant._update_available_quantity",
+        "odoo/odoo/orm/models.py#try_lock_for_update"
+      ],
+      "status": "statique_chemin_et_frontieres_qualifies",
+      "conclusion": "Verrouillage natif observé sur les quants existants avant modification.",
+      "limit": "La branche de création, les contraintes d’unicité et les retries doivent être testés ; SKIP LOCKED ne prouve pas à lui seul toutes les garanties Flow.",
+      "runtime_executed": false
+    },
+    {
+      "id": "tryton-ecriture",
+      "product": "tryton",
+      "kind": "ecriture",
+      "steps": [
+        "tryton/modules/stock/move.py#Move.assign",
+        "tryton/trytond/trytond/model/workflow.py#Workflow.transition",
+        "tryton/trytond/trytond/model/modelsql.py#ModelSQL.write"
+      ],
+      "status": "statique_chemin_et_frontieres_qualifies",
+      "conclusion": "La transition écrit son état via le modèle SQL : le corps assign seul ne représente pas toute la persistance.",
+      "limit": "Le décorateur et le modèle SQL sont des dépendances partagées. Les validations automatiques restent à qualifier hors de la mesure locale.",
+      "runtime_executed": false
+    },
+    {
+      "id": "tryton-correction",
+      "product": "tryton",
+      "kind": "correction",
+      "steps": [
+        "tryton/modules/stock/inventory.py#Inventory.confirm",
+        "tryton/modules/stock/inventory.py#InventoryLine.get_move",
+        "tryton/modules/stock/move.py#Move.do",
+        "tryton/trytond/trytond/model/workflow.py#Workflow.transition"
+      ],
+      "status": "statique_chemin_et_frontieres_qualifies",
+      "conclusion": "L’inventaire construit les mouvements correctifs ; leur état participe au calcul des quantités.",
+      "limit": "Move.do mêle les coûts et le stock : il est documenté mais pas compté intégralement. Les prix et le recalcul financier sont hors périmètre.",
+      "runtime_executed": false
+    },
+    {
+      "id": "tryton-concurrence",
+      "product": "tryton",
+      "kind": "concurrence",
+      "steps": [
+        "tryton/modules/stock/move.py#Move.assign_try",
+        "tryton/modules/stock/move.py#Move._assign_try_lock",
+        "tryton/trytond/trytond/model/modelsql.py#ModelSQL.lock"
+      ],
+      "status": "statique_chemin_et_frontieres_qualifies",
+      "conclusion": "Verrouillage SQL ou de modèle observé dans le chemin d’affectation natif.",
+      "limit": "La politique de choix de ressource de assign_try reste hors du noyau de réservation. Pas de test de contention exécuté.",
+      "runtime_executed": false
+    },
+    {
+      "id": "axelor-ecriture",
+      "product": "axelor",
+      "kind": "ecriture",
+      "steps": [
+        "axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java#updateLocation@137",
+        "axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java#updateLocation@392",
+        "platform/axelor-core/src/main/java/com/axelor/db/JpaRepository.java#save",
+        "platform/axelor-core/src/main/java/com/axelor/db/JPA.java#save"
+      ],
+      "status": "statique_chemin_et_frontieres_qualifies",
+      "conclusion": "La mise à jour des quantités est identifiée jusqu’à la frontière de persistance JPA.",
+      "limit": "Les branches min/max de réapprovisionnement sont retranchées du comptage ; l’injection des extensions et la transaction effective ne sont pas testées.",
+      "runtime_executed": false
+    },
+    {
+      "id": "axelor-correction",
+      "product": "axelor",
+      "kind": "correction",
+      "steps": [
+        "axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java#generateStockMoves",
+        "axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java#realizeGeneratedStockMoves",
+        "axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java#realize",
+        "axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveLineServiceImpl.java#updateLocations"
+      ],
+      "status": "statique_chemin_et_frontieres_qualifies",
+      "conclusion": "La validation produit des mouvements correctifs ; leur réalisation actualise les positions.",
+      "limit": "Ce chemin passe par le service de mouvement et ses extensions. Le workflow complet et la valorisation restent en frontière, pas facturés automatiquement.",
+      "runtime_executed": false
+    },
+    {
+      "id": "axelor-concurrence",
+      "product": "axelor",
+      "kind": "concurrence",
+      "steps": [
+        "axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java#updateReservedQty@767",
+        "axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java#updateReservedQty@776",
+        "axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java#updateReservedQty@994"
+      ],
+      "status": "statique_chemin_et_frontieres_qualifies",
+      "conclusion": "Transaction et contrôles de quantité repérés ; le code examiné ne suffit pas à établir un verrou exclusif sur la réservation.",
+      "limit": "Garantie concurrente non démontrée : inspecter contraintes, verrouillage fourni par le runtime et éventuel protocole de retry. Ne pas déclarer Axelor dépourvu de mécanisme global.",
+      "runtime_executed": false
+    }
+  ],
+  "nodes": {
+    "erpnext/erpnext/stock/stock_ledger.py#make_entry": {
+      "repo": "erpnext",
+      "path": "erpnext/stock/stock_ledger.py",
+      "sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "symbols": [
+        {
+          "name": "make_entry",
+          "start": 308,
+          "end": 323,
+          "slice_sha256": "abc295956ef9e0bdeecefd21de4803a3206c0dd343231acde2cd8e59752d18eb"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "frappe/frappe/model/document.py#Document.submit": {
+      "repo": "frappe",
+      "path": "frappe/model/document.py",
+      "sha256": "467b5820abf3b65ff6e7862deec8ddcb3b3eaa1f829b3127371a6a8172f2cdda",
+      "commit": "2fcb9397a1f1da353b21e53d2f97ec56653acd02",
+      "symbols": [
+        {
+          "name": "Document.submit",
+          "start": 1591,
+          "end": 1594,
+          "slice_sha256": "57c98cac8f6760f9584af7eca3f77845fe00ff8dfdbc4157164135bb8f722ba1"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "frappe/frappe/model/document.py#Document._submit": {
+      "repo": "frappe",
+      "path": "frappe/model/document.py",
+      "sha256": "467b5820abf3b65ff6e7862deec8ddcb3b3eaa1f829b3127371a6a8172f2cdda",
+      "commit": "2fcb9397a1f1da353b21e53d2f97ec56653acd02",
+      "symbols": [
+        {
+          "name": "Document._submit",
+          "start": 1572,
+          "end": 1575,
+          "slice_sha256": "a62d0d62ff39573ea205594ffe2b4280e69fa13ecf385d23be8ce1926e0ab638"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "frappe/frappe/model/document.py#Document.save": {
+      "repo": "frappe",
+      "path": "frappe/model/document.py",
+      "sha256": "467b5820abf3b65ff6e7862deec8ddcb3b3eaa1f829b3127371a6a8172f2cdda",
+      "commit": "2fcb9397a1f1da353b21e53d2f97ec56653acd02",
+      "symbols": [
+        {
+          "name": "Document.save",
+          "start": 792,
+          "end": 794,
+          "slice_sha256": "eacaa9e95b75396f39c672588a31b3a6564dd4416d3e4210fe80d2b5efc30a1e"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "frappe/frappe/model/document.py#Document._save": {
+      "repo": "frappe",
+      "path": "frappe/model/document.py",
+      "sha256": "467b5820abf3b65ff6e7862deec8ddcb3b3eaa1f829b3127371a6a8172f2cdda",
+      "commit": "2fcb9397a1f1da353b21e53d2f97ec56653acd02",
+      "symbols": [
+        {
+          "name": "Document._save",
+          "start": 796,
+          "end": 855,
+          "slice_sha256": "acb8de571bce3e79f58487485d08939e0e870f8eea802082e16be40a655ba603"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "frappe/frappe/model/document.py#Document.db_update": {
+      "repo": "frappe",
+      "path": "frappe/model/document.py",
+      "sha256": "467b5820abf3b65ff6e7862deec8ddcb3b3eaa1f829b3127371a6a8172f2cdda",
+      "commit": "2fcb9397a1f1da353b21e53d2f97ec56653acd02",
+      "symbols": [
+        {
+          "name": "Document.db_update",
+          "start": 2816,
+          "end": 2859,
+          "slice_sha256": "23547ff5b43778c1d2b6f7f2a02ceb64e628ac686817b5f00184438164387d59"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "erpnext/erpnext/stock/stock_ledger.py#update_qty_in_future_sle": {
+      "repo": "erpnext",
+      "path": "erpnext/stock/stock_ledger.py",
+      "sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "symbols": [
+        {
+          "name": "update_qty_in_future_sle",
+          "start": 2575,
+          "end": 2619,
+          "slice_sha256": "340979188f04a96b4506a595865ccaa86af38b9c845e984c79934a5d1298bfe6"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "erpnext/erpnext/stock/stock_ledger.py#get_stock_reco_qty_shift": {
+      "repo": "erpnext",
+      "path": "erpnext/stock/stock_ledger.py",
+      "sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "symbols": [
+        {
+          "name": "get_stock_reco_qty_shift",
+          "start": 2622,
+          "end": 2654,
+          "slice_sha256": "f931cf8d7ce936f8d56c8cf38b9960991716eb03c65925afe194d00b18b33119"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "erpnext/erpnext/stock/stock_ledger.py#get_next_stock_reco": {
+      "repo": "erpnext",
+      "path": "erpnext/stock/stock_ledger.py",
+      "sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "symbols": [
+        {
+          "name": "get_next_stock_reco",
+          "start": 2673,
+          "end": 2705,
+          "slice_sha256": "7c80a79184b5c03e6f30476bddaec0b9ea51ff36c5fab61472debe466681d8b2"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "erpnext/erpnext/stock/stock_ledger.py#validate_negative_qty_in_future_sle": {
+      "repo": "erpnext",
+      "path": "erpnext/stock/stock_ledger.py",
+      "sha256": "5f51da095f96a010e4d821cbdca2777ef923dd63ea741c9ced82249dc88531bc",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "symbols": [
+        {
+          "name": "validate_negative_qty_in_future_sle",
+          "start": 2716,
+          "end": 2763,
+          "slice_sha256": "0b459e21ca546faf549de72cd216c6f216c94b75d4f430959ab939df379a6d4d"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "erpnext/erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py#get_available_qty_to_reserve": {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+      "sha256": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "symbols": [
+        {
+          "name": "get_available_qty_to_reserve",
+          "start": 818,
+          "end": 857,
+          "slice_sha256": "e9d7905e33b43d921239310f023a836b593629c115428e228c3365c909790257"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "erpnext/erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py#StockReservationEntry.validate_with_allowed_qty": {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+      "sha256": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "symbols": [
+        {
+          "name": "StockReservationEntry.validate_with_allowed_qty",
+          "start": 675,
+          "end": 739,
+          "slice_sha256": "a759214e6e8970f7e435180a512e20b19a04c47e1d83ba34b31d16fdea9235de"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "erpnext/erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py#StockReservationEntry.get_from_voucher_reservation_entries": {
+      "repo": "erpnext",
+      "path": "erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py",
+      "sha256": "08bfa3bdbd6542d20cd28afa83299c8a93a69019f82cc272d501178c5770cd5b",
+      "commit": "ade850bbd6a7412e9994a9637d2c5c713771632a",
+      "symbols": [
+        {
+          "name": "StockReservationEntry.get_from_voucher_reservation_entries",
+          "start": 308,
+          "end": 331,
+          "slice_sha256": "e1ea6429fdca475aaa101afc0ff6e89a911bf76de1d10e8c1b4a435a5b03d03a"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "odoo/addons/stock/models/stock_move_line.py#StockMoveLine._synchronize_quant": {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_move_line.py",
+      "sha256": "98a746a2ef3d2ba456d68fa86afb76f3bb4e01da2d9abeca17949244353e1904",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "symbols": [
+        {
+          "name": "StockMoveLine._synchronize_quant",
+          "start": 759,
+          "end": 779,
+          "slice_sha256": "eebb8780edc48fe19415482111bf24347335d927a5230515c4283b41a52dc50c"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "odoo/addons/stock/models/stock_quant.py#StockQuant._update_available_quantity": {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_quant.py",
+      "sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "symbols": [
+        {
+          "name": "StockQuant._update_available_quantity",
+          "start": 1072,
+          "end": 1140,
+          "slice_sha256": "085fe5758eb93d05d71faec272aa764e572373ac18ccd428536521105fd54f37"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "odoo/odoo/orm/models.py#write": {
+      "repo": "odoo",
+      "path": "odoo/orm/models.py",
+      "sha256": "1abb6593fd37d3febc963c7cdd4baf512128d795afad9e90906d995810a50892",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "symbols": [
+        {
+          "name": "BaseModel.write",
+          "start": 3805,
+          "end": 3991,
+          "slice_sha256": "5821814a189f35c90e87c7aa48a79c127d902350cf330bd395e3320271addb42"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "odoo/odoo/orm/fields.py#Field.write": {
+      "repo": "odoo",
+      "path": "odoo/orm/fields.py",
+      "sha256": "a13ab176dbe2ed3145bee4f4950197ad053404cc4310e45ff0c8b4d05098e1d7",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "symbols": [
+        {
+          "name": "Field.write",
+          "start": 1675,
+          "end": 1692,
+          "slice_sha256": "b7b2f59fde24283d534d664b27cc5758e82c9aecc98c732dcc6f32bef6461294"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "odoo/odoo/orm/models.py#flush_model": {
+      "repo": "odoo",
+      "path": "odoo/orm/models.py",
+      "sha256": "1abb6593fd37d3febc963c7cdd4baf512128d795afad9e90906d995810a50892",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "symbols": [
+        {
+          "name": "BaseModel.flush_model",
+          "start": 5830,
+          "end": 5842,
+          "slice_sha256": "2f267431e9042681de815b27d839647e73fb085ca98c7e5ec9a632d731618d33"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "odoo/odoo/orm/models.py#_flush": {
+      "repo": "odoo",
+      "path": "odoo/orm/models.py",
+      "sha256": "1abb6593fd37d3febc963c7cdd4baf512128d795afad9e90906d995810a50892",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "symbols": [
+        {
+          "name": "BaseModel._flush",
+          "start": 5865,
+          "end": 5910,
+          "slice_sha256": "f8a08db76966a912cdde473adcc714bb8c3fe25d9255c9c12a0ac914ccb692eb"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "odoo/odoo/orm/models.py#_write_multi": {
+      "repo": "odoo",
+      "path": "odoo/orm/models.py",
+      "sha256": "1abb6593fd37d3febc963c7cdd4baf512128d795afad9e90906d995810a50892",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "symbols": [
+        {
+          "name": "BaseModel._write_multi",
+          "start": 3997,
+          "end": 4085,
+          "slice_sha256": "d73ad4d1f6c8f93a108256f2f9ebc9105e9e00584cb6d627802ac903f0a96f57"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "odoo/addons/stock/models/stock_quant.py#StockQuant._apply_inventory": {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_quant.py",
+      "sha256": "99ffe30c435d35acd591d78cb6db33ddb47f335e5e1279c756cf969c7b97aafd",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "symbols": [
+        {
+          "name": "StockQuant._apply_inventory",
+          "start": 1031,
+          "end": 1070,
+          "slice_sha256": "48417000a26a70e49de101bfc0a8672b8283a85d877d5f9e07074b30097d979a"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "odoo/addons/stock/models/stock_move.py#StockMove._action_done": {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_move.py",
+      "sha256": "9d663d336cff509764e5c6b46dafd76646e73f02eb19d2e5d7d71771b17dec28",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "symbols": [
+        {
+          "name": "StockMove._action_done",
+          "start": 2354,
+          "end": 2436,
+          "slice_sha256": "fb1248142d6e9824170913bafe247207f55b4eed885b2cfc5ec26a074caffa99"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "odoo/addons/stock/models/stock_move_line.py#StockMoveLine._action_done": {
+      "repo": "odoo",
+      "path": "addons/stock/models/stock_move_line.py",
+      "sha256": "98a746a2ef3d2ba456d68fa86afb76f3bb4e01da2d9abeca17949244353e1904",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "symbols": [
+        {
+          "name": "StockMoveLine._action_done",
+          "start": 594,
+          "end": 730,
+          "slice_sha256": "28f074a1f18ccc74435e88ca3e920be580329074ffe4b19f034324b9b68ff815"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "odoo/odoo/orm/models.py#try_lock_for_update": {
+      "repo": "odoo",
+      "path": "odoo/orm/models.py",
+      "sha256": "1abb6593fd37d3febc963c7cdd4baf512128d795afad9e90906d995810a50892",
+      "commit": "299075f17026b830a9755f3c43f3e83143995946",
+      "symbols": [
+        {
+          "name": "BaseModel.try_lock_for_update",
+          "start": 5089,
+          "end": 5120,
+          "slice_sha256": "e7f0ad3aa57163eb091331a536d0819c7b9923610f71160eb6c521099de5fc69"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "tryton/modules/stock/move.py#Move.assign": {
+      "repo": "tryton",
+      "path": "modules/stock/move.py",
+      "sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "symbols": [
+        {
+          "name": "Move.assign",
+          "start": 875,
+          "end": 878,
+          "slice_sha256": "ac843c57dcb97e001e98f20c570fea74d4303a3914deac40bb49bebd069885c4"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "tryton/trytond/trytond/model/workflow.py#Workflow.transition": {
+      "repo": "tryton",
+      "path": "trytond/trytond/model/workflow.py",
+      "sha256": "d25258838d578f46a09356783f8483fc6151a4f6a25efdfe542388b7e22fc528",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "symbols": [
+        {
+          "name": "Workflow.transition",
+          "start": 19,
+          "end": 52,
+          "slice_sha256": "83e9f5c0abefd9acadf28c8bfa2b49e18b49515ccba0e9a3974723f4768a0860"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "tryton/trytond/trytond/model/modelsql.py#ModelSQL.write": {
+      "repo": "tryton",
+      "path": "trytond/trytond/model/modelsql.py",
+      "sha256": "a2f56ec7a10066aa4d1eb49430e1ea0f19091e53ebaae2e3ed011c03e410d31c",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "symbols": [
+        {
+          "name": "ModelSQL.write",
+          "start": 1516,
+          "end": 1610,
+          "slice_sha256": "e0f54e9e22484489a5a0c3883c1acb1aed6ec4482219061cf8dfd94f53a1f727"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "tryton/modules/stock/inventory.py#Inventory.confirm": {
+      "repo": "tryton",
+      "path": "modules/stock/inventory.py",
+      "sha256": "305d949d7165962450c6915c06692ca9322080d0778fe86be57c0452652f31bb",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "symbols": [
+        {
+          "name": "Inventory.confirm",
+          "start": 180,
+          "end": 205,
+          "slice_sha256": "54f0f9e85613bcb925a1f67977c5a6727e084c501def94a8b7344966505898ae"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "tryton/modules/stock/inventory.py#InventoryLine.get_move": {
+      "repo": "tryton",
+      "path": "modules/stock/inventory.py",
+      "sha256": "305d949d7165962450c6915c06692ca9322080d0778fe86be57c0452652f31bb",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "symbols": [
+        {
+          "name": "InventoryLine.get_move",
+          "start": 536,
+          "end": 577,
+          "slice_sha256": "faeaf6a278a96417d0d29013283b83282afa3390bf455f0775a7b49e7d23f4e6"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "tryton/modules/stock/move.py#Move.do": {
+      "repo": "tryton",
+      "path": "modules/stock/move.py",
+      "sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "symbols": [
+        {
+          "name": "Move.do",
+          "start": 880,
+          "end": 969,
+          "slice_sha256": "f1d6a690fd085c47c50622fbada56a95096a455c26b5b6e6e2d1962575896347"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "tryton/modules/stock/move.py#Move.assign_try": {
+      "repo": "tryton",
+      "path": "modules/stock/move.py",
+      "sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "symbols": [
+        {
+          "name": "Move.assign_try",
+          "start": 1168,
+          "end": 1346,
+          "slice_sha256": "eb6ac6cc66b5f09109164de041a9af7a079ad157e359dbd0eedc2700e8ecf75b"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "tryton/modules/stock/move.py#Move._assign_try_lock": {
+      "repo": "tryton",
+      "path": "modules/stock/move.py",
+      "sha256": "dc74700d04fec421f773cbe037a00e22afb49f670a2e04905c0f53e08bb08633",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "symbols": [
+        {
+          "name": "Move._assign_try_lock",
+          "start": 1348,
+          "end": 1388,
+          "slice_sha256": "d80f8b27c1bd7f58d88655d89f57d68f1b87270b1c4fba8367f678af19dfd071"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "tryton/trytond/trytond/model/modelsql.py#ModelSQL.lock": {
+      "repo": "tryton",
+      "path": "trytond/trytond/model/modelsql.py",
+      "sha256": "a2f56ec7a10066aa4d1eb49430e1ea0f19091e53ebaae2e3ed011c03e410d31c",
+      "commit": "e011222dc305c431677e586706fd241dffe02236",
+      "symbols": [
+        {
+          "name": "ModelSQL.lock",
+          "start": 2359,
+          "end": 2371,
+          "slice_sha256": "90ec75c27595b2ffe6c655f5f741675ab58ad7b978f3e1caaa6053d5fe24df3a"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java#updateLocation@137": {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java",
+      "sha256": "1519a988598214c7456bb0da20a95c1e9b3bc8e0d54c00d837aa1336c4d5e341",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "symbols": [
+        {
+          "name": "updateLocation",
+          "start": 137,
+          "end": 199,
+          "slice_sha256": "4d57f3ffa9fcf4818f4cd406e5bf91f1771f0c02f3b9f4ef8f70c120cc041848"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java#updateLocation@392": {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockLocationLineServiceImpl.java",
+      "sha256": "1519a988598214c7456bb0da20a95c1e9b3bc8e0d54c00d837aa1336c4d5e341",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "symbols": [
+        {
+          "name": "updateLocation",
+          "start": 392,
+          "end": 417,
+          "slice_sha256": "5d1cf3b0fbf4c9259dab6699a853b43bf116dbab81d65cd140f2e243b69d7e33"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "platform/axelor-core/src/main/java/com/axelor/db/JpaRepository.java#save": {
+      "repo": "platform",
+      "path": "axelor-core/src/main/java/com/axelor/db/JpaRepository.java",
+      "sha256": "647ee80715d6e641693998e17b96171d3ca03ffa995fa20f20d08c301c9467cd",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "symbols": [
+        {
+          "name": "save",
+          "start": 98,
+          "end": 109,
+          "slice_sha256": "ce436490ddbe488d1888a62552ded1b6fd5c8a8b29bf20ea32c59d5290c31953"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "platform/axelor-core/src/main/java/com/axelor/db/JPA.java#save": {
+      "repo": "platform",
+      "path": "axelor-core/src/main/java/com/axelor/db/JPA.java",
+      "sha256": "bd57774d8e7addbea8af34f29eb1d02eb1c54599b97500ca8347939f06c687ae",
+      "commit": "96caf51eb97fbab7750b7dadf10a371a55a490a3",
+      "symbols": [
+        {
+          "name": "save",
+          "start": 237,
+          "end": 242,
+          "slice_sha256": "a08bcf6c83033cb7070927946e39af75df2753a6ee8f4bcd9c256705b645fe0f"
+        }
+      ],
+      "funding_owner": "master-data-java-spring",
+      "measured_in_stock": false,
+      "master_data_proof": "audits/2026-10-30-master-data-comparable-reuse/measurements.json"
+    },
+    "axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java#generateStockMoves": {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java",
+      "sha256": "2e7a5404cc4a641c89e30cd488bea400a5f136a8b4a193b9efa98f9169d62238",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "symbols": [
+        {
+          "name": "generateStockMoves",
+          "start": 136,
+          "end": 207,
+          "slice_sha256": "025a03e6b38b7857e1bb39f65c3b208f5870223dc32ae6a09b88680f39c7a838"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java#realizeGeneratedStockMoves": {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/inventory/InventoryValidateServiceImpl.java",
+      "sha256": "2e7a5404cc4a641c89e30cd488bea400a5f136a8b4a193b9efa98f9169d62238",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "symbols": [
+        {
+          "name": "realizeGeneratedStockMoves",
+          "start": 251,
+          "end": 268,
+          "slice_sha256": "6db62c4c2720dc1f3e94bb6e28016143e69bac6e5ece6c139b31269f4b1dfcf0"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java#realize": {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveServiceImpl.java",
+      "sha256": "aca9c5174513dc091f08a3486be8dcb413baa90ca040fe2e106c554ad017c2fd",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "symbols": [
+        {
+          "name": "realize",
+          "start": 525,
+          "end": 528,
+          "slice_sha256": "501546d8bf93f2203e8998fb3b984f14f82f92b8bfdee3aab0f86635a4a59a85"
+        },
+        {
+          "name": "realize",
+          "start": 530,
+          "end": 542,
+          "slice_sha256": "eb707813f3aeb9add6e63ee459fdb45d52da671fa25cc53fbfa70aac0602c06a"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "axelor/axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveLineServiceImpl.java#updateLocations": {
+      "repo": "axelor",
+      "path": "axelor-stock/src/main/java/com/axelor/apps/stock/service/StockMoveLineServiceImpl.java",
+      "sha256": "9d9b07b31a1257daa517c661e37bc9e4f89e8ae483422b160dde4625bf3808a2",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "symbols": [
+        {
+          "name": "updateLocations",
+          "start": 670,
+          "end": 689,
+          "slice_sha256": "437216c6693f476ecab20171751c73898e3b8a7220b1aad5e5a96c4cfb8e93e3"
+        },
+        {
+          "name": "updateLocations",
+          "start": 691,
+          "end": 719,
+          "slice_sha256": "825dd2417933664812e497bba4466fcaf3358d96b0afe65b636d0c1ccbdb9ebb"
+        },
+        {
+          "name": "updateLocations",
+          "start": 721,
+          "end": 739,
+          "slice_sha256": "8da358778a46f4fb39d6bbf963266b069dd1eb6ce8feb4c9906911755758ba3c"
+        },
+        {
+          "name": "updateLocations",
+          "start": 741,
+          "end": 762,
+          "slice_sha256": "e1116b31d700677e894b70afc2e90124f4754e31b5b9af3561fb40ad8e9706ce"
+        },
+        {
+          "name": "updateLocations",
+          "start": 764,
+          "end": 785,
+          "slice_sha256": "159c52a0bc88958cec125cd18c22536117883674dd00811da2b03867c2dd63d7"
+        },
+        {
+          "name": "updateLocations",
+          "start": 787,
+          "end": 825,
+          "slice_sha256": "bcd8f920946c1f681428e58328bb23fc6b87c84200da5b388f2bdc6547c99954"
+        },
+        {
+          "name": "updateLocations",
+          "start": 1264,
+          "end": 1386,
+          "slice_sha256": "e450912264e4033837d66c01e8cdf1c674e3eb98afe8c52bf22ea45ed6d40149"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java#updateReservedQty@767": {
+      "repo": "axelor",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java",
+      "sha256": "802af7215c841703ce10b9956101d1d10bc1cbd360cba2b7d72c40feeb8943d9",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "symbols": [
+        {
+          "name": "updateReservedQty",
+          "start": 767,
+          "end": 775,
+          "slice_sha256": "ca537623a01992694280e5c92c776f6d1c7b420851802f91a99e9716c46358e2"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java#updateReservedQty@776": {
+      "repo": "axelor",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java",
+      "sha256": "802af7215c841703ce10b9956101d1d10bc1cbd360cba2b7d72c40feeb8943d9",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "symbols": [
+        {
+          "name": "updateReservedQty",
+          "start": 777,
+          "end": 816,
+          "slice_sha256": "2ae08757d9b20e0fa56277d7396d2a7e8549a20928989044155e0cfaeda0413f"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    },
+    "axelor/axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java#updateReservedQty@994": {
+      "repo": "axelor",
+      "path": "axelor-supplychain/src/main/java/com/axelor/apps/supplychain/service/ReservedQtyServiceImpl.java",
+      "sha256": "802af7215c841703ce10b9956101d1d10bc1cbd360cba2b7d72c40feeb8943d9",
+      "commit": "e7cbea53bae88d2540f59a70b09bf0f326f1022e",
+      "symbols": [
+        {
+          "name": "updateReservedQty",
+          "start": 995,
+          "end": 1020,
+          "slice_sha256": "e4a0aa23d0a22bd03fe7137b77edb370d7b8f258b1738e9b6f823a04d77f8053"
+        }
+      ],
+      "funding_owner": "stock_candidate_or_external_boundary",
+      "measured_in_stock": "only_if_explicit_in_measured_selection",
+      "master_data_proof": null
+    }
+  },
+  "trace_count": 12,
+  "static_only": true,
+  "shared_platform_code_recharged": false
+}

@@ -79,8 +79,8 @@ class EstimationCalculationTests(unittest.TestCase):
         for slug in ('java-spring','dotnet','rust'):
             self.assertFalse(active_doc(slug)['core'])
         study=study_copy()
-        self.assertEqual(study.baseline['options'][0]['build'],944000)
-        self.assertEqual(len(study.content['business_map']['family_funding']),1)
+        self.assertEqual(study.baseline['options'][0]['build'],4198680)
+        self.assertEqual(len(study.content['business_map']['family_funding']),11)
         self.assertFalse(study.content['business_map']['funding'])
 
 if __name__=='__main__':unittest.main()

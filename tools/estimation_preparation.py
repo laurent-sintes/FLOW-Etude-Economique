@@ -23,8 +23,21 @@ def close(a, b, name):
     require(math.isclose(a, b, rel_tol=1e-10, abs_tol=1e-9), 'Reconciliation failed: ' + name)
 
 
-def prepare(documents, contract, registry, formula):
+def prepare(documents, contract, registry, formula, use_cache=False):
     """Pure adapter; documents and formulas may come from the single YAML export."""
+    if contract['recipe'] == 'professional_components_v1':
+        from estimation_professional import prepare_professional
+        return prepare_professional(documents, contract, registry, formula, use_cache=use_cache)
+    if contract['recipe'] == 'coherent_components_v1':
+        from estimation_components import prepare_components
+        return prepare_components(documents, contract, registry, formula, use_cache=use_cache)
+    if contract['recipe'] == 'native_new_module_analogies_v1':
+        from estimation_ownership import prepare_ownership
+        return prepare_ownership(documents, contract, registry, formula)
+    if contract['recipe'] == 'native_component_analogies_v1':
+        from estimation_stock import prepare_stock
+        return prepare_stock(documents, contract, registry, formula)
+    require(contract['recipe'] == 'native_reuse_plus_complements_v1', 'Unsupported preparation recipe')
     d = {k: deepcopy(documents[path]) for k, path in contract['inputs'].items()}
     baseline, ni, m, p = (d[k] for k in ('baseline', 'native_inputs', 'native_measures', 'complement_inputs'))
     require({x['id'] for x in contract['scope']['capabilities']} == set(ni['scope']['capabilities_in_family']), 'Native evidence belongs to a different capability scope')

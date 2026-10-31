@@ -1,0 +1,162 @@
+version: 1
+id: professional-product-proposal
+status: retained
+stack: java-spring
+inputs:
+  path: audits/2026-10-30-audit-fonctions-transverses/proposal-inputs.json
+  sha256: 638fcfb215f6ae8a2e48145500a14b80fd979fc42e6d092b100658390a63f420
+reading:
+  title: Estimation retenue du produit professionnel
+  note: Cette estimation est adoptée et intégrée aux simulations. Elle remplace Process Management et finance les
+    compléments professionnels identifiés, sans doubler les mécanismes déjà retenus.
+  total: Total retenu
+  cost: Coût de construction retenu
+  adopted: Total retenu avant cet élargissement
+  purpose: Finalité des fonctions
+  roles: JH retenus par rôle
+  month_note: Délais COCOMO locaux, non additionnables. Le repère nominal global est calculé à partir de l’effort
+    total ; il ne remplace pas un ordonnancement des lots ni le calendrier provisoire de référence.
+  jh: JH
+  months: mois
+  assumptions: Hypothèses déterminantes
+  sensitivities: Effet des hypothèses sur le total retenu
+  sensitivity_note: Une hypothèse varie à la fois, toutes les autres restent fixes. Ces impacts ne sont ni des probabilités
+    ni une fourchette statistique.
+  comparisons: Lectures comparatives des quatre OSS
+  cosmic: Contrôle fonctionnel prévisionnel COSMIC × ISBSG
+  cosmic_note: Les CFP sont des hypothèses explicites de processus et mouvements de données. Les nouvelles interfaces
+    utilisant un processus déjà compté ne créent pas automatiquement de CFP supplémentaires. Les résultats par lots
+    ne sont pas une mesure COSMIC intégrée du Core complet.
+  business: Runtime et outils métier
+  it: Fonctions IT complémentaires
+  partition_note: La part IT déjà financée dans Master Data est attribuée par lots de travail identifiés et conservée
+    dans les 1 500 JH. Tous les rôles contribuent aux deux finalités ; aucune catégorie de rôle ne détermine la
+    finalité.
+  proposal: Estimation adoptée
+  delta: Variation du total
+  value: Hypothèse testée
+  module: Composant
+  effort: Charge
+  schedule: Délai local calculé
+  role: Rôle
+  source: Calculs et preuves dans le téléchargement du modèle
+  nominal_schedule: Repère nominal global calculé à partir de l’effort
+  alignment_note: Le contrôle COSMIC est nettement plus bas. Les écarts restent non réconciliés ; le rendement historique
+    à 20 h/CFP n’est pas calibré pour les studios, interfaces et réutilisations de cette proposition.
+  matching_pdr: Rendement en heures par CFP nécessaire pour rejoindre COCOMO sur Process Management
+  current_plan: Calendrier de référence conservé
+  average_team: Personnes en moyenne à capacité productive constante
+  people: personnes
+  progress: Avancement du périmètre déclaré
+  progress_note: Les 88 capacités restent couvertes. Les 20 familles professionnelles inventoriées sont rattachées
+    aux lots retenus ; cette couverture de périmètre ne mesure pas une précision statistique.
+  grouping: Effet du regroupement en un projet COCOMO unique
+  grouping_note: Le total proposé additionne des unités cohérentes, comme la référence adoptée. Un calcul unique
+    sur leur taille équivalente totale est plus élevé. Cette différence est une limite de modélisation et ne représente
+    pas de nouveaux travaux à ajouter automatiquement.
+  code_size: Taille logique équivalente proposée, distincte de lignes physiques Java
+  difference_jh: Différence en JH
+  difference_pct: COSMIC comparé à COCOMO (%)
+  raw_reference: Référence COCOMO avant arrondi
+  alignment_denominator: Les pourcentages utilisent la référence COCOMO avant arrondi comme dénominateur.
+  module_fraction_note: Une fraction de 0,5 signifie une moitié de la taille du composant analogue comme code équivalent
+    à composer ou adapter. Elle ne signifie ni moitié de ses fonctions, ni moitié de sa charge historique.
+  declarative_weight_label: Poids des descriptions d’écrans et de modèles
+  cocomo_column: COCOMO II
+  cosmic_column: COSMIC × ISBSG
+  cfp_label: CFP
+technical_trials:
+  id: temporal-mining-2026-10-31
+  evaluated_on: '2026-10-31'
+  status: targeted_trials_completed
+  effort_effect: unchanged
+  evidence:
+    path: audits/2026-10-31-essais-temporal-mining/technical-evidence.json
+    sha256: 257152db93cc93ff77e3044f0b8d10aee510363f22855c1955d836d07ba9537c
+  reading:
+    title: Essais ciblés Temporal, PM4JS et Superset
+    conclusion: L’assemblage fonctionne sur des données fictives avec un catalogue de processus borné. Le chiffrage
+      professionnel est adopté. Ces essais ne calibrent pas les fractions de code ni le rendement en JH.
+    checks: Contrôles réussis sur les cas d’essai
+    observed: Ce qui devient moins incertain
+    remaining: Ce qui reste à éprouver
+    funding: Rattachement aux lots déjà proposés
+    stop: 'Arrêt de cette série d’essais : répéter les mêmes cas n’améliorerait plus le chiffrage. Une nouvelle
+      itération devient utile si le catalogue, les règles de migration des dossiers ouverts ou les volumes attendus
+      changent.'
+  runtime_versions:
+  - Temporal CLI 1.9.1, SDK Java 1.36.0, serveur de développement SQLite
+  - Java 21, Spring 6.2.12 avec BOM Spring Boot 3.5.7
+  - PM4JS, commit 3eb7378dd5db8db72d7474454d69a455855b9e25
+  - Apache Superset 6.1.0 avec contraintes officielles de dépendances, SDK embarqué 0.4.0
+  observations:
+  - id: temporal
+    label: Exécution et versions des processus
+    detail: Publication depuis un écran, ajout d’un contrôle sans redéploiement du worker, maintien de l’ancienne
+      définition pour les dossiers ouverts, validation humaine, refus, temporisation, retry et compensation. La
+      reprise après arrêt brutal du serveur et du worker conserve l’historique sur SQLite.
+  - id: mining
+    label: Historique, corrections et conformité
+    detail: 'Projection d’historiques Temporal réels de l’essai, dédoublonnage, corrections tardives et lecture
+      à une date connue. PM4JS calcule fréquences, durées et conformité. Un graphe des successions ne suffit pas
+      aux tâches parallèles : un modèle de processus versionné est nécessaire.'
+  - id: superset
+    label: Tableaux de bord intégrés
+    detail: Les mesures PM4JS sont restituées dans Superset. Le SDK officiel renouvelle le jeton. Les essais entre
+      deux organisations séparent les données, y compris avec le cache, lorsque le serveur impose les filtres d’accès
+      aux lignes.
+  - id: limits
+    label: Responsabilités Flow confirmées
+    detail: 'Temporal ne rend pas seul les effets externes uniques : les adaptateurs doivent traiter les doublons.
+      Superset exige des jetons limités à l’organisation et des jeux de données dont toutes les colonnes sont autorisées.
+      Les contrôles de version, projections et autorisations restent du travail Flow.'
+  funding:
+  - requirement: Interprétation du catalogue, publication, versions et reprise
+    module_refs:
+    - process-studio
+    basis: L’adaptateur Temporal, la validation et la publication appartiennent déjà à ce lot. L’essai ne remplace
+      pas le studio complet.
+  - requirement: Validation humaine et rendu des formulaires
+    module_refs:
+    - human-forms
+    basis: Le contrat de tâche est consommé par le portail. Le prototype ne démontre pas un générateur complet de
+      formulaires.
+  - requirement: Projection, corrections, conformité et tableaux de bord
+    module_refs:
+    - analytics-mining
+    basis: PM4JS et Superset fournissent les noyaux. Le modèle de traces, les adaptateurs et le contrôle des tâches
+      parallèles sont dans la couche Flow déjà proposée.
+  - requirement: Identités, filtres de données et effets externes sans doublon
+    module_refs:
+    - admin-security
+    - operations-lifecycle
+    basis: Consommer les mécanismes Master Data déjà financés ; financer une seule fois l’intégration produit des
+      habilitations et de la reprise. Les identités de l’essai sont simulées.
+  remaining:
+  - 'Étendue et ergonomie des studios, catalogue des actions et formulaires : le témoin est volontairement borné,
+    sans validation d’usage par le métier.'
+  - 'Migration des dossiers déjà ouverts : le maintien de leur ancienne version est éprouvé ; une migration arbitraire
+    entre versions ne l’est pas.'
+  - 'Volumétrie, haute disponibilité, reprise d’un cluster, authentification réelle et intégration Beaumanoir :
+    ces essais locaux ne les démontrent pas.'
+  - Le comptage COSMIC prévisionnel et la référence ISBSG restent inchangés. Le désaccord avec COCOMO ne diminue
+    pas avec ces essais techniques.
+  - Les fractions de composants restent des hypothèses par analogie, sans bilan de projet pour les calibrer. Aucune
+    précision statistique n’est déduite des contrôles réussis.
+adoption:
+  decision_date: '2026-10-31'
+  basis:
+    path: audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
+    sha256: 76a9fdec02eb1b829df0beeb1085834509135849f8402a79952392c787c0e0c1
+  unit_ids:
+  - master-data-java-spring
+  - stock-java-spring
+  - inventory-ownership-java-spring
+  - supply-controls-java-spring
+  - orders-java-spring
+  - master-plan-java-spring
+  - supply-decisions-java-spring
+  - service-fulfilment-java-spring
+  - process-management-java-spring
+  - supply-workbenches-java-spring
+  - professional-it-java-spring

@@ -1,0 +1,25 @@
+import {createRequire} from 'node:module';import fs from 'node:fs/promises';import assert from 'node:assert/strict';
+const require=createRequire(import.meta.url),{chromium}=require('C:/Users/laure/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const out='audits/2026-10-31-essais-temporal-mining/results',checks=[],errors=[];const browser=await chromium.launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});const page=await browser.newPage({viewport:{width:1440,height:1050}});page.on('pageerror',e=>errors.push(String(e)));
+function check(id,ok,detail){checks.push({id,passed:!!ok,detail});assert.ok(ok,id+': '+JSON.stringify(detail));}
+try{
+ await page.goto('http://127.0.0.1:18980');await page.locator('#versions .node').first().waitFor();
+ const priorVersions=await page.locator('#versions .node').count();const run='browser-'+Date.now();await page.locator('#name').fill('Validation autonome '+run);await page.locator('#notification').selectOption('express');await page.locator('#control').check();await page.locator('#publish').click();
+ await page.waitForFunction(n=>document.querySelectorAll('#versions .node').length>n,priorVersions);await page.waitForFunction(n=>Number(document.getElementById('version').value)>n,priorVersions);const v=Number(await page.locator('#version').inputValue());await page.locator('#caseId').fill(run);await page.locator('#start').click();
+ for(let i=0;i<50;i++){await page.locator('#refresh').click();if((await page.locator('#result').innerText()).includes('WAITING'))break;await page.waitForTimeout(100);}
+ check('business-editor-publishes-and-starts-version', (await page.locator('#result').innerText()).includes('WAITING'),v);await page.locator('#persona').selectOption('gestionnaire-A');await page.locator('#approve').click();
+ for(let i=0;i<50;i++){await page.locator('#refresh').click();if((await page.locator('#result').innerText()).includes('COMPLETED'))break;await page.waitForTimeout(100);}
+ const state=await page.locator('#result').innerText();check('human-portal-completes-edited-definition',state.includes('COMPLETED')&&state.includes('verifier_capacite')&&state.includes('notifier_express'),JSON.parse(state));await page.screenshot({path:out+'/studio.png',fullPage:true});
+ const responses=[];page.on('response',async r=>{if(r.url().includes('/api/v1/chart/data')&&r.status()===200){try{const d=await r.json();responses.push({url:r.url(),rows:d.result?.[0]?.data??[],cached:d.result?.[0]?.is_cached});}catch{}}});
+ await page.goto('http://127.0.0.1:18989');await page.locator('iframe').waitFor();
+ for(let i=0;i<90&&!responses.some(r=>r.rows[0]?.source);i++)await page.waitForTimeout(500);
+ check('official-sdk-renders-real-superset-chart',responses.length>0,{responses:responses.length,frameUrls:page.frames().map(f=>f.url()),errors});
+ check('embedded-A-sees-only-A',responses.length>=2&&responses.every(r=>r.rows.length>0&&r.rows.every(x=>x.organisation==='A')),{charts:responses.length});check('browser-displays-calculated-PM4JS-metrics',responses.some(r=>r.rows[0]?.source&&typeof r.rows[0].mean_seconds==='number'));await page.screenshot({path:out+'/superset-A.png',fullPage:true});
+ const countBefore=await (await page.request.get('http://127.0.0.1:18989/counts')).json();for(let i=0;i<70;i++){const counts=await(await page.request.get('http://127.0.0.1:18989/counts')).json();if(counts.A>countBefore.A)break;await page.waitForTimeout(500);}
+ const countAfter=await(await page.request.get('http://127.0.0.1:18989/counts')).json();check('official-sdk-renews-short-lived-guest-token',countAfter.A>countBefore.A,{before:countBefore,after:countAfter});
+ const previous=responses.length;await page.locator('#org').selectOption('B');for(let i=0;i<80&&!responses.slice(previous).some(r=>r.rows[0]?.source);i++)await page.waitForTimeout(500);
+ check('embedded-B-after-A-sees-only-B',responses.slice(previous).some(r=>r.rows[0]?.source)&&responses.slice(previous).every(r=>r.rows.length>0&&r.rows.every(x=>x.organisation==='B')),responses.at(-1));await page.screenshot({path:out+'/superset-B.png',fullPage:true});
+ const forged=await page.request.post('http://127.0.0.1:18989/token',{headers:{'X-Trial-User':'lecteur-A'},data:{dashboard:'trial-mining',rls:"1=1"}});check('fixture-broker-rejects-client-supplied-RLS',forged.status()===403,forged.status());
+ check('browser-no-uncaught-JS-errors',errors.length===0,errors);
+ await fs.writeFile(out+'/browser.json',JSON.stringify({status:'passed',date:'2026-10-31',checks,errors,chartResponses:responses.map(r=>({...r,rows:r.rows.length,organisations:[...new Set(r.rows.map(x=>x.organisation))]})),limits:['Identity selector is a fixture, not authentication.','Bounded editor is a witness, not a complete graphical studio or a usability validation.','Superset uses its actual HTTP app and official embedded SDK 0.4.0.']},null,2));console.log(JSON.stringify({status:'passed',checks:checks.length,errors}));
+}finally{await browser.close();}

@@ -82,7 +82,8 @@ def alignment(candidate, reference):
 
 def rounded(value, step):
     if step <= 0: raise ValueError('Invalid rounding step')
-    return int((Decimal(str(value))/Decimal(str(step))).quantize(Decimal('1'),rounding=ROUND_HALF_UP))*step
+    result=(Decimal(str(value))/Decimal(str(step))).quantize(Decimal('1'),rounding=ROUND_HALF_UP)*Decimal(str(step))
+    return int(result) if result==result.to_integral_value() else float(result)
 
 
 @scoped_model
@@ -95,10 +96,10 @@ def calculate(binding):
 @model_memo
 def _calculate(calculation_id):
     binding = {'id': calculation_id}
-    from estimation_inputs import contract, load_proofs
+    from estimation_inputs import contract, _frozen_calculation_proofs
     from estimation_preparation import prepare
     specification, registry = contract(binding)
-    prepared = prepare(load_proofs(registry), specification, registry, formula)
+    prepared = prepare(_frozen_calculation_proofs(registry), specification, registry, formula, use_cache=True)
     c, inputs = prepared['cocomo'], prepared['allocation']
     E = formula('cocomo_exponent',B=c['B'],SF_sum=c['SF_sum'])
     F = formula('schedule_exponent',D=c['D'],E=E,B=c['B'])
@@ -109,29 +110,36 @@ def _calculate(calculation_id):
     for r in rows:r.update(alignment(r['jh'],anchor['jh']))
     months=formula('cocomo_schedule',C=c['C'],JH=total,effort_phase_factor=c['effort_phase_factor'],
         day_hours=c['day_hours'],month_hours=c['month_hours'],SCED=c['SCED'],F=F,schedule_phase_factor=c['schedule_phase_factor'])
-    activities=[]; roles={key:0. for key in inputs['role_labels']}
-    phases=prepared['activity_source']['phase_effort_percent_of_base']
-    for a in prepared['activity_source']['activities']:
-        weights=inputs['activity_role_weights'][a['id']]
-        if not math.isclose(sum(weights.values()),1) or not set(weights)<=set(a['possible_flow_roles']):
-            raise ValueError('Invalid activity to role allocation')
-        effort=total*sum(x*y for x,y in zip(phases,a['percent_by_phase']))/100/sum(phases)
-        activities.append(dict(id=a['id'],label=a['label'],jh=effort,role_weights=weights,
-                               published_percent_by_phase=a['percent_by_phase']))
-        for role,weight in weights.items():roles[role]+=effort*weight
-    if not math.isclose(sum(roles.values()),total):raise ValueError('Activity total drift')
-    step=inputs['role_rounding_jh']
-    allocated={k:math.floor(v/step)*step for k,v in roles.items()}
-    order=sorted(roles,key=lambda k:(-(roles[k]/step-math.floor(roles[k]/step)),k))
-    for role in order[:round((total-sum(allocated.values()))/step)]:allocated[role]+=step
-    if sum(allocated.values())!=total:raise ValueError('Role rounding total drift')
+    if 'role_effort_jh' in inputs:
+        allocated=dict(inputs['role_effort_jh'])
+        if set(allocated)!=set(inputs['role_labels']) or any(type(v) not in (int,float) or not math.isfinite(v) or v<0 for v in allocated.values()) or sum(allocated.values())!=total:
+            raise ValueError('Explicit professional role allocation drift')
+        phases=prepared['activity_source']['phase_effort_percent_of_base']
+        activities=[dict(id=a['id'],label=a['label'],jh=total*sum(x*y for x,y in zip(phases,a['percent_by_phase']))/100/sum(phases),role_weights={},published_percent_by_phase=a['percent_by_phase'],role_allocation_basis=inputs['role_allocation_basis']) for a in prepared['activity_source']['activities']]
+    else:
+        activities=[]; roles={key:0. for key in inputs['role_labels']}
+        phases=prepared['activity_source']['phase_effort_percent_of_base']
+        for a in prepared['activity_source']['activities']:
+            weights=inputs['activity_role_weights'][a['id']]
+            if not math.isclose(sum(weights.values()),1) or not set(weights)<=set(a['possible_flow_roles']):
+                raise ValueError('Invalid activity to role allocation')
+            effort=total*sum(x*y for x,y in zip(phases,a['percent_by_phase']))/100/sum(phases)
+            activities.append(dict(id=a['id'],label=a['label'],jh=effort,role_weights=weights,
+                                   published_percent_by_phase=a['percent_by_phase']))
+            for role,weight in weights.items():roles[role]+=effort*weight
+        if not math.isclose(sum(roles.values()),total):raise ValueError('Activity total drift')
+        step=inputs['role_rounding_jh']
+        allocated={k:math.floor(v/step)*step for k,v in roles.items()}
+        order=sorted(roles,key=lambda k:(-(roles[k]/step-math.floor(roles[k]/step)),k))
+        for role in order[:round((total-sum(allocated.values()))/step)]:allocated[role]+=step
+        if sum(allocated.values())!=total:raise ValueError('Role rounding total drift')
     comparison = dict(specification['comparison'])
     comparison['scope_status'] = 'partial_scope' if any(r['classification'] in ('native_excess','unknown') for r in comparison['scope_rows']) else 'declared_scope'
     comparison_status = comparison['scope_status'] + '_' + comparison['activity_status'] + '_activities_' + comparison['service_status'] + '_service'
     maximum,minimum=max(r['jh'] for r in rows),min(r['jh'] for r in rows)
-    return dict(method='COCOMO II',total_jh=total,months=rounded(months,1),unrounded_months=months,
+    return dict(method='COCOMO II',total_jh=total,months=rounded(months,inputs.get('schedule_rounding_months',1)),unrounded_months=months,
         roles=allocated,activities=activities,activity_source=prepared['activity_source'],
-        trace=prepared['trace'],funding=[m for m in registry['mechanisms'] if m['id'] in {x['mechanism'] for x in specification['funding_claims']}],
+        trace=prepared['trace'],funding=[dict(m,funding_mode=next(x['mode'] for x in specification['funding_claims'] if x['mechanism']==m['id'])) for m in registry['mechanisms'] if m['id'] in {x['mechanism'] for x in specification['funding_claims']}],
         consolidation=registry['consolidation'],
         alignment=dict(reference_id=anchor['id'],reference_label=anchor['label'],reference_jh=anchor['jh'],
             rows=rows,functional=dict(id='cosmic-isbsg',label='COSMIC × ISBSG',jh=functional,**alignment(functional,anchor['jh'])),

@@ -1,11 +1,10 @@
-# Modèle source éditable. Même schéma pour Make et Buy.
 version_schema: 1
 id: java-spring-make
 nom: Java / Spring Boot
 strategie: make
-date_documentation: '2026-10-22'
-description: Backend Java, moteurs métier JVM et frontend React. Services techniques externes explicitement distingués
-  du backend.
+date_documentation: '2026-10-30'
+description: Backend Java, moteurs métier JVM et API Java des noyaux natifs OR-Tools, frontend React. Services techniques
+  externes explicitement distingués du backend.
 conventions:
 - Description d’une stack de travail, sans chiffrage global ni calendrier.
 - Les prix de produits sont à qualifier ; les TJM rémunèrent les interventions humaines.
@@ -197,10 +196,13 @@ elements:
     inclus_dans: []
     precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
   limites: Le produit métier de Case Management reste à assembler. Ne pas inclure gratuitement les écrans riches,
-    la plateforme low-code et les fonctions de l’édition commerciale.
+    la plateforme low-code et les fonctions de l’édition commerciale. La distribution OSS 7 a retiré les applications
+    UI et les moteurs Form/Content ; les anciennes interfaces OSS 6 et les offres commerciales ne sont pas des composants
+    gratuits actuels présumés.
   sources:
   - FLOWABLE
   - FLOWABLE_ED
+  - FLOWABLE_7_SCOPE
 - id: drools
   nom: Drools
   couche: moteur_metier
@@ -235,6 +237,25 @@ elements:
     le solveur libre aux services commerciaux Timefold.
   sources:
   - TIMEFOLD
+- id: ortools
+  nom: Google OR-Tools
+  couche: moteur_metier
+  edition: OSS, API Java
+  description: Solveurs de contraintes, affectation, ordonnancement et routage appelables depuis Java.
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Droit d’usage sans redevance. Réalisation, hébergement, exploitation et support non inclus.
+  limites: Noyaux natifs C++ avec API Java. Les modèles Supply, objectifs, contraintes, packaging et validation
+    sont des travaux applicatifs. Leur adaptation est financée dans l’unité de décision, sans reconstruction du
+    solveur.
+  sources:
+  - ORTOOLS_JAVA
+  - ORTOOLS_LICENSE
 - id: camel
   nom: Apache Camel
   couche: framework
@@ -252,6 +273,95 @@ elements:
     afin de ne pas les réaliser deux fois.
   sources:
   - CAMEL
+- id: temporal
+  nom: Temporal OSS et SDK Java
+  couche: moteur_metier
+  edition: Serveur autohébergé et SDK Java OSS
+  description: Exécution durable des workflows écrits en code, attentes, signaux, reprises et suivi technique ;
+    option privilégiée par le sponsor à examiner pour Process Management.
+  deploiement: service_autogere
+  fondement: proposition
+  licence: MIT (serveur) ; Apache-2.0 (SDK Java)
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Édition OSS sans redevance de licence commerciale. Intégration, hébergement, exploitation et support
+      restent à dimensionner ; aucun JH ajouté ou retiré ici.
+  limites: Alternative à Flowable, sans cumul. Le runtime Temporal est réutilisé dans le lot Process Management
+    retenu, qui finance le studio borné, les tâches, formulaires et adaptateurs. Les essais de versions et de reprise
+    sont conservés ; les garanties et versions de production restent à qualifier.
+  sources:
+  - TEMPORAL_DOCS
+  - TEMPORAL_LICENSE
+  - TEMPORAL_JAVA_LICENSE
+- id: pm4js
+  nom: PM4JS
+  couche: moteur_metier
+  edition: Bibliothèque OSS JavaScript
+  description: 'Algorithmes de Process Mining : découverte de parcours, graphes de fréquence/performance, conformité
+    et journaux liés aux objets. Candidat utilisable avec le frontend React ou un service Node séparé.'
+  deploiement: bibliotheque
+  fondement: proposition
+  licence: BSD-3-Clause
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Édition OSS sans redevance de licence commerciale. Intégration, hébergement, exploitation et support
+      restent à dimensionner ; aucun JH ajouté ou retiré ici.
+  limites: Bibliothèque d’algorithmes, pas un produit métier livré. La corrélation Case/commande/tâche, les deux
+    dates et corrections, les populations, droits, vues et performances restent à vérifier et intégrer. Maintenance,
+    dépendances et volumes à qualifier ; ne pas affirmer une aptitude en production depuis la documentation seule.
+    Alternative à PM4Py, pas deux réalisations de la même fonction.
+  sources:
+  - PM4JS_DOCS
+  - PM4JS_LICENSE
+- id: pm4py
+  nom: PM4Py
+  couche: moteur_metier
+  edition: Bibliothèque OSS Python, alternative à PM4JS
+  description: Algorithmes de découverte, conformité et analyse de processus, y compris journaux centrés objets
+    ; alternative de Process Mining à examiner si PM4JS ne couvre pas les besoins.
+  deploiement: service_autogere
+  fondement: proposition
+  licence: AGPL-3.0-or-later
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Édition OSS sans redevance de licence commerciale. Intégration, hébergement, exploitation et support
+      restent à dimensionner ; aucun JH ajouté ou retiré ici.
+  limites: Composant Python séparé du backend Java. Conditions AGPL et dépendances à examiner pour le mode de distribution
+    et d’exploitation retenu ; aucune compatibilité juridique globale présumée. Pas de portail métier ni tableaux
+    de bord Flow fournis par la bibliothèque seule. Alternative à PM4JS, sans double financement ni licence commerciale
+    ajoutée par défaut.
+  sources:
+  - PM4PY_DOCS
+  - PM4PY_LICENSE
+- id: superset
+  nom: Apache Superset
+  couche: moteur_metier
+  edition: Apache OSS autohébergé
+  description: Création et consultation de tableaux de bord et graphiques sur des jeux de données SQL ; SDK d’intégration
+    des tableaux de bord dans le frontend Flow.
+  deploiement: service_autogere
+  fondement: proposition
+  licence: Apache-2.0
+  tarification:
+    regime: sans_redevance
+    assiette: null
+    inclus_dans: []
+    precision: Édition OSS sans redevance de licence commerciale. Intégration, hébergement, exploitation et support
+      restent à dimensionner ; aucun JH ajouté ou retiré ici.
+  limites: Service Python/React distinct du backend Java. Les données du journal métier, les mesures Supply, l’authentification,
+    les droits par population et l’intégration des vues sont à réaliser. Les tableaux de bord ne fournissent pas
+    à eux seuls les algorithmes de Process Mining. Hébergement et exploitation à chiffrer ; aucun budget supplémentaire
+    implicite.
+  sources:
+  - SUPERSET_DOCS
+  - SUPERSET_EMBED
+  - SUPERSET_LICENSE
 interventions:
   unite: EUR_HT_par_JH
   marche: France
@@ -278,7 +388,8 @@ interventions:
       haut: 650
       nature: hypothese_de_cadrage
       niveau_preuve: faible
-      justification: QA senior Paris Silkhom 2025, 530–700 €/JH. Référence basse dans cette plage ; pas de preuve d'une prime Java spécifique.
+      justification: QA senior Paris Silkhom 2025, 530–700 €/JH. Référence basse dans cette plage ; pas de preuve
+        d'une prime Java spécifique.
       sources:
       - SILKHOM
     architecte:
@@ -287,7 +398,8 @@ interventions:
       haut: 1000
       nature: hypothese_de_cadrage
       niveau_preuve: faible
-      justification: ForTeam Architecture SI et Tech Lead 850–1 000 €/JH confirmé et 920–1 180 senior/expert. Référence de cadrage à 900 pour l'architecture transverse Java/cloud ; pas de cotation FLOW.
+      justification: ForTeam Architecture SI et Tech Lead 850–1 000 €/JH confirmé et 920–1 180 senior/expert. Référence
+        de cadrage à 900 pour l'architecture transverse Java/cloud ; pas de cotation FLOW.
       sources:
       - FORTEAM
     support_utilisateur:
@@ -330,6 +442,10 @@ points_ouverts:
 - Chaîne CI/CD, gestion des secrets, stockage de supervision et contrats de support à préciser.
 - Les coûts logiciels et cloud ne sont pas chiffrés ; aucune gratuité globale n’est déduite des licences OSS.
 - Délimiter le DMN Flowable et Drools ; vérifier les fonctions réservées aux éditions commerciales.
+- Le lot Process Management retenu comprend portail de tâches, formulaires, éditeur métier borné, Process Mining
+  et tableaux de bord. Consulter les calculs actifs, les hypothèses et les essais pour ses limites.
+- Temporal est l’option privilégiée à examiner, Flowable reste une alternative. PM4JS et PM4Py sont deux candidats
+  alternatifs pour le mining ; leur présence ne crée ni budget ni cumul de moteurs.
 sources:
   CADRE:
     titre: Choix de modélisation de cette première version
@@ -416,3 +532,73 @@ sources:
     nature: barometre
     reference: https://www.forteam-it.com/ressources/grille-tjm
     repere: 'SAP : 750–950 confirmé, 950–1 250 senior/expert ; backend senior/expert : 680–880 ; fourchettes indicatives'
+  ORTOOLS_JAVA:
+    titre: Google OR-Tools — API Java
+    nature: documentation_officielle
+    reference: https://developers.google.com/optimization/introduction/java
+    repere: Documentation consultée le 30 octobre 2026 ; variables, contraintes, objectifs et appel du solveur en
+      Java.
+  ORTOOLS_LICENSE:
+    titre: Google OR-Tools — licence
+    nature: documentation_officielle
+    reference: https://github.com/google/or-tools/blob/stable/LICENSE
+    repere: Apache License 2.0 ; source consultée le 30 octobre 2026.
+  TEMPORAL_DOCS:
+    titre: Temporal — définition des workflows
+    nature: documentation_officielle
+    reference: https://docs.temporal.io/workflow-definition
+    repere: Consulté le 30 octobre 2026. Workflows définis en code ; option moteur à examiner, pas éditeur métier
+      autonome.
+  TEMPORAL_LICENSE:
+    titre: Temporal OSS — licence serveur
+    nature: documentation_officielle
+    reference: https://github.com/temporalio/temporal/blob/main/LICENSE
+    repere: Consulté le 30 octobre 2026. MIT, distincte de la licence du SDK Java.
+  TEMPORAL_JAVA_LICENSE:
+    titre: Temporal — licence SDK Java
+    nature: documentation_officielle
+    reference: https://github.com/temporalio/sdk-java/blob/master/LICENSE
+    repere: Consulté le 30 octobre 2026. Apache-2.0.
+  PM4JS_DOCS:
+    titre: PM4JS — documentation des algorithmes
+    nature: documentation_officielle
+    reference: https://github.com/pm4js/pm4js-core/blob/main/DOCS.md
+    repere: Consulté le 30 octobre 2026. Découverte, conformité, DFG de performance et OCEL ; aptitude et performances
+      Flow non testées.
+  PM4JS_LICENSE:
+    titre: PM4JS — licence
+    nature: documentation_officielle
+    reference: https://github.com/pm4js/pm4js-core/blob/main/LICENSE
+    repere: Consulté le 30 octobre 2026. BSD-3-Clause ; les dépendances restent à inventorier.
+  PM4PY_DOCS:
+    titre: PM4Py — présentation officielle
+    nature: documentation_officielle
+    reference: https://processintelligence.solutions/pm4py/
+    repere: Consulté le 30 octobre 2026. Bibliothèque Python de découverte, conformité et analyses centrées objets
+      ; alternative.
+  PM4PY_LICENSE:
+    titre: PM4Py — licence OSS
+    nature: documentation_officielle
+    reference: https://github.com/process-intelligence-solutions/pm4py/blob/release/LICENSE
+    repere: Consulté le 30 octobre 2026. AGPL-3.0-or-later ; aucune licence commerciale présumée obligatoire.
+  SUPERSET_DOCS:
+    titre: Apache Superset — projet officiel
+    nature: documentation_officielle
+    reference: https://superset.apache.org/
+    repere: Consulté le 30 octobre 2026. Tableaux de bord et visualisations SQL.
+  SUPERSET_EMBED:
+    titre: Apache Superset — SDK pour tableaux de bord embarqués
+    nature: documentation_officielle
+    reference: https://github.com/apache/superset/blob/master/superset-embedded-sdk/README.md
+    repere: Consulté le 30 octobre 2026. Guest tokens, intégration applicative et restrictions d’accès à configurer.
+  SUPERSET_LICENSE:
+    titre: Apache Superset — licence
+    nature: documentation_officielle
+    reference: https://github.com/apache/superset/blob/master/LICENSE.txt
+    repere: Consulté le 30 octobre 2026. Apache-2.0.
+  FLOWABLE_7_SCOPE:
+    titre: Flowable OSS 7 — périmètre des moteurs et retrait des applications UI
+    nature: documentation_officielle
+    reference: https://www.flowable.com/blog/releases/flowable-open-source-7-0-0-release
+    repere: Consulté le 30 octobre 2026. Applications UI, Form et Content retirées de la distribution 7 ; ne pas
+      créditer les interfaces commerciales.

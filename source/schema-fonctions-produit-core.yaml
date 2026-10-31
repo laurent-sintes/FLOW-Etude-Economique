@@ -1,0 +1,198 @@
+type: object
+additionalProperties: false
+properties:
+  version:
+    const: 1
+  id:
+    const: core-product-functions
+  scope:
+    const: construction_core
+  purposes:
+    type: array
+    minItems: 2
+    maxItems: 2
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          enum:
+          - business-runtime
+          - it-complement
+        label: &id001
+          type: string
+          minLength: 1
+        definition: *id001
+      required:
+      - id
+      - label
+      - definition
+  functions:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        id: &id003
+          type: string
+          pattern: ^[a-z][a-z0-9-]*$
+        label: *id001
+        purpose:
+          enum:
+          - business-runtime
+          - it-complement
+        boundary: *id001
+        capability_refs: &id002
+          type: array
+          items: *id001
+        depends_on: *id002
+        existing_funding_refs: *id002
+        evidence_refs: *id002
+        qualification:
+          enum:
+          - coverage_to_review
+          - sufficiently_scoped
+        note: *id001
+        additional_jh:
+          type:
+          - number
+          - 'null'
+          minimum: 0
+      required:
+      - id
+      - label
+      - purpose
+      - boundary
+      - capability_refs
+      - depends_on
+      - existing_funding_refs
+      - evidence_refs
+      - qualification
+      - note
+      - additional_jh
+  evidence:
+    type: object
+    additionalProperties: false
+    properties:
+      path: *id001
+      sha256:
+        type: string
+        pattern: ^[a-f0-9]{64}$
+    required:
+    - path
+    - sha256
+  allocations:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        unit_id: *id003
+        evidence_refs:
+          type: array
+          minItems: 1
+          items: *id001
+        shares:
+          type: array
+          minItems: 2
+          maxItems: 2
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              purpose_id:
+                enum:
+                - business-runtime
+                - it-complement
+              jh_by_role:
+                type: object
+                additionalProperties:
+                  type: number
+                  minimum: 0
+            required:
+            - purpose_id
+            - jh_by_role
+        basis:
+          type: string
+          minLength: 1
+      required:
+      - unit_id
+      - evidence_refs
+      - shares
+      - basis
+  reading:
+    type: object
+    additionalProperties: false
+    properties:
+      title: *id001
+      intro: *id001
+      adopted: *id001
+      business: *id001
+      it: *id001
+      unallocated: *id001
+      unknown: *id001
+      no_estimate: *id001
+      jh_unit: *id001
+      allocation_note: *id001
+      missing_note: *id001
+      inventory_title: *id001
+      function_label: *id001
+      purpose_label: *id001
+      funding_label: *id001
+      proof_label: *id001
+      scope_label: *id001
+      progress_label: *id001
+      progress_note: *id001
+      count_label: *id001
+      source_label: *id001
+      review_label: *id001
+      unknown_additional: *id001
+      process_reservation: *id001
+      finance_title:
+        type: string
+        minLength: 1
+      finance_note:
+        type: string
+        minLength: 1
+      finance_detail:
+        type: string
+        minLength: 1
+    required:
+    - title
+    - intro
+    - adopted
+    - business
+    - it
+    - unallocated
+    - unknown
+    - no_estimate
+    - jh_unit
+    - allocation_note
+    - missing_note
+    - inventory_title
+    - function_label
+    - purpose_label
+    - funding_label
+    - proof_label
+    - scope_label
+    - progress_label
+    - progress_note
+    - count_label
+    - source_label
+    - review_label
+    - unknown_additional
+    - process_reservation
+    - finance_title
+    - finance_note
+    - finance_detail
+required:
+- version
+- id
+- scope
+- purposes
+- functions
+- evidence
+- allocations
+- reading
+$schema: https://json-schema.org/draft/2020-12/schema

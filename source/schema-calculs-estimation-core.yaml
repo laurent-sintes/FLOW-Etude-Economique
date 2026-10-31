@@ -70,6 +70,28 @@ properties:
             - kind
             - family
             additionalProperties: false
+          - type: object
+            properties:
+              kind:
+                const: component_domain
+              scope:
+                type: string
+                minLength: 1
+            required:
+            - kind
+            - scope
+            additionalProperties: false
+          - type: object
+            additionalProperties: false
+            properties:
+              kind:
+                const: professional_group
+              scope:
+                type: string
+                minLength: 1
+            required:
+            - kind
+            - scope
         note:
           type: string
           minLength: 1
@@ -96,7 +118,12 @@ properties:
           type: string
           minLength: 1
         recipe:
-          const: native_reuse_plus_complements_v1
+          enum:
+          - native_reuse_plus_complements_v1
+          - native_component_analogies_v1
+          - native_new_module_analogies_v1
+          - coherent_components_v1
+          - professional_components_v1
         scope:
           type: object
           properties:
@@ -144,71 +171,227 @@ properties:
               additionalProperties: false
             analysis_sha256: *id001
             decision_scope_sha256: *id001
+            professional_functions:
+              type: array
+              minItems: 1
+              uniqueItems: true
+              items:
+                type: string
+                minLength: 1
+            professional_group_id:
+              type: string
+              minLength: 1
           required:
           - level
-          - native_id
           - capabilities
           - native_source
           - analysis_sha256
           - decision_scope_sha256
           additionalProperties: false
+          allOf:
+          - if:
+              properties:
+                level:
+                  const: professional_function_group
+            then:
+              required:
+              - professional_group_id
+              - professional_functions
+              not:
+                required:
+                - native_id
+            else:
+              required:
+              - native_id
         inputs:
-          type: object
-          properties:
-            baseline:
-              type: string
-              minLength: 1
-            allocation:
-              type: string
-              minLength: 1
-            native_inputs:
-              type: string
-              minLength: 1
-            native_measures:
-              type: string
-              minLength: 1
-            complement_inputs:
-              type: string
-              minLength: 1
-            analogues:
-              type: string
-              minLength: 1
-            refinements:
-              type: string
-              minLength: 1
-            method_measures:
-              type: string
-              minLength: 1
-            cosmic:
-              type: string
-              minLength: 1
-            productivity:
-              type: string
-              minLength: 1
-            productivity_source:
-              type: string
-              minLength: 1
-            activities:
-              type: string
-              minLength: 1
-            decision_evidence:
-              type: string
-              minLength: 1
-          required:
-          - baseline
-          - allocation
-          - native_inputs
-          - native_measures
-          - complement_inputs
-          - analogues
-          - refinements
-          - method_measures
-          - cosmic
-          - productivity
-          - productivity_source
-          - activities
-          - decision_evidence
-          additionalProperties: false
+          oneOf:
+          - &id003
+            type: object
+            properties:
+              baseline:
+                type: string
+                minLength: 1
+              allocation:
+                type: string
+                minLength: 1
+              native_inputs:
+                type: string
+                minLength: 1
+              native_measures:
+                type: string
+                minLength: 1
+              complement_inputs:
+                type: string
+                minLength: 1
+              analogues:
+                type: string
+                minLength: 1
+              refinements:
+                type: string
+                minLength: 1
+              method_measures:
+                type: string
+                minLength: 1
+              cosmic:
+                type: string
+                minLength: 1
+              productivity:
+                type: string
+                minLength: 1
+              productivity_source:
+                type: string
+                minLength: 1
+              activities:
+                type: string
+                minLength: 1
+              decision_evidence:
+                type: string
+                minLength: 1
+            required:
+            - baseline
+            - allocation
+            - native_inputs
+            - native_measures
+            - complement_inputs
+            - analogues
+            - refinements
+            - method_measures
+            - cosmic
+            - productivity
+            - productivity_source
+            - activities
+            - decision_evidence
+            additionalProperties: false
+          - &id004
+            type: object
+            properties:
+              specification:
+                type: string
+                minLength: 1
+              native_inputs:
+                type: string
+                minLength: 1
+              native_measures:
+                type: string
+                minLength: 1
+              allocation:
+                type: string
+                minLength: 1
+              baseline:
+                type: string
+                minLength: 1
+              cosmic:
+                type: string
+                minLength: 1
+              productivity_source:
+                type: string
+                minLength: 1
+              activities:
+                type: string
+                minLength: 1
+              decision_evidence:
+                type: string
+                minLength: 1
+            required:
+            - specification
+            - native_inputs
+            - native_measures
+            - allocation
+            - baseline
+            - cosmic
+            - productivity_source
+            - activities
+            - decision_evidence
+            additionalProperties: false
+          - type: object
+            properties:
+              specification:
+                type: string
+                minLength: 1
+              native_inputs:
+                type: string
+                minLength: 1
+              baseline:
+                type: string
+                minLength: 1
+              allocation:
+                type: string
+                minLength: 1
+              cosmic:
+                type: string
+                minLength: 1
+              cosmic_refinement:
+                type: string
+                minLength: 1
+              productivity_source:
+                type: string
+                minLength: 1
+              activities:
+                type: string
+                minLength: 1
+              decision_evidence:
+                type: string
+                minLength: 1
+            required:
+            - specification
+            - native_inputs
+            - baseline
+            - allocation
+            - cosmic
+            - cosmic_refinement
+            - productivity_source
+            - activities
+            - decision_evidence
+            additionalProperties: false
+          - &id005
+            type: object
+            properties:
+              specification:
+                type: string
+                minLength: 1
+              archives:
+                type: string
+                minLength: 1
+              native_inputs:
+                type: string
+                minLength: 1
+              allocation:
+                type: string
+                minLength: 1
+              cosmic:
+                type: string
+                minLength: 1
+              productivity_source:
+                type: string
+                minLength: 1
+              activities:
+                type: string
+                minLength: 1
+              decision_evidence:
+                type: string
+                minLength: 1
+            required:
+            - specification
+            - archives
+            - native_inputs
+            - allocation
+            - cosmic
+            - productivity_source
+            - activities
+            - decision_evidence
+            additionalProperties: false
+          - type: object
+            additionalProperties: false
+            properties:
+              proposal_inputs:
+                type: string
+                minLength: 1
+              adoption_basis:
+                type: string
+                minLength: 1
+            required:
+            - proposal_inputs
+            - adoption_basis
         funding_claims:
           type: array
           items:
@@ -295,6 +478,19 @@ properties:
             structure_units_per_group:
               type: number
               minimum: 0
+            professional_component:
+              type: string
+              enum:
+              - process-management
+              - supply-workbenches
+              - professional-it
+            module_groups:
+              type: array
+              minItems: 1
+              uniqueItems: true
+              items:
+                type: string
+                minLength: 1
           required:
           - scenario
           - structure_units_per_group
@@ -310,6 +506,96 @@ properties:
       - comparison
       - recipe_parameters
       additionalProperties: false
+      allOf:
+      - if:
+          properties:
+            recipe:
+              const: native_reuse_plus_complements_v1
+        then:
+          properties:
+            inputs: *id003
+      - if:
+          properties:
+            recipe:
+              const: native_component_analogies_v1
+        then:
+          properties:
+            inputs: *id004
+      - if:
+          properties:
+            recipe:
+              const: native_new_module_analogies_v1
+        then:
+          properties:
+            inputs:
+              type: object
+              properties:
+                specification:
+                  type: string
+                  minLength: 1
+                native_inputs:
+                  type: string
+                  minLength: 1
+                baseline:
+                  type: string
+                  minLength: 1
+                allocation:
+                  type: string
+                  minLength: 1
+                cosmic:
+                  type: string
+                  minLength: 1
+                cosmic_refinement:
+                  type: string
+                  minLength: 1
+                productivity_source:
+                  type: string
+                  minLength: 1
+                activities:
+                  type: string
+                  minLength: 1
+                decision_evidence:
+                  type: string
+                  minLength: 1
+              required:
+              - specification
+              - native_inputs
+              - baseline
+              - allocation
+              - cosmic
+              - cosmic_refinement
+              - productivity_source
+              - activities
+              - decision_evidence
+              additionalProperties: false
+      - if:
+          properties:
+            recipe:
+              const: coherent_components_v1
+        then:
+          properties:
+            inputs: *id005
+      - if:
+          properties:
+            recipe:
+              const: professional_components_v1
+        then:
+          properties:
+            inputs:
+              type: object
+              additionalProperties: false
+              properties:
+                proposal_inputs:
+                  type: string
+                  minLength: 1
+                adoption_basis:
+                  type: string
+                  minLength: 1
+              required:
+              - proposal_inputs
+              - adoption_basis
+          required:
+          - recipe_parameters
   consolidation:
     type: object
     properties:

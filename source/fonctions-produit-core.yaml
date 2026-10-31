@@ -1,0 +1,761 @@
+version: 1
+id: core-product-functions
+scope: construction_core
+purposes:
+- id: business-runtime
+  label: Runtime et outils métier
+  definition: 'Services d’exécution des capacités et outils destinés aux utilisateurs métier : studios, tâches,
+    formulaires, analyse et pilotage métier. Les fonctions IT déjà mêlées aux unités retenues restent à ventiler.'
+- id: it-complement
+  label: Fonctions IT complémentaires
+  definition: 'Administration et robustesse du produit : habilitations, configuration, traitements techniques, sécurité,
+    journaux, purges, sauvegarde et exploitabilité. Elles n’ajoutent aucune capacité à la cartographie métier reçue.'
+functions:
+- id: backoffice
+  label: Backoffice et navigation
+  purpose: it-complement
+  boundary: Cadre de navigation et écrans d’administration génériques ; ne remplace pas les écrans métier de chaque
+    capacité.
+  capability_refs: []
+  depends_on: []
+  existing_funding_refs:
+  - java-spring-framework-services
+  - professional-admin-security
+  evidence_refs:
+  - frappe:frappe/desk/doctype/workspace/workspace.py
+  - odoo:addons/web/static/src/webclient/webclient.js
+  - tryton:sao/src/tab.js
+  - platform:axelor-front/src/layout/nav-drawer/nav-drawer.tsx
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: forms
+  label: Formulaires et studio de formulaires
+  purpose: business-runtime
+  boundary: Saisie et résultat métier contextualisés ; studio et rendu à comparer séparément, pas simple moteur
+    de persistance.
+  capability_refs:
+  - BC-080
+  depends_on: []
+  existing_funding_refs:
+  - master-data-common-domain
+  - flow-human-task
+  - professional-human-forms
+  evidence_refs:
+  - frappe:frappe/public/js/form_builder/FormBuilder.vue
+  - odoo:addons/web/static/src/views/form/form_arch_parser.js
+  - tryton:sao/src/view/form.js
+  - platform:axelor-front/src/views/form/form.tsx
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: process-studio
+  label: Éditeur de processus métier
+  purpose: business-runtime
+  boundary: Édition, validation, publication et versions de parcours utilisables par le métier ; adaptation à Temporal
+    à dimensionner.
+  capability_refs:
+  - BC-076
+  - BC-077
+  depends_on:
+  - forms
+  - permissions
+  existing_funding_refs:
+  - flow-process-definitions
+  - professional-process-studio
+  evidence_refs:
+  - frappe:frappe/public/js/workflow_builder/WorkflowBuilder.vue
+  - studio:react/bpm/src/BPMN/Modeler/BpmnModeler.jsx
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: analytics
+  label: Tableaux de bord et rapports métier
+  purpose: business-runtime
+  boundary: Mesures, populations, filtres, partage et retour aux dossiers ; composants Superset à intégrer.
+  capability_refs:
+  - BC-088
+  depends_on:
+  - permissions
+  existing_funding_refs:
+  - flow-intelligence-local-1
+  - professional-analytics-mining
+  - professional-supply-workbenches
+  evidence_refs:
+  - frappe:frappe/desk/doctype/dashboard/dashboard.py
+  - odoo:addons/web/static/src/views/graph/graph_model.js
+  - tryton:sao/src/view/graph.js
+  - platform:axelor-front/src/views/dashboard/dashboard.tsx
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: process-mining
+  label: Process Mining
+  purpose: business-runtime
+  boundary: Traces corrélées, variantes, durées et conformité. PM4JS/PM4Py candidats ; pas assimilé à des requêtes
+    CRM.
+  capability_refs:
+  - BC-087
+  depends_on:
+  - analytics
+  existing_funding_refs:
+  - flow-intelligence-local-1
+  - professional-analytics-mining
+  evidence_refs: []
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: identities
+  label: Administration des identités et sessions
+  purpose: it-complement
+  boundary: Comptes, groupes, authentification et sessions ; Keycloak réutilisable, intégration produit à financer
+    une fois.
+  capability_refs: []
+  depends_on: []
+  existing_funding_refs:
+  - java-spring-framework-services
+  - master-data-protection
+  - professional-admin-security
+  evidence_refs:
+  - frappe:frappe/core/doctype/user/user.py
+  - odoo:odoo/addons/base/models/res_users.py
+  - tryton:trytond/trytond/res/user.py
+  - platform:axelor-core/src/main/java/com/axelor/auth/AuthSessionService.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: permissions
+  label: Habilitations sur objets, champs et données
+  purpose: it-complement
+  boundary: Administration des droits et contrôles d’accès contextualisés. Les décisions métier conservent leur
+    autorité propre.
+  capability_refs: []
+  depends_on: []
+  existing_funding_refs:
+  - java-spring-framework-services
+  - master-data-protection
+  - professional-admin-security
+  evidence_refs:
+  - frappe:frappe/permissions.py
+  - odoo:odoo/addons/base/models/ir_access.py
+  - tryton:trytond/trytond/ir/model.py
+  - platform:axelor-core/src/main/java/com/axelor/meta/MetaPermissions.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: settings
+  label: Paramètres et administration de configuration
+  purpose: it-complement
+  boundary: Configuration produit, valeurs de référence et contrôles ; les règles Beaumanoir restent de l’intégration.
+  capability_refs: []
+  depends_on: []
+  existing_funding_refs:
+  - java-spring-framework-services
+  - master-data-versions
+  - professional-admin-security
+  evidence_refs:
+  - frappe:frappe/core/doctype/system_settings/system_settings.py
+  - odoo:odoo/addons/base/models/res_config.py
+  - tryton:trytond/trytond/ir/configuration.py
+  - platform:axelor-core/src/main/java/com/axelor/app/AppSettings.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: audit-technical
+  label: Journal d’audit et consultation des changements
+  purpose: it-complement
+  boundary: Traçabilité technique et consultation ; à distinguer des registres métier aux deux dates.
+  capability_refs: []
+  depends_on: []
+  existing_funding_refs:
+  - master-data-protection
+  - professional-operations-lifecycle
+  evidence_refs:
+  - frappe:frappe/core/doctype/version/version.py
+  - odoo:addons/mail/models/mail_message.py
+  - tryton:trytond/trytond/model/modelsql.py
+  - platform:axelor-core/src/main/java/com/axelor/db/audit/AuditListener.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: jobs
+  label: Traitements de fond et planification technique
+  purpose: it-complement
+  boundary: Files, exécutions différées, concurrence et reprise des traitements administratifs ; ne remplace pas
+    la planification Supply.
+  capability_refs: []
+  depends_on: []
+  existing_funding_refs:
+  - java-spring-framework-services
+  - master-data-service
+  - professional-operations-lifecycle
+  evidence_refs:
+  - frappe:frappe/utils/background_jobs.py
+  - odoo:odoo/addons/base/models/ir_cron.py
+  - tryton:trytond/trytond/worker.py
+  - platform:axelor-core/src/main/java/com/axelor/quartz/JobRunner.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: job-console
+  label: Console des traitements et erreurs
+  purpose: it-complement
+  boundary: Consulter erreurs, exécutions et preuves ; autoriser relance ou résolution sans doubler les effets métier.
+  capability_refs: []
+  depends_on:
+  - jobs
+  - permissions
+  - audit-technical
+  existing_funding_refs:
+  - master-data-service
+  - master-data-reprise
+  - professional-operations-lifecycle
+  evidence_refs:
+  - frappe:frappe/core/doctype/scheduled_job_log/scheduled_job_log.py
+  - odoo:odoo/addons/base/models/ir_logging.py
+  - tryton:trytond/trytond/ir/error.py
+  - platform:axelor-core/src/main/java/com/axelor/meta/web/JobController.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: retention
+  label: Purges et durées de conservation
+  purpose: it-complement
+  boundary: Rétention, dépendances, autorisations et preuve de purge. Le nettoyage de logs natif ne démontre pas
+    une purge complète du patrimoine Flow.
+  capability_refs: []
+  depends_on:
+  - jobs
+  - permissions
+  - audit-technical
+  existing_funding_refs:
+  - master-data-protection
+  - professional-operations-lifecycle
+  evidence_refs:
+  - frappe:frappe/core/doctype/log_settings/log_settings.py
+  - odoo:odoo/addons/base/models/ir_autovacuum.py
+  - tryton:trytond/trytond/ir/cron.py
+  - axelor:axelor-base/src/main/java/com/axelor/apps/base/tracking/GlobalTrackingLogServiceImpl.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: backup
+  label: Sauvegardes, restauration et contrôles de reprise
+  purpose: it-complement
+  boundary: Moyens techniques de sauvegarde/restauration et contrôles applicatifs de reprise. Leur exploitation
+    annuelle ne se confond pas avec leur construction.
+  capability_refs: []
+  depends_on:
+  - jobs
+  - permissions
+  - settings
+  existing_funding_refs:
+  - master-data-reprise
+  - master-data-service
+  - professional-operations-lifecycle
+  evidence_refs:
+  - frappe:frappe/utils/backups.py
+  - odoo:addons/web/controllers/database.py
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: upgrades
+  label: Migrations de schéma et mises à jour
+  purpose: it-complement
+  boundary: Outillage de livraison et migration du produit ; les migrations des SI Beaumanoir relèvent de l’intégration.
+  capability_refs: []
+  depends_on:
+  - backup
+  - settings
+  existing_funding_refs:
+  - master-data-versions
+  - master-data-service
+  - professional-operations-lifecycle
+  evidence_refs:
+  - frappe:frappe/migrate.py
+  - odoo:odoo/addons/base/models/ir_module.py
+  - tryton:trytond/trytond/admin.py
+  - platform:axelor-core/src/main/java/com/axelor/meta/loader/ModuleManager.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: bulk-data
+  label: Outils d’import, export et opérations en masse
+  purpose: it-complement
+  boundary: Outillage générique d’administration des données. Les contrats sémantiques Master Data et les interfaces
+    Beaumanoir gardent leurs financements.
+  capability_refs: []
+  depends_on:
+  - permissions
+  - job-console
+  existing_funding_refs:
+  - java-spring-framework-services
+  - master-data-admission
+  - professional-data-services
+  evidence_refs:
+  - frappe:frappe/core/doctype/data_import/data_import.py
+  - odoo:addons/base_import/models/base_import.py
+  - tryton:trytond/trytond/ir/export.py
+  - platform:axelor-core/src/main/java/com/axelor/data/csv/CSVImporter.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: notifications
+  label: Notifications et acheminement technique
+  purpose: it-complement
+  boundary: Files d’envoi, modèles et état de livraison. Les décisions et escalades métier restent dans leurs capacités.
+  capability_refs: []
+  depends_on: []
+  existing_funding_refs:
+  - java-spring-framework-services
+  - flow-work-deadline
+  - professional-data-services
+  evidence_refs:
+  - frappe:frappe/email/doctype/email_queue/email_queue.py
+  - odoo:addons/mail/models/mail_mail.py
+  - tryton:modules/notification_email/notification.py
+  - platform:axelor-core/src/main/java/com/axelor/mail/service/MailService.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: documents
+  label: Pièces jointes, stockage et accès aux fichiers
+  purpose: it-complement
+  boundary: Stockage, limites et droits des pièces ; les documents métier gardent leur sens chez leurs producteurs.
+  capability_refs: []
+  depends_on:
+  - permissions
+  existing_funding_refs:
+  - java-spring-framework-services
+  - master-data-protection
+  - professional-data-services
+  evidence_refs:
+  - frappe:frappe/core/doctype/file/file.py
+  - odoo:odoo/addons/base/models/ir_attachment.py
+  - tryton:trytond/trytond/ir/attachment.py
+  - platform:axelor-core/src/main/java/com/axelor/meta/MetaFiles.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: internationalization
+  label: Langues et qualité d’usage transverse
+  purpose: it-complement
+  boundary: Langues, formats et textes. L’accessibilité est une exigence à vérifier séparément ; sa conformité n’est
+    pas déduite de ces fichiers.
+  capability_refs: []
+  depends_on: []
+  existing_funding_refs:
+  - java-spring-framework-services
+  - professional-data-services
+  evidence_refs:
+  - frappe:frappe/translate.py
+  - odoo:odoo/tools/translate.py
+  - tryton:trytond/trytond/ir/translation.py
+  - platform:axelor-core/src/main/java/com/axelor/i18n/I18n.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: application-security
+  label: Sécurité applicative et protections des accès
+  purpose: it-complement
+  boundary: Protections des sessions, mots de passe et requêtes ; les mécanismes existent mais leur configuration
+    et vérification Flow restent à expliciter.
+  capability_refs: []
+  depends_on: []
+  existing_funding_refs:
+  - java-spring-framework-services
+  - master-data-protection
+  - professional-admin-security
+  evidence_refs:
+  - frappe:frappe/auth.py
+  - odoo:odoo/addons/base/models/res_users.py
+  - tryton:trytond/trytond/security.py
+  - platform:axelor-core/src/main/java/com/axelor/auth/AuthSecurity.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+- id: diagnostics
+  label: Diagnostic technique et exploitabilité
+  purpose: it-complement
+  boundary: Santé, journaux, métriques et diagnostic ; compléter avec l’exploitation, sans assimiler logs techniques
+    et dashboard métier.
+  capability_refs: []
+  depends_on: []
+  existing_funding_refs:
+  - java-spring-framework-services
+  - master-data-service
+  - professional-operations-lifecycle
+  evidence_refs:
+  - frappe:frappe/utils/logger.py
+  - odoo:odoo/addons/base/models/ir_logging.py
+  - tryton:trytond/trytond/status.py
+  - platform:axelor-core/src/main/java/com/axelor/app/internal/AppLogger.java
+  qualification: coverage_to_review
+  note: Fonction financée dans les lots retenus ; la correspondance de code et les limites de garanties restent
+    explicites.
+  additional_jh: null
+evidence:
+  path: audits/2026-10-30-audit-fonctions-transverses/evidence.json
+  sha256: a51e0c2f5dd8b8693088b14ff510e475922531c8f9dc79fd83c3f340f9aeb933
+allocations:
+- unit_id: master-data-java-spring
+  evidence_refs:
+  - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
+  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
+    ne déterminent pas la finalité.
+  shares:
+  - purpose_id: business-runtime
+    jh_by_role:
+      coordination: 158
+      analyse_produit: 140
+      architecture: 121
+      dev_java: 447
+      dev_frontend: 167
+      qa: 186
+      plateforme: 121
+      ux: 28
+      securite: 28
+  - purpose_id: it-complement
+    jh_by_role:
+      coordination: 12
+      analyse_produit: 10
+      architecture: 9
+      dev_java: 33
+      dev_frontend: 13
+      qa: 14
+      plateforme: 9
+      ux: 2
+      securite: 2
+- unit_id: stock-java-spring
+  evidence_refs:
+  - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
+  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
+    ne déterminent pas la finalité.
+  shares:
+  - purpose_id: business-runtime
+    jh_by_role:
+      coordination: 40
+      analyse_produit: 35
+      architecture: 30
+      dev_java: 125
+      dev_frontend: 20
+      qa: 50
+      plateforme: 30
+      ux: 5
+      securite: 5
+  - purpose_id: it-complement
+    jh_by_role:
+      coordination: 0
+      analyse_produit: 0
+      architecture: 0
+      dev_java: 0
+      dev_frontend: 0
+      qa: 0
+      plateforme: 0
+      ux: 0
+      securite: 0
+- unit_id: inventory-ownership-java-spring
+  evidence_refs:
+  - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
+  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
+    ne déterminent pas la finalité.
+  shares:
+  - purpose_id: business-runtime
+    jh_by_role:
+      coordination: 11
+      analyse_produit: 10
+      architecture: 9
+      dev_java: 37
+      dev_frontend: 6
+      qa: 14
+      plateforme: 9
+      ux: 2
+      securite: 2
+  - purpose_id: it-complement
+    jh_by_role:
+      coordination: 0
+      analyse_produit: 0
+      architecture: 0
+      dev_java: 0
+      dev_frontend: 0
+      qa: 0
+      plateforme: 0
+      ux: 0
+      securite: 0
+- unit_id: supply-controls-java-spring
+  evidence_refs:
+  - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
+  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
+    ne déterminent pas la finalité.
+  shares:
+  - purpose_id: business-runtime
+    jh_by_role:
+      coordination: 5
+      analyse_produit: 4
+      architecture: 3
+      dev_java: 15
+      dev_frontend: 2
+      qa: 6
+      plateforme: 3
+      ux: 1
+      securite: 1
+  - purpose_id: it-complement
+    jh_by_role:
+      coordination: 0
+      analyse_produit: 0
+      architecture: 0
+      dev_java: 0
+      dev_frontend: 0
+      qa: 0
+      plateforme: 0
+      ux: 0
+      securite: 0
+- unit_id: orders-java-spring
+  evidence_refs:
+  - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
+  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
+    ne déterminent pas la finalité.
+  shares:
+  - purpose_id: business-runtime
+    jh_by_role:
+      coordination: 20
+      analyse_produit: 17
+      architecture: 15
+      dev_java: 63
+      dev_frontend: 10
+      qa: 24
+      plateforme: 15
+      ux: 3
+      securite: 3
+  - purpose_id: it-complement
+    jh_by_role:
+      coordination: 0
+      analyse_produit: 0
+      architecture: 0
+      dev_java: 0
+      dev_frontend: 0
+      qa: 0
+      plateforme: 0
+      ux: 0
+      securite: 0
+- unit_id: master-plan-java-spring
+  evidence_refs:
+  - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
+  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
+    ne déterminent pas la finalité.
+  shares:
+  - purpose_id: business-runtime
+    jh_by_role:
+      coordination: 41
+      analyse_produit: 35
+      architecture: 30
+      dev_java: 129
+      dev_frontend: 21
+      qa: 50
+      plateforme: 30
+      ux: 7
+      securite: 7
+  - purpose_id: it-complement
+    jh_by_role:
+      coordination: 0
+      analyse_produit: 0
+      architecture: 0
+      dev_java: 0
+      dev_frontend: 0
+      qa: 0
+      plateforme: 0
+      ux: 0
+      securite: 0
+- unit_id: supply-decisions-java-spring
+  evidence_refs:
+  - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
+  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
+    ne déterminent pas la finalité.
+  shares:
+  - purpose_id: business-runtime
+    jh_by_role:
+      coordination: 73
+      analyse_produit: 63
+      architecture: 55
+      dev_java: 232
+      dev_frontend: 38
+      qa: 90
+      plateforme: 55
+      ux: 12
+      securite: 12
+  - purpose_id: it-complement
+    jh_by_role:
+      coordination: 0
+      analyse_produit: 0
+      architecture: 0
+      dev_java: 0
+      dev_frontend: 0
+      qa: 0
+      plateforme: 0
+      ux: 0
+      securite: 0
+- unit_id: service-fulfilment-java-spring
+  evidence_refs:
+  - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
+  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
+    ne déterminent pas la finalité.
+  shares:
+  - purpose_id: business-runtime
+    jh_by_role:
+      coordination: 80
+      analyse_produit: 69
+      architecture: 60
+      dev_java: 254
+      dev_frontend: 42
+      qa: 98
+      plateforme: 60
+      ux: 13
+      securite: 14
+  - purpose_id: it-complement
+    jh_by_role:
+      coordination: 0
+      analyse_produit: 0
+      architecture: 0
+      dev_java: 0
+      dev_frontend: 0
+      qa: 0
+      plateforme: 0
+      ux: 0
+      securite: 0
+- unit_id: process-management-java-spring
+  evidence_refs:
+  - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
+  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
+    ne déterminent pas la finalité.
+  shares:
+  - purpose_id: business-runtime
+    jh_by_role:
+      coordination: 222
+      analyse_produit: 219
+      architecture: 181
+      dev_java: 454
+      dev_frontend: 464
+      qa: 282
+      plateforme: 90
+      ux: 58
+      securite: 40
+  - purpose_id: it-complement
+    jh_by_role:
+      coordination: 0
+      analyse_produit: 0
+      architecture: 0
+      dev_java: 0
+      dev_frontend: 0
+      qa: 0
+      plateforme: 0
+      ux: 0
+      securite: 0
+- unit_id: supply-workbenches-java-spring
+  evidence_refs:
+  - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
+  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
+    ne déterminent pas la finalité.
+  shares:
+  - purpose_id: business-runtime
+    jh_by_role:
+      coordination: 18
+      analyse_produit: 18
+      architecture: 14
+      dev_java: 34
+      dev_frontend: 40
+      qa: 22
+      plateforme: 6
+      ux: 5
+      securite: 3
+  - purpose_id: it-complement
+    jh_by_role:
+      coordination: 0
+      analyse_produit: 0
+      architecture: 0
+      dev_java: 0
+      dev_frontend: 0
+      qa: 0
+      plateforme: 0
+      ux: 0
+      securite: 0
+- unit_id: professional-it-java-spring
+  evidence_refs:
+  - audits/2026-10-31-adoption-produit-professionnel/adoption-basis.json
+  basis: Ventilation adoptée par lots de travail. La part IT Master Data est conservée dans son budget ; les rôles
+    ne déterminent pas la finalité.
+  shares:
+  - purpose_id: business-runtime
+    jh_by_role:
+      coordination: 0
+      analyse_produit: 0
+      architecture: 0
+      dev_java: 0
+      dev_frontend: 0
+      qa: 0
+      plateforme: 0
+      ux: 0
+      securite: 0
+  - purpose_id: it-complement
+    jh_by_role:
+      coordination: 67
+      analyse_produit: 40
+      architecture: 67
+      dev_java: 188
+      dev_frontend: 80
+      qa: 107
+      plateforme: 80
+      ux: 14
+      securite: 27
+reading:
+  title: Distinguer les fonctions métier et les fonctions IT du produit
+  intro: La cartographie décrit le périmètre métier ; elle ne constitue pas l’inventaire complet d’un produit professionnel.
+    Cette lecture complète le périmètre, sans créer de nouvelles capacités métier ni budget automatique.
+  adopted: Charge adoptée
+  business: Runtime et outils métier
+  it: Fonctions IT complémentaires
+  unallocated: Charge adoptée restant à ventiler
+  unknown: Non déterminé
+  no_estimate: Pas d’estimation adoptée
+  jh_unit: JH
+  allocation_note: La ventilation adoptée rattache les JH aux lots de travail. Les 104 JH IT déjà financés dans
+    Master Data sont conservés dans les 1 500 JH ; chaque rôle et chaque montant sont répartis une seule fois.
+  missing_note: Le chiffrage professionnel est adopté et intégré aux calculs financiers. Les limites de périmètre
+    et les hypothèses restent consultables ci-dessous.
+  inventory_title: Fonctions professionnelles financées dans les lots retenus
+  function_label: Fonction du produit
+  purpose_label: Finalité
+  funding_label: Financement retenu
+  proof_label: Références OSS observées
+  scope_label: Travail et limite de couverture
+  progress_label: Avancement de l’inventaire
+  progress_note: Présence de code observée, distincte d’une couverture complète ou d’un chiffrage. Les 75 capacités
+    hors Process Management n’ont pas été réauditées fonctionnellement lors de cet examen.
+  count_label: familles de fonctions
+  source_label: Voir le code de référence
+  review_label: Couverture à vérifier
+  unknown_additional: Financé dans les lots retenus ; pas de répartition d’effort par fonction élémentaire.
+  process_reservation: Process Management comprend le runtime, les studios, le portail de tâches, le Process Mining
+    et les tableaux de bord. L’écart avec COSMIC reste visible et non réconcilié.
+  finance_title: 'Construction retenue : métier et IT'
+  finance_note: Répartition du coût total de construction de référence, avant son étalement par horizon. Les hypothèses
+    personnelles de budget ne modifient pas les JH retenus.
+  finance_detail: Rôles, délais et hypothèses
