@@ -115,6 +115,9 @@ class DocumentRouteTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         assert self.root.resolve().is_relative_to(directory.resolve())
         self.addCleanup(self.temp.cleanup)
+        self.client = self.root / 'client'
+        self.client.mkdir()
+        (self.client / 'index.html').write_text('<div id="root"></div>', encoding='utf-8')
         (self.root / 'proof.yaml').write_text('target:\n  amount: 12.34\nother: excluded\n', encoding='utf-8')
         (self.root / 'private.md').write_text('Not in the library', encoding='utf-8')
         (self.root / 'original.pdf').write_bytes(b'%PDF-original')
@@ -124,7 +127,7 @@ class DocumentRouteTests(unittest.TestCase):
         self.study.document_bytes = lambda reference: Study.document_bytes(self.study, reference)
 
     def get(self, endpoint, reference):
-        handler_class = make_handler(self.study)
+        handler_class = make_handler(self.study, static_root=self.client)
         handler = handler_class.__new__(handler_class)
         handler.path = endpoint + '?path=' + quote(reference, safe='')
         result = {}

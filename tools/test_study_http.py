@@ -9,12 +9,16 @@ from unittest.mock import patch
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from serve_study_app import make_handler,load_current_study
+from validate_stacks import ROOT
 
 class ApiTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.study=study_copy()
-        cls.server=ThreadingHTTPServer(('127.0.0.1',0),make_handler(cls.study))
+        cls.client=TemporaryDirectory(prefix='api-client-',dir=ROOT/'tmp')
+        cls.addClassCleanup(cls.client.cleanup)
+        (Path(cls.client.name)/'index.html').write_text('<div id="root"></div>',encoding='utf-8')
+        cls.server=ThreadingHTTPServer(('127.0.0.1',0),make_handler(cls.study,static_root=cls.client.name))
         cls.thread=Thread(target=cls.server.serve_forever,daemon=True);cls.thread.start()
         cls.url=f'http://127.0.0.1:{cls.server.server_port}'
     @classmethod
@@ -44,7 +48,7 @@ class ApiTests(unittest.TestCase):
         with TemporaryDirectory() as folder:
             path=Path(folder)/'source.yaml';path.write_text('value: 1',encoding='utf-8')
             study=study_copy();study.source_digests[str(path)]='observed-by-loader'
-            server=ThreadingHTTPServer(('127.0.0.1',0),make_handler(study))
+            server=ThreadingHTTPServer(('127.0.0.1',0),make_handler(study,static_root=self.client.name))
             thread=Thread(target=server.serve_forever,daemon=True);thread.start()
             url=f'http://127.0.0.1:{server.server_port}'
             try:
