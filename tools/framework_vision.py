@@ -31,7 +31,7 @@ SCHEMA = _object(dict(
     approach=_object(dict(title=TEXT, steps=dict(type='array', minItems=1,
         items=_object(dict(id=IDENTIFIER, title=TEXT, text=TEXT))),
         matrix=_object(dict(caption=TEXT, activity_label=TEXT, make_label=TEXT, buy_label=TEXT,
-            rows=dict(type='array', minItems=2, maxItems=2, items=MATRIX_ROW), notes=PARAGRAPHS)))),
+            rows=dict(type='array', minItems=3, maxItems=3, items=MATRIX_ROW), notes=PARAGRAPHS)))),
     evidence=_object(dict(title=TEXT, items=dict(type='array', minItems=1,
         items=_object(dict(id=IDENTIFIER, title=TEXT, text=TEXT, href=TEXT, label=TEXT))))),
     confidence=_object(dict(title=TEXT, text=TEXT,
@@ -40,6 +40,21 @@ SCHEMA = _object(dict(
         limits=dict(type='array', minItems=1, items=TEXT))),
     next=_object(dict(title=TEXT, links=dict(type='array', minItems=3, maxItems=3, items=READING_LINK))),
 ))
+
+ARRAY_TEXT = dict(type='array', minItems=1, items=TEXT)
+PROVIDER = _object(dict(option_ref=TEXT, status=TEXT, example=TEXT, inputs=ARRAY_TEXT, treatment=ARRAY_TEXT, output=TEXT,
+    limits=ARRAY_TEXT, links=dict(type='array', minItems=1, items=READING_LINK)))
+MAKE_AUDIT = _object(dict(title=TEXT,intro=TEXT,steps=dict(type='array',minItems=1,items=_object(dict(title=TEXT,text=TEXT,rule_refs=dict(type='array',uniqueItems=True,items=TEXT)))),method=dict(enum=['core_method','net_method','run_method']),sections=dict(type='array',uniqueItems=True,items=TEXT),links=dict(type='array',minItems=1,items=READING_LINK)))
+SCHEMA['properties']['journey'] = _object(dict(title=TEXT,
+    options=dict(type='array', minItems=3, maxItems=3, items=_object(dict(id=TEXT,label=TEXT,short_label=TEXT,status=TEXT))),
+    pending=TEXT, flow=ARRAY_TEXT, consolidation=TITLE_TEXT, method_groups=dict(type='array',minItems=1,items=_object(dict(id=TEXT,title=TEXT))), labels=_object({key:TEXT for key in ('common','inputs','treatment','output','limits','compare','option','next','references','steps','future','state','example','phase','phases','secondary','formula','variables','implementation','audit')}),
+    phases=dict(type='array',minItems=3,maxItems=3,items=_object(dict(id=TEXT,title=TEXT,short_title=TEXT,intro=TEXT,make=TEXT,buy=TEXT,make_audit=MAKE_AUDIT,
+        providers=dict(type='array',minItems=3,maxItems=3,items=PROVIDER)))),
+    scenario=_object(dict(intro=TEXT,example=TITLE_TEXT,primary=READING_LINK,steps=dict(type='array',minItems=1,items=TITLE_TEXT),future=TEXT,
+        links=dict(type='array',minItems=1,items=READING_LINK))),
+    methods=dict(type='array',minItems=1,items=_object(dict(href=TEXT,label=TEXT,text=TEXT,group=TEXT)))))
+SCHEMA['required'].append('journey')
+
 
 
 def compile_vision(document, glossary, routes, documents):
@@ -52,8 +67,8 @@ def compile_vision(document, glossary, routes, documents):
     if [step['id'] for step in document['approach']['steps']] != ['besoin', 'investissement']:
         raise ValueError(f'{ERROR}:{SOURCE}:approach.steps:expected need and investment reading order')
 
-    if [row['id'] for row in document['approach']['matrix']['rows']] != ['build', 'run']:
-        raise ValueError(f'{ERROR}:{SOURCE}:approach.matrix:expected Build and Run reading order')
+    if [row['id'] for row in document['approach']['matrix']['rows']] != ['acquisition', 'integration', 'fonctionnement']:
+        raise ValueError(f'{ERROR}:{SOURCE}:approach.matrix:expected acquisition, integration and operation reading order')
 
     if [level['id'] for level in document['confidence']['levels']] != ['method', 'application', 'review', 'delivery']:
         raise ValueError(f'{ERROR}:{SOURCE}:confidence.levels:expected method, application, review and delivery order')
@@ -69,12 +84,44 @@ def compile_vision(document, glossary, routes, documents):
 
     allowed = {'#' + route for route in routes} | {
         path for path in documents if path.startswith(('source/', 'sources/'))}
+    if 'synvance' in routes:
+        allowed.update('#synvance-'+key for key in ('microsoft','sap','costs','business','oms'))
     if 'modele' in routes:
         allowed.add('#modele?section=scope')
     for link in [document['adaptation'], document['adaptation']['reference_link'], *document['evidence']['items'],
                  *document['confidence']['levels'], *document['confidence']['links'], *document['next']['links']]:
         if link['href'] not in allowed:
             raise ValueError(f'{ERROR}:{SOURCE}:unknown reading link:{link["href"]}')
+
+    journey = document['journey']
+    if [row['id'] for row in journey['options']] != ['java-spring','microsoft','sap']:
+        raise ValueError(f'{ERROR}:journey:unknown or repeated option')
+    if [row['id'] for row in journey['phases']] != ['acquisition','integration','fonctionnement']:
+        raise ValueError(f'{ERROR}:journey:invalid phase order')
+    for phase in journey['phases']:
+        if [p['option_ref'] for p in phase['providers']] != ['java-spring','microsoft','sap']:
+            raise ValueError(f'{ERROR}:journey:unknown or repeated phase option')
+    groups=[g['id'] for g in journey['method_groups']]
+    if len(groups)!=len(set(groups)) or any(m['group'] not in groups for m in journey['methods']):
+        raise ValueError(f'{ERROR}:journey:invalid method group')
+    rules={rule['id'] for rule in read(ROOT/'source/fondamentaux.yaml')['estimation_model']['rules']}
+    methods={'core_method':'source/methode-evaluation-core.yaml','net_method':'source/methode-calcul-net.yaml','run_method':'source/methode-calcul-run.yaml'}
+    for phase in journey['phases']:
+        audit=phase['make_audit']
+        if any(ref not in rules for step in audit['steps'] for ref in step['rule_refs']):
+            raise ValueError(f'{ERROR}:journey:unknown canonical rule')
+        sections={section['id']:section for section in read(ROOT/methods[audit['method']])['sections']}
+        for ref in audit['sections']:
+            if ref not in sections or not any(b['kind']=='formula' for b in sections[ref]['blocks']):
+                raise ValueError(f'{ERROR}:journey:unknown formula section')
+    def check_links(value):
+        if isinstance(value,dict):
+            if 'href' in value and value['href'] not in allowed:
+                raise ValueError(f"{ERROR}:unknown reading link:{value['href']}")
+            for child in value.values():check_links(child)
+        elif isinstance(value,list):
+            for child in value:check_links(child)
+    check_links(journey)
 
     try:
         validate_glossary_literals(document, glossary, path=SOURCE)

@@ -51,6 +51,7 @@ def build_market_reading(market):
         ))
     return dict(projects=projects, services=services,
                 instruction=deepcopy(market.get('instruction')),
+                comparison=deepcopy(market.get('comparison')),
                 comparison_scope=deepcopy(market['reperes_build_core']['etude_oss']['perimetre']),
                 effort={key:deepcopy(market['reperes_build_core'][key])
                         for key in ('introduction','colonnes','lignes','conclusion')},

@@ -23,6 +23,7 @@ from analyze_cost_references import validate_market_references
 from evaluation_status import status_notice, load_status
 from retained_core import coverage as retained_coverage
 from market_instruction import build_market_instruction
+from market_comparison import build_market_comparison
 from core_method import hydrate_core_method, hydrate_market_method, hydrate_net_method, hydrate_run_method, hydrate_levers_method
 from architecture_model import load_architecture, hydrate_architecture, validate_economic_links, SOURCE as ARCHITECTURE_SOURCE
 from fundamentals_model import load_fundamentals, hydrate_fundamentals, SOURCE as FUNDAMENTALS_SOURCE
@@ -220,6 +221,7 @@ class Study:
         market['reperes_build_core'] = enrich_market_products(
             market['reperes_build_core'], {row['id'] for row in complexity['rows']})
         market['instruction'] = build_market_instruction(market)
+        market['comparison'] = build_market_comparison(market)
         economics = {o['stack']:o for o in self.economic['options']}
         stacks = {}
         for slug,o in self.options.items():
@@ -545,7 +547,18 @@ class Study:
             # Synvance input analysis no longer displays economic model projections.
             # Keep them in the full compatibility payload, not the initial delivery.
             content['synvance_reference'] = deepcopy(content['synvance_reference'])
-            content['synvance_reference']['costs'].pop('model')
+            reference=content['synvance_reference']
+            # The current synthesis uses the brief, actors and original documents.
+            # Only supplier-link captions remain in use from the historical overview.
+            reference['overview']={'cards':[{'link_label':card['link_label']} for card in reference['overview']['cards']]}
+            reference.pop('usage',None)
+            costs=content['synvance_reference']['costs']
+            # Legacy economic projections remain in the full compatibility payload.
+            for key in ('model','bridge_title','bridge_note','annual_rows','model_title','model_note','model_limit','model_links'):
+                costs.pop(key,None)
+            for row in costs['rows']:
+                for key in ('model_scope','model_display','nature_refs'):
+                    row.pop(key,None)
         return dict(ui=self.ui,glossary=self.glossary,baseline=self.baseline,content=content,
                     edition=self.edition,
                     model_version=self.version,simulation_contract=self.simulation_contract(),date=self.data['scenario']['date'])

@@ -44,18 +44,23 @@ function MethodExampleTable({example,format,prefix}:{example:MethodExample;forma
  </figure>;
 }
 
+export function MethodReferenceCards({cards,headingLevel=3}:{cards:Extract<MethodBlock,{kind:'reference_cards'}>['cards'];headingLevel?:3|4|5}){
+ const Heading=headingLevel===5?'h5':headingLevel===4?'h4':'h3';
+ return <div className="core-method-reference-grid">{cards.map((card,index)=><article key={index} className="core-method-reference-card">
+   <header><Heading>{card.title}</Heading><p>{card.subtitle}</p></header>
+   <dl>{card.fields.map(field=><div key={field.label}><dt>{field.label}</dt><dd><ul>{field.items.map((text,item)=><li key={item}><MethodText>{text}</MethodText></li>)}</ul></dd></div>)}</dl>
+   <p className="core-method-reference-note"><MethodText>{card.note}</MethodText></p>
+   <ul className="core-method-reference-sources">{card.sources.map(source=><li key={source.href}><a href={source.href} target="_blank" rel="noopener">{source.label} <span aria-hidden="true">↗</span></a></li>)}</ul>
+  </article>)}</div>;
+}
+
 function MethodContent({block,examples,format,prefix}:{block:MethodBlock;examples:MethodExample[];format:(value:number)=>string;prefix:string}){
  switch(block.kind){
   case 'paragraphs':return <div className="core-method-paragraphs">{block.items.map((text,index)=><p key={index}><MethodText>{text}</MethodText></p>)}</div>;
   case 'bullets':return <ul className="core-method-bullets">{block.items.map((text,index)=><li key={index}><MethodText>{text}</MethodText></li>)}</ul>;
   case 'table':return <div className="core-method-table-scroll" tabIndex={0} role="region" aria-label={block.caption}><table className="core-method-table"><caption>{block.caption}</caption><thead><tr>{block.columns.map(column=><th key={column} scope="col">{column}</th>)}</tr></thead><tbody>{block.rows.map((row,index)=><tr key={index}>{row.map((cell,column)=>column===0?<th key={column} scope="row"><MethodText>{cell}</MethodText></th>:<td key={column}><MethodText>{cell}</MethodText></td>)}</tr>)}</tbody></table></div>;
   case 'callout':return <aside className="core-method-callout"><h3>{block.title}</h3><p><MethodText>{block.text}</MethodText></p></aside>;
-  case 'reference_cards':return <div className="core-method-reference-grid">{block.cards.map((card,index)=><article key={index} className="core-method-reference-card">
-   <header><h3>{card.title}</h3><p>{card.subtitle}</p></header>
-   <dl>{card.fields.map(field=><div key={field.label}><dt>{field.label}</dt><dd><ul>{field.items.map((text,item)=><li key={item}><MethodText>{text}</MethodText></li>)}</ul></dd></div>)}</dl>
-   <p className="core-method-reference-note"><MethodText>{card.note}</MethodText></p>
-   <ul className="core-method-reference-sources">{card.sources.map(source=><li key={source.href}><a href={source.href} target="_blank" rel="noopener">{source.label} <span aria-hidden="true">↗</span></a></li>)}</ul>
-  </article>)}</div>;
+  case 'reference_cards':return <MethodReferenceCards cards={block.cards}/>;
   case 'formula':return <p className="core-method-formula">{block.text}</p>;
   case 'links':{
    const links=block.items.filter(link=>!isModelDataReference(link.href));

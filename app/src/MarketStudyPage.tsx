@@ -8,6 +8,7 @@ import {SourceLink} from './components';
 import {isModelDataReference} from './documentVisibility';
 import {MarketReferenceDrawer} from './MarketReferenceDrawer';
 import {MarketInstruction} from './MarketInstruction';
+import {MarketComparison} from './MarketComparison';
 import {MarketSourceList} from './MarketSources';
 import {useMarketReading} from './marketReading';
 import './marketMethod.css';
@@ -27,7 +28,7 @@ function ApplicationNote({section}:{section:Data|undefined}){
   {links.length>0&&<ul>{links.map((link:Data)=><li key={link.href}>{link.href.startsWith('#')?<a className="text-button" href={link.href}>{link.label}</a>:<SourceLink path={link.href}>{link.label}</SourceLink>}</li>)}</ul>}
  </aside>;
 }
-export function MarketStudyPage({view}:{view?:string}){
+export function MarketStudyPage({view,focus}:{view?:string;focus?:string}){
  const {data}=useStudy(),T=data.ui.essential.market_study,M=data.content.market_method;
  const notes=data.ui.essential.application_framework.market.sections as Data[];
  const [open,setOpen]=useState<'products'|'projects'|'services'|null>(null);
@@ -42,6 +43,7 @@ export function MarketStudyPage({view}:{view?:string}){
   <div className="essential-page core-method-page market-study-page dossier-page">
    <DossierNavigation pages={pages} current={current.id} label={N.navigation}/>
    <DossierSheet view={current.id}>
+   {current.id==='comparison'&&(reading?.comparison?<MarketComparison comparison={reading.comparison} focus={focus}/>:loading)}
    {current.id==='qualification'&&<div className="market-study-introduction">
     <p><MethodText>{T.introduction}</MethodText></p>
     <div className="market-study-findings"><h2>{T.findings_title}</h2><ul>{T.findings.map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ul></div>
@@ -57,7 +59,7 @@ export function MarketStudyPage({view}:{view?:string}){
       <thead><tr><th scope="col">{T.instruction.product}</th>{Object.entries(M.instruction.status_labels).map(([key,label])=><th scope="col" key={key}>{String(label)}</th>)}</tr></thead>
       <tbody>{M.instruction.progress.map((row:Data)=><tr key={row.product_ref}><th scope="row">{row.label}</th>{Object.keys(M.instruction.status_labels).map(key=><td className="number" key={key}>{row[key]}</td>)}</tr>)}</tbody>
      </table></div>
-     {loading}{reading?.instruction&&<MarketInstruction reading={reading}/>}
+     {loading}{reading?.instruction&&<MarketInstruction reading={reading} focus={focus}/>}
      <ApplicationNote section={notes.find(section=>section.id==='evidence_status')}/>
     </StudySection>
     <StudySection active={Boolean(current.sections?.includes('produits'))} id="produits" title={T.products_title}>

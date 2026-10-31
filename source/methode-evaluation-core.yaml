@@ -1,10 +1,11 @@
 schema_version: 1
 id: core-evaluation-opportunity
 principle:
-  title: Des preuves à une estimation retenue
-  text: '**Pour {{notion.core_system}} : périmètre → mesures et hypothèses → taille → effort → comparaison → décision.**
-    COCOMO II et COSMIC × ISBSG constituent deux voies distinctes. Le calcul prépare une décision d’opportunité,
-    avec ses limites et ses preuves.'
+  title: Estimer la {{notion.core_system}} à partir des capacités et du code OSS
+  text: '**Cartographie des capacités → composants OSS correspondants → taille préparée → COCOMO II → JH adoptés.**
+    C’est la démarche de base du Make. Les OSS servent de références inspectables pour dimensionner les fonctions
+    à construire en Java/Spring. COSMIC × ISBSG apporte une comparaison distincte. Les compléments du produit professionnel
+    sont inventoriés séparément.'
 notice:
   status_ref: core
 tooling:
@@ -17,12 +18,16 @@ navigation_label: Les cinq étapes de l’estimation
 sections:
 - id: delimiter-perimetre
   title: Définir l’unité et les activités couvertes
-  lead: '**La cartographie délimite le besoin. Elle ne calcule pas les JH.**'
+  lead: '**La cartographie des capacités fixe le périmètre à estimer. Le rapprochement avec les fonctions et composants
+    OSS justifie les mesures retenues.**'
   blocks:
   - kind: bullets
     items:
     - 'Conserver les noms, identifiants et frontières de la capture native. Choisir une unité cohérente : capacité,
       Business Area ou ensemble métier justifiable.'
+    - Pour chaque unité, relier les capacités à des fonctions observées dans les OSS, puis aux modules et chemins
+      de code correspondants. Conserver versions, preuves de couverture, écarts et compléments FLOW. La couverture
+      documentaire reste distincte de la parité démontrée.
     - Déclarer fonctions communes, compléments FLOW, exclusions et garanties attendues. Les adaptations propres
       au Groupe relèvent de l’intégration.
     - Lier le calcul à son unité, sa stack, sa version de périmètre et ses activités. Une nouvelle frontière exige
@@ -31,25 +36,38 @@ sections:
       Une allocation entre familles ne crée pas des estimations indépendantes par capacité.
   - kind: callout
     title: Compléter le périmètre du produit professionnel
-    text: 'Le référentiel des capacités est un entrant métier immuable. Il ne décrit pas tous les outils d’administration,
+    text: Le référentiel des capacités est un entrant métier immuable. Il ne décrit pas tous les outils d’administration,
       de robustesse et de sécurité. Inventorier séparément ces fonctions dans fonctions-produit-core.yaml, les rapprocher
-      des quatre suites et du financement existant. Classer Core Domain et Support selon la contribution à la valeur de Flow, y compris pour les outils utilisés par le métier. Ne pas
-      convertir la répartition des rôles en répartition fonctionnelle. Une fonction non chiffrée reste inconnue,
-      sans budget nul présumé.'
+      des quatre suites et du financement existant. Classer Core Domain et Support selon la contribution à la valeur
+      de Flow, y compris pour les outils utilisés par le métier. Ne pas convertir la répartition des rôles en répartition
+      fonctionnelle. Une fonction non chiffrée reste inconnue, sans budget nul présumé.
 - id: observer-fonctions
   title: Préparer les tailles et la réutilisation
-  lead: '**Quatre références natives éclairent les travaux : ERPNext / Frappe, Odoo, Tryton et Axelor / Open Platform.**'
+  lead: '**Quatre références OSS rendent le dimensionnement inspectable.** PNCLOC désigne les lignes physiques non
+    vides, hors commentaires. Ces sélections ne mesurent pas le produit entier et doivent être rapprochées des capacités
+    avant préparation de la taille COCOMO II.'
   blocks:
   - kind: reference_cards
     cards:
     - title: ERPNext / Frappe
       subtitle: Un ERP métier porté par un framework de documents
       fields:
-      - label: Socle observé
+      - label: Périmètre fonctionnel
         items:
-        - Python et JavaScript, métadonnées DocType en JSON, base MariaDB et services Redis/Valkey.
-      note: Référence de composants et de fonctions à rapprocher du périmètre FLOW. Les cas clients cités ne démontrent
-        pas sa couverture complète.
+        - Achats, ventes, stocks et planification dans ERPNext. Frappe porte documents, droits, workflows et API.
+          Insights complète l’analyse.
+      - label: Langages et socle
+        items:
+        - Python et JavaScript dans Frappe/ERPNext, Vue/TypeScript dans Insights. DocTypes en JSON, MariaDB et Redis/Valkey.
+      - label: Fonction marquante
+        items:
+        - Les DocTypes relient modèle de données, formulaires, droits et API dans un même cadre déclaratif.
+      - label: Déploiements documentés
+        items:
+        - '**Chewy** : portail de contrats de remises fournisseurs adapté sur ERPNext. Ce cas ne prouve pas un Core System
+          logistique Groupe.'
+        - '**Vodafone UK** : commandes SIM et webshop spécifique. Édition et volumes non établis.'
+      note: Relevé du 28 octobre 2026. Le cas client ne démontre pas la parité fonctionnelle FLOW.
       sources:
       - label: Architecture Frappe
         href: https://docs.frappe.io/framework/user/en/basics/architecture
@@ -57,14 +75,29 @@ sections:
         href: https://frappe.io/stories/Chewy
       - label: Cas Vodafone UK publié par Korecent
         href: https://korecent.com/case-study/success-story-of-vodafone-global
+      measurement:
+        product_ref: erpnext
+        label: Code sélectionné et mesuré
     - title: Odoo Community
       subtitle: Un ERP modulaire avec un socle et une interface intégrés
       fields:
-      - label: Socle observé
+      - label: Périmètre fonctionnel
+        items:
+        - Achats, ventes, stocks, fabrication et socle web modulaire. Le panier mesuré ajoute le moteur OSS o-spreadsheet.
+          Les modules Enterprise sont exclus.
+      - label: Langages et socle
         items:
         - Python et PostgreSQL, modèles et ORM côté serveur, vues XML, interface JavaScript/Owl.
-      note: Référence de composants et de fonctions à rapprocher du périmètre FLOW. Les cas clients cités ne démontrent
-        pas sa couverture complète.
+      - label: Fonction marquante
+        items:
+        - Des modules métier intégrés et extensibles, avec une interface web et des vues communes.
+      - label: Déploiements documentés
+        items:
+        - '**Aurora Multimarket** : Odoo Community pour la planification du personnel des magasins. Ce cas ne démontre
+          pas la gestion des stocks sur Odoo.'
+        - '**Toyota Material Handling France** : ventes, achats, stock et fabrication dans un cas publié en 2017.
+          Édition inconnue et usage actuel non reconfirmé.'
+      note: Relevé du 28 octobre 2026. Le cas client ne démontre pas la parité fonctionnelle FLOW.
       sources:
       - label: Code public et composition Odoo Community
         href: https://github.com/odoo/odoo
@@ -72,14 +105,28 @@ sections:
         href: https://ubmsoft.com.ua/en/blog/our-blog-2/wfm-system-in-odoo-how-to-automate-personnel-management-23
       - label: Cas Toyota Material Handling publié par Odoo
         href: https://www.odoo.com/blog/customer-reviews-6/how-toyota-uses-odoo-after-just-6-months-of-integration-312
+      measurement:
+        product_ref: odoo-community
+        label: Code sélectionné et mesuré
     - title: Tryton
       subtitle: Un socle métier modulaire et un code ouvert inspectable
       fields:
-      - label: Socle observé
+      - label: Périmètre fonctionnel
+        items:
+        - Achats, ventes, stocks, approvisionnement et production au moyen de modules indépendants. Le relevé retient
+          le serveur, le client web et 25 modules opérationnels.
+      - label: Langages et socle
         items:
         - Serveur Python avec ORM, base PostgreSQL, client web Sao en JavaScript et vues XML.
-      note: Référence de composants et de fonctions à rapprocher du périmètre FLOW. Les cas clients cités ne démontrent
-        pas sa couverture complète.
+      - label: Fonction marquante
+        items:
+        - Composer et étendre les règles métier par modules Python, au-dessus de modèles et de transactions communs.
+      - label: Déploiements documentés
+        items:
+        - '**Mifarma** : ERP relié au webshop, aux équipements de préparation et aux transporteurs.'
+        - '**Coppernic** : achats, stock, production et livraison, avec des compléments adaptés. Versions et maintien
+          en service non établis par ces cas non datés.'
+      note: Relevé du 28 octobre 2026. Le cas client ne démontre pas la parité fonctionnelle FLOW.
       sources:
       - label: Documentation des modules Tryton
         href: https://docs.tryton.org/
@@ -87,22 +134,41 @@ sections:
         href: https://www.tryton.org/success-stories/mifarma
       - label: Cas Coppernic publié par Tryton
         href: https://www.tryton.org/success-stories/coppernic
+      measurement:
+        product_ref: tryton
+        label: Code sélectionné et mesuré
     - title: Axelor / Open Platform
       subtitle: Un socle Java et des applications métier configurables
       fields:
-      - label: Socle observé
+      - label: Périmètre fonctionnel
         items:
-        - 'Java, persistance Hibernate, modèles et vues XML, scripts Groovy et API REST. Client React/TypeScript pour
-          la version de plateforme étudiée.'
-      note: Référence de composants et de fonctions à rapprocher du périmètre FLOW. Les cas clients cités ne démontrent
-        pas sa couverture complète.
+        - Achats, ventes, stocks et production dans Open Suite. Open Platform et Studio/BPM portent les modèles,
+          interfaces et processus de l’assemblage étudié.
+      - label: Langages et socle
+        items:
+        - Java, persistance Hibernate, modèles et vues XML, scripts Groovy et API REST. Client React/TypeScript
+          pour la version de plateforme étudiée.
+      - label: Fonction marquante
+        items:
+        - Associer modèles et vues déclaratifs à un studio de processus BPMN/DMN. La BI Enterprise est hors du panier
+          OSS mesuré.
+      - label: Déploiements documentés
+        items:
+        - '**thyssenkrupp Materials France** : production, stocks, achats, ventes et étiquetage. Le cas concerne
+          cette filiale, pas le Core System du groupe.'
+        - '**Octopia** : inscription et facturation de vendeurs tiers dans un cas de 2021. Édition et usage actuel
+          non établis.'
+      note: Relevé du 28 octobre 2026. Le cas client ne démontre pas la parité fonctionnelle FLOW.
       sources:
       - label: Code et architecture Axelor Open Platform
         href: https://github.com/axelor/axelor-open-platform
       - label: Cas Octopia publié par Axelor
         href: https://axelor.com/fr/cas-client-cdiscount/
-      - label: Cas clients Axelor, dont Enercoop
-        href: https://axelor.com/our-case-studies/
+      - label: Cas thyssenkrupp Materials France
+        href: https://axelor.com/fr/cas-client-tkmf/
+      measurement:
+        product_ref: axelor-open-suite
+        label: Code sélectionné et mesuré
   - kind: table
     caption: Deux préparations selon les preuves disponibles
     columns:
@@ -125,8 +191,8 @@ sections:
     items:
     - Figer versions, fichiers, comptages et empreintes. Une part de pertinence ou une fraction de module reste
       supposée, même si son calcul est reproductible.
-    - 'Un mécanisme partagé a un propriétaire de financement. Le consommateur finance ses raccordements et adaptations.
-      Le framework entier n’est pas reconstruit pour chaque famille.'
+    - Un mécanisme partagé a un propriétaire de financement. Le consommateur finance ses raccordements et adaptations.
+      Le framework entier n’est pas reconstruit pour chaque famille.
   - kind: links
     items:
     - href: '#etude-marche'
@@ -154,8 +220,8 @@ sections:
       fields:
       - label: Rôle dans le calcul
         items:
-        - 'Compte les mouvements fonctionnels de données E / R / W / X. Chaque mouvement vaut un CFP. Les contraintes
-          internes ne créent pas automatiquement des points.'
+        - Compte les mouvements fonctionnels de données E / R / W / X. Chaque mouvement vaut un CFP. Les contraintes
+          internes ne créent pas automatiquement des points.
       note: COSMIC mesure une taille fonctionnelle. Une référence de productivité est nécessaire pour obtenir des
         JH.
       sources:
@@ -170,7 +236,7 @@ sections:
         items:
         - 'Fournit des observations de productivité à rapprocher d’une mesure COSMIC : population, activités et
           conventions horaires doivent être comparables.'
-      note: 'ISBSG complète la voie COSMIC. La productivité retenue reste une hypothèse de transposition à FLOW.'
+      note: ISBSG complète la voie COSMIC. La productivité retenue reste une hypothèse de transposition à FLOW.
       sources:
       - label: Base Development & Enhancement — ISBSG
         href: https://www.isbsg.org/development-and-enhancement-data/
@@ -200,8 +266,8 @@ sections:
   blocks:
   - kind: paragraphs
     items:
-    - 'Les quatre résultats natifs et la comparaison COSMIC restent visibles. Leur moyenne ne remplace pas la décision.
-      Les écarts utilisent la référence non arrondie. La base financée conserve l’arrondi adopté.'
+    - Les quatre résultats natifs et la comparaison COSMIC restent visibles. Leur moyenne ne remplace pas la décision.
+      Les écarts utilisent la référence non arrondie. La base financée conserve l’arrondi adopté.
   - kind: formula
     rule_ref: retained_rounding
   - kind: formula
@@ -227,14 +293,14 @@ sections:
   blocks:
   - kind: bullets
     items:
-    - 'Décrire les écarts en JH et pourcentage à la référence non arrondie, puis la dispersion. Les hypothèses communes
-      peuvent rapprocher les résultats. Elles ne fournissent pas des validations indépendantes.'
+    - Décrire les écarts en JH et pourcentage à la référence non arrondie, puis la dispersion. Les hypothèses communes
+      peuvent rapprocher les résultats. Elles ne fournissent pas des validations indépendantes.
     - Distinguer mesure, hypothèse, calcul, adoption et revue humaine. Aucune probabilité de dépassement ni fourchette
       statistique n’est déduite des seuls écarts.
     - Consolider les décisions adoptées après déduplication des financements. Ce cumul n’est pas une estimation
       COCOMO intégrée de tout le Core System.
-    - 'Rapporter les capacités étudiées et retenues au périmètre total. Dire ce qui reste à instruire et quelle preuve
-      pourrait améliorer la décision. Les inconnues ne valent pas zéro.'
+    - Rapporter les capacités étudiées et retenues au périmètre total. Dire ce qui reste à instruire et quelle preuve
+      pourrait améliorer la décision. Les inconnues ne valent pas zéro.
   - kind: links
     items:
     - href: '#evaluation-core'

@@ -1,0 +1,1586 @@
+version: 1
+id: complements-budgetaires-flow
+date: '2026-10-31'
+reading:
+  title: Écarts et compléments de budget
+  intro: Tous les écarts identifiés sont rapprochés des financements existants. Les réserves de budget restent séparées
+    des montants adoptés et des scénarios.
+  progress: Écarts instruits
+  progress_note: Instruction documentaire de tous les écarts identifiés. Ce décompte ne mesure ni la couverture fonctionnelle
+    des ERP ni une recette achevée.
+  open: Réserves non dimensionnées
+  priced: Compléments chiffrés proposés
+  total: Total des compléments
+  unknown: Non déterminé
+  none_priced: Aucun complément chiffrable sur les preuves disponibles
+  amount_note: Un montant inconnu reste inconnu. Les réserves ne sont pas ajoutées aux simulations. Une enveloppe
+    existante ne prouve pas qu’elle est suffisante.
+  funding: Déjà financé
+  residual: Ce qui reste à établir
+  open_case: Lire le rapprochement et les réserves
+  back: Revenir à tous les écarts
+  criteria: Besoin, financement et preuve manquante
+  criterion: Critère
+  observation: Constat et financement
+  remaining: Preuve ou comportement restant
+  baselines: Périmètres chiffrés rapprochés
+  baseline_note: Repères de périmètre, non additionnables entre écarts. Chaque lot est financé une seule fois. Les
+    ventilations par famille sont internes au lot.
+  jh: JH
+  cfp: CFP
+  family: Familles rapprochées
+  schemas: Structures déjà prévues
+  source: Preuves et sources
+  checks: Recette à effectuer
+  checks_note: Procédures proposées, non exécutées dans les ERP pendant cet audit.
+  products: Conséquences par solution
+  budget: Réserves de budget identifiées dans le modèle
+  budget_note: Une même réserve peut concerner plusieurs écarts. Son identifiant est unique. Elle ne constitue pas
+    une décision d’adoption.
+  id: Identifiant
+  option: Option
+  phase: Phase
+  status: Statut
+  amount: Complément
+  proof: Pour pouvoir chiffrer
+  excluded: À ne pas recompter
+  integration: Travaux Groupe déjà prévus
+  maintenance: Activités annuelles à rapprocher
+  experiment_link: Consulter les 18 essais expérimentaux et la trace détaillée G02
+  study_limit: Les neuf écarts identifiés sont instruits. Les garanties réelles, les règles métier non approuvées
+    et les inclusions contractuelles restent ouvertes. Aucun supplément chiffré défendable ne ressort de cette revue.
+  phases:
+    obtain_core: Obtenir le Core System
+    integrate_deploy: Intégrer et déployer
+    operate_evolve: Fonctionner et évoluer
+  statuses:
+    dimensionnement_a_requalifier: Dimensionnement existant à requalifier
+    base_a_reestimer: Base de la stack à réestimer
+    inclusion_a_confirmer: Inclusion à confirmer
+    besoin_conditionnel: Besoin conditionnel
+  register_open: Consulter le registre des compléments potentiels
+  existing_count: Comptage prévisionnel déjà associé aux familles rapprochées
+reviews:
+- gap_ref: G01
+  conclusion: '**Les saisons ne constituent pas un nouveau lot complet à ajouter.** Les référentiels contextualisés
+    et politiques sont financés. Le comportement sectoriel reste partiellement apparié aux analogues.'
+  already_funded: Master Data finance les versions et contextes. Les politiques et le devenir des biens sont explicitement
+    financés. Les positions de stock consomment ces références.
+  residual: La relation article × usage × marché × saison, ses fenêtres et la bascule partielle vers permanent ne
+    disposent pas encore d’une spécification ni d’un analogue mesuré propre. Requalifier le lot concerné après déduction
+    des mécanismes existants.
+  criteria:
+  - id: G01-C1
+    title: Saisons parallèles et fenêtres d’usage
+    need_refs:
+    - BC-004.01
+    - BC-004.02
+    - BC-004.03
+    mechanism_refs:
+    - master-data-common-domain
+    - master-data-semantique
+    - master-data-versions
+    observation: Le périmètre Master Data inclut contextes de planification, assortiments et versions. Ce rattachement
+      ne démontre pas une implémentation complète de la saison Fashion.
+    remaining: Définir la cardinalité et les fenêtres par marché. Ne pas confondre un attribut ou une liste de prix
+      avec une saison opérationnelle.
+  - id: G01-C2
+    title: Carry-over et cohérence des engagements
+    need_refs:
+    - BC-008.01
+    - BC-008.03
+    - BC-019.03
+    - BC-011.02
+    mechanism_refs:
+    - flow-policies-local-1
+    - flow-disposition-local-1
+    - stock-common-domain
+    observation: Les règles versionnées et décisions de devenir sont prévues. Les effets d’une bascule sur les engagements
+      ouverts ne sont pas détaillés.
+    remaining: Recetter la bascule partielle, la conservation des engagements et les lectures historiques. Isoler
+      ensuite les adaptations nettes.
+  baseline_refs:
+  - calculation_ref: master-data-java-spring-v1
+    family_refs: []
+  - calculation_ref: supply-controls-java-spring-v1
+    family_refs:
+    - policies
+    - disposition
+  - calculation_ref: stock-java-spring-v1
+    family_refs: []
+  integration_activity_refs:
+  - INT-001
+  - INT-002
+  - INT-003
+  - INT-007
+  - INT-010
+  maintenance_activity_refs:
+  - MAI-003
+  - MAI-004
+  - MAI-005
+  - MAI-006
+  - MAI-009
+  evidence_refs:
+  - rfi
+  - copil4
+  - ax-sector
+  - ms-season
+  - sap-season
+  - code-erpnext
+  - code-odoo-community
+  - code-tryton
+  - sap-learning
+  acceptance_checks:
+  - Deux saisons actives pour un même article en Europe et en Océanie, avec fenêtres différentes.
+  - Passer une partie des usages en permanent. Conserver historique, engagements et explication des politiques.
+  product_actions:
+    microsoft: K3 est déclaré dans la réponse. Faire lever la contradiction E110/G110 et relier les adaptations saisonnières
+      aux provisions de réalisation déjà proposées.
+    sap: Fashion déclare saisons et segmentation. Démontrer chevauchement, fenêtres et bascule dans la release proposée,
+      puis confirmer droits et paramétrage.
+    erpnext: Les variantes et groupes d’articles ne prouvent pas les saisons opérationnelles. Démontrer fenêtres par
+      marché et carry-over sans recréer l’article.
+    odoo-community: Le rejet Synvance concerne le manque de vertical mode, sans édition établie. Vérifier Community
+      et extensions séparément. Ne pas extrapoler le rejet aux autres OSS.
+    tryton: Catégories et variantes sont des primitives de référence. Fenêtres et usages saisonniers parallèles restent
+      non démontrés.
+    axelor-open-suite: La revue du code figé trouve catalogue, listes de prix et périodes. Aucun rapprochement complet
+      avec saisons d’usage, fenêtres et carry-over n’est établi.
+  status: instruction_documentaire_complete_preuves_ouvertes
+  addition_refs:
+  - CB-JAVA-SEASONS
+  - CB-JAVA-SPRING-INTEGRATION
+  - CB-JAVA-SPRING-RUN
+  - CB-DOTNET-CORE
+  - CB-DOTNET-INTEGRATION
+  - CB-DOTNET-RUN
+  - CB-RUST-CORE
+  - CB-RUST-INTEGRATION
+  - CB-RUST-RUN
+  - CB-MICROSOFT-RIGHTS
+  - CB-MICROSOFT-INTEGRATION
+  - CB-MICROSOFT-RUN
+  - CB-SAP-RIGHTS
+  - CB-SAP-INTEGRATION
+  - CB-SAP-RUN
+  non_budget_treatments: []
+- gap_ref: G02
+  conclusion: '**L’affectation future est déjà prévue.** Les garanties et la suffisance de la charge restent à qualifier,
+    comme dans le dossier détaillé G02.'
+  already_funded: Le lot décisions finance priorité, affectation et libération. Stock finance les réservations, Master
+    Data les versions. La ventilation interne du carnet ne sont pas une charge additionnelle.
+  residual: Aucun processus supplémentaire disjoint n’est établi. Les règles de partage et garanties de concurrence
+    doivent être précisées avant une réestimation du même périmètre.
+  criteria:
+  - id: G02-C1
+    title: Affectation datée et réception partielle
+    need_refs:
+    - BC-018.01
+    - BC-018.02
+    - BC-037.02
+    mechanism_refs:
+    - flow-backlog-local-2
+    - stock-stock-f04
+    observation: SupplyAssignment possède ressource, quantité et période. Les processus COSMIC lisent SupplyPlan et
+      écrivent l’affectation.
+    remaining: Démontrer conversion à la réception et absence de double compte sur produit configuré.
+  - id: G02-C2
+    title: Arbitrage, gel et révision
+    need_refs:
+    - BC-037.01
+    - BC-037.03
+    - BC-018.03
+    mechanism_refs:
+    - flow-backlog-local-1
+    - flow-backlog-local-3
+    - master-data-versions
+    observation: Priorité, libération et versions ont des propriétaires. Les essais synthétiques G02 illustrent les
+      critères attendus.
+    remaining: Valider les règles métier et la transaction native sous concurrence. Les essais synthétiques ne calibrent
+      pas les JH.
+  baseline_refs:
+  - calculation_ref: supply-decisions-java-spring-v1
+    family_refs:
+    - backlog
+    - promising
+    - optimization
+    - coordination
+  integration_activity_refs:
+  - INT-001
+  - INT-003
+  - INT-006
+  - INT-010
+  maintenance_activity_refs:
+  - MAI-003
+  - MAI-004
+  - MAI-005
+  - MAI-006
+  - MAI-009
+  evidence_refs:
+  - rfi
+  - ax-sector
+  - ms-backlog
+  - sap-backlog
+  - ms-allocation
+  acceptance_checks:
+  - Partager une réception future entre deux canaux sous quotas, puis recevoir partiellement.
+  - Retarder et annuler un apport. Tester gel, libération, rejeu et commandes concurrentes.
+  product_actions:
+    microsoft: Créditer K3 et les réservations sur approvisionnements commandés. Rapprocher préallocations et commandes
+      ouvertes des extensions du ROM avant tout supplément.
+    sap: Créditer Supply Assignment. Lever E248/H248, qualifier gel et arbitrages, puis rapprocher les adaptations
+      des WRICEF.
+    erpnext: Utiliser le périmètre de code et les fonctions documentées comme analogues. La totalité du scénario reste
+      à exécuter et les extensions à mesurer.
+    odoo-community: Séparer Community, modules additionnels et services Enterprise. Une primitive de stock ou de workflow
+      ne prouve pas le scénario transverse.
+    tryton: Séparer les modules documentés du comportement transverse requis. Mesurer les adaptations après un parcours
+      configuré.
+    axelor-open-suite: Comparer le code figé avec les compléments FLOW déjà chiffrés. La lecture de code ne vaut pas
+      recette du produit configuré.
+  status: instruction_documentaire_complete_preuves_ouvertes
+  addition_refs:
+  - CB-JAVA-ALLOCATION
+  - CB-JAVA-SPRING-INTEGRATION
+  - CB-JAVA-SPRING-RUN
+  - CB-DOTNET-CORE
+  - CB-DOTNET-INTEGRATION
+  - CB-DOTNET-RUN
+  - CB-RUST-CORE
+  - CB-RUST-INTEGRATION
+  - CB-RUST-RUN
+  - CB-MICROSOFT-RIGHTS
+  - CB-MICROSOFT-INTEGRATION
+  - CB-MICROSOFT-RUN
+  - CB-SAP-RIGHTS
+  - CB-SAP-INTEGRATION
+  - CB-SAP-RUN
+  non_budget_treatments: []
+- gap_ref: G03
+  conclusion: '**Offres de capacité et faisabilité sont financées.** Un registre de réservation fournisseur sans achat
+    ferme n’est pas suffisamment spécifié pour prouver sa couverture complète.'
+  already_funded: CapacityOffer, CapacityServiceRequirement, ServiceSelection et PromiseOption portent fournisseur,
+    période, quantité, unité et capacité. La coordination finance l’adaptation des engagements.
+  residual: Le pool fournisseur/site/famille/semaine, ses quotas multimarques et les engagements sans achat ferme
+    doivent être appariés aux contrats de prestation. Un complément est plausible, mais sa frontière avec le lot existant
+    n’est pas isolée.
+  criteria:
+  - id: G03-C1
+    title: Offre fournisseur et faisabilité
+    need_refs:
+    - BC-049.01
+    - BC-047.01
+    mechanism_refs:
+    - flow-service-planning-local-1
+    - flow-promising-local-2
+    observation: Les modèles CapacityOffer et PromiseOption sont présents dans la preuve figée. Une capacité de machine
+      native n’est pas une réservation fournisseur.
+    remaining: Distinguer capacité annoncée, capacité engagée et quantité commandée. Fixer unités, sites et périodes.
+  - id: G03-C2
+    title: Réserver sans achat ferme
+    need_refs:
+    - BC-049.02
+    - BC-049.03
+    mechanism_refs:
+    - flow-service-contract
+    - flow-coordination-local-2
+    observation: Contrat de prestation et adaptation des engagements sont financés. La réservation d’un pool fournisseur
+      n’est pas décrite comme un registre autonome approuvé.
+    remaining: Spécifier consommation, libération et arbitrage concurrent. Comparer les nouveaux mouvements avec ceux
+      déjà comptés avant de dimensionner.
+  baseline_refs:
+  - calculation_ref: supply-decisions-java-spring-v1
+    family_refs:
+    - service-planning
+    - promising
+    - coordination
+  - calculation_ref: service-fulfilment-java-spring-v1
+    family_refs:
+    - transport-orders
+  integration_activity_refs:
+  - INT-001
+  - INT-003
+  - INT-005
+  - INT-006
+  - INT-010
+  maintenance_activity_refs:
+  - MAI-003
+  - MAI-004
+  - MAI-005
+  - MAI-006
+  - MAI-009
+  evidence_refs:
+  - rfi
+  - ax-sector
+  - erp-capacity
+  - erp-blanket
+  - axelor-capacity
+  - ms-cap
+  - sap-cap
+  - sap-bom
+  - ms-ctp
+  - sap-sbc
+  acceptance_checks:
+  - Réserver un pool partagé sans créer de commande d’achat ni de stock fictif.
+  - Consommer, libérer et réconcilier après réduction de capacité. Vérifier demandes concurrentes et reste disponible.
+  product_actions:
+    microsoft: K3 est déclaré pour les réservations fournisseur. Calcul, répartition et adéquation demandent adaptations
+      ou reporting. Obtenir la ventilation des travaux déjà inclus.
+    sap: IBP est inclus dans la BOM. Cela ne prouve ni le parcours configuré ni les droits PP/DS. Faire la démonstration
+      avant de retenir un moteur ou module supplémentaire.
+    erpnext: Le Blanket Order décrit un engagement commercial lié aux commandes. Capacity Planning décrit la fabrication.
+      Aucun des deux ne démontre à lui seul le pool fournisseur sans achat ferme.
+    odoo-community: Séparer Community, modules additionnels et services Enterprise. Une primitive de stock ou de workflow
+      ne prouve pas le scénario transverse.
+    tryton: Séparer les modules documentés du comportement transverse requis. Mesurer les adaptations après un parcours
+      configuré.
+    axelor-open-suite: Comparer le code figé avec les compléments FLOW déjà chiffrés. La lecture de code ne vaut pas
+      recette du produit configuré.
+  status: instruction_documentaire_complete_preuves_ouvertes
+  addition_refs:
+  - CB-JAVA-CAPACITY
+  - CB-JAVA-SPRING-INTEGRATION
+  - CB-JAVA-SPRING-RUN
+  - CB-DOTNET-CORE
+  - CB-DOTNET-INTEGRATION
+  - CB-DOTNET-RUN
+  - CB-RUST-CORE
+  - CB-RUST-INTEGRATION
+  - CB-RUST-RUN
+  - CB-MICROSOFT-RIGHTS
+  - CB-MICROSOFT-INTEGRATION
+  - CB-MICROSOFT-RUN
+  - CB-SAP-RIGHTS
+  - CB-SAP-INTEGRATION
+  - CB-SAP-RUN
+  non_budget_treatments: []
+- gap_ref: G04
+  conclusion: '**Plan, scénarios isolés et application contrôlée sont explicitement chiffrés.** Ajouter un « simulateur
+    » complet doublerait ce périmètre.'
+  already_funded: MasterPlan, PlanScenario, PlanApplication et rapprochement demande/offre sont prévus. Optimisation,
+    explication et contrat du solveur sont financés dans le lot décisions. Les ateliers visuels sont déjà adoptés.
+  residual: Objectifs économiques, contraintes réelles, volumes, temps de réponse et qualité des décisions restent
+    à démontrer. Un optimiseur plus avancé serait une extension à définir, pas un ajout automatique.
+  criteria:
+  - id: G04-C1
+    title: Versions, scénarios et application
+    need_refs:
+    - BC-028.02
+    - BC-034.01
+    - BC-035.01
+    mechanism_refs:
+    - flow-master-plan-local-1
+    - flow-master-plan-local-2
+    - flow-master-plan-local-3
+    observation: Les schémas MasterPlan, PlanScenario et PlanApplication séparent données, simulation et application.
+    remaining: Tester une base devenue obsolète et empêcher une seconde application de la même décision.
+  - id: G04-C2
+    title: Couverture, optimisation et ateliers
+    need_refs:
+    - BC-032.02
+    - BC-030.02
+    - BC-040.01
+    mechanism_refs:
+    - flow-plan-preparation-local-2
+    - flow-optimization-local-1
+    - flow-solver-run-contract
+    - professional-supply-workbenches
+    observation: Le calcul net ne se confond pas avec l’optimisation. Les deux périmètres et l’interface des ateliers
+      sont financés.
+    remaining: Spécifier objectifs et contraintes, puis mesurer qualité et durée sur données représentatives. Réévaluer
+      seulement les écarts au contrat existant.
+  baseline_refs:
+  - calculation_ref: master-plan-java-spring-v1
+    family_refs:
+    - master-plan
+    - plan-preparation
+  - calculation_ref: supply-decisions-java-spring-v1
+    family_refs:
+    - optimization
+  - calculation_ref: supply-workbenches-java-spring-professional-v1
+    family_refs: []
+  integration_activity_refs:
+  - INT-001
+  - INT-003
+  - INT-004
+  - INT-006
+  - INT-010
+  maintenance_activity_refs:
+  - MAI-003
+  - MAI-004
+  - MAI-005
+  - MAI-006
+  - MAI-009
+  evidence_refs:
+  - rfi
+  - axelor-mrp
+  - tryton-supply
+  - erp-projection
+  - ms-replen
+  - sap-replen
+  - odoo-replenishment
+  - tryton-forecast
+  - ms-dom
+  acceptance_checks:
+  - Comparer deux plans datés avec les mêmes faits et des hypothèses distinctes. Expliquer les besoins non servis.
+  - Modifier les données pendant la simulation, refuser l’application obsolète puis appliquer une décision une seule
+    fois.
+  product_actions:
+    microsoft: Distinguer planification, DOM et réassort avancé. Rapprocher les développements déclarés du ROM pilote
+      et du lotissement Groupe.
+    sap: Le réassort magasin est déclaré externe. CAR Allocation est exclu et IBP inclus. Choisir la frontière avant
+      achat, puis rapprocher les préconisations dynamiques des WRICEF.
+    erpnext: Utiliser le périmètre de code et les fonctions documentées comme analogues. La totalité du scénario reste
+      à exécuter et les extensions à mesurer.
+    odoo-community: Séparer Community, modules additionnels et services Enterprise. Une primitive de stock ou de workflow
+      ne prouve pas le scénario transverse.
+    tryton: Séparer les modules documentés du comportement transverse requis. Mesurer les adaptations après un parcours
+      configuré.
+    axelor-open-suite: Comparer le code figé avec les compléments FLOW déjà chiffrés. La lecture de code ne vaut pas
+      recette du produit configuré.
+  status: instruction_documentaire_complete_preuves_ouvertes
+  addition_refs:
+  - CB-JAVA-PLANNING
+  - CB-JAVA-SPRING-INTEGRATION
+  - CB-JAVA-SPRING-RUN
+  - CB-DOTNET-CORE
+  - CB-DOTNET-INTEGRATION
+  - CB-DOTNET-RUN
+  - CB-RUST-CORE
+  - CB-RUST-INTEGRATION
+  - CB-RUST-RUN
+  - CB-MICROSOFT-RIGHTS
+  - CB-MICROSOFT-INTEGRATION
+  - CB-MICROSOFT-RUN
+  - CB-SAP-RIGHTS
+  - CB-SAP-INTEGRATION
+  - CB-SAP-RUN
+  non_budget_treatments: []
+- gap_ref: G05
+  conclusion: '**Le cycle multicanal et l’orchestration ont déjà des propriétaires de financement.** Le choix du pattern
+    d’architecture conditionne les responsabilités et les interfaces.'
+  already_funded: Commandes et filiation, coordination de satisfaction, moteur de processus, journal du dossier et
+    reprise sont financés. Les portails et studios figurent dans les lots professionnels adoptés.
+  residual: Il manque une matrice d’autorité pour commandes, réservations et stocks entre canaux et ERP. Les effets
+    externes et compensations doivent être prouvés. Aucun OMS complet supplémentaire ne se déduit du seul nom d’un
+    module.
+  criteria:
+  - id: G05-C1
+    title: Cycle, fractionnement et retours
+    need_refs:
+    - BC-020.02
+    - BC-025.02
+    - BC-027.01
+    - BC-027.03
+    mechanism_refs:
+    - flow-order-state
+    - flow-order-lineage
+    - flow-orders-local-2
+    observation: Le cycle commun, les filiations et la résolution des retours sont inclus dans le lot commandes.
+    remaining: Exécuter les révisions réparties entre ERP, web et magasin. Définir le détenteur de chaque état métier.
+  - id: G05-C2
+    title: Corrélation, reprise et effets externes
+    need_refs:
+    - BC-078.03
+    - BC-079.02
+    - BC-085.02
+    mechanism_refs:
+    - flow-process-runtime
+    - flow-case-ledger
+    - flow-coordination-local-2
+    - master-data-reprise
+    observation: Le dossier, les événements et la reprise sont chiffrés. L’idempotence locale ne suffit pas à garantir
+      un effet unique chez un partenaire.
+    remaining: Démontrer reprise après délai, réponse perdue, compensation et rejeu sur les interfaces réellement
+      conservées.
+  baseline_refs:
+  - calculation_ref: orders-java-spring-v1
+    family_refs:
+    - orders
+  - calculation_ref: supply-decisions-java-spring-v1
+    family_refs:
+    - coordination
+  - calculation_ref: process-management-java-spring-professional-v1
+    family_refs: []
+  integration_activity_refs:
+  - INT-001
+  - INT-004
+  - INT-005
+  - INT-006
+  - INT-010
+  - INT-011
+  maintenance_activity_refs:
+  - MAI-003
+  - MAI-004
+  - MAI-005
+  - MAI-006
+  - MAI-009
+  evidence_refs:
+  - ms-dom
+  - sap-bom
+  - ms-bom
+  - ax-sector
+  - scope-normalization
+  - erp-workflow
+  - sap-omf
+  - sap-fsd
+  acceptance_checks:
+  - Créer, fractionner, changer, annuler et retourner une commande sur trois canaux. Vérifier conservation des engagements.
+  - Perdre une réponse externe, rejouer et compenser sans double réservation, paiement ou expédition.
+  product_actions:
+    microsoft: Commerce DOM documente l’optimisation du sourcing. Il ne prouve pas toute l’orchestration transverse.
+      Définir l’autorité des canaux et les composants achetés.
+    sap: OMSA est dans le panier. Order Management foundation ne l’est pas de façon établie. Choisir l’architecture,
+      puis justifier tout complément et ses interfaces avant chiffrage.
+    erpnext: Utiliser le périmètre de code et les fonctions documentées comme analogues. La totalité du scénario reste
+      à exécuter et les extensions à mesurer.
+    odoo-community: Séparer Community, modules additionnels et services Enterprise. Une primitive de stock ou de workflow
+      ne prouve pas le scénario transverse.
+    tryton: Séparer les modules documentés du comportement transverse requis. Mesurer les adaptations après un parcours
+      configuré.
+    axelor-open-suite: Comparer le code figé avec les compléments FLOW déjà chiffrés. La lecture de code ne vaut pas
+      recette du produit configuré.
+  status: instruction_documentaire_complete_preuves_ouvertes
+  addition_refs:
+  - CB-JAVA-OMS
+  - CB-JAVA-SPRING-INTEGRATION
+  - CB-JAVA-SPRING-RUN
+  - CB-DOTNET-CORE
+  - CB-DOTNET-INTEGRATION
+  - CB-DOTNET-RUN
+  - CB-RUST-CORE
+  - CB-RUST-INTEGRATION
+  - CB-RUST-RUN
+  - CB-MICROSOFT-RIGHTS
+  - CB-MICROSOFT-INTEGRATION
+  - CB-MICROSOFT-RUN
+  - CB-SAP-RIGHTS
+  - CB-SAP-INTEGRATION
+  - CB-SAP-RUN
+  non_budget_treatments: []
+- gap_ref: G06
+  conclusion: '**Le transport et le dossier douanier sont déjà financés côté Make.** Le périmètre vise les prestations
+    confiées, sans reconstruction d’un TMS complet.'
+  already_funded: TransportInstruction, TransportBooking, TransportResult et CustomsCase/Document/Outcome sont présents.
+    Réservation autonome, pièces manquantes, corrections et rapprochement ont des mécanismes propres.
+  residual: Les connecteurs prestataires, règles de sélection et garanties opérationnelles restent à définir. Une
+    déclaration douanière réglementaire complète ou l’exploitation d’un TMS ne sont pas des inclusions acquises du
+    Core.
+  criteria:
+  - id: G06-C1
+    title: Transport et réservation de capacité
+    need_refs:
+    - BC-071.01
+    - BC-071.02
+    - BC-072.01
+    - BC-072.03
+    mechanism_refs:
+    - flow-transport-orders-local-1
+    - flow-transport-orders-local-2
+    - flow-service-recognition
+    - flow-service-planning-local-3
+    observation: Les ordres et réservations autonomes de transport sont explicitement inclus.
+    remaining: Recetter confirmation, changement, libération et réception partielle. Ne pas chiffrer de nouveau ces
+      contrats.
+  - id: G06-C2
+    title: Dossier douanier et preuves
+    need_refs:
+    - BC-073.01
+    - BC-073.02
+    - BC-073.03
+    mechanism_refs:
+    - flow-customs-local-1
+    - flow-customs-dossier-checks
+    - flow-assurance-local-2
+    observation: Le dossier, les pièces manquantes, les corrections et les résultats sont dans le périmètre figé.
+      Une table tarifaire OSS est un analogue insuffisant à elle seule.
+    remaining: Qualifier échanges, prestataire déclarant, refus et reprise. Identifier tout moteur réglementaire distinct
+      et ses droits avant achat.
+  baseline_refs:
+  - calculation_ref: service-fulfilment-java-spring-v1
+    family_refs:
+    - transport-orders
+    - customs
+    - assurance
+  - calculation_ref: supply-decisions-java-spring-v1
+    family_refs:
+    - service-planning
+  integration_activity_refs:
+  - INT-001
+  - INT-003
+  - INT-005
+  - INT-006
+  - INT-010
+  - INT-011
+  maintenance_activity_refs:
+  - MAI-003
+  - MAI-004
+  - MAI-005
+  - MAI-006
+  - MAI-009
+  evidence_refs:
+  - sap-bom
+  - sap-exec
+  - ms-exec
+  - ms-customs
+  - sap-customs
+  - tryton-customs
+  - erp-shipment
+  - ax-sector
+  - sap-tm
+  acceptance_checks:
+  - Réserver un transport, modifier le créneau, annuler une partie et rapprocher le réalisé.
+  - Recevoir un refus douanier, remplacer une pièce puis reconstituer la décision avec les versions et preuves.
+  product_actions:
+    microsoft: TMS et Landed Cost sont cités. Vérifier le service réellement retenu, ses droits et les flux inclus
+      dans la réalisation.
+    sap: TM est exclu de la BOM. L’alternative système externe reste ouverte. Ne pas ajouter TM et les mêmes interfaces
+      deux fois. Les données vers un déclarant ne prouvent pas tout le dossier douanier.
+    erpnext: Utiliser le périmètre de code et les fonctions documentées comme analogues. La totalité du scénario reste
+      à exécuter et les extensions à mesurer.
+    odoo-community: Séparer Community, modules additionnels et services Enterprise. Une primitive de stock ou de workflow
+      ne prouve pas le scénario transverse.
+    tryton: Séparer les modules documentés du comportement transverse requis. Mesurer les adaptations après un parcours
+      configuré.
+    axelor-open-suite: Comparer le code figé avec les compléments FLOW déjà chiffrés. La lecture de code ne vaut pas
+      recette du produit configuré.
+  status: instruction_documentaire_complete_preuves_ouvertes
+  addition_refs:
+  - CB-JAVA-SERVICES
+  - CB-JAVA-SPRING-INTEGRATION
+  - CB-JAVA-SPRING-RUN
+  - CB-DOTNET-CORE
+  - CB-DOTNET-INTEGRATION
+  - CB-DOTNET-RUN
+  - CB-RUST-CORE
+  - CB-RUST-INTEGRATION
+  - CB-RUST-RUN
+  - CB-MICROSOFT-RIGHTS
+  - CB-MICROSOFT-INTEGRATION
+  - CB-MICROSOFT-RUN
+  - CB-SAP-RIGHTS
+  - CB-SAP-INTEGRATION
+  - CB-SAP-RUN
+  non_budget_treatments: []
+- gap_ref: G07
+  conclusion: '**Finition, nettoyage, retouche et personnalisation figurent déjà explicitement dans les contrats chiffrés.**
+    Leur présentation comme fonctions oubliées serait incorrecte.'
+  already_funded: Douze contrats spécialisés de traitement marchandises sont décrits dans la preuve figée, avec exigences,
+    engagements et résultats. Le contrat commun et la reconnaissance des prestations sont financés une fois.
+  residual: Les vocabulaires, contraintes et connecteurs propres aux ateliers doivent être détaillés. La suffisance
+    des analogies de modules reste à éprouver, sans ajouter à nouveau les douze services.
+  criteria:
+  - id: G07-C1
+    title: Contrats métier au-delà du picking
+    need_refs:
+    - BC-064.01
+    - BC-065.01
+    - BC-066.01
+    - BC-067.01
+    mechanism_refs:
+    - flow-goods-orders-local-6
+    - flow-goods-orders-local-7
+    - flow-goods-orders-local-8
+    - flow-goods-orders-local-9
+    observation: Les quatre services sont nommés dans les schémas financés. Ils ne sont pas assimilés à une simple
+      préparation de stock.
+    remaining: Préciser exigences, tolérances, pièces et règles d’acceptation. Mesurer uniquement le comportement
+      résiduel après le contrat commun.
+  - id: G07-C2
+    title: Confié, partiel et non-conformité
+    need_refs:
+    - BC-066.02
+    - BC-069.02
+    - BC-069.03
+    mechanism_refs:
+    - flow-service-contract
+    - flow-service-recognition
+    - flow-assurance-local-1
+    observation: Le contrat commun, les faits spécialisés et le rapprochement sont inclus.
+    remaining: Recetter lots confiés, réception partielle, correction et filiation chez un prestataire externe.
+  baseline_refs:
+  - calculation_ref: service-fulfilment-java-spring-v1
+    family_refs:
+    - goods-orders
+    - assurance
+  integration_activity_refs:
+  - INT-001
+  - INT-004
+  - INT-005
+  - INT-006
+  - INT-010
+  maintenance_activity_refs:
+  - MAI-003
+  - MAI-004
+  - MAI-005
+  - MAI-006
+  - MAI-009
+  evidence_refs:
+  - rfi
+  - ms-exec
+  - sap-exec
+  - ax-sector
+  - code-erpnext
+  - code-odoo-community
+  - code-tryton
+  acceptance_checks:
+  - Confier une retouche externe, modifier les exigences avant acceptation puis recevoir une partie du lot.
+  - Refuser une partie, reprendre et restituer le même bien avec sa filiation et les preuves de conformité.
+  product_actions:
+    microsoft: Identifier ce qui relève de Dynamics, d’un WMS ou d’un atelier. Une réponse sur expédition ne clôt
+      pas le scénario de retouche.
+    sap: Identifier S/4, WMS et prestataire conservés, puis rapprocher les adaptations de l’enveloppe WRICEF. Ne pas
+      financer un WMS hors cible.
+    erpnext: Utiliser le périmètre de code et les fonctions documentées comme analogues. La totalité du scénario reste
+      à exécuter et les extensions à mesurer.
+    odoo-community: Séparer Community, modules additionnels et services Enterprise. Une primitive de stock ou de workflow
+      ne prouve pas le scénario transverse.
+    tryton: Séparer les modules documentés du comportement transverse requis. Mesurer les adaptations après un parcours
+      configuré.
+    axelor-open-suite: Comparer le code figé avec les compléments FLOW déjà chiffrés. La lecture de code ne vaut pas
+      recette du produit configuré.
+  status: instruction_documentaire_complete_preuves_ouvertes
+  addition_refs:
+  - CB-JAVA-SERVICES
+  - CB-JAVA-SPRING-INTEGRATION
+  - CB-JAVA-SPRING-RUN
+  - CB-DOTNET-CORE
+  - CB-DOTNET-INTEGRATION
+  - CB-DOTNET-RUN
+  - CB-RUST-CORE
+  - CB-RUST-INTEGRATION
+  - CB-RUST-RUN
+  - CB-MICROSOFT-RIGHTS
+  - CB-MICROSOFT-INTEGRATION
+  - CB-MICROSOFT-RUN
+  - CB-SAP-RIGHTS
+  - CB-SAP-INTEGRATION
+  - CB-SAP-RUN
+  non_budget_treatments: []
+- gap_ref: G08
+  conclusion: '**Studios, formulaires, supervision et Process Mining ont été ajoutés puis adoptés dans les lots professionnels.**
+    Ils ne sont plus des compléments à ajouter.'
+  already_funded: Le lot Process Management élargi finance studio, portail, formulaires, journal et analyse. Les ateliers
+    Supply et les services IT ont leurs propres lots. Les essais ciblés restent des preuves sur jeux fictifs.
+  residual: Connecteurs de traces, qualité des événements, volumes, sécurité et profondeur des analyses doivent être
+    vérifiés. La découverte avancée ou les traitements non appariés ne sont pas couverts par le seul succès d’un prototype.
+  criteria:
+  - id: G08-C1
+    title: Tâches, supervision et temporalités
+    need_refs:
+    - BC-080.01
+    - BC-081.02
+    - BC-085.03
+    - BC-086.01
+    mechanism_refs:
+    - professional-process-studio
+    - professional-human-forms
+    - flow-case-ledger
+    - flow-supervision-local-1
+    - professional-admin-security
+    - professional-operations-lifecycle
+    - professional-data-services
+    - professional-supply-workbenches
+    observation: Les fonctions sont financées dans le périmètre professionnel adopté. Le journal distingue faits,
+      corrections et dates.
+    remaining: Exécuter réaffectation, correction tardive et reconstitution à date avec les règles d’accès.
+  - id: G08-C2
+    title: Analyse de processus et pilotage
+    need_refs:
+    - BC-087.01
+    - BC-087.02
+    - BC-088.02
+    mechanism_refs:
+    - professional-analytics-mining
+    - flow-trace-sequence-analysis
+    - flow-intelligence-local-2
+    observation: Les composants d’analyse et de pilotage sont inclus. Les essais PM4JS/Superset ne mesurent ni la
+      production réelle ni les JH.
+    remaining: Fixer algorithmes et volumes, qualifier les traces intersystèmes puis mesurer les adaptations. Ne pas
+      créer une licence par simple disponibilité au catalogue.
+  baseline_refs:
+  - calculation_ref: process-management-java-spring-professional-v1
+    family_refs: []
+  - calculation_ref: supply-workbenches-java-spring-professional-v1
+    family_refs: []
+  - calculation_ref: professional-it-java-spring-professional-v1
+    family_refs: []
+  integration_activity_refs:
+  - INT-001
+  - INT-004
+  - INT-006
+  - INT-008
+  - INT-010
+  - INT-011
+  maintenance_activity_refs:
+  - MAI-003
+  - MAI-004
+  - MAI-005
+  - MAI-006
+  - MAI-009
+  evidence_refs:
+  - erp-workflow
+  - ms-ref
+  - sap-ref
+  - code-axelor-open-suite
+  - ms-mining
+  - sap-signavio
+  acceptance_checks:
+  - Corriger un dossier après clôture, lire ce qui était connu à une date donnée et réaffecter une tâche sous contrôle
+    des droits.
+  - Relier deux systèmes par identifiants stables, détecter une variante et expliquer l’indicateur, y compris en présence
+    de traces manquantes.
+  product_actions:
+    microsoft: Power Automate Process Mining requiert des droits et capacités distincts à confirmer. Le panier Dynamics/K3
+      ne les démontre pas. Vérifier les capacités avant toute tarification.
+    sap: Signavio est un produit distinct, sans inclusion établie dans la BOM. Vérifier d’abord si l’analytique S/4
+      déjà incluse répond au besoin, puis demander le devis net.
+    erpnext: Utiliser le périmètre de code et les fonctions documentées comme analogues. La totalité du scénario reste
+      à exécuter et les extensions à mesurer.
+    odoo-community: Séparer Community, modules additionnels et services Enterprise. Une primitive de stock ou de workflow
+      ne prouve pas le scénario transverse.
+    tryton: Séparer les modules documentés du comportement transverse requis. Mesurer les adaptations après un parcours
+      configuré.
+    axelor-open-suite: Comparer le code figé avec les compléments FLOW déjà chiffrés. La lecture de code ne vaut pas
+      recette du produit configuré.
+  status: instruction_documentaire_complete_preuves_ouvertes
+  addition_refs:
+  - CB-JAVA-PROCESS
+  - CB-JAVA-SPRING-INTEGRATION
+  - CB-JAVA-SPRING-RUN
+  - CB-DOTNET-CORE
+  - CB-DOTNET-INTEGRATION
+  - CB-DOTNET-RUN
+  - CB-RUST-CORE
+  - CB-RUST-INTEGRATION
+  - CB-RUST-RUN
+  - CB-MICROSOFT-RIGHTS
+  - CB-MICROSOFT-INTEGRATION
+  - CB-MICROSOFT-RUN
+  - CB-SAP-RIGHTS
+  - CB-SAP-INTEGRATION
+  - CB-SAP-RUN
+  non_budget_treatments: []
+- gap_ref: G09
+  conclusion: '**La normalisation est un rapprochement de périmètres, pas un budget de développement.** Aucune décote
+    Finance ni extension de généralisation ne peut être inventée.'
+  already_funded: Les décisions Make, forfaits Buy, activités d’intégration et contrats annuels ont leurs propriétaires.
+    Les financements partagés sont repris par référence, jamais par addition des cartes d’écarts.
+  residual: Le ROM Microsoft pilote, la généralisation Groupe, les travaux Finance SAP hors périmètre et les services
+    non ventilés doivent être réconciliés. Sans ventilation attestée, on conserve les montants adoptés et les réserves.
+  criteria:
+  - id: G09-C1
+    title: Frontière commune et autorité
+    need_refs:
+    - BC-002.02
+    - BC-011.03
+    - BC-020.03
+    mechanism_refs:
+    - master-data-admission
+    - stock-common-domain
+    - flow-order-state
+    observation: Le référentiel commun et les responsabilités cibles bornent la comparaison. Les offres Synvance gardent
+      leurs écarts de périmètre.
+    remaining: Faire signer le périmètre et la matrice d’autorité ERP/canaux, puis rapprocher chaque livrable avec
+      un financement.
+  - id: G09-C2
+    title: Travaux et contrats déjà financés
+    need_refs:
+    - BC-002.03
+    - BC-009.02
+    mechanism_refs:
+    - master-data-reprise
+    - stock-stock-f01
+    observation: Les reprises, corrections et activités d’intégration ont déjà une enveloppe. Leur présence dans plusieurs
+      écarts ne crée pas plusieurs budgets.
+    remaining: Obtenir ventilation pilote/généralisation, Finance et contrats mixtes. N’en déduire ni remise ni supplément
+      forfaitaire.
+  baseline_refs:
+  - calculation_ref: master-data-java-spring-v1
+    family_refs: []
+  - calculation_ref: stock-java-spring-v1
+    family_refs: []
+  - calculation_ref: orders-java-spring-v1
+    family_refs:
+    - orders
+  integration_activity_refs:
+  - INT-001
+  - INT-005
+  - INT-006
+  - INT-007
+  - INT-010
+  - INT-013
+  maintenance_activity_refs:
+  - MAI-003
+  - MAI-004
+  - MAI-005
+  - MAI-006
+  - MAI-009
+  evidence_refs:
+  - scope-normalization
+  - ms-bom
+  - sap-bom
+  - ms-stock
+  - sap-stock
+  acceptance_checks:
+  - Rapprocher chaque proposition de la même liste de livrables et de responsabilités.
+  - Identifier coût initial, récurrence, financement existant et reste inconnu pour chaque ajout potentiel, sans totaliser
+    les réserves comme des zéros.
+  product_actions:
+    microsoft: Distinguer ROM pilote, roll-out et hypothèses de généralisation. Obtenir une ventilation des extensions
+      et abonnements déjà inclus.
+    sap: Les travaux Finance sont hors périmètre commun mais non ventilés. Conserver le prix reçu. Confirmer IBP/OMSA
+      inclus et modules exclus sans les financer automatiquement.
+    erpnext: Utiliser le périmètre de code et les fonctions documentées comme analogues. La totalité du scénario reste
+      à exécuter et les extensions à mesurer.
+    odoo-community: Séparer Community, modules additionnels et services Enterprise. Une primitive de stock ou de workflow
+      ne prouve pas le scénario transverse.
+    tryton: Séparer les modules documentés du comportement transverse requis. Mesurer les adaptations après un parcours
+      configuré.
+    axelor-open-suite: Comparer le code figé avec les compléments FLOW déjà chiffrés. La lecture de code ne vaut pas
+      recette du produit configuré.
+  status: instruction_documentaire_complete_preuves_ouvertes
+  addition_refs:
+  - CB-JAVA-SPRING-INTEGRATION
+  - CB-JAVA-SPRING-RUN
+  - CB-DOTNET-CORE
+  - CB-DOTNET-INTEGRATION
+  - CB-DOTNET-RUN
+  - CB-RUST-CORE
+  - CB-RUST-INTEGRATION
+  - CB-RUST-RUN
+  - CB-MICROSOFT-RIGHTS
+  - CB-MICROSOFT-INTEGRATION
+  - CB-MICROSOFT-RUN
+  - CB-SAP-RIGHTS
+  - CB-SAP-INTEGRATION
+  - CB-SAP-RUN
+  non_budget_treatments:
+  - stack: java-spring
+    phase_ref: obtain_core
+    reason: Le rapprochement des périmètres ne crée pas un module de Core supplémentaire. Les réserves fonctionnelles
+      restent dans les écarts G01 à G08.
+additions:
+- id: CB-JAVA-SEASONS
+  stack: java-spring
+  phase_ref: obtain_core
+  gap_refs:
+  - G01
+  title: Adaptations saisonnières résiduelles
+  status: dimensionnement_a_requalifier
+  residual_scope: Fenêtres d’usage, saisons parallèles et carry-over après déduction des référentiels et politiques
+    existants.
+  excluded_scope: Les lots et mécanismes déjà adoptés, les réglages Groupe et les douze prestations nommées ne sont
+    pas facturés à nouveau.
+  proof_to_price: Spécification du comportement manquant, différence avec les processus comptés et analogue mesuré.
+    Recalculer le même ensemble cohérent avec le moteur canonique avant toute proposition.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: JAVA-SEASONS
+  existing_funding_refs:
+  - source_ref: source/estimations-core-retenues.yaml
+    keys:
+    - units
+    label: Décisions de construction adoptées, à rapprocher des lots détaillés dans les écarts
+- id: CB-JAVA-ALLOCATION
+  stack: java-spring
+  phase_ref: obtain_core
+  gap_refs:
+  - G02
+  title: Garanties résiduelles d’affectation future
+  status: dimensionnement_a_requalifier
+  residual_scope: Comportements non appariés après recette des mécanismes d’affectation, gel, réception et concurrence
+    déjà prévus.
+  excluded_scope: Les lots et mécanismes déjà adoptés, les réglages Groupe et les douze prestations nommées ne sont
+    pas facturés à nouveau.
+  proof_to_price: Spécification du comportement manquant, différence avec les processus comptés et analogue mesuré.
+    Recalculer le même ensemble cohérent avec le moteur canonique avant toute proposition.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: JAVA-ALLOCATION
+  existing_funding_refs:
+  - source_ref: source/estimations-core-retenues.yaml
+    keys:
+    - units
+    label: Décisions de construction adoptées, à rapprocher des lots détaillés dans les écarts
+- id: CB-JAVA-CAPACITY
+  stack: java-spring
+  phase_ref: obtain_core
+  gap_refs:
+  - G03
+  title: Engagements fournisseur sans achat ferme
+  status: dimensionnement_a_requalifier
+  residual_scope: Réservation, consommation et libération du pool fournisseur à rapprocher des offres et contrats
+    de prestation existants.
+  excluded_scope: Les lots et mécanismes déjà adoptés, les réglages Groupe et les douze prestations nommées ne sont
+    pas facturés à nouveau.
+  proof_to_price: Spécification du comportement manquant, différence avec les processus comptés et analogue mesuré.
+    Recalculer le même ensemble cohérent avec le moteur canonique avant toute proposition.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: JAVA-CAPACITY
+  existing_funding_refs:
+  - source_ref: source/estimations-core-retenues.yaml
+    keys:
+    - units
+    label: Décisions de construction adoptées, à rapprocher des lots détaillés dans les écarts
+- id: CB-JAVA-PLANNING
+  stack: java-spring
+  phase_ref: obtain_core
+  gap_refs:
+  - G04
+  title: Écart résiduel de planification et optimisation
+  status: dimensionnement_a_requalifier
+  residual_scope: Contraintes ou garanties retenues qui dépasseraient le contrat de calcul, de simulation et d’application
+    déjà financé.
+  excluded_scope: Les lots et mécanismes déjà adoptés, les réglages Groupe et les douze prestations nommées ne sont
+    pas facturés à nouveau.
+  proof_to_price: Spécification du comportement manquant, différence avec les processus comptés et analogue mesuré.
+    Recalculer le même ensemble cohérent avec le moteur canonique avant toute proposition.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: JAVA-PLANNING
+  existing_funding_refs:
+  - source_ref: source/estimations-core-retenues.yaml
+    keys:
+    - units
+    label: Décisions de construction adoptées, à rapprocher des lots détaillés dans les écarts
+- id: CB-JAVA-OMS
+  stack: java-spring
+  phase_ref: obtain_core
+  gap_refs:
+  - G05
+  title: Écart résiduel d’orchestration multicanal
+  status: dimensionnement_a_requalifier
+  residual_scope: Garanties transverses non appariées au cycle, à la filiation, au journal et à la reprise existants.
+  excluded_scope: Les lots et mécanismes déjà adoptés, les réglages Groupe et les douze prestations nommées ne sont
+    pas facturés à nouveau.
+  proof_to_price: Spécification du comportement manquant, différence avec les processus comptés et analogue mesuré.
+    Recalculer le même ensemble cohérent avec le moteur canonique avant toute proposition.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: JAVA-OMS
+  existing_funding_refs:
+  - source_ref: source/estimations-core-retenues.yaml
+    keys:
+    - units
+    label: Décisions de construction adoptées, à rapprocher des lots détaillés dans les écarts
+- id: CB-JAVA-SERVICES
+  stack: java-spring
+  phase_ref: obtain_core
+  gap_refs:
+  - G06
+  - G07
+  title: Spécialisation résiduelle des prestations
+  status: dimensionnement_a_requalifier
+  residual_scope: Comportements transport, douane et traitements non couverts après rapprochement du contrat commun
+    et des contrats spécialisés.
+  excluded_scope: Les lots et mécanismes déjà adoptés, les réglages Groupe et les douze prestations nommées ne sont
+    pas facturés à nouveau.
+  proof_to_price: Spécification du comportement manquant, différence avec les processus comptés et analogue mesuré.
+    Recalculer le même ensemble cohérent avec le moteur canonique avant toute proposition.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: JAVA-SERVICES
+  existing_funding_refs:
+  - source_ref: source/estimations-core-retenues.yaml
+    keys:
+    - units
+    label: Décisions de construction adoptées, à rapprocher des lots détaillés dans les écarts
+- id: CB-JAVA-PROCESS
+  stack: java-spring
+  phase_ref: obtain_core
+  gap_refs:
+  - G08
+  title: Analyse ou supervision non appariée
+  status: dimensionnement_a_requalifier
+  residual_scope: Algorithmes, connecteurs génériques ou garanties qui dépasseraient le périmètre professionnel adopté.
+  excluded_scope: Les lots et mécanismes déjà adoptés, les réglages Groupe et les douze prestations nommées ne sont
+    pas facturés à nouveau.
+  proof_to_price: Spécification du comportement manquant, différence avec les processus comptés et analogue mesuré.
+    Recalculer le même ensemble cohérent avec le moteur canonique avant toute proposition.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: JAVA-PROCESS
+  existing_funding_refs:
+  - source_ref: source/estimations-core-retenues.yaml
+    keys:
+    - units
+    label: Décisions de construction adoptées, à rapprocher des lots détaillés dans les écarts
+- id: CB-JAVA-SPRING-INTEGRATION
+  stack: java-spring
+  phase_ref: integrate_deploy
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Adaptations et raccordements résiduels
+  status: dimensionnement_a_requalifier
+  residual_scope: Travaux Groupe réellement additionnels après rapprochement des politiques, flux, données, interfaces,
+    recette et déploiement existants.
+  excluded_scope: Les activités INT-001 à INT-013 et les forfaits de réalisation sont rapprochés avant tout complément.
+    Les mêmes flux ne sont pas comptés dans plusieurs écarts.
+  proof_to_price: Inventaire des livrables, volumes et interfaces. Ventilation du forfait ou des activités financées.
+    Chiffrer seulement les travaux non inclus.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: JAVA-SPRING-INTEGRATION
+  existing_funding_refs:
+  - source_ref: source/chiffrage/chiffrage-java-spring.yaml
+    keys:
+    - integration
+    - activites
+    label: Travaux communs Make, avec leurs remplacements et diagnostics explicités
+  - source_ref: source/deploiement-groupe.yaml
+    keys: []
+    label: Déploiements et substitutions Groupe, dont les flux déjà financés
+- id: CB-JAVA-SPRING-RUN
+  stack: java-spring
+  phase_ref: operate_evolve
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Fonctionnement et maintenance résiduels
+  status: besoin_conditionnel
+  residual_scope: Charges, volumes, support ou contrats additionnels après choix des composants et des responsabilités.
+  excluded_scope: Ne pas appliquer un nouveau pourcentage au build, ni facturer le même droit dans acquisition et
+    Run. Les activités MAI restent le point de départ.
+  proof_to_price: Composants retenus, volumes, service attendu et inclusion des contrats existants. Distinguer charge
+    annuelle, abonnement et consommation.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: JAVA-SPRING-RUN
+  existing_funding_refs:
+  - source_ref: source/chiffrage/chiffrage-java-spring.yaml
+    keys:
+    - maintenance
+    - activites
+    label: Activités annuelles, inclusions et traitements existants
+  - source_ref: source/maintenance/maintenance-java-spring.yaml
+    keys: []
+    label: Services et contrats annuels retenus
+- id: CB-DOTNET-CORE
+  stack: dotnet
+  phase_ref: obtain_core
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Base Core à réestimer dans cet écosystème
+  status: base_a_reestimer
+  residual_scope: L’évaluation Java/Spring et ses réserves ne constituent pas une estimation .NET ou Rust.
+  excluded_scope: Aucune copie des montants Java/Spring et aucun supplément forfaitaire dérivé de son écart.
+  proof_to_price: Analogues, réutilisations, tailles et activités propres à la stack. Réestimer le Core complet avant
+    de prétendre isoler un supplément.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: DOTNET-CORE
+  existing_funding_refs:
+  - source_ref: source/statut-evaluation.yaml
+    keys: []
+    label: Statut d’évaluation de la stack et limite de transposition des résultats Java/Spring
+- id: CB-DOTNET-INTEGRATION
+  stack: dotnet
+  phase_ref: integrate_deploy
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Adaptations et raccordements résiduels
+  status: dimensionnement_a_requalifier
+  residual_scope: Travaux Groupe réellement additionnels après rapprochement des politiques, flux, données, interfaces,
+    recette et déploiement existants.
+  excluded_scope: Les activités INT-001 à INT-013 et les forfaits de réalisation sont rapprochés avant tout complément.
+    Les mêmes flux ne sont pas comptés dans plusieurs écarts.
+  proof_to_price: Inventaire des livrables, volumes et interfaces. Ventilation du forfait ou des activités financées.
+    Chiffrer seulement les travaux non inclus.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: DOTNET-INTEGRATION
+  existing_funding_refs:
+  - source_ref: source/chiffrage/chiffrage-dotnet.yaml
+    keys:
+    - integration
+    - activites
+    label: Travaux communs Make, avec leurs remplacements et diagnostics explicités
+  - source_ref: source/deploiement-groupe.yaml
+    keys: []
+    label: Déploiements et substitutions Groupe, dont les flux déjà financés
+- id: CB-DOTNET-RUN
+  stack: dotnet
+  phase_ref: operate_evolve
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Fonctionnement et maintenance résiduels
+  status: besoin_conditionnel
+  residual_scope: Charges, volumes, support ou contrats additionnels après choix des composants et des responsabilités.
+  excluded_scope: Ne pas appliquer un nouveau pourcentage au build, ni facturer le même droit dans acquisition et
+    Run. Les activités MAI restent le point de départ.
+  proof_to_price: Composants retenus, volumes, service attendu et inclusion des contrats existants. Distinguer charge
+    annuelle, abonnement et consommation.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: DOTNET-RUN
+  existing_funding_refs:
+  - source_ref: source/chiffrage/chiffrage-dotnet.yaml
+    keys:
+    - maintenance
+    - activites
+    label: Activités annuelles, inclusions et traitements existants
+  - source_ref: source/maintenance/maintenance-dotnet.yaml
+    keys: []
+    label: Services et contrats annuels retenus
+- id: CB-RUST-CORE
+  stack: rust
+  phase_ref: obtain_core
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Base Core à réestimer dans cet écosystème
+  status: base_a_reestimer
+  residual_scope: L’évaluation Java/Spring et ses réserves ne constituent pas une estimation .NET ou Rust.
+  excluded_scope: Aucune copie des montants Java/Spring et aucun supplément forfaitaire dérivé de son écart.
+  proof_to_price: Analogues, réutilisations, tailles et activités propres à la stack. Réestimer le Core complet avant
+    de prétendre isoler un supplément.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: RUST-CORE
+  existing_funding_refs:
+  - source_ref: source/statut-evaluation.yaml
+    keys: []
+    label: Statut d’évaluation de la stack et limite de transposition des résultats Java/Spring
+- id: CB-RUST-INTEGRATION
+  stack: rust
+  phase_ref: integrate_deploy
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Adaptations et raccordements résiduels
+  status: dimensionnement_a_requalifier
+  residual_scope: Travaux Groupe réellement additionnels après rapprochement des politiques, flux, données, interfaces,
+    recette et déploiement existants.
+  excluded_scope: Les activités INT-001 à INT-013 et les forfaits de réalisation sont rapprochés avant tout complément.
+    Les mêmes flux ne sont pas comptés dans plusieurs écarts.
+  proof_to_price: Inventaire des livrables, volumes et interfaces. Ventilation du forfait ou des activités financées.
+    Chiffrer seulement les travaux non inclus.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: RUST-INTEGRATION
+  existing_funding_refs:
+  - source_ref: source/chiffrage/chiffrage-rust.yaml
+    keys:
+    - integration
+    - activites
+    label: Travaux communs Make, avec leurs remplacements et diagnostics explicités
+  - source_ref: source/deploiement-groupe.yaml
+    keys: []
+    label: Déploiements et substitutions Groupe, dont les flux déjà financés
+- id: CB-RUST-RUN
+  stack: rust
+  phase_ref: operate_evolve
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Fonctionnement et maintenance résiduels
+  status: besoin_conditionnel
+  residual_scope: Charges, volumes, support ou contrats additionnels après choix des composants et des responsabilités.
+  excluded_scope: Ne pas appliquer un nouveau pourcentage au build, ni facturer le même droit dans acquisition et
+    Run. Les activités MAI restent le point de départ.
+  proof_to_price: Composants retenus, volumes, service attendu et inclusion des contrats existants. Distinguer charge
+    annuelle, abonnement et consommation.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: RUST-RUN
+  existing_funding_refs:
+  - source_ref: source/chiffrage/chiffrage-rust.yaml
+    keys:
+    - maintenance
+    - activites
+    label: Activités annuelles, inclusions et traitements existants
+  - source_ref: source/maintenance/maintenance-rust.yaml
+    keys: []
+    label: Services et contrats annuels retenus
+- id: CB-MICROSOFT-RIGHTS
+  stack: microsoft
+  phase_ref: obtain_core
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Droits initiaux et activation éventuels
+  status: inclusion_a_confirmer
+  residual_scope: Frais initiaux des modules retenus après démonstration dont l’inclusion n’est pas établie. Les abonnements
+    récurrents relèvent de la réserve de fonctionnement de la même option.
+  excluded_scope: Les composants déjà inclus et les fonctions laissées aux systèmes externes ne créent pas de nouvel
+    achat.
+  proof_to_price: BOM contractuelle, métriques et volumes, devis daté net des droits déjà inclus. Aucun prix public
+    transposé sans qualification.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: MICROSOFT-RIGHTS
+  existing_funding_refs:
+  - source_ref: source/selection-buy.yaml
+    keys: []
+    label: Sélection et qualification Buy déjà financées
+  - source_ref: source/maintenance/maintenance-microsoft.yaml
+    keys: []
+    label: Contrats éditeur retenus, sans ventilation attestée de frais initiaux supplémentaires
+- id: CB-MICROSOFT-INTEGRATION
+  stack: microsoft
+  phase_ref: integrate_deploy
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Adaptations et raccordements résiduels
+  status: inclusion_a_confirmer
+  residual_scope: Travaux Groupe réellement additionnels après rapprochement des politiques, flux, données, interfaces,
+    recette et déploiement existants.
+  excluded_scope: Les activités INT-001 à INT-013 et les forfaits de réalisation sont rapprochés avant tout complément.
+    Les mêmes flux ne sont pas comptés dans plusieurs écarts.
+  proof_to_price: Inventaire des livrables, volumes et interfaces. Ventilation du forfait ou des activités financées.
+    Chiffrer seulement les travaux non inclus.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: MICROSOFT-INTEGRATION
+  existing_funding_refs:
+  - source_ref: source/chiffrage/chiffrage-microsoft.yaml
+    keys:
+    - integration
+    - prix_rfi
+    label: Forfait de réalisation Buy
+- id: CB-MICROSOFT-RUN
+  stack: microsoft
+  phase_ref: operate_evolve
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Fonctionnement et maintenance résiduels
+  status: besoin_conditionnel
+  residual_scope: Abonnements récurrents, capacités consommées et services annuels additionnels après choix des composants.
+    Les frais initiaux sont portés par la réserve d’acquisition, sans double compte.
+  excluded_scope: Ne pas appliquer un nouveau pourcentage au build, ni facturer le même droit dans acquisition et
+    Run. Les activités MAI restent le point de départ.
+  proof_to_price: Composants retenus, volumes, service attendu et inclusion des contrats existants. Distinguer charge
+    annuelle, abonnement et consommation.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: MICROSOFT-RUN
+  existing_funding_refs:
+  - source_ref: source/chiffrage/chiffrage-microsoft.yaml
+    keys:
+    - maintenance
+    - activites
+    label: Activités annuelles, inclusions et traitements existants
+  - source_ref: source/maintenance/maintenance-microsoft.yaml
+    keys: []
+    label: Services et contrats annuels retenus
+- id: CB-SAP-RIGHTS
+  stack: sap
+  phase_ref: obtain_core
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Droits initiaux et activation éventuels
+  status: inclusion_a_confirmer
+  residual_scope: Frais initiaux des modules retenus après démonstration dont l’inclusion n’est pas établie. Les abonnements
+    récurrents relèvent de la réserve de fonctionnement de la même option.
+  excluded_scope: Les composants déjà inclus et les fonctions laissées aux systèmes externes ne créent pas de nouvel
+    achat.
+  proof_to_price: BOM contractuelle, métriques et volumes, devis daté net des droits déjà inclus. Aucun prix public
+    transposé sans qualification.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: SAP-RIGHTS
+  existing_funding_refs:
+  - source_ref: source/selection-buy.yaml
+    keys: []
+    label: Sélection et qualification Buy déjà financées
+  - source_ref: source/maintenance/maintenance-sap.yaml
+    keys: []
+    label: Contrats éditeur retenus, sans ventilation attestée de frais initiaux supplémentaires
+- id: CB-SAP-INTEGRATION
+  stack: sap
+  phase_ref: integrate_deploy
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Adaptations et raccordements résiduels
+  status: inclusion_a_confirmer
+  residual_scope: Travaux Groupe réellement additionnels après rapprochement des politiques, flux, données, interfaces,
+    recette et déploiement existants.
+  excluded_scope: Les activités INT-001 à INT-013 et les forfaits de réalisation sont rapprochés avant tout complément.
+    Les mêmes flux ne sont pas comptés dans plusieurs écarts.
+  proof_to_price: Inventaire des livrables, volumes et interfaces. Ventilation du forfait ou des activités financées.
+    Chiffrer seulement les travaux non inclus.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: SAP-INTEGRATION
+  existing_funding_refs:
+  - source_ref: source/chiffrage/chiffrage-sap.yaml
+    keys:
+    - integration
+    - prix_rfi
+    label: Forfait de réalisation Buy
+- id: CB-SAP-RUN
+  stack: sap
+  phase_ref: operate_evolve
+  gap_refs:
+  - G01
+  - G02
+  - G03
+  - G04
+  - G05
+  - G06
+  - G07
+  - G08
+  - G09
+  title: Fonctionnement et maintenance résiduels
+  status: besoin_conditionnel
+  residual_scope: Abonnements récurrents, capacités consommées et services annuels additionnels après choix des composants.
+    Les frais initiaux sont portés par la réserve d’acquisition, sans double compte.
+  excluded_scope: Ne pas appliquer un nouveau pourcentage au build, ni facturer le même droit dans acquisition et
+    Run. Les activités MAI restent le point de départ.
+  proof_to_price: Composants retenus, volumes, service attendu et inclusion des contrats existants. Distinguer charge
+    annuelle, abonnement et consommation.
+  estimate_ref: null
+  net_extra_jh: null
+  net_extra_initial_eur_ht: null
+  net_extra_annual_eur_ht: null
+  work_package_ref: SAP-RUN
+  existing_funding_refs:
+  - source_ref: source/chiffrage/chiffrage-sap.yaml
+    keys:
+    - maintenance
+    - activites
+    label: Activités annuelles, inclusions et traitements existants
+  - source_ref: source/maintenance/maintenance-sap.yaml
+    keys: []
+    label: Services et contrats annuels retenus

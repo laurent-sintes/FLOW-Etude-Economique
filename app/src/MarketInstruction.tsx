@@ -1,12 +1,14 @@
-import {useState} from 'react';
+import {useEffect,useState} from 'react';
 import {useStudy,type Data} from './context';
 import {MethodText} from './MethodDocument';
 import {MarketSourceLink,MarketSourceList} from './MarketSources';
 
-export function MarketInstruction({reading}:{reading:Data}){
+export function MarketInstruction({reading,focus}:{reading:Data;focus?:string}){
  const {data}=useStudy(),T=data.ui.essential.market_study.qualification;
  const I=reading.instruction;
  const first=I.qualifications[0];
+ const [focusCapability,focusProduct]=(focus||'').split('~');
+ useEffect(()=>{if(I.products.some((p:Data)=>p.id===focusProduct)&&I.capabilities.some((c:Data)=>c.capability_ref===focusCapability)){setProduct(focusProduct);setCapability(focusCapability);}},[focus]);
  const [product,setProduct]=useState(first?.product_ref||I.products[0].id);
  const [capability,setCapability]=useState(first?.capability_ref||I.capabilities[0].capability_ref);
  const native=(id:string)=>data.content.complexity.rows.find((row:Data)=>row.capacite_id===id);

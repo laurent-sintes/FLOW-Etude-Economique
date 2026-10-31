@@ -9,6 +9,8 @@ from validation_reporting import test_ids
 from validate_stacks import ROOT
 
 ALGORITHM_CHECKS = {
+ 'budget_reserve_reconciliation': 'test_budget_supplements.BudgetSupplementTests.test_all_gaps_options_phases_and_unknown_totals',
+ 'market_comparison_contract': 'test_market_comparison.MarketComparisonTests.test_no_false_coverage_or_budget',
  'role_allocation': 'test_estimation_calculation.EstimationCalculationTests.test_four_references_and_adoption_reproduce',
  'retained_rounding': 'test_estimation_calculation.EstimationCalculationTests.test_four_references_and_adoption_reproduce',
  'nonlinear_complements': 'test_estimation_audit.AuditCorrectionsTests.test_reconstructed_counts_and_costs',

@@ -239,13 +239,11 @@ export function SynvanceReferencePage({providerId,view='overview'}:{providerId?:
  const {data}=useStudy(),R=data.content.synvance_reference;
  const provider=providerId?R.synthesis.providers.find((item:Data)=>item.id===providerId):null;
  const evidence=provider?uniqueProofs(provider):view==='business'?uniqueProofs({architecture:{proofs:R.business.architecture_proofs},patterns:R.business.pattern_reading,axes:R.business.axes.filter((row:Data)=>!['oms-b2c','architecture'].includes(row.id)),others:R.business.others}):view==='oms'?uniqueProofs(R.business.oms):view==='costs'?uniqueProofs(R.costs):[];
- const costSections=[{id:'synvance-source-costs',title:R.costs.sources_title},{id:'synvance-cost-bridge',title:R.costs.bridge_title},{id:'synvance-model-costs',title:R.costs.model_title}];
  return <div className="essential-page core-method-page synvance-reference-page" data-synvance-page={providerId||view} style={{'--publisher-ms':R.reading.publishers[0].accent,'--publisher-sap':R.reading.publishers[1].accent} as CSSProperties}>
   <LocalNavigation reference={R} current={provider?'costs':view} detail={Boolean(provider)}/>
   <DossierSheet view={providerId||view}>
   <EvidenceContext.Provider value={view==='overview'&&!provider?null:evidence}>
    {provider?<ProviderDetails reference={R} provider={provider}/>:<>
-    {view==='costs'&&<Contents sections={costSections} label={R.reading.cost_navigation}/>}
     <ol className="core-method-sections">
      {view==='overview'&&<><Brief reference={R}/><Documents reference={R}/></>}
      {view==='business'&&<BusinessScope reference={R}/>}

@@ -1,0 +1,16 @@
+import type {Data} from './context';
+import {MethodText} from './MethodDocument';
+
+export function GapInstruction({instruction:I,reading:T,unitName}:{instruction:Data;reading:Data;unitName:(id:string)=>string}){
+ const format=(v:number)=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(v),B=I.baseline,Q=I.quantification;
+ return <article className="gap-instruction">
+  <p className="comparison-context">{T.date} · {I.date}</p><h2>{I.title}</h2><p className="core-method-lead"><MethodText>{I.conclusion}</MethodText></p><p>{I.scope}</p>
+  <div className="comparison-completeness"><h3>{T.sizing_attempt}</h3><p>{Q.reason}</p><p className="comparison-limit"><strong>{T.extra} : </strong>{T.not_estimated}</p><p><strong>{Q.decision}</strong></p></div>
+  <section><h3>{T.phase_boundaries}</h3><div className="comparison-consequences">{[['core','core_scope'],['integration','integration_scope']].map(([key,label])=><div key={key}><h4>{T[label]}</h4><ul>{I.boundaries[key].map((text:string)=><li key={text}>{text}</li>)}</ul></div>)}</div><p><strong>{T.outside_scope} : </strong>{I.boundaries.excluded.join(' · ')}</p></section>
+  <section><h3>{T.instruction_title}</h3><div className="comparison-table-scroll" tabIndex={0} role="region" aria-label={T.instruction_title}><table className="gap-instruction-table"><thead><tr><th scope="col">{T.criterion}</th><th scope="col">{T.observation}</th><th scope="col">{T.covered_by}</th></tr></thead><tbody>{I.criteria.map((c:Data)=><tr key={c.id}><th scope="row">{c.title}<small>{c.need_refs.join(' · ')}</small></th><td><p>{c.observed}</p><p><strong>{T.expected} : </strong>{c.expected}</p></td><td><ul>{c.funding.map((m:Data)=><li key={m.id}>{m.label}<small>{unitName(m.owner)}</small></li>)}</ul></td></tr>)}</tbody></table></div></section>
+  <section className="gap-instruction-baseline"><h3>{T.baseline}</h3><dl><div><dt>{T.coherent_lot}</dt><dd>{format(B.adopted_jh)} {T.unit}</dd></div><div><dt>{T.backlog_allocation}</dt><dd>{format(B.internal_backlog_jh)} {T.unit}</dd></div><div><dt>{T.backlog_count}</dt><dd>{B.backlog_cfp} {T.count_unit}</dd></div></dl><p className="reading-note">{T.allocation_note}</p><p><strong>{T.bank} : </strong>{B.selected_axelor_units} {T.bank_unit}</p><h4>{T.existing_models}</h4><ul>{B.schemas.map((s:Data)=><li key={s.name}><code>{s.name}</code><small>{s.fields.join(' · ')}</small></li>)}</ul><h4>{T.existing_processes}</h4><ul>{B.processes.map((p:Data)=><li key={p.id}>{p.label}<small>{p.movements.map((m:Data)=>m.type+' '+m.group).join(' · ')}</small></li>)}</ul><p>{Q.cocomo_treatment}</p><p>{Q.cosmic_treatment}</p><p className="comparison-context">{T.calculation_base} · <code>{Q.calculation_ref}</code></p></section>
+  <section><h3>{T.experiment}</h3><p><strong>{I.experiment_result.tests} {T.experiment_count}</strong></p><p><MethodText>{I.experiment.interpretation}</MethodText></p></section>
+  <section><h3>{T.next_instruction}</h3><ol className="gap-instruction-next">{I.next_steps.map((step:Data)=><li key={step.title}><h4>{step.title}</h4><p>{step.deliverable}</p><small>{T.role} · {step.role}</small></li>)}</ol></section>
+  <section><h3>{T.buy_instruction}</h3>{I.buy_followup.map((f:Data)=><article key={f.product_ref}><h4>{I.buy_product_labels[f.product_ref]}</h4><p>{f.conclusion}</p><p>{f.requested}</p></article>)}</section>
+ </article>;
+}

@@ -21,7 +21,7 @@ const output=path.resolve(flags.get('--output')||'tmp/pages-validation-report.js
 await fs.mkdir(path.dirname(output),{recursive:true});
 const oracle=JSON.parse((await fs.readFile(casesPath,'utf8')).replace(/^\uFEFF/,''));
 assert.equal(Object.keys(oracle.cases).length,6,'Six current model scenarios are required.');
-const navRoutes=['synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire','telechargements'];
+const navRoutes=['synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','acquisition','integration','fonctionnement','scenarios','methodes','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire','telechargements'];
 const synvanceProviders=['microsoft','sap'];
 const routes=[navRoutes[0],...['business','oms','costs',...synvanceProviders].map(page=>'synvance-'+page),...navRoutes.slice(1)];
 const report={url:site.href,status:'running',routes:{},worker:{},proofs:{},storage:{},errors:[],warnings:[]};
@@ -64,7 +64,7 @@ function watch(target){
 }
 async function route(id){
  await page.evaluate(value=>{location.hash='#'+value;},id);
- const navigationId=id.startsWith('synvance-')?'synvance':id;
+ const navigationId=id.startsWith('synvance-')?'synvance':['modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers'].includes(id)?'methodes':id;
  await page.locator(`.essential-nav-group a[href="#${navigationId}"][aria-current="page"]`).waitFor({state:'attached'});
  await page.locator('main .essential-page:visible').first().waitFor();
  if(navigationId==='synvance')await page.locator(`[data-synvance-page="${id==='synvance'?'overview':id.slice('synvance-'.length)}"]`).waitFor();
@@ -86,7 +86,7 @@ async function checkFrameworkNavigation(){
  await open();await navigation.locator('nav a').last().focus();await page.keyboard.press('Tab');
  await page.waitForFunction(()=>document.querySelector('.topbar button[aria-controls="study-navigation"]')?.getAttribute('aria-expanded')==='false');
  assert.equal(await navigation.evaluate(element=>element.contains(document.activeElement)),false,'Leaving the nonmodal menu should keep focus outside.');
- await open();await navigation.locator('a[href="#marche"]').click();await route('marche');
+ await open();await navigation.locator('a[href="#integration"]').click();await route('integration');
  await page.waitForFunction(()=>document.querySelector('main h1')===document.activeElement);
  assert.equal(await opener.getAttribute('aria-expanded'),'false','Choosing a page must close the mobile navigation.');
  await open();await page.setViewportSize({width:1440,height:1000});
@@ -99,6 +99,83 @@ async function checkFrameworkNavigation(){
  await page.waitForFunction(()=>document.activeElement===document.querySelector('.topbar button[aria-controls="study-navigation"]'));
  await page.setViewportSize({width:1440,height:1000});
  report.accessibility={mobileMenuFocus:true,escapeRestoresFocus:true,leavingClosesMenu:true,pageHeadingFocus:true,resizeKeepsFocusVisible:true,reverseResizeRestoresFocus:true};
+}
+async function checkFrameworkJourney(data){
+ const combinations=[];
+ for(const width of [1440,390]){
+  await page.setViewportSize({width,height:1000});
+  await route('vision');
+  await page.screenshot({path:output+'.overview-'+width+'.png',fullPage:true});
+  if(width===390){
+   assert.equal(await page.locator('.vision-phase-mobile>article:visible').count(),3);
+   assert.equal(await page.locator('.vision-phase-desktop:visible').count(),0);
+  }
+
+  for(const phase of ['acquisition','integration','fonctionnement']){
+   await route(phase);
+   for(const option of ['java-spring','microsoft','sap']){
+    await page.locator(`.journey-option-navigation a[href="#${phase}?option=${option}"]`).click();
+    await page.locator(`.journey-option-navigation a[aria-current="page"][href="#${phase}?option=${option}"]`).waitFor();
+    assert.equal(await page.locator('.journey-treatment section').count(),2);
+    assert.equal(await page.locator('.journey-comparison').count(),0);
+    assert.equal(await page.locator('.journey-example').count(),1);
+    const state=await page.locator('.journey-option-status').innerText();
+    if(phase!=='acquisition')assert.doesNotMatch(state,/Estimation de construction adoptée/);
+    assert.match(await page.locator('.reading-phase').innerText(),/Phase [123] sur 3/i);
+    const resultBeforeDetail=await page.locator('.journey-result').evaluate(el=>Boolean(el.compareDocumentPosition(document.querySelector('.journey-treatment'))&Node.DOCUMENT_POSITION_FOLLOWING));
+    assert.equal(resultBeforeDetail,true);
+    if(option==='java-spring'){
+     assert.ok(await page.locator('.make-audit-steps>li').count()>1);
+     assert.ok(await page.locator('.make-formula').count()>0);
+     for(const element of await page.locator('.make-rule').all()){
+      const ref=await element.getAttribute('data-rule-ref');
+      const rule=data.ui.essential.estimation_model.rules.find(item=>item.id===ref);
+      assert.ok(rule,'Unknown displayed rule: '+ref);
+      assert.equal(await element.locator('.make-formula code').textContent(),rule.expression);
+      assert.equal(await element.locator('.make-rule-unit').textContent(),rule.unit);
+     }
+     const cards=page.locator('.make-audit .core-method-reference-card');
+     assert.equal(await cards.count(),phase==='acquisition'?4:0);
+     if(phase==='acquisition'){
+      const originals=data.ui.essential.core_method.sections.flatMap(section=>section.blocks)
+       .find(block=>block.kind==='reference_cards').cards;
+      for(let index=0;index<originals.length;index++){
+       assert.equal(await cards.nth(index).locator('dt').count(),5);
+       assert.equal(await cards.nth(index).locator('header h5').textContent(),originals[index].title);
+       assert.match(await cards.nth(index).innerText(),/PNCLOC/);
+       assert.equal(await cards.nth(index).locator('a').count(),originals[index].sources.length);
+      }
+     }
+    }else assert.equal(await page.locator('.make-audit').count(),0);
+
+    assert.ok(await page.locator('.journey-limits li').count()>0);
+    assert.ok((await page.locator('.journey-result').innerText()).length>20);
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+    combinations.push({width,phase,option});
+   }
+  }
+  await route('integration');
+  await page.locator('.journey-option-navigation a[href$="option=sap"]').click();
+  await page.locator('.framework-phase-next').click();
+  await page.locator('[data-framework-phase="fonctionnement"]').waitFor();
+  assert.match(page.url(),/fonctionnement\?option=sap$/);
+  await page.reload();
+  await page.locator('.journey-option-navigation a[aria-current="page"][href$="option=sap"]').waitFor();
+  await route('acquisition');
+  await page.locator('.journey-option-navigation a[aria-current="page"][href$="option=sap"]').waitFor();
+  await page.locator('.framework-journey').screenshot({path:output+'.phase-'+width+'.png'});
+  await route('scenarios');
+  assert.equal(await page.locator('.journey-scenario-steps>li').count(),4);
+  assert.equal(await page.locator('a.framework-primary-link[href="#se-projeter"]').count(),1);
+  assert.match(await page.locator('.framework-journey').innerText(),/pas simulés aujourd’hui/);
+  await route('methodes');
+  assert.equal(await page.locator('.journey-methods article').count(),7);
+  await page.locator('.journey-methods a[href="#modele"]').click();
+  await page.locator('.model-reading').waitFor();
+  await page.locator('a.journey-method-back').click();
+  await page.locator('.journey-methods').waitFor();
+ }
+ report.frameworkJourney={combinations,optionPersistsAcrossPhasesAndReload:true,legacyMethodsReachable:true};
 }
 async function workerRequest(manifest,manifestUrl,requestPath,body){
  const id=++sequence;
@@ -124,7 +201,7 @@ try{
  const data=await bootstrapResponse.json();
  equalProjection(data.baseline,oracle.cases.reference.result,'The static reference differs from the Python reference.');
  assert.deepEqual(data.ui.essential.nav.map(item=>item.id),navRoutes);
- assert.equal(navRoutes.length,19);assert.equal(routes.length,24);
+ assert.equal(navRoutes.length,24);assert.equal(routes.length,29);
  await page.waitForFunction(()=>location.hash==='#vision');
  assert.equal(await page.locator('.brand-home').getAttribute('href'),'#vision','The home link must open the Vision.');
  await route('modele');await page.locator('.brand-home').click();await route('vision');
@@ -249,6 +326,7 @@ try{
  report.proofs.businessModelDownload={bytes:downloadBytes.length,sha256:createHash('sha256').update(downloadBytes).digest('hex'),singleFile:true};
 
  await route('etude-marche');
+ await page.locator('.dossier-navigation a[href="#etude-marche?view=qualification"]').click();
  const marketNote=data.ui.essential.application_framework.market.sections.find(section=>section.id==='evidence_status').links[0];
  const sourceButton=page.getByRole('button',{name:marketNote.label,exact:true});
  await sourceButton.click();
@@ -300,11 +378,12 @@ try{
  await page.waitForFunction(target=>location.hash===target&&document.activeElement?.id==='glossary-term-'+new URLSearchParams(target.split('?')[1]).get('term'),glossaryTarget);
  report.proofs.glossary={canonicalEntries:Object.keys(data.glossary.notions).length,search:true,directTerm:true,methodLink:true};
  await route('vision');
- assert.deepEqual(await page.locator('.vision-reading-paths a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),['#modele','#comparer','#capacite-realisation']);
- assert.deepEqual(await page.locator('.vision-adaptation a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),['#parametres','#simuler']);
+ assert.deepEqual(await page.locator('.vision-reading-paths a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),['#acquisition']);
+ assert.deepEqual(await page.locator('.vision-adaptation a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),[]);
  assert.deepEqual(await page.locator('.vision-evidence a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),['#cartographie','#synvance']);
- assert.equal(await page.locator('.vision-matrix tbody tr').count(),2);
- assert.equal(await page.locator('.vision-matrix tbody td').count(),4);
+ assert.equal(await page.locator('.vision-matrix tbody tr').count(),3);
+ assert.equal(await page.locator('.vision-matrix tbody td').count(),6);
+ await route('methodes');
  assert.equal(await page.locator('.vision-proof-levels>li').count(),4,'The Vision should distinguish four levels of evidence.');
  await page.locator('.vision-confidence-links a[href="#conditions-realisation"]').click();await route('conditions-realisation');
  assert.equal(await page.locator('.delivery-conditions-page').count(),1);
@@ -451,6 +530,7 @@ try{
  await reader.locator('.market-study-page').waitFor();
  report.proofs.unpublishedDocumentHandled=true;
  await reader.close();
+ await checkFrameworkJourney(data);
  assert.deepEqual(report.errors,[],'Browser or static network errors.');
  assert.deepEqual(httpApiRequests,[],'A static application must never call an HTTP API.');
  report.httpApiRequests=httpApiRequests;

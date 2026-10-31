@@ -1,0 +1,240 @@
+{
+  "id": "instruction-g02-v1",
+  "date": "2026-10-31",
+  "status": "qualification_partielle",
+  "title": "G02 · Allocation anticipée : besoin précisé, supplément non établi",
+  "conclusion": "**L’affectation future est déjà prévue dans le périmètre financé.** Le travail restant consiste à préciser ses garanties et à requalifier la charge prévue. Aucun nouveau complément autonome n’est suffisamment isolé pour justifier un supplément chiffré.",
+  "scope": "Premier dossier d’instruction Make Java/Spring à partir d’Axelor. Les constats Buy restent des questions de preuve et de financement, sans devis complémentaire.",
+  "boundaries": {
+    "core": [
+      "Ressources attendues datées, affectations par demande, protection et justification.",
+      "Conversion vers le stock reçu, gel, révision et contrôle de l’application des décisions."
+    ],
+    "integration": [
+      "Définition des priorités, quotas et saisons du Groupe.",
+      "Raccordement des événements fournisseur, WMS et canaux, puis recette des parcours."
+    ],
+    "excluded": [
+      "Construction d’un nouveau WMS ou d’un moteur ERP complet.",
+      "Remplacement automatique de tous les outils de canal.",
+      "Réservation de capacité fournisseur sans achat ferme, traitée dans G03."
+    ]
+  },
+  "criteria": [
+    {
+      "id": "G02-C01",
+      "title": "Affecter un approvisionnement futur admissible",
+      "need_refs": [
+        "BC-018.01",
+        "BC-037.01"
+      ],
+      "expected": "Une affectation future ne crée pas de stock physique et ne promet pas une disponibilité avant l’arrivée admissible.",
+      "observed": "Mouvements planifiés datés et achat lié observés. Le solde futureQty seul ne filtre pas l’horizon.",
+      "evidence_refs": [
+        "ax-sector"
+      ],
+      "mechanism_refs": [
+        "stock-common-domain",
+        "flow-backlog-local-2",
+        "flow-promising-local-1"
+      ],
+      "native_status": "partiel"
+    },
+    {
+      "id": "G02-C02",
+      "title": "Partager une ressource entre canaux sans double affectation",
+      "need_refs": [
+        "BC-037.02",
+        "BC-041.01"
+      ],
+      "expected": "Les affectations respectent la quantité de la ressource et les protections retenues pour chaque bénéficiaire.",
+      "observed": "Réservation native plafonnée au stock courant. Quotas et choix sous contraintes déjà prévus dans les compléments FLOW.",
+      "evidence_refs": [
+        "ax-sector",
+        "ms-backlog",
+        "sap-backlog"
+      ],
+      "mechanism_refs": [
+        "flow-backlog-local-1",
+        "flow-backlog-local-2",
+        "flow-optimization-local-2"
+      ],
+      "native_status": "a_demontrer"
+    },
+    {
+      "id": "G02-C03",
+      "title": "Traiter une réception partielle et ses échéances",
+      "need_refs": [
+        "BC-018.02",
+        "BC-021.03",
+        "BC-037.02"
+      ],
+      "expected": "À réception, ne compter une quantité ni deux fois en stock attendu et physique, ni deux fois dans les engagements.",
+      "observed": "Réallocation à réception réalisée observée. Conversion datée des affectations futures vers les réservations physiques à qualifier.",
+      "evidence_refs": [
+        "ax-sector"
+      ],
+      "mechanism_refs": [
+        "stock-common-domain",
+        "flow-order-state",
+        "flow-backlog-local-2",
+        "flow-promising-local-1"
+      ],
+      "native_status": "partiel"
+    },
+    {
+      "id": "G02-C04",
+      "title": "Préserver un gel et signaler une promesse devenue impossible",
+      "need_refs": [
+        "BC-018.03",
+        "BC-037.02",
+        "BC-037.03"
+      ],
+      "expected": "Un retard ou une annulation fournisseur est reconnu comme un fait. Le système expose le manque et ne supprime pas silencieusement un engagement gelé.",
+      "observed": "Le schéma SupplyAssignment possède période, état et motif. Le comportement précis de gel, dégel et traitement des aléas reste à spécifier.",
+      "evidence_refs": [
+        "ax-sector",
+        "ms-backlog",
+        "sap-backlog"
+      ],
+      "mechanism_refs": [
+        "flow-backlog-local-2",
+        "flow-coordination-local-2",
+        "flow-case-ledger"
+      ],
+      "native_status": "a_demontrer"
+    },
+    {
+      "id": "G02-C05",
+      "title": "Contrôler les écritures concurrentes et les reprises",
+      "need_refs": [
+        "BC-018.03",
+        "BC-037.02"
+      ],
+      "expected": "Deux décisions concurrentes ne consomment pas la même capacité disponible. Un événement rejoué ne produit pas un second effet, un contenu contradictoire est signalé.",
+      "observed": "Le framework apporte le versionnement optimiste. Cela ne prouve pas une garantie sur les affectations futures multi-lignes.",
+      "evidence_refs": [
+        "ax-sector"
+      ],
+      "mechanism_refs": [
+        "master-data-admission",
+        "master-data-versions",
+        "stock-common-domain",
+        "flow-order-state",
+        "flow-backlog-local-2"
+      ],
+      "native_status": "a_demontrer"
+    },
+    {
+      "id": "G02-C06",
+      "title": "Appliquer et expliquer les politiques saison/canal",
+      "need_refs": [
+        "BC-008.01",
+        "BC-008.03",
+        "BC-037.03"
+      ],
+      "expected": "Conserver la version des règles, l’admissibilité, les priorités et les motifs des demandes non servies.",
+      "observed": "DemandPriority, FulfilmentPolicy et SupplyAssignment sont déjà dans la préparation financée. Les règles Groupe ne sont pas approuvées dans cet exercice.",
+      "evidence_refs": [
+        "ms-backlog",
+        "sap-backlog",
+        "rfi"
+      ],
+      "mechanism_refs": [
+        "flow-backlog-local-1",
+        "flow-backlog-local-2",
+        "flow-policies-local-1",
+        "flow-optimization-local-2"
+      ],
+      "native_status": "a_demontrer"
+    },
+    {
+      "id": "G02-C07",
+      "title": "Simuler puis appliquer une décision encore valide",
+      "need_refs": [
+        "BC-045.01",
+        "BC-045.02",
+        "BC-037.02"
+      ],
+      "expected": "Une simulation ne modifie pas les engagements actifs. L’application vérifie que sa base n’a pas changé.",
+      "observed": "PlanScenario et le contrat de calcul sont déjà financés. La validation au moment d’appliquer un résultat reste à détailler.",
+      "evidence_refs": [
+        "rfi"
+      ],
+      "mechanism_refs": [
+        "flow-master-plan-local-3",
+        "flow-solver-run-contract",
+        "flow-backlog-local-2",
+        "master-data-versions"
+      ],
+      "native_status": "a_demontrer"
+    }
+  ],
+  "experiment": {
+    "report_ref": "audits/2026-10-31-g02-allocation-anticipee/acceptance-results.json",
+    "report_sha256": "2aa01b4412956ff0ac59ddef595861a9204fe4db6c08e3b185752046bb391b91",
+    "implementation_ref": "audits/2026-10-31-g02-allocation-anticipee/acceptance_model.py",
+    "implementation_sha256": "2e75ffcc1b17ad4c8edb0da0bc04ed01c1df2c21ffbe2c8fd255eb80916e2005",
+    "interpretation": "**Essais sur un modèle expérimental et des données synthétiques.** Ils illustrent les critères, sans exécuter Axelor ni démontrer une transaction en base, une concurrence réelle ou une charge de production. Ils ne calibrent pas les JH."
+  },
+  "quantification": {
+    "status": "complement_non_isole",
+    "calculation_ref": "supply-decisions-java-spring-v1",
+    "family_refs": [
+      "backlog",
+      "optimization",
+      "promising",
+      "coordination"
+    ],
+    "new_equivalent_units": null,
+    "new_cfp": null,
+    "net_extra_jh": null,
+    "reason": "Le calcul actuel finance déjà les familles concernées. Les nouvelles exigences précisent surtout leur comportement. Il manque une décomposition approuvée et une mesure du travail réellement additionnel. Choisir arbitrairement un nombre de modules ou augmenter une fraction d’analogie produirait un montant sans justification.",
+    "cocomo_treatment": "Reconstituer la base, puis comparer le même ensemble cohérent élargi avec la même frontière d’activités. Le supplément ne peut être calculé tant que la taille additionnelle et ses réutilisations ne sont pas étayées.",
+    "cosmic_treatment": "Le comptage actuel prévoit déjà l’affectation avec lecture du plan d’approvisionnement. Un attribut de date ou de gel n’est pas automatiquement un mouvement COSMIC supplémentaire. Il faut isoler un processus, un groupe de données ou un mouvement réellement nouveau.",
+    "decision": "Ne pas ajouter de forfait G02. Maintenir une réserve sur la suffisance du dimensionnement du lot existant. Cette décision d’instruction ne vaut ni supplément nul ni validation de l’enveloppe."
+  },
+  "next_steps": [
+    {
+      "title": "Fixer les règles qui changent les résultats",
+      "role": "Métier et architecture",
+      "deliverable": "Choix de priorité, protection par canal, gel, dégel et comportement en cas de promesse non tenable."
+    },
+    {
+      "title": "Démontrer le scénario dans une version configurée",
+      "role": "Équipe produit et QA",
+      "deliverable": "Résultats attendus et observés sur achats futurs, retards, réceptions partielles, changements concurrents et reprises."
+    },
+    {
+      "title": "Décomposer uniquement le travail résiduel",
+      "role": "Architecture et estimation",
+      "deliverable": "Réutilisation, adaptations et fonctions nouvelles rapprochées des lots existants, avec mesures et hypothèses de taille."
+    },
+    {
+      "title": "Proposer puis faire adopter une révision",
+      "role": "Estimation puis sponsor",
+      "deliverable": "COCOMO II et contrôle COSMIC comparables, JH par rôle et effets sur intégration et fonctionnement, sans modifier la référence avant décision."
+    }
+  ],
+  "buy_followup": [
+    {
+      "product_ref": "microsoft",
+      "evidence_refs": [
+        "ms-backlog",
+        "ms-stock",
+        "ms-bom"
+      ],
+      "conclusion": "L’allocation anticipée est déclarée standard, mais préallocations et commandes ouvertes nécessitent des extensions. Inventory Visibility reste une option d’architecture.",
+      "requested": "Faire démontrer le scénario, identifier le composant et la version, puis rapprocher les adaptations du ROM, de ses provisions et de la généralisation avant tout supplément."
+    },
+    {
+      "product_ref": "sap",
+      "evidence_refs": [
+        "sap-backlog",
+        "sap-bom"
+      ],
+      "conclusion": "Supply Assignment est cité pour les allocations anticipées. La réponse standard et le commentaire de développement à E248/H248 doivent être réconciliés.",
+      "requested": "Faire démontrer le scénario avec les composants réellement proposés. Rapprocher préallocations, priorités et tracking des travaux WRICEF et du système de transport conservé."
+    }
+  ]
+}

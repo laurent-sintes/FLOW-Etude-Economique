@@ -1,6 +1,7 @@
 """Compile shared method documents, never the economic evaluation itself."""
 from copy import deepcopy
 import math
+import re
 
 from jsonschema import Draft202012Validator
 from validate_stacks import ROOT, read
@@ -41,6 +42,27 @@ BLOCK = dict(oneOf=[
                  items=_object(dict(href=dict(enum=READING_ROUTES), label=TEXT))))),
     _object(dict(kind=dict(const='example'), ref=IDENTIFIER)),
 ])
+REFERENCE_CARD_SCHEMA = next(item for item in BLOCK['oneOf'] if item['properties']['kind'].get('const') == 'reference_cards')['properties']['cards']['items']
+REFERENCE_CARD_SCHEMA['properties']['measurement'] = _object(dict(
+    product_ref=dict(enum=['erpnext','odoo-community','tryton','axelor-open-suite']), label=TEXT))
+
+
+def _reference_measurement(card, registry):
+    """Project the frozen OSS registry measure, without an effort conversion."""
+    binding = card.pop('measurement')
+    product = registry['fiches_produit'][binding['product_ref']]
+    size = product['code']['pncloc']
+    if binding['product_ref'] == 'erpnext':
+        study = registry['etude_oss']
+        size = sum(study['mesure']['composants'][component][selection]['pncloc']
+                   for component, selection in study['calcul_cocomo']['selections'].items())
+    if not isinstance(size, int) or isinstance(size, bool) or size <= 0:
+        raise ValueError('ERR_CORE_METHOD:invalid measured code size:' + binding['product_ref'])
+    amount = format(size, ',').replace(',', ' ')
+    card['fields'].insert(1, dict(label=binding['label'], items=[
+        '**' + amount + ' PNCLOC**. ' + '. '.join(part[:1].upper()+part[1:] for part in re.split(r'\s*;\s*', product['code']['limite']))]))
+
+
 SCHEMA = _object(dict(
     schema_version=dict(const=1), id=dict(const='core-evaluation-opportunity'),
     principle=TITLE_TEXT, notice=TITLE_TEXT, navigation_label=TEXT,
@@ -86,12 +108,19 @@ def _compile_document(document, schema, source, error_code):
     unique(value['sections'], 'sections')
     unique(value['examples'], 'examples')
     references=set()
+    oss_registry=None
     for section in value['sections']:
         if section.get('kind')=='example' and not section.get('eyebrow'):
             raise ValueError(f'{error_code}:{source}:{section["id"]}:example requires an explicit label')
         if source==METHOD_SOURCE and any(block['kind']=='example' for block in section['blocks']) and section.get('kind')!='example':
             raise ValueError(f'{error_code}:{source}:{section["id"]}:illustration must be separate from method steps')
         for block in section['blocks']:
+            if block['kind']=='reference_cards':
+                for card in block['cards']:
+                    if 'measurement' in card:
+                        if oss_registry is None:
+                            oss_registry=read(ROOT/'source/references-couts-integration.yaml')['reperes_build_core']
+                        _reference_measurement(card, oss_registry)
             if block['kind']=='formula' and 'rule_ref' in block:
                 from estimation_calculation import metamodel
                 rules = {r['id']:r for r in metamodel()['rules']}

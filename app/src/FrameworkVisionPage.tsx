@@ -1,72 +1,20 @@
-import {ArrowDown,ArrowRight,ChartNoAxesCombined,FileCheck2,ListTree} from 'lucide-react';
+import {ArrowDown,ArrowRight} from 'lucide-react';
 import {useStudy,type Data} from './context';
-import {SourceLink} from './components';
 import {MethodText} from './MethodDocument';
+import {ReadingNote} from './ReadingNote';
 import './frameworkVision.css';
-
-const stepIcons={besoin:ListTree,investissement:ChartNoAxesCombined};
-function VisionStep({step}:{step:Data}){
- const Icon=stepIcons[step.id as keyof typeof stepIcons];
- return <article className={`vision-step vision-step-${step.id}`}>
-  <div className="vision-step-title"><Icon size={23} aria-hidden="true"/><h3>{step.title}</h3></div>
-  <p><MethodText>{step.text}</MethodText></p>
- </article>;
-}
-
+import './frameworkJourney.css';
 export function FrameworkVisionPage(){
- const {data}=useStudy(),V=data.ui.essential.framework_vision;
- const [need,investment]=V.approach.steps,M=V.approach.matrix;
- return <div className="essential-page framework-vision">
-  <section className="vision-opening" aria-labelledby="vision-opening-title">
-   <h2 id="vision-opening-title">{V.opening.title}</h2>
-   <p><MethodText>{V.opening.text}</MethodText></p>
-   <p className="vision-status" role="status"><MethodText>{data.ui.essential.core_status_summary}</MethodText></p>
-  </section>
-  <aside className="vision-adaptation" aria-labelledby="vision-adaptation-title">
-   <h2 id="vision-adaptation-title">{V.adaptation.title}</h2>
-   <p><MethodText>{V.adaptation.text}</MethodText></p>
-   <div className="vision-adaptation-links"><a className="text-button" href={V.adaptation.reference_link.href}>{V.adaptation.reference_link.label}<ArrowRight size={15} aria-hidden="true"/></a><a className="text-button" href={V.adaptation.href}>{V.adaptation.label}<ArrowRight size={15} aria-hidden="true"/></a></div>
-  </aside>
-  <section className="vision-section" aria-labelledby="vision-approach-title">
-   <h2 id="vision-approach-title">{V.approach.title}</h2>
-   <div className="vision-path">
-    <VisionStep step={need}/>
-    <div className="vision-path-connector" aria-hidden="true"><ArrowDown size={21}/></div>
-    <div className="vision-matrix-scroll" tabIndex={0} role="region" aria-labelledby="vision-matrix-caption">
-     <table className="vision-matrix"><caption id="vision-matrix-caption">{M.caption}</caption>
-      <thead><tr><th scope="col">{M.activity_label}</th><th scope="col">{M.make_label}</th><th scope="col">{M.buy_label}</th></tr></thead>
-      <tbody>{M.rows.map((row:Data)=><tr key={row.id}>
-       <th scope="row">{row.title}</th>
-       {[row.make,row.buy].map((paragraphs:string[],index:number)=><td key={index}>{paragraphs.map((text:string,paragraph:number)=><p key={paragraph}><MethodText>{text}</MethodText></p>)}</td>)}
-      </tr>)}</tbody>
-     </table>
-    </div>
-    <div className="vision-matrix-notes">{M.notes.map((text:string,index:number)=><p key={index}><MethodText>{text}</MethodText></p>)}</div>
-    <div className="vision-path-connector" aria-hidden="true"><ArrowDown size={21}/></div>
-    <VisionStep step={investment}/>
-   </div>
-  </section>
-  <section className="vision-section" aria-labelledby="vision-evidence-title">
-   <h2 id="vision-evidence-title">{V.evidence.title}</h2>
-   <div className="vision-evidence">{V.evidence.items.map((item:Data)=><article key={item.id}>
-    <FileCheck2 className="vision-evidence-icon" size={21} aria-hidden="true"/>
-    <div><h3>{item.title}</h3><p><MethodText>{item.text}</MethodText></p>
-     {item.href.startsWith('#')?<a className="text-button" href={item.href}>{item.label}<ArrowRight size={15} aria-hidden="true"/></a>:<SourceLink path={item.href}>{item.label}</SourceLink>}
-    </div>
-   </article>)}</div>
-  </section>
-  <section className="vision-section vision-confidence" aria-labelledby="vision-confidence-title">
-   <h2 id="vision-confidence-title">{V.confidence.title}</h2>
-   <p><MethodText>{V.confidence.text}</MethodText></p>
-   <ol className="vision-proof-levels">{V.confidence.levels.map((level:Data)=><li key={level.id} data-proof-level={level.id}>
-    <h3>{level.title}</h3><p><MethodText>{level.text}</MethodText></p>
-    <a className="text-button" href={level.href}>{level.label}<ArrowRight size={15} aria-hidden="true"/></a>
-   </li>)}</ol>
-   <div className="vision-confidence-links">{V.confidence.links.map((link:Data)=><a className="text-button" href={link.href} key={link.href}>{link.label}<ArrowRight size={17} aria-hidden="true"/></a>)}</div>
-   <div className="vision-limits"><h3>{V.confidence.limits_title}</h3>
-    <ul>{V.confidence.limits.map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ul>
-   </div>
-  </section>
-  <nav className="vision-reading-paths" aria-labelledby="vision-reading-paths-title"><h2 id="vision-reading-paths-title">{V.next.title}</h2><ul>{V.next.links.map((link:Data)=><li key={link.href}><a className="text-button" href={link.href}>{link.label}<ArrowRight size={17} aria-hidden="true"/></a></li>)}</ul></nav>
+ const {data}=useStudy(),V=data.ui.essential.framework_vision,J=V.journey,M=V.approach.matrix;
+ return <div className="essential-page framework-vision framework-journey">
+  <section className="vision-opening"><h2>{V.opening.title}</h2><p><MethodText>{V.opening.text}</MethodText></p></section>
+  <ol className="framework-story">{J.flow.map((step:string)=><li key={step}>{step}</li>)}</ol>
+  <section className="vision-section"><h2>{V.approach.steps[0].title}</h2><p><MethodText>{V.approach.steps[0].text}</MethodText></p><div className="journey-evidence vision-evidence">{V.evidence.items.map((item:Data)=><a className="text-button" key={item.id} href={item.href}>{item.label}<ArrowRight size={15} aria-hidden="true"/></a>)}</div></section>
+  <section className="vision-section"><h2>{V.approach.title}</h2><div className="vision-matrix-scroll vision-phase-desktop" tabIndex={0} role="region" aria-label={M.caption}><table className="vision-matrix"><caption>{M.caption}</caption><thead><tr><th scope="col">{M.activity_label}</th><th scope="col">{M.make_label}</th><th scope="col">{M.buy_label}</th></tr></thead><tbody>{M.rows.map((row:Data)=><tr key={row.id}><th scope="row"><a href={'#'+row.id}>{row.title}</a></th>{[row.make,row.buy].map((paragraphs:string[],i:number)=><td key={i}>{paragraphs.map(text=><p key={text}><MethodText>{text}</MethodText></p>)}</td>)}</tr>)}</tbody></table></div><div className="vision-phase-mobile">{M.rows.map((row:Data)=><article key={row.id}><h3><a href={'#'+row.id}>{row.title}</a></h3>{[['make',M.make_label],['buy',M.buy_label]].map(([key,label])=><section key={key}><h4>{label}</h4>{row[key].map((text:string)=><p key={text}><MethodText>{text}</MethodText></p>)}</section>)}</article>)}</div></section>
+  <section className="vision-section vision-consolidation"><h2>{J.consolidation.title}</h2><p><MethodText>{J.consolidation.text}</MethodText></p></section>
+  <section className="vision-section"><h2>{J.title}</h2><div className="journey-options">{J.options.map((o:Data)=><article key={o.id}><h3>{o.label}</h3><p>{o.status}</p></article>)}</div><ReadingNote>{J.pending}</ReadingNote></section>
+  <div className="vision-path-connector" aria-hidden="true"><ArrowDown size={21}/></div>
+  <section className="vision-step vision-step-investissement"><h2>{V.approach.steps[1].title}</h2><p><MethodText>{V.approach.steps[1].text}</MethodText></p></section>
+  <nav className="vision-reading-paths" aria-label={J.labels.next}><a className="journey-overview-next text-button" href="#acquisition">{J.labels.next+' · '+J.phases[0].title}<ArrowRight size={18} aria-hidden="true"/></a></nav>
  </div>;
 }

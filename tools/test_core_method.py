@@ -106,6 +106,34 @@ class CoreMethodTests(unittest.TestCase):
         malformed['essential']['core_method']['source']='other-method.yaml'
         with self.assertRaisesRegex(ValueError,'ERR_CORE_METHOD'):hydrate_core_method(malformed)
 
+    def test_oss_cards_project_measures_from_the_registry_and_reject_unknown_refs(self):
+        registry=read(ROOT/'source/references-couts-integration.yaml')
+        def cards(document):
+            return next(b['cards'] for section in document['sections'] for b in section['blocks']
+                        if b['kind']=='reference_cards')
+        original=deepcopy(self.document)
+        actual=cards(compile_method(original))
+        self.assertEqual(len(actual),4)
+        for card in actual:
+            self.assertEqual(len(card['fields']),5)
+            self.assertIn('PNCLOC',card['fields'][1]['items'][0])
+            self.assertNotIn('measurement',card)
+        self.assertEqual(original,self.document)
+        registry['reperes_build_core']['fiches_produit']['tryton']['code']['pncloc']=123456
+        real_read=read
+        def changed(path):
+            return registry if path==ROOT/'source/references-couts-integration.yaml' else real_read(path)
+        with patch('core_method.read',side_effect=changed):
+            changed_cards=cards(compile_method(original))
+        self.assertIn('123 456 PNCLOC',changed_cards[2]['fields'][1]['items'][0])
+        invalid=deepcopy(original)
+        cards(invalid)[0]['measurement']['product_ref']='invented-product'
+        with self.assertRaisesRegex(ValueError,'ERR_CORE_METHOD'):
+            compile_method(invalid)
+        registry['reperes_build_core']['fiches_produit']['tryton']['code']['pncloc']=None
+        with patch('core_method.read',side_effect=changed),self.assertRaisesRegex(ValueError,'invalid measured code size'):
+            compile_method(original)
+
     def test_release_freezes_method_and_presentation_is_not_an_economic_input(self):
         study=study_copy()
         economics=deepcopy(study.baseline)

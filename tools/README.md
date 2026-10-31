@@ -74,7 +74,7 @@ La grille est validée une fois par chargement ; un nouveau processus ou chargem
 
 ## Contrôler dans un vrai navigateur
 
-`check_model --auto` est réservé au jalon de validation et inclut le vrai navigateur pour les modifications de présentation. En Dev, utiliser `check_dev` et le parcours touché. `--full --browser` l’ajoute explicitement au contrôle complet. La CI utilise Playwright avec Chromium sur la livraison Pages. Le contrôle échoue si une requête HTTP vers une API est émise. Il vérifie les 24 vues en mobile et en bureau, les huit scénarios du témoin, la reprise des sauvegardes, les originaux téléchargeables et le clavier.
+`check_model --auto` est réservé au jalon de validation et inclut le vrai navigateur pour les modifications de présentation. En Dev, utiliser `check_dev` et le parcours touché. `--full --browser` l’ajoute explicitement au contrôle complet. La CI utilise Playwright avec Chromium sur la livraison Pages. Le contrôle échoue si une requête HTTP vers une API est émise. Il vérifie toutes les vues en mobile et en bureau, les huit scénarios du témoin, la reprise des sauvegardes, les originaux téléchargeables et le clavier.
 
 ```powershell
 node app/scripts/verify-pages.mjs --url http://127.0.0.1:8766/ --allow-root true --cases tmp/validation-optimization-parity.json --output tmp/local-browser-report.json
@@ -286,3 +286,11 @@ La préparation de nouveaux modules de propriété suit native_new_module_analog
 La préparation coherent_components_v1 dans tools/estimation_components.py reconstruit les six ensembles fortement liés depuis les archives complètes figées gzip/base64. Les tailles de leurs modules sont additionnées avant un seul calcul COCOMO par unité. Le téléchargement contient ces archives et permet la reprise sans checkout OSS. Les mécanismes ont un propriétaire unique ; une allocation entre familles ne crée pas de nouveaux JH. Java/Spring couvre les 88 capacités, tandis que .NET et Rust restent à réestimer. Les trois décisions précédentes restent inchangées et aucun délai local n’est additionné.
 
 La lecture des fonctions professionnelles utilise `core_product_scope.py`. La proposition complète séparée est reconstruite par `core_product_estimate.py`, depuis `source/proposition-produit-core.yaml` et ses preuves figées. Elle ne modifie pas les décisions ni les paramètres personnels ; les formules restent dans le métamodèle canonique. Les tests contrôlent remplacement sans cumul, conservation des rôles/coûts et exclusions COSMIC des fonctions consommées.
+
+## Comparaison fonctionnelle des solutions
+
+`source/comparaison-solutions.yaml` porte les lectures par BA, sources, écarts et rapprochements RFI. `tools/market_comparison.py` vérifie leurs liens aux propriétaires existants et dérive la matrice chargée à la demande. Les règles sont définies dans le métamodèle unique. `python -m unittest test_market_comparison` contrôle les rejets de couverture injustifiée, les exclusions et les financements inconnus. Aucun écart documentaire ne modifie les décisions économiques.
+
+Le dossier G02 relie les critères aux préparations et financements existants. `python -m unittest test_gap_instruction` vérifie ses références et interdit de convertir les inconnues ou les essais en chiffrage. `python audits/2026-10-31-g02-allocation-anticipee/acceptance_model.py` rejoue les critères expérimentaux et écrit son résultat dans `tmp/`, sans modifier la preuve figée ni la référence économique.
+
+Les réserves des écarts sont contrôlées par `python -m unittest test_budget_supplements` avec `PYTHONPATH=tools`. Le contrôle rejoue les financements référencés, couvre les couples écart/option/phase et refuse doublons, montants sans contrat et faux totaux. Les procédures de recette du dossier sont des travaux à effectuer, pas des tests ERP exécutés.

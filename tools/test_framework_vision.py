@@ -108,6 +108,34 @@ class FrameworkVisionTests(unittest.TestCase):
             with self.subTest(missing_route=route), self.assertRaisesRegex(ValueError, 'unknown reading link'):
                 hydrate_framework_vision(ui, self.glossary)
 
+    def test_phase_options_and_method_links_are_validated(self):
+        for change in ('order','option','link','budget'):
+            document=deepcopy(self.document)
+            phase=document['journey']['phases'][0]
+            if change=='order':document['journey']['phases'].reverse()
+            elif change=='option':phase['providers'][0]['option_ref']='rust'
+            elif change=='link':phase['providers'][0]['links'][0]['href']='#missing'
+            else:phase['providers'][0]['budget']=1000
+            with self.subTest(change=change),self.assertRaisesRegex(ValueError,'ERR_FRAMEWORK_VISION'):
+                self.compile(document)
+        compiled=self.compile(self.document)
+        self.assertEqual([p['id'] for p in compiled['journey']['phases']],['acquisition','integration','fonctionnement'])
+        for phase in compiled['journey']['phases']:
+            self.assertEqual([p['option_ref'] for p in phase['providers']],['java-spring','microsoft','sap'])
+
+    def test_make_audit_rejects_invented_rules_and_formula_sections(self):
+        for target in ('rule','section'):
+            document=deepcopy(self.document)
+            audit=document['journey']['phases'][0]['make_audit']
+            if target=='rule':audit['steps'][0]['rule_refs']=['missing']
+            else:audit['sections']=['missing']
+            with self.subTest(target=target),self.assertRaisesRegex(ValueError,'ERR_FRAMEWORK_VISION'):
+                self.compile(document)
+        document=deepcopy(self.document)
+        document['journey']['methods'][0]['group']='missing'
+        with self.assertRaisesRegex(ValueError,'invalid method group'):
+            self.compile(document)
+
     def test_snapshot_freezes_overview_and_sources_without_affecting_simulations(self):
         study = study_copy()
         baseline = deepcopy(study.baseline)

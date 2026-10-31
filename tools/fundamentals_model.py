@@ -253,7 +253,10 @@ def hydrate_fundamentals(ui, document):
         target[key] = chapters[chapter]['title']
     target['model_complexity_link'] = document['reading']['next_label']
     target['model_workload'] = deepcopy(document['estimation'])
-    target['estimation_model'] = deepcopy(document['estimation_model'])
+    # Formulas and implementation provenance are the UI projection.
+    # The full metamodel remains in the canonical source and model download.
+    target['estimation_model'] = {key:deepcopy(document['estimation_model'][key])
+                                  for key in ('rules','implementations')}
     target['model_purposes'] = deepcopy(document['purpose_reading'])
     # The UI keeps a glossary reference, never a copied canonical definition.
     for purpose in target['model_purposes']['types']:purpose.pop('definition')
