@@ -2,7 +2,26 @@
 
 Un seul flux de travail : les sources courantes sont dans `source/` et `config/`. La construction statique les fige pour le navigateur, sans choix de mode ni publication intermédiaire. En local comme sur GitHub Pages, le serveur expose uniquement les fichiers. Les calculs sont exécutés dans un Web Worker avec Python/Pyodide, sans API HTTP métier. Les simulations personnelles restent dans le navigateur ; aucune commande ci-dessous ne les efface. `release/current.json` reste un instantané technique facultatif.
 
-## Contrôler
+## Développement local ciblé
+
+Commande habituelle après une modification locale :
+
+```powershell
+python -m tools.check_dev --paths app/src/App.tsx app/src/styles.css
+python -m tools.check_dev --paths tools/estimation_stock.py --plan-only
+python -m tools.check_dev --paths tools/estimation_stock.py
+python -m tools.check_dev --paths tools/test_model_inputs.py --tests test_model_inputs.ModelInputTests
+```
+
+Fournir tous les fichiers de la tâche, y compris les nouveaux. Le plan sélectionne les tests Python par imports directs et transitifs, y compris ceux placés dans les fonctions. Les imports construits dynamiquement ne sont pas détectés. Compléter avec `--tests module.Classe.methode` lorsque nécessaire. Les données déclenchent le chargement validé et les invariants des entrées, financements et calculs. Pour une évolution métier, ajouter les tests du domaine concerné.
+
+CSS et documentation ne déclenchent aucune suite Python. TypeScript lance les types, les tests JavaScript et les règles de contenu, sans livraison Pages ni régression Python. Un fichier non reconnu bloque avec une demande de contrôles ciblés, sans relancer toute la suite. Le sélecteur travaille sur le périmètre de la tâche, pas sur les changements accumulés depuis une ancienne validation complète.
+
+Contrôler visuellement la page et le parcours touchés sur le serveur local. La reconstruction nécessaire à leur affichage est distincte des tests. Utiliser le lanceur habituel pour actualiser la livraison statique. `--browser` est optionnel et demande explicitement la régression navigateur complète existante. Pour une retouche visuelle, privilégier l'inspection du parcours touché. Ne pas annoncer une vérification visuelle sur la seule réussite du script.
+
+Les rapports chronométrés sont dans `tmp/validation/` et `tmp/check-dev-last.json`. Ils portent `mode: dev` et `certification: false`. Ils ne remplacent ni le manifeste complet ni les preuves des scripts de commit et push. La CI et les validations complètes existantes restent inchangées.
+
+## Contrôler au jalon de validation
 
 Depuis la racine, dans l’environnement Python du projet :
 
@@ -48,7 +67,7 @@ La grille est validée une fois par chargement ; un nouveau processus ou chargem
 
 ## Contrôler dans un vrai navigateur
 
-`check_model --auto` inclut le vrai navigateur pour les modifications de présentation. `--full --browser` l’ajoute explicitement au contrôle complet. La CI utilise Playwright avec Chromium sur la livraison Pages. Le contrôle échoue si une requête HTTP vers une API est émise. Il vérifie les 23 vues en mobile et en bureau, les huit scénarios du témoin, la reprise des sauvegardes, les originaux téléchargeables et le clavier.
+`check_model --auto` est réservé au jalon de validation et inclut le vrai navigateur pour les modifications de présentation. En Dev, utiliser `check_dev` et le parcours touché. `--full --browser` l’ajoute explicitement au contrôle complet. La CI utilise Playwright avec Chromium sur la livraison Pages. Le contrôle échoue si une requête HTTP vers une API est émise. Il vérifie les 23 vues en mobile et en bureau, les huit scénarios du témoin, la reprise des sauvegardes, les originaux téléchargeables et le clavier.
 
 ```powershell
 node app/scripts/verify-pages.mjs --url http://127.0.0.1:8766/ --allow-root true --cases tmp/validation-optimization-parity.json --output tmp/local-browser-report.json
