@@ -1,6 +1,7 @@
 """Guard the adopted project effort against double funding and false precision."""
 from copy import deepcopy
 import unittest
+from model_context import scoped_model
 from unittest.mock import patch
 from jsonschema import ValidationError
 from retained_core import validate, value_units, coverage
@@ -56,6 +57,7 @@ class RetainedCoreTests(unittest.TestCase):
         self.assertIsNone(u['uncertainty']['confidence_level'])
         self.assertAlmostEqual(u['schedule']['average_fte']*u['months']*u['schedule']['productive_jh_per_month'],1500)
 
+    @scoped_model
     def test_invalid_or_duplicate_funding_is_rejected(self):
         for mutate, message in [
             (lambda d:d['units'].append(deepcopy(d['units'][0])), 'Duplicate family owner'),

@@ -1,6 +1,7 @@
 """Business metamodel, reproducibility and interpretation boundaries."""
 from copy import deepcopy
 import unittest
+from model_context import scoped_model
 from unittest.mock import patch
 from model_context import model_session
 from validate_stacks import ROOT, read
@@ -43,6 +44,7 @@ class EstimationCalculationTests(unittest.TestCase):
         self.assertAlmostEqual(a['spread_jh'],164.2050916852886)
         self.assertAlmostEqual(sum(r['jh'] for r in result['activities']),1500)
 
+    @scoped_model
     def test_decision_drift_is_rejected(self):
         for field,value in [('method','invented'),('months',99)]:
             document=validate();document['units'][0][field]=value

@@ -43,9 +43,9 @@ class SynvanceReferenceTests(unittest.TestCase):
         self.assertTrue(any(proof['label'] == piece['titre'] and
             proof['path'] == 'sources/client/copil-5.pdf#page=8' for proof in question['proofs']))
         self.assertNotIn('proof_refs', question)
-        for target in ('question', 'highlights'):
+        for target in ('question', 'highlights', 'actor'):
             editorial = deepcopy(self.editorial)
-            item = editorial['brief']['questions'][0] if target == 'question' else editorial['brief']['highlights']
+            item = {'question':editorial['brief']['questions'][0], 'highlights':editorial['brief']['highlights'], 'actor':editorial['brief']['actors']['items'][0]}[target]
             item['proof_refs'] = ['missing']
             with self.assertRaisesRegex(ValueError, 'unknown proof'):
                 self.compile(editorial=editorial)
@@ -53,6 +53,27 @@ class SynvanceReferenceTests(unittest.TestCase):
         editorial['brief']['questions'][1]['id'] = editorial['brief']['questions'][0]['id']
         with self.assertRaisesRegex(ValueError, 'duplicate id:brief/questions'):
             self.compile(editorial=editorial)
+
+    def test_document_dates_sort_unknowns_and_keep_provenance(self):
+        guide = deepcopy(self.guide)
+        guide['pieces'].reverse()
+        documents = self.compile(guide=guide)['documents']['items']
+        self.assertEqual([doc['date']['value'] for doc in documents],
+                         sorted(piece['date']['value'] for piece in guide['pieces']))
+        self.assertTrue(all(doc['date']['provenance'] for doc in documents))
+        workbook = next(doc for doc in documents if doc['id'] == 'questionnaire_microsoft')
+        self.assertEqual(workbook['date']['nature'], 'file_modified')
+        undated = guide['pieces'][0]
+        undated['date'] = dict(value=None, nature='unknown', provenance='No date in the available evidence')
+        documents = self.compile(guide=guide)['documents']['items']
+        self.assertEqual(documents[-1]['id'], undated['id'])
+        self.assertIsNone(documents[-1]['date']['value'])
+        for invalid, error in [(dict(value='2025-02-30', nature='document', provenance='Cover'), 'invalid document date'),
+                               (dict(value=None, nature='document', provenance='Cover'), 'document date nature')]:
+            invalid_guide = deepcopy(self.guide)
+            invalid_guide['pieces'][0]['date'] = invalid
+            with self.assertRaisesRegex(ValueError, error):
+                self.compile(guide=invalid_guide)
 
     def test_business_scope_rejects_unknown_evidence_and_duplicate_axes(self):
         for target in ('architecture', 'axis', 'candidate', 'oms'):

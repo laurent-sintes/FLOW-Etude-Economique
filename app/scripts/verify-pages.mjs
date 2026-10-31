@@ -9,14 +9,14 @@ import {chromium} from 'playwright';
 const flags=new Map();
 for(let index=2;index<process.argv.length;index+=2){
  const key=process.argv[index];
- assert.ok(['--url','--cases','--output'].includes(key)&&process.argv[index+1],`Unknown or incomplete argument: ${key}`);
+ assert.ok(['--url','--cases','--output','--allow-root'].includes(key)&&process.argv[index+1],`Unknown or incomplete argument: ${key}`);
  flags.set(key,process.argv[index+1]);
 }
 const address=flags.get('--url')||process.env.FLOW_PAGES_URL;
 const casesPath=flags.get('--cases')||process.env.FLOW_PAGES_CASES;
 assert.ok(address&&casesPath,'Provide --url and --cases (or FLOW_PAGES_URL / FLOW_PAGES_CASES).');
 const site=new URL(address);site.hash='';site.search='';if(!site.pathname.endsWith('/'))site.pathname+='/';
-assert.notEqual(site.pathname,'/','Test the GitHub Pages project subpath, not the origin root.');
+if(flags.get('--allow-root')!=='true')assert.notEqual(site.pathname,'/','Test the GitHub Pages project subpath, not the origin root.');
 const output=path.resolve(flags.get('--output')||'tmp/pages-validation-report.json');
 await fs.mkdir(path.dirname(output),{recursive:true});
 const oracle=JSON.parse((await fs.readFile(casesPath,'utf8')).replace(/^\uFEFF/,''));
@@ -29,6 +29,8 @@ const started=performance.now();
 const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE}:{})});
 const context=await browser.newContext({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
 let page;
+const httpApiRequests=[];
+context.on('request',request=>{if(new URL(request.url()).pathname.includes('/api/'))httpApiRequests.push(request.url());});
 const clean=value=>String(value).replace(/\s+/g,' ').trim();
 const cloneWithoutVersion=value=>{const result=structuredClone(value);delete result.model_version;return result;};
 const equalProjection=(actual,expected,name)=>assert.deepEqual(cloneWithoutVersion(actual),cloneWithoutVersion(expected),name);
@@ -441,6 +443,8 @@ try{
  report.proofs.unpublishedDocumentHandled=true;
  await reader.close();
  assert.deepEqual(report.errors,[],'Browser or static network errors.');
+ assert.deepEqual(httpApiRequests,[],'A static application must never call an HTTP API.');
+ report.httpApiRequests=httpApiRequests;
  report.status='passed';
 }catch(error){
  report.status='failed';report.failure=error.stack||String(error);process.exitCode=1;

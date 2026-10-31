@@ -5,7 +5,7 @@ import operator
 from decimal import Decimal, ROUND_HALF_UP
 from jsonschema import Draft202012Validator
 from validate_stacks import ROOT, read
-from model_context import model_memo, scoped_model
+from model_context import CURRENT, model_memo, scoped_model
 
 META = 'source/fondamentaux.yaml'
 SCHEMA = 'source/schema-fondamentaux.yaml'
@@ -41,7 +41,18 @@ def metamodel(document=None):
 
 
 def formula(rule_id, **values):
-    rule = next(r for r in metamodel()['rules'] if r['id'] == rule_id)
+    # Private index belongs to this loading session. Public metamodel() still
+    # returns isolated copies and explicit documents always validate afresh.
+    session = CURRENT.get()
+    if session is None:
+        rule = next(r for r in metamodel()['rules'] if r['id'] == rule_id)
+    else:
+        key = ('estimation_calculation', 'rule_index')
+        if key not in session.memo:
+            session.memo[key] = {r['id']: r for r in metamodel()['rules']}
+        rule = session.memo[key].get(rule_id)
+        if rule is None:
+            raise StopIteration(rule_id)
     return evaluate_rule(rule, **values)
 
 

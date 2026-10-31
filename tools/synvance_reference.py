@@ -1,6 +1,7 @@
 """Read the Synvance input dossier without creating or changing a FLOW budget."""
 from copy import deepcopy
 from decimal import Decimal
+from datetime import date
 import math
 from pathlib import PurePosixPath
 
@@ -13,8 +14,8 @@ ERROR = 'ERR_SYNVANCE_REFERENCE'
 PROVIDERS = ('microsoft', 'sap')
 
 
-def _object(properties):
-    return dict(type='object', properties=properties, required=list(properties), additionalProperties=False)
+def _object(properties, optional=()):
+    return dict(type='object', properties=properties, required=[key for key in properties if key not in optional], additionalProperties=False)
 
 
 def _array(items, minimum=1):
@@ -22,6 +23,8 @@ def _array(items, minimum=1):
 
 
 TEXT = dict(type='string', minLength=1, pattern=r'\S')
+ISO_DATE = dict(type='string', pattern=r'^\d{4}-\d{2}-\d{2}$')
+EDITORIAL_NOTE = _object(dict(title=TEXT, text=TEXT))
 ID = dict(type='string', pattern='^[a-z][a-z0-9-]*$')
 PROOFS = dict(type='array', minItems=1, uniqueItems=True, items=TEXT)
 SOURCE_CELL = _object(dict(status=TEXT, scope=TEXT,
@@ -37,8 +40,12 @@ SCHEMA = _object(dict(
     labels=_object({key: TEXT for key in ('amount', 'period', 'status', 'scope', 'source', 'year',
         'annual_amount', 'price_year', 'open', 'download_pdf', 'download_xlsx',
         'back_to_overview', 'provider_navigation', 'overview_link', 'reading_note', 'provider_note')}),
-    brief=_object(dict(title=TEXT, introduction=TEXT,
-        questions=_array(_object(dict(id=ID, question=TEXT, answer=TEXT, proof_refs=PROOFS))),
+    brief=_object(dict(title=TEXT, introduction=TEXT,finalists_label=TEXT,
+        start=_object(dict(value=ISO_DATE,label=TEXT,proof_refs=PROOFS)),
+        questions=_array(_object(dict(id=ID, question=TEXT, answer=TEXT, proof_refs=PROOFS,
+            note=EDITORIAL_NOTE,publisher_refs=dict(type='array',minItems=1,uniqueItems=True,items=dict(enum=list(PROVIDERS)))),optional=('note','publisher_refs'))),
+        actors=_object(dict(title=TEXT,items=_array(_object(dict(id=ID,name=TEXT,role=TEXT,text=TEXT,proof_refs=PROOFS,
+            publisher_ref=dict(enum=list(PROVIDERS))),optional=('publisher_ref',))))),
         highlights=_object(dict(title=TEXT, items=_array(TEXT), proof_refs=PROOFS)))),
     business=_object(dict(title=TEXT, introduction=TEXT,
         architectures=_array(_object(dict(id=dict(enum=['backbone','suite']),title=TEXT, text=TEXT, systems=_array(TEXT)))), architecture_note=TEXT,
@@ -79,7 +86,7 @@ SCHEMA = _object(dict(
         annual_rows=_array(_object(dict(id=TEXT, label=TEXT))),
         model_title=TEXT, model_note=TEXT, model_limit=TEXT,
         model_links=_array(_object(dict(href=dict(enum=['#parametres','#se-projeter','#comparer']), label=TEXT))))),
-    documents=_object(dict(title=TEXT, introduction=TEXT)),
+    documents=_object(dict(title=TEXT,date_note=TEXT, date_labels=_object({key:TEXT for key in ('document','file_modified','unknown')}))),
     usage=_object(dict(title=TEXT, introduction=TEXT, paragraphs=_array(TEXT), links=_array(_object(dict(
         href=dict(enum=['#vision', '#marche', '#etude-marche', '#evaluation-core']), label=TEXT, text=TEXT)))))
 ))
@@ -123,9 +130,17 @@ def compile_synvance_reference(editorial, guide, prices, annual, glossary, docum
         path = item['path'].split('#')[0]
         suffix = PurePosixPath(path).suffix.lower()
         require(suffix in ('.pdf', '.xlsx'), 'original document format:' + path)
+        dated=item.get('date')
+        require(isinstance(dated,dict) and set(dated)=={'value','nature','provenance'},'document date metadata:'+item['id'])
+        require(dated['nature'] in ('document','file_modified','unknown') and isinstance(dated['provenance'],str) and dated['provenance'].strip(), 'document date provenance:'+item['id'])
+        require((dated['value'] is None)==(dated['nature']=='unknown'),'document date nature:'+item['id'])
+        if dated['value'] is not None:
+            try:
+                require(date.fromisoformat(dated['value']).isoformat()==dated['value'],'invalid document date:'+item['id'])
+            except (TypeError,ValueError): raise ValueError(ERROR+':invalid document date:'+item['id'])
         documents.append(dict(id=item['id'], title=item['titre'], author=item['auteur'], path=item['path'],
-            location=item['localisation'], scope=item['objet'], format=suffix[1:]))
-    result['documents']['items'] = documents
+            location=item['localisation'], scope=item['objet'], format=suffix[1:],date=deepcopy(dated)))
+    result['documents']['items'] = sorted(documents,key=lambda item:item['date']['value'] or '9999-12-31')
     input_refs = [row['piece_ref'] for row in result['overview']['inputs']]
     require(len(input_refs) == len(set(input_refs)) and set(input_refs) == {
         'demande', 'besoins', 'questionnaire_microsoft', 'questionnaire_sap'}, 'input evidence coverage')
@@ -164,7 +179,10 @@ def compile_synvance_reference(editorial, guide, prices, annual, glossary, docum
         item['proofs'] = proofs(item.pop('proof_refs'))
 
     index(result['brief']['questions'], 'brief/questions')
-    for item in [*result['brief']['questions'], result['brief']['highlights']]:
+    index(result['brief']['actors']['items'], 'brief/actors')
+    try: date.fromisoformat(result['brief']['start']['value'])
+    except ValueError: raise ValueError(ERROR+':invalid study start date')
+    for item in [*result['brief']['questions'], result['brief']['highlights'],result['brief']['start'],*result['brief']['actors']['items']]:
         item['proofs'] = proofs(item.pop('proof_refs'))
 
     for provider in result['synthesis']['providers']:

@@ -37,8 +37,13 @@ jobs:
       - name: Validate model and local application
         run: |
           mkdir -p tmp
-          pnpm --dir app exec vite build
           python -m tools.check_model --full
+      - name: Keep validation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-reports
+          path: tmp/validation/
       - name: Build static application and original evidence
         run: |
           pnpm --dir app exec vite build --outDir dist-pages --base /FLOW-Etude-Economique/

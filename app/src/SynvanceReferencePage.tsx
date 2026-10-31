@@ -1,18 +1,20 @@
 import {createContext,useContext,useState,type CSSProperties,type ReactNode} from 'react';
-import {ArrowLeft,ArrowRight,Download,FileText} from 'lucide-react';
+import {ArrowLeft,ArrowRight,CalendarDays,Download,FileSpreadsheet,FileText} from 'lucide-react';
 import {DossierNavigation,DossierSheet} from './Dossier';
 import {useStudy,useFormat,type Data} from './context';
 import {SourceLink} from './components';
 import {MethodText} from './MethodDocument';
+import {ReadingNote} from './ReadingNote';
 import {HorizonFacts} from './EssentialViews';
 import {fileHref} from './transport';
 import './synvanceReference.css';
 
 const sectionId=(id:string)=>'synvance-reference-'+id;
-function Chapter({id,title,lead,children}:{id:string;title:string;lead:string;children:ReactNode}){
+const documentDate=(value:string,locale:string)=>new Intl.DateTimeFormat(locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));
+function Chapter({id,title,lead,children}:{id:string;title:string;lead?:string;children:ReactNode}){
  return <li><section className="core-method-section" data-kind="method" aria-labelledby={sectionId(id)}>
   <h2 id={sectionId(id)} tabIndex={-1}>{title}</h2>
-  <p className="core-method-lead"><MethodText>{lead}</MethodText></p>
+  {lead&&<p className="core-method-lead"><MethodText>{lead}</MethodText></p>}
   <div className="core-method-blocks">{children}</div>
  </section></li>;
 }
@@ -60,20 +62,29 @@ function Contents({sections,label}:{sections:{id:string;title:string}[];label:st
  return <nav className="core-method-navigation" aria-label={label}><h2>{label}</h2><ol>{sections.map(section=><li key={section.id}><button type="button" aria-controls={sectionId(section.id)} onClick={()=>goTo(section.id)}>{section.title}</button></li>)}</ol></nav>;
 }
 function Brief({reference:R}:{reference:Data}){
- const B=R.brief;
+ const {data}=useStudy(),B=R.brief;
  return <Chapter id="brief" title={B.title} lead={B.introduction}>
+  <div className="synvance-study-start"><CalendarDays size={19} aria-hidden="true"/><p>{B.start.label} <time dateTime={B.start.value}>{documentDate(B.start.value,data.ui.locale)}</time></p><Proofs items={B.start.proofs}/></div>
+  <section className="synvance-finalists-summary" aria-label={B.finalists_label}><strong>{B.finalists_label}</strong><ul className="synvance-finalists">{B.questions.find((item:Data)=>item.publisher_refs)?.publisher_refs.map((id:string)=><li key={id}><ProviderMark id={id} detail/></li>)}</ul></section>
   <button className="synvance-documents-shortcut" type="button" onClick={()=>{const heading=document.getElementById(sectionId('documents'));heading?.focus({preventScroll:true});heading?.scrollIntoView({block:'start'});}}><FileText size={15} aria-hidden="true"/>{R.reading.documents_link}</button>
   <div className="synvance-brief-questions">{B.questions.map((item:Data)=><section key={item.id} aria-labelledby={'synvance-brief-'+item.id}>
    <h3 id={'synvance-brief-'+item.id}>{item.question}</h3>
    <p><MethodText>{item.answer}</MethodText></p>
+   {item.note&&<ReadingNote title={item.note.title}>{item.note.text}</ReadingNote>}
    <Proofs items={item.proofs}/>
   </section>)}</div>
+  <section className="synvance-actors-section" aria-labelledby="synvance-actors-title"><h3 id="synvance-actors-title">{B.actors.title}</h3>
+   <div className="synvance-actors">{B.actors.items.map((actor:Data)=><article key={actor.id}>
+    <header>{actor.publisher_ref&&<img src={R.reading.publishers.find((publisher:Data)=>publisher.id===actor.publisher_ref).asset} alt="" aria-hidden="true" data-publisher={actor.publisher_ref}/>}<h4>{actor.name}</h4></header>
+    <strong className="synvance-actor-role">{actor.role}</strong><p><MethodText>{actor.text}</MethodText></p><Proofs items={actor.proofs}/>
+   </article>)}</div>
+  </section>
   <section className="synvance-brief-highlights" aria-labelledby="synvance-brief-highlights">
    <h3 id="synvance-brief-highlights">{B.highlights.title}</h3>
    <ul className="core-method-bullets">{B.highlights.items.map((text:string,index:number)=><li key={index}><MethodText>{text}</MethodText></li>)}</ul>
    <Proofs items={B.highlights.proofs}/>
   </section>
-  <aside className="synvance-acquired"><h3>{R.reading.acquired_title}</h3><p>{R.reading.acquired_text}</p><a href="#etude-marche">{R.reading.acquired_link}<ArrowRight size={15} aria-hidden="true"/></a></aside>
+  <aside className="synvance-acquired"><h3>{R.reading.acquired_title}</h3><p>{R.reading.acquired_text}</p><a href="#synvance-business">{R.reading.acquired_link}<ArrowRight size={15} aria-hidden="true"/></a></aside>
   <SupplierLinks reference={R}/>
  </Chapter>;
 }
@@ -117,7 +128,7 @@ function OmsComparison({reference:R}:{reference:Data}){
     </tbody></table>
    </div>
    <section className="synvance-open-points" aria-labelledby="synvance-open-points-title"><h3 id="synvance-open-points-title">{B.oms.open_points_title}</h3><ul>{B.oms.open_points.map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ul></section>
-   <p className="synvance-source-note"><MethodText>{B.oms.note}</MethodText></p>
+   <ReadingNote>{B.oms.note}</ReadingNote>
    <ul className="synvance-product-links">{B.oms.product_sources.map((source:Data)=><li key={source.href}><a href={source.href} target="_blank" rel="noopener">{source.label}</a></li>)}</ul>
   </div>
  </Chapter>;
@@ -180,13 +191,19 @@ function CostComparison({reference:R}:{reference:Data}){
   <ul className="synvance-product-links">{C.model_links.map((link:Data)=><li key={link.href}><a href={link.href}>{link.label}</a></li>)}</ul>
  </Chapter>;
 }
+function FileFormatMark({format}:{format:string}){
+ const Icon=format==='xlsx'?FileSpreadsheet:FileText;
+ return <span className={'synvance-file-type synvance-file-type--'+format}><Icon size={19} aria-hidden="true"/><span>{format.toUpperCase()}</span></span>;
+}
 function Documents({reference:R}:{reference:Data}){
- const L=R.labels;
- return <Chapter id="documents" title={R.documents.title} lead={R.documents.introduction}>
-  <div className="synvance-documents">{R.documents.items.map((doc:Data)=>{const download=fileHref(doc.path.split('#')[0]);const label=doc.format==='pdf'?L.download_pdf:L.download_xlsx;return <article key={doc.id} className="synvance-document">
-   <div className="synvance-document-copy"><div className="synvance-document-heading"><FileText aria-hidden="true" size={18}/><h3>{doc.title}</h3></div><p className="synvance-document-author">{doc.author}</p></div>
-   <div className="synvance-document-actions"><SourceLink path={doc.path}>{L.open}<span className="synvance-sr-only">{' — '+doc.title}</span></SourceLink>{download&&<a className="secondary synvance-download" href={download} download={doc.path.split('#')[0].split('/').pop()} aria-label={label+' — '+doc.title}><Download size={16} aria-hidden="true"/>{doc.format.toUpperCase()}</a>}</div>
-  </article>;})}</div>
+ const {data}=useStudy(),L=R.labels;
+ return <Chapter id="documents" title={R.documents.title}>
+  <ol className="synvance-documents">{R.documents.items.map((doc:Data)=>{const download=fileHref(doc.path.split('#')[0]);const label=doc.format==='pdf'?L.download_pdf:L.download_xlsx;return <li key={doc.id}><article className="synvance-document">
+   <div className="synvance-document-date" title={doc.date.provenance}><span>{R.documents.date_labels[doc.date.nature]}</span>{doc.date.value&&<time dateTime={doc.date.value}>{documentDate(doc.date.value,data.ui.locale)}</time>}</div>
+   <div className="synvance-document-copy"><h3>{doc.title}</h3><p className="synvance-document-author">{doc.author}</p><p className="synvance-document-scope">{doc.scope}</p></div>
+   <div className="synvance-document-actions"><SourceLink path={doc.path}>{L.open}<span className="synvance-sr-only">{' — '+doc.title}</span></SourceLink>{download&&<a className="secondary synvance-download" href={download} download={doc.path.split('#')[0].split('/').pop()} aria-label={label+' — '+doc.title}><FileFormatMark format={doc.format}/><Download size={14} aria-hidden="true"/></a>}</div>
+  </article></li>;})}</ol>
+  <ReadingNote>{R.documents.date_note}</ReadingNote>
  </Chapter>;
 }
 function Integration({reference:R,provider:P}:{reference:Data;provider:Data}){

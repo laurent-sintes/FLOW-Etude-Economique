@@ -5,6 +5,17 @@
 - Tutoyer l’utilisateur dans les échanges. Expliquer les indicateurs avec des termes courants : une estimation plus basse ou plus haute que la référence, sans le jargon « écart signé ».
 - Conserver « QA » dans les textes : ce jargon est partagé avec le client.
 
+## Style éditorial de l’application
+
+- Ne pas utiliser de points-virgules dans les textes de l’interface. Séparer les phrases par un point, reformuler la liaison ou présenter les énumérations en puces. Les séparateurs mathématiques peuvent être écrits avec une virgule. Préserver les citations, les identifiants techniques et les pièces originales.
+- Donner une idée principale par paragraphe et privilégier les phrases courtes. Mettre en gras les informations qui orientent la lecture, notamment les dates clés, finalistes, décisions, inclusions et limites déterminantes. Le gras reste sélectif.
+- Détacher les précisions secondaires dans une note de lecture identifiable, avec un libellé, un repère visuel discret et une typographie lisible. Une note peut préciser un écart de périmètre ou une limite documentaire. Ne pas y reléguer une information indispensable à la compréhension ni un avertissement important. Auditer les occurrences avant de généraliser un nouveau style de note.
+- Un sous-titre doit apporter un fait ou une information utile. Supprimer ceux qui répètent le titre, comptent les documents ou décrivent le plan déjà visible dans les intercalaires.
+- Conserver la continuité du parcours de lecture. Les appels à poursuivre conduisent à l’étape suivante du dossier. Éviter les liens transverses qui font sortir prématurément du parcours.
+- Utiliser de petits logos de marque aux endroits qui aident à identifier les acteurs et les comparaisons, avec leur nom en texte. Éviter leur répétition à chaque occurrence dans la prose. Les logos ne constituent ni une validation ni une preuve fonctionnelle.
+- Présenter les acteurs et leurs rôles sans supposer des responsabilités ou engagements absents des pièces. Dater les événements et les documents, et classer les pièces chronologiquement. Distinguer date du document, date de réponse et dernière modification technique. Une date inconnue reste explicitement inconnue.
+- Associer aux téléchargements une icône de type de fichier, un format explicite et un nom accessible. Exploiter l’espace pour les informations utiles plutôt que pour une description redondante de la section.
+
 ## Autorités et finalité
 
 - Étude d’opportunité pour décider des voies et conditions de réalisation du Core System, première étape de la plateforme de marques, sans engagement forfaitaire. La poursuite se décide par jalons ; l’ambition stratégique ne vaut pas financement de toute la plateforme ni engagement d’exécution sur dix ans. Présenter les résultats et partis pris actuels ; les récits de correction restent dans les audits.
@@ -57,7 +68,8 @@ Contexte communiqué par l’utilisateur le 29 octobre 2026. Il décrit la postu
 
 ## Flux courant et simulations
 
-- Un seul flux de travail (« main stream ») dans `source/` et `config/`, hors résultats générés listés dans le guide du modèle. L’application charge toujours les sources courantes ; aucun mode brouillon/release ni publication à demander pour voir les modifications.
+- Application entièrement statique, en local comme sur GitHub Pages. Le serveur web expose uniquement les fichiers. Les simulations et les preuves documentaires sont traitées dans le navigateur par le moteur Python unique via Pyodide et un Web Worker. Aucune API HTTP métier ni formule économique parallèle en JavaScript. Le lanceur courant prépare la livraison si les empreintes ont changé, puis utilise `python -m http.server`.
+- Un seul flux de travail (« main stream ») dans `source/` et `config/`, hors résultats générés listés dans le guide du modèle. La construction statique charge les sources courantes ; aucun mode brouillon/release ni publication à demander pour voir les modifications.
 - Après une modification, appliquer les contrôles proportionnés, reconstruire l’interface si nécessaire et actualiser le serveur avec le lanceur courant. Données, textes, paramètres et preuves textuelles sont figés ensemble en mémoire au chargement. Les pièces binaires restent originales et vérifiées par empreinte. `release/current.json` reste un instantané technique facultatif, remplacé atomiquement seulement sur demande explicite ; il ne pilote pas l’application locale.
 - Un chargement forme un objet cohérent. Les simulations ne relisent pas les YAML ; modifier les sources ne change pas les sessions chargées. Actualiser le serveur après les contrôles, puis recharger l’application au moment utile.
 - Les simulations personnelles sont des paramètres, pas des versions du modèle. Garder clés de stockage, sens des paramètres et adaptateurs existants. Un changement de prix ou de présentation ne rompt pas le contrat.
@@ -66,6 +78,8 @@ Contexte communiqué par l’utilisateur le 29 octobre 2026. Il décrit la postu
 
 ## Contrôles proportionnés
 
+- Utiliser `check_model --auto` pour sélectionner les contrôles depuis le dernier passage complet réussi. Toute modification métier, numérique, structurelle, du moteur, des preuves ou inconnue exige la suite complète. La réduction pour le client React/TypeScript/CSS et les champs éditoriaux existants, avec contrôle dans un vrai navigateur, ne vaut pas certification complète.
+- Conserver les rapports automatiques de phases et de tests, y compris en échec. Une nouvelle règle canonique doit être reliée à un test exécutable dans `tools/business_contract.py`. Les exemples arithmétiques indépendants restent dans les tests, sans recopier le métamodèle métier.
 - Contrôles ciblés pendant le travail ; une suite complète sur le candidat stabilisé. Ne pas recalibrer après une correction de style ni répéter une suite sans nouveau risque.
 - `check_model --quick` contrôle contrats, financements et calendriers ; `--content` les contenus et références courants ; `--full` la suite complète et la reprise (`--release` reste un alias technique compatible). Commandes exactes dans `tools/README.md`.
 - Dans le bac à sable Codex sous Windows, l'alias `python.exe` de `WindowsApps` peut être inexécutable. Découvrir le runtime avec `load_workspace_dependencies` puis employer son chemin explicite. Si `PyYAML` ou `jsonschema` manque, installer les versions de `tools/requirements-model.txt` dans `tmp/model-deps` et ajouter ce dossier à `PYTHONPATH` pour les seuls contrôles ; ne pas installer globalement. Sur ce poste, le téléchargement PyPI exige `exec_command` avec `sandbox_permissions=require_escalated`.
@@ -110,5 +124,5 @@ Contexte communiqué par l’utilisateur le 29 octobre 2026. Il décrit la postu
 - GitHub personnel est `github.com` / `laurent-sintes`. Les commandes `gh api` ciblent explicitement `--hostname github.com` ; ne pas utiliser le compte professionnel `beaumanoir.ghe.com` par défaut ni modifier l’identité Git globale.
 - Pages livre un ensemble technique figé depuis les sources courantes. Les calculs restent dans le même moteur Python, exécuté via Pyodide ; aucune formule économique parallèle en JavaScript. Préserver erreurs, contrats, stockage et import/export des simulations.
 - Vérifier le vrai navigateur statique et la parité avec le moteur Python lorsque le transport ou le calcul change. Les cas de CI sont dérivés des hypothèses courantes ; un témoin historique ne doit pas figer les futures évolutions économiques autorisées.
-- `app/dist/` sert l’application locale à la racine ; `app/dist-pages/` sert Pages sous `/FLOW-Etude-Economique/`. Ne pas remplacer l’un par l’autre. Le serveur local se lance depuis `C:/Dev/FLOW-Etude-Economique`, sur le port habituel 8766.
+- `app/dist/` sert l’application locale à la racine ; `app/dist-pages/` sert Pages sous `/FLOW-Etude-Economique/`. Ne pas remplacer l’un par l’autre. Le serveur web statique local se lance depuis `C:/Dev/FLOW-Etude-Economique`, sur le port habituel 8766.
 - Les simulations du site et celles de localhost ont des stockages d’origine distincts. Les fichiers personnels restent exportables et importables ; ne jamais vider les sauvegardes pour un déplacement ou un déploiement.

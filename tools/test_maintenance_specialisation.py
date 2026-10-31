@@ -1,6 +1,7 @@
 """Cloud/security repricing stays within existing funded effort and keeps Buy inclusions."""
 from copy import deepcopy
 import unittest
+from model_context import scoped_model
 
 from calculate_costs import (
     SCENARIOS, calculate_option, maintenance_specialist_adjustment, role_rates, validate_inputs,
@@ -21,6 +22,7 @@ class MaintenanceSpecialisationTests(unittest.TestCase):
         return maintenance_specialist_adjustment(doc or self.docs[slug],maintenance or self.catalogues[slug],
             cal or self.cal,rates or self.rates[slug],self.scenario,case)
 
+    @scoped_model
     def test_specialisation_reprices_existing_days_and_does_not_add_effort(self):
         disabled=deepcopy(self.cal)
         disabled['specialisation_maintenance_make']['plafond_jh_avant_sensibilite']=0

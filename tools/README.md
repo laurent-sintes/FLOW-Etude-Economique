@@ -1,20 +1,23 @@
 # Modèle FLOW : commandes courantes
 
-Un seul flux de travail : les sources courantes sont dans `source/` et `config/`. L’application locale les charge directement, sans choix de mode ni publication intermédiaire. Les simulations personnelles restent dans le navigateur ; aucune commande ci-dessous ne les efface. `release/current.json` reste un instantané technique facultatif.
+Un seul flux de travail : les sources courantes sont dans `source/` et `config/`. La construction statique les fige pour le navigateur, sans choix de mode ni publication intermédiaire. En local comme sur GitHub Pages, le serveur expose uniquement les fichiers. Les calculs sont exécutés dans un Web Worker avec Python/Pyodide, sans API HTTP métier. Les simulations personnelles restent dans le navigateur ; aucune commande ci-dessous ne les efface. `release/current.json` reste un instantané technique facultatif.
 
 ## Contrôler
 
 Depuis la racine, dans l’environnement Python du projet :
 
 ```powershell
+python -m tools.check_model --auto
 python -m tools.check_model --quick
 python -m tools.check_model --content
 python -m tools.check_model --full
+python -m tools.check_model --full --browser
 ```
 
+- **auto** : comparer les empreintes et les champs YAML au dernier contrôle complet réussi. Une modification numérique, structurelle, du métamodèle, du moteur, des preuves ou non reconnue déclenche la suite complète. Seules les modifications de champs éditoriaux existants et du client React/TypeScript/CSS autorisent les contrôles de présentation avec chargement, contrats, interface, reprise et vrai navigateur. Ce passage ne remplace pas une certification complète. Sans témoin complet valide, lancer la suite complète.
 - **quick** : contrats des entrées, volumes dérivés, calendriers, rôles, prix et inclusions Buy, invariants financiers, isolation du modèle et de la release. Un seul chargement partagé, aucune ouverture de port.
 - **content** : vérifier les textes et références avec le modèle courant, sans modifier les hypothèses ni les résultats enregistrés. Aucun instantané préalable requis.
-- **full** : tous les tests Python, HTTP, JavaScript, formats, navigation, reprise des anciennes simulations, compilation TypeScript, contenu et build de l’application. `--release` reste un alias compatible. Aucun instantané remplacé sans `--publish`.
+- **full** : tous les tests Python, compatibilité HTTP historique, JavaScript, formats, navigation, reprise des anciennes simulations, compilation TypeScript, contenu et livraison statique de l’application. `--release` reste un alias compatible. Aucun instantané remplacé sans `--publish`.
 
 ### Repli Codex Windows / bac à sable
 
@@ -31,9 +34,27 @@ Sur ce poste, lancer l'installation isolée depuis PyPI directement avec `exec_c
 
 La suite `--full` doit pouvoir ouvrir son serveur HTTP sur `127.0.0.1` et écrire dans le dossier temporaire Windows. Dans le bac à sable Codex de ce poste, lancer **cette commande de contrôle** avec `exec_command` et `sandbox_permissions="require_escalated"` (justification : tests HTTP locaux et dossiers temporaires). Les erreurs `WinError 10013` pour le socket ou `WinError 5` dans `Temp` viennent de cette restriction ; relancer la même suite sous ces permissions, sans changer le code. `--quick` fonctionne dans le bac à sable ordinaire. Les contrôles courants restent utilisables après modification du moteur, sans actualiser l’ancien instantané.
 
-Le dernier relevé remplace `tmp/check-model-last.json`. Il n’y a pas de série de rapports automatiques. Pour une correction CSS, utiliser directement le build et la vérification visuelle ciblée ; ne pas lancer une recalibration économique.
+Chaque exécution conserve `tmp/validation/<identifiant>/report.json`, `junit.xml` et les journaux des contrôles de l’interface. `tmp/check-model-last.json` pointe sur le dernier résultat, même en échec. Les rapports incluent les durées par phase et par test, les erreurs immédiates, les tests planifiés et la traçabilité des règles vers les tests effectivement réussis. La CI conserve ces rapports comme artefacts.
+
+`business_contract.py` relie chaque règle du métamodèle canonique à un test réel. Une règle nouvelle ou un test supprimé sans mise à jour de ce contrat fait échouer le contrôle. Les 18 règles arithmétiques ont des exemples indépendants avec résultats littéraux et rejets des entrées invalides. Cette traçabilité ne constitue pas une mesure de couverture des lignes ou branches du code. Les tests existants continuent de vérifier financements uniques, capacités natives, rôles, finalités, annuités au centime, horizons, inconnus, exports et calcul sans lecture disque.
+
+```powershell
+python -m tools.check_model --full --preserve tmp/validation-optimization-parity.json --compare audits/2026-10-31-optimisation-controles-avant.json
+```
+
+`--compare` conserve l’inventaire des tests du relevé précédent et mesure le temps gagné. Aucun test historique de cet inventaire ne peut disparaître ou être ignoré. `--preserve` compare exactement les projections, hors identifiant technique du moteur, pour les six simulations et les cas limites du témoin choisi. Ce témoin ponctuel ne fige pas les futures évolutions économiques autorisées.
 
 La grille est validée une fois par chargement ; un nouveau processus ou chargement revalide ses propres sources. Le relevé indique le poids du bootstrap essentiel. Les rapports de performance distinguent temps de calcul, transport et temps de rendu, sans déduire ce dernier des seuls timings HTTP.
+
+## Contrôler dans un vrai navigateur
+
+`check_model --auto` inclut le vrai navigateur pour les modifications de présentation. `--full --browser` l’ajoute explicitement au contrôle complet. La CI utilise Playwright avec Chromium sur la livraison Pages. Le contrôle échoue si une requête HTTP vers une API est émise. Il vérifie les 23 vues en mobile et en bureau, les huit scénarios du témoin, la reprise des sauvegardes, les originaux téléchargeables et le clavier.
+
+```powershell
+node app/scripts/verify-pages.mjs --url http://127.0.0.1:8766/ --allow-root true --cases tmp/validation-optimization-parity.json --output tmp/local-browser-report.json
+```
+
+Le scénario local utilise la même architecture statique que Pages. Aucun navigateur personnel ni stockage existant n’est effacé. Les adresses internes `/api/...` du moteur sont des messages vers le Worker, pas des appels réseau. Le serveur local n’expose ni `/api/health` ni `/api/simulate`.
 
 ## Instruire les sorties des skills
 
@@ -56,9 +77,9 @@ Les contrats sont décrits dans `source/README.md`. Aucune de ces commandes ne r
 powershell -ExecutionPolicy Bypass -File tools/start_study_app.ps1 -NoOpen
 ```
 
-Le lanceur recharge le serveur suivi si les sources, le moteur ou le build ont changé. `-Restart` permet de forcer ce rechargement. Après une modification React ou CSS, reconstruire l’interface avant de relancer le lanceur. Chaque mise à jour de l’étude se termine par les contrôles adaptés et cette actualisation.
+Le lanceur utilise `prepare_static_app` pour vérifier les empreintes des sources et des fichiers livrés. Une livraison inchangée est réutilisée. Sinon, les sources courantes et l’interface sont reconstruites ensemble, puis servies par `python -m http.server`. Le serveur historique d’API locale est arrêté lors de la migration du processus suivi. `-Restart` permet de forcer ce rechargement. Le lanceur reconstruit aussi les modifications React ou CSS si nécessaire. Chaque mise à jour de l’étude se termine par les contrôles adaptés et cette actualisation.
 
-Le serveur sur `http://127.0.0.1:8766` présente « Étude en cours ». Il charge un ensemble cohérent de données, paramètres, preuves textuelles et assets. Les simulations ne relisent pas les YAML. Les PDF et classeurs originaux restent vérifiés par empreinte. Garder le même port conserve le stockage navigateur et les simulations personnelles.
+Le serveur sur `http://127.0.0.1:8766` présente « Étude en cours ». Le navigateur charge un ensemble cohérent de données, paramètres, preuves textuelles et assets. Le serveur ne calcule aucun montant. Les simulations ne relisent pas les YAML. Les PDF et classeurs originaux restent vérifiés par empreinte. Garder le même port conserve le stockage navigateur et les simulations personnelles.
 
 ## Créer un instantané technique sur demande
 
@@ -120,7 +141,8 @@ python -m tools.check_model --full --preserve audits/2026-10-27-refonte-modele-p
 | `economic_reading.py` | Lecture figée des montants existants : sélection Buy, intégration et fonctionnement annuel des cinq options. Vérifie leurs propriétaires et la réconciliation des postes. `/api/economic-evaluations` sert cette lecture versionnée sans relire les sources ni ajouter de calcul. |
 | `market_reading.py` | Projection documentaire des projets, prix et services du registre déjà chargé. Servie à la demande par `/api/market-references`, avec contrôle de version et sans lecture disque ni ajout au bootstrap essentiel. Aucun prix transposé ou annualisé supplémentaire. |
 | `study_snapshot.py` | Carte transportée par identifiants, sources figées et publication atomique d’une release. |
-| `serve_study_app.py` | Serveur local sur les sources courantes, ensemble figé en mémoire et bootstrap préparé une fois. |
+| `prepare_static_app.py`, `start_study_app.ps1` | Construction statique vérifiée et serveur de fichiers local. |
+| `serve_study_app.py` | Adaptateur HTTP historique conservé pour les contrôles de compatibilité. Le lancement courant ne l’utilise plus. |
 | `check_model.py`, `test_support.py` | Contrôles gradués, fixture partagée avec copies isolées et dernier relevé des durées. |
 | `oss_flow_code_audit.py` | Comptage reproductible du code public Frappe/ERPNext/Insights pour la fiche et les mesures du modèle de marché ; aucun calcul actif des cinq options. |
 | `oss_candidates_code_audit.py` | Comptage reproductible, par dépôt et couche, des sélections Odoo Community, Tryton et Axelor ; résultats de code et déclarations distincts, sans JH ni calcul économique actif. |

@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-31",
+  "status": "Audit exécuté. Orchestration et optimisations proposées, non déployées.",
+  "priorities": [
+    {
+      "priority": "P0",
+      "change": "Rapport par test et par phase, écrit même en cas d’échec",
+      "implementation": "Résultat unittest chronométré, sorties immédiates, rapport JSON/JUnit et empreinte du candidat. Un répertoire par exécution évite les collisions de tmp.",
+      "acceptance": "Identifier le test actif et les échecs sans relance ni diagnostic manuel du processus."
+    },
+    {
+      "priority": "P1",
+      "change": "Réduire les copies et mutualiser une session immuable",
+      "implementation": "Partager les preuves privées validées dans une même session. Copier les seules entrées mutées et les résultats publics. Grouper les comparaisons de scénarios dans une session lorsque leurs sources restent identiques.",
+      "acceptance": "Tests d’isolation, modification de source détectée, résultats identiques sur cinq options et horizons 3/5/7/10 ans."
+    },
+    {
+      "priority": "P1",
+      "change": "Commande de contrôle adaptée au changement",
+      "implementation": "Comparer les champs YAML et le code avec la dernière référence validée. Utiliser les dépendances déclarées pour sélectionner les contrôles. Tout changement inconnu, règle, formule, schéma ou contrat déclenche le contrôle complet.",
+      "acceptance": "Une modification de texte ne reconstruit pas les calculs historiques. Une modification de tarif, calendrier, règle ou financement ne peut pas être classée éditoriale."
+    },
+    {
+      "priority": "P2",
+      "change": "CI avec branches indépendantes et builds dédupliqués",
+      "implementation": "Exécuter typage et lint indépendants en parallèle du modèle. Produire une seule fixture économique validée. Supprimer le build local redondant avant --full. Conserver un build local et un build statique car leurs bases URL diffèrent.",
+      "acceptance": "Même candidat et mêmes empreintes dans les deux livraisons. Rapport conservé même si une branche échoue."
+    },
+    {
+      "priority": "P2",
+      "change": "Couverture exécutable du modèle et du métamodèle",
+      "implementation": "Dériver les identifiants depuis fondamentaux.yaml et le registre des calculs. Relier chaque règle exécutable à son implémentation et à ses tests. Contrôler schémas, unités, relations, périmètres, financement unique, arrondis et inconnus.",
+      "acceptance": "Nouvelle règle ou relation sans contrôle identifiée automatiquement. Les résultats attendus ne sont pas calculés par la fonction testée."
+    }
+  ],
+  "profiles": [
+    {
+      "change": "Texte, style, navigation",
+      "checks": "Syntaxe, liens, contenus, tests de page concernés, typage si TSX, build et contrôle visuel ciblé. Parité témoin si la projection des données change.",
+      "budget": "Objectif de retour en moins de 30 s hors revue visuelle, à mesurer après découplage."
+    },
+    {
+      "change": "Instances métier, paramètres, tarifs, calendriers",
+      "checks": "Schémas et relations, fermeture des preuves, unités impactées, financements et journal, annuités et cinq options.",
+      "budget": "Budget à fixer après mesure des recalculs impactés."
+    },
+    {
+      "change": "Métamodèle, règles, moteur, schémas ou dépendance inconnue",
+      "checks": "Suite complète, cas limites indépendants, export et reprise autonome, parité locale/statique et simulations dans le navigateur.",
+      "budget": "Conserver la couverture complète. Réduire le temps par les optimisations, pas par suppression de contrôles."
+    }
+  ],
+  "model_contracts": [
+    "Structure et types JSON Schema",
+    "Identifiants, références, cycles et périmètre natif immuable",
+    "Domaines et unités des règles, zéro distinct de null et de sans objet",
+    "Propriétaire unique du financement, réutilisations consommées non recomptées",
+    "Conservation JH et montants par rôles et finalités",
+    "Sommes du journal, annuités, cumuls et responsabilités au centime",
+    "Reconstruction depuis les preuves exportées sans accès disque",
+    "Compatibilité des paramètres et sauvegardes personnelles"
+  ],
+  "cache_policy": "Cache borné et vérifié par dépendances, empreintes et version du moteur. Aucun cache global mutable. Aucun témoin historique utilisé pour interdire une évolution économique autorisée.",
+  "limits": [
+    "Le profilage d’un chargement ne mesure pas chaque test individuellement.",
+    "Les durées du profileur sont plus élevées que les temps réels.",
+    "Les budgets proposés sont des cibles, pas des gains déjà obtenus.",
+    "Le graphe de dépendances des preuves existe. Les autres dépendances doivent être déclarées avant une sélection automatique fiable."
+  ],
+  "reproduction": "python -m tools.audit_validation_performance --profile --output audits/2026-10-31-performance-controles.json"
+}
