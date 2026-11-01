@@ -30,10 +30,15 @@ class FrameworkVisionTests(unittest.TestCase):
         compiled = self.compile(self.document)
         self.assertEqual(compiled, before)
         self.assertIsNot(compiled, self.document)
-        self.assertEqual(compiled['adaptation']['href'], '#simuler')
+        self.assertEqual(compiled['adaptation']['href'], '#comparer')
         self.assertEqual(compiled['adaptation']['reference_link']['href'], '#parametres')
         hydrated = hydrate_framework_vision(self.ui, self.glossary)
-        self.assertEqual(hydrated['essential']['framework_vision'], compiled)
+        hydrated_vision = deepcopy(hydrated['essential']['framework_vision'])
+        stack_elements = {e['id']: e for e in read(ROOT / 'source/stacks/java-spring.yaml')['elements']}
+        for group in hydrated_vision['journey']['phases'][0]['providers'][0]['stack_reading']['groups']:
+            elements = group.pop('elements')
+            self.assertEqual(elements, [dict(id=ref, name=stack_elements[ref]['nom'], description=stack_elements[ref]['description']) for ref in group['element_refs']])
+        self.assertEqual(hydrated_vision, compiled)
         self.assertEqual(self.ui['essential']['framework_vision'], {'source': SOURCE})
         compiled['opening']['text'] = 'Périmètre : {{notion.core_system}}.'
         glossary = deepcopy(self.glossary)
@@ -102,11 +107,19 @@ class FrameworkVisionTests(unittest.TestCase):
             ui['essential']['framework_vision'] = reference
             with self.subTest(reference=reference), self.assertRaisesRegex(ValueError, 'ERR_FRAMEWORK_VISION'):
                 hydrate_framework_vision(ui, self.glossary)
-        for route in ('modele', 'parametres', 'simuler', 'cartographie', 'synvance', 'conditions-realisation', 'capacite-realisation'):
+        for route in ('modele', 'parametres', 'comparer', 'cartographie', 'synvance', 'conditions-realisation', 'preetude-projets', 'preetude-solutions', 'preetude-couts'):
             ui = deepcopy(self.ui)
             ui['essential']['pages'].pop(route)
             with self.subTest(missing_route=route), self.assertRaisesRegex(ValueError, 'unknown reading link'):
                 hydrate_framework_vision(ui, self.glossary)
+
+    def test_pre_studies_are_visible_inputs_and_readiness_has_no_standalone_group(self):
+        groups = [group for group in self.ui['essential']['nav_groups'] if not group.get('hidden')]
+        self.assertEqual(groups[0]['items'], ['preetudes', 'synvance', 'cartographie', 'preetude-projets', 'preetude-solutions', 'preetude-couts', 'preetude-productivite'])
+        self.assertNotIn('capacite-realisation', [page for group in groups for page in group['items']])
+        self.assertEqual(next(group for group in groups if group['label'] == 'Dossier économique')['items'], ['comparer', 'evaluation-core', 'parametres'])
+        links = {item['href'] for item in self.document['evidence']['items']}
+        self.assertTrue({'#preetude-projets', '#preetude-solutions', '#preetude-couts'} <= links)
 
     def test_phase_options_and_method_links_are_validated(self):
         for change in ('order','option','link','budget'):
@@ -122,6 +135,18 @@ class FrameworkVisionTests(unittest.TestCase):
         self.assertEqual([p['id'] for p in compiled['journey']['phases']],['acquisition','integration','fonctionnement'])
         for phase in compiled['journey']['phases']:
             self.assertEqual([p['option_ref'] for p in phase['providers']],['java-spring','microsoft','sap'])
+
+    def test_stack_reading_rejects_unknown_duplicate_and_misplaced_components(self):
+        for change in ('unknown', 'duplicate', 'phase', 'provider'):
+            document = deepcopy(self.document)
+            providers = document['journey']['phases'][0]['providers']
+            reading = providers[0]['stack_reading']
+            if change == 'unknown': reading['groups'][0]['element_refs'] = ['missing']
+            elif change == 'duplicate': reading['groups'][1]['element_refs'].append(reading['groups'][0]['element_refs'][0])
+            elif change == 'phase': document['journey']['phases'][1]['providers'][0]['stack_reading'] = providers[0].pop('stack_reading')
+            else: providers[1]['stack_reading'] = providers[0].pop('stack_reading')
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, 'ERR_FRAMEWORK_VISION'):
+                self.compile(document)
 
     def test_make_audit_rejects_invented_rules_and_formula_sections(self):
         for target in ('rule','section'):

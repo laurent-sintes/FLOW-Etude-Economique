@@ -27,6 +27,17 @@ class MarketComparisonTests(unittest.TestCase):
   excluded=[r for r in c['rows'] if not r['included']];self.assertEqual(len(excluded),1)
   self.assertTrue(all(x['reading_status']=='hors_perimetre' for x in excluded[0]['cells']))
   self.assertTrue(all(x['complete_ba_coverage'] is None for r in c['rows'] for x in r['cells']))
+ def test_hierarchy_is_native_and_documentary_comparison_excludes_estimates(self):
+  c=self.build();nodes={n['id']:n for n in self.snapshot['nodes']}
+  for row in c['rows']:
+   block=next(b for b in self.grid['blocs'] if b['chemin'][-2]==row['id'])
+   self.assertEqual([n['id'] for n in row['hierarchy']],block['chemin'][:-2])
+   self.assertEqual([n['name'] for n in row['hierarchy']],[nodes[k]['fields']['name'] for k in block['chemin'][:-2]])
+  market=deepcopy(self.market);market['comparison']=c
+  shown=build_market_reading(market)['documentary_comparison']
+  self.assertNotIn('summary',shown);self.assertNotIn('budget_review',shown)
+  self.assertTrue(all('instruction' not in g and 'funding_candidates' not in g for g in shown['gaps']))
+  self.assertEqual(shown['rows'],c['rows'])
  def test_no_false_coverage_or_budget(self):
   c=self.build();self.assertEqual(c['summary']['adopted_java_spring_jh'],sum(u['total_jh'] for u in self.retained if u['stack']=='java-spring'))
   self.assertIsNone(c['summary']['net_extra_jh']);self.assertEqual(c['summary']['reviewed_business_area_pairs'],0)

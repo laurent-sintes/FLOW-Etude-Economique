@@ -22,49 +22,23 @@ class StudyTests(unittest.TestCase):
         cls.study=study_copy()
     def setUp(self): self.p=deepcopy(self.study.parameters)
 
-    def test_global_faq_has_resolvable_links_and_live_reference_figures(self):
-        study=self.study; faq=study.content['faq']; ui=study.ui
-        reference_group=next(g for g in ui['navigation_groups'] if 'faq' in g['items'])
-        self.assertEqual(reference_group['items'],['faq','glossaire'])
-        self.assertFalse(reference_group['sequential'])
-        self.assertEqual(ui['document_routes']['source/faq-sponsors.md'],'#faq')
-        self.assertNotIn('explanation_document',ui)
-        self.assertEqual(len({q['id'] for q in faq['questions']}),len(faq['questions']))
-        self.assertEqual({q['category'] for q in faq['questions']},{c['id'] for c in faq['categories']})
-        for q in faq['questions']:
-            self.assertTrue(q['answer'] and q['paragraphs'] and q['links'] and q['sources'])
-            for link in q['links']: self.assertIn(link['route'].split('?')[0],ui['pages'])
-            for source in q['sources']: self.assertTrue(study.document_path(source['path']).is_file())
-        values={f['binding']:f['value'] for q in faq['questions'] for f in q.get('figures',[])}
-        self.assertEqual(values['options.java-spring.integration'],study.baseline['options'][0]['integration'])
-        self.assertEqual(values['options.java-spring.hosting_build'],102000)
-        before=study.baseline
-        try:
-            self.p['options']['java-spring']['build_mois']=60
-            study.baseline=study.simulate(self.p)
-            updated=study._faq()
-            changed={f['binding']:f['value'] for q in updated['questions'] for f in q.get('figures',[])}
-            self.assertNotEqual(values['options.java-spring.hosting_build'],changed['options.java-spring.hosting_build'])
-            self.assertEqual(changed['options.java-spring.hosting_build'],127500)
-        finally: study.baseline=before
-
-    def test_faq_rejects_dangling_numeric_bindings(self):
-        from unittest.mock import patch
-        import study_app
-        original=study_app.read
-        broken=deepcopy(self.study.content['faq'])
-        question=next(q for q in broken['questions'] if q.get('figures'))
-        question['figures'][0]['binding']='reference.missing'
-        with patch.object(study_app,'read',side_effect=lambda path:broken if path.name=='faq-sponsors.yaml' else original(path)):
-            with self.assertRaisesRegex(ValueError,'ERR_FAQ_BINDING'): self.study._faq()
+    def test_retired_faq_is_absent_from_runtime_publication_and_navigation(self):
+        self.assertNotIn('faq',self.study.content)
+        self.assertNotIn('faq',[row['id'] for row in self.study.ui['nav']])
+        self.assertNotIn('faq',self.study.ui['pages'])
+        self.assertFalse(any('faq-sponsors' in path for path in self.study.files))
+        self.assertFalse(any('faq-sponsors' in path for path in self.study.source_digests))
+        self.assertFalse(any('faq-sponsors' in row['path'] for row in self.study.content['downloads']['documents']))
+        for suffix in ('md','yaml'):
+            with self.assertRaises(ScenarioError):self.study.document_path('source/faq-sponsors.'+suffix)
 
     def test_reading_guide_proofs_terms_and_menu_are_resolvable(self):
         guide=self.study.content['guide']
         self.assertEqual(len(guide['etapes']),6)
         self.assertEqual([n['id'] for n in self.study.ui['nav']],
-            ['synthese','logique','perimetres','build','exploitation','market','simulation-hypotheses','simulations','simulation-depenses','faq','glossaire'])
+            ['synthese','logique','perimetres','build','exploitation','market','simulation-hypotheses','simulations','simulation-depenses','glossaire'])
         grouped=[i for g in self.study.ui['navigation_groups'] for i in g['items']]
-        self.assertEqual(grouped,['logique','perimetres','build','exploitation','market','simulation-hypotheses','simulations','simulation-depenses','faq','glossaire'])
+        self.assertEqual(grouped,['logique','perimetres','build','exploitation','market','simulation-hypotheses','simulations','simulation-depenses','glossaire'])
         self.assertEqual([(g['label'],g['items']) for g in self.study.ui['navigation_groups'][:2]],
                          [('Comprendre',['logique','perimetres']),('Estimer',['build','exploitation','market'])])
         self.assertEqual([p['id'] for p in self.study.ui['context_pages']],['synvance'])
@@ -301,10 +275,10 @@ class StudyTests(unittest.TestCase):
     def test_essential_reader_groups_framework_before_economic_pages(self):
         from document_excerpt import document_excerpt
         essential=self.study.ui['essential']
-        self.assertEqual([item['id'] for item in essential['nav']],['synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','acquisition','integration','fonctionnement','scenarios','methodes','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire','telechargements'])
-        self.assertEqual(set(essential['pages']),{'cartographie','synvance','synvance-business','synvance-oms','synvance-costs','synvance-microsoft','synvance-sap','vision','modele','conditions-realisation','complexite','calcul-net','calcul-run','marche','leviers','acquisition','integration','fonctionnement','scenarios','methodes','capacite-realisation','etude-marche','parametres','comparer','evaluation-core','se-projeter','simuler','glossaire','telechargements'})
+        self.assertEqual([item['id'] for item in essential['nav']],['preetudes','synvance','cartographie','preetude-projets','preetude-solutions','preetude-couts','preetude-productivite','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','acquisition','integration','fonctionnement','charges-acquisition','charges-integration','charges-fonctionnement','scenarios','methodes','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire','telechargements'])
+        self.assertEqual(set(essential['pages']),{'preetudes','preetude-productivite','cartographie','synvance','synvance-business','synvance-oms','synvance-costs','synvance-microsoft','synvance-sap','vision','modele','conditions-realisation','complexite','calcul-net','calcul-run','marche','leviers','acquisition','integration','fonctionnement','charges-acquisition','charges-integration','charges-fonctionnement','preetude-projets','preetude-solutions','preetude-couts','scenarios','methodes','capacite-realisation','etude-marche','parametres','comparer','evaluation-core','se-projeter','simuler','glossaire','telechargements'})
         self.assertEqual([group['items'] for group in essential['nav_groups']],
-                         [['synvance','cartographie'],['vision','acquisition','integration','fonctionnement','scenarios','methodes'],['modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers'],['capacite-realisation'],['etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler'],['glossaire','telechargements']])
+                         [['preetudes','synvance','cartographie','preetude-projets','preetude-solutions','preetude-couts','preetude-productivite'],['vision','acquisition','integration','fonctionnement','scenarios','methodes'],['charges-acquisition','charges-integration','charges-fonctionnement'],['modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','capacite-realisation'],['comparer','evaluation-core','parametres'],['glossaire','telechargements']])
         self.assertEqual([phase['key'] for phase in essential['structure']['phases']],['obtention','integration','services'])
         for concept in essential['concepts']:
             self.assertIn(concept['notion'],self.study.glossary['notions'])
@@ -653,7 +627,7 @@ class StudyTests(unittest.TestCase):
         for value in ('../AGENTS.md','source/../../AGENTS.md','.git/config','tools/serve_study_app.py'):
             with self.subTest(value=value):
                 with self.assertRaises(ScenarioError):self.study.document_path(value)
-        self.assertTrue(self.study.document_path('source/faq-sponsors.md').is_file())
+        self.assertTrue(self.study.document_path('source/plan-investissement.yaml').is_file())
 
 
 

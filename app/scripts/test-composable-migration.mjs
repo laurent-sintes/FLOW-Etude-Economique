@@ -7,18 +7,18 @@ import {createSavedScenario,restoreSavedScenario,prepareSavedScenario} from '../
 const fixture=JSON.parse(readFileSync(new URL('../../audits/2026-10-27-modele-composable-migration-fixture.json',import.meta.url),'utf8'));
 const old=fixture.old,current=process.env.FLOW_TEST_BOOTSTRAP?JSON.parse(readFileSync(process.env.FLOW_TEST_BOOTSTRAP,'utf8')):fixture.current;
 
-test('actual previous session keeps overrides, horizon, chosen option and name under the composable contract',async()=>{
+test('actual previous session for a current option keeps overrides, horizon, choice and name under the composable contract',async()=>{
  const session=initialSession(old);
  session.draft.options['java-spring'].build_mois=60;
  session.draft.common.bonus_continuite_pct=17;
- session.horizon=7;session.chosen='rust';session.name='Hypothèses avant migration';
+ session.horizon=7;session.chosen='java-spring';session.name='Hypothèses avant migration';
  const raw=encodeSession(old,session);
  let request;
  const restored=await restoreSession(current,raw,async parameters=>{request=structuredClone(parameters);return {...current.baseline,parameters};});
  assert.equal(restored.restored,true);assert.equal(restored.recovery,null);
  assert.equal(request.options['java-spring'].build_mois,60);
  assert.equal(request.common.bonus_continuite_pct,17);
- assert.equal(restored.session.horizon,7);assert.equal(restored.session.chosen,'rust');assert.equal(restored.session.name,session.name);
+ assert.equal(restored.session.horizon,7);assert.equal(restored.session.chosen,'java-spring');assert.equal(restored.session.name,session.name);
  assert.equal(raw,encodeSession(old,session));
 });
 

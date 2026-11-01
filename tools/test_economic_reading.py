@@ -18,7 +18,7 @@ class EconomicReadingTests(unittest.TestCase):
     def compile(self, **changes):
         arguments = dict(baseline=self.study.baseline, content=self.study.content,
                          editorial=self.editorial, glossary=self.study.glossary,
-                         document_path=self.study.document_path)
+                         document_path=self.study.document_path, inputs=self.study.data['options'][0]['composable']['inputs'])
         arguments.update(changes)
         return compile_economic_evaluations(**arguments)
 
@@ -118,6 +118,89 @@ class EconomicReadingTests(unittest.TestCase):
         content['stacks']['java-spring']['economic_reading']['buckets']['socle']['total']+=1
         with self.assertRaisesRegex(ValueError,'annual detail ownership'):
             self.compile(content=content)
+
+    def test_cost_bridges_conserve_all_options_and_horizons(self):
+        before = deepcopy(self.study.baseline)
+        for reading, option in zip(self.compile()['options'], before['options']):
+            if option['mode'] == 'Buy':
+                self.assertAlmostEqual(sum(reading['integration']['offer_bridge'].values()), option['integration'], places=2)
+            else:
+                self.assertIsNone(reading['integration']['offer_bridge'])
+            for bridge, horizon in zip(reading['spending_bridge'], option['horizons']):
+                self.assertEqual(bridge['years'], horizon['years'])
+                self.assertGreaterEqual(bridge['recurring_eur_ht'], 0)
+                self.assertAlmostEqual(bridge['transition_eur_ht']+bridge['recurring_eur_ht'], horizon['totals']['mco_run'], places=2)
+        self.assertEqual(self.study.baseline, before)
+        java = next(row for row in self.compile()['options'] if row['stack']=='java-spring')
+        last = next(row for row in java['spending_bridge'] if row['years']==10)
+        self.assertAlmostEqual(last['transition_eur_ht'], 1294824.15, places=2)
+        self.assertAlmostEqual(last['recurring_eur_ht'], 3898507.05, places=2)
+
+    def test_offer_bridge_rejects_an_unowned_supplement(self):
+        content = deepcopy(self.study.content)
+        content['stacks']['microsoft']['economic']['detail_integration']['complements_flow'] += 1
+        with self.assertRaisesRegex(ValueError, 'offer bridge ownership'):
+            self.compile(content=content)
+
+    def test_dimensioning_follows_loaded_inputs_and_is_isolated(self):
+        result = self.compile()
+        inputs = self.study.data['options'][0]['composable']['inputs']['volumes']
+        self.assertEqual(result['drivers']['perimeter'], inputs['perimetre'])
+        self.assertEqual(result['drivers']['annual_volumes'], inputs['volumes'])
+        result['drivers']['perimeter']['utilisateurs_nominatifs'] = -1
+        self.assertGreater(inputs['perimetre']['utilisateurs_nominatifs'], 0)
+
+    def test_completion_spending_includes_early_contracts_and_all_transition_costs(self):
+        result = self.compile()
+        known = {'java-spring':8170877.10, 'microsoft':7620227.45, 'sap':16850516.68}
+        for option in result['options']:
+            original = next(o for o in self.study.baseline['options'] if o['stack']==option['stack'])
+            completion = option['service_completion']
+            self.assertEqual(completion['month'], original['service_start_month'])
+            self.assertAlmostEqual(completion['initial_eur_ht']+completion['subscriptions_eur_ht'], completion['total_eur_ht'], places=2)
+            self.assertAlmostEqual(completion['initial_eur_ht'], sum(row['amount'] for row in original['funding_ledger']), places=2)
+            if option['mode']=='Make':self.assertEqual(completion['subscriptions_eur_ht'],0)
+            else:self.assertGreater(completion['subscriptions_eur_ht'],0)
+            if option['stack'] in known:self.assertAlmostEqual(completion['total_eur_ht'],known[option['stack']],places=2)
+        ms = next(o for o in result['options'] if o['stack']=='microsoft')['service_completion']
+        self.assertAlmostEqual(ms['subscriptions_eur_ht'],3100171.45,places=2)
+        result['options'][0]['service_completion']['total_eur_ht']=-1
+        self.assertGreater(self.compile()['options'][0]['service_completion']['total_eur_ht'],0)
+
+    def test_completion_rejects_a_journal_extending_beyond_the_service_date(self):
+        baseline=deepcopy(self.study.baseline)
+        option=baseline['options'][0]
+        next(line for line in option['funding_ledger'] if line['phase']=='mco_run')['end']=option['service_start_month']+1
+        with self.assertRaisesRegex(ValueError,'completion journal'):
+            self.compile(baseline=baseline)
+
+    def test_comparison_keeps_the_same_horizon_and_reference(self):
+        reference=next(o for o in self.study.baseline['options'] if o['stack']=='java-spring')
+        for reading in self.compile()['options']:
+            option=next(o for o in self.study.baseline['options'] if o['stack']==reading['stack'])
+            self.assertEqual(reading['comparison']['reference'],reference['stack'])
+            for row in reading['comparison']['horizons']:
+                value=next(h['totals']['total'] for h in option['horizons'] if h['years']==row['years'])
+                anchor=next(h['totals']['total'] for h in reference['horizons'] if h['years']==row['years'])
+                self.assertAlmostEqual(anchor+row['difference_eur_ht'],value,places=2)
+                self.assertGreaterEqual(row['amount_eur_ht'],0)
+                self.assertEqual(row['direction'],'higher' if value>anchor else 'lower' if value<anchor else 'equal')
+
+    def test_projected_years_distinguish_project_transition_and_full_service(self):
+        result={o['stack']:{r['year']:r['stage'] for r in o['annual']['projected_stages']} for o in self.compile()['options']}
+        for slug,before,partial,full in [('java-spring',6,7,8),('microsoft',3,4,5)]:
+            self.assertEqual(result[slug][before],'before_service')
+            self.assertEqual(result[slug][partial],'partial_service')
+            self.assertEqual(result[slug][full],'full_service')
+        self.assertEqual(result['sap'][3],'before_service')
+        self.assertEqual(result['sap'][4],'full_service')
+
+    def test_sponsor_sections_reject_duplicated_or_misassigned_topics(self):
+        for field,reason in [('determinants','sponsor determinant contract'),('scope_rows','sponsor scope contract')]:
+            editorial=deepcopy(self.editorial)
+            editorial['sponsor'][field][0]=deepcopy(editorial['sponsor'][field][1])
+            with self.assertRaisesRegex(ValueError,reason):
+                self.compile(editorial=editorial)
 
     def test_documentary_fragments_reach_complete_evidence(self):
         paths = set()

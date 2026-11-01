@@ -6,6 +6,7 @@ import {CoreEvaluationResults,CoreEvaluationTrace,RetainedCoreFamilies} from './
 import {MethodText} from './MethodDocument';
 import {request,useStudy,useFormat,type Data} from './context';
 import './economicEvaluations.css';
+import {visibleOptions} from './applicationScope';
 
 type EconomicOption={stack:string;name:string;mode:'Make'|'Buy';core:Data|null;selection:null|{budget_eur_ht:number;months:number;source:string};integration:{budget_eur_ht:number;months:number;source:string;detail:Data[]};annual:{items:Record<string,number|null>;total_eur_ht:number;source:string;breakdown:Data[]}};
 type EconomicReading={model_version:string;editorial:Data;options:EconomicOption[];price_convention:{text:string;source:string}};
@@ -91,7 +92,7 @@ export function EconomicEvaluationsPage({familyId}:{familyId?:string}){
   let current=true;setReading(null);setError('');
   request<EconomicReading>(`/api/economic-evaluations?model_version=${encodeURIComponent(data.model_version)}`).then(result=>{
    if(result.model_version!==data.model_version)throw Object.assign(new Error('version'),{code:'version'});
-   if(current)setReading(result);
+   if(current)setReading({...result,options:visibleOptions(data.ui,result.options)});
   }).catch(reason=>{if(current)setError(reason.code==='version'?'version':'network');});
   return ()=>{current=false;};
  },[data.model_version,retry]);

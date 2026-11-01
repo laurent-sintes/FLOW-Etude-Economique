@@ -25,6 +25,7 @@ export async function restoreSession(data:Bootstrap,raw:string|null,simulate:(p:
   saved=JSON.parse(raw);
   const compatible=saved.contract===data.simulation_contract||data.ui.compatible_simulation_contracts?.includes(saved.contract);
   if(saved.format!==1||!compatible||!saved.overrides||typeof saved.name!=='string')throw Error('ERR_SESSION');
+  if(data.ui.essential?.active_options&&saved.chosen&&!data.ui.essential.active_options.includes(saved.chosen))throw Error('ERR_SESSION');
   if(data.ui.horizons.includes(saved.horizon))session.horizon=saved.horizon;
   if(data.baseline.options.some(o=>o.stack===saved.chosen))session.chosen=saved.chosen;
   session.name=saved.name.slice(0,120);

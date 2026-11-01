@@ -26,7 +26,7 @@ PROOF_LEVEL = _object(dict(id=IDENTIFIER, title=TEXT, text=TEXT, href=TEXT, labe
 SCHEMA = _object(dict(
     version=dict(const=1), id=dict(const='framework-vision'),
     opening=TITLE_TEXT,
-    adaptation=_object(dict(title=TEXT, text=TEXT, href=dict(const='#simuler'), label=TEXT,
+    adaptation=_object(dict(title=TEXT, text=TEXT, href=dict(const='#comparer'), label=TEXT,
         reference_link=_object(dict(href=dict(const='#parametres'), label=TEXT)))),
     approach=_object(dict(title=TEXT, steps=dict(type='array', minItems=1,
         items=_object(dict(id=IDENTIFIER, title=TEXT, text=TEXT))),
@@ -44,6 +44,11 @@ SCHEMA = _object(dict(
 ARRAY_TEXT = dict(type='array', minItems=1, items=TEXT)
 PROVIDER = _object(dict(option_ref=TEXT, status=TEXT, example=TEXT, inputs=ARRAY_TEXT, treatment=ARRAY_TEXT, output=TEXT,
     limits=ARRAY_TEXT, links=dict(type='array', minItems=1, items=READING_LINK)))
+STACK_READING = _object(dict(title=TEXT, intro=TEXT, choices=TEXT,
+    groups=dict(type='array', minItems=1, items=_object(dict(title=TEXT,
+        element_refs=dict(type='array', minItems=1, uniqueItems=True, items=TEXT))))))
+PROVIDER['properties']['stack_reading'] = STACK_READING
+
 MAKE_AUDIT = _object(dict(title=TEXT,intro=TEXT,steps=dict(type='array',minItems=1,items=_object(dict(title=TEXT,text=TEXT,rule_refs=dict(type='array',uniqueItems=True,items=TEXT)))),method=dict(enum=['core_method','net_method','run_method']),sections=dict(type='array',uniqueItems=True,items=TEXT),links=dict(type='array',minItems=1,items=READING_LINK)))
 SCHEMA['properties']['journey'] = _object(dict(title=TEXT,
     options=dict(type='array', minItems=3, maxItems=3, items=_object(dict(id=TEXT,label=TEXT,short_label=TEXT,status=TEXT))),
@@ -101,6 +106,15 @@ def compile_vision(document, glossary, routes, documents):
     for phase in journey['phases']:
         if [p['option_ref'] for p in phase['providers']] != ['java-spring','microsoft','sap']:
             raise ValueError(f'{ERROR}:journey:unknown or repeated phase option')
+    stack = read(ROOT / 'source/stacks/java-spring.yaml')
+    element_ids = {element['id'] for element in stack['elements']}
+    for phase in journey['phases']:
+        for provider in phase['providers']:
+            reading = provider.get('stack_reading')
+            if reading:
+                refs = [ref for group in reading['groups'] for ref in group['element_refs']]
+                if phase['id'] != 'acquisition' or provider['option_ref'] != 'java-spring' or len(refs) != len(set(refs)) or not set(refs) <= element_ids:
+                    raise ValueError(f'{ERROR}:journey:invalid stack reading references')
     groups=[g['id'] for g in journey['method_groups']]
     if len(groups)!=len(set(groups)) or any(m['group'] not in groups for m in journey['methods']):
         raise ValueError(f'{ERROR}:journey:invalid method group')
@@ -139,6 +153,12 @@ def hydrate_framework_vision(ui, glossary):
     routes = {item['id'] for item in essential['nav']} & set(essential['pages'])
     documents = read(ROOT / 'config/publication.yaml')['documents']
     document = compile_vision(read(ROOT / SOURCE), glossary, routes, documents)
+    elements = {element['id']: element for element in read(ROOT / 'source/stacks/java-spring.yaml')['elements']}
+    for provider in document['journey']['phases'][0]['providers']:
+        if 'stack_reading' in provider:
+            for group in provider['stack_reading']['groups']:
+                group['elements'] = [dict(id=ref, name=elements[ref]['nom'], description=elements[ref]['description'])
+                                     for ref in group['element_refs']]
     value = deepcopy(ui)
     value['essential']['framework_vision'] = document
     return value

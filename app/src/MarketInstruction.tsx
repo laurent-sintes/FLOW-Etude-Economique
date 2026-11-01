@@ -13,7 +13,8 @@ export function MarketInstruction({reading,focus}:{reading:Data;focus?:string}){
  const [capability,setCapability]=useState(first?.capability_ref||I.capabilities[0].capability_ref);
  const native=(id:string)=>data.content.complexity.rows.find((row:Data)=>row.capacite_id===id);
  const detailedCapabilities=new Set(I.qualifications.filter((row:Data)=>row.product_ref===product).map((row:Data)=>row.capability_ref));
- const chooseProduct=(value:string)=>{setProduct(value);const firstRecord=I.qualifications.find((row:Data)=>row.product_ref===value);if(firstRecord)setCapability(firstRecord.capability_ref);};
+ const choose=(cap:string,pid:string)=>{location.hash='#preetude-solutions?view=qualification&focus='+encodeURIComponent(cap)+'~'+encodeURIComponent(pid);};
+ const chooseProduct=(value:string)=>choose(capability,value);
  const pair=I.rows.find((row:Data)=>row.product_ref===product&&row.capability_ref===capability);
  const detail=I.qualifications.filter((row:Data)=>row.product_ref===product&&row.capability_ref===capability);
  const current=native(capability);
@@ -22,10 +23,11 @@ export function MarketInstruction({reading,focus}:{reading:Data;focus?:string}){
  const name=(id:string)=>{const row=native(id);return row?`${row.id} · ${row.name||row.capacite?.nom}`:id;};
  const needName=(id:string)=>{const need=proposedFunctions.find((row:Data)=>row.id===id);return need?`${id} · ${need.resultat}`:id;};
  return <div className="market-qualification-reading">
-  <h3>{T.title}</h3><p><MethodText>{T.intro}</MethodText></p>
+  <a className="text-button" href={'#preetude-solutions?focus='+encodeURIComponent(reading.documentary_comparison.rows.find((row:Data)=>row.capabilities.some((cap:Data)=>cap.id===capability))?.id+'~'+product)}>{data.ui.essential.prestudies.back_comparison}</a>
+  <h2>{(current?.name||current?.capacite?.nom||capability)+' · '+(data.ui.essential.dossiers.product_labels[product]||product)}</h2>
   <div className="market-qualification-selectors">
    <label>{T.product}<select value={product} onChange={event=>chooseProduct(event.target.value)}>{I.products.map((row:Data)=><option key={row.id} value={row.id}>{row.label}</option>)}</select></label>
-   <label>{T.capability}<select value={capability} onChange={event=>setCapability(event.target.value)}>{[true,false].map(detailed=>{const rows=I.capabilities.filter((row:Data)=>detailedCapabilities.has(row.capability_ref)===detailed);return rows.length>0&&<optgroup key={String(detailed)} label={detailed?T.analysed_capabilities:T.other_capabilities}>{rows.map((row:Data)=><option key={row.capability_ref} value={row.capability_ref}>{name(row.capability_ref)}</option>)}</optgroup>;})}</select></label>
+   <label>{T.capability}<select value={capability} onChange={event=>choose(event.target.value,product)}>{[true,false].map(detailed=>{const rows=I.capabilities.filter((row:Data)=>detailedCapabilities.has(row.capability_ref)===detailed);return rows.length>0&&<optgroup key={String(detailed)} label={detailed?T.analysed_capabilities:T.other_capabilities}>{rows.map((row:Data)=><option key={row.capability_ref} value={row.capability_ref}>{name(row.capability_ref)}</option>)}</optgroup>;})}</select></label>
   </div>
   <p className="market-qualification-status"><strong>{I.status_labels[pair.status]}</strong> · {T.product_date} {observation.date}</p>
   <p className="market-qualification-path">{(current?.path||current?.hierarchie?.slice(1).map((item:Data)=>item.nom))?.join(' › ')}</p>

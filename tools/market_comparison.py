@@ -87,6 +87,7 @@ def build_market_comparison(market, *, spec=None, snapshot=None, grid=None, mech
             c['gap_refs']=[g['id'] for g in gaps.values() if bid in g['business_area_refs'] and pid in g['product_refs']]
             cells.append(c)
         rows.append(dict(id=bid,name=n['fields']['name'],target=r['target'],next_qualification=r['next_qualification'],
+            hierarchy=[dict(id=k,name=nodes[k]['fields']['name'],kind=nodes[k]['kind']) for k in blocks[0]['chemin'][:-2]],
             capabilities=[dict(id=b['capacite_id'],bc_ref=b['id'],name=nodes[b['capacite_id']]['fields']['name'],included=b['id'] not in excluded,needs=deepcopy(b['fonctions'])) for b in blocks],
             included=bool(included),cells=cells,crosswalk_refs=[x['id'] for x in crosswalk.values() if x['business_area_ref']==bid]))
     from gap_instruction import compile_gap_instruction

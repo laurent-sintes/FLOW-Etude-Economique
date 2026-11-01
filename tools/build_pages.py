@@ -138,6 +138,7 @@ def build_pages(output, base='/', study=None):
         'market-build': {key: deepcopy(market[key]) for key in ('etude_oss', 'cadre_comparaison', 'fiches_produit', 'candidats_a_etudier')},
         'market-references': build_market_reading(study.content['market']),
         'economic-evaluations': deepcopy(study.content['economic_evaluations']),
+        'gross-evaluations': deepcopy(study.content['gross_evaluations']),
         'capabilities': capabilities,
     }
     _clean_generated(output)
@@ -164,6 +165,7 @@ def build_pages(output, base='/', study=None):
                         '/api/ui': data_path + '/ui.json', '/api/market-build': data_path + '/market-build.json',
                         '/api/market-references': data_path + '/market-references.json',
                         '/api/economic-evaluations': data_path + '/economic-evaluations.json',
+                        '/api/gross-evaluations': data_path + '/gross-evaluations.json',
                         '/api/capability': data_path + '/capabilities.json',
                     }, documents=documents,
                     python=dict(archive=data_path + '/engine.zip', model=data_path + '/model.json.gz',

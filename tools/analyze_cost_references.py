@@ -80,6 +80,8 @@ def validate_reading(data):
         reading = entry['lecture_flow']
         assert reading['score_utilite'] in rubric['echelle'], entry['id']
         assert reading['raison'] and reading['enseignement'] and reading['date_revue'], entry['id']
+        assert all(isinstance(reading.get(key), str) and reading[key].strip()
+                   for key in ('similitudes', 'differences')), entry['id']
         assert set(reading['postes']) == set(labels['postes']), entry['id']
         assert all(s in labels['statuts'] for s in reading['postes'].values()), entry['id']
         assert reading['integration'] and reading['mco_run'], entry['id']

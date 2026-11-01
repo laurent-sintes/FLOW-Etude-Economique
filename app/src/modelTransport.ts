@@ -1,9 +1,10 @@
 import type {Bootstrap} from './context';
+import {scopeBootstrap} from './applicationScope.ts';
 
 /** Resolve canonical node IDs once; all views then share the same objects. */
 export function hydrateBootstrap(data:Bootstrap):Bootstrap{
  const content=data.content;
- if(!content.transport_format)return data;
+ if(!content.transport_format)return scopeBootstrap(data);
  if(content.transport_format!==1)throw Error('ERR_CONTENT_FORMAT');
  const map=content.business_map,nodes=map.nodes;
  const node=(id:string)=>{if(!nodes[id])throw Error('ERR_NODE');return nodes[id];};
@@ -14,5 +15,5 @@ export function hydrateBootstrap(data:Bootstrap):Bootstrap{
  }
  content.complexity.rows=map.rows;
  delete map.nodes;delete content.transport_format;
- return data;
+ return scopeBootstrap(data);
 }

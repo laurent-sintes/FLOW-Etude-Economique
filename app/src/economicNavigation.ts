@@ -1,0 +1,43 @@
+export const economicPages=['comparer','evaluation-core','parametres'] as const;
+export type EconomicPage=typeof economicPages[number];
+export type EconomicRoute={page:EconomicPage;option?:string;horizon?:string;view?:string;focus?:string;family?:string;detail?:'tarifs'|'diagnostics'};
+const options=['java-spring','microsoft','sap'];
+const horizons=['3','5','7','10'];
+/** Old simulation URLs now open the fixed reference. Only reading choices survive. */
+export function economicDestination(page:string,params:URLSearchParams):EconomicRoute|{page:'acquisition';option:string}|null{
+ const option=options.includes(params.get('option')||'')?params.get('option')!:undefined;
+ const view=horizons.includes(params.get('view')||'')?params.get('view')!:undefined;
+ const horizon=horizons.includes(params.get('horizon')||'')?params.get('horizon')!:undefined;
+ const context={...(horizon?{horizon}:{}),...(params.get('family')?{family:params.get('family')!}:{}),...(params.get('focus')?{focus:params.get('focus')!}:{})};
+ if(['comparer','se-projeter','simulation-depenses','simuler','simulations','simulation-hypotheses'].includes(page))return {page:'comparer',option,view,...context};
+ if(page==='parametres')return {page:'parametres',option,view,...context,detail:params.get('detail')==='tarifs'?'tarifs':params.get('detail')==='diagnostics'?'diagnostics':undefined};
+ if(page==='evaluation-core')return {page:'evaluation-core',option,...context,view:['financements','transpositions'].includes(params.get('view')||'')?params.get('view')!:view,family:params.get('family')||undefined,focus:params.get('focus')||undefined};
+ if(page==='etude-marche')return params.get('view')==='construction'?{page:'acquisition',option:'java-spring'}:{page:'evaluation-core',option,...context,view:params.get('view')==='references'?'transpositions':'financements',focus:params.get('focus')||undefined};
+ return null;
+}
+export function economicHash(route:{page:string;option?:string;horizon?:string;view?:string;family?:string;focus?:string;detail?:string}){
+ if(!economicPages.includes(route.page as EconomicPage))return null;
+ const query=new URLSearchParams();
+ for(const key of ['option','horizon','view','family','focus','detail'] as const)if(route[key])query.set(key,route[key]!);
+ return '#'+route.page+(query.size?'?'+query.toString():'');
+}
+
+/** A detail never changes the reading horizon of its parent. */
+export function economicPeriod(route:{horizon?:string;view?:string}){
+ const value=route.horizon||route.view;
+ return horizons.includes(value||'')?Number(value):10;
+}
+
+/** Reading links keep the phase context across summaries, evidence and costs. */
+export function phaseReadingHash(route:{page:string;option?:string;horizon?:string;focus?:string;returnTo?:string;family?:string}){
+ if(!['acquisition','integration','fonctionnement','scenarios','methodes'].includes(route.page)&&!['charges-acquisition','charges-integration','charges-fonctionnement'].includes(route.page))return null;
+ const query=new URLSearchParams();
+ for(const key of ['option','focus','horizon','returnTo','family'] as const)if(route[key]&&(key!=='horizon'||horizons.includes(route[key]!)))query.set(key,route[key]!);
+ return '#'+route.page+(query.size?'?'+query.toString():'');
+}
+export function contextualEconomicLink(href:string,option:string,horizon?:string){
+ const [page,query='']=href.replace(/^#/,'').split('?');
+ if(!href.startsWith('#'))return href;
+ const target=economicDestination(page,new URLSearchParams(query));
+ return target&&economicPages.includes(target.page as EconomicPage)?economicHash({...target,option,...(horizon&&horizons.includes(horizon)?{horizon}:{})})!:href;
+}

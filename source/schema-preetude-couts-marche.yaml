@@ -1,0 +1,211 @@
+type: object
+additionalProperties: false
+required:
+- version
+- id
+- recorded_on
+- provenance
+- rates
+- purchase_refs
+- ai_refs
+- effort_groups
+- programmes
+properties:
+  version:
+    const: 1
+  id:
+    const: preetude-couts-marche
+  recorded_on: &id001
+    type: string
+    minLength: 1
+  provenance: *id001
+  rates:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - profile
+      - unit
+      - tax_status
+      - kind
+      - scope
+      - source_stack
+      - basis_ref
+      - stacks
+      - roles
+      - min
+      - max
+      - price_date
+      - source_ids
+      - purchase_mode
+      properties:
+        id: *id001
+        profile: *id001
+        unit:
+          const: EUR_par_JH
+        tax_status:
+          enum:
+          - non_retranscrit
+          - HT
+        kind:
+          enum:
+          - barometre
+          - annonce
+          - signal_contradictoire
+          - non_retranscrit
+          - offre_fournisseur
+        scope: *id001
+        source_stack: *id001
+        basis_ref: *id001
+        stacks:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            enum:
+            - java-spring
+            - dotnet
+            - rust
+            - microsoft
+            - sap
+        roles:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            enum:
+            - expert
+            - qa
+            - architecte
+            - support_utilisateur
+        min: &id002
+          type:
+          - number
+          - 'null'
+          minimum: 0
+        max: *id002
+        price_date:
+          type:
+          - string
+          - 'null'
+        source_ids:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items: *id001
+        purchase_mode:
+          enum:
+          - freelance_direct
+          - esn
+        source_locator:
+          type: string
+          minLength: 1
+  purchase_refs:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - title
+      - observation
+      properties:
+        id: *id001
+        title: *id001
+        observation: *id001
+  ai_refs:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - title
+      - published_on
+      - observed_result
+      - population
+      - limit
+      properties:
+        id: *id001
+        title: *id001
+        published_on:
+          type: string
+          minLength: 1
+        observed_result:
+          type: string
+          minLength: 1
+        population:
+          type: string
+          minLength: 1
+        limit:
+          type: string
+          minLength: 1
+  effort_groups:
+    type: object
+    additionalProperties: false
+    required:
+    - productivity
+    - programmes
+    properties:
+      productivity:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items: *id001
+      programmes:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items: *id001
+  programmes:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - title
+      - currency
+      - period
+      - status
+      - scope
+      - limit
+      - url
+      - basis_ref
+      - amount
+      properties:
+        id:
+          type: string
+          minLength: 1
+        title:
+          type: string
+          minLength: 1
+        currency:
+          enum:
+          - USD
+          - EUR
+        period:
+          type: string
+          minLength: 1
+        status:
+          type: string
+          minLength: 1
+        scope:
+          type: string
+          minLength: 1
+        limit:
+          type: string
+          minLength: 1
+        url:
+          type: string
+          minLength: 1
+        basis_ref:
+          type: string
+          minLength: 1
+        amount:
+          type: number
+          minimum: 0

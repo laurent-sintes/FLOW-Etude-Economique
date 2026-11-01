@@ -1,0 +1,92 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {economicDestination,economicHash,economicPeriod,phaseReadingHash,contextualEconomicLink} from '../src/economicNavigation.ts';
+import {preStudyDestination} from '../src/preStudyNavigation.ts';
+
+test('every old simulation entry opens the fixed reference and drops overrides',()=>{
+ for(const page of ['simuler','simulations','simulation-hypotheses','simulation-depenses','se-projeter']){
+  assert.deepEqual(economicDestination(page,new URLSearchParams('view=5&option=sap&budget=123&inflation_tjm=99')),{page:'comparer',option:'sap',view:'5'});
+ }
+});
+test('economic deep links retain the lot, selected option and reading horizon together',()=>{
+ const route=economicDestination('evaluation-core',new URLSearchParams('family=master-data-java-spring&option=java-spring&view=3'));
+ assert.equal(economicHash(route),'#evaluation-core?option=java-spring&view=3&family=master-data-java-spring');
+ assert.deepEqual(economicDestination('parametres',new URLSearchParams('detail=tarifs&option=microsoft&view=7')),{page:'parametres',option:'microsoft',view:'7',detail:'tarifs'});
+});
+test('old funding and project references stay economic while observations stay in pre-studies',()=>{
+ for(const focus of ['G01','G01-detail','CB-JAVA-SERVICES','budgets'])assert.equal(economicDestination('etude-marche',new URLSearchParams({focus})).focus,focus);
+ assert.equal(economicDestination('etude-marche',new URLSearchParams('view=references')).view,'transpositions');
+ assert.deepEqual(economicDestination('etude-marche',new URLSearchParams('view=construction')),{page:'acquisition',option:'java-spring'});
+ assert.equal(preStudyDestination('etude-marche',new URLSearchParams('view=offers')).page,'synvance');
+ assert.equal(preStudyDestination('etude-marche',new URLSearchParams('focus=ba-stock~sap')).page,'preetude-solutions');
+});
+test('retired personal choices never silently become a Java simulation',()=>{
+ for(const option of ['rust','dotnet'])assert.equal(preStudyDestination('simuler',new URLSearchParams({option})).page,'preetudes');
+ assert.equal(economicDestination('comparer',new URLSearchParams('option=invalid&view=999')).option,undefined);
+ assert.equal(economicDestination('comparer',new URLSearchParams('option=invalid&view=999')).view,undefined);
+ assert.equal(economicHash({page:'vision'}),null);
+});
+
+test('the economic evidence register shows current options and preserves the historical record',async()=>{
+ const {visibleBudgetReview}=await import('../src/applicationScope.ts');
+ const ui={essential:{active_options:['java-spring','microsoft','sap']}};
+ const stacks=['java-spring','dotnet','rust','microsoft','sap'];
+ const budget={option_labels:Object.fromEntries(stacks.map(s=>[s,s])),summary:{unpriced_reserves:5,net_extra_initial_eur_ht:null},additions:stacks.map(stack=>({id:stack,stack,net_extra_initial_eur_ht:null,net_extra_annual_eur_ht:null})),reviews:[{addition_refs:stacks,non_budget_treatments:stacks.map(stack=>({stack,reason:'retained'}))}]};
+ const before=structuredClone(budget),scoped=visibleBudgetReview(ui,budget);
+ assert.deepEqual(scoped.additions.map(row=>row.stack),ui.essential.active_options);
+ assert.deepEqual(scoped.reviews[0].addition_refs,ui.essential.active_options);
+ assert.deepEqual(scoped.reviews[0].non_budget_treatments.map(row=>row.stack),ui.essential.active_options);
+ assert.equal(scoped.summary.unpriced_reserves,3);
+ assert.equal(scoped.summary.net_extra_initial_eur_ht,null);
+ assert.deepEqual(budget,before);
+});
+
+test('expert details preserve an independent horizon and the original reading focus',()=>{
+ for(const horizon of ['3','5','7','10'])for(const view of ['financements','transpositions']){
+  const route=economicDestination('evaluation-core',new URLSearchParams({option:'microsoft',horizon,view,family:'master-data-java-spring',focus:'G01'}));
+  assert.equal(economicPeriod(route),Number(horizon));
+  const detailHash=economicHash(route);
+  const loaded=economicDestination('evaluation-core',new URLSearchParams(detailHash.split('?')[1]));
+  assert.deepEqual(loaded,route);
+  const back={...loaded,view:undefined};
+  assert.equal(economicPeriod(back),Number(horizon));
+  assert.equal(back.option,'microsoft');assert.equal(back.focus,'G01');
+  const assumptions=economicDestination('parametres',new URLSearchParams(economicHash({...back,page:'parametres'}).split('?')[1]));
+  assert.equal(assumptions.family,route.family);assert.equal(economicPeriod(assumptions),Number(horizon));
+ }
+ assert.equal(economicPeriod({view:'3'}),3);
+ assert.equal(economicPeriod({view:'financements'}),10);
+ assert.equal(economicPeriod({horizon:'7',view:'3'}),7);
+ assert.equal(economicPeriod({horizon:'bad'}),10);
+});
+
+
+test('phase shortcuts and phase changes preserve the chosen option and independent horizon',()=>{
+ for(const option of ['java-spring','microsoft','sap'])for(const horizon of ['3','5','7','10']){
+  for(const page of ['acquisition','integration','fonctionnement','scenarios','charges-acquisition','charges-integration','charges-fonctionnement']){
+   const route={page,option,horizon},before=structuredClone(route);
+   const hash=phaseReadingHash(route),params=new URLSearchParams(hash.split('?')[1]);
+   assert.equal(params.get('option'),option);assert.equal(params.get('horizon'),horizon);
+   assert.equal(hash.split('?')[0],'#'+page);assert.deepEqual(route,before);
+  }
+  for(const focus of ['method','summary']){
+   const params=new URLSearchParams(phaseReadingHash({page:'acquisition',option,horizon,focus}).split('?')[1]);
+   assert.equal(params.get('focus'),focus);assert.equal(params.get('option'),option);assert.equal(params.get('horizon'),horizon);
+  }
+ }
+ assert.equal(phaseReadingHash({page:'glossaire'}),null);
+ assert.equal(phaseReadingHash({page:'integration',option:'sap',horizon:'999'}),'#integration?option=sap');
+ assert.equal(phaseReadingHash({page:'charges-acquisition',option:'java-spring',horizon:'5',focus:'master-data-java-spring',returnTo:'evaluation-core',family:'master-data-java-spring'}),'#charges-acquisition?option=java-spring&focus=master-data-java-spring&horizon=5&returnTo=evaluation-core&family=master-data-java-spring');
+});
+
+test('an option-specific evidence link never falls back to Java costs',()=>{
+ for(const option of ['java-spring','microsoft','sap'])for(const horizon of ['3','5','7','10']){
+  for(const href of ['#evaluation-core','#parametres','#comparer','#se-projeter','#etude-marche?view=references']){
+   const hash=contextualEconomicLink(href,option,horizon),[page,query]=hash.slice(1).split('?');
+   const loaded=economicDestination(page,new URLSearchParams(query));
+   assert.equal(loaded.option,option);assert.equal(economicPeriod(loaded),Number(horizon));
+  }
+ }
+ assert.equal(contextualEconomicLink('#evaluation-core?view=financements&horizon=7&focus=G01','sap'),'#evaluation-core?option=sap&horizon=7&view=financements&focus=G01');
+ for(const href of ['#complexite','#synvance-microsoft','source/offres-synvance.md','https://example.org/proof'])assert.equal(contextualEconomicLink(href,'microsoft','3'),href);
+});

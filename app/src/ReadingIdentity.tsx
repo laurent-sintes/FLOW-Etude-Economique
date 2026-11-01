@@ -19,9 +19,9 @@ export function useReadingArrival<T extends HTMLElement=HTMLElement>(identity:st
 export function PageHeading({active,page,icon}:{active:Data;page:Data;icon:ReactNode}){
  const {data}=useStudy();const ui=data.ui;
  const group=ui.essential.nav_groups.find((g:Data)=>g.items.includes(active.id));
- const journey=ui.essential.framework_vision.journey,phaseIndex=journey.phases.findIndex((p:Data)=>p.id===active.id);
+ const journey=ui.essential.framework_vision.journey,phaseIndex=journey.phases.findIndex((p:Data)=>p.id===active.id.replace(/^charges-/, ''));
  const {ref,arrived}=useReadingArrival<HTMLDivElement>(active.id);
- return <header className="page-heading reading-hero" data-arrived={arrived}>
+ return <header className={'page-heading reading-hero'+(['comparer','evaluation-core','parametres'].includes(active.id)?' eco-heading':'')} data-arrived={arrived}>
   <div className="reading-hero-copy">
    <div className="reading-eyebrow"><span className="reading-page-symbol" aria-hidden="true">{icon}</span><span>{group?.label||active.label}</span>{phaseIndex>=0?<span className="reading-phase">{journey.labels.phase.replace('{index}',String(phaseIndex+1)).replace('{total}',String(journey.phases.length))}</span>:group&&group.sequential!==false&&<span className="reading-step" aria-hidden="true">{String(group.items.indexOf(active.id)+1).padStart(2,'0')+' / '+String(group.items.length).padStart(2,'0')}</span>}</div>
    <h1><GlossaryText>{page.title}</GlossaryText></h1>

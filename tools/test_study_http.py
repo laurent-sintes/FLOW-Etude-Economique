@@ -94,7 +94,10 @@ class ApiTests(unittest.TestCase):
         self.assertIn('model_scope',full['content']['synvance_reference']['costs']['rows'][0])
         self.assertEqual(set(small['content']['synvance_reference']['overview']),{'cards'})
         self.assertIn('title',full['content']['synvance_reference']['overview'])
-        self.assertLess(len(light),1_100_000)
+        # Includes the current pre-study editorial summaries. Documentary charge
+        # details remain lazy. Bound both the decoded payload and real transfer.
+        self.assertLess(len(light),1_120_000)
+        self.assertLess(len(packed),280_000)
         self.assertLess(len(light),len(get('/api/bootstrap')[0])/8)
         self.assertIn('business_map',full['content'])
 

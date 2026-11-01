@@ -34,6 +34,9 @@ class ExportBusinessModelTests(unittest.TestCase):
         self.assertNotIn('source/recalibration-metier.yaml', result['model'])
         self.assertNotIn('source/couts-15-ans.yaml', result['model'])
         self.assertNotIn('config/application.yaml', result['model'])
+        self.assertFalse(any('faq-sponsors' in key for key in result['sources']))
+        self.assertEqual(result['model_revision'], self.study.model_revision)
+        self.assertIn('source/version-modele.yaml',result['model'])
 
     def test_export_from_loaded_study_accepts_registered_markdown_documents(self):
         from export_business_model import export, public_metadata
@@ -46,6 +49,7 @@ class ExportBusinessModelTests(unittest.TestCase):
             self.assertEqual(metadata['bytes'],len(raw))
             value=yaml.load(raw,Loader=getattr(yaml,'CSafeLoader',yaml.SafeLoader))
             self.assertEqual(metadata['source_fingerprint'],value['source_fingerprint'])
+            self.assertEqual(metadata['model_revision'],self.study.model_revision)
             self.assertNotIn('source/glossaire.md',value['model'])
 
     def test_model_and_metamodel_changes_invalidate_content(self):

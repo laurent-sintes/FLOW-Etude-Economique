@@ -19,7 +19,7 @@ class DownloadCatalogTests(unittest.TestCase):
   for row in all_rows:
    self.assertNotIn(row['format'],['YAML','YML']);raw=(ROOT/row['path']).read_bytes();self.assertEqual(row['sha256'],hashlib.sha256(raw).hexdigest());self.assertEqual(row['bytes'],len(raw))
    if row['path'] in originals:self.assertEqual(row['date'],originals[row['path']]['date'])
-  self.assertEqual(c['personal_route'],'#simuler');self.assertNotIn('scenarios',c)
+  self.assertEqual(c['personal_route'],'#comparer');self.assertNotIn('scenarios',c)
  def test_unknown_yaml_and_duplicate_paths_are_rejected(self):
   for path in ['source/estimations-core-retenues.yaml','../secret.md','source/missing.md']:
    with self.subTest(path=path):

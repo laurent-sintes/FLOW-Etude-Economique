@@ -1,5 +1,6 @@
 """Reconcile every declared gap and keep unique, unpriced reserves outside adopted budgets."""
 from copy import deepcopy
+from content_model import resolve_text_tree
 from jsonschema import Draft202012Validator,FormatChecker
 from validate_stacks import ROOT,read
 from model_context import model_memo
@@ -107,7 +108,7 @@ def compile_budget_review(comparison,grid,mechanisms,*,spec=None):
             product_findings=[dict(id=p['id'],label=p['label'],action=r['product_actions'][p['id']],assessments=[dict(area=x['name'],status=c['reading_status'],summary=c['summary']) for x in comparison['rows'] if x['id'] in gaps[gid]['business_area_refs'] for c in x['cells'] if c['product_ref']==p['id']]) for p in products.values()],
             sources=[sources[k] for k in r['evidence_refs']])
         rendered.append(r)
-    return dict(id=spec['id'],date=spec['date'],reading=spec['reading'],reviews=rendered,additions=list(additions.values()),
+    return dict(id=spec['id'],date=spec['date'],reading=resolve_text_tree(spec['reading'],read(ROOT/'source/glossaire.yaml'),path=SOURCE),reviews=rendered,additions=list(additions.values()),
         option_labels={o:read(ROOT/('source/stacks/'+o+'.yaml'))['nom'] for o in sorted(options)},
         summary=dict(identified_gaps=len(gaps),reviewed_gaps=len(reviews),reviewed_gap_option_phases=len(reviews)*len(options)*len(phases),
             unique_reserves=len(additions),unpriced_reserves=len(additions),priced_reserves=0,

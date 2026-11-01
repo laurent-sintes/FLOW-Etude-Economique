@@ -24,6 +24,7 @@ from evaluation_status import status_notice, load_status
 from retained_core import coverage as retained_coverage
 from market_instruction import build_market_instruction
 from market_comparison import build_market_comparison
+from prestudy_costs import build_cost_evidence
 from core_method import hydrate_core_method, hydrate_market_method, hydrate_net_method, hydrate_run_method, hydrate_levers_method
 from architecture_model import load_architecture, hydrate_architecture, validate_economic_links, SOURCE as ARCHITECTURE_SOURCE
 from fundamentals_model import load_fundamentals, hydrate_fundamentals, SOURCE as FUNDAMENTALS_SOURCE
@@ -31,9 +32,11 @@ from framework_vision import hydrate_framework_vision
 from framework_parameters import hydrate_framework_parameters
 from application_framework import hydrate_application_framework
 from economic_reading import build_economic_evaluations
+from gross_evaluations import build_gross_evaluations, hydrate_gross_ui, dependencies as gross_dependencies
 from synvance_reference import build_synvance_reference
 from delivery_readiness import build_delivery_readiness
 from download_catalog import build_download_catalog
+from model_revision import load_revision
 from core_product_scope import build_core_product_scope, dependencies as core_product_dependencies
 
 
@@ -56,7 +59,7 @@ class Study:
         raw_ui=hydrate_fundamentals(hydrate_architecture(hydrate_market_method(hydrate_core_method(read(ROOT/'config/application.yaml'))), architecture), fundamentals)
         raw_ui=hydrate_levers_method(hydrate_run_method(hydrate_net_method(raw_ui)))
         raw_ui=hydrate_application_framework(raw_ui)
-        raw_ui=hydrate_framework_vision(raw_ui, self.glossary)
+        raw_ui=hydrate_gross_ui(hydrate_framework_vision(raw_ui, self.glossary))
         raw_ui['essential']['core_results']['status'] = status_notice(raw_ui['essential']['core_results'].pop('status_ref'))
         validate_glossary_literals(raw_ui,self.glossary,path='config/application.yaml')
         self.ui = resolve_text_tree(raw_ui, self.glossary, path='config/application.yaml')
@@ -70,6 +73,7 @@ class Study:
         assert self.horizons == sorted(set(self.horizons))
         assert all(isinstance(h, int) and 0 < h <= self.data['scenario']['horizon_ans'] for h in self.horizons)
         self.options = {o['stack']: o for o in self.data['options']}
+        self.model_revision = load_revision()
         self.parameters = self._defaults()
         self.files = self._files()
         # Model identity follows calculation inputs, not an unrelated Markdown edit.
@@ -90,6 +94,7 @@ class Study:
         self=cls.__new__(cls)
         for key in ('data','economic','ui','baseline','parameters','version','architecture','fundamentals'):
             setattr(self,key,deepcopy(payload[key]))
+        self.model_revision=deepcopy(payload.get('model_revision'))
         self.glossary=self.data['glossaire'];self.horizons=self.ui['horizons']
         self.options={o['stack']:o for o in self.data['options']}
         self.content=unpack_content(payload['content'])
@@ -117,7 +122,7 @@ class Study:
         assert manifest['version']==1
         paths=manifest['documents']
         assert all(isinstance(p,str) for p in paths) and len(paths)==len(set(paths))
-        files=set(paths)|set(self.data['empreintes'])|core_product_dependencies()
+        files=set(paths)|set(self.data['empreintes'])|core_product_dependencies()|gross_dependencies()
         for path in files:
             file=(ROOT/path).resolve()
             assert file.is_relative_to(ROOT.resolve()) and file.is_file(), ('Missing publication document',path)
@@ -231,17 +236,19 @@ class Study:
             stacks[slug] = dict(model=stack,features=rows,economic=economics[slug],pricing=costs['integration']['prix_rfi'],
                 architecture=self._architecture(stack,slug,reading['architecture']))
             stacks[slug]['economic_reading']=self._annual_reading(slug,economics[slug],reading['economique'])
+        market['cost_evidence'] = build_cost_evidence(stacks, market)
         content = dict(scope=resolve_text_tree(self.data['explications']['perimetre_compare'],self.glossary),
             stacks=stacks,reading=reading,calibration=read(ROOT/'source/calibration-couts.yaml'),
             market=market,
-            guide=self._synvance_guide(),complexity=complexity,sponsor=self._sponsor_summary(),business=self._business_summary(),integration_paths=self._integration_paths(),buy_review=self._buy_review(),faq=self._faq())
+            guide=self._synvance_guide(),complexity=complexity,sponsor=self._sponsor_summary(),business=self._business_summary(),integration_paths=self._integration_paths(),buy_review=self._buy_review())
         content['business_map'] = build_business_map(content['complexity'],content['business'],content['buy_review'],content['integration_paths'],content['scope'])
         content['journey'] = build_sponsor_reading(content,self.baseline,self.glossary,self.document_path)
         content['framework'] = self._framework_content(stacks,content['calibration'])
-        content['economic_evaluations'] = build_economic_evaluations(self.baseline, content, self.glossary, self.document_path)
+        content['economic_evaluations'] = build_economic_evaluations(self.baseline, content, self.glossary, self.document_path, self.data['options'][0]['composable']['inputs'])
         content['core_product_scope'] = build_core_product_scope(self.economic)
         content['synvance_reference'] = build_synvance_reference(
             content['guide'], self.glossary, self.document_path, self.baseline, self.architecture, content['economic_evaluations'])
+        content['gross_evaluations'] = build_gross_evaluations(self.economic, self.data, self.baseline, content, self.glossary, self.version)
         content['delivery_method'], content['delivery_readiness'] = build_delivery_readiness(
             content['complexity'], self.glossary, self.document_path)
         content['downloads'] = build_download_catalog(self.ui, content['synvance_reference']['documents'], self.files)
@@ -325,37 +332,6 @@ class Study:
                                           for slug in self.options}))
         return hydrate_framework_parameters(result, stacks, calibration, self.ui, self.files)
 
-    def _faq(self):
-        faq=resolve_text_tree(read(ROOT/'source/faq-sponsors.yaml'),self.glossary)
-        categories=[c['id'] for c in faq['categories']]
-        ids=[q['id'] for q in faq['questions']]
-        if len(set(categories))!=len(categories) or len(set(ids))!=len(ids):
-            raise ValueError('ERR_FAQ_ID')
-        pages=set(self.ui['pages'])
-        roots=dict(reference=self.baseline,exclusions=self.data['sensibilite_finance_sap'],
-                   options={o['stack']:o for o in self.baseline['options']})
-        for q in faq['questions']:
-            if (q['category'] not in categories or not isinstance(q['title'],str) or not isinstance(q['answer'],str)
-                    or not q['title'] or not q['answer'] or not q['sources']
-                    or not all(isinstance(p,str) for p in q['paragraphs'])):
-                raise ValueError('ERR_FAQ_CONTENT')
-            for link in q.get('links',[]):
-                if link['route'].split('?')[0] not in pages: raise ValueError('ERR_FAQ_ROUTE')
-            for source in q['sources']: self.document_path(source['path'])
-            for figure in q.get('figures',[]):
-                if figure['format'] not in ('money','annual_money','percent','months'):
-                    raise ValueError('ERR_FAQ_FORMAT')
-                try:
-                    value=roots
-                    for key in figure['binding'].split('.'):
-                        value=value[int(key)] if isinstance(value,list) else value[key]
-                except (KeyError,IndexError,ValueError,TypeError) as error:
-                    raise ValueError('ERR_FAQ_BINDING:'+figure['binding']) from error
-                if isinstance(value,bool) or not isinstance(value,(int,float)) or not math.isfinite(value):
-                    raise ValueError('ERR_FAQ_NUMBER')
-                figure['value']=value
-        return faq
-
     def _buy_review(self):
         model=validate_business_calibration();d=validate_buy(model)
         grid={b['id']:b for b in self._complexity_grid()['rows']}
@@ -378,7 +354,7 @@ class Study:
         return d
 
     def _synvance_guide(self):
-        guide=read(ROOT/'source/parcours-synvance.yaml')
+        guide=resolve_text_tree(read(ROOT/'source/parcours-synvance.yaml'),self.glossary,path='source/parcours-synvance.yaml')
         Draft202012Validator(read(ROOT/'source/schema-parcours-synvance.yaml')).validate(guide)
         pieces={p['id']:p for p in guide['pieces']}
         if len(pieces)!=len(guide['pieces']): raise ValueError('ERR_GUIDE_DUPLICATE_PIECE')
@@ -403,7 +379,7 @@ class Study:
         return dict(rows=rows,retained_units=units,method={'natures':[]},sources={})
 
     def _sponsor_summary(self):
-        content=read(ROOT/'source/synthese-sponsor.yaml')
+        content=resolve_text_tree(read(ROOT/'source/synthese-sponsor.yaml'),self.glossary,path='source/synthese-sponsor.yaml')
         decision=read(ROOT/'source/decision-make-buy.yaml')
         self.validate_decision(decision)
         for option in decision['options']:
@@ -560,7 +536,7 @@ class Study:
                 for key in ('model_scope','model_display','nature_refs'):
                     row.pop(key,None)
         return dict(ui=self.ui,glossary=self.glossary,baseline=self.baseline,content=content,
-                    edition=self.edition,
+                    edition=self.edition,model_revision=self.model_revision,
                     model_version=self.version,simulation_contract=self.simulation_contract(),date=self.data['scenario']['date'])
 
     def _essential_complexity(self):

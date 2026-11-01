@@ -1,14 +1,10 @@
 import {useStudy,type Data} from './context';
-import {MethodText,MethodReferenceCards} from './MethodDocument';
+import {MethodText} from './MethodDocument';
 export function FrameworkMakeAudit({plan}:{plan:Data}){
  const {data}=useStudy(),L=data.ui.essential.framework_vision.journey.labels,M=data.ui.essential.estimation_model;
  const method=data.ui.essential[plan.method];
- const referenceSection=method.sections.find((section:Data)=>section.id==='observer-fonctions');
- const references=(referenceSection?[referenceSection]:[]).flatMap((section:Data)=>section.blocks.filter((block:Data)=>block.kind==='reference_cards'));
  return <section className="make-audit" aria-labelledby="make-audit-heading"><h3 id="make-audit-heading">{plan.title}</h3><p><MethodText>{plan.intro}</MethodText></p>
   <ol className="make-audit-steps">{plan.steps.map((step:Data)=><li key={step.title}><h4>{step.title}</h4><p><MethodText>{step.text}</MethodText></p>
-   {step.rule_refs.includes('prepare_size')&&referenceSection&&<p><MethodText>{referenceSection.lead}</MethodText></p>}
-   {step.rule_refs.includes('prepare_size')&&references.map((block:Data,index:number)=><MethodReferenceCards key={index} cards={block.cards} headingLevel={5}/>)}
    {step.rule_refs.map((ref:string)=>{const rule=M.rules.find((r:Data)=>r.id===ref),implementations=M.implementations.filter((i:Data)=>i.rules.includes(ref));return <section className="make-rule" data-rule-ref={ref} key={ref}>
     <h5>{rule.title}<span className="make-rule-unit">{rule.unit}</span></h5>
     <pre className="make-formula"><code>{rule.expression}</code></pre>

@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from jsonschema import Draft202012Validator
 
+from project_investment import phase_expense, subscription_expense
 from content_model import resolve_text_tree, validate_glossary_literals
 from validate_stacks import ROOT, read
 
@@ -21,7 +22,17 @@ TEXT = dict(type='string', minLength=1, pattern=r'\S')
 LINK = _object(dict(path=TEXT, label=TEXT))
 LINKS = dict(type='array', minItems=1, items=LINK)
 SECTION = dict(title=TEXT, lead=TEXT, caption=TEXT, note=TEXT, sources=LINKS)
+SPONSOR = _object(dict(
+    **{key:TEXT for key in ('cumulative', 'comparison_note', 'completion', 'completion_note', 'completion_detail', 'initial_ledger', 'subscriptions', 'insight', 'insight_text', 'compare_parts', 'compare_parts_note', 'acquisition', 'difference', 'reference_option', 'funding_and_annual', 'annual_base', 'projected_year', 'annual_pair_note', 'budgets_detail', 'scope_title', 'scope_short', 'trajectory', 'trajectory_note', 'annual_parts', 'determinant_title', 'determinant_note', 'lots', 'users')},
+    difference_labels=_object({key:TEXT for key in ('higher','lower','equal')}),
+    stages=_object({key:TEXT for key in ('before_service','partial_service','full_service')}),
+    drivers=_object({key:TEXT for key in ('java-spring','microsoft','sap')}),
+    determinants=dict(type='array', minItems=4, maxItems=4, items=_object(dict(id=dict(enum=['calendar','core','offers','service']),title=TEXT,status=TEXT,text=TEXT))),
+    scope_rows=dict(type='array', minItems=3, maxItems=3, items=_object(dict(id=dict(enum=['priced','unpriced','sap']),title=TEXT,text=TEXT,action=TEXT))),
+    decision=_object(dict(title=TEXT,intro=TEXT,items=dict(type='array',minItems=3,items=TEXT),budget=TEXT,href=dict(const='#capacite-realisation?view=gates&focus=delivery-readiness-gate-dispositif'),link=TEXT)),
+))
 SCHEMA = _object(dict(
+    sponsor=SPONSOR,
     version=dict(const=1), id=dict(const='economic-evaluations'), navigation_label=TEXT,
     intro=_object(dict(title=TEXT, text=TEXT)),
     labels=_object({key:TEXT for key in ('option', 'budget', 'duration', 'months', 'source',
@@ -51,7 +62,7 @@ def _require(condition, reason):
         raise ValueError(f'{ERROR}:{reason}')
 
 
-def compile_economic_evaluations(baseline, content, editorial, glossary, document_path):
+def compile_economic_evaluations(baseline, content, editorial, glossary, document_path, inputs):
     """Project from one loaded reference, without reading sources or recalculating it."""
     errors = sorted(Draft202012Validator(SCHEMA).iter_errors(editorial), key=lambda error:str(error.path))
     if errors:
@@ -59,6 +70,8 @@ def compile_economic_evaluations(baseline, content, editorial, glossary, documen
         raise ValueError(f'{ERROR}:{list(error.path)}:{error.message}')
     _require([row['id'] for row in editorial['sections']['annual']['rows']] == list(ANNUAL_KEYS), 'annual row contract')
     _require(len({row['href'] for row in editorial['links']}) == len(editorial['links']), 'duplicate reading link')
+    _require([row['id'] for row in editorial['sponsor']['determinants']] == ['calendar','core','offers','service'], 'sponsor determinant contract')
+    _require([row['id'] for row in editorial['sponsor']['scope_rows']] == ['priced','unpriced','sap'], 'sponsor scope contract')
     validate_glossary_literals(editorial, glossary, path=SOURCE)
     text = resolve_text_tree(editorial, glossary, path=SOURCE)
     for section in text['sections'].values():
@@ -117,21 +130,58 @@ def compile_economic_evaluations(baseline, content, editorial, glossary, documen
             _require(line['id'] in text['sections']['integration']['ledger_labels'], f'integration label:{line["id"]}')
             detail.append(dict(id=line['id'], label=text['sections']['integration']['ledger_labels'][line['id']],
                                amount=line['amount'], start=line['start'], end=line['end']))
+        offer_bridge = deepcopy(content['stacks'][slug]['economic']['detail_integration']) if mode == 'Buy' else None
+        if offer_bridge is not None:
+            _require(abs(sum(Decimal(str(value)) for value in offer_bridge.values()) -
+                         Decimal(str(option['integration']))) < Decimal('0.005'), f'offer bridge ownership:{slug}')
+        spending_bridge = []
+        for horizon in option['horizons']:
+            # The existing journal and its cent-conserving spread remain the owners.
+            transition = sum((Decimal(str(phase_expense(line['amount'], line['start'],
+                line['end']-line['start'], 0, horizon['years']*12)))
+                for line in option['funding_ledger'] if line['phase'] == 'mco_run'), Decimal(0))
+            other = Decimal(str(horizon['totals']['mco_run']))
+            _require(Decimal(0) <= transition <= other, f'transition ownership:{slug}')
+            spending_bridge.append(dict(years=horizon['years'], transition_eur_ht=float(transition),
+                                        recurring_eur_ht=float(other-transition)))
+        end = option['service_start_month']
+        _require(all(line['end'] <= end for line in option['funding_ledger']), f'completion journal:{slug}')
+        initial = sum((Decimal(str(line['amount'])) for line in option['funding_ledger']), Decimal(0))
+        subscriptions = (subscription_expense(prices, baseline['parameters']['common']['inflation_licences'],
+                         option['selection_months'], 0, end) if prices else 0)
+        completion = dict(month=end, initial_eur_ht=float(initial), subscriptions_eur_ht=subscriptions,
+                          total_eur_ht=float(initial+Decimal(str(subscriptions))))
+        stages = [dict(year=row['annee'], stage='full_service' if (row['annee']-1)*12 >= end else
+                       'before_service' if row['annee']*12 <= end else 'partial_service') for row in option['annual']]
         breakdown = deepcopy(list(content['stacks'][slug]['economic_reading']['buckets'].values()))
         _require(abs(sum(Decimal(str(group['total'])) for group in breakdown)-Decimal(str(total))) < Decimal('0.005'),
                  f'annual detail ownership:{slug}')
         options.append(dict(stack=slug, name=option['name'], mode=mode, selection=selection, core=core,
-            integration=dict(budget_eur_ht=option['integration'], months=duration, source=integration_source, detail=detail),
-            annual=dict(items=annual_items, total_eur_ht=total, source=annual_source, breakdown=breakdown,
+            integration=dict(budget_eur_ht=option['integration'], months=duration, source=integration_source, detail=detail, offer_bridge=offer_bridge),
+            spending_bridge=spending_bridge, service_completion=completion,
+            annual=dict(projected_stages=stages, items=annual_items, total_eur_ht=total, source=annual_source, breakdown=breakdown,
                         service_allocation=deepcopy(option['services']))))
+
+    reference = next(option for option in baseline['options'] if option['stack']=='java-spring')
+    for option in options:
+        original = next(row for row in baseline['options'] if row['stack']==option['stack'])
+        differences = []
+        for horizon in original['horizons']:
+            reference_total = next(h['totals']['total'] for h in reference['horizons'] if h['years']==horizon['years'])
+            difference = Decimal(str(horizon['totals']['total']))-Decimal(str(reference_total))
+            differences.append(dict(years=horizon['years'], difference_eur_ht=float(difference),
+                amount_eur_ht=float(abs(difference)), direction='higher' if difference>0 else 'lower' if difference<0 else 'equal'))
+        option['comparison'] = dict(reference='java-spring', horizons=differences)
 
     price_source = 'source/calibration-couts.yaml#convention/prix'
     document_path(price_source)
     return dict(model_version=baseline['model_version'], editorial=text, options=options,
+                drivers=dict(perimeter=deepcopy(inputs['volumes']['perimetre']),
+                             annual_volumes=deepcopy(inputs['volumes']['volumes'])),
                 price_convention=dict(text=content['calibration']['convention']['prix'], source=price_source))
 
 
-def build_economic_evaluations(baseline, content, glossary, document_path):
+def build_economic_evaluations(baseline, content, glossary, document_path, inputs):
     """Compile once during Study loading; endpoints serve the frozen result only."""
     document_path(SOURCE)
-    return compile_economic_evaluations(baseline, content, read(ROOT / SOURCE), glossary, document_path)
+    return compile_economic_evaluations(baseline, content, read(ROOT / SOURCE), glossary, document_path, inputs)

@@ -82,3 +82,20 @@ test('manifest data cannot address another origin or escape the project prefix',
  const base='https://example.github.io/FLOW-Etude-Economique/site-manifest.json';
  for(const path of ['../secret.json','/other/data.json','https://unrelated.example/model.json'])assert.throws(()=>siteAssetUrl(path,base),{code:'missing_document'});
 });
+
+
+test('gross phase results load lazily under the Pages subpath and require the loaded version',async()=>{
+ const f=fixture();
+ f.manifest.routes['/api/gross-evaluations']='data/delivery-1/gross-evaluations.json';
+ f.files.set(f.root+f.manifest.routes['/api/gross-evaluations'],{model_version:'model-1',adopted:6660,proposed:5950});
+ await f.client.request('/api/bootstrap?view=essential');
+ assert.equal(f.fetched.length,2);
+ await assert.rejects(f.client.request('/api/gross-evaluations?model_version=old'),{code:'version'});
+ const reading=await f.client.request('/api/gross-evaluations?model_version=model-1');
+ assert.deepEqual(reading,{model_version:'model-1',adopted:6660,proposed:5950});
+ reading.adopted=0;
+ assert.equal((await f.client.request('/api/gross-evaluations?model_version=model-1')).adopted,6660);
+ assert.equal(f.fetched.length,3);
+ assert.equal(f.workers.length,0);
+ assert.ok(f.fetched.every(({url})=>url.startsWith(f.root)&&!url.includes('/api/')));
+});

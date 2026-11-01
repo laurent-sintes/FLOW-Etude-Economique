@@ -24,9 +24,41 @@ class MarketReadingTests(unittest.TestCase):
                 self.assertEqual(shown['normalized'], source['normalisation_2026'])
                 self.assertEqual(shown['transposed'], source['transposition_au_perimetre_flow_beaumanoir'])
                 self.assertEqual(shown['proofs'], source['lecture_flow']['preuves'])
+                self.assertEqual(shown['similarities'], source['lecture_flow']['similitudes'])
+                self.assertEqual(shown['differences'], source['lecture_flow']['differences'])
+                self.assertEqual(shown['lesson'], source['lecture_flow']['enseignement'])
                 self.assertEqual(shown['sources'], source['sources'])
                 self.assertEqual(shown['source_ref'],
                                  'source/references-couts-integration.yaml#references/' + source['id'])
+
+    def test_phase_guardrails_keep_unknown_flow_ranges_and_canonical_published_bounds(self):
+        original = deepcopy(self.market)
+        frozen = json.loads(json.dumps(self.market))
+        before = deepcopy(frozen)
+        with patch.object(Path, 'read_bytes', side_effect=AssertionError('no source reread')):
+            phases = build_market_reading(frozen)['phase_summary']['phases']
+        self.assertEqual([row['id'] for row in phases], ['acquisition', 'integration', 'fonctionnement'])
+        self.assertTrue(all(row['flow_range'] is None for row in phases))
+        self.assertEqual([(g['min_eur'], g['max_eur']) for g in phases[1]['groups']],
+                         [(7_000_000, 20_000_000), (1_517_180, 14_294_386)])
+        self.assertEqual(len(phases[1]['groups'][0]['references']), 4)
+        self.assertTrue(all('?view=services&focus=' in ref['href'] for ref in phases[2]['references']))
+        self.assertEqual(frozen, before)
+        frozen['reperes_exploratoires_marche']['contrepoints_dynamics']['minimum_eur_2026'] = 2_000_000
+        self.assertEqual(build_market_reading(frozen)['phase_summary']['phases'][1]['groups'][1]['min_eur'],
+                         2_000_000)
+        phases[1]['groups'][0]['references'].clear()
+        self.assertEqual(self.market, original)
+
+    def test_phase_guardrails_reject_unbound_references_and_missing_phases(self):
+        broken = deepcopy(self.market)
+        broken['synthese_phases']['phases'][2]['references'].append('unbound-project')
+        with self.assertRaises(KeyError):
+            build_market_reading(broken)
+        broken = deepcopy(self.market)
+        broken['synthese_phases']['phases'].pop()
+        with self.assertRaisesRegex(ValueError, 'three FLOW phases'):
+            build_market_reading(broken)
 
     def test_services_keep_each_observation_once_with_its_original_period_and_scope(self):
         services = build_market_reading(self.market)['services']
@@ -68,6 +100,22 @@ class MarketReadingTests(unittest.TestCase):
         presentation['projects'][0]['proofs'].clear()
         presentation['services'][0]['observations'].clear()
         self.assertEqual(source, self.market)
+
+    def test_documentary_fiches_never_expose_computed_effort_or_transposed_prices(self):
+        source = deepcopy(self.market)
+        for fiche in source['reperes_build_core']['fiches_produit'].values():
+            fiche['code']['effort_jh'] = 987654321
+            fiche['prix_retraite_flow_eur_2026'] = 123456789
+        shown = build_market_reading(source)['documentary_products']
+        raw = json.dumps(shown)
+        for forbidden in ('effort_jh', 'calcul_cocomo', 'prix_retraite_flow_eur_2026', '987654321', '123456789'):
+            self.assertNotIn(forbidden, raw)
+        self.assertEqual(set(shown['fiches_produit']), set(source['reperes_build_core']['fiches_produit']))
+        for key, row in shown['fiches_produit'].items():
+            self.assertEqual(row['code']['pncloc'], source['reperes_build_core']['fiches_produit'][key]['code']['pncloc'])
+            self.assertEqual(row['evaluations'], source['reperes_build_core']['fiches_produit'][key]['evaluations'])
+        shown['fiches_produit'].clear()
+        self.assertEqual(len(source['reperes_build_core']['fiches_produit']), 6)
 
 
 if __name__ == '__main__':

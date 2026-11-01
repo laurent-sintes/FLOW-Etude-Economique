@@ -141,17 +141,24 @@ function MarketOssCodeDetails({study,labels}:{study:Data;labels:Data}){
  </div>;
 }
 
-export function MarketProductDrawer({onClose}:{onClose:()=>void}){
+function DocumentaryDetail({active,label,children}:{active:boolean;label:string;children:ReactNode}){
+ return active?<details className="prestudy-proof market-product-proof"><summary>{label}</summary>{children}</details>:<>{children}</>;
+}
+
+export function MarketProducts({documentaryStudy,focus}:{documentaryStudy?:Data;focus?:string}={}){
  const {data}=useStudy(),{n,amount}=useFormat(),M=data.ui.essential.market_oss;
- const [study,setStudy]=useState<Data|null>(null),[error,setError]=useState(false),[reload,setReload]=useState(0),[selected,setSelected]=useState('erpnext');
- useEffect(()=>{let current=true;setStudy(null);setError(false);
+ const documentary=Boolean(documentaryStudy);
+ const [loadedStudy,setStudy]=useState<Data|null>(null),[error,setError]=useState(false),[reload,setReload]=useState(0),[selected,setSelected]=useState('erpnext');
+ const study=documentaryStudy||loadedStudy;
+ const chooseProduct=(id:string)=>{if(documentary)location.hash='#preetude-solutions?view=products&focus=product~'+encodeURIComponent(id);else setSelected(id);};
+ useEffect(()=>{if(documentary)return;let current=true;setStudy(null);setError(false);
   request<Data>('/api/market-build?model_version='+encodeURIComponent(data.model_version))
    .then(response=>{if(current){if(response.etude_oss&&response.cadre_comparaison&&response.fiches_produit)setStudy(response);else setError(true);}})
    .catch(()=>{if(current)setError(true);});
   return()=>{current=false;};
- },[data.model_version,reload]);
+ },[data.model_version,reload,documentary]);
  const order=['erpnext','odoo-community','tryton','axelor-open-suite','microsoft','sap'],products=study?order.map(id=>study.fiches_produit[id]).filter(Boolean):[];
- const product=products.find(item=>item.id===selected)??products[0];
+ const product=products.find(item=>item.id===(documentary?focus?.split('~')[1]:selected))??products[0];
  const tabKey=(event:React.KeyboardEvent<HTMLButtonElement>,index:number)=>{
   const count=products.length;let next=index;
   if(event.key==='ArrowRight')next=(index+1)%count;
@@ -159,28 +166,36 @@ export function MarketProductDrawer({onClose}:{onClose:()=>void}){
   else if(event.key==='Home')next=0;
   else if(event.key==='End')next=count-1;
   else return;
-  event.preventDefault();setSelected(products[next].id);
+  event.preventDefault();chooseProduct(products[next].id);
   const tabs=event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="tab"]');tabs?.[next]?.focus();
  };
- return <Drawer title={M.title} onClose={onClose} wide><div className="essential-market">
+ return <div className="essential-market">
   {!study&&(error?<div role="alert" className="essential-market-state"><p>{M.error}</p><button type="button" className="secondary" onClick={()=>setReload(value=>value+1)}>{M.retry}</button></div>:<p role="status" className="essential-market-state">{M.loading}</p>)}
   {study&&product&&<>
-   <p className="essential-market-introduction">{study.cadre_comparaison.introduction}</p>
-   <div className="dossier-navigation dossier-navigation-compact" role="tablist" aria-label={M.product_tabs}>{products.map((item,index)=><button key={item.id} id={'market-tab-'+item.id} type="button" role="tab" data-open={product.id===item.id} aria-label={item.nom} aria-selected={product.id===item.id} aria-controls={'market-panel-'+item.id} tabIndex={product.id===item.id?0:-1} onClick={()=>setSelected(item.id)} onKeyDown={event=>tabKey(event,index)}><DossierLabel label={data.ui.essential.dossiers.product_labels[item.id]||item.nom}/></button>)}</div>
+   {!documentary&&<p className="essential-market-introduction">{study.cadre_comparaison.introduction}</p>}
+   <div className="dossier-navigation dossier-navigation-compact" role="tablist" aria-label={M.product_tabs}>{products.map((item,index)=><button key={item.id} id={'market-tab-'+item.id} type="button" role="tab" data-open={product.id===item.id} aria-label={item.nom} aria-selected={product.id===item.id} aria-controls={'market-panel-'+item.id} tabIndex={product.id===item.id?0:-1} onClick={()=>chooseProduct(item.id)} onKeyDown={event=>tabKey(event,index)}><DossierLabel label={data.ui.essential.dossiers.product_labels[item.id]||item.nom}/></button>)}</div>
    <div id={'market-panel-'+product.id} role="tabpanel" aria-labelledby={'market-tab-'+product.id} tabIndex={0} key={product.id} className="essential-market-panel dossier-sheet dossier-panel-enter">
     <header className="essential-market-header"><div><p className="essential-market-eyebrow">{M.product_fiche}</p><h3>{product.nom}</h3></div><dl><div><dt>{M.family}</dt><dd>{M.family_labels[product.famille]??product.famille}</dd></div><div><dt>{M.status}</dt><dd>{M.product_status_labels[product.statut]??product.statut}</dd></div><div><dt>{M.version_edition}</dt><dd>{product.version_edition}</dd></div><div><dt>{M.observation}</dt><dd><time dateTime={product.date_observation}>{product.date_observation}</time></dd></div></dl></header>
     {product.preuve_ref&&<SourceLink path={product.preuve_ref}>{M.product_source}</SourceLink>}
+    {documentary&&M.documentary_summaries[product.id]&&<section className="prestudy-product-findings"><h3>{M.documentary_findings}</h3><h4>{M.documentary_summaries[product.id].title}</h4><p>{M.documentary_summaries[product.id].finding}</p><p>{M.documentary_summaries[product.id].limit}</p><MarketProofList paths={study.cadre_comparaison.singularites.produits[product.id].atout.preuves} label={M.source}/></section>}
+    <DocumentaryDetail active={documentary} label={M.documentary_details}>
     <section><h3>{M.composition}</h3><div className="essential-market-composition"><div><h4>{M.products_included}</h4><ul>{marketItems(product.composition.produits).map((item,index)=><li key={index}>{item}</li>)}</ul></div><div><h4>{M.technologies}</h4><p>{product.composition.technologies}</p></div></div>{product.composition.preuve_ref&&<MarketSourceLink path={product.composition.preuve_ref} label={M.source}/>}</section>
     {study.cadre_comparaison.singularites?.produits?.[product.id]&&<MarketSingularitySection frame={study.cadre_comparaison.singularites} profile={study.cadre_comparaison.singularites.produits[product.id]} labels={M}/>}
     <section><h3>{M.deployment_references}</h3><p className="essential-market-note">{M.deployment_note}</p>{Array.isArray(product.references_deploiement)?<div className="essential-market-deployments">{product.references_deploiement.map((reference:Data)=><article key={reference.id}><h4>{reference.organisation}</h4><dl><div><dt>{M.deployment_size}</dt><dd>{reference.taille_organisation}</dd></div><div><dt>{M.deployment_entity}</dt><dd>{reference.entite_equipee}</dd></div><div><dt>{M.deployment_use}</dt><dd>{reference.usage_atteste}</dd></div><div><dt>{M.deployment_edition}</dt><dd>{reference.edition_deploiement??M.deployment_unknown}</dd></div><div><dt>{M.deployment_year}</dt><dd>{reference.annee_preuve??M.deployment_undated}</dd></div><div><dt>{M.deployment_recency}</dt><dd>{M.deployment_recency_labels[reference.actualite]??reference.actualite}</dd></div><div><dt>{M.deployment_limit}</dt><dd>{reference.limite_flow}</dd></div></dl><MarketSourceList paths={reference.preuves} label={M.source}/></article>)}</div>:<p className="essential-market-note">{M.deployment_unstudied}</p>}</section>
-    <section><h3>{M.code}</h3><p>{M.code_visibility_labels[product.code.observabilite]??product.code.observabilite}</p><div className="essential-market-code-summary">{typeof product.code.pncloc==='number'&&<div><span>{M.pncloc_unit}</span><strong>{n(product.code.pncloc,0)}</strong></div>}{typeof product.code.effort_jh==='number'&&<div><span>{M.diagnostic}</span><strong>{n(product.code.effort_jh,0)} {M.jh_unit}</strong></div>}{product.code.pncloc==null&&product.code.effort_jh==null&&<p>{M.code_unmeasured}</p>}</div><p className="essential-market-note">{product.code.limite}</p>{product.id==='erpnext'&&<MarketOssCodeDetails study={study.etude_oss} labels={M}/>}</section>
-    <section><h3>{M.price}</h3><p className="essential-market-note"><MethodText>{product.famille==='proprietaire'?M.buy_price_scope:M.price_scope}</MethodText></p><dl className="essential-market-prices"><div><dt>{M.observed_price}</dt><dd>{typeof product.prix_observe_eur_ht==='number'?amount(product.prix_observe_eur_ht):M.price_unreported}</dd></div><div><dt>{M.flow_price}</dt><dd>{typeof product.prix_retraite_flow_eur_2026==='number'?amount(product.prix_retraite_flow_eur_2026,data.ui.labels.normalized_money_unit):M.price_unreported}</dd></div></dl>{product.famille==='proprietaire'&&<SourceLink path={M.buy_price_source_ref}>{M.buy_price_source}</SourceLink>}</section>
-    <section><h3>{M.comparison}</h3><div className="essential-market-axes">{study.cadre_comparaison.axes.map((axis:Data)=>{const item=product.evaluations[axis.id];return <article key={axis.id} aria-labelledby={'market-product-axis-'+axis.id}><header><h4 id={'market-product-axis-'+axis.id}>{axis.titre}</h4><small>{axis.bc_refs?.join(' · ')}</small></header><div className="essential-market-axis"><p><strong>{M.flow_target} :</strong> <MethodText>{axis.cible_flow}</MethodText></p>{item?<><p><strong>{M.product_function} :</strong> <MethodText>{item.fonctionnalite}</MethodText></p><p><strong>{M.offer_status} :</strong> {M.offer_status_labels[item.statut_offre]??item.statut_offre}</p><p><strong>{M.offer} :</strong> <MethodText>{item.offre}</MethodText></p><p><strong>{M.product_limit} :</strong> <MethodText>{item.limite}</MethodText></p><p><strong>{M.flow_parity} :</strong> {M.parity_labels[item.parite_flow]??item.parite_flow}</p>{item.preuves?.length>0&&<MarketSourceList paths={item.preuves} label={M.source}/>}</>:<p>{M.undocumented}</p>}{axis.essai&&<p className="essential-market-test"><strong>{M.test} :</strong> <MethodText>{axis.essai}</MethodText></p>}</div></article>;})}</div></section>
+    <section><h3>{M.code}</h3><p>{M.code_visibility_labels[product.code.observabilite]??product.code.observabilite}</p><div className="essential-market-code-summary">{typeof product.code.pncloc==='number'&&<div><span>{M.pncloc_unit}</span><strong>{n(product.code.pncloc,0)}</strong></div>}{!documentary&&typeof product.code.effort_jh==='number'&&<div><span>{M.diagnostic}</span><strong>{n(product.code.effort_jh,0)} {M.jh_unit}</strong></div>}{product.code.pncloc==null&&product.code.effort_jh==null&&<p>{M.code_unmeasured}</p>}</div><p className="essential-market-note">{documentary?M.code_measure_note:product.code.limite}</p>{!documentary&&product.id==='erpnext'&&<MarketOssCodeDetails study={study.etude_oss} labels={M}/>}</section>
+    {!documentary&&<section><h3>{M.price}</h3><p className="essential-market-note"><MethodText>{product.famille==='proprietaire'?M.buy_price_scope:M.price_scope}</MethodText></p><dl className="essential-market-prices"><div><dt>{M.observed_price}</dt><dd>{typeof product.prix_observe_eur_ht==='number'?amount(product.prix_observe_eur_ht):M.price_unreported}</dd></div><div><dt>{M.flow_price}</dt><dd>{typeof product.prix_retraite_flow_eur_2026==='number'?amount(product.prix_retraite_flow_eur_2026,data.ui.labels.normalized_money_unit):M.price_unreported}</dd></div></dl>{product.famille==='proprietaire'&&<SourceLink path={M.buy_price_source_ref}>{M.buy_price_source}</SourceLink>}</section>}
+    <section><h3>{M.comparison}</h3><div className="essential-market-axes">{study.cadre_comparaison.axes.map((axis:Data)=>{const item=product.evaluations[axis.id];return <article key={axis.id} aria-labelledby={'market-product-axis-'+axis.id}><header><h4 id={'market-product-axis-'+axis.id}>{axis.titre}</h4><small>{axis.bc_refs?.join(' · ')}</small></header><div className="essential-market-axis"><p><strong>{M.flow_target} :</strong> <MethodText>{axis.cible_flow}</MethodText></p>{item?<><p><strong>{M.product_function} :</strong> <MethodText>{item.fonctionnalite}</MethodText></p>{(!documentary||product.famille==='proprietaire')&&<><p><strong>{M.offer_status} :</strong> {M.offer_status_labels[item.statut_offre]??item.statut_offre}</p><p><strong>{M.offer} :</strong> <MethodText>{item.offre}</MethodText></p></>}<p><strong>{M.product_limit} :</strong> <MethodText>{item.limite}</MethodText></p>{!documentary&&<p><strong>{M.flow_parity} :</strong> {M.parity_labels[item.parite_flow]??item.parite_flow}</p>}{item.preuves?.length>0&&<MarketSourceList paths={item.preuves} label={M.source}/>}</>:<p>{M.undocumented}</p>}{axis.essai&&<p className="essential-market-test"><strong>{M.test} :</strong> <MethodText>{axis.essai}</MethodText></p>}</div></article>;})}</div></section>
+    </DocumentaryDetail>
    </div>
-   <section className="essential-market-candidates"><h3>{M.candidates}</h3><p>{M.candidates_note}</p><div className="essential-market-candidate-list">{study.candidats_a_etudier.map((candidate:Data)=><article key={candidate.id}><div><h4>{candidate.nom}</h4><span>{M.candidate_priority_labels[candidate.priorite]??candidate.priorite}</span></div><small>{M.candidate_category_labels[candidate.categorie]??candidate.categorie}</small><p>{candidate.motif}</p>{candidate.preuve_ref&&<MarketSourceLink path={candidate.preuve_ref} label={M.source}/>}</article>)}</div></section>
-   {product.id==='erpnext'&&<section><h3>{M.conclusion}</h3><p>{study.etude_oss.lecture.conclusion}</p><h4>{M.limits}</h4><p>{study.etude_oss.lecture.limites}</p></section>}
+   {!documentary&&<section className="essential-market-candidates"><h3>{M.candidates}</h3><p>{M.candidates_note}</p><div className="essential-market-candidate-list">{study.candidats_a_etudier.map((candidate:Data)=><article key={candidate.id}><div><h4>{candidate.nom}</h4><span>{M.candidate_priority_labels[candidate.priorite]??candidate.priorite}</span></div><small>{M.candidate_category_labels[candidate.categorie]??candidate.categorie}</small><p>{candidate.motif}</p>{candidate.preuve_ref&&<MarketSourceLink path={candidate.preuve_ref} label={M.source}/>}</article>)}</div></section>}
+   {!documentary&&product.id==='erpnext'&&<section><h3>{M.conclusion}</h3><p>{study.etude_oss.lecture.conclusion}</p><h4>{M.limits}</h4><p>{study.etude_oss.lecture.limites}</p></section>}
   </>}
- </div></Drawer>;
+ </div>;
+}
+
+export function MarketProductDrawer({onClose}:{onClose:()=>void}){
+ const {data}=useStudy();
+ return <Drawer title={data.ui.essential.market_oss.title} onClose={onClose} wide><MarketProducts/></Drawer>;
 }
 
 export {ModelPage} from './ModelPage';

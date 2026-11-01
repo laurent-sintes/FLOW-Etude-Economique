@@ -8,6 +8,7 @@ import {createSavedScenario,readScenarioCollection,restoreSavedScenario,scenario
 import {AnnualProjection,Comparison,EvidenceButton,HorizonPicker} from './EssentialViews';
 import {EconomicContext,EconomicNext} from './EconomicJourney';
 import {MethodText} from './MethodDocument';
+import {visibleProjection} from './applicationScope';
 
 export function Simulations({view}:{view:string}){
  const {data,session,setSession}=useStudy();const {ui,baseline}=data;const L=ui.labels;const W=ui.simulation_workspace;const {money,amount,n,pct}=useFormat();
@@ -41,14 +42,14 @@ export function Simulations({view}:{view:string}){
  useEffect(()=>{
   if(!pending||invalidField){setBusy(false);setError(null);return;}
   let live=true;setError(null);setBusy(true);
-  const timer=setTimeout(()=>{request<Projection>('/api/simulate',{parameters:draft,model_version:data.model_version}).then(r=>{if(live){setResult(r);setBusy(false);}}).catch(e=>{if(live){setError({code:e.code||'network',field:e.field});setBusy(false);}});},350);
+  const timer=setTimeout(()=>{request<Projection>('/api/simulate',{parameters:draft,model_version:data.model_version}).then(r=>{if(live){setResult(visibleProjection(ui,r));setBusy(false);}}).catch(e=>{if(live){setError({code:e.code||'network',field:e.field});setBusy(false);}});},350);
   return()=>{live=false;clearTimeout(timer);};
  },[draft,data.model_version,retry,pending,invalidField?.path]);
  const reset=()=>{setResetBackup(structuredClone(draft));setDraft(structuredClone(baseline.parameters));setResult(baseline);setError(null);setBusy(false);};
  const field=(key:string,value:number,slug?:string)=>{setResetBackup(null);setDraft(p=>slug?{...p,options:{...p.options,[slug]:{...p.options[slug],[key]:value}}}:{...p,common:{...p.common,[key]:value}});};
  const persist=(items:SavedScenario[])=>{try{localStorage.setItem(ui.storage_key,serializeScenarioCollection(savedCollection,items));setSavedCollection(c=>({...c,items}));return true;}catch{setNotice(savedCollection.recovery!==null?ui.saved_scenarios.recovery_note:ui.errors.storage);return false;}};
  const save=()=>{if(!name.trim()){setNotice(ui.errors.empty_name);return;}const item=createSavedScenario(data,name,result.parameters);if(persist([...saved.filter(s=>s.name!==item.name),item])){setName(item.name);setNotice(L.saved);}};
- const load=async(value:unknown)=>{setBusy(true);try{const {item,projection:r}=await restoreSavedScenario(data,value,(parameters,model_version)=>request<Projection>('/api/simulate',{parameters,model_version}));setResult(r);setDraft(structuredClone(r.parameters));setError(null);setName(item.name.slice(0,120));setResetBackup(null);setSaving(false);setNotice('');}catch(e:any){setNotice(ui.errors[e.code]||ui.errors.import);}finally{setBusy(false);}};
+ const load=async(value:unknown)=>{setBusy(true);try{const {item,projection:r}=await restoreSavedScenario(data,value,(parameters,model_version)=>request<Projection>('/api/simulate',{parameters,model_version}));setResult(visibleProjection(ui,r));setDraft(structuredClone(r.parameters));setError(null);setName(item.name.slice(0,120));setResetBackup(null);setSaving(false);setNotice('');}catch(e:any){setNotice(ui.errors[e.code]||ui.errors.import);}finally{setBusy(false);}};
  const download=(text:string,filename:string)=>{const blob=new Blob([text],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
  const exportScenario=()=>download(JSON.stringify(createSavedScenario(data,name,result.parameters),null,2),ui.id+'-'+data.model_version.slice(0,8)+'.json');
  const importScenario=async(file?:File)=>{if(!file)return;try{await load(JSON.parse(await file.text()));}catch{setNotice(ui.errors.import);}finally{if(inputRef.current)inputRef.current.value='';}};

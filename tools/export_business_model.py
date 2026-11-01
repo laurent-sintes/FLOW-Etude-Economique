@@ -11,6 +11,7 @@ import tempfile
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import yaml
 from model_context import model_session
+from model_revision import SOURCE as REVISION_SOURCE, validate_revision
 from study_app import Study
 from validate_stacks import ROOT, read
 
@@ -41,7 +42,9 @@ def compose(documents, digests, root=ROOT):
     if metamodel is None or not model:
         raise ValueError('Missing business model or metamodel')
     fingerprint = hashlib.sha256(json.dumps(provenance, sort_keys=True).encode()).hexdigest()
-    return dict(format='flow-business-model', format_version=2,
+    revision = documents.get(root / REVISION_SOURCE)
+    revision = validate_revision(revision) if revision is not None else None
+    return dict(format='flow-business-model', format_version=2,model_revision=revision,
         description='Modèle métier courant et métamodèle. Export généré, non éditable. Les chemins sont ceux des sources d’origine.',
         scope='Instances actives dans model ; pièces historiques utilisées par les calculs dans evidence, distinctes des décisions adoptées. La chaîne des mesures, paramètres, dépendances et empreintes est incluse. Les dépôts OSS complets et PDF externes restent référencés ; les scénarios personnels ne sont pas inclus.',
         source_fingerprint=fingerprint, sources=provenance,
@@ -112,7 +115,7 @@ def cached_export(output, signature, study=None):
         if hashes(dependencies) != dependencies:
             return None
         return dict(path=str(output), changed=False, cache_hit=True,
-                    sha256=record['sha256'], bytes=len(raw), sources=record['sources'], source_fingerprint=record['source_fingerprint'])
+                    sha256=record['sha256'], bytes=len(raw), sources=record['sources'], source_fingerprint=record['source_fingerprint'],model_revision=deepcopy(record['model_revision']))
     except (OSError, KeyError, TypeError, json.JSONDecodeError):
         return None
 
@@ -147,17 +150,17 @@ def export(output=DEFAULT_OUTPUT, study=None):
                 raise ValueError('Source changed during export: ' + str(path))
     changed = write_if_changed(output, raw)
     result = dict(path=str(output), changed=changed, cache_hit=False,
-                  sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw), sources=len(document['sources']), source_fingerprint=document['source_fingerprint'])
+                  sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw), sources=len(document['sources']), source_fingerprint=document['source_fingerprint'],model_revision=document['model_revision'])
     if hashes(dependencies) != dependencies or generator_signature() != signature:
         raise ValueError('Dependencies changed during export')
     record = dict(version=1, generator=signature, dependencies=dependencies,
-                  **{key: result[key] for key in ('sha256','bytes','sources','source_fingerprint')})
+                  **{key: result[key] for key in ('sha256','bytes','sources','source_fingerprint','model_revision')})
     write_if_changed(Path(str(output)+'.cache.json'), json.dumps(record,sort_keys=True).encode())
     return result
 
 
 def public_metadata(result):
-    return {key: result[key] for key in ('sha256', 'bytes', 'sources', 'source_fingerprint')} | dict(format_version=2, asset=ASSET)
+    return {key: result[key] for key in ('sha256', 'bytes', 'sources', 'source_fingerprint', 'model_revision')} | dict(format_version=2, asset=ASSET)
 
 
 def main():

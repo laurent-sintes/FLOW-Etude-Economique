@@ -256,7 +256,7 @@ node app/scripts/verify-pages.mjs --url http://127.0.0.1:8777/FLOW-Etude-Economi
 
 Le script vérifie les pages, les preuves, les simulations réelles dans Pyodide et la reprise des sauvegardes. Installer Chromium avec `pnpm --dir app exec playwright install chromium`, ou définir `PLAYWRIGHT_CHROMIUM_EXECUTABLE` vers un Chrome installé. Le workflow prépare une prévisualisation isolée et installe les dépendances système du navigateur sur son runner Linux. Les cas de référence de ce contrôle sont recalculés à chaque exécution, sans geler les hypothèses économiques.
 
-Garder `app/dist/` pour le serveur local sur 8766. Après modification, relancer `tools/start_study_app.ps1 -NoOpen` depuis `C:/Dev/FLOW-Etude-Economique` ; contrôler `/api/health`, son PID, l’empreinte du client et `sources_current`.
+Garder `app/dist/` pour le serveur local sur 8766. Après modification, relancer `tools/start_study_app.ps1 -NoOpen` depuis `C:/Dev/FLOW-Etude-Economique`, puis vérifier le manifeste `site-manifest.json` et le chargement de l’application. Le serveur statique ne fournit pas de route HTTP `/api/health`.
 
 ## Calcul des familles et métamodèle
 
@@ -294,3 +294,7 @@ La lecture des fonctions professionnelles utilise `core_product_scope.py`. La pr
 Le dossier G02 relie les critères aux préparations et financements existants. `python -m unittest test_gap_instruction` vérifie ses références et interdit de convertir les inconnues ou les essais en chiffrage. `python audits/2026-10-31-g02-allocation-anticipee/acceptance_model.py` rejoue les critères expérimentaux et écrit son résultat dans `tmp/`, sans modifier la preuve figée ni la référence économique.
 
 Les réserves des écarts sont contrôlées par `python -m unittest test_budget_supplements` avec `PYTHONPATH=tools`. Le contrôle rejoue les financements référencés, couvre les couples écart/option/phase et refuse doublons, montants sans contrat et faux totaux. Les procédures de recette du dossier sont des travaux à effectuer, pas des tests ERP exécutés.
+
+## Version lisible du modèle
+
+`python -m tools.model_revision show` affiche la date et le numéro d’ordre courant. `python -m tools.model_revision bump --date AAAA-MM-JJ` incrémente explicitement le compteur global et écrit la date de cette nouvelle version. Aucun incrément n’a lieu au démarrage, pendant un export, un test ou une reconstruction. Préparer les changements du modèle avant cet incrément et les contrôles. Les empreintes techniques et le contrat des simulations restent distincts.

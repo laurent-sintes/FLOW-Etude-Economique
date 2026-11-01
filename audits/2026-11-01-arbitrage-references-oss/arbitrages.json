@@ -1,0 +1,291 @@
+{
+  "date": "2026-11-01",
+  "status": "audit_proposals_not_adopted",
+  "criteria": [
+    "Même responsabilité fonctionnelle et mêmes exclusions",
+    "Profondeur de mesure du code et dépendances explicites",
+    "Réutilisation et financement unique",
+    "Transposition au mode Java/React retenu",
+    "Fonctions nouvelles et garanties comparables avant interprétation des JH"
+  ],
+  "units": [
+    {
+      "id": "master-data-java-spring",
+      "decision": "Conserver Axelor comme référence principale",
+      "status": "reference_conservee",
+      "reason": "Le rapprochement Java, modèles XML et services de plateforme est explicite. Les analogues des compléments sont eux-mêmes mesurés dans Axelor. Le choix est cohérent avec le mode de construction Java/Spring, une fois les services de framework réutilisés distingués des fonctions nouvelles.",
+      "alternatives": {
+        "erpnext": "Contrepoint fonctionnel des DocTypes, documents, droits et admission. Son framework Python rend les volumes de code natifs différents du travail Java à produire.",
+        "odoo": "Contrepoint ORM, modèles et vues. Sa valeur, légèrement supérieure à Axelor, ne justifie pas un changement de référence sans transposition de technologie.",
+        "tryton": "Contrepoint d’un socle modulaire compact. La plus faible taille native ne démontre pas un coût Java inférieur.",
+        "axelor": "Référence principale de transposition. Les quatre lectures utilisent aussi la banque Axelor pour les compléments, ce qui explique une partie de leur proximité."
+      },
+      "next_actions": [
+        "Conserver une table des services fournis par Spring, les bibliothèques et le patrimoine Master Data.",
+        "Maintenir les rapprochements par traitement et les déductions de réutilisation."
+      ],
+      "evidence": [
+        "audits/2026-10-30-master-data-consolidation/inputs.json",
+        "audits/2026-10-30-master-data-spring-flow/analogues.json",
+        "audits/2026-10-30-master-data-spring-reprise/treatment-mapping.json"
+      ]
+    },
+    {
+      "id": "stock-java-spring",
+      "decision": "Conserver Axelor, challengé par ERPNext et Odoo sur les réservations",
+      "status": "reference_conservee",
+      "reason": "Axelor fournit une chaîne Java de mouvements, inventaires et quantités. ERPNext et Tryton donnent des résultats proches du chiffrage retenu. Odoo apporte un périmètre plus large de quantités, lots, colis et propriétaires. Le comparer sur ces responsabilités explique mieux son résultat supérieur que de le traiter comme une estimation interchangeable.",
+      "alternatives": {
+        "erpnext": "Contrepoint prioritaire du registre de mouvements, corrections et réservations explicites.",
+        "odoo": "Contrepoint des réservations et dimensions lot, colis, propriétaire. Retenir les traitements utiles, sans reprendre tout le périmètre stock.quant.",
+        "tryton": "Contrepoint modulaire des mouvements et positions. Résultat proche d’ERPNext, utile pour vérifier le découpage.",
+        "axelor": "Ancre de taille Java. Réservation physique et affectation future restent deux responsabilités distinctes."
+      },
+      "next_actions": [
+        "Comparer les transitions de réservation et les corrections sur les mêmes situations métier.",
+        "Réutiliser le dossier G02 pour distinguer les arrivées futures de la réservation de stock présent."
+      ],
+      "evidence": [
+        "audits/2026-10-30-stock-consolidation-09/inputs.json",
+        "audits/2026-10-30-stock-adoption-10/inputs.json",
+        "audits/2026-10-31-g02-allocation-anticipee/instruction-results.json"
+      ]
+    },
+    {
+      "id": "inventory-ownership-java-spring",
+      "decision": "Écarter un ERP unique comme équivalent métier complet",
+      "status": "reference_a_reconstruire",
+      "reason": "Les quatre lectures chiffrent six modules Flow nouveaux à partir des analogues de réservation et correction du Stock. Elles ne mesurent pas quatre registres natifs de propriété équivalents. Axelor a la plus petite banque de réservation et de correction. Le choisir pour son langage reste utile pour les traitements Java, mais ne départage pas les règles de transfert, preuves et lectures aux deux dates.",
+      "alternatives": {
+        "erpnext": "Référence complémentaire du journal, de ses corrections et des liens documentaires. À circonscrire au registre demandé.",
+        "odoo": "Référence complémentaire de la dimension propriétaire dans les mouvements et quantités. Détention physique et transfert de propriété doivent être séparés.",
+        "tryton": "Contrepoint des mouvements et corrections sur un modèle compact. Aucun registre autonome à deux dates n’est mesuré dans le calcul courant.",
+        "axelor": "Support principal de transposition Java et des adaptateurs Stock. Son analogue compact ne suffit pas à justifier seul le lot métier complet."
+      },
+      "next_actions": [
+        "Dimensionner séparément détermination, actes, registre, corrections, lectures temporelles et rapprochement.",
+        "Choisir un analogue par responsabilité, puis sommer les tailles du lot avant un seul calcul COCOMO.",
+        "Reconduire les 100 JH comme décision existante, sans les présenter comme issus d’un arbitrage fonctionnel achevé."
+      ],
+      "evidence": [
+        "audits/2026-10-30-propriete-stock-calcul-02/inputs.json",
+        "audits/2026-10-30-propriete-stock-consolidation-04/inputs.json",
+        "tools/estimation_ownership.py"
+      ]
+    },
+    {
+      "id": "supply-controls-java-spring",
+      "decision": "Référence composite : Odoo pour les règles, Axelor pour la transposition Java",
+      "status": "reference_composite",
+      "reason": "Le lot regroupe autorisation des prestataires, politiques versionnées et devenir des biens. Les codes retenus sont des contrôles opérationnels et des règles de stock, de qualité ou de réparation. Les petits volumes Axelor de politiques et de correction produisent le résultat le plus bas. Ils ne constituent pas à eux seuls un catalogue comparable de politiques et de décisions de devenir.",
+      "alternatives": {
+        "erpnext": "Source de situations métier de rangement, réapprovisionnement et qualité. Le moteur de versionnement des politiques est un complément Flow.",
+        "odoo": "Référence fonctionnelle principale pour séparer règles, déclenchement et actions de stock. Les réparations sont un contrepoint des devenirs, pas un équivalent complet.",
+        "tryton": "Contrepoint des seuils, tiers et décisions qualité. Sert à tester un découpage minimal cohérent.",
+        "axelor": "Référence Java pour contrôles, restrictions et adaptations. Le devenir est estimé à partir du journal de correction Stock."
+      },
+      "next_actions": [
+        "Distinguer les trois familles et leurs données, décisions et preuves.",
+        "Séparer les services fournis par le moteur de règles des fonctions de politique Flow.",
+        "Ne pas sélectionner Axelor parce que ses 37,60 JH sont le minimum du panel."
+      ],
+      "evidence": [
+        "audits/2026-10-30-core-adoption-09/controls-allocation.json",
+        "audits/2026-10-30-core-adoption-09/archives.json"
+      ]
+    },
+    {
+      "id": "orders-java-spring",
+      "decision": "Conserver Axelor comme référence principale, compléter la lecture avec Odoo et ERPNext",
+      "status": "reference_conservee",
+      "reason": "Les commandes, lignes, transitions et mouvements sont bien représentés dans Axelor Java. C’est une raison fonctionnelle et technique de le conserver. Les écarts viennent aussi de la taille des cycles et des modules additionnels de consignation, retour et rapprochement. Ces responsabilités doivent être comparées explicitement aux autres ERP.",
+      "alternatives": {
+        "erpnext": "Contrepoint des documents d’achat/vente, amendements et liens aux résultats.",
+        "odoo": "Contrepoint prioritaire des liens commande, ligne et mouvement, avec les cas de retours et scissions à rapprocher.",
+        "tryton": "Contrepoint d’un cycle modulaire de ventes et expéditions. Le montant ne remplace pas la lecture des extensions nécessaires.",
+        "axelor": "Référence principale des services Java de commandes et transitions. Consignation et résolution des retours restent identifiées comme compléments."
+      },
+      "next_actions": [
+        "Comparer les mêmes variantes de retour, de consignation, de scission et de reliquat.",
+        "Conserver une seule attribution des cycles et filiations partagés avec les autres lots."
+      ],
+      "evidence": [
+        "audits/2026-10-30-core-adoption-09/orders-specification.json",
+        "audits/2026-10-30-core-adoption-09/archives.json"
+      ]
+    },
+    {
+      "id": "master-plan-java-spring",
+      "decision": "Axelor pour le calcul net Java, ERPNext pour compléter le périmètre fonctionnel",
+      "status": "reference_composite",
+      "reason": "Axelor dispose d’une chaîne MRP qui rapproche stocks, arrivées, besoins et prévisions. C’est l’analogue principal le plus cohérent dans le panier Java actuel. ERPNext représente une chaîne de production et de demandes matière plus large. Le panier Odoo courant utilise un centre de charge et des règles de stock, et ne représente pas un Master Plan complet. Tryton fournit un calcul compact d’approvisionnement utile comme contrepoint.",
+      "alternatives": {
+        "erpnext": "Référence fonctionnelle de consolidation des demandes, prévisions et besoins matière. Retirer les fonctions industrielles hors Flow avant de transposer sa taille.",
+        "odoo": "Écarté comme ancre globale dans la sélection actuelle. mrp_workcenter.py traite charge, disponibilité et capacité. La documentation MPS ne remplace pas le code mesuré dans ce panier.",
+        "tryton": "Contrepoint de besoins nets, dates d’approvisionnement, seuils et prévisions. Compléter le périmètre avant toute lecture de ses 139 JH comme alternative complète.",
+        "axelor": "Ancre principale du calcul net et des services Java. Ajouter explicitement contexte de plan, contributions versionnées, application et scénarios Flow."
+      },
+      "next_actions": [
+        "Rapprocher les mêmes fonctions : ingestion, contexte, prévision résiduelle, besoins nets, apports, application et scénarios.",
+        "Distinguer les calculs MRP des capacités de pilotage du Master Plan.",
+        "Recalculer un candidat seulement après cette harmonisation, en conservant les 350 JH actuels."
+      ],
+      "evidence": [
+        "audits/2026-10-30-core-adoption-09/planning-specification.json",
+        "audits/2026-10-30-core-adoption-09/archives.json"
+      ]
+    },
+    {
+      "id": "supply-decisions-java-spring",
+      "decision": "Références par responsabilité : ERPNext, Odoo et Axelor",
+      "status": "reference_composite",
+      "reason": "Le lot réunit affectation, promesse, optimisation, capacité et coordination. Ses comparaisons agrègent des réservations, réapprovisionnements, calendriers et postes de travail différents. Aucun des quatre paniers n’est une implémentation complète des cinq responsabilités Flow. Les solveurs sont réutilisés, leurs contrats métier et leurs adaptateurs doivent être chiffrés séparément du noyau.",
+      "alternatives": {
+        "erpnext": "Référence fonctionnelle prioritaire pour liens demande/réservation, disponibilité, préparation et besoins.",
+        "odoo": "Référence complémentaire pour règles de stock et calendrier de ressources. Son calendrier est beaucoup plus représenté que les 16 atomes ERPNext ou 26 Tryton du sous-ensemble de planification de service.",
+        "tryton": "Contrepoint minimal de réapprovisionnement et de travail de production. Sa faible taille ne représente pas une alternative complète de promesse et optimisation.",
+        "axelor": "Référence de transposition Java pour décisions, planification et adaptateurs. Ne pas assimiler la réservation liée à un mouvement à l’affectation générique d’une arrivée future."
+      },
+      "next_actions": [
+        "Distinguer affectation, promesse ATP/CTP, optimisation, offres de capacité et coordination.",
+        "Expliciter le contrat de capacité externe fournisseur au-delà des calendriers de machines.",
+        "Mesurer les adaptateurs et contrats Flow en consommant les solveurs disponibles une seule fois."
+      ],
+      "evidence": [
+        "audits/2026-10-30-core-adoption-09/decisions-specification.json",
+        "audits/2026-10-30-core-adoption-09/archives.json",
+        "audits/2026-10-31-g02-allocation-anticipee/instruction-results.json"
+      ]
+    },
+    {
+      "id": "service-fulfilment-java-spring",
+      "decision": "Référence composite par famille de prestation",
+      "status": "reference_composite",
+      "reason": "Le total du lot est relativement proche entre les quatre ERP, mais masque des compensations importantes. Axelor a le plus gros analogue assurance dans le lot, un petit analogue de dossier douanier et une autre répartition des services financiers. Un seul résultat global masque ces responsabilités.",
+      "alternatives": {
+        "erpnext": "Référence pour préparation, livraison, qualité et demandes ou reconnaissance de factures et paiements. Exclure la comptabilité générale.",
+        "odoo": "Contrepoint des mouvements, réparations, pièces et transactions. Son analogue douanier est un mécanisme de pièces, pas un moteur réglementaire.",
+        "tryton": "Référence complémentaire pour expéditions, transporteurs et documents de facturation ou paiement.",
+        "axelor": "Référence Java pour les contrats et leur reconnaissance. Compléter les analogues de transport et de pièces par les responsabilités identifiées dans les autres ERP."
+      },
+      "next_actions": [
+        "Arbitrer séparément assurance, prestations sur biens, transport, douane et services financiers.",
+        "Conserver les exclusions de WMS, comptabilité, moteur fiscal et moteur réglementaire.",
+        "Additionner les tailles harmonisées avant COCOMO, sans moyenner les coûts ni cumuler des mécanismes partagés."
+      ],
+      "evidence": [
+        "audits/2026-10-30-core-adoption-09/services-specification.json",
+        "audits/2026-10-30-core-adoption-09/archives.json"
+      ]
+    },
+    {
+      "id": "process-management-java-spring",
+      "decision": "Conserver la référence composite Axelor + Odoo, nettoyer la banque mesurée",
+      "status": "reference_composite",
+      "reason": "Le modèle combine déjà les studios et formulaires Axelor avec l’analogue analytique Odoo, partagé entre les quatre lectures. Ce choix correspond à des composants réellement différents. Il faut toutefois isoler les bibliothèques et éléments assemblés du travail propre au produit et préciser l’adaptation à Temporal.",
+      "alternatives": {
+        "erpnext": "Le workflow et les formulaires Frappe sont des contrepoints utiles. Leur mesure ne couvre pas le même studio de processus que le panier Axelor.",
+        "odoo": "Référence directe du graphe/pivot pour le connecteur analytique commun. Elle ne représente pas un moteur de Process Mining.",
+        "tryton": "Contrepoint des interfaces de formulaire et de graphe. Le studio autonome n’est pas mesuré dans son panier.",
+        "axelor": "Référence directe du studio et des formulaires, y compris l’interface React et les services de conception. La banque inclut bundled-config.js, à isoler du code spécifique à construire."
+      },
+      "next_actions": [
+        "Retirer de la future banque les bibliothèques fournies et le code assemblé, en conservant leurs raccordements.",
+        "Distinguer conception, publication/versions, formulaires, tâches, collecte/corrélation et pilotage.",
+        "Conserver PM4JS/Superset comme noyaux réutilisés et dimensionner la couche Flow.",
+        "Ne pas interpréter les quatre résultats proches comme quatre bases de dimensionnement distinctes."
+      ],
+      "evidence": [
+        "audits/2026-10-30-audit-fonctions-transverses/proposal-inputs.json",
+        "tools/core_product_estimate.py"
+      ]
+    },
+    {
+      "id": "supply-workbenches-java-spring",
+      "decision": "Axelor React comme ancre, Frappe comme contrepoint. Harmoniser le panier",
+      "status": "reference_a_redecouper",
+      "reason": "L’ancre Axelor est cohérente avec le frontend React visé. Elle comprend calendrier, kanban et aides de vue. Frappe fournit un contrepoint d’assemblage de vues. Tryton n’est mesuré que sur un calendrier. Odoo contient un ensemble de modèles, contrôleurs et rendus de vue plus vaste. Les montants ne comparent donc pas les mêmes ateliers.",
+      "alternatives": {
+        "erpnext": "Contrepoint fonctionnel et de composition des vues calendrier/kanban : 7 fichiers mesurés.",
+        "odoo": "Réserve de composants pour les contrats de modèle, contrôleur et rendu. Ses 56 fichiers doivent être réduits au même périmètre avant comparaison.",
+        "tryton": "Écarté comme référence principale dans le panier actuel : un seul fichier de calendrier, sans ensemble kanban et aides équivalent.",
+        "axelor": "Ancre de transposition React : 14 fichiers mesurés. Séparer les composants de vue fournis des trois ateliers métier réellement à construire."
+      },
+      "next_actions": [
+        "Fixer les interactions des trois ateliers : saisie, sélection, comparaison, explication, validation et suivi.",
+        "Mesurer le même périmètre de cadre de vue dans les quatre OSS, puis isoler le travail Flow.",
+        "Revoir le multiplicateur 2,4 après ce découpage. Les 160 JH restent la décision actuelle."
+      ],
+      "evidence": [
+        "audits/2026-10-30-audit-fonctions-transverses/proposal-inputs.json",
+        "tools/core_product_estimate.py"
+      ]
+    },
+    {
+      "id": "professional-it-java-spring",
+      "decision": "Abandonner l’ancre globale au profit de trois paniers fonctionnels",
+      "status": "reference_a_redecouper",
+      "reason": "Les banques comparent des périmètres de framework différents. Le panier Axelor contient notamment MFA/LDAP et chargeurs de vues XML. La cible utilise Keycloak, Spring et ses moyens de déploiement. Une fraction globale de ces banques ne suffit pas à isoler les consoles et adaptations produit réellement à construire.",
+      "alternatives": {
+        "erpnext": "Référence fonctionnelle utile pour imports, tâches de fond, sauvegardes et migrations. Transposer les raccordements au runtime Java retenu.",
+        "odoo": "Contrepoint pour droits, imports, pièces, messages et traductions. Écarter les outils de développement comme clickbot du panier métier de référence.",
+        "tryton": "Contrepoint compact des workers, tâches planifiées, export, traduction et pièces.",
+        "axelor": "Référence Java et React des interfaces d’administration. Isoler les noyaux MFA/LDAP et chargeurs de modèles ou vues déjà fournis par la cible."
+      },
+      "next_actions": [
+        "Créer trois paniers de référence : administration/habilitations, opérations/cycle de vie, services de données.",
+        "Déclarer pour chaque fonction le noyau réutilisé, le crédit Master Data et l’adaptation nouvelle.",
+        "Transposer les analogues retenus dans une même convention Java/React avant tout candidat chiffré."
+      ],
+      "evidence": [
+        "audits/2026-10-30-audit-fonctions-transverses/proposal-inputs.json",
+        "source/stacks/java-spring.yaml",
+        "tools/core_product_estimate.py"
+      ]
+    }
+  ],
+  "web_sources": [
+    {
+      "id": "erpnext-production",
+      "url": "https://docs.frappe.io/erpnext/production-plan",
+      "title": "ERPNext — Production Plan",
+      "use": "Confirme la chaîne production, commandes, demandes matière et nomenclatures. Les mesures proviennent du commit figé, pas de cette documentation courante."
+    },
+    {
+      "id": "axelor-mrp",
+      "url": "https://docs.axelor.com/aos/en/8.2/aos/supplychain/CBN_stock_rules/",
+      "title": "Axelor AOS 8.2 — MRP et règles de stock",
+      "use": "Explique le rapprochement du stock, encours et prévisions. Documentation 8.2 utilisée comme contexte fonctionnel du code AOS 9.1.10 mesuré."
+    },
+    {
+      "id": "odoo-mps",
+      "url": "https://www.odoo.com/documentation/19.0/applications/inventory_and_mrp/manufacturing/workflows/use_mps.html",
+      "title": "Odoo 19 — Master Production Schedule",
+      "use": "Distingue une planification par prévision d’un centre de charge. Le panier Community figé ne contient pas ce module MPS, aucune capacité documentée ici n’est ajoutée à ses tailles."
+    },
+    {
+      "id": "tryton-forecast",
+      "url": "https://docs.tryton.org/latest/modules-stock-forecast/design.html",
+      "title": "Tryton — Stock Forecast",
+      "use": "Confirme la représentation de demandes attendues par période, entrepôt et destination."
+    },
+    {
+      "id": "axelor-bpm",
+      "url": "https://docs.axelor.com/studio/3.3/bpm-docs/introduction/index.html",
+      "title": "Axelor Studio 3.3 — BPM Studio",
+      "use": "Décrit le modeler, les versions et le déploiement. Le panier de code figé reste la preuve des composants mesurés."
+    },
+    {
+      "id": "axelor-forms",
+      "url": "https://docs.axelor.com/studio/3.2/studio-docs/studio-features/view-builder.html",
+      "title": "Axelor Studio 3.2 — Visual View Builder",
+      "use": "Distingue conception de formulaires, modèle et extensions de vues."
+    },
+    {
+      "id": "frappe-doctypes",
+      "url": "https://docs.frappe.io/framework/user/en/basics/doctypes",
+      "title": "Frappe — DocTypes",
+      "use": "Contexte du modèle déclaratif de Frappe. Aucun coefficient de conversion Java n’est déduit de la documentation."
+    }
+  ]
+}

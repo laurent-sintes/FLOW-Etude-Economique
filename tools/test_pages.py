@@ -90,6 +90,9 @@ class PagesTests(unittest.TestCase):
             self.assertEqual(exported['ui']['parameters'], before['ui']['parameters'])
             self.assertTrue(exported['ui']['brand_assets']['flow'].startswith('/FLOW-Etude-Economique/'))
             self.assertEqual(self.study.bootstrap(essential=True), before)
+            gross=json.loads((output / manifest['routes']['/api/gross-evaluations']).read_text(encoding='utf-8'))
+            self.assertEqual(gross,self.study.content['gross_evaluations'])
+            self.assertNotIn('gross_evaluations',exported['content'])
             for url in [manifest['bootstrap'], *manifest['routes'].values(), manifest['python']['archive'], manifest['python']['model']]:
                 self.assertIn(manifest['server_revision'], url)
                 self.assertTrue((output / url).is_file())

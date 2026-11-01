@@ -1,0 +1,345 @@
+{
+  "version": 1,
+  "id": "proposal-oss-arbitration-2026-11-01",
+  "date": "2026-11-01",
+  "status": "proposal_not_adopted",
+  "baseline": "audits/2026-11-01-arbitrage-references-oss/results.json",
+  "arbitrations": "audits/2026-11-01-arbitrage-references-oss/arbitrages.json",
+  "method": {
+    "cocomo_parameters": "unchanged_from_each_active_unit",
+    "target_structure": "Java scaffold, schemas, views and existing shared funding retained",
+    "analogue_unit_equivalence": 1,
+    "equivalence_status": "Hypothèse de transposition dans le proxy logique du modèle courant. Aucun coefficient de productivité entre langages n’est ajouté.",
+    "foreign_analogue_sensitivity": [
+      0.75,
+      1.25
+    ],
+    "rounding": "same_step_as_active_decision",
+    "fractions": "existing_module_analogy_fractions_unchanged",
+    "scope": "Same eleven units, native capacities and professional functions. No new global programme, integration or MCO budget."
+  },
+  "preserved_units": [
+    "master-data-java-spring",
+    "stock-java-spring",
+    "orders-java-spring"
+  ],
+  "ownership": {
+    "OWN-F01": {
+      "product": "axelor",
+      "bank": "reservation_chain",
+      "reason": "Contexte, portée et conditions sur quantité, transposés en Java."
+    },
+    "OWN-F02": {
+      "product": "odoo",
+      "bank": "reservation_chain",
+      "reason": "Quantités partielles, dimensions propriétaire et liens de mouvement comme analogue du traitement de détermination. Les règles de transfert restent propres à Flow."
+    },
+    "OWN-F03": {
+      "product": "erpnext",
+      "bank": "reservation_chain",
+      "reason": "Admission de références et état des résultats, sans reconstruire le moteur Orders."
+    },
+    "OWN-F04": {
+      "product": "erpnext",
+      "bank": "correction_chain",
+      "reason": "Journal autonome, origines et corrections de quantités."
+    },
+    "OWN-F05": {
+      "product": "erpnext",
+      "bank": "correction_chain",
+      "reason": "Corrections, reprise et reconstitution comme analogue. La lecture aux deux dates demeure une fonction Flow nouvelle."
+    },
+    "OWN-F06": {
+      "product": "tryton",
+      "bank": "correction_chain",
+      "reason": "Rapprochement des états et positions après correction, transposé avec les schémas Java."
+    }
+  },
+  "families": {
+    "policies": {
+      "kind": "native_bank",
+      "product": "odoo",
+      "reason": "Règles opérationnelles plus représentatives que les seuls contrôles Axelor. Structure et modèle de politique Flow restent Java."
+    },
+    "plan-preparation": {
+      "kind": "selected_methods",
+      "selector": "planning_forecast",
+      "reason": "Complète l’ancre MRP Axelor par les contributions et besoins ERPNext, après retrait de la fabrication."
+    },
+    "backlog": {
+      "kind": "selected_methods",
+      "selector": "allocation",
+      "reason": "Liens de demande, disponibilité et quantités réservées ERPNext, hors picking physique."
+    },
+    "promising": {
+      "kind": "selected_methods",
+      "selector": "availability",
+      "reason": "Disponibilité projetée et engagements, sans reprendre les prix ni la fabrication du panier ERPNext."
+    },
+    "service-planning": {
+      "kind": "selected_methods",
+      "selector": "calendar",
+      "reason": "Calendriers de ressources Odoo, avec adaptations et contrats de capacité Java."
+    },
+    "assurance": {
+      "kind": "selected_methods",
+      "selector": "recognition",
+      "reason": "Résultats et reconnaissance, distincts de la réalisation physique du contrôle."
+    },
+    "transport-orders": {
+      "kind": "selected_methods",
+      "selector": "transport_instruction",
+      "reason": "Cycle de demande et instruction de transport. Les solveurs et tournées sont financés ailleurs."
+    },
+    "customs": {
+      "kind": "stock_bank",
+      "product": "axelor",
+      "bank": "correction_chain",
+      "reason": "Analogue d’un dossier avec faits, justification, corrections et pièces. Remplace le minuscule analogue de métadonnée, sans financer un moteur douanier ni un stockage de pièces."
+    },
+    "financial-services": {
+      "kind": "selected_methods",
+      "selector": "finance_requests",
+      "reason": "Retenir demandes et reconnaissance des résultats externes, conformément à l’exclusion de la tenue comptable."
+    }
+  },
+  "selectors": {
+    "planning_forecast": {
+      "family": "plan-preparation",
+      "product": "erpnext",
+      "reason": "Contributions de prévision, demandes, commandes et apports. Exclut nomenclatures, sous-assemblages et création des ordres de fabrication.",
+      "files": {
+        "sales_forecast.py": [
+          "generate_manual_demand",
+          "validate",
+          "validate_stock_items",
+          "validate_periods_and_dates",
+          "update_sales_forecast_status",
+          "validate_parent_warehouse",
+          "validate_demand_qty",
+          "generate_demand",
+          "on_discard",
+          "on_cancel"
+        ],
+        "production_plan.py": [
+          "get_sales_orders",
+          "sales_order_query",
+          "get_pending_material_requests",
+          "get_so_items",
+          "get_mr_items",
+          "validate_sales_orders",
+          "get_planned_qty_of_references",
+          "get_bin_details",
+          "add_items",
+          "make_material_request"
+        ]
+      }
+    },
+    "allocation": {
+      "family": "backlog",
+      "product": "erpnext",
+      "reason": "Lecture des quantités, répartition sous limites, mise à jour des liens et statuts. Les traitements série/lot servent d’analogues de répartition de ressources, sans reconstruire le picking physique.",
+      "files": {
+        "stock_reservation_entry.py": [
+          "get_status",
+          "get_available_qty_to_reserve",
+          "get_sre_reserved_qty_for_voucher_detail_no",
+          "get_sre_reserved_qty_for_items_and_warehouses",
+          "get_sre_reserved_qty_for_item_and_warehouse",
+          "get_whole_sales_unit_qty",
+          "has_reserved_stock",
+          "set_delivered_qty",
+          "get_sre_reserved_qty_details_for_voucher",
+          "allocate_serial_batch_qty",
+          "set_reserved_serial_batch_entries",
+          "add_available_serial_batch_entries",
+          "get_open_serial_batch_entries",
+          "get_serial_batch_open_qty"
+        ]
+      }
+    },
+    "availability": {
+      "family": "promising",
+      "product": "erpnext",
+      "reason": "Disponibilité, projections et quantités engagées. Exclut prix, taxes, comptabilité, nomenclatures, transformations et exécution de fabrication.",
+      "files": {
+        "get_item_details.py": [
+          "get_projected_qty",
+          "get_bin_details",
+          "get_company_total_stock",
+          "get_item_warehouse_",
+          "update_stock",
+          "update_bin_details",
+          "get_batch_qty"
+        ],
+        "work_order.py": [
+          "get_reserved_qty_for_production",
+          "get_work_order_allocated_qty",
+          "qty_against_sales_order",
+          "update_ordered_qty",
+          "get_work_order_qty_against_sales_order",
+          "get_ordered_qty_of_plan_item",
+          "update_completed_qty_in_material_request",
+          "set_available_qty",
+          "get_batch_capacity",
+          "update_planned_qty",
+          "validate_qty"
+        ]
+      }
+    },
+    "calendar": {
+      "family": "service-planning",
+      "product": "odoo",
+      "reason": "Disponibilités, indisponibilités et projection de durée. Exclut maintenance des calendriers ORM et formulaires, fournit le comportement analogue des adaptateurs de capacité Flow.",
+      "files": {
+        "resource_calendar.py": [
+          "_attendance_intervals_batch",
+          "_leave_intervals_batch",
+          "_unavailable_intervals_batch",
+          "_work_intervals_batch",
+          "plan_hours",
+          "plan_days",
+          "get_work_hours_count",
+          "get_work_duration_data",
+          "_get_closest_work_time",
+          "_get_attendance_intervals_days_data"
+        ]
+      }
+    },
+    "recognition": {
+      "family": "assurance",
+      "product": "erpnext",
+      "reason": "Validation des références, statuts et résultats. Exclut réalisation du contrôle qualité, calculs de mesure, mouvements physiques et comptabilité.",
+      "files": {
+        "quality_inspection.py": [
+          "validate_qi_reference",
+          "set_child_row_reference",
+          "has_inspected_rows",
+          "validate_inspection_required",
+          "validate_status",
+          "before_submit",
+          "on_submit",
+          "before_cancel",
+          "validate_not_used_by_submitted_document",
+          "is_linked_on_reference",
+          "on_cancel",
+          "update_qc_reference"
+        ],
+        "delivery_note.py": [
+          "update_delivery_note_status",
+          "validate_with_previous_doc",
+          "validate_references",
+          "validate_sales_order_references",
+          "validate_sales_invoice_references",
+          "check_next_docstatus",
+          "update_status"
+        ]
+      }
+    },
+    "transport_instruction": {
+      "family": "transport-orders",
+      "product": "erpnext",
+      "reason": "Instruction, liaison des livraisons, validation et suivi. Les itinéraires, directions et calculs de tournée sont consommés du lot décisions, pas reconstruits ici.",
+      "files": {
+        "shipment.py": [
+          "validate_parties",
+          "validate_delivery_note_row",
+          "validate_weight",
+          "validate_delivery_notes",
+          "on_submit",
+          "validate_pickup_time",
+          "validate_party_links",
+          "is_linked_to_party",
+          "on_discard",
+          "before_update_after_submit",
+          "on_cancel"
+        ],
+        "delivery_trip.py": [
+          "update_delivery_notes",
+          "validate_delivery_notes_not_on_other_trips",
+          "validate_stop_contacts",
+          "update_status",
+          "release_delivery_note",
+          "release_removed_delivery_notes",
+          "link_delivery_note",
+          "validate_delivery_note_not_draft",
+          "validate_stop_addresses",
+          "on_discard",
+          "on_cancel",
+          "on_submit"
+        ]
+      }
+    },
+    "finance_requests": {
+      "family": "financial-services",
+      "product": "erpnext",
+      "reason": "Demande, référence, état, montant et rapprochement avec facture ou paiement. Exclut écritures comptables, fiscalité, passerelles bancaires, actifs, caisse, fidélité et abonnements.",
+      "files": {
+        "payment_request.py": [
+          "make_payment_request",
+          "apply_payment_references",
+          "set_payment_references",
+          "get_amount",
+          "get_irequest_status",
+          "cancel_old_payment_requests",
+          "get_existing_payment_request_amount",
+          "update_payment_requests_as_per_pe_references",
+          "get_open_payment_requests_query",
+          "get_existing_payment_references",
+          "validate_against_payment_reference",
+          "validate_reference_document",
+          "validate_reference_company",
+          "validate_payment_request_amount",
+          "validate_currency",
+          "get_request_amount",
+          "on_cancel",
+          "set_as_paid",
+          "set_failed",
+          "set_as_cancelled",
+          "update_reference_advance_payment_status",
+          "_allocate_payment_request_to_pe_references"
+        ],
+        "sales_invoice.py": [
+          "validate_with_previous_doc",
+          "validate_delivery_note_rows_billed_by_invoice",
+          "update_billing_status_in_dn",
+          "set_status",
+          "get_returned_amount",
+          "get_pending_qty"
+        ]
+      }
+    }
+  },
+  "professional": {
+    "removed_studio_files": [
+      "react/bpm/bundled-config.js"
+    ],
+    "admin_supplied_patterns": [
+      "/auth/pac4j/",
+      "/auth/MFA",
+      "/resources/domains/MFA.xml",
+      "/resources/views/MFA.xml",
+      "/resources/domains/UserToken.xml",
+      "/resources/views/UserToken.xml"
+    ],
+    "operations_supplied_patterns": [
+      "/meta/loader/"
+    ],
+    "data_services": "axelor_existing_net_bank",
+    "workbenches": "axelor_react_existing_net_bank_14_files",
+    "note": "Only net analogue units are removed after existing Master Data credits. Product permissions, configuration, operations and data adapters remain in the residual baskets. No additional global reuse discount."
+  },
+  "decisions": [
+    "Les trois lots dont l’ancre est conservée gardent leurs décisions arrondies.",
+    "Les modèles, vues et structures sont ceux de la cible Java. Seuls les comportements analogues changent dans les familles concernées.",
+    "Les méthodes de référence retenues sont des analogues de taille, pas une liste de portage des sources ERP.",
+    "Les fractions de module existantes s’appliquent aux comportements résiduels, avec leurs modèles et raccordements. Leur effet est étudié séparément.",
+    "Les composants fournis ou financés ailleurs ne sont pas facturés une seconde fois.",
+    "Les 21 réserves de compléments et les trois phases économiques actives ne sont pas recalibrées par cette proposition."
+  ],
+  "review_iteration": {
+    "number": 2,
+    "reason": "Relecture fonctionnelle avant livraison : le panier affectation doit inclure choix et mises à jour des liens, au-delà des lectures de quantité.",
+    "previous_results": "iteration-01-results.json"
+  }
+}

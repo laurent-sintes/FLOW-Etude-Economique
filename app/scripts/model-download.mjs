@@ -16,7 +16,7 @@ function compose(){
  const env={...process.env,PYTHONPATH:[existsSync(deps)?deps:'',resolve(root,'tools'),process.env.PYTHONPATH||''].filter(Boolean).join(delimiter)};
  execFileSync(python,['-B','-m','tools.export_business_model'],{cwd:root,env,stdio:'inherit'});
  const record=JSON.parse(readFileSync(output+'.cache.json','utf8'));
- const metadata=Object.fromEntries(['sha256','bytes','sources','source_fingerprint'].map(key=>[key,record[key]]));
+ const metadata=Object.fromEntries(['sha256','bytes','sources','source_fingerprint','model_revision'].map(key=>[key,record[key]]));
  return {raw:readFileSync(output),metadata:JSON.stringify({...metadata,format_version:2,asset})};
 }
 export function modelDownload(){

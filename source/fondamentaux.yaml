@@ -10,7 +10,7 @@ reading:
   - id: scope
     title: Ce que nous évaluons
     lead: '**La {{notion.core_system}} constitue la première étape de l’ambition de {{notion.plateforme_marques.court}}.**
-      Le modèle compare cinq options pour obtenir ce produit, l’intégrer au Groupe et le faire fonctionner. Le périmètre
+      Le modèle compare trois options pour obtenir ce produit, l’intégrer au Groupe et le faire fonctionner. Le périmètre
       évalué reste celui des capacités retenues. Les étapes ultérieures de l’ambition ne sont pas financées implicitement.'
   - id: strategies
     title: Sur quoi reposent les évaluations Make et Buy
@@ -47,7 +47,7 @@ reading:
   - href: source/offres-synvance.md
     label: Comprendre les offres issues de Synvance
   - href: '#etude-marche'
-    label: Voir l’analyse des écarts dans le dossier économique — chapitre « Offres reçues »
+    label: Vérifier les financements et les écarts de couverture
   costs_intro: Les sept postes ci-dessous décrivent ce qui est acheté ou réalisé. Leurs tags indiquent la nature Build
     ou Run des activités.
   costs_note: '**Le poste « {{notion.grouped_buy}} » conserve les prix groupés et leurs inclusions.** Une part non
@@ -155,8 +155,8 @@ strategies:
   text: '**Construire la {{notion.flow_core_system}}, version Make de la {{notion.core_system}}, sous maîtrise du
     Groupe.** La réalisation peut associer équipes internes et partenaire. Make ne suppose pas une équipe interne
     déjà opérationnelle. Responsabilité produit, participation métier, compétences, transfert et continuité sont à
-    organiser. Les capacités métier orientent les travaux après réutilisation. Trois options techniques sont comparées
-    : Java / Spring, .NET et Rust.'
+    organiser. Les capacités métier orientent les travaux après réutilisation. Java / Spring est la voie technique
+    Make étudiée.'
   implementation_ref: flow_core_system
 - id: buy
   notion: buy
@@ -727,6 +727,7 @@ estimation_model:
     - asset
     - metadata_asset
     - filename
+    - model_revision
     - source_fingerprint
     - sha256
     - bytes
@@ -751,6 +752,14 @@ estimation_model:
     - product_actions
     - addition_refs
     - residual
+  - id: reference_arbitration_proposal
+    label: Proposition d’arbitrage des références OSS non adoptée
+    owner: source/evaluation-charges-brutes.yaml
+    attributes:
+    - proposal.path
+    - proposal.sha256
+    - proposal.status
+    - unit_arbitrations
   - id: budget_supplement_reserve
     label: Complément potentiel non adopté
     owner: source/complements-budgetaires.yaml
@@ -770,6 +779,11 @@ estimation_model:
     - net_extra_annual_eur_ht
     - existing_funding_refs
   relations:
+  - id: arbitration_compares_adopted_units
+    source: reference_arbitration_proposal
+    target: evaluation_unit
+    cardinality: many-to-many
+    meaning: Compare les charges proposées aux décisions adoptées, sans alimenter les financements ni les scénarios.
   - id: business_area_contains
     source: native_business_area
     target: native_capability
@@ -1458,7 +1472,7 @@ estimation_model:
       inputs: Instances et preuves du registre des calculs
     unit: contrôle
     kind: algorithm
-    note: Un contrôle structurel ne valide pas la justesse des hypothèses métier.
+    note: Chaque décision conserve le lien vers les mesures et hypothèses de son propre périmètre.
   - id: evidence_closure
     title: Vérifier les preuves de bout en bout
     expression: Recalculer les empreintes de toutes les dépendances déclarées. Rejeter cycles, dépendances omises
@@ -1467,7 +1481,7 @@ estimation_model:
       inputs: Instances et preuves du registre des calculs
     unit: contrôle
     kind: algorithm
-    note: Un contrôle structurel ne valide pas la justesse des hypothèses métier.
+    note: Les versions et empreintes permettent de retrouver les entrants exacts du calcul.
   - id: unique_mechanism_funding
     title: Financer chaque mécanisme une fois
     expression: Un propriétaire par mécanisme. Un consommateur référence le financement adopté sans recopier sa taille.
@@ -1475,7 +1489,7 @@ estimation_model:
       inputs: Instances et preuves du registre des calculs
     unit: contrôle
     kind: algorithm
-    note: Un contrôle structurel ne valide pas la justesse des hypothèses métier.
+    note: Les adaptations restent dans le lot consommateur. Le mécanisme partagé reste dans son lot propriétaire.
   - id: decision_consolidation
     title: Cumuler les décisions adoptées
     expression: Sommer les décisions après contrôle des financements. Aucune estimation intégrée COCOMO ni somme des
@@ -1484,7 +1498,7 @@ estimation_model:
       inputs: Instances et preuves du registre des calculs
     unit: contrôle
     kind: algorithm
-    note: Un contrôle structurel ne valide pas la justesse des hypothèses métier.
+    note: Le cumul additionne les efforts des lots adoptés après déduplication des financements.
   - id: prepare_size
     title: Reconstruire les tailles depuis les mesures
     expression: Réconcilier les fichiers mesurés, pondérer le déclaratif, appliquer la réutilisation et compter les
@@ -1493,7 +1507,7 @@ estimation_model:
       inputs: Instances et preuves du registre des calculs
     unit: contrôle
     kind: algorithm
-    note: Un contrôle structurel ne valide pas la justesse des hypothèses métier.
+    note: La taille préparée distingue le code de référence, la réutilisation et les compléments Flow.
   - id: cosmic_count
     title: Recompter les mouvements COSMIC
     expression: Sommer les mouvements E/R/W/X de 1 CFP. Groupes, processus et mouvements distincts et référencés.
@@ -1501,7 +1515,7 @@ estimation_model:
       inputs: Instances et preuves du registre des calculs
     unit: contrôle
     kind: algorithm
-    note: Un contrôle structurel ne valide pas la justesse des hypothèses métier.
+    note: E désigne une entrée, R une lecture, W une écriture et X une sortie de données.
   - id: comparison_contract
     title: Qualifier la comparaison
     expression: Contrôler les unités et activités. Exposer les différences de périmètre et les garanties de service
@@ -1510,7 +1524,7 @@ estimation_model:
       inputs: Instances et preuves du registre des calculs
     unit: contrôle
     kind: algorithm
-    note: Un contrôle structurel ne valide pas la justesse des hypothèses métier.
+    note: La comparaison rapproche les mêmes fonctions, activités et conventions horaires.
   - id: component_attribution
     title: Attribuer une taille métier au code mixte
     expression: max(taille source après retrait du patrimoine déjà financé × part supposée, plancher métier mesuré)
