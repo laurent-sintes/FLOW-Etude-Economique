@@ -116,7 +116,8 @@ def _calculate(calculation_id):
     F = formula('schedule_exponent',D=c['D'],E=E,B=c['B'])
     rows = prepared['rows']
     anchor=next(r for r in rows if r['id']==inputs['selected_reference'])
-    total=rounded(anchor['jh'],inputs['rounding_jh'])
+    retained_effort=prepared.get('retained_effort_jh',anchor['jh'])
+    total=rounded(retained_effort,inputs['rounding_jh'])
     functional=formula('cosmic_effort',**{k:prepared['functional'][k] for k in ('CFP','hours_per_CFP','factor','day_hours')})
     for r in rows:r.update(alignment(r['jh'],anchor['jh']))
     months=formula('cocomo_schedule',C=c['C'],JH=total,effort_phase_factor=c['effort_phase_factor'],
@@ -148,7 +149,7 @@ def _calculate(calculation_id):
     comparison['scope_status'] = 'partial_scope' if any(r['classification'] in ('native_excess','unknown') for r in comparison['scope_rows']) else 'declared_scope'
     comparison_status = comparison['scope_status'] + '_' + comparison['activity_status'] + '_activities_' + comparison['service_status'] + '_service'
     maximum,minimum=max(r['jh'] for r in rows),min(r['jh'] for r in rows)
-    return dict(method='COCOMO II',total_jh=total,months=rounded(months,inputs.get('schedule_rounding_months',1)),unrounded_months=months,
+    return dict(method=prepared.get('method','COCOMO II'),total_jh=total,months=rounded(months,inputs.get('schedule_rounding_months',1)),unrounded_months=months,
         roles=allocated,activities=activities,activity_source=prepared['activity_source'],
         trace=prepared['trace'],funding=[dict(m,funding_mode=next(x['mode'] for x in specification['funding_claims'] if x['mechanism']==m['id'])) for m in registry['mechanisms'] if m['id'] in {x['mechanism'] for x in specification['funding_claims']}],
         consolidation=registry['consolidation'],
@@ -156,7 +157,7 @@ def _calculate(calculation_id):
             rows=rows,functional=dict(id='cosmic-isbsg',label='COSMIC × ISBSG',jh=functional,**alignment(functional,anchor['jh'])),
             spread_jh=formula('spread',maximum=maximum,minimum=minimum),
             spread_pct=formula('spread_pct',maximum=maximum,minimum=minimum,reference=anchor['jh']),
-            rounding_delta_jh=total-anchor['jh'],
+            rounding_delta_jh=total-retained_effort,
             implied_hours_per_CFP=formula('implied_productivity',JH=anchor['jh'],day_hours=c['day_hours'],CFP=prepared['functional']['CFP']),
             comparability_status=comparison_status,
             comparison=comparison,

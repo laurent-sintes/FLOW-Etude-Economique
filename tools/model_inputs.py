@@ -95,7 +95,16 @@ def validate_funding(config, group, scenario, integration=None):
     """Return independent compiled inputs; no caller can mutate the source cache."""
     validate_group_contract(group, integration if integration is not None else read(ROOT/'source/integration.yaml'))
     c=deepcopy(config);g=deepcopy(group)
-    assert set(c)=={'version','date','statut','dependances','contrat','definitions','cartographie','classification_make','reception','relais_service_complet','hebergement_build','buy'}
+    assert set(c)=={'version','date','statut','dependances','contrat','definitions','cartographie','classification_make','reception','relais_service_complet','hebergement_build','buy','equipe_transformation'}
+    team=c['equipe_transformation']
+    fields(team, {'nom','jours_par_an','statut','calendrier','exclusions','non_double_compte','architecture','roles'}, path='equipe_transformation')
+    positive(team['jours_par_an'],False)
+    assert len(team['roles'])==5 and len({r['id'] for r in team['roles']})==5
+    for role in team['roles']:
+        fields(role, {'id','nom','etp','tarif_eur_jh','mission'}, path='transformation/role')
+        positive(role['etp'],False)
+        assert role['etp']==1
+        positive(role['tarif_eur_jh'],False)
     assert tuple(c['contrat']['responsabilites'])==RESPONSIBILITIES
     classes=c['classification_make']
     assert set(classes)=={f'MAI-{i:03d}' for i in range(1,10)}

@@ -31,11 +31,16 @@ def baseline(calculation_ref):
     result=calculate({'id':calculation_ref})
     require(result['total_jh']==unit['total_jh'],'baseline does not reproduce adopted decision')
     families={};processes=[]
+    while contract['recipe'] in ('oss_reference_revision_v1','scenario_scope_adoption_v1','work_package_adoption_v1'):
+        basis=read(ROOT/contract['inputs']['revision_basis'])
+        contract=next(c for c in basis['registry']['calculations'] if c['unit_id']==unit['id'])
     if contract['recipe']=='coherent_components_v1':
         frozen=unpack_archives(read(ROOT/contract['inputs']['archives']))
         selected=set(read(ROOT/contract['inputs']['specification'])['families'])
         families={f['slug']:f for f in frozen['proposal_inputs']['families'] if f['slug'] in selected}
         processes=read(ROOT/contract['inputs']['cosmic'])['processes']
+    if result['trace'].get('scope_adoption'):
+        processes=[dict(id=p['family']+'-'+p['id'],label=p['label'],movements=[dict(type=k,group=g,cfp=1) for k in ('E','R','W','X') for g in p[k]]) for p in result['trace']['scope_adoption']['processes']]
     return dict(calculation_ref=calculation_ref,unit_id=unit['id'],label=unit['label'],adopted_jh=unit['total_jh'],
         families=families,processes=processes,allocations=result['trace'].get('component_allocations',[]),
         evidence_paths=list(contract['inputs'].values()))

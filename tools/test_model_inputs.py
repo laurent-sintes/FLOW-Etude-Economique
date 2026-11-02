@@ -12,6 +12,13 @@ class ModelInputTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):cls.study=study_copy()
 
+    def test_transformation_requires_full_time_numeric_roles(self):
+        config=read(ROOT/'source/modele-composable.yaml');group=read(ROOT/'source/deploiement-groupe.yaml')
+        for value in (True,False,0,.5,-1):
+            changed=deepcopy(config);changed['equipe_transformation']['roles'][0]['etp']=value
+            with self.subTest(value=value),self.assertRaises((AssertionError,ValueError)):
+                validate_funding(changed,group,annual_scenario())
+
     def test_current_cycle_contracts_and_supplier_inclusions(self):
         from validate_cycle import validate
         self.assertTrue(validate())

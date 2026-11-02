@@ -1,0 +1,481 @@
+{
+  "id": "four-lots-detailed-challenger",
+  "date": "2026-11-02",
+  "status": "proposal_not_adopted",
+  "method": "bottom_up_engineering_challenge",
+  "effort_basis": "Hypothèses de charge projet par livrable. Analyse, conception, développement, QA, pilotage de l’équipe produit et mise en service inclus dans chaque montant. Aucun temps de réalisation observé ni mesure nouvelle de code. Ne remplace pas les calculs COCOMO/COSMIC actifs.",
+  "user_scope_decision": "L’édition de redressement Master Data est incluse à la demande de l’utilisateur. Elle conserve provenance, autorité, validation et versions.",
+  "units": [
+    {
+      "id": "master-data-java-spring",
+      "label": "Master Data",
+      "work": [
+        {
+          "id": "MD01",
+          "label": "Admission et diagnostic des contributions",
+          "jh": 150,
+          "scope": "Admission, rejet motivé et suivi des contributions. Interface générique, sans connecteur spécifique de marque.",
+          "reuse": "Transport, identité et persistance standards disponibles.",
+          "scenario_refs": [
+            "reference-plan-correction",
+            "product-quality-feedback"
+          ],
+          "funding_ref": "master-data-admission",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "MD02",
+          "label": "Six familles de références",
+          "jh": 180,
+          "scope": "Six adaptations de schémas et contrôles communs à 30 JH chacune.",
+          "reuse": "Même cadre pour partenaires, marchandises, conditionnements, fournitures, services et accords. Aucun PIM ou PLM complet.",
+          "scenario_refs": [
+            "fashion-launch",
+            "reference-plan-correction"
+          ],
+          "funding_ref": "master-data-semantique",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "MD03",
+          "label": "Versions, dépendances et publication",
+          "jh": 250,
+          "scope": "Publication atomique, compatibilité des deux versions canoniques, identités et dépendances stables.",
+          "reuse": "Les corrections utilisent ce service sans reconstruire leur propre versionnement.",
+          "scenario_refs": [
+            "reference-plan-correction",
+            "workflow-version-change"
+          ],
+          "funding_ref": "master-data-versions",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "MD04",
+          "label": "Portées, validité et conflits de références",
+          "jh": 180,
+          "scope": "Portées et validités des données reçues. Détection des conflits et provenance source ou correction locale.",
+          "reuse": "Saisons opérationnelles et droits de stock restent financés dans politiques. Pas de second moteur de politiques.",
+          "scenario_refs": [
+            "fashion-launch",
+            "seasonal-order-backlog"
+          ],
+          "funding_ref": "master-data-semantique",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "MD05",
+          "label": "Consultation et diagnostic de la référence",
+          "jh": 160,
+          "scope": "Recherche, consultation à date, différences de versions et liens vers usages.",
+          "reuse": "Cadre CRUD, recherche et composants de présentation réutilisés. Les formulaires de correction sont MD09.",
+          "scenario_refs": [
+            "reference-plan-correction",
+            "trace-accessory-kits"
+          ],
+          "funding_ref": "master-data-common-domain",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "MD06",
+          "label": "Rejeu et rapprochement après correction",
+          "jh": 140,
+          "scope": "Rejeu sémantique et réconciliation des consommateurs après correction ou restauration.",
+          "reuse": "Ne facture pas les écrans de correction MD09 ni les réactions métier des autres lots.",
+          "scenario_refs": [
+            "reference-plan-correction",
+            "product-quality-feedback"
+          ],
+          "funding_ref": "master-data-reprise",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "MD07",
+          "label": "Qualification des flux et des volumes",
+          "jh": 170,
+          "scope": "Qualification transversale des transformations, rejets, reprise et lot de 100 000 lignes selon la cible S1 existante.",
+          "reuse": "Tests de composants inclus dans MD01 à MD06 et MD09. Ici uniquement parcours croisés et performances du service Master Data.",
+          "scenario_refs": [
+            "reference-plan-correction",
+            "last-item-concurrency"
+          ],
+          "funding_ref": "master-data-service",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "MD08",
+          "label": "Protection, audit, purge et restauration du noyau",
+          "jh": 160,
+          "scope": "Contrôles des accès et usages protégés, journal sensible, purge et restauration propres au noyau Master Data.",
+          "reuse": "Les consoles transverses IT consomment ces services. Les noyaux identité, sauvegarde et bases de données ne sont pas développés.",
+          "scenario_refs": [
+            "reference-plan-correction",
+            "product-quality-feedback"
+          ],
+          "funding_ref": "master-data-protection",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "MD09",
+          "label": "Édition de redressement autorisée",
+          "jh": 210,
+          "scope": "Éditer une donnée canonique erronée sur les six familles. Motif, aperçu de changement, droits, validation, nouvelle version, provenance et conflit avec une contribution source ultérieure. Une correction ne réécrit pas une ancienne version publiée.",
+          "reuse": "Réutilise versions MD03, portées MD04, audit MD08 et composants CRUD. Ne remplace ni conception produit, ni assortiment commercial, ni les systèmes sources. Les règles de priorité par marque restent dans l’intégration.",
+          "scenario_refs": [
+            "reference-plan-correction",
+            "product-quality-feedback",
+            "fashion-launch"
+          ],
+          "funding_ref": "master-data-admission",
+          "effort_status": "engineering_assumption_not_observed"
+        }
+      ]
+    },
+    {
+      "id": "process-management-java-spring",
+      "label": "Process Management, studios et portail",
+      "work": [
+        {
+          "id": "PM01",
+          "label": "Catalogue des actions et des contrats",
+          "jh": 120,
+          "scope": "Catalogue borné des actions, types d’événements et contrats utilisables par les studios.",
+          "reuse": "Les services métier restent dans leurs lots propriétaires.",
+          "scenario_refs": [
+            "workflow-version-change",
+            "order-structuring-engaged"
+          ],
+          "funding_ref": "flow-process-definitions",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "PM02",
+          "label": "Éditeur graphique des processus",
+          "jh": 300,
+          "scope": "Graphe, propriétés, branchements, délais, sélection des actions et diagnostic dans le studio.",
+          "reuse": "Bibliothèque graphique fournie. Pas de nouveau moteur graphique ni langage de programmation libre.",
+          "scenario_refs": [
+            "workflow-version-change",
+            "process-approval-bottleneck"
+          ],
+          "funding_ref": "professional-process-studio",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "PM03",
+          "label": "Validation et prévisualisation",
+          "jh": 180,
+          "scope": "Contrôles statiques, prévisualisation des parcours et diagnostics de contrat.",
+          "reuse": "Réutilise le catalogue PM01 et les schémas des actions. Aucun optimiseur métier.",
+          "scenario_refs": [
+            "workflow-version-change",
+            "service-policy-deactivation"
+          ],
+          "funding_ref": "professional-process-studio",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "PM04",
+          "label": "Publication et retrait des versions",
+          "jh": 180,
+          "scope": "Publication, retrait, accès et association entre modèle et version exécutable.",
+          "reuse": "Identités et audit technique fournis. Les versions Master Data ne sont pas reconstruites.",
+          "scenario_refs": [
+            "workflow-version-change"
+          ],
+          "funding_ref": "flow-process-definitions",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "PM05",
+          "label": "Migration des dossiers engagés et interventions",
+          "jh": 220,
+          "scope": "Préparer et appliquer une migration autorisée, bloquer les changements incompatibles et constater les effets des interventions.",
+          "reuse": "Temporal fournit la persistance et les reprises techniques. Pas de rejeu des paiements acquis.",
+          "scenario_refs": [
+            "workflow-version-change",
+            "remote-payment-ambiguous"
+          ],
+          "funding_ref": "flow-process-intervention",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "PM06",
+          "label": "Studio et rendu des formulaires",
+          "jh": 230,
+          "scope": "Types de champs bornés, dispositions, validations de formulaire, versions et rendu.",
+          "reuse": "Composants de champs fournis. Les écritures métier passent par les services propriétaires.",
+          "scenario_refs": [
+            "process-approval-bottleneck",
+            "return-credit-refund"
+          ],
+          "funding_ref": "professional-human-forms",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "PM07",
+          "label": "Portail des tâches et attribution",
+          "jh": 170,
+          "scope": "Files, contexte du dossier, affectation, échéances et résultat du travail humain.",
+          "reuse": "Réutilise PM06 et le contrat de tâche. Aucun recalcul de promesse ou d’allocation.",
+          "scenario_refs": [
+            "process-approval-bottleneck",
+            "b2b-release-deadline"
+          ],
+          "funding_ref": "flow-human-task",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "PM08",
+          "label": "Adaptation du runtime et corrélation",
+          "jh": 190,
+          "scope": "Liaisons moteur, corrélation des événements, délais, pauses et résultats reconnus.",
+          "reuse": "Moteur et ordonnanceur fournis. Aucune nouvelle construction de Temporal.",
+          "scenario_refs": [
+            "remote-payment-ambiguous",
+            "transport-missed-connection"
+          ],
+          "funding_ref": "flow-process-runtime",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "PM09",
+          "label": "Journal, supervision et projections",
+          "jh": 140,
+          "scope": "Journal métier à date, suivi d’exécution et rapprochement des événements tardifs.",
+          "reuse": "Infrastructure de logs et stockage fournis. Les projections Supply spécialisées restent aux services métier.",
+          "scenario_refs": [
+            "remote-payment-ambiguous",
+            "workflow-version-change"
+          ],
+          "funding_ref": "flow-case-ledger",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "PM10",
+          "label": "Analyses et tableaux de bord",
+          "jh": 180,
+          "scope": "Modèle de traces FLOW, variantes, durées, conformité et tableaux de bord bornés.",
+          "reuse": "PM4JS et Superset disponibles. Pas d’outil universel de BI, ni de découverte généralisée ou apprentissage.",
+          "scenario_refs": [
+            "process-approval-bottleneck",
+            "workflow-version-change"
+          ],
+          "funding_ref": "professional-analytics-mining",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "PM11",
+          "label": "Qualification des parcours croisés",
+          "jh": 150,
+          "scope": "Tester publication, migration, reprise et événements ambigus sur les parcours de bout en bout du moteur.",
+          "reuse": "Les tests de composants sont dans PM01 à PM10. Les recettes des interfaces Supply appartiennent aux ateliers.",
+          "scenario_refs": [
+            "workflow-version-change",
+            "remote-payment-ambiguous",
+            "process-approval-bottleneck"
+          ],
+          "funding_ref": "flow-process-exception",
+          "effort_status": "engineering_assumption_not_observed"
+        }
+      ]
+    },
+    {
+      "id": "supply-workbenches-java-spring",
+      "label": "Ateliers visuels métier",
+      "work": [
+        {
+          "id": "WB01",
+          "label": "Cadre commun des trois ateliers",
+          "jh": 60,
+          "scope": "Sélection de contexte, disposition, grilles, filtres, vues sauvegardées et navigation commune.",
+          "reuse": "Consomme les composants UI standards et les droits. Ce cadre est construit une fois.",
+          "scenario_refs": [
+            "fashion-launch",
+            "reference-plan-correction"
+          ],
+          "funding_ref": "professional-supply-workbenches",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "WB02",
+          "label": "Atelier carnet et Master Plan",
+          "jh": 90,
+          "scope": "Voir carnets et plan, modifier les choix autorisés, lire les conflits et suivre la demande d’application.",
+          "reuse": "Moteur de planification, consommation des prévisions et calcul des écarts déjà financés.",
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "forecast-to-shortage-arbitration",
+            "planning-actuals-feedback"
+          ],
+          "funding_ref": "professional-supply-workbenches",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "WB03",
+          "label": "Atelier de comparaison des décisions",
+          "jh": 100,
+          "scope": "Comparer les options, voir gagnants et perdants, expliquer les contraintes et demander l’application autorisée.",
+          "reuse": "Promesse, affectation, optimisation et autorisation métier restent dans décisions et politiques.",
+          "scenario_refs": [
+            "shortage-reassessment",
+            "substitution-price-service",
+            "complete-order-multiline"
+          ],
+          "funding_ref": "professional-supply-workbenches",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "WB04",
+          "label": "Atelier prestations et transport",
+          "jh": 80,
+          "scope": "Présenter prestations, deux chargements pour six magasins, correspondances et exceptions.",
+          "reuse": "Les calculs de tournée, contrats de prestation et preuves de résultat ne sont pas redéveloppés.",
+          "scenario_refs": [
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "export-remote-services"
+          ],
+          "funding_ref": "professional-supply-workbenches",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "WB05",
+          "label": "Fraîcheur et modifications simultanées",
+          "jh": 40,
+          "scope": "Afficher un résultat obsolète, distinguer une demande de son effet et gérer un conflit de modification à l’écran.",
+          "reuse": "La cohérence transactionnelle et l’idempotence serveur sont financées dans les services métier.",
+          "scenario_refs": [
+            "last-item-concurrency",
+            "reference-plan-correction"
+          ],
+          "funding_ref": "professional-supply-workbenches",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "WB06",
+          "label": "Qualification croisée des trois ateliers",
+          "jh": 30,
+          "scope": "Recette ergonomique et des enchaînements propres aux trois ateliers.",
+          "reuse": "Les tests de chaque écran sont compris dans WB01 à WB05. Aucun doublon des tests du moteur métier.",
+          "scenario_refs": [
+            "transport-loads-six-stores",
+            "shortage-reassessment",
+            "fashion-launch"
+          ],
+          "funding_ref": "professional-supply-workbenches",
+          "effort_status": "engineering_assumption_not_observed"
+        }
+      ]
+    },
+    {
+      "id": "professional-it-java-spring",
+      "label": "Administration, robustesse et services IT",
+      "work": [
+        {
+          "id": "IT01",
+          "label": "Administration des habilitations produit",
+          "jh": 70,
+          "scope": "Consoles des habilitations contextualisées, contrôle de portée et diagnostic des refus.",
+          "reuse": "Identité, MFA, sessions et contrôles Master Data réutilisés.",
+          "scenario_refs": [
+            "reference-plan-correction",
+            "customer-credit-hold"
+          ],
+          "funding_ref": "professional-admin-security",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "IT02",
+          "label": "Configuration et publication du paramétrage",
+          "jh": 80,
+          "scope": "Consoles des paramètres techniques produit, validation de leur cohérence et déploiement contrôlé.",
+          "reuse": "Les règles métier et studios sont dans leurs lots. Pas de nouveau moteur de politiques.",
+          "scenario_refs": [
+            "workflow-version-change",
+            "service-policy-deactivation"
+          ],
+          "funding_ref": "professional-admin-security",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "IT03",
+          "label": "Traitements et reprises transverses",
+          "jh": 60,
+          "scope": "Console inter-lots des traitements, erreurs et demandes de reprise, avec accès aux preuves.",
+          "reuse": "Les mécanismes de reprise, les traitements et les garanties d’effet sont financés chez leurs propriétaires.",
+          "scenario_refs": [
+            "remote-payment-ambiguous",
+            "reference-plan-correction"
+          ],
+          "funding_ref": "professional-operations-lifecycle",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "IT04",
+          "label": "Audit, rétention et purge transverses",
+          "jh": 80,
+          "scope": "Composition des demandes de purge, dépendances inter-lots et consultation des preuves d’audit.",
+          "reuse": "Consomme les services d’audit et purge du noyau Master Data. Ne reconstruit ni les services ni les règles de conservation métier.",
+          "scenario_refs": [
+            "product-quality-feedback",
+            "reference-plan-correction"
+          ],
+          "funding_ref": "professional-operations-lifecycle",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "IT05",
+          "label": "Consoles des imports et exports",
+          "jh": 70,
+          "scope": "Déclenchement, suivi et diagnostic inter-lots des échanges génériques.",
+          "reuse": "Les noyaux d’import, transformations, admission et adaptateurs propres aux marques restent financés ailleurs.",
+          "scenario_refs": [
+            "reference-plan-correction",
+            "partial-receiving"
+          ],
+          "funding_ref": "professional-data-services",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "IT06",
+          "label": "Documents, notifications et langues",
+          "jh": 50,
+          "scope": "Composition et administration des pièces, acheminements et langues du produit.",
+          "reuse": "Stockage, transport de messages et bibliothèques de traduction fournis. Les règles métier de notification ne sont pas redéveloppées.",
+          "scenario_refs": [
+            "export-remote-services",
+            "process-approval-bottleneck"
+          ],
+          "funding_ref": "professional-data-services",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "IT07",
+          "label": "Migrations et restauration du produit",
+          "jh": 70,
+          "scope": "Enchaîner les opérations par lot et qualifier la restauration cohérente du produit.",
+          "reuse": "CI, sauvegarde, base et restauration du noyau Master Data déjà financées. Pas de seconde usine logicielle.",
+          "scenario_refs": [
+            "reference-plan-correction",
+            "workflow-version-change"
+          ],
+          "funding_ref": "professional-operations-lifecycle",
+          "effort_status": "engineering_assumption_not_observed"
+        },
+        {
+          "id": "IT08",
+          "label": "Diagnostic et qualification des garanties communes",
+          "jh": 60,
+          "scope": "Raccorder les diagnostics et éprouver les parcours critiques selon les cibles S1 courantes.",
+          "reuse": "Ne finance ni exploitation annuelle, ni multi-région actif, ni campagnes de performance de chaque moteur.",
+          "scenario_refs": [
+            "last-item-concurrency",
+            "remote-payment-ambiguous"
+          ],
+          "funding_ref": "professional-operations-lifecycle",
+          "effort_status": "engineering_assumption_not_observed"
+        }
+      ]
+    }
+  ]
+}

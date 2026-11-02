@@ -54,6 +54,26 @@ class RuntimeTests(unittest.TestCase):
         import yaml
         with self.assertRaises(ValueError):yaml.load('amount: 1\namount: 2',Loader=UniqueKeyLoader)
 
+    def test_json_reader_rejects_duplicate_keys_and_nonfinite_values_and_stays_isolated(self):
+        with tempfile.TemporaryDirectory(dir=ROOT/'tmp') as folder:
+            path=Path(folder)/'value.json'
+            path.write_text('{"amount":1,"nested":{"value":2}}',encoding='utf-8')
+            with model_session():
+                first=read(path);first['nested']['value']=99
+                self.assertEqual(read(path)['nested']['value'],2)
+            for text in ('{"amount":1,"amount":2}', '{"nested":{"a":1,"a":2}}', '{"amount":NaN}', '{"amount":Infinity}'):
+                path.write_text(text,encoding='utf-8')
+                with self.subTest(text=text),self.assertRaises(ValueError):read(path)
+            path.write_text('{"amount":3}',encoding='utf-8')
+            with model_session():self.assertEqual(read(path)['amount'],3)
+
+    def test_hierarchy_projection_is_small_and_does_not_expose_mutable_native_data(self):
+        from capability_catalog import native, native_kinds
+        with model_session():
+            kinds=native_kinds();key=next(iter(kinds));kinds[key]='changed'
+            self.assertNotEqual(native_kinds()[key],'changed')
+            self.assertEqual(native_kinds(),{n['id']:n['kind'] for n in native()['nodes']})
+
     def test_canonical_transport_preserves_every_business_row(self):
         packed=pack_content(self.study.content);restored=unpack_content(packed)
         self.assertEqual(restored['business_map'],self.study.content['business_map'])

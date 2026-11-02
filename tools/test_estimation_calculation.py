@@ -1,4 +1,5 @@
 """Business metamodel, reproducibility and interpretation boundaries."""
+from test_support import active_reference
 from copy import deepcopy
 import unittest
 from model_context import scoped_model
@@ -32,7 +33,7 @@ class EstimationCalculationTests(unittest.TestCase):
 
     def test_four_references_and_adoption_reproduce(self):
         unit=validate()['units'][0];result=calculate(unit['calculation'])
-        self.assertEqual((result['total_jh'],result['months']),(1500,17))
+        self.assertEqual((result['total_jh'],result['months']),(active_reference()['units']['master-data-java-spring']['jh'],active_reference()['units']['master-data-java-spring']['months']))
         self.assertEqual(result['roles'],{r['id']:r['jh'] for r in unit['roles']})
         a=result['alignment']
         self.assertEqual(len(a['rows']),4)
@@ -40,9 +41,9 @@ class EstimationCalculationTests(unittest.TestCase):
         self.assertAlmostEqual(a['functional']['jh'],1200)
         self.assertAlmostEqual(a['functional']['gap_jh'],1200-a['reference_jh'])
         self.assertAlmostEqual(a['functional']['gap_pct'],100*(1200-a['reference_jh'])/a['reference_jh'])
-        self.assertAlmostEqual(a['rounding_delta_jh'],1500-a['reference_jh'])
+        self.assertAlmostEqual(a['rounding_delta_jh'],0)
         self.assertAlmostEqual(a['spread_jh'],164.2050916852886)
-        self.assertAlmostEqual(sum(r['jh'] for r in result['activities']),1500)
+        self.assertAlmostEqual(sum(r['jh'] for r in result['activities']),active_reference()['units']['master-data-java-spring']['jh'])
 
     @scoped_model
     def test_decision_drift_is_rejected(self):
@@ -81,7 +82,7 @@ class EstimationCalculationTests(unittest.TestCase):
         for slug in ('java-spring','dotnet','rust'):
             self.assertFalse(active_doc(slug)['core'])
         study=study_copy()
-        self.assertEqual(study.baseline['options'][0]['build'],4198680)
+        self.assertEqual(study.baseline['options'][0]['build'],active_reference()['cost_eur_ht'])
         self.assertEqual(len(study.content['business_map']['family_funding']),11)
         self.assertFalse(study.content['business_map']['funding'])
 

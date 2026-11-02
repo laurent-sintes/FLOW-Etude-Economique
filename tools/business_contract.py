@@ -9,6 +9,8 @@ from validation_reporting import test_ids
 from validate_stacks import ROOT
 
 ALGORITHM_CHECKS = {
+ 'integration_unit_dimensioning': 'test_integration_units.IntegrationUnitsTests.test_dimensioning_and_funding_guards',
+ 'transformation_team_cost': 'test_composable_costs.ComposableTests.test_transformation_team_is_continuous_prorated_and_funded_once',
  'budget_reserve_reconciliation': 'test_budget_supplements.BudgetSupplementTests.test_all_gaps_options_phases_and_unknown_totals',
  'market_comparison_contract': 'test_market_comparison.MarketComparisonTests.test_no_false_coverage_or_budget',
  'role_allocation': 'test_estimation_calculation.EstimationCalculationTests.test_four_references_and_adoption_reproduce',
@@ -32,6 +34,9 @@ ALGORITHM_CHECKS = {
  'coherent_component_preparation': 'test_complete_core_adoption.CompleteCoreAdoptionTests.test_global_roles_coverage_and_valuation_reconcile_without_common_surcharge',
  'product_purpose_partition': 'test_core_product_scope.ProductScopeTests.test_both_purposes_conserve_each_role_and_cost',
  'complete_product_proposal': 'test_core_product_scope.ProductScopeTests.test_reference_and_replacement_are_separate',
+ 'oss_reference_revision': 'test_oss_revision.OSSRevisionTests.test_revision_replays_without_io_and_preserves_funding',
+ 'work_package_adoption': 'test_work_package_adoption.WorkPackageAdoptionTests.test_portable_replay_and_input_immutability',
+ 'scenario_scope_adoption': 'test_scenario_scope_adoption.ScenarioScopeAdoptionTests.test_portable_replay_counts_and_input_immutability',
  'professional_component_preparation': 'test_professional_adoption.ProfessionalAdoptionTests.test_three_calculations_replay_from_exported_documents_without_io',
 }
 

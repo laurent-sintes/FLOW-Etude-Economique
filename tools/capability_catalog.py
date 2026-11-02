@@ -16,6 +16,12 @@ def native():
     return snapshot
 
 @model_memo
+def native_kinds():
+    """Small validated projection for hierarchy checks, without copying full native text."""
+    return {node['id']: node['kind'] for node in native()['nodes']}
+
+
+@model_memo
 def analysis():
     doc=read(ROOT/ANALYSIS);snapshot=native()
     assert set(doc)=={'version','status','blocs'} and doc['version']==1 and doc['status']=='analyse_etude'

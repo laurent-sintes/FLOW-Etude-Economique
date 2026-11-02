@@ -182,7 +182,7 @@ class Study:
                 o['ventilation_services'] = dict(core=p['services_core'],integration=p['services_integration'],groupes=0)
                 o['base_annuelle']['services_mco'] = p['services_core']+p['services_integration']
             else:
-                o.update(integration=p['integration'],integration_mois=p['integration_mois'])
+                o.update(integration=p['integration'],integration_source=p['integration'],integration_mois=p['integration_mois'])
                 o['base_annuelle']['services_mco'] = p['services_grouped']
                 o['ventilation_services'] = dict(core=None,integration=None,groupes=p['services_grouped'])
             for key in ('hebergement','ipaas','licences_complementaires'): o['base_annuelle'][key] = p[key]
@@ -209,7 +209,7 @@ class Study:
             output.append(dict(stack=o['stack'],name=o['nom'],mode=o['mode'],horizons=horizons,annual=r['annees'],
                 service_start_month=end,build=o['build'],integration=o['integration'],annual_base=o['base_annuelle'],
                 selection_buy=o.get('selection_buy',0),selection_months=o.get('selection_mois',0),
-                initial_months=b,obtention=o['build']+o.get('selection_buy',0),
+                initial_months=b,obtention=round(sum(l['amount'] for l in r['financements_initiaux'] if l['phase']=='build'),2),
                 editor_prices=o['prix_abonnements'],services=o['ventilation_services'],
                 funding_ledger=r['financements_initiaux'],annual_services=r['services_composables'],
                 annual_responsibilities={key:round(r['services_composables'].get(key,0)+(sum(o['base_annuelle'][k] for k in ('hebergement','ipaas','licences_complementaires')) if key=='run' else 0)+(o['prix_abonnements'][0] if key=='grouped_buy' and o['prix_abonnements'] else 0),2) for key in RESPONSIBILITIES},
@@ -301,7 +301,9 @@ class Study:
             # The composable journal replaces this legacy allowance with deployment activities.
             # Descriptive source fields cannot reintroduce it into the executed financing.
             row['status']='replaced' if row['key']=='accompagnement_make' else 'retained'
-        result = dict(inflation=rates,tariffs=tariffs,
+        from composable_costs import transformation_summary
+        from model_inputs import funding_inputs
+        result = dict(transformation=transformation_summary(funding_inputs()[0]['equipe_transformation']),inflation=rates,tariffs=tariffs,
             support=dict(value=support[0]['reference'],method=support[0]['justification']),
             frontend=dict(value=stacks['java-spring']['model']['interventions']['tarifs']['expert']['reference'],
                           method=calibration['calibration']['frontend']),

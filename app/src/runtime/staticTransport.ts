@@ -27,7 +27,7 @@ export function createStaticTransport(dependencies:Dependencies){
   if(!response.ok)throw transportError('network');
   return response.json();
  };
- const loadManifest=()=>loading??=(readJson(manifestUrl).then(assertManifest).then(value=>manifest=value).catch(error=>{loading=undefined;throw error;}));
+ const loadManifest=()=>loading??=(readJson(manifestUrl,{cache:'no-store'}).then(assertManifest).then(value=>manifest=value).catch(error=>{loading=undefined;throw error;}));
  const readResource=async(reference:string)=>{
   const url=siteAssetUrl(reference,manifestUrl);
   if(!resources.has(url))resources.set(url,readJson(url).catch(error=>{resources.delete(url);throw error;}));

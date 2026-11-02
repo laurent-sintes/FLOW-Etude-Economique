@@ -1,0 +1,531 @@
+{
+  "id": "master-plan-java-spring",
+  "basis": "planning",
+  "assessment": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques.",
+  "processes": [
+    {
+      "id": "plan-ingest",
+      "label": "Recevoir une contribution externe de plan",
+      "capabilities": [
+        "BC-028"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Recevoir une contribution externe de plan sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PlanContribution"
+      ],
+      "R": [
+        "SourceContract",
+        "ContributionIdentity",
+        "BusinessReferences"
+      ],
+      "W": [
+        "PlanContribution"
+      ],
+      "X": [
+        "AdmissionResult"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-qualify",
+      "label": "Qualifier la prévision pour son usage opérationnel",
+      "capabilities": [
+        "BC-029"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Qualifier la prévision pour son usage opérationnel sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ForecastQualificationRequest"
+      ],
+      "R": [
+        "ForecastContribution",
+        "Units",
+        "Horizon",
+        "QualityRules"
+      ],
+      "W": [
+        "ForecastQualification"
+      ],
+      "X": [
+        "QualificationResult"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-consume",
+      "label": "Construire la demande et la prévision résiduelle",
+      "capabilities": [
+        "BC-030"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Construire la demande et la prévision résiduelle sur commande explicite ou résultat corrélé.",
+      "E": [
+        "DemandPlanRequest"
+      ],
+      "R": [
+        "QualifiedForecast",
+        "OrderSnapshot",
+        "ConsumptionRule",
+        "PriorConsumption"
+      ],
+      "W": [
+        "DemandPlan",
+        "ForecastConsumption"
+      ],
+      "X": [
+        "DemandPlanResult"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-supply",
+      "label": "Construire ou réviser la projection d’approvisionnement",
+      "capabilities": [
+        "BC-032"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Construire ou réviser la projection d’approvisionnement sur commande explicite ou résultat corrélé.",
+      "E": [
+        "SupplyProjectionRequest"
+      ],
+      "R": [
+        "DemandPlan",
+        "SupplyConstraints",
+        "ExistingExpectedSupply",
+        "PlanningAssumptions"
+      ],
+      "W": [
+        "SupplyPlan"
+      ],
+      "X": [
+        "SupplyPlanResult"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-read",
+      "label": "Interpréter les contributions de demande et d’apports",
+      "capabilities": [
+        "BC-031",
+        "BC-033"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Interpréter les contributions de demande et d’apports sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PlanViewRequest"
+      ],
+      "R": [
+        "PlanContribution",
+        "DemandPlan",
+        "SupplyPlan",
+        "Qualifications"
+      ],
+      "W": [],
+      "X": [
+        "PlanView"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-firm-replace",
+      "label": "Remplacer l’apport planifié par son achat ferme sans doublon",
+      "capabilities": [
+        "BC-028",
+        "BC-033"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Remplacer l’apport planifié par son achat ferme sans doublon sur commande explicite ou résultat corrélé.",
+      "E": [
+        "FirmedPurchaseNotice"
+      ],
+      "R": [
+        "PlanContribution",
+        "FirmingLink",
+        "SupplierConfirmation",
+        "PriorReplacement"
+      ],
+      "W": [
+        "PlanContribution",
+        "ContributionLineage"
+      ],
+      "X": [
+        "ReplacementOutcome"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-reconcile",
+      "label": "Rapprocher les plans et retenir la version autorisée",
+      "capabilities": [
+        "BC-034"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Rapprocher les plans et retenir la version autorisée sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PlanReconciliationRequest"
+      ],
+      "R": [
+        "DemandPlan",
+        "SupplyPlan",
+        "Qualifications",
+        "Authority"
+      ],
+      "W": [
+        "PlanReconciliation"
+      ],
+      "X": [
+        "Gaps",
+        "RetainedPlan"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-frame",
+      "label": "Définir périmètre horizon et objectifs du calcul net",
+      "capabilities": [
+        "BC-035"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Définir périmètre horizon et objectifs du calcul net sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PlanningScopeCommand"
+      ],
+      "R": [
+        "BusinessReferences",
+        "ActivePolicy",
+        "CurrentPlan"
+      ],
+      "W": [
+        "PlanningScope"
+      ],
+      "X": [
+        "ScopeOutcome"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-schedule",
+      "label": "Définir le lancement métier ponctuel ou récurrent",
+      "capabilities": [
+        "BC-035"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Définir le lancement métier ponctuel ou récurrent sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PlanningScheduleCommand"
+      ],
+      "R": [
+        "PlanningScope",
+        "Calendars",
+        "ExistingSchedule"
+      ],
+      "W": [
+        "PlanningSchedule"
+      ],
+      "X": [
+        "ScheduleOutcome"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-run",
+      "label": "Lancer le calcul net sur des coupes identifiées",
+      "capabilities": [
+        "BC-035"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Lancer le calcul net sur des coupes identifiées sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PlanningRunRequest"
+      ],
+      "R": [
+        "PlanningScope",
+        "DemandPlan",
+        "StockSnapshot",
+        "ExpectedSupply",
+        "ActivePolicy"
+      ],
+      "W": [
+        "MasterPlan",
+        "CoverageGaps"
+      ],
+      "X": [
+        "PlanResult",
+        "DecisionRequests"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-stop",
+      "label": "Arrêter le calcul et constater son arrêt",
+      "capabilities": [
+        "BC-035"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Arrêter le calcul et constater son arrêt sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PlanningStopCommand"
+      ],
+      "R": [
+        "PlanningRun",
+        "CurrentRunState",
+        "Authority"
+      ],
+      "W": [
+        "PlanningRun"
+      ],
+      "X": [
+        "StopOutcome"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-rerun",
+      "label": "Relancer après correction ou échec avec effets acquis",
+      "capabilities": [
+        "BC-035"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Relancer après correction ou échec avec effets acquis sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PlanningRerunRequest"
+      ],
+      "R": [
+        "PlanningScope",
+        "PriorRun",
+        "CorrectedFacts",
+        "AcceptedEffects"
+      ],
+      "W": [
+        "PlanningRun"
+      ],
+      "X": [
+        "NewRunReference"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-scenario",
+      "label": "Exécuter une variante isolée et ses hypothèses",
+      "capabilities": [
+        "BC-045"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Exécuter une variante isolée et ses hypothèses sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ScenarioRunRequest"
+      ],
+      "R": [
+        "BaselinePlan",
+        "ScenarioAssumptions",
+        "CalculatorVersions"
+      ],
+      "W": [
+        "ScenarioResult"
+      ],
+      "X": [
+        "ScenarioResult"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-compare",
+      "label": "Comparer les variantes sur des indicateurs communs",
+      "capabilities": [
+        "BC-045"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Comparer les variantes sur des indicateurs communs sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ScenarioComparisonRequest"
+      ],
+      "R": [
+        "ScenarioResult",
+        "IndicatorDefinitions",
+        "ComparisonPopulation"
+      ],
+      "W": [
+        "ScenarioComparison"
+      ],
+      "X": [
+        "ComparisonReport"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-apply",
+      "label": "Transmettre les seuls changements autorisés",
+      "capabilities": [
+        "BC-039"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Transmettre les seuls changements autorisés sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PlanApplicationCommand"
+      ],
+      "R": [
+        "MasterPlan",
+        "AuthorizedDecisions",
+        "TargetContracts"
+      ],
+      "W": [
+        "PlanApplication"
+      ],
+      "X": [
+        "TargetChangeRequests"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-effects",
+      "label": "Reconnaître acceptation refus et effets partiels",
+      "capabilities": [
+        "BC-039"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Reconnaître acceptation refus et effets partiels sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PlanApplicationResult"
+      ],
+      "R": [
+        "PlanApplication",
+        "RecognizedEffects",
+        "ResultIdentity"
+      ],
+      "W": [
+        "PlanApplication"
+      ],
+      "X": [
+        "UnappliedChanges",
+        "RecalculationNotice"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    },
+    {
+      "id": "plan-monitor",
+      "label": "Restituer écarts et besoins de réexamen",
+      "capabilities": [
+        "BC-035"
+      ],
+      "scenario_refs": [
+        "forecast-to-shortage-arbitration",
+        "preorder-future-availability",
+        "planning-actuals-feedback",
+        "shortage-reassessment",
+        "seasonal-order-backlog"
+      ],
+      "trigger": "Restituer écarts et besoins de réexamen sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PlanMonitoringRequest"
+      ],
+      "R": [
+        "MasterPlan",
+        "PlanApplication",
+        "CurrentFacts",
+        "CoverageGaps"
+      ],
+      "W": [],
+      "X": [
+        "PlanMonitoring"
+      ],
+      "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+    }
+  ]
+}

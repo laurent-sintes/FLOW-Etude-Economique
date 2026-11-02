@@ -44,6 +44,21 @@ class DevSelectionTests(unittest.TestCase):
         self.assertEqual(selection['unresolved'], [])
         self.assertEqual(selection['python_tests'], ['test_check_dev'])
 
+    def test_explicit_targeting_keeps_source_contracts_without_import_expansion(self):
+        from unittest.mock import patch
+        with patch('check_dev.impacted_tests', side_effect=AssertionError('No import expansion')):
+            selection = plan(Path('.'), ['tools/engine.py', 'source/rates.yaml'], ['test_work_package_adoption'], targeted=True)
+        self.assertIn('test_work_package_adoption', selection['python_tests'])
+        self.assertIn('test_business_contract', selection['python_tests'])
+        self.assertIn('test_composable_costs', selection['python_tests'])
+        self.assertFalse(selection['certification'])
+        self.assertEqual(selection['unresolved'], [])
+        self.assertTrue(plan(Path('.'), ['tools/engine.py'], targeted=True)['unresolved'])
+
+    def test_selected_module_or_class_does_not_repeat_its_named_methods(self):
+        selection = plan(Path('.'), [], ['test_a', 'test_a.Case.test_one', 'test_b.Case', 'test_b.Case.test_two', 'test_c.Case.test_three'])
+        self.assertEqual(selection['python_tests'], ['test_a', 'test_b.Case', 'test_c.Case.test_three'])
+
     def test_failed_run_saves_report_without_full_validation_receipt(self):
         import io
         import json

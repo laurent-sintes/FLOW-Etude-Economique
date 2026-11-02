@@ -105,7 +105,9 @@ class ApiTests(unittest.TestCase):
         self.assertTrue({'architecture','oms-b2c'}.isdisjoint(row['id'] for row in light_reference['business']['axes']))
         # Includes the current pre-study editorial summaries. Documentary charge
         # details remain lazy. Bound both the decoded payload and real transfer.
-        self.assertLess(len(light),1_120_000)
+        # Includes 50 new funding allocations and the eighth cost structure.
+        # Preserve the compressed-transfer cap and lazy documentary payload.
+        self.assertLess(len(light),1_200_000)
         self.assertLess(len(packed),280_000)
         self.assertLess(len(light),len(get('/api/bootstrap')[0])/8)
         self.assertIn('business_map',full['content'])

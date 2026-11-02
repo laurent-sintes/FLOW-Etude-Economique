@@ -47,7 +47,7 @@ SCHEMA = _object(dict(
         selection=_object(SECTION),
         integration=_object(dict(**SECTION, detail_title=TEXT, detail_note=TEXT,
             ledger_labels=_object({key:TEXT for key in ('travaux_communs','coordination_commune','deploiements',
-                'coordination_deploiements','programme','MAI-005/reception','MAI-006/reception','integration_initiale')}),
+                'transformation_direction_projet/integration','transformation_pmo/integration','transformation_synchronisation/integration','transformation_change/integration','transformation_architecture/integration','coordination_deploiements','programme','MAI-005/reception','MAI-006/reception','integration_initiale')}),
             explanations=_object({key:TEXT for key in ('Make', 'microsoft', 'sap')}))),
         annual=_object(dict(**SECTION, detail_title=TEXT, detail_note=TEXT, rows=dict(type='array', minItems=5, maxItems=5,
             items=_object(dict(id=dict(enum=list(ANNUAL_KEYS)), label=TEXT, explanation=TEXT))))),
@@ -132,6 +132,7 @@ def compile_economic_evaluations(baseline, content, editorial, glossary, documen
                                amount=line['amount'], start=line['start'], end=line['end']))
         offer_bridge = deepcopy(content['stacks'][slug]['economic']['detail_integration']) if mode == 'Buy' else None
         if offer_bridge is not None:
+            offer_bridge['transformation_office']=sum(l['amount'] for l in ledger if l['id'].startswith('transformation_'))
             _require(abs(sum(Decimal(str(value)) for value in offer_bridge.values()) -
                          Decimal(str(option['integration']))) < Decimal('0.005'), f'offer bridge ownership:{slug}')
         spending_bridge = []
@@ -157,6 +158,7 @@ def compile_economic_evaluations(baseline, content, editorial, glossary, documen
         _require(abs(sum(Decimal(str(group['total'])) for group in breakdown)-Decimal(str(total))) < Decimal('0.005'),
                  f'annual detail ownership:{slug}')
         options.append(dict(stack=slug, name=option['name'], mode=mode, selection=selection, core=core,
+            transformation=dict(budget_eur_ht=float(sum((Decimal(str(l['amount'])) for l in option['funding_ledger'] if l['id'].startswith('transformation_')),Decimal(0)))),
             integration=dict(budget_eur_ht=option['integration'], months=duration, source=integration_source, detail=detail, offer_bridge=offer_bridge),
             spending_bridge=spending_bridge, service_completion=completion,
             annual=dict(projected_stages=stages, items=annual_items, total_eur_ht=total, source=annual_source, breakdown=breakdown,

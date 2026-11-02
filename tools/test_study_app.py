@@ -364,12 +364,13 @@ class StudyTests(unittest.TestCase):
         self.assertEqual(framework['pilotage']['programme']['direction_etp'],deployment['scenarios']['central']['direction_etp'])
         self.assertEqual(framework['pilotage']['programme']['coordination_etp'],deployment['scenarios']['central']['coordination_etp'])
         programme=framework['pilotage']['programme']
-        programme_cost=(programme['direction_jh']*programme['tarif_direction_eur_jh']+
-                        programme['coordination_jh']*programme['tarif_coordination_eur_jh'])
+        office=framework['transformation']
+        self.assertEqual(office['annuel_eur_ht'],982800)
+        self.assertEqual(len(office['roles']),5)
         for option in self.study.baseline['options']:
-            if option['mode']=='Make':
-                funded=next(line['amount'] for line in option['funding_ledger'] if line['id']=='programme')
-                self.assertAlmostEqual(programme_cost,funded,places=2)
+            self.assertNotIn('programme',[l['id'] for l in option['funding_ledger']])
+            funded=sum(l['amount'] for l in option['funding_ledger'] if l['id'].startswith('transformation_'))
+            self.assertAlmostEqual(funded,office['annuel_eur_ht']*option['service_start_month']/12,places=2)
         self.assertEqual(programme['direction_jh'],programme['direction_jh_par_mois']*programme['duree_mois'])
         self.assertEqual(programme['coordination_jh'],programme['coordination_jh_par_mois']*programme['duree_mois'])
         self.assertEqual(framework['pilotage']['programme']['choix'],deployment['justifications_centrales']['programme'])
@@ -581,7 +582,7 @@ class StudyTests(unittest.TestCase):
                 self.assertEqual(result['parameters'],p)
                 self.assertEqual(len(result['options']),5)
                 self.assertEqual(result['options'][:4],original['options'][:4])
-                self.assertEqual(result['options'][4]['integration'],budget)
+                self.assertEqual(result['options'][4]['integration'],budget+2457000)
                 expected=None if budget<threshold else 0
                 for key in ('ancre_avant_bonus_eur_ht','reduction_eur_ht','budget_apres_bonus_eur_ht'):
                     self.assertEqual(result['anchor'][key],expected)

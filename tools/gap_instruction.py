@@ -45,6 +45,9 @@ def compile_gap_instruction(case,gap,grid,sources,mechanisms,retained):
     registry=read(ROOT/'source/calculs-estimation-core.yaml')
     contract=next((x for x in registry['calculations'] if x['id']==q['calculation_ref']),None)
     _require(contract is not None and contract['stack']=='java-spring','calculation reference mismatch')
+    while contract['recipe'] in ('oss_reference_revision_v1','scenario_scope_adoption_v1','work_package_adoption_v1'):
+        basis=read(ROOT/contract['inputs']['revision_basis'])
+        contract=next(c for c in basis['registry']['calculations'] if c['unit_id']==contract['unit_id'])
     _require(contract['recipe']=='coherent_components_v1','unsupported baseline boundary')
     from estimation_components import unpack_archives
     archived=unpack_archives(read(ROOT/contract['inputs']['archives']))
@@ -58,10 +61,12 @@ def compile_gap_instruction(case,gap,grid,sources,mechanisms,retained):
     _require(unit is not None and unit['total_jh']==calculation['total_jh'],'adopted baseline mismatch')
     cosmic=read(ROOT/contract['inputs']['cosmic'])
     processes=[p for p in cosmic['processes'] if p['id'].startswith('backlog-')]
+    if calculation['trace'].get('scope_adoption'):
+        processes=[dict(id=p['id'],label=p['label'],movements=[dict(type=k,group=g) for k in ('E','R','W','X') for g in p[k]]) for p in calculation['trace']['scope_adoption']['processes'] if p['family']=='backlog']
     backlog=families['backlog'];bank=[b for b in backlog['bindings'] if b['repo']=='axelor' and not b['provided_kernel']]
     allocations={x['id']:x for x in calculation['trace']['component_allocations']}
     result['baseline']=dict(unit_id=unit['id'],unit_label=unit['label'],adopted_jh=unit['total_jh'],
-        unrounded_jh=calculation['alignment']['reference_jh'],equivalent_units=calculation['trace']['component_sizes']['axelor']['equivalent_units'],
+        unrounded_jh=calculation['alignment']['reference_jh'],equivalent_units=calculation['trace'].get('revision',{}).get('equivalent_units',calculation['trace']['component_sizes']['axelor']['equivalent_units']),
         internal_backlog_jh=allocations['backlog']['jh'],backlog_cfp=sum(len(p['movements']) for p in processes),
         selected_axelor_units=sum(len(b['atoms']) for b in bank),module_quantity=backlog['quantity'],analogy_fraction=backlog['extension_fraction'],
         schemas=deepcopy(backlog['schemas']),processes=[dict(id=p['id'],label=p['label'],movements=[dict(type=m['type'],group=m['group']) for m in p['movements']]) for p in processes],

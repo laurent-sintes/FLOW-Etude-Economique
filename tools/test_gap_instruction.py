@@ -19,7 +19,7 @@ class GapInstructionTests(unittest.TestCase):
   self.assertEqual(i['baseline']['adopted_jh'],next(u['total_jh'] for u in self.units if u['id']==i['baseline']['unit_id']))
   self.assertLessEqual(sum(a['jh'] for a in i['baseline']['family_allocations']),i['baseline']['adopted_jh'])
   self.assertEqual(i['baseline']['internal_backlog_jh'],next(a['jh'] for a in i['baseline']['family_allocations'] if a['id']=='backlog'))
-  self.assertEqual(i['baseline']['backlog_cfp'],31)
+  self.assertEqual(i['baseline']['backlog_cfp'],40)
   self.assertIsNone(i['quantification']['net_extra_jh'])
   self.assertEqual(c['summary']['adopted_java_spring_jh'],sum(u['total_jh'] for u in self.units if u['stack']=='java-spring'))
   self.assertEqual(i['experiment_result']['tests'],18)

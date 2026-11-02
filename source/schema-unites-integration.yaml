@@ -1,0 +1,325 @@
+type: object
+additionalProperties: false
+required:
+- version
+- id
+- labels
+- sources
+- funding_groups
+- units
+- packages
+properties:
+  version:
+    const: 1
+  id:
+    const: integration-work-units
+  labels:
+    type: object
+    additionalProperties: false
+    required:
+    - title
+    - intro
+    - quantity
+    - unknown
+    - delivery
+    - acceptance
+    - drivers
+    - boundary
+    - counting
+    - options
+    - effort
+    - formula
+    - funding
+    - basis
+    - sources
+    - no_allocation
+    - option_names
+    - covered
+    - remaining
+    - matrix
+    - work
+    - evidence_packages
+    - shared
+    - observations
+    - observation_note
+    - range_to
+    - actions
+    - status_labels
+    - option_findings
+    properties:
+      title: &id001
+        type: string
+        minLength: 1
+      intro: *id001
+      quantity: *id001
+      unknown: *id001
+      delivery: *id001
+      acceptance: *id001
+      drivers: *id001
+      boundary: *id001
+      counting: *id001
+      options: *id001
+      effort: *id001
+      formula: *id001
+      funding: *id001
+      basis: *id001
+      sources: *id001
+      no_allocation: *id001
+      option_names:
+        type: object
+        additionalProperties: false
+        required:
+        - java-spring
+        - microsoft
+        - sap
+        properties:
+          java-spring: *id001
+          microsoft: *id001
+          sap: *id001
+      covered: &id002
+        type: string
+        minLength: 1
+      remaining: *id002
+      matrix: *id002
+      work: *id002
+      evidence_packages: *id002
+      shared: *id002
+      observations: *id002
+      observation_note: *id002
+      range_to: *id002
+      actions: *id002
+      status_labels:
+        type: object
+        additionalProperties: false
+        required: &id003
+        - inclus_documente
+        - partiel
+        - a_rapprocher
+        - complement
+        - sans_objet
+        properties:
+          inclus_documente: *id002
+          partiel: *id002
+          a_rapprocher: *id002
+          complement: *id002
+          sans_objet: *id002
+      option_findings:
+        type: object
+        additionalProperties: false
+        required:
+        - java-spring
+        - microsoft
+        - sap
+        properties:
+          java-spring:
+            type: string
+            minLength: 1
+          microsoft:
+            type: string
+            minLength: 1
+          sap:
+            type: string
+            minLength: 1
+  sources:
+    type: object
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      required:
+      - path
+      - location
+      properties:
+        path: *id001
+        location: *id001
+  funding_groups:
+    type: object
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      required:
+      - option
+      - label
+      - path
+      - scope
+      properties:
+        option:
+          enum:
+          - java-spring
+          - microsoft
+          - sap
+        label: *id001
+        path: *id001
+        scope: *id001
+  units:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - activity_ref
+      - label
+      - deliverable
+      - count_unit
+      - counting_rule
+      - quantity
+      - quantity_basis
+      - acceptance
+      - drivers
+      - boundary
+      - scenario_refs
+      - source_refs
+      - options
+      properties:
+        id: *id001
+        activity_ref: *id001
+        label: *id001
+        deliverable: *id001
+        count_unit: *id001
+        counting_rule: *id001
+        quantity: &id004
+          type:
+          - number
+          - 'null'
+          minimum: 0
+        quantity_basis:
+          type:
+          - string
+          - 'null'
+        acceptance:
+          type: array
+          items: *id001
+          minItems: 1
+          uniqueItems: true
+        drivers: *id001
+        boundary: *id001
+        scenario_refs:
+          type: array
+          items: *id001
+          uniqueItems: true
+        source_refs:
+          type: array
+          items: *id001
+          minItems: 1
+          uniqueItems: true
+        options:
+          type: object
+          additionalProperties: false
+          required:
+          - java-spring
+          - microsoft
+          - sap
+          properties:
+            java-spring: &id006
+              type: object
+              additionalProperties: false
+              required:
+              - treatment
+              - funding_group
+              - inclusion
+              - setup_jh
+              - unit_jh
+              - estimate_basis
+              - reconciliation
+              properties:
+                treatment: *id001
+                funding_group: *id001
+                inclusion:
+                  enum: *id003
+                setup_jh: &id005
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - developpement
+                  - integration
+                  - support_n3
+                  - support_n1
+                  properties:
+                    developpement: *id004
+                    integration: *id004
+                    support_n3: *id004
+                    support_n1: *id004
+                unit_jh: *id005
+                estimate_basis:
+                  type:
+                  - string
+                  - 'null'
+                reconciliation:
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - package_refs
+                  - covered
+                  - remaining
+                  properties:
+                    package_refs:
+                      type: array
+                      minItems: 1
+                      uniqueItems: true
+                      items: *id002
+                    covered: *id002
+                    remaining: *id002
+            microsoft: *id006
+            sap: *id006
+    minItems: 1
+    uniqueItems: true
+  packages:
+    type: object
+    minProperties: 1
+    additionalProperties:
+      type: object
+      additionalProperties: false
+      required:
+      - option
+      - label
+      - kind
+      - work_ref
+      - source_ref
+      - location
+      - measures
+      - note
+      properties:
+        option:
+          enum:
+          - java-spring
+          - microsoft
+          - sap
+        label: *id002
+        kind:
+          enum:
+          - source
+          - make_activity
+          - make_deployment
+        work_ref:
+          type:
+          - string
+          - 'null'
+        source_ref: *id002
+        location: *id002
+        measures:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - label
+            - low
+            - high
+            - unit
+            properties:
+              label: *id002
+              low:
+                type: number
+                minimum: 0
+              high:
+                type: number
+                minimum: 0
+              unit:
+                enum:
+                - JH
+                - EUR
+                - processus
+                - objets
+                - interfaces
+        note: *id002
+$schema: https://json-schema.org/draft/2020-12/schema

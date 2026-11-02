@@ -17,6 +17,7 @@ test('static bootstrap uses the project subpath and cached data stays isolated',
  const first=await f.client.request('/api/bootstrap?view=essential');first.baseline.value=999;
  assert.equal((await f.client.request('/api/bootstrap?view=essential')).baseline.value,123);
  assert.equal(f.fetched.length,2);assert.equal(f.workers.length,0);
+ assert.equal(f.fetched[0].options.cache,'no-store');
  assert.ok(f.fetched.every(({url})=>url.startsWith(f.root)));
  assert.equal(f.client.fileHref('sources/offre.pdf#page=3'),f.root+'documents/hash/offre.pdf#page=3');
  assert.equal(f.client.fileHref('sources/private.pdf'),undefined);

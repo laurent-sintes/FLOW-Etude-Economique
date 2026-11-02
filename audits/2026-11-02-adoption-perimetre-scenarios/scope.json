@@ -1,0 +1,4346 @@
+{
+  "id": "adopted-scenario-scope",
+  "units": [
+    {
+      "id": "master-plan-java-spring",
+      "basis": "planning",
+      "assessment": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques.",
+      "processes": [
+        {
+          "id": "plan-ingest",
+          "label": "Recevoir une contribution externe de plan",
+          "capabilities": [
+            "BC-028"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Recevoir une contribution externe de plan sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PlanContribution"
+          ],
+          "R": [
+            "SourceContract",
+            "ContributionIdentity",
+            "BusinessReferences"
+          ],
+          "W": [
+            "PlanContribution"
+          ],
+          "X": [
+            "AdmissionResult"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-qualify",
+          "label": "Qualifier la prévision pour son usage opérationnel",
+          "capabilities": [
+            "BC-029"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Qualifier la prévision pour son usage opérationnel sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ForecastQualificationRequest"
+          ],
+          "R": [
+            "ForecastContribution",
+            "Units",
+            "Horizon",
+            "QualityRules"
+          ],
+          "W": [
+            "ForecastQualification"
+          ],
+          "X": [
+            "QualificationResult"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-consume",
+          "label": "Construire la demande et la prévision résiduelle",
+          "capabilities": [
+            "BC-030"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Construire la demande et la prévision résiduelle sur commande explicite ou résultat corrélé.",
+          "E": [
+            "DemandPlanRequest"
+          ],
+          "R": [
+            "QualifiedForecast",
+            "OrderSnapshot",
+            "ConsumptionRule",
+            "PriorConsumption"
+          ],
+          "W": [
+            "DemandPlan",
+            "ForecastConsumption"
+          ],
+          "X": [
+            "DemandPlanResult"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-supply",
+          "label": "Construire ou réviser la projection d’approvisionnement",
+          "capabilities": [
+            "BC-032"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Construire ou réviser la projection d’approvisionnement sur commande explicite ou résultat corrélé.",
+          "E": [
+            "SupplyProjectionRequest"
+          ],
+          "R": [
+            "DemandPlan",
+            "SupplyConstraints",
+            "ExistingExpectedSupply",
+            "PlanningAssumptions"
+          ],
+          "W": [
+            "SupplyPlan"
+          ],
+          "X": [
+            "SupplyPlanResult"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-read",
+          "label": "Interpréter les contributions de demande et d’apports",
+          "capabilities": [
+            "BC-031",
+            "BC-033"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Interpréter les contributions de demande et d’apports sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PlanViewRequest"
+          ],
+          "R": [
+            "PlanContribution",
+            "DemandPlan",
+            "SupplyPlan",
+            "Qualifications"
+          ],
+          "W": [],
+          "X": [
+            "PlanView"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-firm-replace",
+          "label": "Remplacer l’apport planifié par son achat ferme sans doublon",
+          "capabilities": [
+            "BC-028",
+            "BC-033"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Remplacer l’apport planifié par son achat ferme sans doublon sur commande explicite ou résultat corrélé.",
+          "E": [
+            "FirmedPurchaseNotice"
+          ],
+          "R": [
+            "PlanContribution",
+            "FirmingLink",
+            "SupplierConfirmation",
+            "PriorReplacement"
+          ],
+          "W": [
+            "PlanContribution",
+            "ContributionLineage"
+          ],
+          "X": [
+            "ReplacementOutcome"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-reconcile",
+          "label": "Rapprocher les plans et retenir la version autorisée",
+          "capabilities": [
+            "BC-034"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Rapprocher les plans et retenir la version autorisée sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PlanReconciliationRequest"
+          ],
+          "R": [
+            "DemandPlan",
+            "SupplyPlan",
+            "Qualifications",
+            "Authority"
+          ],
+          "W": [
+            "PlanReconciliation"
+          ],
+          "X": [
+            "Gaps",
+            "RetainedPlan"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-frame",
+          "label": "Définir périmètre horizon et objectifs du calcul net",
+          "capabilities": [
+            "BC-035"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Définir périmètre horizon et objectifs du calcul net sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PlanningScopeCommand"
+          ],
+          "R": [
+            "BusinessReferences",
+            "ActivePolicy",
+            "CurrentPlan"
+          ],
+          "W": [
+            "PlanningScope"
+          ],
+          "X": [
+            "ScopeOutcome"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-schedule",
+          "label": "Définir le lancement métier ponctuel ou récurrent",
+          "capabilities": [
+            "BC-035"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Définir le lancement métier ponctuel ou récurrent sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PlanningScheduleCommand"
+          ],
+          "R": [
+            "PlanningScope",
+            "Calendars",
+            "ExistingSchedule"
+          ],
+          "W": [
+            "PlanningSchedule"
+          ],
+          "X": [
+            "ScheduleOutcome"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-run",
+          "label": "Lancer le calcul net sur des coupes identifiées",
+          "capabilities": [
+            "BC-035"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Lancer le calcul net sur des coupes identifiées sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PlanningRunRequest"
+          ],
+          "R": [
+            "PlanningScope",
+            "DemandPlan",
+            "StockSnapshot",
+            "ExpectedSupply",
+            "ActivePolicy"
+          ],
+          "W": [
+            "MasterPlan",
+            "CoverageGaps"
+          ],
+          "X": [
+            "PlanResult",
+            "DecisionRequests"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-stop",
+          "label": "Arrêter le calcul et constater son arrêt",
+          "capabilities": [
+            "BC-035"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Arrêter le calcul et constater son arrêt sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PlanningStopCommand"
+          ],
+          "R": [
+            "PlanningRun",
+            "CurrentRunState",
+            "Authority"
+          ],
+          "W": [
+            "PlanningRun"
+          ],
+          "X": [
+            "StopOutcome"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-rerun",
+          "label": "Relancer après correction ou échec avec effets acquis",
+          "capabilities": [
+            "BC-035"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Relancer après correction ou échec avec effets acquis sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PlanningRerunRequest"
+          ],
+          "R": [
+            "PlanningScope",
+            "PriorRun",
+            "CorrectedFacts",
+            "AcceptedEffects"
+          ],
+          "W": [
+            "PlanningRun"
+          ],
+          "X": [
+            "NewRunReference"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-scenario",
+          "label": "Exécuter une variante isolée et ses hypothèses",
+          "capabilities": [
+            "BC-045"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Exécuter une variante isolée et ses hypothèses sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ScenarioRunRequest"
+          ],
+          "R": [
+            "BaselinePlan",
+            "ScenarioAssumptions",
+            "CalculatorVersions"
+          ],
+          "W": [
+            "ScenarioResult"
+          ],
+          "X": [
+            "ScenarioResult"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-compare",
+          "label": "Comparer les variantes sur des indicateurs communs",
+          "capabilities": [
+            "BC-045"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Comparer les variantes sur des indicateurs communs sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ScenarioComparisonRequest"
+          ],
+          "R": [
+            "ScenarioResult",
+            "IndicatorDefinitions",
+            "ComparisonPopulation"
+          ],
+          "W": [
+            "ScenarioComparison"
+          ],
+          "X": [
+            "ComparisonReport"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-apply",
+          "label": "Transmettre les seuls changements autorisés",
+          "capabilities": [
+            "BC-039"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Transmettre les seuls changements autorisés sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PlanApplicationCommand"
+          ],
+          "R": [
+            "MasterPlan",
+            "AuthorizedDecisions",
+            "TargetContracts"
+          ],
+          "W": [
+            "PlanApplication"
+          ],
+          "X": [
+            "TargetChangeRequests"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-effects",
+          "label": "Reconnaître acceptation refus et effets partiels",
+          "capabilities": [
+            "BC-039"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Reconnaître acceptation refus et effets partiels sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PlanApplicationResult"
+          ],
+          "R": [
+            "PlanApplication",
+            "RecognizedEffects",
+            "ResultIdentity"
+          ],
+          "W": [
+            "PlanApplication"
+          ],
+          "X": [
+            "UnappliedChanges",
+            "RecalculationNotice"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        },
+        {
+          "id": "plan-monitor",
+          "label": "Restituer écarts et besoins de réexamen",
+          "capabilities": [
+            "BC-035"
+          ],
+          "scenario_refs": [
+            "forecast-to-shortage-arbitration",
+            "preorder-future-availability",
+            "planning-actuals-feedback",
+            "shortage-reassessment",
+            "seasonal-order-backlog"
+          ],
+          "trigger": "Restituer écarts et besoins de réexamen sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PlanMonitoringRequest"
+          ],
+          "R": [
+            "MasterPlan",
+            "PlanApplication",
+            "CurrentFacts",
+            "CoverageGaps"
+          ],
+          "W": [],
+          "X": [
+            "PlanMonitoring"
+          ],
+          "scope_reason": "Calculs internes et ingestion externe distincts. Prévision source et calculateurs spécialisés ne sont pas reconstruits. Les commandes et résultats métier sont comptés, pas chaque étape interne d’un même algorithme. Le moteur de jobs fournit le lancement et la reprise techniques."
+        }
+      ],
+      "basis_path": "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-planning.json",
+      "benchmark": {
+        "hours_per_CFP": 20,
+        "factor": 1,
+        "day_hours": 7
+      },
+      "baseline_CFP": 74,
+      "removed_process_ids": [
+        "master-plan-P01",
+        "master-plan-P02",
+        "master-plan-P03",
+        "master-plan-P04",
+        "master-plan-P05",
+        "master-plan-P06",
+        "plan-preparation-P01",
+        "plan-preparation-P02",
+        "plan-preparation-P03",
+        "plan-preparation-P04",
+        "plan-preparation-P05"
+      ],
+      "kept_process_ids": [],
+      "CFP": 116,
+      "raw_jh": 331.42857142857144,
+      "rounding_jh": 10,
+      "proposal_jh": 330,
+      "recipe": "scenario_scope_revision_v1",
+      "status": "proposal_not_adopted",
+      "baseline_jh": 250,
+      "unit_id": "master-plan-java-spring",
+      "delta_jh": 80,
+      "supersedes_policy_revision": false,
+      "proposal_sources": {
+        "audits/2026-11-02-proposition-perimetre-complete/master-plan-java-spring.json": "64cf3d029db8654f97b7574e049cb83a28d140407d5c2d3dbc82c78ab88fc852"
+      }
+    },
+    {
+      "id": "orders-java-spring",
+      "basis": "orders",
+      "assessment": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points.",
+      "processes": [
+        {
+          "id": "order-admit",
+          "label": "Recevoir une commande typée et ses lignes",
+          "capabilities": [
+            "BC-020",
+            "BC-021",
+            "BC-022",
+            "BC-023",
+            "BC-024"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Recevoir une commande typée et ses lignes sur commande explicite ou résultat corrélé.",
+          "E": [
+            "OrderContribution"
+          ],
+          "R": [
+            "BusinessReferences",
+            "Agreement",
+            "OrderIdentity"
+          ],
+          "W": [
+            "Order"
+          ],
+          "X": [
+            "AdmissionOutcome"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "order-commit",
+          "label": "Accepter ou réviser un engagement de commande",
+          "capabilities": [
+            "BC-020",
+            "BC-021",
+            "BC-022"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Accepter ou réviser un engagement de commande sur commande explicite ou résultat corrélé.",
+          "E": [
+            "CommitmentResponse"
+          ],
+          "R": [
+            "Order",
+            "ProposedCommitment",
+            "Agreement",
+            "Authority"
+          ],
+          "W": [
+            "OrderCommitment"
+          ],
+          "X": [
+            "CommitmentOutcome"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "order-cancel",
+          "label": "Autoriser une annulation totale ou partielle",
+          "capabilities": [
+            "BC-020",
+            "BC-021",
+            "BC-022"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Autoriser une annulation totale ou partielle sur commande explicite ou résultat corrélé.",
+          "E": [
+            "CancellationCommand"
+          ],
+          "R": [
+            "Order",
+            "OrderCommitment",
+            "RealizedQuantities",
+            "Agreement"
+          ],
+          "W": [
+            "CancellationDecision",
+            "OrderBalance"
+          ],
+          "X": [
+            "CancellationOutcome",
+            "ChangeRequest"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "order-preorder",
+          "label": "Faire progresser la précommande avec la même identité",
+          "capabilities": [
+            "BC-020"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Faire progresser la précommande avec la même identité sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PreorderTransition"
+          ],
+          "R": [
+            "Order",
+            "AdmissiblePromise",
+            "AcceptedConditions"
+          ],
+          "W": [
+            "Order"
+          ],
+          "X": [
+            "TransitionOutcome"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "order-firm",
+          "label": "Affermir un achat planifié avec filiation et notification au plan",
+          "capabilities": [
+            "BC-021"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Affermir un achat planifié avec filiation et notification au plan sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PurchaseFirmingCommand"
+          ],
+          "R": [
+            "PlannedPurchase",
+            "AcceptedTerms",
+            "Authority",
+            "ExistingFirmingLink"
+          ],
+          "W": [
+            "PurchaseOrder",
+            "FirmingLink"
+          ],
+          "X": [
+            "FirmingOutcome",
+            "PlanReplacementNotice"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "order-split",
+          "label": "Scinder en préservant quantités liens et engagements",
+          "capabilities": [
+            "BC-027"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Scinder en préservant quantités liens et engagements sur commande explicite ou résultat corrélé.",
+          "E": [
+            "SplitCommand"
+          ],
+          "R": [
+            "Order",
+            "Commitment",
+            "Assignment",
+            "ReservationReference"
+          ],
+          "W": [
+            "OrderLineage",
+            "Order"
+          ],
+          "X": [
+            "SplitOutcome",
+            "ChangeRequests"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "order-group",
+          "label": "Regrouper sans effacer les identités de commande",
+          "capabilities": [
+            "BC-027"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Regrouper sans effacer les identités de commande sur commande explicite ou résultat corrélé.",
+          "E": [
+            "GroupingCommand"
+          ],
+          "R": [
+            "Order",
+            "CompatibilityConditions",
+            "Commitment"
+          ],
+          "W": [
+            "OrderGroup"
+          ],
+          "X": [
+            "GroupingOutcome"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "order-merge",
+          "label": "Fusionner les commandes compatibles",
+          "capabilities": [
+            "BC-027"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Fusionner les commandes compatibles sur commande explicite ou résultat corrélé.",
+          "E": [
+            "MergeCommand"
+          ],
+          "R": [
+            "Order",
+            "Commitment",
+            "RealizedQuantities",
+            "CompatibilityConditions"
+          ],
+          "W": [
+            "Order",
+            "OrderLineage"
+          ],
+          "X": [
+            "MergeOutcome"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "order-result",
+          "label": "Rapprocher résultats et reste à satisfaire",
+          "capabilities": [
+            "BC-020",
+            "BC-021",
+            "BC-022",
+            "BC-023",
+            "BC-024"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Rapprocher résultats et reste à satisfaire sur commande explicite ou résultat corrélé.",
+          "E": [
+            "RecognizedOrderResult"
+          ],
+          "R": [
+            "OrderCommitment",
+            "ResultIdentity",
+            "OrderBalance"
+          ],
+          "W": [
+            "OrderBalance"
+          ],
+          "X": [
+            "BalanceOutcome"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "order-release",
+          "label": "Appliquer une autorisation aux seules lignes à livrer",
+          "capabilities": [
+            "BC-020"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Appliquer une autorisation aux seules lignes à livrer sur commande explicite ou résultat corrélé.",
+          "E": [
+            "DeliveryAuthorization"
+          ],
+          "R": [
+            "OrderCommitment",
+            "DeliveryDecision",
+            "OrderBalance"
+          ],
+          "W": [
+            "OrderRelease"
+          ],
+          "X": [
+            "ReleasedLines",
+            "RemainingLines"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "consignment-request",
+          "label": "Demander apport ou reprise sous accord de consignation",
+          "capabilities": [
+            "BC-023",
+            "BC-024"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Demander apport ou reprise sous accord de consignation sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ConsignmentCommand"
+          ],
+          "R": [
+            "Agreement",
+            "OwnershipPosition",
+            "OrderBalance"
+          ],
+          "W": [
+            "ConsignmentOrder"
+          ],
+          "X": [
+            "ConsignmentOutcome"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "return-admit",
+          "label": "Enregistrer un retour et sa résolution autorisée",
+          "capabilities": [
+            "BC-025",
+            "BC-026"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Enregistrer un retour et sa résolution autorisée sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ReturnAuthorization"
+          ],
+          "R": [
+            "OriginalOrder",
+            "Agreement",
+            "GoodsIdentity",
+            "AuthorizedResolution"
+          ],
+          "W": [
+            "ReturnOrder",
+            "ReturnResolution"
+          ],
+          "X": [
+            "ReturnOutcome"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "return-provider",
+          "label": "Lier le retour fournisseur à ses attentes propres",
+          "capabilities": [
+            "BC-026"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Lier le retour fournisseur à ses attentes propres sur commande explicite ou résultat corrélé.",
+          "E": [
+            "SupplierReturnCommand"
+          ],
+          "R": [
+            "ReturnOrder",
+            "Agreement",
+            "ReplacementOrRepairTerms"
+          ],
+          "W": [
+            "SupplierReturnLink"
+          ],
+          "X": [
+            "ExpectedResolution"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "return-replacement",
+          "label": "Relier la vente de remplacement et son attendu",
+          "capabilities": [
+            "BC-025",
+            "BC-020"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Relier la vente de remplacement et son attendu sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ReplacementAuthorization"
+          ],
+          "R": [
+            "ReturnOrder",
+            "ResolutionTerms",
+            "ExistingReplacement"
+          ],
+          "W": [
+            "ReplacementLink"
+          ],
+          "X": [
+            "ReplacementRequest"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "return-result",
+          "label": "Rapprocher les suites physiques et financières du retour",
+          "capabilities": [
+            "BC-025",
+            "BC-026"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Rapprocher les suites physiques et financières du retour sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ReturnResolutionResult"
+          ],
+          "R": [
+            "ReturnResolution",
+            "ServiceRecognition",
+            "OrderBalance"
+          ],
+          "W": [
+            "ReturnResolution"
+          ],
+          "X": [
+            "RemainingResolution"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "intercompany-link",
+          "label": "Établir les engagements réciproques par ligne et société",
+          "capabilities": [
+            "BC-020",
+            "BC-021",
+            "BC-027"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Établir les engagements réciproques par ligne et société sur commande explicite ou résultat corrélé.",
+          "E": [
+            "IntercompanyAgreementRequest"
+          ],
+          "R": [
+            "CompanyIdentity",
+            "SalesOrder",
+            "PurchaseOrder",
+            "TransferPriceReference"
+          ],
+          "W": [
+            "IntercompanyLinks"
+          ],
+          "X": [
+            "LinkedCommitments"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "intercompany-change",
+          "label": "Recevoir la réponse ou révision de l’autre société",
+          "capabilities": [
+            "BC-020",
+            "BC-021",
+            "BC-027"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Recevoir la réponse ou révision de l’autre société sur commande explicite ou résultat corrélé.",
+          "E": [
+            "IntercompanyResponse"
+          ],
+          "R": [
+            "IntercompanyLinks",
+            "OrderCommitment",
+            "ChangeProposal"
+          ],
+          "W": [
+            "IntercompanyResponse",
+            "OrderCommitment"
+          ],
+          "X": [
+            "AcceptedChanges",
+            "UnresolvedDifferences"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "intercompany-result",
+          "label": "Rapprocher le même réalisé des engagements distincts",
+          "capabilities": [
+            "BC-020",
+            "BC-021"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Rapprocher le même réalisé des engagements distincts sur commande explicite ou résultat corrélé.",
+          "E": [
+            "IntercompanyFulfilmentResult"
+          ],
+          "R": [
+            "IntercompanyLinks",
+            "RecognizedDelivery",
+            "OrderBalance"
+          ],
+          "W": [
+            "OrderBalance",
+            "IntercompanyReconciliation"
+          ],
+          "X": [
+            "RemainingDifferences"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "intercompany-return",
+          "label": "Relier retour partiel et autorisations réciproques",
+          "capabilities": [
+            "BC-025",
+            "BC-026",
+            "BC-027"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Relier retour partiel et autorisations réciproques sur commande explicite ou résultat corrélé.",
+          "E": [
+            "IntercompanyReturnRequest"
+          ],
+          "R": [
+            "IntercompanyLinks",
+            "OriginalInvoice",
+            "ReturnAuthorization"
+          ],
+          "W": [
+            "IntercompanyReturnLinks"
+          ],
+          "X": [
+            "ReturnRequests"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "order-finance-result",
+          "label": "Tenir le traitement acheteur et les attentes financières",
+          "capabilities": [
+            "BC-021",
+            "BC-025",
+            "BC-026"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Tenir le traitement acheteur et les attentes financières sur commande explicite ou résultat corrélé.",
+          "E": [
+            "FinancialRecognitionResult"
+          ],
+          "R": [
+            "IntercompanyLinks",
+            "ReturnResolution",
+            "InvoiceReference",
+            "OrderBalance"
+          ],
+          "W": [
+            "FinancialExpectation"
+          ],
+          "X": [
+            "UnresolvedFinancialAmounts"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        },
+        {
+          "id": "order-query",
+          "label": "Restituer engagements liens et restes de commande",
+          "capabilities": [
+            "BC-020",
+            "BC-021",
+            "BC-022",
+            "BC-023",
+            "BC-024",
+            "BC-025",
+            "BC-026",
+            "BC-027"
+          ],
+          "scenario_refs": [
+            "intercompany-direct-delivery",
+            "intercompany-stock-transfer",
+            "intercompany-partial-return",
+            "order-structuring-engaged",
+            "preorder-future-availability",
+            "supplier-return-outcomes",
+            "return-credit-refund"
+          ],
+          "trigger": "Restituer engagements liens et restes de commande sur commande explicite ou résultat corrélé.",
+          "E": [
+            "OrderQuery"
+          ],
+          "R": [
+            "Order",
+            "OrderCommitment",
+            "OrderBalance",
+            "OrderLineage",
+            "FinancialExpectation"
+          ],
+          "W": [],
+          "X": [
+            "OrderPosition"
+          ],
+          "scope_reason": "Remplacement des sept fonctions génériques. Commandes typées mutualisées, engagements réciproques et attentes financières distingués. Stock, propriété, prestations et workflow sont consommés sans les reconstruire. Un type de commande ou une société ne multiplie pas les points."
+        }
+      ],
+      "basis_path": "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-orders.json",
+      "benchmark": {
+        "hours_per_CFP": 20,
+        "factor": 1,
+        "day_hours": 7
+      },
+      "baseline_CFP": 58,
+      "removed_process_ids": [
+        "orders-P01",
+        "orders-P02",
+        "orders-P03",
+        "orders-P04",
+        "orders-P05",
+        "orders-P06",
+        "orders-P07"
+      ],
+      "kept_process_ids": [],
+      "CFP": 147,
+      "raw_jh": 420.0,
+      "rounding_jh": 10,
+      "proposal_jh": 420,
+      "recipe": "scenario_scope_revision_v1",
+      "status": "proposal_not_adopted",
+      "baseline_jh": 170,
+      "unit_id": "orders-java-spring",
+      "delta_jh": 250,
+      "supersedes_policy_revision": false,
+      "proposal_sources": {
+        "audits/2026-11-02-proposition-perimetre-complete/orders-java-spring.json": "03cf49f7908e6b0832260b5bcf5de665b0044f1fd68256f13f2c1d981ed2ad29"
+      }
+    },
+    {
+      "id": "service-fulfilment-java-spring",
+      "basis": "services",
+      "assessment": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique.",
+      "processes": [
+        {
+          "id": "service-admit",
+          "label": "Enregistrer une demande de prestation typée",
+          "capabilities": [
+            "BC-059",
+            "BC-060",
+            "BC-061",
+            "BC-062",
+            "BC-063",
+            "BC-064",
+            "BC-065",
+            "BC-066",
+            "BC-067",
+            "BC-068",
+            "BC-069",
+            "BC-070",
+            "BC-071",
+            "BC-072",
+            "BC-073",
+            "BC-074",
+            "BC-075"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Enregistrer une demande de prestation typée sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ServiceOrderCommand"
+          ],
+          "R": [
+            "ServiceReference",
+            "Requirements",
+            "Authority",
+            "ExistingRequest"
+          ],
+          "W": [
+            "ServiceOrder"
+          ],
+          "X": [
+            "AdmissionOutcome"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "service-commit",
+          "label": "Recevoir les engagements et changements du prestataire",
+          "capabilities": [
+            "BC-059",
+            "BC-060",
+            "BC-061",
+            "BC-062",
+            "BC-063",
+            "BC-064",
+            "BC-065",
+            "BC-066",
+            "BC-067",
+            "BC-068",
+            "BC-069",
+            "BC-070",
+            "BC-071",
+            "BC-072",
+            "BC-073"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Recevoir les engagements et changements du prestataire sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ProviderCommitmentResponse"
+          ],
+          "R": [
+            "ServiceOrder",
+            "ExistingCommitment",
+            "Agreement"
+          ],
+          "W": [
+            "ServiceCommitment"
+          ],
+          "X": [
+            "CommitmentOutcome"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "service-track",
+          "label": "Intégrer un fait ou une estimation avec sa provenance",
+          "capabilities": [
+            "BC-056"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Intégrer un fait ou une estimation avec sa provenance sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ServiceEvent"
+          ],
+          "R": [
+            "ServiceOrder",
+            "EventIdentity",
+            "SourceContract"
+          ],
+          "W": [
+            "ServiceEvent"
+          ],
+          "X": [
+            "EventAdmission"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "service-reconcile",
+          "label": "Rapprocher attendu et résultats partiels reconnus",
+          "capabilities": [
+            "BC-057"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Rapprocher attendu et résultats partiels reconnus sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ServiceReconciliationRequest"
+          ],
+          "R": [
+            "ServiceCommitment",
+            "ServiceEvent",
+            "PriorRecognitions"
+          ],
+          "W": [
+            "ServiceRecognition"
+          ],
+          "X": [
+            "RecognizedResult",
+            "OutstandingResults"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "service-correct",
+          "label": "Qualifier une contradiction ou corriger le reconnu",
+          "capabilities": [
+            "BC-056",
+            "BC-057"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Qualifier une contradiction ou corriger le reconnu sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ServiceCorrectionCommand"
+          ],
+          "R": [
+            "ServiceEvent",
+            "ServiceRecognition",
+            "SupportingEvidence",
+            "Authority"
+          ],
+          "W": [
+            "CorrectedRecognition"
+          ],
+          "X": [
+            "CorrectionOutcome",
+            "ConsumerCorrection"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "service-visible",
+          "label": "Restituer les perspectives entrepôt transport magasin",
+          "capabilities": [
+            "BC-058"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Restituer les perspectives entrepôt transport magasin sur commande explicite ou résultat corrélé.",
+          "E": [
+            "OperationsViewRequest"
+          ],
+          "R": [
+            "ServiceOrder",
+            "ServiceCommitment",
+            "ServiceRecognition"
+          ],
+          "W": [],
+          "X": [
+            "OperationsView"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "goods-requirements",
+          "label": "Porter les exigences et preuves du traitement typé",
+          "capabilities": [
+            "BC-059",
+            "BC-060",
+            "BC-061",
+            "BC-062",
+            "BC-063",
+            "BC-064",
+            "BC-065",
+            "BC-066",
+            "BC-067",
+            "BC-068",
+            "BC-069",
+            "BC-070"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Porter les exigences et preuves du traitement typé sur commande explicite ou résultat corrélé.",
+          "E": [
+            "GoodsRequirementsCommand"
+          ],
+          "R": [
+            "GoodsReference",
+            "PackagingSpecification",
+            "ServiceOrder"
+          ],
+          "W": [
+            "TypedGoodsRequirements"
+          ],
+          "X": [
+            "RequirementsOutcome"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "goods-announcement",
+          "label": "Reconnaître unités logistiques et contenus annoncés",
+          "capabilities": [
+            "BC-060",
+            "BC-063",
+            "BC-069",
+            "BC-056"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Reconnaître unités logistiques et contenus annoncés sur commande explicite ou résultat corrélé.",
+          "E": [
+            "HandlingUnitAnnouncement"
+          ],
+          "R": [
+            "ServiceOrder",
+            "GoodsReference",
+            "UnitIdentity",
+            "SourceContract"
+          ],
+          "W": [
+            "AnnouncedHandlingContent"
+          ],
+          "X": [
+            "AnnouncementResult",
+            "StockFactRequest"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "goods-observed",
+          "label": "Reconnaître les contenus réellement constatés",
+          "capabilities": [
+            "BC-060",
+            "BC-063",
+            "BC-069",
+            "BC-056"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Reconnaître les contenus réellement constatés sur commande explicite ou résultat corrélé.",
+          "E": [
+            "HandlingUnitObservation"
+          ],
+          "R": [
+            "AnnouncedHandlingContent",
+            "ServiceOrder",
+            "ObservationEvidence"
+          ],
+          "W": [
+            "ObservedHandlingContent"
+          ],
+          "X": [
+            "ObservedContentResult",
+            "StockFactRequest"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "goods-lineage",
+          "label": "Transmettre assemblage décomposition et personnalisation reconnus",
+          "capabilities": [
+            "BC-063",
+            "BC-067",
+            "BC-056"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Transmettre assemblage décomposition et personnalisation reconnus sur commande explicite ou résultat corrélé.",
+          "E": [
+            "TransformationResult"
+          ],
+          "R": [
+            "ServiceOrder",
+            "GoodsIdentity",
+            "ExpectedComposition"
+          ],
+          "W": [
+            "RecognizedTransformation"
+          ],
+          "X": [
+            "LineageFactRequest",
+            "TransformationOutcome"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "goods-discrepancy",
+          "label": "Qualifier l’écart entre demandé annoncé et reçu",
+          "capabilities": [
+            "BC-057",
+            "BC-060",
+            "BC-069"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Qualifier l’écart entre demandé annoncé et reçu sur commande explicite ou résultat corrélé.",
+          "E": [
+            "GoodsDiscrepancyRequest"
+          ],
+          "R": [
+            "TypedGoodsRequirements",
+            "AnnouncedHandlingContent",
+            "ObservedHandlingContent",
+            "RecognizedTransformation"
+          ],
+          "W": [
+            "GoodsDiscrepancy"
+          ],
+          "X": [
+            "DiscrepancyReport",
+            "OpenQuantities"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "goods-proof",
+          "label": "Reconnaître la preuve partielle du traitement de biens",
+          "capabilities": [
+            "BC-066",
+            "BC-068",
+            "BC-070"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Reconnaître la preuve partielle du traitement de biens sur commande explicite ou résultat corrélé.",
+          "E": [
+            "GoodsServiceProof"
+          ],
+          "R": [
+            "ServiceOrder",
+            "ExpectedProof",
+            "GoodsIdentity"
+          ],
+          "W": [
+            "RecognizedGoodsProof"
+          ],
+          "X": [
+            "ProofOutcome",
+            "OutstandingProof"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "transport-instruct",
+          "label": "Porter arrêts étapes rendez-vous et changements autorisés",
+          "capabilities": [
+            "BC-071"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Porter arrêts étapes rendez-vous et changements autorisés sur commande explicite ou résultat corrélé.",
+          "E": [
+            "TransportInstruction"
+          ],
+          "R": [
+            "ServiceOrder",
+            "AuthorizedRoute",
+            "AcceptedConditions"
+          ],
+          "W": [
+            "TransportInstruction"
+          ],
+          "X": [
+            "InstructionOutcome"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "transport-book",
+          "label": "Demander une réservation autonome de transport",
+          "capabilities": [
+            "BC-072"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Demander une réservation autonome de transport sur commande explicite ou résultat corrélé.",
+          "E": [
+            "TransportBookingCommand"
+          ],
+          "R": [
+            "ServiceReference",
+            "CapacityConditions",
+            "ExistingBooking"
+          ],
+          "W": [
+            "TransportBookingRequest"
+          ],
+          "X": [
+            "BookingRequest"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "transport-book-result",
+          "label": "Reconnaître confirmation changement ou libération du booking",
+          "capabilities": [
+            "BC-072"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Reconnaître confirmation changement ou libération du booking sur commande explicite ou résultat corrélé.",
+          "E": [
+            "BookingResponse"
+          ],
+          "R": [
+            "TransportBookingRequest",
+            "ProviderCommitment"
+          ],
+          "W": [
+            "TransportBooking"
+          ],
+          "X": [
+            "BookingOutcome"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "customs-request",
+          "label": "Confier le dossier de dédouanement",
+          "capabilities": [
+            "BC-073"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Confier le dossier de dédouanement sur commande explicite ou résultat corrélé.",
+          "E": [
+            "CustomsServiceRequest"
+          ],
+          "R": [
+            "GoodsReferences",
+            "RequiredDocuments",
+            "Agreement"
+          ],
+          "W": [
+            "CustomsCase"
+          ],
+          "X": [
+            "CustomsRequest"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "customs-doc",
+          "label": "Reconnaître pièces requises manquantes ou fournies",
+          "capabilities": [
+            "BC-073"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Reconnaître pièces requises manquantes ou fournies sur commande explicite ou résultat corrélé.",
+          "E": [
+            "CustomsDocumentResult"
+          ],
+          "R": [
+            "CustomsCase",
+            "DocumentRequirement",
+            "DocumentReference"
+          ],
+          "W": [
+            "CustomsDocumentStatus"
+          ],
+          "X": [
+            "DocumentOutcome",
+            "MissingDocuments"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "customs-result",
+          "label": "Reconnaître l’issue douanière et ses réserves",
+          "capabilities": [
+            "BC-073"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Reconnaître l’issue douanière et ses réserves sur commande explicite ou résultat corrélé.",
+          "E": [
+            "CustomsOutcome"
+          ],
+          "R": [
+            "CustomsCase",
+            "CustomsDocumentStatus",
+            "ProcedureEvidence"
+          ],
+          "W": [
+            "CustomsRecognition"
+          ],
+          "X": [
+            "CustomsResult"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "billing-request",
+          "label": "Demander facture ou avoir sur éléments éligibles",
+          "capabilities": [
+            "BC-074"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Demander facture ou avoir sur éléments éligibles sur commande explicite ou résultat corrélé.",
+          "E": [
+            "BillingCommand"
+          ],
+          "R": [
+            "AuthorizedBillingBasis",
+            "OrderReferences",
+            "Agreement",
+            "ExistingBilling"
+          ],
+          "W": [
+            "BillingRequest"
+          ],
+          "X": [
+            "InvoiceOrCreditRequest"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "billing-result",
+          "label": "Reconnaître facture avoir rejet ou correction",
+          "capabilities": [
+            "BC-074"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Reconnaître facture avoir rejet ou correction sur commande explicite ou résultat corrélé.",
+          "E": [
+            "BillingResult"
+          ],
+          "R": [
+            "BillingRequest",
+            "ExternalDocumentIdentity",
+            "PriorRecognition"
+          ],
+          "W": [
+            "InvoiceRecognition"
+          ],
+          "X": [
+            "BillingOutcome",
+            "UnresolvedBilling"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "payment-request",
+          "label": "Demander encaissement ou remboursement autorisé",
+          "capabilities": [
+            "BC-075"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Demander encaissement ou remboursement autorisé sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PaymentCommand"
+          ],
+          "R": [
+            "AuthorizedAmount",
+            "InvoiceRecognition",
+            "ExistingPaymentRequest"
+          ],
+          "W": [
+            "PaymentRequest"
+          ],
+          "X": [
+            "ExternalPaymentRequest"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "payment-result",
+          "label": "Reconnaître paiement partiel échec ou correction",
+          "capabilities": [
+            "BC-075"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Reconnaître paiement partiel échec ou correction sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PaymentResult"
+          ],
+          "R": [
+            "PaymentRequest",
+            "ExternalTransactionIdentity",
+            "PriorRecognition"
+          ],
+          "W": [
+            "PaymentRecognition"
+          ],
+          "X": [
+            "PaymentOutcome",
+            "RemainingAmount"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        },
+        {
+          "id": "service-close",
+          "label": "Autoriser la clôture partielle avec reste expliqué",
+          "capabilities": [
+            "BC-057",
+            "BC-059",
+            "BC-060",
+            "BC-061",
+            "BC-062",
+            "BC-063",
+            "BC-064",
+            "BC-065",
+            "BC-066",
+            "BC-067",
+            "BC-068",
+            "BC-069",
+            "BC-070",
+            "BC-071",
+            "BC-072",
+            "BC-073",
+            "BC-074",
+            "BC-075"
+          ],
+          "scenario_refs": [
+            "packaging-receipt-variance",
+            "gift-kits-crossdock",
+            "trace-accessory-kits",
+            "partial-receiving",
+            "remote-payment-ambiguous",
+            "return-credit-refund",
+            "damaged-stock-disposition",
+            "export-remote-services",
+            "transport-missed-connection"
+          ],
+          "trigger": "Autoriser la clôture partielle avec reste expliqué sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ServiceClosureCommand"
+          ],
+          "R": [
+            "ServiceCommitment",
+            "ServiceRecognition",
+            "Authority",
+            "OpenQuantities"
+          ],
+          "W": [
+            "ServiceClosure"
+          ],
+          "X": [
+            "ClosureOutcome"
+          ],
+          "scope_reason": "Contrats et reconnaissance des faits sans refaire les opérations des exécutants. Les douze traitements partagent le cycle. Stock tient la filiation et les registres, contrôles décide du devenir, décisions choisit et coordonne, Process Management traite les tâches humaines. Connecteurs Beaumanoir, fiscalité et banque restent hors construction générique."
+        }
+      ],
+      "basis_path": "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-services.json",
+      "benchmark": {
+        "hours_per_CFP": 20,
+        "factor": 1,
+        "day_hours": 7
+      },
+      "baseline_CFP": 135,
+      "removed_process_ids": [
+        "assurance-P02",
+        "assurance-P03",
+        "assurance-P04",
+        "goods-orders-P01",
+        "goods-orders-P02",
+        "goods-orders-P04",
+        "transport-orders-P01",
+        "transport-orders-P02",
+        "transport-orders-P03",
+        "transport-orders-P04",
+        "transport-orders-P05",
+        "customs-P01",
+        "customs-P02",
+        "customs-P03",
+        "financial-services-P01",
+        "financial-services-P02",
+        "financial-services-P03",
+        "financial-services-P04",
+        "financial-services-P05",
+        "service-result-received"
+      ],
+      "kept_process_ids": [],
+      "CFP": 152,
+      "raw_jh": 434.2857142857143,
+      "rounding_jh": 10,
+      "proposal_jh": 430,
+      "recipe": "scenario_scope_revision_v1",
+      "status": "proposal_not_adopted",
+      "baseline_jh": 420,
+      "unit_id": "service-fulfilment-java-spring",
+      "delta_jh": 10,
+      "supersedes_policy_revision": false,
+      "proposal_sources": {
+        "audits/2026-11-02-proposition-perimetre-complete/service-fulfilment-java-spring.json": "e8fbeb0e963a16f2b90faffca457e4cb0212b5362ba6bcfa1b80ef5cfd8088dc"
+      }
+    },
+    {
+      "id": "supply-controls-java-spring",
+      "basis": "controls",
+      "assessment": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH.",
+      "processes": [
+        {
+          "id": "policy-strategy",
+          "label": "Définir et réviser une stratégie",
+          "E": [
+            "StrategyCommand"
+          ],
+          "R": [
+            "BusinessReferences",
+            "Strategy",
+            "Rights"
+          ],
+          "W": [
+            "Strategy",
+            "Audit"
+          ],
+          "X": [
+            "Outcome"
+          ],
+          "scope_reason": "Commande métier propre à la stratégie, hors stockage générique de versions fourni par Master Data.",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock"
+          ],
+          "trigger": "Définir et réviser une stratégie sur commande explicite."
+        },
+        {
+          "id": "policy-scope",
+          "label": "Configurer les bénéficiaires et périmètres",
+          "E": [
+            "ScopeCommand"
+          ],
+          "R": [
+            "BusinessReferences",
+            "ScopeHierarchy",
+            "Rights"
+          ],
+          "W": [
+            "ScopeHierarchy",
+            "Audit"
+          ],
+          "X": [
+            "Outcome",
+            "Diagnostic"
+          ],
+          "scope_reason": "Hiérarchies marque, canal et usage. Pas une création des référentiels maîtres.",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock"
+          ],
+          "trigger": "Configurer les bénéficiaires et périmètres sur commande explicite."
+        },
+        {
+          "id": "policy-protection",
+          "label": "Configurer protections quotas et plafonds",
+          "E": [
+            "ProtectionCommand"
+          ],
+          "R": [
+            "ScopeHierarchy",
+            "Strategy",
+            "Units",
+            "Rights"
+          ],
+          "W": [
+            "ProtectionRules",
+            "Audit"
+          ],
+          "X": [
+            "Outcome"
+          ],
+          "scope_reason": "Définitions de droits collectifs. Les réservations individuelles restent dans Stock. Les compteurs collectifs sont financés ici.",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock"
+          ],
+          "trigger": "Configurer protections quotas et plafonds sur commande explicite."
+        },
+        {
+          "id": "policy-priority",
+          "label": "Configurer priorités et marges de réarbitrage",
+          "E": [
+            "PriorityCommand"
+          ],
+          "R": [
+            "Strategy",
+            "ScopeHierarchy",
+            "Rights"
+          ],
+          "W": [
+            "PriorityRules",
+            "Audit"
+          ],
+          "X": [
+            "Outcome",
+            "Diagnostic"
+          ],
+          "scope_reason": "Définition des règles. Le calcul d’affectation reste dans le lot décisions.",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock"
+          ],
+          "trigger": "Configurer priorités et marges de réarbitrage sur commande explicite."
+        },
+        {
+          "id": "policy-exceptions",
+          "label": "Configurer les dérogations autorisées",
+          "E": [
+            "ExceptionCommand"
+          ],
+          "R": [
+            "Strategy",
+            "Rights",
+            "Authorities"
+          ],
+          "W": [
+            "ExceptionRules",
+            "Audit"
+          ],
+          "X": [
+            "Outcome"
+          ],
+          "scope_reason": "Catalogue de dérogations métier. Le moteur de tâches et d’approbation est consommé.",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock"
+          ],
+          "trigger": "Configurer les dérogations autorisées sur commande explicite."
+        },
+        {
+          "id": "policy-validate",
+          "label": "Contrôler les paramètres et leurs combinaisons",
+          "E": [
+            "ValidationRequest"
+          ],
+          "R": [
+            "Strategy",
+            "ScopeHierarchy",
+            "ProtectionRules",
+            "PriorityRules",
+            "ExceptionRules"
+          ],
+          "W": [
+            "ValidationReport"
+          ],
+          "X": [
+            "Diagnostic"
+          ],
+          "scope_reason": "Contrôle de types, périodes, unités et combinaisons autorisées, distinct de l’enregistrement des brouillons.",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock"
+          ],
+          "trigger": "Contrôler les paramètres et leurs combinaisons sur commande explicite."
+        },
+        {
+          "id": "policy-conflicts",
+          "label": "Détecter les incompatibilités entre politiques",
+          "E": [
+            "ConflictCheckRequest"
+          ],
+          "R": [
+            "PolicySet",
+            "ScopeHierarchy",
+            "ProtectionRules",
+            "PriorityRules",
+            "ExceptionRules"
+          ],
+          "W": [
+            "ConflictReport"
+          ],
+          "X": [
+            "ConflictReport",
+            "Counterexample"
+          ],
+          "scope_reason": "Analyse croisée des priorités, chevauchements et protections sous un langage de règles borné. Pas preuve formelle de tout programme arbitraire.",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock"
+          ],
+          "trigger": "Détecter les incompatibilités entre politiques sur commande explicite."
+        },
+        {
+          "id": "policy-commitments",
+          "label": "Contrôler la compatibilité avec les engagements",
+          "E": [
+            "ImpactRequest"
+          ],
+          "R": [
+            "CandidatePolicy",
+            "ActivePolicy",
+            "StockCommitments",
+            "Assignments",
+            "Rights"
+          ],
+          "W": [
+            "ImpactReport"
+          ],
+          "X": [
+            "ImpactReport",
+            "Rejections"
+          ],
+          "scope_reason": "Interrogation des moteurs existants et interprétation métier de l’impact. Pas second moteur Stock ni second solveur.",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock"
+          ],
+          "trigger": "Contrôler la compatibilité avec les engagements sur commande explicite."
+        },
+        {
+          "id": "policy-tests",
+          "label": "Exécuter un jeu de tests de politique",
+          "E": [
+            "TestRunRequest"
+          ],
+          "R": [
+            "PolicyVersion",
+            "TestCases",
+            "ExpectedOutcomes",
+            "Rights"
+          ],
+          "W": [
+            "TestRun",
+            "TestResults"
+          ],
+          "X": [
+            "TestResults"
+          ],
+          "scope_reason": "Jeux de cas de règles. Réutilisation des calculs de plan, promesse et réservation, sans refaire leur simulation.",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock"
+          ],
+          "trigger": "Exécuter un jeu de tests de politique sur commande explicite."
+        },
+        {
+          "id": "policy-activate",
+          "label": "Planifier et autoriser une activation",
+          "E": [
+            "ActivationCommand"
+          ],
+          "R": [
+            "PolicyVersion",
+            "ValidationReport",
+            "ConflictReport",
+            "ImpactReport",
+            "Rights"
+          ],
+          "W": [
+            "PolicyActivation",
+            "Audit"
+          ],
+          "X": [
+            "Outcome"
+          ],
+          "scope_reason": "Remplace le processus initial d’activation. Master Data conserve les versions et Process Management les approbations.",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock"
+          ],
+          "trigger": "Planifier et autoriser une activation sur commande explicite."
+        },
+        {
+          "id": "policy-resolve",
+          "label": "Résoudre les règles applicables à un contexte",
+          "E": [
+            "PolicyQuery"
+          ],
+          "R": [
+            "ActivePolicy",
+            "ScopeHierarchy",
+            "ProtectionRules",
+            "PriorityRules",
+            "ExceptionRules"
+          ],
+          "W": [
+            "PolicyResolution"
+          ],
+          "X": [
+            "ApplicableRules"
+          ],
+          "scope_reason": "Service de résolution pour les consommateurs. Il ne choisit pas l’affectation ni ne réserve la ressource.",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock"
+          ],
+          "trigger": "Résoudre les règles applicables à un contexte sur commande explicite."
+        },
+        {
+          "id": "policy-explain",
+          "label": "Expliquer une règle appliquée ou écartée",
+          "E": [
+            "ExplanationQuery"
+          ],
+          "R": [
+            "PolicyResolution",
+            "PolicyVersion",
+            "Audit"
+          ],
+          "W": [
+            "PolicyExplanation"
+          ],
+          "X": [
+            "Explanation"
+          ],
+          "scope_reason": "Remplace l’explication générique initiale avec raisons des choix et conflits.",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock"
+          ],
+          "trigger": "Expliquer une règle appliquée ou écartée sur commande explicite."
+        },
+        {
+          "id": "policy-withdraw",
+          "label": "Suspendre ou retirer une politique",
+          "E": [
+            "WithdrawalCommand"
+          ],
+          "R": [
+            "PolicyActivation",
+            "StockCommitments",
+            "Assignments",
+            "Rights"
+          ],
+          "W": [
+            "PolicyActivation",
+            "Audit"
+          ],
+          "X": [
+            "Outcome"
+          ],
+          "scope_reason": "Contrôle métier du retrait. La sauvegarde et le retour technique de version restent fournis.",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock"
+          ],
+          "trigger": "Suspendre ou retirer une politique sur commande explicite."
+        },
+        {
+          "id": "eligibility-maintain",
+          "label": "Tenir une restriction de prestataire",
+          "capabilities": [
+            "BC-001"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Tenir une restriction de prestataire sur commande explicite ou résultat corrélé.",
+          "E": [
+            "RestrictionCommand"
+          ],
+          "R": [
+            "Party",
+            "Agreement",
+            "Restriction"
+          ],
+          "W": [
+            "Restriction"
+          ],
+          "X": [
+            "Outcome"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "eligibility-check",
+          "label": "Contrôler une nouvelle sollicitation",
+          "capabilities": [
+            "BC-001"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Contrôler une nouvelle sollicitation sur commande explicite ou résultat corrélé.",
+          "E": [
+            "EligibilityRequest"
+          ],
+          "R": [
+            "Restriction",
+            "Agreement"
+          ],
+          "W": [
+            "EligibilityDecision"
+          ],
+          "X": [
+            "EligibilityDecision"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "eligibility-impact",
+          "label": "Exposer les engagements touchés par une désactivation",
+          "capabilities": [
+            "BC-001"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Exposer les engagements touchés par une désactivation sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ImpactRequest"
+          ],
+          "R": [
+            "Restriction",
+            "ServiceCommitment"
+          ],
+          "W": [
+            "ImpactReport"
+          ],
+          "X": [
+            "ImpactReport"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "pool-allocate",
+          "label": "Créer ou corriger une enveloppe de droits collectifs",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Créer ou corriger une enveloppe de droits collectifs sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PoolCommand"
+          ],
+          "R": [
+            "ActivePolicy",
+            "GroupHierarchy",
+            "StockPosition",
+            "PoolState"
+          ],
+          "W": [
+            "PoolState",
+            "PoolMovement"
+          ],
+          "X": [
+            "Outcome"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "pool-consume",
+          "label": "Consommer atomiquement les droits des groupes admissibles",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Consommer atomiquement les droits des groupes admissibles sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ConsumptionCommand"
+          ],
+          "R": [
+            "ActivePolicy",
+            "GroupHierarchy",
+            "PoolState",
+            "ConsumptionIdentity"
+          ],
+          "W": [
+            "PoolState",
+            "PoolMovement"
+          ],
+          "X": [
+            "ConsumptionOutcome"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "pool-reverse",
+          "label": "Restituer les droits après annulation ou correction",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Restituer les droits après annulation ou correction sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ReversalCommand"
+          ],
+          "R": [
+            "PoolMovement",
+            "PoolState",
+            "ActivePolicy"
+          ],
+          "W": [
+            "PoolState",
+            "PoolMovement"
+          ],
+          "X": [
+            "ReversalOutcome"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "pool-transfer",
+          "label": "Réviser les droits entre bénéficiaires sous autorité",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Réviser les droits entre bénéficiaires sous autorité sur commande explicite ou résultat corrélé.",
+          "E": [
+            "GroupTransferCommand"
+          ],
+          "R": [
+            "ActivePolicy",
+            "GroupHierarchy",
+            "PoolState",
+            "ExistingCommitments"
+          ],
+          "W": [
+            "PoolState",
+            "PoolMovement"
+          ],
+          "X": [
+            "TransferOutcome",
+            "ImpactReport"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "pool-read",
+          "label": "Consulter alloué consommé et restant",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Consulter alloué consommé et restant sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PoolQuery"
+          ],
+          "R": [
+            "PoolState",
+            "PoolMovement",
+            "GroupHierarchy"
+          ],
+          "W": [],
+          "X": [
+            "PoolPosition"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "pool-reconcile",
+          "label": "Rapprocher consommation des droits et effets reconnus",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Rapprocher consommation des droits et effets reconnus sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PoolReconciliationRequest"
+          ],
+          "R": [
+            "PoolState",
+            "PoolMovement",
+            "RecognizedEffects"
+          ],
+          "W": [
+            "PoolReconciliation"
+          ],
+          "X": [
+            "DiscrepancyReport"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "season-context",
+          "label": "Définir le contexte opérationnel article usage marché saison",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Définir le contexte opérationnel article usage marché saison sur commande explicite ou résultat corrélé.",
+          "E": [
+            "SeasonContextCommand"
+          ],
+          "R": [
+            "BusinessReferences",
+            "ActivePolicy",
+            "SeasonContext"
+          ],
+          "W": [
+            "SeasonContext"
+          ],
+          "X": [
+            "Outcome"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "season-propose",
+          "label": "Préparer une bascule partielle en permanent",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Préparer une bascule partielle en permanent sur commande explicite ou résultat corrélé.",
+          "E": [
+            "CarryOverRequest"
+          ],
+          "R": [
+            "SeasonContext",
+            "StockPosition",
+            "ExistingCommitments",
+            "ActivePolicy"
+          ],
+          "W": [
+            "CarryOverProposal"
+          ],
+          "X": [
+            "CarryOverImpact"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "season-activate",
+          "label": "Autoriser la bascule opérationnelle retenue",
+          "capabilities": [
+            "BC-008"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Autoriser la bascule opérationnelle retenue sur commande explicite ou résultat corrélé.",
+          "E": [
+            "CarryOverActivation"
+          ],
+          "R": [
+            "CarryOverProposal",
+            "Rights",
+            "ExistingCommitments"
+          ],
+          "W": [
+            "SeasonContext",
+            "CarryOverDecision"
+          ],
+          "X": [
+            "ActivationOutcome"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "disposition-context",
+          "label": "Qualifier les biens et quantités concernés par un devenir",
+          "capabilities": [
+            "BC-019"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Qualifier les biens et quantités concernés par un devenir sur commande explicite ou résultat corrélé.",
+          "E": [
+            "DispositionRequest"
+          ],
+          "R": [
+            "InspectionFact",
+            "GoodsLineage",
+            "Ownership",
+            "ActivePolicy"
+          ],
+          "W": [
+            "DispositionCase"
+          ],
+          "X": [
+            "DispositionContext"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "disposition-options",
+          "label": "Déterminer les usages et traitements autorisés",
+          "capabilities": [
+            "BC-019"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Déterminer les usages et traitements autorisés sur commande explicite ou résultat corrélé.",
+          "E": [
+            "DispositionEligibilityRequest"
+          ],
+          "R": [
+            "DispositionCase",
+            "ActivePolicy",
+            "ExistingCommitments"
+          ],
+          "W": [
+            "DispositionOptions"
+          ],
+          "X": [
+            "AdmissibilityReport"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "disposition-value",
+          "label": "Comparer valeur récupérable coûts délais et risques",
+          "capabilities": [
+            "BC-019"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Comparer valeur récupérable coûts délais et risques sur commande explicite ou résultat corrélé.",
+          "E": [
+            "RecoveryComparisonRequest"
+          ],
+          "R": [
+            "DispositionOptions",
+            "ServicePriceBook",
+            "LeadTime",
+            "RiskAssumptions"
+          ],
+          "W": [
+            "RecoveryComparison"
+          ],
+          "X": [
+            "RecoveryComparison"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "disposition-decide",
+          "label": "Autoriser une destination pour les quantités retenues",
+          "capabilities": [
+            "BC-019"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Autoriser une destination pour les quantités retenues sur commande explicite ou résultat corrélé.",
+          "E": [
+            "DispositionDecisionCommand"
+          ],
+          "R": [
+            "RecoveryComparison",
+            "ActivePolicy",
+            "Rights"
+          ],
+          "W": [
+            "DispositionDecision"
+          ],
+          "X": [
+            "Outcome",
+            "EffectRequest"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        },
+        {
+          "id": "disposition-result",
+          "label": "Rapprocher les effets du devenir et maintenir les restes",
+          "capabilities": [
+            "BC-019"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "redistribute-protected-stock",
+            "damaged-stock-disposition",
+            "service-policy-deactivation"
+          ],
+          "trigger": "Rapprocher les effets du devenir et maintenir les restes sur commande explicite ou résultat corrélé.",
+          "E": [
+            "DispositionEffectResult"
+          ],
+          "R": [
+            "DispositionDecision",
+            "RecognizedServiceResult"
+          ],
+          "W": [
+            "DispositionCase"
+          ],
+          "X": [
+            "OpenQuantities"
+          ],
+          "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+        }
+      ],
+      "basis_path": "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-controls.json",
+      "benchmark": {
+        "hours_per_CFP": 20,
+        "factor": 1,
+        "day_hours": 7
+      },
+      "baseline_CFP": 64,
+      "removed_process_ids": [
+        "eligibility-P01",
+        "eligibility-P02",
+        "eligibility-P03",
+        "policies-P01",
+        "policies-P02",
+        "policies-P03",
+        "disposition-P01",
+        "disposition-P02",
+        "disposition-P03",
+        "disposition-P04"
+      ],
+      "kept_process_ids": [],
+      "CFP": 214,
+      "raw_jh": 611.4285714285714,
+      "rounding_jh": 10,
+      "proposal_jh": 610,
+      "recipe": "scenario_scope_revision_v1",
+      "status": "proposal_not_adopted",
+      "baseline_jh": 50,
+      "unit_id": "supply-controls-java-spring",
+      "delta_jh": 560,
+      "supersedes_policy_revision": true,
+      "proposal_sources": {
+        "audits/2026-11-02-proposition-perimetre-complete/supply-controls-java-spring.json": "0426a6d2a16ecd50be15120d1df84e112175b6d7f044a82c2ba5741b0aa37188"
+      }
+    },
+    {
+      "id": "supply-decisions-java-spring",
+      "basis": "decisions",
+      "assessment": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan.",
+      "processes": [
+        {
+          "id": "backlog-rank",
+          "label": "Classer collectivement les demandes sur un contexte commun",
+          "capabilities": [
+            "BC-036"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Classer collectivement les demandes sur un contexte commun sur commande explicite ou résultat corrélé.",
+          "E": [
+            "BacklogPriorityRequest"
+          ],
+          "R": [
+            "DemandSnapshot",
+            "ActivePolicy",
+            "ExistingCommitments"
+          ],
+          "W": [
+            "DemandPriority"
+          ],
+          "X": [
+            "RankedBacklog"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "backlog-assign",
+          "label": "Affecter les ressources en préservant les liens protégés",
+          "capabilities": [
+            "BC-037"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Affecter les ressources en préservant les liens protégés sur commande explicite ou résultat corrélé.",
+          "E": [
+            "AssignmentRequest"
+          ],
+          "R": [
+            "DemandPriority",
+            "StockSnapshot",
+            "SupplySnapshot",
+            "ActivePolicy",
+            "ExistingAssignments"
+          ],
+          "W": [
+            "AssignmentProposal"
+          ],
+          "X": [
+            "AssignmentResult",
+            "UncoveredDemand"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "backlog-reassign",
+          "label": "Réexaminer les liens autorisés et leurs effets collectifs",
+          "capabilities": [
+            "BC-037"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Réexaminer les liens autorisés et leurs effets collectifs sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ReassignmentRequest"
+          ],
+          "R": [
+            "AssignmentProposal",
+            "CurrentAssignments",
+            "ChangedResources",
+            "ProtectedCommitments",
+            "ActivePolicy"
+          ],
+          "W": [
+            "AssignmentProposal"
+          ],
+          "X": [
+            "AssignmentImpacts",
+            "UncoveredDemand"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "backlog-release",
+          "label": "Décider livraison complète ou partiel admissible",
+          "capabilities": [
+            "BC-038"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Décider livraison complète ou partiel admissible sur commande explicite ou résultat corrélé.",
+          "E": [
+            "DeliveryReleaseRequest"
+          ],
+          "R": [
+            "OrderCommitment",
+            "AssignmentProposal",
+            "AssortmentRequirement",
+            "AcceptedConditions",
+            "ActivePolicy"
+          ],
+          "W": [
+            "DeliveryDecision"
+          ],
+          "X": [
+            "DeliveryAuthorization",
+            "RemainingDemand"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "backlog-no-solution",
+          "label": "Expliquer les réponses non admissibles et le réexamen",
+          "capabilities": [
+            "BC-036",
+            "BC-037",
+            "BC-038"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Expliquer les réponses non admissibles et le réexamen sur commande explicite ou résultat corrélé.",
+          "E": [
+            "BacklogExplanationRequest"
+          ],
+          "R": [
+            "AssignmentProposal",
+            "DemandPriority",
+            "DeliveryDecision",
+            "ConstraintDiagnostics"
+          ],
+          "W": [],
+          "X": [
+            "RejectionExplanation",
+            "ReassessmentConditions"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "opt-targets-local",
+          "label": "Recommander les objectifs de stock magasin ou centre",
+          "capabilities": [
+            "BC-040"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Recommander les objectifs de stock magasin ou centre sur commande explicite ou résultat corrélé.",
+          "E": [
+            "LocalTargetOptimizationRequest"
+          ],
+          "R": [
+            "DemandStatistics",
+            "LeadTime",
+            "ServiceObjectives",
+            "StorageConstraints",
+            "CostAssumptions"
+          ],
+          "W": [
+            "TargetRecommendation"
+          ],
+          "X": [
+            "TargetTradeoffs"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "opt-targets-network",
+          "label": "Recommander conjointement les cibles multi-échelon",
+          "capabilities": [
+            "BC-040"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Recommander conjointement les cibles multi-échelon sur commande explicite ou résultat corrélé.",
+          "E": [
+            "NetworkTargetOptimizationRequest"
+          ],
+          "R": [
+            "NetworkTopology",
+            "DemandStatistics",
+            "LeadTime",
+            "ServiceObjectives",
+            "CostAssumptions",
+            "ExistingTargets"
+          ],
+          "W": [
+            "NetworkTargetRecommendation"
+          ],
+          "X": [
+            "NetworkTradeoffs"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "opt-group",
+          "label": "Recommander droits et plafonds entre bénéficiaires",
+          "capabilities": [
+            "BC-041"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Recommander droits et plafonds entre bénéficiaires sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ProtectionOptimizationRequest"
+          ],
+          "R": [
+            "GroupDemand",
+            "ActivePolicy",
+            "StockProjection",
+            "ServiceObjectives"
+          ],
+          "W": [
+            "ProtectionRecommendation"
+          ],
+          "X": [
+            "BeneficiaryImpacts"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "opt-reservation",
+          "label": "Recommander les conditions de réservation selon service et risque",
+          "capabilities": [
+            "BC-042"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Recommander les conditions de réservation selon service et risque sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ReservationRuleOptimizationRequest"
+          ],
+          "R": [
+            "DemandRisk",
+            "ShortageProjection",
+            "ServiceCommitments",
+            "ExistingReservationRules"
+          ],
+          "W": [
+            "ReservationRuleRecommendation"
+          ],
+          "X": [
+            "ReservationTradeoffs"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "opt-replenish",
+          "label": "Proposer un apport pour besoin daté ou cible",
+          "capabilities": [
+            "BC-043"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Proposer un apport pour besoin daté ou cible sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ReplenishmentRequest"
+          ],
+          "R": [
+            "NetRequirements",
+            "ExistingSupply",
+            "ActiveTargets",
+            "PurchaseConstraints",
+            "PackagingConstraints"
+          ],
+          "W": [
+            "ReplenishmentProposal"
+          ],
+          "X": [
+            "ProposedSupply",
+            "UncoveredNeed"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "opt-adjust",
+          "label": "Proposer une révision des apports déjà attendus",
+          "capabilities": [
+            "BC-043"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Proposer une révision des apports déjà attendus sur commande explicite ou résultat corrélé.",
+          "E": [
+            "SupplyAdjustmentRequest"
+          ],
+          "R": [
+            "ExistingSupply",
+            "ChangedRequirements",
+            "SupplierCommitment",
+            "LeadTime"
+          ],
+          "W": [
+            "SupplyAdjustmentProposal"
+          ],
+          "X": [
+            "AdjustmentRequest"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "opt-redistribute",
+          "label": "Proposer rééquilibrage ou consolidation physique",
+          "capabilities": [
+            "BC-044"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Proposer rééquilibrage ou consolidation physique sur commande explicite ou résultat corrélé.",
+          "E": [
+            "RedistributionRequest"
+          ],
+          "R": [
+            "NetworkStock",
+            "ActiveTargets",
+            "ProtectedDemand",
+            "TransportConditions"
+          ],
+          "W": [
+            "RedistributionProposal"
+          ],
+          "X": [
+            "ProposedTransfers",
+            "SiteImpacts"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "opt-submit",
+          "label": "Soumettre la recommandation à l’autorité compétente",
+          "capabilities": [
+            "BC-040",
+            "BC-041",
+            "BC-042",
+            "BC-043",
+            "BC-044"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Soumettre la recommandation à l’autorité compétente sur commande explicite ou résultat corrélé.",
+          "E": [
+            "OptimizationSubmission"
+          ],
+          "R": [
+            "Recommendation",
+            "Authority",
+            "ActivePolicy"
+          ],
+          "W": [
+            "SubmittedRecommendation"
+          ],
+          "X": [
+            "ApprovalRequest"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "promise-atp",
+          "label": "Calculer sur stock courant ou projeté admissible",
+          "capabilities": [
+            "BC-046"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Calculer sur stock courant ou projeté admissible sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ATPRequest"
+          ],
+          "R": [
+            "OrderRequirements",
+            "StockSnapshot",
+            "ExpectedSupply",
+            "GroupRights",
+            "ExistingCommitments",
+            "Calendars"
+          ],
+          "W": [
+            "ATPOption"
+          ],
+          "X": [
+            "ATPResult"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "promise-ctp",
+          "label": "Établir la faisabilité d’un nouvel apport",
+          "capabilities": [
+            "BC-047"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Établir la faisabilité d’un nouvel apport sur commande explicite ou résultat corrélé.",
+          "E": [
+            "CTPRequest"
+          ],
+          "R": [
+            "OrderRequirements",
+            "QualifiedSources",
+            "MaterialAvailability",
+            "LeadTime",
+            "PackagingConstraints"
+          ],
+          "W": [
+            "CTPOption"
+          ],
+          "X": [
+            "SupplyFeasibility"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "promise-capacity",
+          "label": "Vérifier la faisabilité à capacité finie",
+          "capabilities": [
+            "BC-047"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Vérifier la faisabilité à capacité finie sur commande explicite ou résultat corrélé.",
+          "E": [
+            "FiniteCapacityRequest"
+          ],
+          "R": [
+            "CTPOption",
+            "CapacityOffers",
+            "ExistingLoad",
+            "Calendars",
+            "Dependencies",
+            "MaterialAvailability"
+          ],
+          "W": [
+            "FiniteCapacityResult"
+          ],
+          "X": [
+            "FeasibleOption",
+            "BlockingConstraints"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "promise-common",
+          "label": "Construire une possibilité commune à plusieurs lignes",
+          "capabilities": [
+            "BC-046",
+            "BC-047"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Construire une possibilité commune à plusieurs lignes sur commande explicite ou résultat corrélé.",
+          "E": [
+            "CommonPromiseRequest"
+          ],
+          "R": [
+            "ATPOption",
+            "FiniteCapacityResult",
+            "OrderRequirements",
+            "AssortmentRequirement",
+            "SharedResources"
+          ],
+          "W": [
+            "CommonPromiseOption"
+          ],
+          "X": [
+            "CommonDateAndQuantities"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "promise-cost",
+          "label": "Évaluer les coûts comparables et coûts inconnus",
+          "capabilities": [
+            "BC-048"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Évaluer les coûts comparables et coûts inconnus sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PromiseCostRequest"
+          ],
+          "R": [
+            "CommonPromiseOption",
+            "ServicePriceBook",
+            "Agreement",
+            "CostAssumptions"
+          ],
+          "W": [
+            "PromiseCost"
+          ],
+          "X": [
+            "KnownCosts",
+            "UnknownCosts"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "promise-choice",
+          "label": "Choisir la possibilité économiquement admissible",
+          "capabilities": [
+            "BC-048"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Choisir la possibilité économiquement admissible sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PromiseChoiceRequest"
+          ],
+          "R": [
+            "PromiseCost",
+            "ServiceConstraints",
+            "EconomicCriteria",
+            "Authority"
+          ],
+          "W": [
+            "PromiseChoice"
+          ],
+          "X": [
+            "ChosenOption",
+            "RejectedOptions"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "promise-revalidate",
+          "label": "Réexaminer la possibilité avant sa confirmation",
+          "capabilities": [
+            "BC-046",
+            "BC-047",
+            "BC-048"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Réexaminer la possibilité avant sa confirmation sur commande explicite ou résultat corrélé.",
+          "E": [
+            "PromiseRevalidationRequest"
+          ],
+          "R": [
+            "PromiseChoice",
+            "CurrentResourceVersions",
+            "ActivePolicy",
+            "CurrentCapacity"
+          ],
+          "W": [
+            "PromiseValidity"
+          ],
+          "X": [
+            "ValidOption",
+            "ReassessmentConditions"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "capacity-admit",
+          "label": "Qualifier une offre de capacité avec ses réserves",
+          "capabilities": [
+            "BC-049"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Qualifier une offre de capacité avec ses réserves sur commande explicite ou résultat corrélé.",
+          "E": [
+            "CapacityContribution"
+          ],
+          "R": [
+            "ServiceReference",
+            "OfferIdentity",
+            "CapacityUnits"
+          ],
+          "W": [
+            "CapacityOffer"
+          ],
+          "X": [
+            "QualifiedCapacity"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "capacity-hold",
+          "label": "Demander une capacité fournisseur avant achat ferme",
+          "capabilities": [
+            "BC-049",
+            "BC-051"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Demander une capacité fournisseur avant achat ferme sur commande explicite ou résultat corrélé.",
+          "E": [
+            "CapacityHoldRequest"
+          ],
+          "R": [
+            "CapacityOffer",
+            "SharedCapacityUse",
+            "ActivePolicy",
+            "Agreement"
+          ],
+          "W": [
+            "CapacityHoldRequest"
+          ],
+          "X": [
+            "ProviderHoldRequest"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "capacity-result",
+          "label": "Reconnaître confirmation révision ou libération de capacité",
+          "capabilities": [
+            "BC-049",
+            "BC-051"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Reconnaître confirmation révision ou libération de capacité sur commande explicite ou résultat corrélé.",
+          "E": [
+            "CapacityResponse"
+          ],
+          "R": [
+            "CapacityHoldRequest",
+            "ProviderResponse",
+            "SharedCapacityUse"
+          ],
+          "W": [
+            "CapacityCommitment",
+            "SharedCapacityUse"
+          ],
+          "X": [
+            "CapacityOutcome",
+            "UnconfirmedCapacity"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "service-requirements",
+          "label": "Déterminer prestations et résultats nécessaires",
+          "capabilities": [
+            "BC-050"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Déterminer prestations et résultats nécessaires sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ServiceRequirementRequest"
+          ],
+          "R": [
+            "OrderRequirements",
+            "BusinessReferences",
+            "AcceptedPromise"
+          ],
+          "W": [
+            "ServiceRequirements"
+          ],
+          "X": [
+            "RequiredServices"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "service-selection",
+          "label": "Choisir prestation et exécutant admissibles",
+          "capabilities": [
+            "BC-051"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Choisir prestation et exécutant admissibles sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ServiceSelectionRequest"
+          ],
+          "R": [
+            "ServiceRequirements",
+            "CapacityOffer",
+            "EligibilityResult",
+            "ServiceConditions"
+          ],
+          "W": [
+            "ServiceSelection"
+          ],
+          "X": [
+            "ChosenService",
+            "RejectedServices"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "transport-load",
+          "label": "Construire les chargements sous contraintes",
+          "capabilities": [
+            "BC-052"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Construire les chargements sous contraintes sur commande explicite ou résultat corrélé.",
+          "E": [
+            "LoadPlanningRequest"
+          ],
+          "R": [
+            "ServiceRequirements",
+            "GoodsVolumes",
+            "CapacityOffer",
+            "CompatibilityRules",
+            "DeliveryWindows"
+          ],
+          "W": [
+            "LoadPlan"
+          ],
+          "X": [
+            "AdmissibleLoads",
+            "UnassignedGoods"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "transport-route",
+          "label": "Déterminer trajets arrêts et horaires compatibles",
+          "capabilities": [
+            "BC-052"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Déterminer trajets arrêts et horaires compatibles sur commande explicite ou résultat corrélé.",
+          "E": [
+            "RoutePlanningRequest"
+          ],
+          "R": [
+            "LoadPlan",
+            "TravelTimes",
+            "Calendars",
+            "DeliveryWindows",
+            "ServiceConditions"
+          ],
+          "W": [
+            "RoutePlan"
+          ],
+          "X": [
+            "AdmissibleRoute",
+            "BlockingConstraints"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "transport-replan",
+          "label": "Réviser le plan local ou signaler la promesse intenable",
+          "capabilities": [
+            "BC-052",
+            "BC-054"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Réviser le plan local ou signaler la promesse intenable sur commande explicite ou résultat corrélé.",
+          "E": [
+            "TransportReplanRequest"
+          ],
+          "R": [
+            "RoutePlan",
+            "ChangedConstraints",
+            "AcceptedPromise",
+            "CurrentCommitments"
+          ],
+          "W": [
+            "TransportAdaptationProposal"
+          ],
+          "X": [
+            "LocalAdaptation",
+            "UnmetPromise"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "coordination-prepare",
+          "label": "Définir les dépendances de prestations du besoin",
+          "capabilities": [
+            "BC-053"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Définir les dépendances de prestations du besoin sur commande explicite ou résultat corrélé.",
+          "E": [
+            "FulfilmentCoordinationRequest"
+          ],
+          "R": [
+            "ServiceSelection",
+            "ServiceRequirements",
+            "AcceptedPromise"
+          ],
+          "W": [
+            "FulfilmentPlan"
+          ],
+          "X": [
+            "AuthorizedServiceRequests"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "coordination-event",
+          "label": "Reconnaître progression et impact d’un aléa",
+          "capabilities": [
+            "BC-053",
+            "BC-054"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Reconnaître progression et impact d’un aléa sur commande explicite ou résultat corrélé.",
+          "E": [
+            "RecognizedServiceEvent"
+          ],
+          "R": [
+            "FulfilmentPlan",
+            "RecognizedServiceResult",
+            "EventIdentity"
+          ],
+          "W": [
+            "FulfilmentProgress"
+          ],
+          "X": [
+            "ProgressImpact",
+            "AdaptationNeed"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "coordination-adapt",
+          "label": "Autoriser puis demander une adaptation locale",
+          "capabilities": [
+            "BC-054"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Autoriser puis demander une adaptation locale sur commande explicite ou résultat corrélé.",
+          "E": [
+            "AdaptationCommand"
+          ],
+          "R": [
+            "FulfilmentProgress",
+            "LocalAdaptationProposal",
+            "Authority",
+            "AcceptedPromise"
+          ],
+          "W": [
+            "AuthorizedAdaptation"
+          ],
+          "X": [
+            "ServiceChangeRequests"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        },
+        {
+          "id": "service-release",
+          "label": "Décider lot ou regroupement utile des prestations",
+          "capabilities": [
+            "BC-055"
+          ],
+          "scenario_refs": [
+            "seasonal-order-backlog",
+            "shortage-reassessment",
+            "complete-order-multiline",
+            "no-admissible-promise",
+            "transport-loads-six-stores",
+            "transport-missed-connection",
+            "redistribute-protected-stock",
+            "preorder-future-availability"
+          ],
+          "trigger": "Décider lot ou regroupement utile des prestations sur commande explicite ou résultat corrélé.",
+          "E": [
+            "ServiceReleaseRequest"
+          ],
+          "R": [
+            "FulfilmentPlan",
+            "DeliveryAuthorization",
+            "ProviderWindow",
+            "CompletenessConditions"
+          ],
+          "W": [
+            "ServiceReleaseDecision"
+          ],
+          "X": [
+            "ReleasedServiceOrders",
+            "HeldServices"
+          ],
+          "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+        }
+      ],
+      "basis_path": "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-decisions.json",
+      "benchmark": {
+        "hours_per_CFP": 20,
+        "factor": 1,
+        "day_hours": 7
+      },
+      "baseline_CFP": 166,
+      "removed_process_ids": [
+        "backlog-P01",
+        "backlog-P02",
+        "backlog-P03",
+        "backlog-P04",
+        "optimization-P01",
+        "optimization-P02",
+        "optimization-P03",
+        "optimization-P04",
+        "optimization-P05",
+        "promising-P01",
+        "promising-P02",
+        "promising-P03",
+        "promising-P04",
+        "service-planning-P01",
+        "service-planning-P02",
+        "service-planning-P03",
+        "service-planning-P04",
+        "coordination-P01",
+        "coordination-P02",
+        "coordination-P03",
+        "coordination-P04"
+      ],
+      "kept_process_ids": [],
+      "CFP": 249,
+      "raw_jh": 711.4285714285714,
+      "rounding_jh": 10,
+      "proposal_jh": 710,
+      "recipe": "scenario_scope_revision_v1",
+      "status": "proposal_not_adopted",
+      "baseline_jh": 530,
+      "unit_id": "supply-decisions-java-spring",
+      "delta_jh": 180,
+      "supersedes_policy_revision": false,
+      "proposal_sources": {
+        "audits/2026-11-02-proposition-perimetre-complete/supply-decisions-java-spring.json": "639d88f9f78742d4f661143cd987b5b708dd8fc1e215841b481723ebad21ec07"
+      }
+    }
+  ],
+  "benchmark": {
+    "hours_per_CFP": 20,
+    "day_hours": 7,
+    "factor": 1
+  },
+  "input_hashes": {}
+}

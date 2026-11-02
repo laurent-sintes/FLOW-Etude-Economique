@@ -102,9 +102,9 @@ async function checkFrameworkJourney(data){
   for(const phase of ['acquisition','integration','fonctionnement'])for(const option of ['java-spring','microsoft','sap']){
    await route(phase+'?option='+option+'&horizon=5');
    assert.equal(await page.locator('.journey-treatment section').count(),2);assert.equal(await page.locator('.journey-example').count(),1);
-   assert.equal(await page.locator('.journey-option-navigation a[aria-current="page"]').getAttribute('href'),'#'+phase+'?option='+option+'&horizon=5');
+   assert.equal(await page.locator('.journey-option-navigation a[aria-current="page"]').getAttribute('href'),'#'+phase+'?option='+option+'&horizon=5&origin=project&options=java-spring%2Cmicrosoft%2Csap');
    assert.equal(await page.locator('.journey-reading-shortcuts a').count(),option==='java-spring'?3:2);
-   assert.equal(await page.locator('.journey-reading-shortcuts a').first().getAttribute('href'),'#charges-'+phase+'?option='+option+'&horizon=5');
+   assert.equal(await page.locator('.journey-reading-shortcuts a').first().getAttribute('href'),'#charges-'+phase+'?option='+option+'&horizon=5&origin=project&options=java-spring%2Cmicrosoft%2Csap');
    if(option==='java-spring'){
     assert.ok(await page.locator('.make-audit-steps>li').count()>1);
     for(const element of await page.locator('.make-rule').all()){
@@ -115,9 +115,9 @@ async function checkFrameworkJourney(data){
    }else assert.equal(await page.locator('.make-audit').count(),0);
    assert.ok(await page.locator('.journey-limits li').count()>0);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));combinations.push({width,phase,option});
   }
-  await route('charges-fonctionnement?option=microsoft&horizon=3');await page.locator('a.framework-phase-next').click();await page.waitForURL(/#evaluation-core\?option=microsoft&horizon=3$/);
+  await route('charges-fonctionnement?option=microsoft&horizon=3');await page.locator('a.framework-phase-next').click();await page.waitForURL(/#evaluation-core\?option=microsoft&horizon=3(?:&origin=project&options=java-spring%2Cmicrosoft%2Csap)?$/);
   await page.locator('.eco-options a[aria-current="true"]').waitFor();assert.match(await page.locator('.eco-options a[aria-current="true"]').innerText(),/Microsoft/);
-  await route('scenarios?option=sap&horizon=7');assert.equal(await page.locator('.journey-scenario-steps>li').count(),4);assert.equal(await page.locator('a.framework-primary-link').getAttribute('href'),'#comparer?option=sap&horizon=7');
+  await route('scenarios?option=sap&horizon=7');assert.equal(await page.locator('.journey-scenario-steps>li').count(),4);assert.equal(await page.locator('a.framework-primary-link').getAttribute('href'),'#comparer?option=sap&horizon=7&origin=project&options=java-spring%2Cmicrosoft%2Csap');
   await route('methodes');assert.equal(await page.locator('.journey-methods article').count(),7);await page.locator('.journey-methods a[href="#modele"]').click();await page.locator('.model-reading').waitFor();await page.locator('a.journey-method-back').click();await page.locator('.journey-methods').waitFor();
  }
  report.frameworkJourney={combinations,optionAndHorizonPreserved:true,methodAnchors:true,legacyMethodsReachable:true};
@@ -164,9 +164,9 @@ try{
  const assets=await page.locator('img').evaluateAll(els=>els.map(el=>({src:el.src,loaded:el.complete&&el.naturalWidth>0})));assert.ok(assets.length);for(const asset of assets){assert.ok(asset.loaded);assert.ok(new URL(asset.src).pathname.startsWith(site.pathname));}report.assets=assets.length;
  await route('charges-acquisition?option=java-spring');const grossResponse=await page.request.get(new URL(manifest.routes['/api/gross-evaluations'],manifestUrl).href);assert.ok(grossResponse.ok());const gross=await grossResponse.json();
  const core=gross.phases.acquisition.options['java-spring'].core;assert.equal(core.adopted_jh,data.baseline.options.find(o=>o.stack==='java-spring').obtention?.total_jh??data.content.core_product_scope.proposal.adopted_jh);
- assert.equal(await page.locator('.gross-adopted-lots tbody tr').count(),core.rows.length);assert.equal(await page.locator('.gross-proposal').getAttribute('open'),null);await page.locator('.gross-proposal>summary').click();assert.ok((await page.locator('.gross-proposal').innerText()).includes(gross.labels.no_adoption.replaceAll('**','')));
+ assert.equal(await page.locator('.gross-adopted-lots tbody tr').count(),core.rows.length);assert.equal(await page.locator('.gross-completeness').getAttribute('data-core-status'),core.status);assert.ok((await page.locator('#gross-focus-proposal').innerText()).includes(gross.labels.adoption_note.replaceAll('**','')));assert.equal(await page.locator('.gross-proposal').count(),0);
  for(const row of core.rows){await route('charges-acquisition?option=java-spring&focus='+encodeURIComponent(row.id));assert.equal(await page.locator('#gross-focus-'+row.id).getAttribute('open'),'');assert.ok((await page.locator('#gross-focus-'+row.id).innerText()).length>80);}
- report.proofs.phaseCharges={adopted_jh:core.adopted_jh,units:core.rows.length,proposalNotAdopted:true};
+ report.proofs.phaseCharges={adopted_jh:core.adopted_jh,units:core.rows.length,adoptionStatus:core.status};
  await route('evaluation-core?option=java-spring&horizon=10');assert.equal(await page.locator('.eco-cost-overview>article').count(),3);assert.equal(await page.locator('.eco-year-chart li').count(),10);
  await route('parametres');assert.equal(await page.locator('.eco-determinants article').count(),4);report.proofs.fixedEconomicDossier=true;
  await route('modele');const modelDownload=page.locator('.model-download a[download]'),downloadHref=await modelDownload.getAttribute('href');assert.equal(new URL(downloadHref,site).pathname,site.pathname+'exports/flow-modele-metier.yaml');

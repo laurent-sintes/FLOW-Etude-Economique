@@ -460,8 +460,8 @@ parameters:
     max: 100000
     step: 100
     scale: 1000
-    help: Budget d’intégration Buy hors préparation transférée à la sélection. Les anciennes sauvegardes sont converties
-      une seule fois en retirant cette provision, sans modifier leurs autres hypothèses.
+    help: Budget des prestations d’intégration Buy, hors Transformation Office. L’équipe transverse est calculée séparément
+      selon les durées des phases. La préparation acheteur est financée dans la sélection.
     source: source/plan-investissement.yaml#integration_make
   - key: services_core
     modes:
@@ -1123,7 +1123,7 @@ essential:
     assumptions: '{{vue.parametres_modele}}'
     open: Voir les coûts et comparer les options
     reference: Référence de l’étude
-    fixed: Les hypothèses sont établies pour cette étude. Les choix de lecture ne modifient aucun montant de référence.
+    fixed: Les hypothèses chiffrées définissent la référence de l’étude. L’équipe de transformation est chiffrée sur les durées d’obtention et d’intégration.
     horizon: Horizon depuis le début du projet
     reading_scope:
       title: Périmètre de lecture
@@ -1257,18 +1257,26 @@ essential:
       capacite_buy_microsoft: Capacité cloud complémentaire Microsoft
       capacite_buy_sap: Capacité cloud complémentaire SAP
       power_platform: Droits Microsoft complémentaires
-    coordination: Coordination et pilotage du programme
+    transformation_title: '{{notion.transformation_office}}'
+    transformation_included: Déjà compris dans les deux budgets de phase, de l’obtention à la fin de l’intégration.
+    transformation_details: Voir les cinq postes et leurs tarifs
+    transformation_role: Poste à temps plein
+    transformation_daily: Tarif journalier HT
+    transformation_annual: Coût annuel HT
+    transformation_total: Total des cinq postes
+    governance_charges: Voir les charges et les manques
+    coordination: Provisions de coordination et de pilotage déjà chiffrées
     coordination_note: Les lots adoptés comprennent leur pilotage local, sans pourcentage supplémentaire. Les autres
-      travaux estimés utilisent les provisions ci-dessous. La direction du programme Groupe reste un budget distinct.
+      travaux techniques estimés utilisent les provisions ci-dessous. La provision de direction et de coordination couvre uniquement l’intégration Make.
     coordination_labels:
       build_pct: Construction hors lots déjà adoptés
       integration_make_pct: Travaux d’intégration Make
       maintenance_pct: Services annuels estimés
       complements_buy_pct: Compléments Buy estimés
-    programme_direction: Direction du programme
-    programme_coordination: Coordination du programme
-    programme_note: JH retenus sur la durée d’intégration Make. Les capacités mensuelles expliquent le calendrier,
-      elles ne créent pas un budget supplémentaire.
+    programme_direction: Direction de programme pendant l’intégration
+    programme_coordination: Coordination / PMO pendant l’intégration
+    programme_note: Ces JH couvrent uniquement la phase d’intégration Make. Le pilotage transverse de la construction,
+      du portefeuille et du programme, la synchronisation à l’échelle et le change restent à dimensionner dans les hypothèses ci-dessus.
     licences: Séquences des offres éditeur
     licences_note: Les montants documentés sont conservés dans leur ordre. Après cette séquence, le modèle applique
       l’indexation des logiciels. Les deux valeurs SAP reprises correspondent aux années commerciales 4 et 5 de la
@@ -1290,6 +1298,7 @@ essential:
     bridge_note: Ces éléments composent le budget d’intégration affiché. Le prix fournisseur reste groupé, sans ventilation
       inventée entre ses prestations.
     bridge_labels:
+      transformation_office: Transformation Office client pendant l’intégration
       base_rfi: Base fournisseur retenue
       prestations_estimees: Prestations estimées
       complements_flow: Compléments FLOW estimés
@@ -2023,6 +2032,13 @@ essential:
       href: '#vision'
       label: Poursuivre avec le Framework
   market_costs:
+    transformation_title: Transformation Office FLOW · rôles et prix de marché
+    transformation_intro: Cinq rôles étudiés en France le 2 novembre 2026. Les prix ci-dessous sont des observations indépendantes des tarifs retenus pour FLOW. Leur contexte et leur date sont précisés pour chaque source.
+    transformation_market_name: Intitulé utilisé sur le marché
+    transformation_observed: Prix observé
+    transformation_recorded: Relevé le
+    transformation_undated: Date de publication non indiquée
+    transformation_conclusion: Positionnement de l’hypothèse FLOW
     shared_profiles: QA, architecture et support
     intro: '**Les prix observés éclairent les hypothèses du dossier économique.** Les segments de marché, profils,
       dates et modes d’achat sont conservés. La page ne sélectionne aucun tarif pour FLOW.'
@@ -2667,7 +2683,7 @@ essential:
     partial_amount: Part chiffrée
     partial_reference: Référence Make partielle
   structure:
-    scope: 'Trois agrégats regroupent les sept structures du modèle. Les budgets initiaux et la base annuelle ont des temporalités
+    scope: 'Trois agrégats regroupent les huit structures du modèle. Les budgets initiaux et la base annuelle ont des temporalités
       différentes. Leurs montants ne s’additionnent pas ici.'
     phases:
     - key: obtention
@@ -2761,6 +2777,8 @@ essential:
       lane: 3
     - cost: operations_support
       lane: 4
+    - cost: transformation
+      lane: 5
   model_examples_label: Exemples
   model_rows:
   - key: obtention
@@ -2777,6 +2795,8 @@ essential:
     icon: operations_support
   - key: grouped_buy
     icon: grouped_buy
+  - key: transformation
+    icon: transformation
   calendar_costs_label: Rubriques de coûts concernées
   calendar:
   - phase_ref: obtain_core

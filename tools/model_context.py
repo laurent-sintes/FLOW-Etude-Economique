@@ -4,6 +4,11 @@ from contextvars import ContextVar
 from copy import deepcopy
 from functools import wraps
 import hashlib
+from pathlib import Path
+
+def adoption_guard():
+    if (Path(__file__).resolve().parents[1]/'tmp/core-adoptions/pending.json').exists():
+        raise ValueError('ERR_ADOPTION_IN_PROGRESS: recover the interrupted adoption before loading the model')
 
 CURRENT = ContextVar('flow_model_snapshot', default=None)
 
@@ -22,6 +27,7 @@ class SourceSnapshot:
         return deepcopy(self.documents[path])
 
     def verify(self):
+        adoption_guard()
         for path, digest in self.digests.items():
             if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
                 raise ValueError(f'Source changed during model loading: {path}')
@@ -32,6 +38,7 @@ def model_session():
     if existing is not None:
         yield existing
         return
+    adoption_guard()
     snapshot = SourceSnapshot()
     token = CURRENT.set(snapshot)
     try:

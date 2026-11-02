@@ -6,7 +6,7 @@ from pathlib import PurePosixPath
 from jsonschema import Draft202012Validator
 from validate_stacks import ROOT, read
 from model_context import CURRENT, model_memo, scoped_model
-from capability_catalog import analysis, native
+from capability_catalog import analysis, native_kinds
 
 SOURCE = 'source/calculs-estimation-core.yaml'
 SCHEMA = 'source/schema-calculs-estimation-core.yaml'
@@ -42,7 +42,12 @@ def historical_dependencies(path, document):
         result[name] = sha
     for key, filename in (('inputs_sha256', 'inputs.json'), ('measurements_sha256', 'measurements.json')):
         if key in document:
-            result[(PurePosixPath(path).parent / filename).as_posix()] = document[key]
+            if isinstance(document[key], dict):
+                for name, sha in document[key].items():
+                    relative = name if name.startswith('audits/') else str(PurePosixPath(path).parent / name)
+                    result[relative] = sha
+            else:
+                result[(PurePosixPath(path).parent / filename).as_posix()] = document[key]
     return result
 
 
@@ -144,7 +149,7 @@ def validate_binding(unit, document=None):
             (c['unit_id'], c['stack'], c['scope']['capabilities']), 'Calculation does not belong to this unit, stack or capability scope')
     require(c['scope']['native_source'] == read(ROOT / 'source/referentiel-capacites.yaml'), 'Native scope version changed')
     selected = [b for b in analysis()['blocs'] if b['id'] in {x['id'] for x in unit['capabilities']}]
-    nodes = {n['id']: n for n in native()['nodes']}
+    nodes = native_kinds()
     scope = c['scope']
     professional=scope.get('professional_functions',[])
     require(unit.get('professional_functions',[])==professional,'Professional function binding mismatch')
@@ -152,9 +157,9 @@ def validate_binding(unit, document=None):
         known={f['id'] for f in read(ROOT/'source/fonctions-produit-core.yaml')['functions']}
         require(set(professional)<=known and len(professional)==len(set(professional)),'Unknown professional function')
     if scope['level']=='professional_function_group':
-        require(not unit['capabilities'] and bool(professional) and c['recipe']=='professional_components_v1','Professional group cannot invent native capabilities')
+        require(not unit['capabilities'] and bool(professional) and c['recipe'] in ('professional_components_v1','oss_reference_revision_v1','work_package_adoption_v1'),'Professional group cannot invent native capabilities')
     else:
-        require(scope['native_id'] in nodes and nodes[scope['native_id']]['kind'] == scope['level'], 'Invalid evaluation hierarchy')
+        require(scope['native_id'] in nodes and nodes[scope['native_id']] == scope['level'], 'Invalid evaluation hierarchy')
         require(all(scope['native_id'] in b['chemin'] for b in selected), 'Capabilities outside evaluation hierarchy')
     require(digest(selected) == c['scope']['analysis_sha256'], 'Study scope changed without rebinding calculation')
     require(digest({k: unit[k] for k in ('capabilities', 'includes', 'excludes')+ (('professional_functions',) if 'professional_functions' in unit else ())}) == c['scope']['decision_scope_sha256'], 'Decision activity scope changed')

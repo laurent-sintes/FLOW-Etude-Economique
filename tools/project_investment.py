@@ -10,7 +10,7 @@ from validate_stacks import ROOT, read
 from model_inputs import annual_scenario, funding_inputs, buy_selection_inputs
 from content_model import resolve_text_tree
 from current_cost_inputs import active_doc
-from composable_costs import annual_split, initial_ledger, service_parts, RESPONSIBILITIES, load_funding_model
+from composable_costs import annual_split, initial_ledger, service_parts, RESPONSIBILITIES, load_funding_model, transformation_ledger
 from model_context import scoped_model
 
 OUTPUT = ROOT/'source/investissements-15-ans.yaml'
@@ -201,6 +201,7 @@ def prepare(economic=None, include_presentation=False):
         prices=[x['postes_eur_ht']['licences_rfi'] for x in o['maintenance_annuelle'][:n]]
         assert abs(sum(base.values())+(prices[0] if prices else 0)-o['synthese_eur_ht']['maintenance_premiere_annee'])<0.05
         options.append(dict(stack=slug,nom=name,mode='Make' if make else 'Buy',
+          equipe_transformation=funding_inputs()[0]['equipe_transformation'],
           build=o['synthese_eur_ht']['build_core'],
           integration_source=o['synthese_eur_ht']['integration'],
           integration=0 if make else o['synthese_eur_ht']['integration'],
@@ -217,7 +218,7 @@ def prepare(economic=None, include_presentation=False):
             ref=dict(o['ventilation_services'])
             o['composable']=dict(reference_services=ref, inputs=load_funding_model(o['stack']),
                 annual_reference=annual_split(o['stack'],e,o['base_annuelle']['services_mco'],ref['core'],cal))
-            ledger=initial_ledger(o,ref)
+            ledger=initial_ledger(o,ref)+transformation_ledger(o)
             o['integration']=round(sum(r['amount'] for r in ledger if r['phase']=='integration'),2)
     return dict(scenario=scenario,taux=rates,options=options,
                 explications=read(ROOT/'source/explications-modele.yaml'),
@@ -282,8 +283,10 @@ def _financing_year_prefix(option, ledger, parts, rate, year, boundary):
     cloud=round(cloud_initial+service*base['hebergement']*(1+rate['cloud'])**(y-1),2)
     purchases=round(purchases_initial+service*(base['ipaas']*(1+ipaas_rate)**(y-1)
         +base['licences_complementaires']*(1+rate['licences_logiciels'])**(y-1)),2)
-    natures=dict(obtention=build,integration=integration,
-        core_care=round(detail['core_lifecycle']-(build if o['mode']=='Make' else 0),2),
+    transformation_build=sum(phase_expense(l['amount'],l['start'],l['end']-l['start'],lo,hi) for l in ledger if l['id'].startswith('transformation_') and l['phase']=='build')
+    transformation_integration=sum(phase_expense(l['amount'],l['start'],l['end']-l['start'],lo,hi) for l in ledger if l['id'].startswith('transformation_') and l['phase']=='integration')
+    natures=dict(transformation=round(transformation_build+transformation_integration,2),obtention=round(build-transformation_build,2),integration=round(integration-transformation_integration,2),
+        core_care=round(detail['core_lifecycle']-(build-transformation_build if o['mode']=='Make' else 0),2),
         client_care=round(detail['mco_client']+detail['client_evolutions'],2),
         run_cloud=cloud,technical_purchases=purchases,
         operations_support=round(detail['run']-cloud-purchases,2),grouped_buy=detail['grouped_buy'])
@@ -331,16 +334,17 @@ def project(data, horizon_years=None):
         assert 6<=d<=60 and end<=120
 
         ledger=initial_ledger(o,o['composable']['reference_services']) if o['mode']=='Make' else [
-            dict(id='integration_initiale',financement_id='integration_initiale',amount=o['integration'],start=b,end=end,
+            dict(id='integration_initiale',financement_id='integration_initiale',amount=o['integration_source'],start=b,end=end,
                  objet='adaptations_client',prestation='integration',responsibility='integration_client',phase='integration',source=f"source/chiffrage/chiffrage-{o['stack']}.yaml")]
         if o['mode']=='Buy' and o.get('selection_buy',0):
             ledger.insert(0,dict(id='selection_contractualisation',financement_id='selection_contractualisation',amount=o['selection_buy'],start=0,end=b,
                 objet='programme',prestation='pilotage',responsibility='integration_client',phase='build',source='source/selection-buy.yaml'))
+        ledger.extend(transformation_ledger(o))
         o['integration']=round(sum(r['amount'] for r in ledger if r['phase']=='integration'),2)
         parts=service_parts(o)
         rows=project_financing(o,ledger,parts,data["taux"],years)
         totals={k:round(sum(a[k] for a in rows),2) for k in ['build','integration','mco_run','total']}
-        assert totals['build']==round(o['build']+o.get('selection_buy',0),2)
+        assert totals['build']==round(sum(r['amount'] for r in ledger if r['phase']=='build'),2)
         assert totals['integration']==round(o['integration'],2)
         assert totals['total']==round(sum(totals[k] for k in ('build','integration','mco_run')),2)
         results.append(dict(stack=o['stack'],annees_service_complet=(years*12-end)/12,

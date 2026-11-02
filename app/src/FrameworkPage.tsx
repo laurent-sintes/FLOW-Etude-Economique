@@ -67,7 +67,6 @@ export function FrameworkPage({detail}:{detail?:'tarifs'|'diagnostics'}){
  const percent=(value:number)=>n(value,1)+'\u00a0%';
  const natures=Object.keys(F.workload.ia.taux_pct[F.tariffs[0].key]);
  const activityAllocations=data.ui.essential.model_rows.filter((row:Data)=>row.activity_allocation);
- const programme=F.pilotage.programme;
  const pilotage=[
   {key:'integration_make_pct',label:T.pilotage_integration,base:T.pilotage_integration_base},
   {key:'deployment_pct',label:T.pilotage_deployment,base:T.pilotage_deployment_base},
@@ -217,18 +216,7 @@ export function FrameworkPage({detail}:{detail?:'tarifs'|'diagnostics'}){
     </tr>)}</tbody></ParameterTable>
     <ApplicationHypothesis id="coordination"/>
     {[F.sources.coordination,F.sources.deployment].some(path=>!isModelDataReference(path))&&<div className="framework-reading-sources"><SourceLink path={F.sources.coordination}>{T.coordination_source}</SourceLink><SourceLink path={F.sources.deployment}>{T.deployment_source}</SourceLink></div>}
-    <div className="framework-programme">
-     <h3>{T.pilotage_programme_title}</h3>
-     <Formulas items={T.programme_formulas}/>
-     <p><strong>{T.pilotage_duration} : {programme.duree_mois} {T.pilotage_months}</strong></p>
-     <ParameterTable caption={T.programme_caption}><thead><tr>{T.programme_columns.map((label:string)=><th scope="col" key={label}>{label}</th>)}</tr></thead>
-      <tbody>{[{key:'direction',label:T.pilotage_direction},{key:'coordination',label:T.pilotage_coordination}].map(role=><tr key={role.key}>
-       <th scope="row">{role.label}</th><td>{n(programme[role.key+'_jh_par_mois'],1)}</td><td>{n(programme[role.key+'_jh'],1)}</td><td>{dailyRate(programme['tarif_'+role.key+'_eur_jh'])}</td>
-      </tr>)}</tbody>
-     </ParameterTable>
-     <p><MethodText>{programme.choix}</MethodText></p><p><MethodText>{programme.distinction}</MethodText></p>
-     <SourceLink path={F.sources.programme}>{T.programme_source}</SourceLink>
-    </div>
+    <div className="framework-programme"><h3>{F.transformation.nom}</h3><p>{F.transformation.calendrier}</p><p>{F.transformation.non_double_compte}</p><p>{F.transformation.architecture}</p><p>{F.transformation.exclusions}</p><a href="#parametres?focus=programme">{data.ui.essential.economic_dossier.governance_charges} →</a></div>
    </ParameterSection>
 
    <ParameterSection id="moyens" title={T.other_title} lead={T.other_note}>

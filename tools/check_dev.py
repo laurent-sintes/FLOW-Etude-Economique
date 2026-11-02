@@ -37,15 +37,17 @@ def impacted_tests(root, paths):
     return sorted(name for name in affected if name.startswith('test_') and name in modules)
 
 
-def plan(root, paths, extra_tests=()):
+def plan(root, paths, extra_tests=(), targeted=False):
     selected = set(extra_tests)
     unresolved = []
+    if targeted and not extra_tests:
+        unresolved.append("Explicit --tests required with --targeted")
     frontend = False
     content = False
     for name in paths:
         path = Path(name)
         if name.startswith('tools/') and path.suffix == '.py':
-            tests = impacted_tests(root, [name])
+            tests = [] if targeted else impacted_tests(root, [name])
             selected.update(tests)
             if not tests and not extra_tests:
                 unresolved.append(name)
@@ -62,7 +64,10 @@ def plan(root, paths, extra_tests=()):
             pass
         elif not extra_tests:
             unresolved.append(name)
+    # A selected module/class already includes its named methods. Run each test once.
+    selected = {name for name in selected if not any(name.startswith(parent + '.') for parent in selected if parent != name)}
     return dict(paths=paths, python_tests=sorted(selected), frontend=frontend, content=content,
+                selection_mode='explicit' if targeted else 'transitive',
                 unresolved=unresolved, certification=False)
 
 
@@ -70,6 +75,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--paths', nargs='+', required=True, help='All files changed for this local task')
     parser.add_argument('--tests', nargs='*', default=[], help='Additional unittest modules, classes or methods')
+    parser.add_argument('--targeted', action='store_true', help='Use explicit --tests instead of transitive Python selection. Source financial contracts remain mandatory.')
     parser.add_argument('--plan-only', action='store_true')
     parser.add_argument('--browser', action='store_true', help='Explicit comprehensive browser regression')
     args = parser.parse_args()
@@ -79,7 +85,7 @@ def main():
         if not path.is_relative_to(ROOT):
             parser.error('Path outside project: ' + name)
         paths.append(path.relative_to(ROOT).as_posix())
-    selection = plan(ROOT, sorted(set(paths)), args.tests)
+    selection = plan(ROOT, sorted(set(paths)), args.tests, targeted=args.targeted)
     if args.plan_only:
         print(json.dumps(selection, indent=2))
         return 2 if selection['unresolved'] else 0

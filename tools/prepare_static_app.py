@@ -9,7 +9,7 @@ import sys
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tools'))
-from validation_changes import snapshot
+from validation_changes import snapshot, strings
 from build_pages import normalize_base
 
 
@@ -19,7 +19,14 @@ def hashes(folder):
 
 
 def inputs(root):
-    result={name:item['sha256'] for name,item in snapshot(root)['files'].items()}
+    files=snapshot(root)['files']
+    explicit={value for name,item in files.items() if name.startswith(('source/', 'config/'))
+              for value in strings(item.get('document', {})) if value in files}
+    result={name:item['sha256'] for name,item in files.items()
+            if name in explicit or not (name.startswith(('skills/', '.github/'))
+                    or name in {'AGENTS.md', 'README.md'}
+                    or (name.startswith('tools/') and Path(name).name.startswith('test_'))
+                    or (name.startswith('app/scripts/') and Path(name).name.startswith('test-')))}
     for name,digest in hashes(root/'app/public').items():
         if not name.startswith('exports/'):
             result['app/public/'+name]=digest

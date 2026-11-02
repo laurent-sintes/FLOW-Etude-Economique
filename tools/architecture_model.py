@@ -12,6 +12,7 @@ SCHEMA = 'source/schema-architecture.yaml'
 # Stable domain identities consumed by the ledger. Labels, coverage and the client
 # allocation remain editable; these associations express their economic meaning.
 COST_SEMANTICS = {
+    'transformation': ('transformation_office', {'transformation'}, {'build'}),
     'obtention': ('obtention_initiale_core_system', {'obtention'}, {'build'}),
     'integration': ('integration_deploiement_initiaux', {'integration'}, {'build'}),
     'core_care': ('maintenance_core', {'core_care'}, {'build'}),
@@ -142,10 +143,10 @@ def hydrate_architecture(ui, document):
             fail('view/blocks', 'only cost reference and placement are allowed')
         for key in ('lane', 'lane_span'):
             value = block.get(key, 1)
-            if type(value) is not int or not 1 <= value <= 4:
+            if type(value) is not int or not 1 <= value <= 5:
                 fail('view/blocks', 'invalid lane or span')
-        if block['lane'] + block.get('lane_span', 1) > 5:
-            fail('view/blocks', 'placement exceeds four lanes')
+        if block['lane'] + block.get('lane_span', 1) > 6:
+            fail('view/blocks', 'placement exceeds five lanes')
     if unique(blocks, 'cost', 'view/blocks') != set(structures):
         fail('view/blocks', 'missing or unknown cost structure')
     compiled = {key: deepcopy(view[key]) for key in ('title', 'intro', 'layers_title')}

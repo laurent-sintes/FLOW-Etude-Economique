@@ -1,4 +1,5 @@
 """Adopted Ownership: independent funding, pure reconstruction, temporal count and export."""
+from test_support import active_reference
 from copy import deepcopy
 import hashlib,json
 import unittest
@@ -17,18 +18,20 @@ class OwnershipAdoptionTests(unittest.TestCase):
  def setUpClass(cls):
   with model_session() as snapshot:
    cls.units=validate()['units'];cls.unit=next(u for u in cls.units if u['id']=='inventory-ownership-java-spring')
-   cls.spec,cls.registry=contract(cls.unit['calculation']);cls.docs=load_proofs(cls.registry)
+   cls.active_spec,cls.registry=contract(cls.unit['calculation']);cls.docs=load_proofs(cls.registry)
+   cls.prior_registry=cls.docs[cls.active_spec['inputs']['revision_basis']]['registry'];cls.spec=next(c for c in cls.prior_registry['calculations'] if c['id']==cls.active_spec['id'])
    cls.result=calculate(cls.unit['calculation']);cls.bundle=compose(snapshot.documents,snapshot.digests)
  def prepared(self,change=None):
   docs=deepcopy(self.docs);views={k:docs[p] for k,p in self.spec['inputs'].items()}
   if change:change(views,docs)
-  with model_session():return prepare(docs,self.spec,self.registry,formula)
+  with model_session():return prepare(docs,self.spec,self.prior_registry,formula)
  def test_adopted_roles_schedule_and_prior_families(self):
   before=json.loads((ROOT/'audits/2026-10-30-propriete-stock-adoption-05/baseline.json').read_text(encoding='utf-8'))
-  self.assertEqual(self.units[:2],before['retained_units'])
-  self.assertEqual((self.result['total_jh'],self.result['months']),(100,7))
-  self.assertEqual(self.result['roles'],dict(coordination=11,analyse_produit=10,architecture=9,dev_java=37,dev_frontend=6,qa=14,plateforme=9,ux=2,securite=2))
-  self.assertAlmostEqual(self.result['unrounded_months'],7.072892092893779)
+  self.assertEqual(self.units[1],before['retained_units'][1])
+  self.assertEqual(self.units[0]['capabilities'],before['retained_units'][0]['capabilities'])
+  self.assertEqual((self.result['total_jh'],self.result['months']),(190,9))
+  self.assertEqual(self.result['roles'],dict(coordination=22,analyse_produit=19,architecture=17,dev_java=70,dev_frontend=11,qa=27,plateforme=16,ux=4,securite=4))
+  self.assertAlmostEqual(self.result['unrounded_months'],8.674090564782492)
   for p in ('source/referentiel-capacites.yaml','sources/cartographie-scm-2026-10-24.yaml'):
    self.assertEqual(hashlib.sha256((ROOT/p).read_bytes()).hexdigest(),before['file_hashes'][p])
  def test_native_new_sizes_and_COSMIC_reconstructed(self):
@@ -41,7 +44,7 @@ class OwnershipAdoptionTests(unittest.TestCase):
   self.assertEqual((p['trace']['CFP'],p['trace']['processes'],p['trace']['groups']),(80,9,21))
   self.assertEqual(p['trace']['movements'],dict(E=9,R=35,W=15,X=21))
   self.assertAlmostEqual(self.result['alignment']['functional']['jh'],80*20/7)
-  self.assertAlmostEqual(self.result['alignment']['functional']['gap_pct'],131.0769560193113)
+  self.assertAlmostEqual(self.result['alignment']['functional']['gap_pct'],100*(80*20/7/self.result['alignment']['reference_jh']-1))
  def test_export_reconstructs_without_disk_or_OSS_checkout(self):
   b=self.bundle;reg=b['model']['source/calculs-estimation-core.yaml']
   spec=next(c for c in reg['calculations'] if c['id']==self.unit['calculation']['id'])
@@ -52,9 +55,10 @@ class OwnershipAdoptionTests(unittest.TestCase):
   self.assertAlmostEqual(p['rows'][3]['jh'],98.9157173042935)
  def test_aggregate_coverage_and_consumed_owners(self):
   study=study_copy();core=study.content['stacks']['java-spring']['economic']
-  self.assertEqual(core['jh']['core_project_roles_jh'],6660)
+  self.assertEqual(core['jh']['core_project_roles_jh'],active_reference()['total_jh'])
   family=next(u for u in core['core_units'] if u['id']==self.unit['id'])
-  self.assertEqual((family['labour_eur_ht'],family['tooling_eur_ht']),(62150,800))
+  self.assertEqual(family['tooling_eur_ht'],1520)
+  self.assertEqual(family['labour_eur_ht'],sum(r['jh']*r['rate_eur_jh'] for r in family['roles']))
   consumed=[m for m in family['funding'] if m['funding_mode']=='consumed']
   self.assertEqual({m['funding_owner'] for m in consumed},{'master-data-java-spring','stock-java-spring'})
   self.assertTrue(all(m['funding_owner_label'] for m in consumed))

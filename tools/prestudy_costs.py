@@ -67,8 +67,14 @@ def compile_cost_evidence(spec, schema, stacks, market, inflation, proofs):
                 pricing=deepcopy(element['tarification']),
                 evidence=[source(model['sources'][key]) for key in element['sources']
                           if urlsplit(model['sources'][key]['reference']).scheme in ('https', 'http')]))
+    transformation=deepcopy(spec['transformation_roles'])
+    require({r['id'] for r in transformation}=={'direction_projet','pmo','synchronisation','change','architecture'}, 'transformation role identities')
+    for role in transformation:
+        for observation in role['observations']:
+            require(urlsplit(observation['url']).scheme=='https', 'invalid transformation evidence')
+            require(observation['min']<=observation['max'], 'reversed transformation range')
     # Exclude selected rates, provisions, gains and projections from this input reading.
-    return dict(recorded_on=spec['recorded_on'], provenance=spec['provenance'], rates=rates,
+    return dict(recorded_on=spec['recorded_on'], provenance=spec['provenance'], rates=rates, transformation_roles=transformation,
         options=[dict(id=slug, label=stack['model']['nom']) for slug, stack in stacks.items()],
         purchases=proof_rows('purchase_refs'), products=products, ai=proof_rows('ai_refs'),
         programmes=deepcopy(spec['programmes']),

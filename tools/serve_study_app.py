@@ -54,7 +54,8 @@ def make_handler(study, static_root=None):
     # Bound to this immutable loaded study; never cache simulation parameters.
     @lru_cache(maxsize=16)
     def compressed(body):
-        return gzip.compress(body,compresslevel=5,mtime=0)
+        # Immutable responses pay this compression cost once per loaded study.
+        return gzip.compress(body,compresslevel=6,mtime=0)
 
     def accepts_gzip(header):
         encodings={}

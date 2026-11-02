@@ -124,6 +124,9 @@ properties:
           - native_new_module_analogies_v1
           - coherent_components_v1
           - professional_components_v1
+          - oss_reference_revision_v1
+          - scenario_scope_adoption_v1
+          - work_package_adoption_v1
         scope:
           type: object
           properties:
@@ -392,6 +395,23 @@ properties:
             required:
             - proposal_inputs
             - adoption_basis
+          - &id006
+            type: object
+            additionalProperties: false
+            properties:
+              revision_basis:
+                type: string
+                minLength: 1
+              revision_proposal:
+                type: string
+                minLength: 1
+              revision_hypotheses:
+                type: string
+                minLength: 1
+            required:
+            - revision_basis
+            - revision_proposal
+            - revision_hypotheses
         funding_claims:
           type: array
           items:
@@ -596,6 +616,36 @@ properties:
               - adoption_basis
           required:
           - recipe_parameters
+      - if:
+          properties:
+            recipe:
+              const: oss_reference_revision_v1
+        then:
+          properties:
+            inputs: *id006
+      - if:
+          properties:
+            recipe:
+              const: work_package_adoption_v1
+        then:
+          properties:
+            inputs:
+              type: object
+              additionalProperties: false
+              properties:
+                revision_basis:
+                  type: string
+                  minLength: 1
+                revision_proposal:
+                  type: string
+                  minLength: 1
+                revision_hypotheses:
+                  type: string
+                  minLength: 1
+              required:
+              - revision_basis
+              - revision_proposal
+              - revision_hypotheses
   consolidation:
     type: object
     properties:

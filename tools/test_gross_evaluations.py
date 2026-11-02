@@ -1,4 +1,5 @@
 """Phase readers preserve adopted economics and isolate the OSS proposal."""
+from test_support import active_reference
 from copy import deepcopy
 import gzip
 import json
@@ -34,18 +35,132 @@ class GrossEvaluationsTests(unittest.TestCase):
 
     def test_proposal_is_distinct_and_all_lots_reconcile(self):
         core=self.reading['phases']['acquisition']['options']['java-spring']['core']
-        self.assertEqual((core['adopted_jh'],core['proposal_jh'],core['delta_jh']),(6660,5950,-710))
-        self.assertEqual([r['proposal_jh'] for r in core['rows']],[1500,340,190,50,170,250,530,420,1960,160,380])
-        self.assertEqual(core['status'],'proposal_not_adopted')
+        self.assertEqual((core['adopted_jh'],core['proposal_jh'],core['delta_jh']),(active_reference()['total_jh'],active_reference()['total_jh'],active_reference()['delta_jh']))
+        self.assertEqual([r['proposal_jh'] for r in core['rows']],active_reference()['unit_days'])
+        self.assertEqual(core['status'],'adopted')
         for row in core['rows']:
             self.assertEqual(len(row['references']),4)
             self.assertEqual(row['rationale'],self.spec['unit_arbitrations'][row['id']])
-        self.assertEqual(sum(u['total_jh'] for u in self.units),6660)
+        self.assertEqual(sum(u['total_jh'] for u in self.units),active_reference()['total_jh'])
+
+    def test_five_comparisons_are_priced_without_changing_retained_decisions(self):
+        from gross_evaluations import value_unit_comparisons
+        unit=dict(total_jh=10,tooling_eur_jh=20,roles=[dict(jh=3,rate_eur_jh=800),dict(jh=7,rate_eur_jh=500)],alignment=dict(rows=[dict(id='erpnext',label='ERPNext',jh=10)],functional=dict(id='cosmic-isbsg',label='COSMIC × ISBSG',jh=5)))
+        before=deepcopy(unit);rows=value_unit_comparisons(unit)
+        self.assertEqual([r['cost_eur_ht'] for r in rows],[6100,3050])
+        self.assertEqual(unit,before)
+        core=self.reading['phases']['acquisition']['options']['java-spring']['core']
+        self.assertEqual(len(core['rows']),11)
+        for row in core['rows']:
+            self.assertEqual(len(row['comparisons']),5)
+            self.assertEqual({r['id'] for r in row['comparisons']},{'erpnext','odoo','tryton','axelor','cosmic-isbsg'})
+        master=next(r for r in core['rows'] if r['id']=='master-data-java-spring')
+        self.assertEqual(master['adopted_cost_eur_ht'],active_reference()['units']['master-data-java-spring']['cost_eur_ht'])
+        self.assertEqual(next(r['cost_eur_ht'] for r in master['comparisons'] if r['id']=='cosmic-isbsg'),755212.5)
+        self.assertEqual(sum(r['adopted_jh'] for r in core['rows']),active_reference()['total_jh'])
+
+    def test_module_analysis_distinguishes_interface_work_from_incremental_functional_size(self):
+        core=self.reading['phases']['acquisition']['options']['java-spring']['core']
+        rows={r['id']:r for r in core['rows']}
+        self.assertEqual(core['analysis_order'][:3],['process-management-java-spring','supply-workbenches-java-spring','supply-controls-java-spring'])
+        self.assertEqual(len(core['analysis_order']),len(set(core['analysis_order'])))
+        self.assertEqual(set(core['analysis_order']),set(rows))
+        process=rows['process-management-java-spring']['detail']['analysis_metrics']
+        visual=rows['supply-workbenches-java-spring']['detail']['analysis_metrics']
+        self.assertEqual((process['CFP'],visual['CFP']),(216,5))
+        self.assertAlmostEqual(process['cosmic_jh'],617.1428571428571)
+        self.assertAlmostEqual(visual['cosmic_jh'],14.285714285714286)
+        self.assertAlmostEqual(process['implied_hours_per_CFP'],63.5065119384794)
+        self.assertAlmostEqual(visual['implied_hours_per_CFP'],227.26689552639013)
+        # The five-point result excludes the four business functions already consumed.
+        from core_product_estimate import load_inputs,functional_forecast
+        _,inputs=load_inputs()
+        visual_processes=inputs['cosmic']['processes']['supply-workbenches']
+        self.assertEqual([p['id'] for p in visual_processes if p['scope']=='new'],['layout'])
+        self.assertEqual({p['id'] for p in visual_processes if p['scope']=='existing_function_consumed'},{'plan','compare','service','act'})
+        f=functional_forecast(inputs)
+        self.assertEqual([f['CFP_by_group'][g] for g in ('process-studio','human-forms','analytics-mining')],[49,44,47])
+        for row in rows.values():
+            self.assertEqual(set(row['detail']['analysis']),{'finding','oss','cosmic','decision','remaining'})
+            self.assertTrue(all(row['detail']['analysis'].values()))
+            self.assertGreater(row['detail']['analysis_metrics']['CFP'],0)
+        self.assertEqual(sum(r['adopted_jh'] for r in rows.values()),active_reference()['total_jh'])
+        self.assertEqual((rows['process-management-java-spring']['adopted_cost_eur_ht'],rows['supply-workbenches-java-spring']['adopted_cost_eur_ht']),(active_reference()['units']['process-management-java-spring']['cost_eur_ht'],active_reference()['units']['supply-workbenches-java-spring']['cost_eur_ht']))
+
+    def test_policy_rescan_replaces_the_old_scope_without_adopting_a_budget(self):
+        core=self.reading['phases']['acquisition']['options']['java-spring']['core']
+        row=next(r for r in core['rows'] if r['id']=='supply-controls-java-spring')
+        from gross_evaluations import project_unit_revision
+        legacy=read(ROOT/'audits/2026-11-02-audit-politiques-allocation/results.json')
+        unit=next(u for u in read(ROOT/'audits/2026-11-02-adoption-perimetre-scenarios/basis.json')['valued_units'] if u['id']==row['id'])
+        r=project_unit_revision(legacy,unit)
+        r['core_candidate_jh']=5950+r['delta_jh']
+        r['proof']={'path':'audits/2026-11-02-audit-politiques-allocation/results.json'}
+        self.assertEqual((r['replaced_CFP'],r['policy_CFP'],r['kept_CFP'],r['total_CFP']),(17,103,47,150))
+        self.assertAlmostEqual(r['raw_jh'],428.57142857142856)
+        self.assertEqual((r['jh'],r['delta_jh'],r['core_candidate_jh']),(430,380,6330))
+        self.assertEqual((r['cost_eur_ht'],r['delta_cost_eur_ht']),(270590,239140))
+        self.assertEqual(sum(role['jh'] for role in r['roles']),430)
+        self.assertEqual(len(r['processes']),13)
+        self.assertEqual((row['adopted_jh'],row['adopted_cost_eur_ht'],core['adopted_jh']),(610,383630,active_reference()['total_jh']))
+        self.assertEqual(r['status'],'proposal_not_adopted')
+        self.assertIn(r['proof']['path'],self.study.files)
+        # Archived rescanned code is the measured code, independent of the checkouts.
+        import base64,gzip,hashlib,json
+        proof=read(ROOT/r['proof']['path'])
+        archive=json.loads(gzip.decompress(base64.b64decode(proof['source_archive']['data'])))
+        self.assertEqual(len(archive),14)
+        for m in proof['measures']:
+            self.assertEqual(hashlib.sha256(base64.b64decode(archive[m['repo']+'/'+m['path']])).hexdigest(),m['sha256'])
+        self.assertTrue(all(x['status']=='partial_functional_analogue_not_retained' for x in proof['cocomo_diagnostics']))
+
+    def test_policy_revision_rejects_duplicate_functions_and_double_funding(self):
+        from gross_evaluations import project_unit_revision
+        core=self.reading['phases']['acquisition']['options']['java-spring']['core']
+        row=next(r for r in core['rows'] if r['id']=='supply-controls-java-spring')
+        source=read(ROOT/'audits/2026-11-02-audit-politiques-allocation/results.json')
+        unit=next(u for u in read(ROOT/'audits/2026-11-02-adoption-perimetre-scenarios/basis.json')['valued_units'] if u['id']==row['id'])
+        for kind in ('duplicate','reuse','count','benchmark','adopted','basis'):
+            proof=deepcopy(source)
+            if kind=='duplicate':proof['processes'].append(deepcopy(proof['processes'][0]))
+            if kind=='reuse':proof['kept_process_ids'].append(proof['removed_process_ids'][0])
+            if kind=='count':proof['policy_CFP']+=1
+            if kind=='benchmark':proof['benchmark']['hours_per_CFP']=30
+            if kind=='adopted':proof['status']='adopted'
+            if kind=='basis':proof['baseline_jh']=60
+            with self.subTest(kind=kind),self.assertRaisesRegex(ValueError,'ERR_GROSS_EVALUATIONS'):
+                project_unit_revision(proof,unit)
+
+    def test_adopted_scenario_scope_replaces_the_proposal_panel(self):
+        core=self.reading['phases']['acquisition']['options']['java-spring']['core']
+        self.assertEqual(core['adopted_jh'],active_reference()['total_jh'])
+        self.assertNotIn('revision_summary',core)
+        self.assertEqual(self.spec['unit_revisions'],{})
+        self.assertTrue(all('revision' not in r['detail'] for r in core['rows']))
+        self.assertEqual(sum(r['adopted_cost_eur_ht'] for r in core['rows']),active_reference()['cost_eur_ht'])
+        for row in core['rows']:
+            if row['id'] in ('supply-controls-java-spring','orders-java-spring','master-plan-java-spring','supply-decisions-java-spring','service-fulfilment-java-spring'):
+                self.assertEqual(row['detail']['method'],'COSMIC × ISBSG')
+
+    def test_scenario_prototype_still_rejects_overlap_and_stale_benchmark(self):
+        from gross_evaluations import project_unit_revision
+        unit=next(u for u in read(ROOT/'audits/2026-11-02-adoption-perimetre-scenarios/basis.json')['valued_units'] if u['id']=='supply-decisions-java-spring')
+        source=read(ROOT/'audits/2026-11-02-proposition-perimetre-complete/supply-decisions-java-spring.json')
+        for kind in ('duplicate','credit','count','scope','benchmark','status'):
+            p=deepcopy(source)
+            if kind=='duplicate':p['processes'].append(deepcopy(p['processes'][0]))
+            if kind=='credit':p['kept_process_ids']=[p['removed_process_ids'][0]]
+            if kind=='count':p['CFP']+=1
+            if kind=='scope':p['processes'][0]['capabilities']=['BC-008']
+            if kind=='benchmark':p['benchmark']['hours_per_CFP']=30
+            if kind=='status':p['status']='adopted'
+            with self.subTest(kind=kind),self.assertRaisesRegex(ValueError,'ERR_GROSS_EVALUATIONS'):
+                project_unit_revision(p,unit)
 
     def test_malformed_or_obsolete_proposal_is_rejected(self):
-        for kind in ('adopted','duplicate','negative','nonfinite','total','difference','scope','decision'):
+        for kind in ('invalid-status','duplicate','negative','nonfinite','total','difference','scope','decision'):
             proof=deepcopy(self.proof)
-            if kind=='adopted':proof['status']='adopted'
+            if kind=='invalid-status':proof['status']='invalid'
             if kind=='duplicate':proof['units'][1]=deepcopy(proof['units'][0])
             if kind=='negative':proof['units'][0]['proposal_jh']=-1
             if kind=='nonfinite':proof['units'][0]['proposal_jh']=float('nan')
@@ -68,8 +183,8 @@ class GrossEvaluationsTests(unittest.TestCase):
     def test_buy_selection_not_mistaken_for_free_or_a_supplier_price(self):
         for slug in ('microsoft','sap'):
             reading=self.reading['phases']['acquisition']['options'][slug]
-            self.assertEqual(reading['total_jh'],110)
-            self.assertEqual(len(reading['groups'][0]['rows']),6)
+            self.assertEqual(reading['total_jh'],70)
+            self.assertEqual(len(reading['groups'][0]['rows']),4)
             self.assertEqual(reading['quotes'][0]['entries'],[])
             self.assertIsNone(self.reading['phases']['integration']['options'][slug]['total_jh'])
 
@@ -82,8 +197,8 @@ class GrossEvaluationsTests(unittest.TestCase):
         self.assertNotIn('INT-012',work)
         self.assertNotIn('INT-013',work)
         self.assertEqual(sum(r['value'] for r in groups['deployment']['rows']),1200)
-        self.assertEqual(sum(r['value'] for r in groups['programme']['rows']),810)
-        self.assertEqual(reading['total_jh'],3935)
+        self.assertEqual(sum(r['value'] for r in groups['programme']['rows']),2700)
+        self.assertEqual(reading['total_jh'],5825)
         self.assertEqual([r['unit'] for r in groups['coordination']['rows']],['€ HT','€ HT'])
         ledger={r['id']:r['amount'] for r in self.study.baseline['options'][0]['funding_ledger']}
         for row in groups['coordination']['rows']:self.assertEqual(row['value'],ledger[row['id']])
@@ -124,7 +239,7 @@ class GrossEvaluationsTests(unittest.TestCase):
         self.assertEqual(sum(r['jh'] for r in core['roles']),core['adopted_jh'])
         for row in core['rows']:
             self.assertEqual(sum(r['jh'] for r in row['detail']['roles']),row['adopted_jh'])
-            self.assertTrue(row['detail']['includes'] and row['detail']['excludes'])
+            self.assertTrue(row['detail']['includes'] or row['detail']['scope_note'])
             self.assertIn(row['detail']['proof']['path'],self.study.files)
 
     def test_annual_pilotage_is_copied_without_inventing_human_effort(self):

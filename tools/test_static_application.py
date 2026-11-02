@@ -39,6 +39,20 @@ class StaticApplicationTests(unittest.TestCase):
                 self.assertEqual(len(calls),4)
             with self.assertRaises(ValueError):prepare(root/'outside',root=root,builder=builder)
 
+    def test_delivery_cache_ignores_test_and_workflow_edits_but_keeps_explicit_documents(self):
+        from prepare_static_app import inputs
+        files={name:dict(sha256='a') for name in ['tools/test_engine.py', 'app/scripts/test-ui.mjs', 'skills/x/SKILL.md', '.github/workflows/ci.yml', 'AGENTS.md', 'README.md', 'tools/engine.py', 'source/rates.yaml', 'app/src/App.tsx']}
+        files['config/publication.yaml']=dict(sha256='a',document={'documents':['tools/test_published.py']})
+        files['tools/test_published.py']=dict(sha256='a')
+        with patch('prepare_static_app.snapshot',return_value={'files':files}), patch('prepare_static_app.hashes',return_value={}):
+            a=inputs(Path('.'))
+            for name in ['tools/test_engine.py','app/scripts/test-ui.mjs','skills/x/SKILL.md','.github/workflows/ci.yml','AGENTS.md','README.md']:self.assertNotIn(name,a)
+            for name in ['tools/engine.py','source/rates.yaml','app/src/App.tsx','tools/test_published.py']:self.assertIn(name,a)
+            files['tools/test_engine.py']['sha256']='changed'
+            self.assertEqual(inputs(Path('.')),a)
+            files['tools/test_published.py']['sha256']='changed'
+            self.assertNotEqual(inputs(Path('.')),a)
+
     def test_concurrent_source_change_cannot_be_certified_as_cached_build(self):
         with tempfile.TemporaryDirectory(dir=ROOT/'tmp') as folder:
             root=Path(folder)

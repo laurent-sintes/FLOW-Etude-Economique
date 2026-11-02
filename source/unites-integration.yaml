@@ -1,0 +1,3089 @@
+version: 1
+id: integration-work-units
+labels:
+  title: Rapprochement des travaux et des chiffrages existants
+  intro: Chaque ligne relie le besoin commun aux enveloppes Make et aux postes des offres Synvance. Un travail chiffré
+    dans une enveloppe ne possède pas nécessairement un prix individuel. Les points ouverts précisent le périmètre
+    ou la responsabilité à confirmer avant tout supplément.
+  quantity: Quantité à établir
+  unknown: À dimensionner
+  delivery: Livrable attendu
+  acceptance: Critères de recette
+  drivers: Facteurs de difficulté
+  boundary: Frontière de financement
+  counting: Règle de comptage
+  options: Traitement et financement par option
+  effort: Charge détaillée de cette ligne
+  formula: Charge par rôle = préparation fixe + quantité × charge unitaire. Cette proposition ne s’ajoute pas automatiquement
+    aux budgets.
+  funding: Enveloppes et postes de référence
+  basis: Justification du dimensionnement
+  sources: Sources et cas métier
+  no_allocation: Les forfaits ne sont pas ventilés entre les lignes tant que cette répartition n’est pas documentée.
+  option_names:
+    java-spring: Make · Java/Spring
+    microsoft: Microsoft · Avanade
+    sap: SAP · Delaware
+  covered: Déjà chiffré
+  remaining: Ce qui reste à établir ou à estimer
+  matrix: Couverture de la grille commune
+  work: Travail commun
+  evidence_packages: Postes rapprochés
+  shared: Enveloppe partagée avec plusieurs lignes. Ne pas additionner ses renvois.
+  observations: Détail des postes utilisés pour le rapprochement
+  observation_note: Les postes du pilote Microsoft ne ventilent pas la projection Groupe. Chez SAP, les vues par
+    domaine, phase et type de développement se recoupent. Elles détaillent les mêmes lots et ne s’additionnent pas.
+  status_labels:
+    inclus_documente: Chiffré dans une enveloppe
+    partiel: Périmètre partiellement rapproché
+    a_rapprocher: Inclusion à confirmer
+    complement: Complément à estimer
+    sans_objet: Sans objet
+  range_to: à
+  actions: Points ouverts par option
+  option_findings:
+    java-spring: Les activités et paquets actifs financent les familles de travaux de la grille. Il reste à en détailler
+      les quantités, les critères de recette et les frontières de réutilisation. Un dépassement de périmètre doit
+      être démontré avant de créer un complément.
+    microsoft: Le pilote chiffre configuration, interfaces, customisation, architecture, tests et démarrage. Migration,
+      formation, transfert, chaîne de livraison, automatisation, supervision et reprise restent à localiser dans
+      les forfaits. La projection Groupe demande le rapprochement des vagues et des responsabilités.
+    sap: Les lots chiffrent domaines, développements, interfaces, reprise, recette, bascule et assistance initiale.
+      Formation, transfert, automatisation, identités et garanties de service restent à confirmer. Les règles et
+      parcours FLOW doivent être rapprochés de la BPML. Le périmètre Finance est encore présent dans les montants
+      sources.
+sources:
+  RFI:
+    path: sources/client/rfi-presentation.pdf
+    location: 'p. 4–7 : périmètre, systèmes et frontières'
+  BESOINS:
+    path: sources/client/rfi-besoins.pdf
+    location: Expression des besoins. Index fonctionnel à rapprocher des cas FLOW
+  MS:
+    path: sources/client/microsoft-1.pdf
+    location: 'PDF p. 39 : cinq postes du ROM pilote. PDF p. 40 : abaques de déploiement.'
+  MSQ:
+    path: sources/client/microsoft-questionnaire.xlsx
+    location: 2. Interfaces, lignes 7–12. 1. Besoins fonctionnels, E302/G302. 8. Estimations budgétaires, C13/D13
+      et lignes 20–23
+  SAP:
+    path: sources/client/delaware-septembre.pdf
+    location: 'PDF p. 33 : volumes. PDF p. 38 : lots. PDF p. 39–40 : domaines et phases. PDF p. 41 : WRICEF.'
+  SAPQ:
+    path: sources/client/sap-questionnaire.xlsx
+    location: 1. Besoins fonctionnels, E136/H136, E229/H229 à E231/H231, E300/H300, E302/H302. 2. Interfaces, lignes
+      7–8
+  COPIL:
+    path: sources/client/copil-5.pdf
+    location: 'p. 7–8 : pilote, généralisation, équipes internes, autonomie et pré-cadrage'
+  CATALOGUE:
+    path: source/integration.yaml
+    location: 'INT-001 à INT-013 : activités et frontières communes'
+  PARCOURS:
+    path: source/parcours-integration.yaml
+    location: Cas métier et rapprochements proposés avec les activités
+  MAKE:
+    path: source/integration/integration-java-spring.yaml
+    location: Responsabilités par activité. Le diagnostic historique des flux est remplacé par le scénario Groupe
+      actif.
+  DEPLOIEMENT:
+    path: source/deploiement-groupe.yaml
+    location: Paquets Groupe et substitutions INT-012/INT-013
+  OFFICE:
+    path: source/modele-composable.yaml
+    location: 'equipe_transformation : pilotage client, architecture transverse et conduite du changement'
+  ECARTS:
+    path: source/ecarts-perimetre-flow-rfi.md
+    location: Rapprochement documentaire des offres et du périmètre FLOW
+  QUALIFICATION:
+    path: source/qualification-buy.yaml
+    location: Points de couverture et de droits Buy encore à qualifier
+  MAKE_COST:
+    path: source/chiffrage/chiffrage-java-spring.yaml
+    location: Activités INT-001 à INT-011. INT-006 remplacé par le scénario Groupe actif.
+funding_groups:
+  make-common:
+    option: java-spring
+    label: Travaux communs Make existants
+    path: source/integration/integration-java-spring.yaml
+    scope: Activités conservées INT-001 à INT-011. Rapprochement à effectuer, sans addition au budget existant.
+  make-deployment:
+    option: java-spring
+    label: Paquets de déploiement Groupe
+    path: source/deploiement-groupe.yaml
+    scope: Remplacent INT-012 et INT-013. Un forfait couvre plusieurs unités sans ventilation présumée.
+  microsoft-offer:
+    option: microsoft
+    label: Offre Microsoft pilote et projection Groupe
+    path: source/reperes-synvance.yaml
+    scope: Le ROM pilote et la projection Groupe restent distincts. Inclusion de chaque livrable à confirmer.
+  sap-offer:
+    option: sap
+    label: Lots SAP reçus
+    path: source/reperes-synvance.yaml
+    scope: Lots Boardriders et Beaumanoir. Finance hors FLOW à réconcilier. Aucun partage de forfait inventé.
+units:
+- id: authority
+  activity_ref: INT-001
+  label: Définir une frontière de responsabilité
+  deliverable: Matrice des données, décisions et opérations avec leurs autorités.
+  count_unit: frontière entre systèmes
+  counting_rule: Compter chaque frontière entre systèmes une seule fois dans cette ligne. Le nombre de scénarios
+    associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Une commande et un mouvement ont chacun une autorité explicite.
+  drivers: Nombre de systèmes, décisions partagées et exceptions.
+  boundary: Exclut pilotage programme et conception du moteur Core.
+  scenario_refs: &id001
+  - additional-purchase-partial
+  - b2b-partial-stock
+  - b2b-release-deadline
+  - complete-order-multiline
+  - consignment-launch-replenishment
+  - consignment-sale-pickup
+  - customer-credit-hold
+  - damaged-stock-disposition
+  - export-remote-services
+  - fashion-launch
+  - forecast-to-shortage-arbitration
+  - gift-kits-crossdock
+  - intercompany-direct-delivery
+  - intercompany-partial-return
+  - intercompany-stock-transfer
+  - last-item-concurrency
+  - no-admissible-promise
+  - order-structuring-engaged
+  - ownership-transit-deadline
+  - packaging-receipt-variance
+  - partial-receiving
+  - pickup-or-direct-shipment
+  - planning-actuals-feedback
+  - preorder-future-availability
+  - process-approval-bottleneck
+  - product-quality-feedback
+  - redistribute-protected-stock
+  - reference-plan-correction
+  - remote-payment-ambiguous
+  - return-credit-refund
+  - return-customer-replacement
+  - return-fashion-recovery
+  - seasonal-order-backlog
+  - service-policy-deactivation
+  - shortage-reassessment
+  - stocktaking-variance
+  - substitution-price-service
+  - supplier-return-outcomes
+  - trace-accessory-kits
+  - transfer-replenishment-order-driven
+  - transport-loads-six-stores
+  - transport-missed-connection
+  - workflow-version-change
+  source_refs: &id002
+  - RFI
+  - MS
+  - SAP
+  - COPIL
+  - ECARTS
+  options:
+    java-spring:
+      treatment: Définir les contrats avec les SI sources et les responsabilités de FLOW.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-001
+        covered: Travail financé dans l’activité active.
+        remaining: Délimiter les responsabilités de chaque canal et système dans les ateliers financés.
+    microsoft:
+      treatment: Gouvernance et architecture dans le ROM pilote. Commerce et interfaces ne tranchent pas la responsabilité
+        de chaque canal.
+      funding_group: microsoft-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-governance
+        covered: Architecture et gouvernance du pilote.
+        remaining: Confirmer les autorités par canal et les responsabilités Groupe. Le pilotage client reste au
+          Transformation Office.
+    sap:
+      treatment: RACI et gouvernance décrits. Séparer opérations FLOW et transformation Finance présente dans les
+        lots.
+      funding_group: sap-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-domain
+        covered: Blueprint, gouvernance et coordination dans les lots.
+        remaining: Confirmer autorités FLOW, frontières des canaux et responsabilités client. Ne pas ajouter une
+          seconde gouvernance fournisseur.
+- id: fit-gap
+  activity_ref: INT-001
+  label: Instruire un écart de configuration
+  deliverable: Décision standard, paramétrage ou extension justifiée.
+  count_unit: écart métier
+  counting_rule: Compter chaque écart métier une seule fois dans cette ligne. Le nombre de scénarios associés ne
+    multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Besoin, option retenue et propriétaire de financement identifiés.
+  drivers: Nombre de variantes et de parties décisionnaires.
+  boundary: La réalisation de l’extension appartient à INT-005.
+  scenario_refs: *id001
+  source_refs: *id002
+  options:
+    java-spring:
+      treatment: Définir les contrats avec les SI sources et les responsabilités de FLOW.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-001
+        covered: Travail financé dans l’activité active.
+        remaining: Affecter les écarts réels à la configuration ou aux extensions déjà provisionnées.
+    microsoft:
+      treatment: Gouvernance et architecture dans le ROM pilote. Commerce et interfaces ne tranchent pas la responsabilité
+        de chaque canal.
+      funding_group: microsoft-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-standard
+        covered: Analyse du standard et des écarts du pilote.
+        remaining: Rapprocher la liste des besoins FLOW et les variantes des pôles avant de chiffrer les écarts
+          non couverts.
+    sap:
+      treatment: RACI et gouvernance décrits. Séparer opérations FLOW et transformation Finance présente dans les
+        lots.
+      funding_group: sap-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-domain
+        covered: Processus estimés par domaine et phases.
+        remaining: Rapprocher la BPML et les écarts FLOW. Les domaines hors périmètre source demandent une estimation
+          spécifique.
+- id: structure
+  activity_ref: INT-002
+  label: Configurer une structure organisationnelle
+  deliverable: Entités, sites, réseaux, calendriers et unités cohérents.
+  count_unit: configuration organisationnelle distincte
+  counting_rule: Compter chaque configuration organisationnelle distincte une seule fois dans cette ligne. Le nombre
+    de scénarios associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Une transaction suit les structures autorisées et les dates applicables.
+  drivers: Diversité des structures et règles de validité.
+  boundary: Exclut migration historique et création du référentiel produit.
+  scenario_refs: &id003
+  - additional-purchase-partial
+  - b2b-partial-stock
+  - b2b-release-deadline
+  - complete-order-multiline
+  - consignment-launch-replenishment
+  - consignment-sale-pickup
+  - customer-credit-hold
+  - damaged-stock-disposition
+  - export-remote-services
+  - fashion-launch
+  - forecast-to-shortage-arbitration
+  - gift-kits-crossdock
+  - intercompany-direct-delivery
+  - intercompany-partial-return
+  - intercompany-stock-transfer
+  - last-item-concurrency
+  - no-admissible-promise
+  - order-structuring-engaged
+  - ownership-transit-deadline
+  - packaging-receipt-variance
+  - partial-receiving
+  - pickup-or-direct-shipment
+  - planning-actuals-feedback
+  - preorder-future-availability
+  - process-approval-bottleneck
+  - product-quality-feedback
+  - redistribute-protected-stock
+  - reference-plan-correction
+  - remote-payment-ambiguous
+  - return-credit-refund
+  - return-customer-replacement
+  - return-fashion-recovery
+  - seasonal-order-backlog
+  - service-policy-deactivation
+  - shortage-reassessment
+  - stocktaking-variance
+  - substitution-price-service
+  - supplier-return-outcomes
+  - trace-accessory-kits
+  - transfer-replenishment-order-driven
+  - transport-loads-six-stores
+  - transport-missed-connection
+  - workflow-version-change
+  source_refs: &id004
+  - MS
+  - SAP
+  - PARCOURS
+  options:
+    java-spring:
+      treatment: Configurer le produit livré et les six familles de références, sans reconstruire Master Data.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-002
+        covered: Travail financé dans l’activité active.
+        remaining: Confirmer le nombre de configurations réellement distinctes.
+    microsoft:
+      treatment: Analyse et configuration du standard identifiées dans le pilote.
+      funding_group: microsoft-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-standard
+        covered: Configuration du standard dans le pilote.
+        remaining: Confirmer sociétés, marques, calendriers et réutilisation dans les déploiements.
+    sap:
+      treatment: Blueprint et réalisation par domaine dans les lots 2 et 3.
+      funding_group: sap-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-structure
+        covered: Configuration de la structure dans le lot Boardriders.
+        remaining: Confirmer la reprise du modèle pour Beaumanoir et les variantes locales, sans interpréter le
+          zéro du lot 3 comme une absence de besoin.
+- id: reference
+  activity_ref: INT-002
+  label: Définir un mapping de référence
+  deliverable: Identifiants, attributs, unités et règles de qualité documentés.
+  count_unit: contrat de correspondance
+  counting_rule: Compter chaque contrat de correspondance une seule fois dans cette ligne. Le nombre de scénarios
+    associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Une référence source est rapprochée sans perte d’identité ni ambiguïté silencieuse.
+  drivers: Hétérogénéité, qualité et priorités entre sources.
+  boundary: Définition sémantique ici. Transport en INT-006 et chargement initial en INT-007.
+  scenario_refs: *id003
+  source_refs: *id004
+  options:
+    java-spring:
+      treatment: Configurer le produit livré et les six familles de références, sans reconstruire Master Data.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-002
+        covered: Travail financé dans l’activité active.
+        remaining: Établir les mappings communs et leur frontière avec les transformations techniques INT-006.
+    microsoft:
+      treatment: Analyse et configuration du standard identifiées dans le pilote.
+      funding_group: microsoft-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-standard
+        - ms-flows
+        covered: Configuration et interfaces disposent de postes.
+        remaining: Le dictionnaire de correspondance et son partage entre flux restent à attribuer. Éviter de payer
+          le même mapping dans chaque interface.
+    sap:
+      treatment: Blueprint et réalisation par domaine dans les lots 2 et 3.
+      funding_group: sap-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-domain
+        - sap-migration
+        covered: Domaines fonctionnels et reprise de données chiffrés.
+        remaining: Identifier les mappings sémantiques réutilisés par les flux et reprises. Ventilation exacte non
+          fournie.
+- id: policy
+  activity_ref: INT-003
+  label: Configurer un ensemble de règles métier
+  deliverable: Priorités, protections, saisons, seuils et exceptions versionnés.
+  count_unit: ensemble cohérent de règles
+  counting_rule: Compter chaque ensemble cohérent de règles une seule fois dans cette ligne. Le nombre de scénarios
+    associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Conflits et dérogations sont traités sur un jeu de cas de référence.
+  drivers: Nombre de règles interdépendantes, marques et cas limites.
+  boundary: Moteurs génériques déjà financés. Exclut leur développement.
+  scenario_refs: &id005
+  - additional-purchase-partial
+  - b2b-partial-stock
+  - b2b-release-deadline
+  - complete-order-multiline
+  - consignment-launch-replenishment
+  - consignment-sale-pickup
+  - customer-credit-hold
+  - damaged-stock-disposition
+  - export-remote-services
+  - fashion-launch
+  - forecast-to-shortage-arbitration
+  - gift-kits-crossdock
+  - intercompany-direct-delivery
+  - intercompany-partial-return
+  - intercompany-stock-transfer
+  - last-item-concurrency
+  - no-admissible-promise
+  - order-structuring-engaged
+  - ownership-transit-deadline
+  - packaging-receipt-variance
+  - partial-receiving
+  - pickup-or-direct-shipment
+  - planning-actuals-feedback
+  - preorder-future-availability
+  - process-approval-bottleneck
+  - product-quality-feedback
+  - redistribute-protected-stock
+  - reference-plan-correction
+  - remote-payment-ambiguous
+  - return-credit-refund
+  - return-customer-replacement
+  - return-fashion-recovery
+  - seasonal-order-backlog
+  - service-policy-deactivation
+  - shortage-reassessment
+  - stocktaking-variance
+  - substitution-price-service
+  - supplier-return-outcomes
+  - trace-accessory-kits
+  - transfer-replenishment-order-driven
+  - transport-loads-six-stores
+  - transport-missed-connection
+  - workflow-version-change
+  source_refs: &id006
+  - MS
+  - SAPQ
+  - QUALIFICATION
+  - PARCOURS
+  options:
+    java-spring:
+      treatment: Paramétrer et calibrer les moteurs financés dans le Core.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-003
+        covered: Travail financé dans l’activité active.
+        remaining: Lister les politiques multimarques et jeux de recette, puis vérifier leur tenue dans l’enveloppe.
+    microsoft:
+      treatment: Rapprocher règles Beaumanoir, standard Dynamics/K3 et adaptations du pilote.
+      funding_group: microsoft-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-standard
+        - ms-custom
+        covered: Paramétrage standard et provision de customisation.
+        remaining: Identifier les règles d’allocation, droits collectifs, saisons et incompatibilités réellement
+          couvertes. Chiffrer seulement les règles hors provision.
+    sap:
+      treatment: Rapprocher règles Beaumanoir, standard et systèmes conservés. Réassort externe déclaré à qualifier.
+      funding_group: sap-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-domain
+        covered: Configuration des domaines commerciaux et Supply dans les lots.
+        remaining: Rapprocher droits collectifs, saisons, incompatibilités et règles d’allocation. Les mécanismes
+          hors périmètre source restent à qualifier puis estimer.
+- id: calibration
+  activity_ref: INT-003
+  label: Calibrer un modèle de décision
+  deliverable: Paramètres et résultats attendus de promesse, réassort ou allocation.
+  count_unit: modèle et contexte de décision
+  counting_rule: Compter chaque modèle et contexte de décision une seule fois dans cette ligne. Le nombre de scénarios
+    associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Les résultats sont expliqués sur les cas de pénurie et de capacité.
+  drivers: Contraintes, volumes et qualité des données.
+  boundary: Exclut construction de l’algorithme et recette transverse INT-010.
+  scenario_refs: *id005
+  source_refs: *id006
+  options:
+    java-spring:
+      treatment: Paramétrer et calibrer les moteurs financés dans le Core.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-003
+        covered: Travail financé dans l’activité active.
+        remaining: Définir modèles, jeux de calibration et objectifs mesurables. Estimer seulement l’éventuel dépassement
+          justifié.
+    microsoft:
+      treatment: Rapprocher règles Beaumanoir, standard Dynamics/K3 et adaptations du pilote.
+      funding_group: microsoft-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-standard
+        - ms-custom
+        covered: Postes candidats de paramétrage et de customisation.
+        remaining: Confirmer les modèles de décision, jeux de calibration et objectifs de qualité. Leur financement
+          précis n’est pas établi.
+    sap:
+      treatment: Rapprocher règles Beaumanoir, standard et systèmes conservés. Réassort externe déclaré à qualifier.
+      funding_group: sap-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-domain
+        covered: Planification Supply incluse dans les domaines chiffrés.
+        remaining: Vérifier les modèles et jeux de calibration FLOW. Ne pas déduire une couverture complète de l’optimisation
+          ou du réassort à partir du nom du domaine.
+- id: workflow
+  activity_ref: INT-004
+  label: Configurer un parcours opérationnel
+  deliverable: Étapes, événements, exceptions et validations configurés.
+  count_unit: parcours et variantes délimités
+  counting_rule: Compter chaque parcours et variantes délimités une seule fois dans cette ligne. Le nombre de scénarios
+    associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Un parcours nominal et ses exceptions aboutissent aux résultats attendus.
+  drivers: Nombre d’événements, variantes et interventions.
+  boundary: Tests locaux inclus. Recette intersystèmes en INT-010.
+  scenario_refs: &id007
+  - additional-purchase-partial
+  - b2b-partial-stock
+  - b2b-release-deadline
+  - complete-order-multiline
+  - consignment-launch-replenishment
+  - consignment-sale-pickup
+  - customer-credit-hold
+  - damaged-stock-disposition
+  - export-remote-services
+  - fashion-launch
+  - forecast-to-shortage-arbitration
+  - gift-kits-crossdock
+  - intercompany-direct-delivery
+  - intercompany-partial-return
+  - intercompany-stock-transfer
+  - last-item-concurrency
+  - no-admissible-promise
+  - order-structuring-engaged
+  - ownership-transit-deadline
+  - packaging-receipt-variance
+  - partial-receiving
+  - pickup-or-direct-shipment
+  - planning-actuals-feedback
+  - preorder-future-availability
+  - process-approval-bottleneck
+  - product-quality-feedback
+  - redistribute-protected-stock
+  - reference-plan-correction
+  - remote-payment-ambiguous
+  - return-credit-refund
+  - return-customer-replacement
+  - return-fashion-recovery
+  - seasonal-order-backlog
+  - service-policy-deactivation
+  - shortage-reassessment
+  - stocktaking-variance
+  - substitution-price-service
+  - supplier-return-outcomes
+  - trace-accessory-kits
+  - transfer-replenishment-order-driven
+  - transport-loads-six-stores
+  - transport-missed-connection
+  - workflow-version-change
+  source_refs: &id008
+  - MS
+  - SAP
+  - ECARTS
+  - PARCOURS
+  options:
+    java-spring:
+      treatment: Utiliser les studios et ateliers du Core déjà financés.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-004
+        covered: Travail financé dans l’activité active.
+        remaining: Inventorier parcours et variantes spécifiques du Groupe.
+    microsoft:
+      treatment: Déterminer les parcours fournis par Commerce et ceux à configurer ou étendre.
+      funding_group: microsoft-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-standard
+        - ms-custom
+        covered: Parcours standard et provision d’adaptation.
+        remaining: Inventorier les parcours multicanaux, exceptions et reprises à configurer au-delà du pilote.
+    sap:
+      treatment: Qualifier les responsabilités S/4, OMSA et des systèmes de canaux pour chaque parcours.
+      funding_group: sap-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-domain
+        - sap-custom
+        covered: Processus standard et extensions chiffrés.
+        remaining: Préciser les parcours S/4, OMSA et SI de canaux. Estimer les exceptions non reprises dans la
+          BPML.
+- id: form
+  activity_ref: INT-004
+  label: Configurer un écran ou formulaire
+  deliverable: Champs, actions autorisées, validations et contexte.
+  count_unit: vue opérationnelle
+  counting_rule: Compter chaque vue opérationnelle une seule fois dans cette ligne. Le nombre de scénarios associés
+    ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Le bon acteur voit et exécute les seules actions autorisées.
+  drivers: Champs, rôles, règles et exigences ergonomiques.
+  boundary: Exclut développement du studio et Design System commun.
+  scenario_refs: *id007
+  source_refs: *id008
+  options:
+    java-spring:
+      treatment: Utiliser les studios et ateliers du Core déjà financés.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-004
+        covered: Travail financé dans l’activité active.
+        remaining: Inventorier les formulaires locaux et les fonctions d’administration réellement réutilisées.
+    microsoft:
+      treatment: Déterminer les parcours fournis par Commerce et ceux à configurer ou étendre.
+      funding_group: microsoft-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-standard
+        - ms-custom
+        covered: Paramétrage et customisation peuvent porter les écrans locaux.
+        remaining: Faire confirmer la liste des écrans et formulaires, leurs variantes et leurs droits avant tout
+          complément.
+    sap:
+      treatment: Qualifier les responsabilités S/4, OMSA et des systèmes de canaux pour chaque parcours.
+      funding_group: sap-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-forms
+        covered: Développements Forms et Fiori identifiés.
+        remaining: Rapprocher chaque formulaire et écran FLOW. Les chiffres WRICEF ne donnent pas un prix par écran
+          et ne s’ajoutent pas aux lots.
+- id: extension
+  activity_ref: INT-005
+  label: Réaliser une extension locale
+  deliverable: Comportement propre au Groupe absent du paramétrage.
+  count_unit: extension indépendante
+  counting_rule: Compter chaque extension indépendante une seule fois dans cette ligne. Le nombre de scénarios associés
+    ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Contrat fonctionnel et non-régression de l’extension vérifiés.
+  drivers: Règles, dépendances et compatibilité avec les mises à jour.
+  boundary: Un manque générique du Core remonte à l’obtention du produit.
+  scenario_refs: &id009
+  - additional-purchase-partial
+  - b2b-partial-stock
+  - b2b-release-deadline
+  - complete-order-multiline
+  - consignment-launch-replenishment
+  - consignment-sale-pickup
+  - customer-credit-hold
+  - damaged-stock-disposition
+  - export-remote-services
+  - fashion-launch
+  - forecast-to-shortage-arbitration
+  - gift-kits-crossdock
+  - intercompany-direct-delivery
+  - intercompany-partial-return
+  - intercompany-stock-transfer
+  - last-item-concurrency
+  - no-admissible-promise
+  - order-structuring-engaged
+  - ownership-transit-deadline
+  - packaging-receipt-variance
+  - partial-receiving
+  - pickup-or-direct-shipment
+  - planning-actuals-feedback
+  - preorder-future-availability
+  - process-approval-bottleneck
+  - product-quality-feedback
+  - redistribute-protected-stock
+  - reference-plan-correction
+  - remote-payment-ambiguous
+  - return-credit-refund
+  - return-customer-replacement
+  - return-fashion-recovery
+  - seasonal-order-backlog
+  - service-policy-deactivation
+  - shortage-reassessment
+  - stocktaking-variance
+  - substitution-price-service
+  - supplier-return-outcomes
+  - trace-accessory-kits
+  - transfer-replenishment-order-driven
+  - transport-loads-six-stores
+  - transport-missed-connection
+  - workflow-version-change
+  source_refs: &id010
+  - MS
+  - SAP
+  - COPIL
+  options:
+    java-spring:
+      treatment: Extensions locales seulement. Les fonctions génériques manquantes relèvent du produit Core.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-005
+        covered: Travail financé dans l’activité active.
+        remaining: Rapprocher les extensions locales du besoin résiduel, hors moteur générique Core.
+    microsoft:
+      treatment: Provision développement/customisation dans le ROM pilote. Ventilation et portée Groupe non acquises.
+      funding_group: microsoft-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-custom
+        covered: Provision dédiée au développement et à la customisation.
+        remaining: Ventiler les écarts FLOW dans cette provision et faire chiffrer seulement le dépassement de périmètre
+          documenté.
+    sap:
+      treatment: Gaps annoncés dans le lot Beaumanoir. Rapprochement avec les besoins FLOW à établir.
+      funding_group: sap-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-custom
+        covered: Enhancements, exits et Badi chiffrés.
+        remaining: Rapprocher les écarts FLOW et les WRICEF. Chiffrer uniquement les extensions absentes du périmètre
+          reçu.
+- id: extension-upgrade
+  activity_ref: INT-005
+  label: Qualifier la compatibilité d’une extension
+  deliverable: Paquet de tests et adaptation initiale à la version cible.
+  count_unit: extension et version cible
+  counting_rule: Compter chaque extension et version cible une seule fois dans cette ligne. Le nombre de scénarios
+    associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - La livraison initiale passe les tests de compatibilité.
+  drivers: Couplage aux API et nombre de composants modifiés.
+  boundary: Exclut maintenance annuelle et tests locaux déjà dans la réalisation.
+  scenario_refs: *id009
+  source_refs: *id010
+  options:
+    java-spring:
+      treatment: Extensions locales seulement. Les fonctions génériques manquantes relèvent du produit Core.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-005
+        covered: Travail financé dans l’activité active.
+        remaining: Ventiler réalisation et qualification de compatibilité initiale au sein de la même activité.
+    microsoft:
+      treatment: Provision développement/customisation dans le ROM pilote. Ventilation et portée Groupe non acquises.
+      funding_group: microsoft-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-custom
+        - ms-tests
+        covered: Développement et tests du pilote sont chiffrés.
+        remaining: Confirmer la qualification initiale des extensions avec les versions cibles. Séparer la maintenance
+          des mises à jour futures.
+    sap:
+      treatment: Gaps annoncés dans le lot Beaumanoir. Rapprochement avec les besoins FLOW à établir.
+      funding_group: sap-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-custom
+        - sap-tests
+        covered: Spécifiques et phases de test chiffrés.
+        remaining: Faire confirmer la qualification de compatibilité initiale et sa frontière avec les upgrades
+          ultérieurs.
+- id: flow
+  activity_ref: INT-006
+  label: Raccorder un contrat d’échange
+  deliverable: Adaptateur, mapping technique, idempotence, erreurs et reprise.
+  count_unit: contrat de flux distinct
+  counting_rule: Compter chaque contrat de flux distinct une seule fois dans cette ligne. Le nombre de scénarios
+    associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Doublon, retard et rejeu ne créent pas de double effet.
+  drivers: Protocoles, transformations, volumes, latence et qualité.
+  boundary: Exclut spécification sémantique INT-002 et licence iPaaS.
+  scenario_refs: &id011
+  - additional-purchase-partial
+  - b2b-partial-stock
+  - b2b-release-deadline
+  - complete-order-multiline
+  - consignment-launch-replenishment
+  - consignment-sale-pickup
+  - customer-credit-hold
+  - damaged-stock-disposition
+  - export-remote-services
+  - fashion-launch
+  - forecast-to-shortage-arbitration
+  - gift-kits-crossdock
+  - intercompany-direct-delivery
+  - intercompany-partial-return
+  - intercompany-stock-transfer
+  - last-item-concurrency
+  - no-admissible-promise
+  - order-structuring-engaged
+  - ownership-transit-deadline
+  - packaging-receipt-variance
+  - partial-receiving
+  - pickup-or-direct-shipment
+  - planning-actuals-feedback
+  - preorder-future-availability
+  - process-approval-bottleneck
+  - product-quality-feedback
+  - redistribute-protected-stock
+  - reference-plan-correction
+  - remote-payment-ambiguous
+  - return-credit-refund
+  - return-customer-replacement
+  - return-fashion-recovery
+  - seasonal-order-backlog
+  - service-policy-deactivation
+  - shortage-reassessment
+  - stocktaking-variance
+  - substitution-price-service
+  - supplier-return-outcomes
+  - trace-accessory-kits
+  - transfer-replenishment-order-driven
+  - transport-loads-six-stores
+  - transport-missed-connection
+  - workflow-version-change
+  source_refs: &id012
+  - MS
+  - MSQ
+  - SAP
+  - SAPQ
+  - MAKE
+  options:
+    java-spring:
+      treatment: Le scénario Groupe actif remplace le diagnostic historique des contrats de flux. La charge affichée
+        vient du même calcul que le budget courant.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-006
+        covered: Travail financé dans l’activité active.
+        remaining: Dédupliquer les échanges et confirmer la correspondance avec les interfaces du scénario Groupe
+          actif.
+    microsoft:
+      treatment: 40 interfaces identifiées dans le ROM pilote. WMS, magasins et SAP FICO cités dans le questionnaire.
+      funding_group: microsoft-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-flows
+        covered: Poste de raccordement pour les interfaces identifiées du pilote.
+        remaining: Rapprocher chaque échange, sens, transformation et mode de reprise avec le catalogue Groupe.
+          Chiffrer les interfaces réellement additionnelles.
+    sap:
+      treatment: Interfaces WMS/magasins décrites. Integration Suite non inclus dans la BOM examinée.
+      funding_group: sap-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-flows
+        covered: Interfaces recensées et développements d’entrée/sortie identifiés dans les lots.
+        remaining: Dédupliquer les échanges des deux lots et rapprocher le catalogue FLOW. Les licences de middleware
+          restent un poste distinct.
+- id: flow-monitoring
+  activity_ref: INT-006
+  label: Configurer une supervision partagée des flux
+  deliverable: Alertes, corrélation et tableaux de suivi communs.
+  count_unit: dispositif partagé de supervision
+  counting_rule: Compter chaque dispositif partagé de supervision une seule fois dans cette ligne. Le nombre de
+    scénarios associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Un incident est détecté, attribué et suivi jusqu’à reprise.
+  drivers: Nombre de chaînes, corrélations et règles d’alerte.
+  boundary: Exclut gestion d’erreurs locale du flux et service annuel de monitoring.
+  scenario_refs: *id011
+  source_refs: *id012
+  options:
+    java-spring:
+      treatment: 30 contrats de flux dans l’hypothèse actuelle. Mappings partagés réalisés une fois.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-006
+        - make-INT-011
+        covered: Travail financé dans l’activité active.
+        remaining: Rapprochement partagé entre raccordement et préparation de l’exploitation. Ne pas ajouter une
+          nouvelle supervision aux deux enveloppes.
+    microsoft:
+      treatment: 40 interfaces identifiées dans le ROM pilote. WMS, magasins et SAP FICO cités dans le questionnaire.
+      funding_group: microsoft-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-flows
+        - ms-tests
+        covered: Interfaces et support constituent les postes candidats.
+        remaining: Faire confirmer supervision commune, alertes et outils de rejeu. Une interface livrée ne prouve
+          pas une supervision transverse financée.
+    sap:
+      treatment: Interfaces WMS/magasins décrites. Integration Suite non inclus dans la BOM examinée.
+      funding_group: sap-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-flows
+        - sap-infra
+        covered: Interfaces et support infrastructure chiffrés.
+        remaining: Confirmer l’installation de la supervision des flux, les alertes et reprises. Le monitoring annuel
+          ne finance pas automatiquement leur création.
+- id: migration-object
+  activity_ref: INT-007
+  label: Préparer la migration d’un objet
+  deliverable: Extraction, transformation, chargement et rapprochement.
+  count_unit: objet métier à reprendre
+  counting_rule: Compter chaque objet métier à reprendre une seule fois dans cette ligne. Le nombre de scénarios
+    associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Identités, quantités et engagements sont conservés avec écarts expliqués.
+  drivers: Historique, qualité, volumes et dépendances entre objets.
+  boundary: Exclut nettoyage métier interne et opérations de répétition collective.
+  scenario_refs: &id013 []
+  source_refs: &id014
+  - SAP
+  - MS
+  - DEPLOIEMENT
+  - PARCOURS
+  options:
+    java-spring:
+      treatment: Provision de migration conservée dans le modèle. Répétitions financées ici, pas une seconde fois
+        dans les déploiements.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-007
+        covered: Travail financé dans l’activité active.
+        remaining: Inventorier les objets, règles de nettoyage et réconciliation. La provision couvre déjà les répétitions
+          prévues.
+    microsoft:
+      treatment: Réalisation de migration à localiser dans la décomposition contractuelle du pilote et des déploiements.
+      funding_group: microsoft-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-standard
+        - ms-rollout
+        covered: Pilote et déploiements chiffrés globalement.
+        remaining: Obtenir les objets de reprise, règles de nettoyage et réconciliation et leur inclusion dans le
+          forfait. Estimer les objets non inclus.
+    sap:
+      treatment: Data migration isolée à 401 JH pour le lot 2 et 304 JH pour le lot 3, sur leur périmètre d’origine.
+      funding_group: sap-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-migration
+        covered: Reprise de données et objets décrits par lot.
+        remaining: Rapprocher les objets FLOW, historiques, qualités et règles de réconciliation. Ne pas ajouter
+          une seconde fois les conversions WRICEF.
+- id: migration-rehearsal
+  activity_ref: INT-007
+  label: Exécuter une répétition de migration
+  deliverable: Exécution chronométrée, contrôles et bilan des écarts.
+  count_unit: campagne de reprise
+  counting_rule: Compter chaque campagne de reprise une seule fois dans cette ligne. Le nombre de scénarios associés
+    ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Le temps disponible et les critères de rapprochement sont respectés.
+  drivers: Volumes, dépendances et fenêtre d’indisponibilité.
+  boundary: Scripts en migration-object. Ne pas recompter la même répétition dans le déploiement.
+  scenario_refs: *id013
+  source_refs: *id014
+  options:
+    java-spring:
+      treatment: Provision de migration conservée dans le modèle. Répétitions financées ici, pas une seconde fois
+        dans les déploiements.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-007
+        covered: Travail financé dans l’activité active.
+        remaining: Confirmer les deux répétitions par unité supposées dans la provision, sans rajouter les scripts
+          ni la bascule locale.
+    microsoft:
+      treatment: Réalisation de migration à localiser dans la décomposition contractuelle du pilote et des déploiements.
+      funding_group: microsoft-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-tests
+        - ms-rollout
+        covered: Tests et déploiements disposent d’enveloppes.
+        remaining: Confirmer le nombre de répétitions complètes et les responsabilités de nettoyage, sans recompter
+          les scripts de migration.
+    sap:
+      treatment: Data migration isolée à 401 JH pour le lot 2 et 304 JH pour le lot 3, sur leur périmètre d’origine.
+      funding_group: sap-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-migration
+        - sap-cutover
+        covered: Reprise répartie sur réalisation, SIT/UAT et bascule.
+        remaining: Confirmer le nombre de répétitions complètes et leur RACI. La présence de phases de test ne donne
+          pas ce nombre.
+- id: environment
+  activity_ref: INT-008
+  label: Raccorder un environnement au Groupe
+  deliverable: Réseau, secrets, accès et paramètres de sécurité configurés.
+  count_unit: environnement distinct
+  counting_rule: Compter chaque environnement distinct une seule fois dans cette ligne. Le nombre de scénarios associés
+    ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Les accès autorisés fonctionnent et les accès interdits sont refusés.
+  drivers: Isolation, réseau, données sensibles et dépendances.
+  boundary: Exclut fabrication du socle produit et consommations cloud.
+  scenario_refs: &id015 []
+  source_refs: &id016
+  - MS
+  - SAP
+  - CATALOGUE
+  - MAKE
+  options:
+    java-spring:
+      treatment: Activité déjà prévue. Distinguer socle produit et raccordements propres au Groupe.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-008
+        covered: Travail financé dans l’activité active.
+        remaining: Confirmer les raccordements client et distinguer le socle produit générique déjà financé.
+    microsoft:
+      treatment: Panier de produits et architecture à rapprocher des prestations et responsabilités techniques.
+      funding_group: microsoft-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-governance
+        covered: Architecture du pilote chiffrée.
+        remaining: Distinguer services cloud et travaux de raccordement réseau, sécurité et environnements au SI
+          Groupe. Faire confirmer ces derniers.
+    sap:
+      treatment: Support Infrastructure dans les charges et panier RISE à rapprocher des responsabilités client.
+      funding_group: sap-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-infra
+        covered: Support Infrastructure BC chiffré dans chaque lot.
+        remaining: Confirmer les travaux réseau, sécurité et raccordements client, distincts du contrat RISE.
+- id: identity
+  activity_ref: INT-008
+  label: Configurer les identités et habilitations
+  deliverable: Fédération, rôles, cycle de vie et séparation des droits.
+  count_unit: population et politique d’accès
+  counting_rule: Compter chaque population et politique d’accès une seule fois dans cette ligne. Le nombre de scénarios
+    associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Arrivée, changement de rôle et départ sont pris en compte.
+  drivers: Sources d’identité, rôles et restrictions contextuelles.
+  boundary: Exclut moteur d’habilitation Core et abonnements.
+  scenario_refs: *id015
+  source_refs: *id016
+  options:
+    java-spring:
+      treatment: Activité déjà prévue. Distinguer socle produit et raccordements propres au Groupe.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-008
+        covered: Travail financé dans l’activité active.
+        remaining: Dimensionner populations et politiques d’accès dans l’activité existante.
+    microsoft:
+      treatment: Panier de produits et architecture à rapprocher des prestations et responsabilités techniques.
+      funding_group: microsoft-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-standard
+        - ms-governance
+        covered: Configuration standard et architecture chiffrées.
+        remaining: Confirmer SSO, populations, rôles, séparation des tâches et intégration de l’annuaire Groupe.
+    sap:
+      treatment: Support Infrastructure dans les charges et panier RISE à rapprocher des responsabilités client.
+      funding_group: sap-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-infra
+        - sap-domain
+        covered: Infrastructure et configuration fonctionnelle constituent les postes candidats.
+        remaining: Faire confirmer SSO, annuaire, habilitations et séparation des tâches Groupe.
+- id: pipeline
+  activity_ref: INT-009
+  label: Adapter une chaîne de livraison client
+  deliverable: Promotion des configurations et extensions, contrôles et retour arrière.
+  count_unit: pipeline de livraison distinct
+  counting_rule: Compter chaque pipeline de livraison distinct une seule fois dans cette ligne. Le nombre de scénarios
+    associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Une livraison reproductible est traçable et réversible.
+  drivers: Environnements, artefacts et contraintes de validation.
+  boundary: Réutiliser les pipelines du socle. Exclut leur reconstruction et les licences ALM.
+  scenario_refs: &id017 []
+  source_refs: &id018
+  - COPIL
+  - CATALOGUE
+  - MAKE
+  options:
+    java-spring:
+      treatment: Industrialisation déjà identifiée. Déduire les composants et pipelines réutilisés du Build.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-009
+        covered: Travail financé dans l’activité active.
+        remaining: Délimiter réutilisation du socle Build et adaptations client pour éviter de payer deux fois la
+          chaîne initiale.
+    microsoft:
+      treatment: 'COPIL : mises à jour majeures obligatoires et non-régression continue. Chiffrage initial détaillé
+        à confirmer.'
+      funding_group: microsoft-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-custom
+        covered: Réalisation de spécifiques provisionnée.
+        remaining: Identifier la mise en place de la chaîne de livraison client, les transports et la responsabilité
+          du maintien de cette chaîne.
+    sap:
+      treatment: Chaîne de transport/livraison et responsabilités à détailler dans les prestations.
+      funding_group: sap-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-infra
+        - sap-custom
+        covered: Infrastructure et réalisation des développements sont chiffrées.
+        remaining: Confirmer transports, automatisation de livraison et moyens mis à disposition du client.
+- id: regression
+  activity_ref: INT-009
+  label: Automatiser un paquet de non-régression
+  deliverable: Exécution automatisée sur les contrats d’intégration retenus.
+  count_unit: paquet de tests réutilisable
+  counting_rule: Compter chaque paquet de tests réutilisable une seule fois dans cette ligne. Le nombre de scénarios
+    associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Un changement incompatible est détecté avant déploiement.
+  drivers: Données de test, dépendances et stabilité des interfaces.
+  boundary: Automatisation uniquement. Conception et exécution de la recette métier en INT-010.
+  scenario_refs: *id017
+  source_refs: *id018
+  options:
+    java-spring:
+      treatment: Industrialisation déjà identifiée. Déduire les composants et pipelines réutilisés du Build.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-009
+        covered: Travail financé dans l’activité active.
+        remaining: Définir les tests réutilisables, distincts des scénarios de recette et de leur exécution.
+    microsoft:
+      treatment: 'COPIL : mises à jour majeures obligatoires et non-régression continue. Chiffrage initial détaillé
+        à confirmer.'
+      funding_group: microsoft-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-tests
+        covered: Tests du pilote chiffrés.
+        remaining: Confirmer la livraison de tests automatisés réutilisables et leurs jeux de données. L’exécution
+          des tests ne prouve pas leur automatisation.
+    sap:
+      treatment: Chaîne de transport/livraison et responsabilités à détailler dans les prestations.
+      funding_group: sap-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-tests
+        covered: SIT/UAT chiffrés dans les phases des lots.
+        remaining: Identifier les tests automatisés livrés et leurs jeux de données. Ne pas convertir toute la recette
+          en budget d’automatisation.
+- id: acceptance
+  activity_ref: INT-010
+  label: Recetter un scénario intégré
+  deliverable: Jeu de données, résultats attendus, exécution et anomalies.
+  count_unit: scénario de recette et variantes
+  counting_rule: Compter chaque scénario de recette et variantes une seule fois dans cette ligne. Le nombre de scénarios
+    associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Le scénario de bout en bout respecte les critères métier communs.
+  drivers: Systèmes traversés, variantes et disponibilités des acteurs.
+  boundary: Exclut tests locaux, corrections de produit et acceptation locale du déploiement.
+  scenario_refs: &id019
+  - additional-purchase-partial
+  - b2b-partial-stock
+  - b2b-release-deadline
+  - complete-order-multiline
+  - consignment-launch-replenishment
+  - consignment-sale-pickup
+  - customer-credit-hold
+  - damaged-stock-disposition
+  - export-remote-services
+  - fashion-launch
+  - forecast-to-shortage-arbitration
+  - gift-kits-crossdock
+  - intercompany-direct-delivery
+  - intercompany-partial-return
+  - intercompany-stock-transfer
+  - last-item-concurrency
+  - no-admissible-promise
+  - order-structuring-engaged
+  - ownership-transit-deadline
+  - packaging-receipt-variance
+  - partial-receiving
+  - pickup-or-direct-shipment
+  - planning-actuals-feedback
+  - preorder-future-availability
+  - process-approval-bottleneck
+  - product-quality-feedback
+  - redistribute-protected-stock
+  - reference-plan-correction
+  - remote-payment-ambiguous
+  - return-credit-refund
+  - return-customer-replacement
+  - return-fashion-recovery
+  - seasonal-order-backlog
+  - service-policy-deactivation
+  - shortage-reassessment
+  - stocktaking-variance
+  - substitution-price-service
+  - supplier-return-outcomes
+  - trace-accessory-kits
+  - transfer-replenishment-order-driven
+  - transport-loads-six-stores
+  - transport-missed-connection
+  - workflow-version-change
+  source_refs: &id020
+  - MS
+  - SAP
+  - PARCOURS
+  - DEPLOIEMENT
+  options:
+    java-spring:
+      treatment: Recette transverse financée. Acceptations locales dans les paquets de déploiement.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-010
+        covered: Travail financé dans l’activité active.
+        remaining: Rapprocher les scénarios FLOW du socle de recette transverse et des acceptations locales déjà
+          financées.
+    microsoft:
+      treatment: Tests, validation, go-live et support regroupés dans une phase du pilote.
+      funding_group: microsoft-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-tests
+        covered: Tests et validation explicitement chiffrés.
+        remaining: Rapprocher cas FLOW et acceptations locales. Séparer prestation d’accompagnement et temps des
+          métiers.
+    sap:
+      treatment: SIT et UAT présents dans les phases, même lorsque la ligne transverse Tests est faible ou nulle.
+      funding_group: sap-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-tests
+        covered: SIT et UAT chiffrés dans les deux lots.
+        remaining: Rapprocher les scénarios FLOW et le RACI. Les charges internes de participation ne sont pas des
+          prestations Delaware supplémentaires.
+- id: resilience
+  activity_ref: INT-010
+  label: Qualifier une exigence de service
+  deliverable: Mesure des volumes, temps de réponse, concurrence ou reprise.
+  count_unit: campagne de performance ou de reprise
+  counting_rule: Compter chaque campagne de performance ou de reprise une seule fois dans cette ligne. Le nombre
+    de scénarios associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Les seuils explicitement retenus sont atteints et les limites documentées.
+  drivers: Charge cible, distribution, injections d’incidents et profondeur de mesure.
+  boundary: Exclut tests génériques du produit et exercice de transfert exploitation INT-011.
+  scenario_refs: *id019
+  source_refs: *id020
+  options:
+    java-spring:
+      treatment: Recette transverse financée. Acceptations locales dans les paquets de déploiement.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-010
+        covered: Travail financé dans l’activité active.
+        remaining: Fixer volumes, concurrence, délais de reprise et campagnes nécessaires dans la provision.
+    microsoft:
+      treatment: Tests, validation, go-live et support regroupés dans une phase du pilote.
+      funding_group: microsoft-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-tests
+        covered: Enveloppe de test identifiée.
+        remaining: Confirmer campagnes de charge, concurrence, panne et reprise, volumes et objectifs mesurables.
+    sap:
+      treatment: SIT et UAT présents dans les phases, même lorsque la ligne transverse Tests est faible ou nulle.
+      funding_group: sap-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-tests
+        - sap-infra
+        covered: Tests et infrastructure chiffrés.
+        remaining: Faire confirmer performance, concurrence, reprise et objectifs de service sur les volumes Groupe.
+- id: operations
+  activity_ref: INT-011
+  label: Préparer un service d’exploitation
+  deliverable: Procédures, escalades, monitoring et engagements de service.
+  count_unit: service et responsabilité de support
+  counting_rule: Compter chaque service et responsabilité de support une seule fois dans cette ligne. Le nombre
+    de scénarios associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Un incident représentatif est pris en charge sans responsabilité orpheline.
+  drivers: Horaires, équipes, criticité et nombre de prestataires.
+  boundary: Préparation initiale seulement. Service récurrent dans le fonctionnement.
+  scenario_refs: &id021 []
+  source_refs: &id022
+  - MS
+  - MSQ
+  - SAP
+  - CATALOGUE
+  options:
+    java-spring:
+      treatment: Préparation du service déjà prévue. Distinguer installation initiale et prestations annuelles.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-011
+        covered: Travail financé dans l’activité active.
+        remaining: Détailler procédures, alertes et diagnostics à transmettre. Le fonctionnement annuel est distinct.
+    microsoft:
+      treatment: Go-live/support dans le pilote. Support initial mentionné dans le questionnaire, portée opérationnelle
+        à préciser.
+      funding_group: microsoft-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-tests
+        covered: Go-live et support du pilote chiffrés.
+        remaining: Confirmer runbooks, alertes, diagnostic et transfert au support Groupe. Ne pas recompter les
+          services initiaux déjà tarifés.
+    sap:
+      treatment: MCO, monitoring des flux et TMA décrits après stabilisation. Leurs prix annuels ne chiffrent pas
+        automatiquement la préparation initiale.
+      funding_group: sap-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-operate
+        - sap-infra
+        covered: Operate de projet et support infrastructure chiffrés.
+        remaining: Identifier runbooks, transfert et préparation du support dans ces postes. Séparer cette préparation
+          des contrats annuels.
+- id: recovery
+  activity_ref: INT-011
+  label: Transférer une procédure de restauration
+  deliverable: Exercice exécuté par l’équipe destinataire et procès-verbal.
+  count_unit: procédure de reprise opérationnelle
+  counting_rule: Compter chaque procédure de reprise opérationnelle une seule fois dans cette ligne. Le nombre de
+    scénarios associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - L’équipe d’exploitation sait restaurer et contrôler le résultat.
+  drivers: Dépendances techniques, données et responsabilités.
+  boundary: Exclut développement de la sauvegarde et benchmark de résilience INT-010.
+  scenario_refs: *id021
+  source_refs: *id022
+  options:
+    java-spring:
+      treatment: Préparation du service déjà prévue. Distinguer installation initiale et prestations annuelles.
+      funding_group: make-common
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-INT-011
+        covered: Travail financé dans l’activité active.
+        remaining: Préciser les exercices et procédures de reprise dans la préparation de l’exploitation.
+    microsoft:
+      treatment: Go-live/support dans le pilote. Support initial mentionné dans le questionnaire, portée opérationnelle
+        à préciser.
+      funding_group: microsoft-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-tests
+        covered: Support de démarrage chiffré.
+        remaining: Confirmer procédures et exercices de restauration et responsabilités client. L’abonnement cloud
+          ne démontre pas leur réalisation.
+    sap:
+      treatment: MCO, monitoring des flux et TMA décrits après stabilisation. Leurs prix annuels ne chiffrent pas
+        automatiquement la préparation initiale.
+      funding_group: sap-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-infra
+        - sap-operate
+        covered: Infrastructure et phase Operate identifiées.
+        remaining: Confirmer procédures de restauration, exercices et responsabilités RISE/client.
+- id: training
+  activity_ref: INT-012
+  label: Préparer et dispenser une formation
+  deliverable: Supports, environnement pédagogique, sessions et évaluation.
+  count_unit: parcours et groupe de participants
+  counting_rule: Compter chaque parcours et groupe de participants une seule fois dans cette ligne. Le nombre de
+    scénarios associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Les participants exécutent les opérations attendues.
+  drivers: Profils, langues, groupes et profondeur des exercices.
+  boundary: Temps métier interne exclu du chiffrage actuel. Pas de seconde provision face aux paquets Groupe.
+  scenario_refs: &id023 []
+  source_refs: &id024
+  - COPIL
+  - SAP
+  - DEPLOIEMENT
+  options:
+    java-spring:
+      treatment: 'INT-012 remplacée par les paquets Groupe : ne pas additionner les deux.'
+      funding_group: make-deployment
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-deployment
+        covered: Travail financé dans les paquets Groupe qui remplacent les anciennes lignes de formation et de
+          bascule.
+        remaining: Dimensionner relais, supports et sessions dans les paquets. Le temps métier est exclu et le change
+          transverse est déjà financé ailleurs.
+    microsoft:
+      treatment: 'COPIL : montée en autonomie et centre de compétences. Prestations et volumes de formation à expliciter.'
+      funding_group: microsoft-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-rollout
+        covered: Déploiements estimés par abaque.
+        remaining: Faire préciser publics, sessions, supports, formation des relais et RACI. Estimer ensuite la
+          prestation externe non incluse, hors temps métier.
+    sap:
+      treatment: 'COPIL : centre de compétences. Ligne Formations à zéro dans les tableaux des lots 2 et 3, inclusion
+        ailleurs ou prise en charge client à clarifier.'
+      funding_group: sap-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-training
+        covered: Aucune charge isolée dans la ligne Formations.
+        remaining: Faire confirmer financement ailleurs ou responsabilité client. Chiffrer supports et sessions
+          externes manquants, sans compter le temps métier.
+- id: handover
+  activity_ref: INT-012
+  label: Transférer une compétence d’administration
+  deliverable: Documentation, tutorat et mise en pratique.
+  count_unit: compétence et équipe destinataire
+  counting_rule: Compter chaque compétence et équipe destinataire une seule fois dans cette ligne. Le nombre de
+    scénarios associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - L’équipe traite un cas sans dépendance non prévue au fournisseur.
+  drivers: Compétences initiales, profondeur et disponibilité des intervenants.
+  boundary: Exclut conduite du changement Office et formation utilisateur déjà comptée.
+  scenario_refs: *id023
+  source_refs: *id024
+  options:
+    java-spring:
+      treatment: 'INT-012 remplacée par les paquets Groupe : ne pas additionner les deux.'
+      funding_group: make-deployment
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-deployment
+        covered: Travail financé dans les paquets Groupe qui remplacent les anciennes lignes de formation et de
+          bascule.
+        remaining: Préciser les compétences transmises dans les paquets, sans ajouter les anciens INT-012.
+    microsoft:
+      treatment: 'COPIL : montée en autonomie et centre de compétences. Prestations et volumes de formation à expliciter.'
+      funding_group: microsoft-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-rollout
+        covered: Déploiements et objectif d’autonomie du COPIL.
+        remaining: Confirmer transfert applicatif, administration et centre de compétences. La conduite du changement
+          du Transformation Office ne remplace pas ce transfert.
+    sap:
+      treatment: 'COPIL : centre de compétences. Ligne Formations à zéro dans les tableaux des lots 2 et 3, inclusion
+        ailleurs ou prise en charge client à clarifier.'
+      funding_group: sap-offer
+      inclusion: a_rapprocher
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-training
+        - sap-operate
+        covered: Operate présent, formation non isolée.
+        remaining: Préciser les livrables de transfert applicatif et d’administration. Chiffrer les prestations
+          absentes après clarification du RACI.
+- id: cutover
+  activity_ref: INT-013
+  label: Préparer et exécuter une bascule locale
+  deliverable: Plan de bascule, critères de décision et retour arrière.
+  count_unit: unité de déploiement
+  counting_rule: Compter chaque unité de déploiement une seule fois dans cette ligne. Le nombre de scénarios associés
+    ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Stocks et engagements rapprochés, service ouvert et décision tracée.
+  drivers: Applications, pays, fenêtres et dépendances entre vagues.
+  boundary: Exclut seconde réalisation des interfaces et répétitions INT-007.
+  scenario_refs: &id025 []
+  source_refs: &id026
+  - MS
+  - SAP
+  - COPIL
+  - DEPLOIEMENT
+  options:
+    java-spring:
+      treatment: INT-013 remplacée par les paquets Groupe avec stabilisation locale. Pas de répétition des travaux
+        communs.
+      funding_group: make-deployment
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-deployment
+        covered: Travail financé dans les paquets Groupe qui remplacent les anciennes lignes de formation et de
+          bascule.
+        remaining: Confirmer les vagues et leur séquencement dans les paquets, sans ajouter les anciens INT-013.
+    microsoft:
+      treatment: ROM pour un pilote, repères de déploiement puis projection Groupe du COPIL. Généralisation à contractualiser.
+      funding_group: microsoft-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-tests
+        - ms-rollout
+        covered: Go-live du pilote et abaques de déploiement.
+        remaining: Valider les vagues et le RACI Groupe. Rapprocher la projection du COPIL sans additionner le pilote
+          une seconde fois.
+    sap:
+      treatment: Lots Boardriders et Beaumanoir, phases Final Prep, Go Live et Operate documentées.
+      funding_group: sap-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-cutover
+        covered: Final Prep et Go Live chiffrés pour les deux lots.
+        remaining: Rapprocher les unités, pays et vagues FLOW. Les phases déjà chiffrées ne doivent pas être ajoutées
+          aux domaines.
+- id: stabilisation
+  activity_ref: INT-013
+  label: Stabiliser une unité déployée
+  deliverable: Traitement initial des incidents et transfert au régime permanent.
+  count_unit: mois de stabilisation par unité
+  counting_rule: Compter chaque mois de stabilisation par unité une seule fois dans cette ligne. Le nombre de scénarios
+    associés ne multiplie pas la quantité.
+  quantity: null
+  quantity_basis: null
+  acceptance:
+  - Critères d’acceptation locale et sortie de stabilisation satisfaits.
+  drivers: Volume d’incidents, horaires et niveaux de support.
+  boundary: Ne pas superposer le même support annuel et le paquet de stabilisation.
+  scenario_refs: *id025
+  source_refs: *id026
+  options:
+    java-spring:
+      treatment: INT-013 remplacée par les paquets Groupe avec stabilisation locale. Pas de répétition des travaux
+        communs.
+      funding_group: make-deployment
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement avec les travaux actifs de la référence Make. Le montant couvre l’activité ou
+        le paquet entier, pas chaque sous-ligne.
+      reconciliation:
+        package_refs:
+        - make-deployment
+        covered: Travail financé dans les paquets Groupe qui remplacent les anciennes lignes de formation et de
+          bascule.
+        remaining: Confirmer la couverture des deux mois de stabilisation locale et la relève par les services annuels.
+    microsoft:
+      treatment: ROM pour un pilote, repères de déploiement puis projection Groupe du COPIL. Généralisation à contractualiser.
+      funding_group: microsoft-offer
+      inclusion: partiel
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - ms-tests
+        - ms-rollout
+        covered: Support au go-live et déploiements prévus.
+        remaining: Fixer durée, couverture et effectifs par vague et le passage au support annuel, en retirant les
+          recouvrements.
+    sap:
+      treatment: Lots Boardriders et Beaumanoir, phases Final Prep, Go Live et Operate documentées.
+      funding_group: sap-offer
+      inclusion: inclus_documente
+      setup_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      unit_jh:
+        developpement: null
+        integration: null
+        support_n3: null
+        support_n1: null
+      estimate_basis: Rapprochement documentaire du 2 novembre 2026. Les postes sources ci-dessous établissent le
+        périmètre chiffré, sans ventilation arbitraire ni extension au périmètre FLOW.
+      reconciliation:
+        package_refs:
+        - sap-operate
+        covered: Assistance Operate initiale dans les deux lots.
+        remaining: Confirmer durée et couverture locales, puis bascule vers le service annuel sans chevauchement.
+packages:
+  make-INT-001:
+    option: java-spring
+    label: INT-001
+    kind: make_activity
+    work_ref: INT-001
+    source_ref: MAKE_COST
+    location: INT-001
+    measures: []
+    note: Charge active de l’activité entière, partagée entre ses unités de travail.
+  make-INT-002:
+    option: java-spring
+    label: INT-002
+    kind: make_activity
+    work_ref: INT-002
+    source_ref: MAKE_COST
+    location: INT-002
+    measures: []
+    note: Charge active de l’activité entière, partagée entre ses unités de travail.
+  make-INT-003:
+    option: java-spring
+    label: INT-003
+    kind: make_activity
+    work_ref: INT-003
+    source_ref: MAKE_COST
+    location: INT-003
+    measures: []
+    note: Charge active de l’activité entière, partagée entre ses unités de travail.
+  make-INT-004:
+    option: java-spring
+    label: INT-004
+    kind: make_activity
+    work_ref: INT-004
+    source_ref: MAKE_COST
+    location: INT-004
+    measures: []
+    note: Charge active de l’activité entière, partagée entre ses unités de travail.
+  make-INT-005:
+    option: java-spring
+    label: INT-005
+    kind: make_activity
+    work_ref: INT-005
+    source_ref: MAKE_COST
+    location: INT-005
+    measures: []
+    note: Charge active de l’activité entière, partagée entre ses unités de travail.
+  make-INT-006:
+    option: java-spring
+    label: INT-006
+    kind: make_activity
+    work_ref: INT-006
+    source_ref: DEPLOIEMENT
+    location: Scénario Groupe actif
+    measures: []
+    note: Charge active de l’activité entière, partagée entre ses unités de travail.
+  make-INT-007:
+    option: java-spring
+    label: INT-007
+    kind: make_activity
+    work_ref: INT-007
+    source_ref: MAKE_COST
+    location: INT-007
+    measures: []
+    note: Charge active de l’activité entière, partagée entre ses unités de travail.
+  make-INT-008:
+    option: java-spring
+    label: INT-008
+    kind: make_activity
+    work_ref: INT-008
+    source_ref: MAKE_COST
+    location: INT-008
+    measures: []
+    note: Charge active de l’activité entière, partagée entre ses unités de travail.
+  make-INT-009:
+    option: java-spring
+    label: INT-009
+    kind: make_activity
+    work_ref: INT-009
+    source_ref: MAKE_COST
+    location: INT-009
+    measures: []
+    note: Charge active de l’activité entière, partagée entre ses unités de travail.
+  make-INT-010:
+    option: java-spring
+    label: INT-010
+    kind: make_activity
+    work_ref: INT-010
+    source_ref: MAKE_COST
+    location: INT-010
+    measures: []
+    note: Charge active de l’activité entière, partagée entre ses unités de travail.
+  make-INT-011:
+    option: java-spring
+    label: INT-011
+    kind: make_activity
+    work_ref: INT-011
+    source_ref: MAKE_COST
+    location: INT-011
+    measures: []
+    note: Charge active de l’activité entière, partagée entre ses unités de travail.
+  make-deployment:
+    option: java-spring
+    label: Paquets de déploiement Groupe
+    kind: make_deployment
+    work_ref: deployment
+    source_ref: DEPLOIEMENT
+    location: deploiement et scénario actif
+    measures: []
+    note: Formation des relais, transfert, recette locale, bascule et stabilisation dans les mêmes paquets. Les
+      anciens INT-012 et INT-013 sont remplacés.
+  ms-standard:
+    option: microsoft
+    label: Analyse et configuration du standard
+    kind: source
+    work_ref: null
+    source_ref: MS
+    location: PDF p. 39
+    measures:
+    - label: ROM pilote
+      low: 520
+      high: 630
+      unit: JH
+    - label: ROM pilote
+      low: 630000
+      high: 760000
+      unit: EUR
+    note: Poste du pilote uniquement. Les bornes ne constituent pas une ventilation du montant Groupe du COPIL.
+      Le total nominal du ROM ne se reconstitue pas par addition systématique des bornes.
+  ms-flows:
+    option: microsoft
+    label: Intégration des interfaces
+    kind: source
+    work_ref: null
+    source_ref: MS
+    location: PDF p. 39
+    measures:
+    - label: ROM pilote
+      low: 380
+      high: 460
+      unit: JH
+    - label: ROM pilote
+      low: 380000
+      high: 460000
+      unit: EUR
+    note: Poste du pilote uniquement. Les bornes ne constituent pas une ventilation du montant Groupe du COPIL.
+      Le total nominal du ROM ne se reconstitue pas par addition systématique des bornes.
+  ms-custom:
+    option: microsoft
+    label: Provision développement et customisation
+    kind: source
+    work_ref: null
+    source_ref: MS
+    location: PDF p. 39
+    measures:
+    - label: ROM pilote
+      low: 190
+      high: 230
+      unit: JH
+    - label: ROM pilote
+      low: 190000
+      high: 230000
+      unit: EUR
+    note: Poste du pilote uniquement. Les bornes ne constituent pas une ventilation du montant Groupe du COPIL.
+      Le total nominal du ROM ne se reconstitue pas par addition systématique des bornes.
+  ms-governance:
+    option: microsoft
+    label: Gouvernance et architecture
+    kind: source
+    work_ref: null
+    source_ref: MS
+    location: PDF p. 39
+    measures:
+    - label: ROM pilote
+      low: 320
+      high: 380
+      unit: JH
+    - label: ROM pilote
+      low: 300000
+      high: 540000
+      unit: EUR
+    note: Poste du pilote uniquement. Les bornes ne constituent pas une ventilation du montant Groupe du COPIL.
+      Le total nominal du ROM ne se reconstitue pas par addition systématique des bornes.
+  ms-tests:
+    option: microsoft
+    label: Tests, validation, go-live et support
+    kind: source
+    work_ref: null
+    source_ref: MS
+    location: PDF p. 39
+    measures:
+    - label: ROM pilote
+      low: 490
+      high: 600
+      unit: JH
+    - label: ROM pilote
+      low: 400000
+      high: 650000
+      unit: EUR
+    note: Poste du pilote uniquement. Les bornes ne constituent pas une ventilation du montant Groupe du COPIL.
+      Le total nominal du ROM ne se reconstitue pas par addition systématique des bornes.
+  ms-rollout:
+    option: microsoft
+    label: Déploiements par unité
+    kind: source
+    work_ref: null
+    source_ref: MS
+    location: PDF p. 40
+    measures:
+    - label: Small
+      low: 100
+      high: 100
+      unit: JH
+    - label: Medium
+      low: 200
+      high: 200
+      unit: JH
+    - label: Complex
+      low: 400
+      high: 400
+      unit: JH
+    note: Abaques par unité géographique, non cumulables entre catégories. Nombre de sites, pays, adhérence et RACI
+      à préciser pour la projection Groupe.
+  sap-domain:
+    option: sap
+    label: Processus des lots Boardriders et Beaumanoir
+    kind: source
+    work_ref: null
+    source_ref: SAP
+    location: PDF p. 33 et p. 39–40
+    measures:
+    - label: Processus lot 2
+      low: 142
+      high: 142
+      unit: processus
+    - label: Processus lot 3
+      low: 82
+      high: 82
+      unit: processus
+    note: Blueprint et réalisation chiffrés par domaine. Les volumes par lot ne constituent pas des processus uniques
+      FLOW. Finance reste dans le périmètre source.
+  sap-structure:
+    option: sap
+    label: Business structure and guidelines
+    kind: source
+    work_ref: null
+    source_ref: SAP
+    location: PDF p. 39–40
+    measures:
+    - label: Lot 2
+      low: 152
+      high: 152
+      unit: JH
+    - label: Lot 3
+      low: 0
+      high: 0
+      unit: JH
+    note: Le zéro du lot 3 ne signifie pas absence de structure. Réutilisation et écarts Beaumanoir à confirmer.
+  sap-migration:
+    option: sap
+    label: Reprise de données
+    kind: source
+    work_ref: null
+    source_ref: SAP
+    location: PDF p. 33 et p. 39–40
+    measures:
+    - label: Lot 2
+      low: 401
+      high: 401
+      unit: JH
+    - label: Lot 3
+      low: 304
+      high: 304
+      unit: JH
+    - label: Objets lot 2
+      low: 32
+      high: 32
+      unit: objets
+    - label: Objets lot 3
+      low: 31
+      high: 31
+      unit: objets
+    note: Scripts, essais et bascule ventilés par phases. Ne pas ajouter les conversions WRICEF à cette charge sans
+      établir leur frontière.
+  sap-infra:
+    option: sap
+    label: Support Infrastructure BC
+    kind: source
+    work_ref: null
+    source_ref: SAP
+    location: PDF p. 39–40
+    measures:
+    - label: Lot 2
+      low: 245
+      high: 245
+      unit: JH
+    - label: Lot 3
+      low: 245
+      high: 245
+      unit: JH
+    note: Prestation initiale transverse. Ne prouve pas à elle seule le financement de tous les raccordements et
+      services IT client.
+  sap-custom:
+    option: sap
+    label: Enhancements, exits et Badi
+    kind: source
+    work_ref: null
+    source_ref: SAP
+    location: PDF p. 41
+    measures:
+    - label: Lot 2
+      low: 169
+      high: 169
+      unit: JH
+    - label: Lot 3
+      low: 134
+      high: 134
+      unit: JH
+    note: Focus des lots, pas supplément. Les autres WRICEF ont leurs propres catégories.
+  sap-forms:
+    option: sap
+    label: Forms et Fiori
+    kind: source
+    work_ref: null
+    source_ref: SAP
+    location: PDF p. 41
+    measures:
+    - label: Forms lot 2
+      low: 168
+      high: 168
+      unit: JH
+    - label: Forms lot 3
+      low: 109
+      high: 109
+      unit: JH
+    - label: Fiori lot 2
+      low: 294
+      high: 294
+      unit: JH
+    - label: Fiori lot 3
+      low: 227
+      high: 227
+      unit: JH
+    note: Sous-ensembles des développements des lots. Aucun prix individuel de formulaire FLOW n’en découle.
+  sap-flows:
+    option: sap
+    label: Entrées et sorties WRICEF
+    kind: source
+    work_ref: null
+    source_ref: SAP
+    location: PDF p. 33 et p. 41
+    measures:
+    - label: Input lot 2
+      low: 473
+      high: 473
+      unit: JH
+    - label: Input lot 3
+      low: 282
+      high: 282
+      unit: JH
+    - label: Output lot 2
+      low: 358
+      high: 358
+      unit: JH
+    - label: Output lot 3
+      low: 354
+      high: 354
+      unit: JH
+    - label: Interfaces lot 2
+      low: 41
+      high: 41
+      unit: interfaces
+    - label: Interfaces lot 3
+      low: 37
+      high: 37
+      unit: interfaces
+    note: Les catégories Input et Output sont plus larges qu’un bordereau de connecteurs. Les interfaces des deux
+      lots ne sont pas prouvées uniques. Licence Integration Suite distincte des travaux de raccordement.
+  sap-tests:
+    option: sap
+    label: Phases SIT et UAT
+    kind: source
+    work_ref: null
+    source_ref: SAP
+    location: PDF p. 39–40
+    measures:
+    - label: SIT lot 2
+      low: 825
+      high: 825
+      unit: JH
+    - label: UAT lot 2
+      low: 1128
+      high: 1128
+      unit: JH
+    - label: SIT lot 3
+      low: 609
+      high: 609
+      unit: JH
+    - label: UAT lot 3
+      low: 716
+      high: 716
+      unit: JH
+    note: Colonnes transverses des mêmes lots, recoupant domaines, migration et infrastructure. Ne pas les ajouter
+      aux lignes métier.
+  sap-cutover:
+    option: sap
+    label: Final Prep et Go Live
+    kind: source
+    work_ref: null
+    source_ref: SAP
+    location: PDF p. 39–40
+    measures:
+    - label: Final Prep lot 2
+      low: 709
+      high: 709
+      unit: JH
+    - label: Go Live lot 2
+      low: 286
+      high: 286
+      unit: JH
+    - label: Final Prep lot 3
+      low: 506
+      high: 506
+      unit: JH
+    - label: Go Live lot 3
+      low: 226
+      high: 226
+      unit: JH
+    note: Colonnes des mêmes lots. Ne pas les ajouter aux charges par domaine ou aux travaux de migration.
+  sap-operate:
+    option: sap
+    label: Phase Operate initiale
+    kind: source
+    work_ref: null
+    source_ref: SAP
+    location: PDF p. 39–40
+    measures:
+    - label: Lot 2
+      low: 217
+      high: 217
+      unit: JH
+    - label: Lot 3
+      low: 151
+      high: 151
+      unit: JH
+    note: Assistance de projet après démarrage, distincte des contrats annuels. La durée de stabilisation cible
+      reste à rapprocher.
+  sap-training:
+    option: sap
+    label: Ligne Formations
+    kind: source
+    work_ref: null
+    source_ref: SAP
+    location: PDF p. 39–40
+    measures:
+    - label: Lot 2
+      low: 0
+      high: 0
+      unit: JH
+    - label: Lot 3
+      low: 0
+      high: 0
+      unit: JH
+    note: Aucune charge isolée sur cette ligne. Vérifier formation incluse ailleurs ou prise en charge client, puis
+      estimer les prestations réellement manquantes.

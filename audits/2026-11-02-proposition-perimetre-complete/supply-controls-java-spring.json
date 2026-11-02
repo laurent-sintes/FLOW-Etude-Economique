@@ -1,0 +1,932 @@
+{
+  "id": "supply-controls-java-spring",
+  "basis": "controls",
+  "assessment": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH.",
+  "processes": [
+    {
+      "id": "policy-strategy",
+      "label": "Définir et réviser une stratégie",
+      "E": [
+        "StrategyCommand"
+      ],
+      "R": [
+        "BusinessReferences",
+        "Strategy",
+        "Rights"
+      ],
+      "W": [
+        "Strategy",
+        "Audit"
+      ],
+      "X": [
+        "Outcome"
+      ],
+      "scope_reason": "Commande métier propre à la stratégie, hors stockage générique de versions fourni par Master Data.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock"
+      ],
+      "trigger": "Définir et réviser une stratégie sur commande explicite."
+    },
+    {
+      "id": "policy-scope",
+      "label": "Configurer les bénéficiaires et périmètres",
+      "E": [
+        "ScopeCommand"
+      ],
+      "R": [
+        "BusinessReferences",
+        "ScopeHierarchy",
+        "Rights"
+      ],
+      "W": [
+        "ScopeHierarchy",
+        "Audit"
+      ],
+      "X": [
+        "Outcome",
+        "Diagnostic"
+      ],
+      "scope_reason": "Hiérarchies marque, canal et usage. Pas une création des référentiels maîtres.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock"
+      ],
+      "trigger": "Configurer les bénéficiaires et périmètres sur commande explicite."
+    },
+    {
+      "id": "policy-protection",
+      "label": "Configurer protections quotas et plafonds",
+      "E": [
+        "ProtectionCommand"
+      ],
+      "R": [
+        "ScopeHierarchy",
+        "Strategy",
+        "Units",
+        "Rights"
+      ],
+      "W": [
+        "ProtectionRules",
+        "Audit"
+      ],
+      "X": [
+        "Outcome"
+      ],
+      "scope_reason": "Définitions de droits collectifs. Les réservations individuelles restent dans Stock. Les compteurs collectifs sont financés ici.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock"
+      ],
+      "trigger": "Configurer protections quotas et plafonds sur commande explicite."
+    },
+    {
+      "id": "policy-priority",
+      "label": "Configurer priorités et marges de réarbitrage",
+      "E": [
+        "PriorityCommand"
+      ],
+      "R": [
+        "Strategy",
+        "ScopeHierarchy",
+        "Rights"
+      ],
+      "W": [
+        "PriorityRules",
+        "Audit"
+      ],
+      "X": [
+        "Outcome",
+        "Diagnostic"
+      ],
+      "scope_reason": "Définition des règles. Le calcul d’affectation reste dans le lot décisions.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock"
+      ],
+      "trigger": "Configurer priorités et marges de réarbitrage sur commande explicite."
+    },
+    {
+      "id": "policy-exceptions",
+      "label": "Configurer les dérogations autorisées",
+      "E": [
+        "ExceptionCommand"
+      ],
+      "R": [
+        "Strategy",
+        "Rights",
+        "Authorities"
+      ],
+      "W": [
+        "ExceptionRules",
+        "Audit"
+      ],
+      "X": [
+        "Outcome"
+      ],
+      "scope_reason": "Catalogue de dérogations métier. Le moteur de tâches et d’approbation est consommé.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock"
+      ],
+      "trigger": "Configurer les dérogations autorisées sur commande explicite."
+    },
+    {
+      "id": "policy-validate",
+      "label": "Contrôler les paramètres et leurs combinaisons",
+      "E": [
+        "ValidationRequest"
+      ],
+      "R": [
+        "Strategy",
+        "ScopeHierarchy",
+        "ProtectionRules",
+        "PriorityRules",
+        "ExceptionRules"
+      ],
+      "W": [
+        "ValidationReport"
+      ],
+      "X": [
+        "Diagnostic"
+      ],
+      "scope_reason": "Contrôle de types, périodes, unités et combinaisons autorisées, distinct de l’enregistrement des brouillons.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock"
+      ],
+      "trigger": "Contrôler les paramètres et leurs combinaisons sur commande explicite."
+    },
+    {
+      "id": "policy-conflicts",
+      "label": "Détecter les incompatibilités entre politiques",
+      "E": [
+        "ConflictCheckRequest"
+      ],
+      "R": [
+        "PolicySet",
+        "ScopeHierarchy",
+        "ProtectionRules",
+        "PriorityRules",
+        "ExceptionRules"
+      ],
+      "W": [
+        "ConflictReport"
+      ],
+      "X": [
+        "ConflictReport",
+        "Counterexample"
+      ],
+      "scope_reason": "Analyse croisée des priorités, chevauchements et protections sous un langage de règles borné. Pas preuve formelle de tout programme arbitraire.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock"
+      ],
+      "trigger": "Détecter les incompatibilités entre politiques sur commande explicite."
+    },
+    {
+      "id": "policy-commitments",
+      "label": "Contrôler la compatibilité avec les engagements",
+      "E": [
+        "ImpactRequest"
+      ],
+      "R": [
+        "CandidatePolicy",
+        "ActivePolicy",
+        "StockCommitments",
+        "Assignments",
+        "Rights"
+      ],
+      "W": [
+        "ImpactReport"
+      ],
+      "X": [
+        "ImpactReport",
+        "Rejections"
+      ],
+      "scope_reason": "Interrogation des moteurs existants et interprétation métier de l’impact. Pas second moteur Stock ni second solveur.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock"
+      ],
+      "trigger": "Contrôler la compatibilité avec les engagements sur commande explicite."
+    },
+    {
+      "id": "policy-tests",
+      "label": "Exécuter un jeu de tests de politique",
+      "E": [
+        "TestRunRequest"
+      ],
+      "R": [
+        "PolicyVersion",
+        "TestCases",
+        "ExpectedOutcomes",
+        "Rights"
+      ],
+      "W": [
+        "TestRun",
+        "TestResults"
+      ],
+      "X": [
+        "TestResults"
+      ],
+      "scope_reason": "Jeux de cas de règles. Réutilisation des calculs de plan, promesse et réservation, sans refaire leur simulation.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock"
+      ],
+      "trigger": "Exécuter un jeu de tests de politique sur commande explicite."
+    },
+    {
+      "id": "policy-activate",
+      "label": "Planifier et autoriser une activation",
+      "E": [
+        "ActivationCommand"
+      ],
+      "R": [
+        "PolicyVersion",
+        "ValidationReport",
+        "ConflictReport",
+        "ImpactReport",
+        "Rights"
+      ],
+      "W": [
+        "PolicyActivation",
+        "Audit"
+      ],
+      "X": [
+        "Outcome"
+      ],
+      "scope_reason": "Remplace le processus initial d’activation. Master Data conserve les versions et Process Management les approbations.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock"
+      ],
+      "trigger": "Planifier et autoriser une activation sur commande explicite."
+    },
+    {
+      "id": "policy-resolve",
+      "label": "Résoudre les règles applicables à un contexte",
+      "E": [
+        "PolicyQuery"
+      ],
+      "R": [
+        "ActivePolicy",
+        "ScopeHierarchy",
+        "ProtectionRules",
+        "PriorityRules",
+        "ExceptionRules"
+      ],
+      "W": [
+        "PolicyResolution"
+      ],
+      "X": [
+        "ApplicableRules"
+      ],
+      "scope_reason": "Service de résolution pour les consommateurs. Il ne choisit pas l’affectation ni ne réserve la ressource.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock"
+      ],
+      "trigger": "Résoudre les règles applicables à un contexte sur commande explicite."
+    },
+    {
+      "id": "policy-explain",
+      "label": "Expliquer une règle appliquée ou écartée",
+      "E": [
+        "ExplanationQuery"
+      ],
+      "R": [
+        "PolicyResolution",
+        "PolicyVersion",
+        "Audit"
+      ],
+      "W": [
+        "PolicyExplanation"
+      ],
+      "X": [
+        "Explanation"
+      ],
+      "scope_reason": "Remplace l’explication générique initiale avec raisons des choix et conflits.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock"
+      ],
+      "trigger": "Expliquer une règle appliquée ou écartée sur commande explicite."
+    },
+    {
+      "id": "policy-withdraw",
+      "label": "Suspendre ou retirer une politique",
+      "E": [
+        "WithdrawalCommand"
+      ],
+      "R": [
+        "PolicyActivation",
+        "StockCommitments",
+        "Assignments",
+        "Rights"
+      ],
+      "W": [
+        "PolicyActivation",
+        "Audit"
+      ],
+      "X": [
+        "Outcome"
+      ],
+      "scope_reason": "Contrôle métier du retrait. La sauvegarde et le retour technique de version restent fournis.",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock"
+      ],
+      "trigger": "Suspendre ou retirer une politique sur commande explicite."
+    },
+    {
+      "id": "eligibility-maintain",
+      "label": "Tenir une restriction de prestataire",
+      "capabilities": [
+        "BC-001"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Tenir une restriction de prestataire sur commande explicite ou résultat corrélé.",
+      "E": [
+        "RestrictionCommand"
+      ],
+      "R": [
+        "Party",
+        "Agreement",
+        "Restriction"
+      ],
+      "W": [
+        "Restriction"
+      ],
+      "X": [
+        "Outcome"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "eligibility-check",
+      "label": "Contrôler une nouvelle sollicitation",
+      "capabilities": [
+        "BC-001"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Contrôler une nouvelle sollicitation sur commande explicite ou résultat corrélé.",
+      "E": [
+        "EligibilityRequest"
+      ],
+      "R": [
+        "Restriction",
+        "Agreement"
+      ],
+      "W": [
+        "EligibilityDecision"
+      ],
+      "X": [
+        "EligibilityDecision"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "eligibility-impact",
+      "label": "Exposer les engagements touchés par une désactivation",
+      "capabilities": [
+        "BC-001"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Exposer les engagements touchés par une désactivation sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ImpactRequest"
+      ],
+      "R": [
+        "Restriction",
+        "ServiceCommitment"
+      ],
+      "W": [
+        "ImpactReport"
+      ],
+      "X": [
+        "ImpactReport"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "pool-allocate",
+      "label": "Créer ou corriger une enveloppe de droits collectifs",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Créer ou corriger une enveloppe de droits collectifs sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PoolCommand"
+      ],
+      "R": [
+        "ActivePolicy",
+        "GroupHierarchy",
+        "StockPosition",
+        "PoolState"
+      ],
+      "W": [
+        "PoolState",
+        "PoolMovement"
+      ],
+      "X": [
+        "Outcome"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "pool-consume",
+      "label": "Consommer atomiquement les droits des groupes admissibles",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Consommer atomiquement les droits des groupes admissibles sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ConsumptionCommand"
+      ],
+      "R": [
+        "ActivePolicy",
+        "GroupHierarchy",
+        "PoolState",
+        "ConsumptionIdentity"
+      ],
+      "W": [
+        "PoolState",
+        "PoolMovement"
+      ],
+      "X": [
+        "ConsumptionOutcome"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "pool-reverse",
+      "label": "Restituer les droits après annulation ou correction",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Restituer les droits après annulation ou correction sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ReversalCommand"
+      ],
+      "R": [
+        "PoolMovement",
+        "PoolState",
+        "ActivePolicy"
+      ],
+      "W": [
+        "PoolState",
+        "PoolMovement"
+      ],
+      "X": [
+        "ReversalOutcome"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "pool-transfer",
+      "label": "Réviser les droits entre bénéficiaires sous autorité",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Réviser les droits entre bénéficiaires sous autorité sur commande explicite ou résultat corrélé.",
+      "E": [
+        "GroupTransferCommand"
+      ],
+      "R": [
+        "ActivePolicy",
+        "GroupHierarchy",
+        "PoolState",
+        "ExistingCommitments"
+      ],
+      "W": [
+        "PoolState",
+        "PoolMovement"
+      ],
+      "X": [
+        "TransferOutcome",
+        "ImpactReport"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "pool-read",
+      "label": "Consulter alloué consommé et restant",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Consulter alloué consommé et restant sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PoolQuery"
+      ],
+      "R": [
+        "PoolState",
+        "PoolMovement",
+        "GroupHierarchy"
+      ],
+      "W": [],
+      "X": [
+        "PoolPosition"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "pool-reconcile",
+      "label": "Rapprocher consommation des droits et effets reconnus",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Rapprocher consommation des droits et effets reconnus sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PoolReconciliationRequest"
+      ],
+      "R": [
+        "PoolState",
+        "PoolMovement",
+        "RecognizedEffects"
+      ],
+      "W": [
+        "PoolReconciliation"
+      ],
+      "X": [
+        "DiscrepancyReport"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "season-context",
+      "label": "Définir le contexte opérationnel article usage marché saison",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Définir le contexte opérationnel article usage marché saison sur commande explicite ou résultat corrélé.",
+      "E": [
+        "SeasonContextCommand"
+      ],
+      "R": [
+        "BusinessReferences",
+        "ActivePolicy",
+        "SeasonContext"
+      ],
+      "W": [
+        "SeasonContext"
+      ],
+      "X": [
+        "Outcome"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "season-propose",
+      "label": "Préparer une bascule partielle en permanent",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Préparer une bascule partielle en permanent sur commande explicite ou résultat corrélé.",
+      "E": [
+        "CarryOverRequest"
+      ],
+      "R": [
+        "SeasonContext",
+        "StockPosition",
+        "ExistingCommitments",
+        "ActivePolicy"
+      ],
+      "W": [
+        "CarryOverProposal"
+      ],
+      "X": [
+        "CarryOverImpact"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "season-activate",
+      "label": "Autoriser la bascule opérationnelle retenue",
+      "capabilities": [
+        "BC-008"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Autoriser la bascule opérationnelle retenue sur commande explicite ou résultat corrélé.",
+      "E": [
+        "CarryOverActivation"
+      ],
+      "R": [
+        "CarryOverProposal",
+        "Rights",
+        "ExistingCommitments"
+      ],
+      "W": [
+        "SeasonContext",
+        "CarryOverDecision"
+      ],
+      "X": [
+        "ActivationOutcome"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "disposition-context",
+      "label": "Qualifier les biens et quantités concernés par un devenir",
+      "capabilities": [
+        "BC-019"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Qualifier les biens et quantités concernés par un devenir sur commande explicite ou résultat corrélé.",
+      "E": [
+        "DispositionRequest"
+      ],
+      "R": [
+        "InspectionFact",
+        "GoodsLineage",
+        "Ownership",
+        "ActivePolicy"
+      ],
+      "W": [
+        "DispositionCase"
+      ],
+      "X": [
+        "DispositionContext"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "disposition-options",
+      "label": "Déterminer les usages et traitements autorisés",
+      "capabilities": [
+        "BC-019"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Déterminer les usages et traitements autorisés sur commande explicite ou résultat corrélé.",
+      "E": [
+        "DispositionEligibilityRequest"
+      ],
+      "R": [
+        "DispositionCase",
+        "ActivePolicy",
+        "ExistingCommitments"
+      ],
+      "W": [
+        "DispositionOptions"
+      ],
+      "X": [
+        "AdmissibilityReport"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "disposition-value",
+      "label": "Comparer valeur récupérable coûts délais et risques",
+      "capabilities": [
+        "BC-019"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Comparer valeur récupérable coûts délais et risques sur commande explicite ou résultat corrélé.",
+      "E": [
+        "RecoveryComparisonRequest"
+      ],
+      "R": [
+        "DispositionOptions",
+        "ServicePriceBook",
+        "LeadTime",
+        "RiskAssumptions"
+      ],
+      "W": [
+        "RecoveryComparison"
+      ],
+      "X": [
+        "RecoveryComparison"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "disposition-decide",
+      "label": "Autoriser une destination pour les quantités retenues",
+      "capabilities": [
+        "BC-019"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Autoriser une destination pour les quantités retenues sur commande explicite ou résultat corrélé.",
+      "E": [
+        "DispositionDecisionCommand"
+      ],
+      "R": [
+        "RecoveryComparison",
+        "ActivePolicy",
+        "Rights"
+      ],
+      "W": [
+        "DispositionDecision"
+      ],
+      "X": [
+        "Outcome",
+        "EffectRequest"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    },
+    {
+      "id": "disposition-result",
+      "label": "Rapprocher les effets du devenir et maintenir les restes",
+      "capabilities": [
+        "BC-019"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "redistribute-protected-stock",
+        "damaged-stock-disposition",
+        "service-policy-deactivation"
+      ],
+      "trigger": "Rapprocher les effets du devenir et maintenir les restes sur commande explicite ou résultat corrélé.",
+      "E": [
+        "DispositionEffectResult"
+      ],
+      "R": [
+        "DispositionDecision",
+        "RecognizedServiceResult"
+      ],
+      "W": [
+        "DispositionCase"
+      ],
+      "X": [
+        "OpenQuantities"
+      ],
+      "scope_reason": "Configuration et résolution des règles, application atomique des droits collectifs et devenir des biens. Stock fournit transactions, positions, réservations individuelles et filiation. Décisions fournit recommandations et affectations. Aucun second moteur commun. Le lot remplace aussi la proposition antérieure à 430 JH."
+    }
+  ],
+  "basis_path": "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-controls.json",
+  "benchmark": {
+    "hours_per_CFP": 20,
+    "factor": 1,
+    "day_hours": 7
+  },
+  "baseline_CFP": 64,
+  "removed_process_ids": [
+    "eligibility-P01",
+    "eligibility-P02",
+    "eligibility-P03",
+    "policies-P01",
+    "policies-P02",
+    "policies-P03",
+    "disposition-P01",
+    "disposition-P02",
+    "disposition-P03",
+    "disposition-P04"
+  ],
+  "kept_process_ids": [],
+  "CFP": 214,
+  "raw_jh": 611.4285714285714,
+  "rounding_jh": 10,
+  "proposal_jh": 610,
+  "recipe": "scenario_scope_revision_v1",
+  "status": "proposal_not_adopted",
+  "baseline_jh": 50,
+  "unit_id": "supply-controls-java-spring",
+  "inputs_sha256": {
+    "source/estimations-core-retenues.yaml": "a65ab4a496f7e5bc1c8859ee7abcebf2ce79a48b36ed55242cc065a27e7cee6f",
+    "source/calibration-couts.yaml": "702fd01024f2dca6de2bb6005df7ddf81f01264558dcd055e3432f9b0fb65852",
+    "audits/2026-11-02-revue-perimetre-scenarios/results.json": "7f6fae9a6b26934249d89cca31f97e53a9b5554be3965ec28844ac4ee48110c3",
+    "audits/2026-11-02-audit-politiques-allocation/results.json": "05091a8b68b774d00b2882310e86452cba8c2510b96a9179daa7509bab62ad5c",
+    "audits/2026-11-02-proposition-perimetre-complete/closure.json": "0ec0313c275543d7e85b9e68f5cb7d7a9d5257afd09a2277b9ab6bbf86fbaeab",
+    "audits/2026-11-02-proposition-perimetre-complete/scope-controls.json": "1a6b50da97c005e57ed98a81b8e9054e945187312fa6cc852b24202ea705402a",
+    "audits/2026-11-02-proposition-perimetre-complete/scope-decisions.json": "575526efa8660be6133c7331f7d6446435501b043aef2df793fc0f01b6a4e7f6",
+    "audits/2026-11-02-proposition-perimetre-complete/scope-orders.json": "261efa9c232afa7155e7b40b73cd9bc20fec86502bc20d8a9e6c2e2b3ac16b26",
+    "audits/2026-11-02-proposition-perimetre-complete/scope-planning.json": "d7411898bd8a2618a665b7ccd1e5fa3c0d1399c9bc325623fd8d6c3ccbed40a6",
+    "audits/2026-11-02-proposition-perimetre-complete/scope-services.json": "a526f3b5009fccd6f3dbe7db14403a06c9da71490874c43795ad798735786f4a",
+    "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-controls.json": "c7342f97edf10dfc633543657ea17b50be83566c25cc0c65f2d7021d8de3af43",
+    "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-decisions.json": "b6cea9d63853dcc8ea867f7f047b40ab5a9ef1c47d1fdb832c2964e906112f82",
+    "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-orders.json": "fbc367f4efb6b85c8ae5fedbcd22660f66d02ebeca3c26d9a9431e0063a98cea",
+    "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-planning.json": "5007fafe1c377eb818dd1fdf607b1222379cbbc3933084f9d86c7e9d43f72f1d",
+    "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-services.json": "9ee51b130d1484f57cf37016ecbe3d9faa4595c327d12267f39c3038cae0dc5e",
+    "audits/2026-11-02-proposition-perimetre-complete/prepare.py": "763acefce08929685660d7237b3f0f90077d87d4c2b9d35109d0bbbb1652e8d2"
+  },
+  "delta_jh": 560,
+  "supersedes_policy_revision": true
+}

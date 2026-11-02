@@ -125,8 +125,7 @@ def initial_ledger(option, reference):
     deploy=money(sum(spec['deploiement_jh_par_unite'])*sum(share/100*(rates[role]+tool) for role,share in group['deploiement']['roles_pct'].items()))
     add('deploiements',deploy,b,end,'integration_client','integration')
     add('coordination_deploiements',deploy*group['deploiement']['coordination_technique_pct']/100,b,end,'integration_client','integration')
-    gov=group['pilotage']
-    add('programme',duration*gov['jours_par_etp_mois']*(spec['direction_etp']*gov['tarif_direction_eur_jh']+spec['coordination_etp']*gov['tarif_coordination_eur_jh']),b,end,'integration_client','integration')
+    # The continuous client transformation team replaces the former programme provision.
     core_factor=option['ventilation_services']['core']/reference['core']
     client_factor=option['ventilation_services']['integration']/reference['integration']
     core_units={c['volume_ref']:c['jh_unitaire'] for c in activities['MAI-003']['charges']}
@@ -172,3 +171,26 @@ def service_parts(option):
     weights=[ref[k] for k in ('run','mco_client','client_evolutions')]
     parts=allocate(client,weights)
     return dict(core_lifecycle=core,run=parts[0],mco_client=parts[1],client_evolutions=parts[2])
+
+
+def transformation_ledger(option):
+    team=option['equipe_transformation']
+    initial=option['build_mois']+option.get('selection_mois',0)
+    end=initial+option['integration_mois']
+    rows=[]
+    for role in team['roles']:
+        monthly=team['jours_par_an']/12*role['etp']*role['tarif_eur_jh']
+        for phase,start,stop in [('build',0,initial),('integration',initial,end)]:
+            if stop<=start: continue
+            identity='transformation_'+role['id']+'/'+phase
+            rows.append(dict(id=identity,financement_id='transformation_'+role['id'],amount=money(monthly*(stop-start)),
+                start=start,end=stop,objet='programme',prestation='pilotage',responsibility='integration_client',
+                phase=phase,source=PATH))
+    return rows
+
+
+def transformation_summary(team):
+    result=dict(team)
+    result['roles']=[dict(r,annuel_eur_ht=money(team['jours_par_an']*r['etp']*r['tarif_eur_jh'])) for r in team['roles']]
+    result['annuel_eur_ht']=money(sum(r['annuel_eur_ht'] for r in result['roles']))
+    return result

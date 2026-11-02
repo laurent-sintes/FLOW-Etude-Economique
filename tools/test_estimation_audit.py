@@ -1,4 +1,5 @@
 """Regression cases from the business-model / dual-estimator audit."""
+from test_support import active_reference
 from copy import deepcopy
 import unittest
 from unittest.mock import patch
@@ -19,6 +20,7 @@ class AuditCorrectionsTests(unittest.TestCase):
             cls.unit=validate()['units'][0]
             cls.spec,cls.registry=contract(cls.unit['calculation'])
             cls.proofs=load_proofs(cls.registry)
+            cls.spec=cls.proofs['audits/2026-11-02-adoption-quatre-lots/basis.json']['registry']['calculations'][0]
             cls.result=calculate(cls.unit['calculation'])
             cls.bundle=compose(snapshot.documents,snapshot.digests)
 
@@ -37,9 +39,9 @@ class AuditCorrectionsTests(unittest.TestCase):
         self.assertEqual(p['trace']['groups'],42)
         self.assertAlmostEqual(p['trace']['complement_units'],8286.5)
         self.assertAlmostEqual(p['trace']['reuse_factor'],.035)
-        self.assertEqual((self.result['total_jh'],self.result['months']),(1500,17))
+        self.assertEqual((self.result['total_jh'],self.result['months']),(active_reference()['units']['master-data-java-spring']['jh'],active_reference()['units']['master-data-java-spring']['months']))
         self.assertEqual(self.result['alignment']['functional']['jh'],1200)
-        self.assertAlmostEqual(sum(self.result['roles'].values()),1500)
+        self.assertAlmostEqual(sum(self.result['roles'].values()),active_reference()['units']['master-data-java-spring']['jh'])
         self.assertTrue(all(abs(r['common_jh']+r['complements_jh']-r['jh'])<1e-9 for r in p['rows']))
 
     def test_clone_or_reassignment_cannot_reuse_master_data_calculation(self):

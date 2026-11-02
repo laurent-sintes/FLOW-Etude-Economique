@@ -25,6 +25,15 @@ def close(a, b, name):
 
 def prepare(documents, contract, registry, formula, use_cache=False):
     """Pure adapter; documents and formulas may come from the single YAML export."""
+    if contract['recipe'] == 'work_package_adoption_v1':
+        from estimation_revision import prepare_work_package_adoption
+        return prepare_work_package_adoption(documents, contract, registry, formula, use_cache=use_cache)
+    if contract['recipe'] == 'scenario_scope_adoption_v1':
+        from estimation_revision import prepare_scenario_adoption
+        return prepare_scenario_adoption(documents, contract, registry, formula, use_cache=use_cache)
+    if contract['recipe'] == 'oss_reference_revision_v1':
+        from estimation_revision import prepare_revision
+        return prepare_revision(documents, contract, registry, formula, use_cache=use_cache)
     if contract['recipe'] == 'professional_components_v1':
         from estimation_professional import prepare_professional
         return prepare_professional(documents, contract, registry, formula, use_cache=use_cache)

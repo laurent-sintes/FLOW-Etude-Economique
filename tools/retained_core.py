@@ -57,7 +57,7 @@ def validate(document=None):
 
 
 def dependencies():
-    files = {SOURCE, SCHEMA, META, META_SCHEMA, 'tools/retained_core.py', 'tools/estimation_calculation.py', INPUTS, INPUT_SCHEMA, 'tools/estimation_inputs.py', 'tools/estimation_preparation.py', 'tools/estimation_stock.py', 'tools/estimation_ownership.py', 'tools/estimation_components.py', 'tools/estimation_professional.py'}
+    files = {SOURCE, SCHEMA, META, META_SCHEMA, 'tools/retained_core.py', 'tools/estimation_calculation.py', INPUTS, INPUT_SCHEMA, 'tools/estimation_inputs.py', 'tools/estimation_preparation.py', 'tools/estimation_stock.py', 'tools/estimation_ownership.py', 'tools/estimation_components.py', 'tools/estimation_professional.py', 'tools/estimation_revision.py'}
     files.update(registry()['proofs'])
     for unit in validate()['units']:
         files.add(unit['provenance']['path'])

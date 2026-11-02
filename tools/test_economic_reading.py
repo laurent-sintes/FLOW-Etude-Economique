@@ -1,4 +1,5 @@
 """The economic page projects one frozen reference, with no alternate calculations."""
+from test_support import active_reference
 from copy import deepcopy
 from unittest.mock import patch
 import unittest
@@ -207,7 +208,7 @@ class EconomicReadingTests(unittest.TestCase):
 
     def test_completion_spending_includes_early_contracts_and_all_transition_costs(self):
         result = self.compile()
-        known = {'java-spring':8170877.10, 'microsoft':7620227.45, 'sap':16850516.68}
+        known = active_reference()['completion_costs']
         for option in result['options']:
             original = next(o for o in self.study.baseline['options'] if o['stack']==option['stack'])
             completion = option['service_completion']

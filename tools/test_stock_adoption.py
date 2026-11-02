@@ -1,4 +1,5 @@
 """Stock adoption: pure reconstruction, reuse ownership, rejection and export."""
+from test_support import active_reference
 from copy import deepcopy
 import hashlib
 import unittest
@@ -25,13 +26,13 @@ class StockAdoptionTests(unittest.TestCase):
   with model_session():return prepare(docs,self.spec,self.registry,formula)
  def test_decisions_roles_scope_and_cost(self):
   md=next(u for u in self.units if u['id']=='master-data-java-spring')
-  self.assertEqual((md['total_jh'],md['months']),(1500,17))
+  self.assertEqual((md['total_jh'],md['months']),(active_reference()['units']['master-data-java-spring']['jh'],active_reference()['units']['master-data-java-spring']['months']))
   r=self.result;self.assertEqual((r['total_jh'],r['months']),(340,10))
   self.assertEqual(r['roles'],dict(coordination=40,analyse_produit=35,architecture=30,dev_java=125,dev_frontend=20,qa=50,plateforme=30,ux=5,securite=5))
   self.assertAlmostEqual(r['unrounded_months'],10.436994130535364)
   study=study_copy();core=study.content['stacks']['java-spring']['economic']
-  self.assertEqual(core['jh']['core_project_roles_jh'],6660)
-  self.assertEqual(core['detail_build']['prestations'],4198680)
+  self.assertEqual(core['jh']['core_project_roles_jh'],active_reference()['total_jh'])
+  self.assertEqual(core['detail_build']['prestations'],active_reference()['cost_eur_ht'])
   stock=next(u for u in core['core_units'] if u['id']=='stock-java-spring')
   self.assertEqual((stock['labour_eur_ht'],stock['tooling_eur_ht']),(211250,2720))
   covered=next(x for x in study._essential_core_evaluation() if x['stack']=='java-spring')['coverage']
@@ -53,10 +54,12 @@ class StockAdoptionTests(unittest.TestCase):
    p=prepare(b['evidence'],spec,reg,lambda id,**v:evaluate_rule(rules[id],**v))
   self.assertAlmostEqual(p['rows'][3]['jh'],339.0185977157613)
   self.assertEqual(p['trace']['CFP'],169)
- def test_master_data_source_and_decision_unchanged(self):
+ def test_master_data_source_and_prior_decision_are_preserved(self):
   import json
   before=json.loads((ROOT/'audits/2026-10-30-stock-adoption-10/baseline.json').read_text(encoding='utf-8'))
-  self.assertEqual(self.units[0],before['retained_master_data'])
+  self.assertEqual(self.units[0]['capabilities'],before['retained_master_data']['capabilities'])
+  historical=self.proofs['audits/2026-11-02-adoption-quatre-lots/basis.json']['units'][0]
+  self.assertEqual(historical,before['retained_master_data'])
   for path,key in [('sources/cartographie-scm-2026-10-24.yaml','capability_source_sha256'),('source/referentiel-capacites.yaml','capability_reference_sha256')]:
    self.assertEqual(hashlib.sha256((ROOT/path).read_bytes()).hexdigest(),before[key])
  def test_stock_cannot_claim_master_data_funding_or_drop_owner(self):

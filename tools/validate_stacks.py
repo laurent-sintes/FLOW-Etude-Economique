@@ -1,6 +1,7 @@
 """Validate the editable YAML model, with identical rules for Make and Buy."""
 from pathlib import Path
 import sys
+import json
 import yaml
 from jsonschema import Draft202012Validator
 from model_context import CURRENT
@@ -21,8 +22,25 @@ def unique_mapping(loader, node, deep=False):
 
 UniqueKeyLoader.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, unique_mapping)
 
+def unique_json_mapping(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f'Duplicate JSON key: {key}')
+        result[key] = value
+    return result
+
+
+def invalid_json_constant(value):
+    raise ValueError('Nonfinite JSON constant: ' + value)
+
+
+def load_json(text):
+    return json.loads(text, object_pairs_hook=unique_json_mapping, parse_constant=invalid_json_constant)
+
+
 def read(path):
-    load = lambda text: yaml.load(text, Loader=UniqueKeyLoader)
+    load = load_json if path.suffix.lower() == '.json' else (lambda text: yaml.load(text, Loader=UniqueKeyLoader))
     session = CURRENT.get()
     return session.read(path, load) if session is not None else load(path.read_text(encoding='utf-8-sig'))
 

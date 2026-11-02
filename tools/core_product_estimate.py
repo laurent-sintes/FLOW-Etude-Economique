@@ -139,6 +139,37 @@ def build_product_proposal(economic):
  r['it_cosmic']['jh']=formula('cosmic_effort',CFP=r['it_cosmic']['CFP'],hours_per_CFP=d['cosmic']['hours_per_CFP'],factor=1,day_hours=d['cosmic']['day_hours']);r['it_cosmic']['alignment']=alignment(r['it_cosmic']['jh'],next(x['it_raw_jh'] for x in r['comparative_rows'] if x['id']=='axelor'));r['it_cosmic']['reference_unrounded_jh']=next(x['it_raw_jh'] for x in r['comparative_rows'] if x['id']=='axelor')
  plan=read(ROOT/'source/plan-investissement.yaml')['build_make_mois'][doc['stack']];capacity=read(ROOT/'source/deploiement-groupe.yaml')['calendrier_autonome']['capacite']['jours_productifs_etp_mois'];r['planning']=dict(reference_months=plan,productive_days_per_person_month=capacity,average_people_at_reference=r['total_jh']/plan/capacity,average_people_at_nominal=r['total_jh']/r['nominal_effort_based_months']/capacity)
  r.update(technical_trials=trials,reading=doc['reading'],sensitivities=sensitivities,assumptions=d['assumptions'],cosmic=dict(CFP_by_group=cfps,jh_by_group={g:formula('cosmic_effort',CFP=v,hours_per_CFP=d['cosmic']['hours_per_CFP'],factor=1,day_hours=d['cosmic']['day_hours']) for g,v in cfps.items()},status=d['cosmic']['status'],limit=d['cosmic']['ISBSG_limit']),measured_files=len(d['measurements']['files']),scope_functions=len({f for g in d['measurements']['groups'].values() for f in g['functions']}),existing_it_partition_basis=d['md_partition']['basis'],module_assumptions=[dict(id=id,**g) for id,g in d['groups'].items()],source_ref=SOURCE)
+ if doc.get('adoption',{}).get('revision'):
+  from estimation_calculation import calculate as replay
+  ref=doc['adoption']['revision'];path=(ROOT/ref['path']).resolve()
+  require(path.is_relative_to(ROOT.resolve()) and hashlib.sha256(path.read_bytes()).hexdigest()==ref['sha256'],'revision evidence changed')
+  revision=read(path);previous=r['total_jh'];index={u['id']:u for u in active}
+  require(revision.get('professional_baseline_jh',revision['adopted_jh'])==previous and revision['proposal_jh']==sum(u['total_jh'] for u in active),'revision total mismatch')
+  for row,id in zip(r['rows'],('process-management-java-spring','supply-workbenches-java-spring','professional-it-java-spring')):
+   unit=index[id];row.update(jh=unit['total_jh'],months=unit['months'],roles={x['id']:x['jh'] for x in unit['roles']},eur_ht=unit['cost_eur_ht'])
+  r['historical_comparative_rows']=r.pop('comparative_rows')
+  r['total_jh']=sum(u['total_jh'] for u in active);r['eur_ht']=round(sum(u['cost_eur_ht'] for u in active),2)
+  for role in r['roles']:role['jh']=sum(next(x['jh'] for x in u['roles'] if x['id']==role['id']) for u in active)
+  r['sensitivities']=[dict(id=s['id'],value=s['value'],total_jh=s['total_jh'],delta_jh=s['total_jh']-r['total_jh']) for s in revision['sensitivity']]
+  c=d['cocomo'];E=formula('cocomo_exponent',B=c['B'],SF_sum=c['SF_sum']);F=formula('schedule_exponent',D=c['D'],E=E,B=c['B'])
+  def effort(size):return formula('cocomo_effort',A=c['A'],KSLOC=size/1000,E=E,EM=c['other_EM'],SCED=c['SCED'],month_hours=c['month_hours'],day_hours=c['day_hours'],effort_phase_factor=c['effort_phase_factor'])
+  size=r['grouping_sensitivity']['equivalent_logical_units']
+  for u in active:
+   result=replay(u['calculation']);trace=result['trace'];rev=trace.get('revision')
+   if rev:
+    old=trace.get('component_sizes',trace.get('ownership_sizes',{}))['axelor']['equivalent_units']
+    size+=rev['equivalent_units']-old
+  single=effort(size);r['grouping_sensitivity']=dict(equivalent_logical_units=size,single_project_jh=single,sum_of_units_jh=r['total_jh'],gap_jh=single-r['total_jh'],gap_pct=100*(single/r['total_jh']-1))
+  if revision.get('professional_baseline_jh'):
+   r['historical_grouping_sensitivity']=r['grouping_sensitivity']
+   r['grouping_sensitivity']=dict(applicable=False,equivalent_logical_units=None,single_project_jh=None,sum_of_units_jh=r['total_jh'],gap_jh=None,gap_pct=None)
+  r['nominal_effort_based_months']=formula('cocomo_schedule',C=c['C'],JH=r['total_jh'],effort_phase_factor=c['effort_phase_factor'],day_hours=c['day_hours'],month_hours=c['month_hours'],SCED=c['SCED'],F=F,schedule_phase_factor=c['schedule_phase_factor'])
+  for key,id in [('cosmic_process','process-management-java-spring'),('it_cosmic','professional-it-java-spring')]:
+   a=replay(index[id]['calculation'])['alignment'];r[key].update(alignment=alignment(r[key]['jh'],a['reference_jh']),reference_unrounded_jh=a['reference_jh'])
+   if key=='cosmic_process':r[key]['hours_per_CFP_to_match']=a['reference_jh']*c['day_hours']/r[key]['CFP']
+  r['planning'].update(average_people_at_reference=r['total_jh']/plan/capacity,average_people_at_nominal=r['total_jh']/r['nominal_effort_based_months']/capacity)
+  # Current purpose amounts are assigned by core_product_scope, their canonical owner.
+  r['revision_previous_jh']=previous
  if doc.get('adoption'):
   require(doc['status']=='retained','adoption status mismatch')
   require({u['id'] for u in active}==set(doc['adoption']['unit_ids']),'adoption unit identities')

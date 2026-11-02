@@ -1,4 +1,5 @@
 """Guard the adopted project effort against double funding and false precision."""
+from test_support import active_reference
 from copy import deepcopy
 import unittest
 from model_context import scoped_model
@@ -18,19 +19,17 @@ class RetainedCoreTests(unittest.TestCase):
     def test_adopted_scope_role_sum_and_cost_identity(self):
         economic = self.study.content['stacks']['java-spring']['economic']
         unit = next(u for u in economic['core_units'] if u['id']=='master-data-java-spring')
-        self.assertEqual((unit['total_jh'], unit['months']), (1500, 17))
-        self.assertEqual(sum(r['jh'] for r in unit['roles']), 1500)
-        self.assertEqual({r['id']:r['jh'] for r in unit['roles']}, dict(
-            coordination=170, analyse_produit=150, architecture=130,
-            dev_java=480, dev_frontend=180, qa=200, plateforme=130, ux=30, securite=30))
+        self.assertEqual((unit['total_jh'], unit['months']), (active_reference()['units']['master-data-java-spring']['jh'], active_reference()['units']['master-data-java-spring']['months']))
+        self.assertEqual(sum(r['jh'] for r in unit['roles']), active_reference()['units']['master-data-java-spring']['jh'])
+        self.assertEqual({r['id']:r['jh'] for r in unit['roles']}, active_reference()['units']['master-data-java-spring']['roles'])
         self.assertEqual(unit['labour_eur_ht'], sum(r['jh']*r['rate_eur_jh'] for r in unit['roles']))
         self.assertEqual(unit['cost_eur_ht'], unit['labour_eur_ht']+unit['tooling_eur_ht'])
         self.assertEqual(economic['detail_build']['prestations'], sum(u['cost_eur_ht'] for u in economic['core_units']))
         self.assertEqual(economic['detail_build']['pilotage'], 0)
-        self.assertEqual(economic['jh']['core_project_roles_jh'], 6660)
+        self.assertEqual(economic['jh']['core_project_roles_jh'], active_reference()['total_jh'])
         self.assertEqual(economic['jh']['core_backend'], 0)  # no project roles disguised as backend days
         self.assertEqual(economic['jh']['core_frontend'], 0)
-        self.assertEqual(economic['jh']['core_avant_ia'], 6660)
+        self.assertEqual(economic['jh']['core_avant_ia'], active_reference()['total_jh'])
 
     def test_legacy_ai_and_coordination_do_not_reduce_or_inflate_family(self):
         calibration = deepcopy(self.study.content['calibration'])
@@ -55,7 +54,7 @@ class RetainedCoreTests(unittest.TestCase):
         self.assertNotEqual(self.study.baseline['parameters']['options']['java-spring']['build_mois'],java['units'][0]['months'])
         u = java['units'][0]
         self.assertIsNone(u['uncertainty']['confidence_level'])
-        self.assertAlmostEqual(u['schedule']['average_fte']*u['months']*u['schedule']['productive_jh_per_month'],1500)
+        self.assertAlmostEqual(u['schedule']['average_fte']*u['months']*u['schedule']['productive_jh_per_month'],active_reference()['units']['master-data-java-spring']['jh'])
 
     @scoped_model
     def test_invalid_or_duplicate_funding_is_rejected(self):
@@ -76,7 +75,7 @@ class RetainedCoreTests(unittest.TestCase):
     def test_family_is_not_split_or_repeated_on_capabilities(self):
         metrics=self.study.content['journey']['metrics']
         family=metrics['work_totals']['java-spring']
-        self.assertEqual(family['family_jh'],6660)
+        self.assertEqual(family['family_jh'],active_reference()['total_jh'])
         caps=metrics['map']['capabilities']
         covered=[c for c in caps.values() if c['stacks']['java-spring']['retained_units']]
         self.assertEqual(len(covered),88)

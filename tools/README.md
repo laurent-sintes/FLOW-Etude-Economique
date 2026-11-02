@@ -13,7 +13,7 @@ python -m tools.check_dev --paths tools/estimation_stock.py
 python -m tools.check_dev --paths tools/test_model_inputs.py --tests test_model_inputs.ModelInputTests
 ```
 
-Fournir tous les fichiers de la tâche, y compris les nouveaux. Le plan sélectionne les tests Python par imports directs et transitifs, y compris ceux placés dans les fonctions. Les imports construits dynamiquement ne sont pas détectés. Compléter avec `--tests module.Classe.methode` lorsque nécessaire. Les données déclenchent le chargement validé et les invariants des entrées, financements et calculs. Pour une évolution métier, ajouter les tests du domaine concerné.
+Fournir tous les fichiers de la tâche, y compris les nouveaux. Le plan sélectionne les tests Python par imports directs et transitifs, y compris ceux placés dans les fonctions. Les imports construits dynamiquement ne sont pas détectés. Compléter avec `--tests module.Classe.methode` lorsque nécessaire. Si les imports transitifs sélectionnent des suites sans rapport avec la tâche, utiliser `--targeted --tests ...` avec les tests métier explicitement choisis. Ce mode conserve les contrôles financiers obligatoires des modifications de données. Il exige une sélection explicite et ne certifie jamais une validation complète. Les modules et méthodes qui se recouvrent ne sont exécutés qu’une fois. Les données déclenchent le chargement validé et les invariants des entrées, financements et calculs. Pour une évolution métier, ajouter les tests du domaine concerné.
 
 CSS et documentation ne déclenchent aucune suite Python. TypeScript lance les types, les tests JavaScript et les règles de contenu, sans livraison Pages ni régression Python. Un fichier non reconnu bloque avec une demande de contrôles ciblés, sans relancer toute la suite. Le sélecteur travaille sur le périmètre de la tâche, pas sur les changements accumulés depuis une ancienne validation complète.
 
@@ -298,3 +298,37 @@ Les réserves des écarts sont contrôlées par `python -m unittest test_budget_
 ## Version lisible du modèle
 
 `python -m tools.model_revision show` affiche la date et le numéro d’ordre courant. `python -m tools.model_revision bump --date AAAA-MM-JJ` incrémente explicitement le compteur global et écrit la date de cette nouvelle version. Aucun incrément n’a lieu au démarrage, pendant un export, un test ou une reconstruction. Préparer les changements du modèle avant cet incrément et les contrôles. Les empreintes techniques et le contrat des simulations restent distincts.
+
+
+## Adopter une estimation Core
+
+Après validation métier des nouveaux montants, une seule entrée prépare les documents, vérifie une copie isolée et applique l’ensemble :
+
+```powershell
+python -m tools.adopt_core template --output tmp/proposition-core.json
+# Modifier la proposition : livrables, JH et répartition Core Domain / Support.
+python -m tools.adopt_core run --proposal tmp/proposition-core.json --decision-note "Validation métier du chiffrage" --refresh
+```
+
+`template` reprend les lots déjà détaillés par livrable. Il ne crée aucun coût. Pour une simple évolution de charges, réutiliser la méthode en place. La répartition entre finalités doit être explicite lorsque le lot est mixte. Une proposition identique retourne `no_change` sans nouvelle version ni écriture des sources.
+
+Pour examiner le résultat avant application :
+
+```powershell
+python -m tools.adopt_core prepare --proposal tmp/proposition-core.json --decision-note "Validation métier du chiffrage"
+python -m tools.adopt_core apply --plan tmp/core-adoptions/IDENTIFIANT/plan.json
+```
+
+Le plan conserve le détail des fichiers, leurs images avant/après, les empreintes des entrants, le résultat des vérifications, les montants et les temps de chaque phase. La validation charge le vrai modèle dans une copie isolée et réconcilie les cinq options et vingt horizons. Le calendrier, les tarifs et les autres options doivent rester inchangés. La version lisible est incrémentée une fois dans le candidat, puis dans les sources seulement si l’application réussit.
+
+Les propositions COCOMO ou COSMIC déjà préparées peuvent utiliser le même point d’entrée avec `method: prepared_contracts`. Le fichier JSON comprend `format: 1`, `date`, `decision_ref` et `documents` (objets YAML/JSON, texte pour les Markdown). Il fournit les décisions retenues, les contrats de calcul, leurs nouvelles preuves et les ventilations requises. La décision porte `adopted_jh`, `proposal_jh`, `previous_cost_eur_ht`, `construction_cost_eur_ht`, `status: adopted`, `decision_status: adopted`, la date et `user_decision` identique à la note passée en argument. Les calculs doivent utiliser les recettes déjà implémentées. Le moteur valide ces documents avant toute écriture. Aucun code Python, référentiel natif ou ancienne preuve n’est remplacé par un paquet d’adoption. Les liens de lecture, la publication et la version sont mis à jour par la commande.
+
+Une modification concurrente des entrants ou d’un fichier cible bloque l’application. L’écriture utilise un verrou et un journal. En cas d’erreur, les octets précédents sont restaurés. Après une interruption brutale :
+
+```powershell
+python -m tools.adopt_core recover
+```
+
+Tant qu’un journal est en attente, un nouveau chargement du modèle est bloqué. Les simulations déjà chargées restent utilisables. La récupération refuse d’écraser des modifications étrangères à l’adoption. Le plan et son journal restent disponibles sous `tmp/core-adoptions/`. `--refresh` reconstruit une seule livraison après la validation et l’application. Un échec de livraison est signalé séparément d’une adoption déjà appliquée. Aucune commande ne committe ni ne pousse sur GitHub.
+
+Les tests des montants courants lisent `test_support.active_reference()`. Son pointeur unique est `tools/fixtures/active-adoption.json`, avec l’empreinte d’une référence figée liée à la décision adoptée. La commande renouvelle ce pointeur et sa référence dans la même transaction. Les exemples arithmétiques indépendants et les décisions historiques restent distincts des valeurs actives.

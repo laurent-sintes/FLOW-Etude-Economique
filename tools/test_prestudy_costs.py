@@ -69,6 +69,16 @@ class PreStudyCostsTests(unittest.TestCase):
         self.assertEqual(before['products'],after['products'])
         self.assertNotIn('gain',after['ai'][0])
 
+    def test_transformation_roles_retain_independent_prices_and_provenance(self):
+        rows=self.build()['transformation_roles']
+        self.assertEqual({r['id'] for r in rows},{'direction_projet','pmo','synchronisation','change','architecture'})
+        self.assertEqual(next(r for r in rows if r['id']=='architecture')['observations'][0]['min'],920)
+        for row in rows:
+            self.assertNotIn('retained_price',row)
+            self.assertTrue(all(o['url'].startswith('https://') and o['recorded_on']=='2026-11-02' for o in row['observations']))
+        bad=deepcopy(self.spec);bad['transformation_roles'][0]['observations'][0]['url']='javascript:bad'
+        with self.assertRaisesRegex(ValueError,'invalid transformation evidence'):self.build(spec=bad)
+
     def test_bad_provenance_and_partial_ranges_fail_before_publication(self):
         for change in ('duplicate','source','owner','basis','partial','order','group','extra'):
             spec=deepcopy(self.spec)

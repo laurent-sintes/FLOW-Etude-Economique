@@ -10,9 +10,9 @@ class CostNatureTests(unittest.TestCase):
             for row in option['annual']:
                 n=row['cost_natures']
                 self.assertEqual(round(sum(n.values()),2),row['total'])
-                self.assertEqual(n['obtention'],row['build'])
+                self.assertLessEqual(n['obtention'],row['build'])
                 self.assertEqual(n['grouped_buy'],row['responsibilities']['grouped_buy'])
-                self.assertEqual(n['core_care'],round(row['responsibilities']['core_lifecycle']-(row['build'] if option['mode']=='Make' else 0),2))
+                self.assertEqual(n['core_care'],round(row['responsibilities']['core_lifecycle']-(n['obtention'] if option['mode']=='Make' else 0),2))
             for h in option['horizons']:
                 self.assertEqual(round(sum(h['cost_natures'].values()),2),h['totals']['total'])
 

@@ -1,0 +1,1191 @@
+{
+  "id": "supply-decisions-java-spring",
+  "basis": "decisions",
+  "assessment": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan.",
+  "processes": [
+    {
+      "id": "backlog-rank",
+      "label": "Classer collectivement les demandes sur un contexte commun",
+      "capabilities": [
+        "BC-036"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Classer collectivement les demandes sur un contexte commun sur commande explicite ou résultat corrélé.",
+      "E": [
+        "BacklogPriorityRequest"
+      ],
+      "R": [
+        "DemandSnapshot",
+        "ActivePolicy",
+        "ExistingCommitments"
+      ],
+      "W": [
+        "DemandPriority"
+      ],
+      "X": [
+        "RankedBacklog"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "backlog-assign",
+      "label": "Affecter les ressources en préservant les liens protégés",
+      "capabilities": [
+        "BC-037"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Affecter les ressources en préservant les liens protégés sur commande explicite ou résultat corrélé.",
+      "E": [
+        "AssignmentRequest"
+      ],
+      "R": [
+        "DemandPriority",
+        "StockSnapshot",
+        "SupplySnapshot",
+        "ActivePolicy",
+        "ExistingAssignments"
+      ],
+      "W": [
+        "AssignmentProposal"
+      ],
+      "X": [
+        "AssignmentResult",
+        "UncoveredDemand"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "backlog-reassign",
+      "label": "Réexaminer les liens autorisés et leurs effets collectifs",
+      "capabilities": [
+        "BC-037"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Réexaminer les liens autorisés et leurs effets collectifs sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ReassignmentRequest"
+      ],
+      "R": [
+        "AssignmentProposal",
+        "CurrentAssignments",
+        "ChangedResources",
+        "ProtectedCommitments",
+        "ActivePolicy"
+      ],
+      "W": [
+        "AssignmentProposal"
+      ],
+      "X": [
+        "AssignmentImpacts",
+        "UncoveredDemand"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "backlog-release",
+      "label": "Décider livraison complète ou partiel admissible",
+      "capabilities": [
+        "BC-038"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Décider livraison complète ou partiel admissible sur commande explicite ou résultat corrélé.",
+      "E": [
+        "DeliveryReleaseRequest"
+      ],
+      "R": [
+        "OrderCommitment",
+        "AssignmentProposal",
+        "AssortmentRequirement",
+        "AcceptedConditions",
+        "ActivePolicy"
+      ],
+      "W": [
+        "DeliveryDecision"
+      ],
+      "X": [
+        "DeliveryAuthorization",
+        "RemainingDemand"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "backlog-no-solution",
+      "label": "Expliquer les réponses non admissibles et le réexamen",
+      "capabilities": [
+        "BC-036",
+        "BC-037",
+        "BC-038"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Expliquer les réponses non admissibles et le réexamen sur commande explicite ou résultat corrélé.",
+      "E": [
+        "BacklogExplanationRequest"
+      ],
+      "R": [
+        "AssignmentProposal",
+        "DemandPriority",
+        "DeliveryDecision",
+        "ConstraintDiagnostics"
+      ],
+      "W": [],
+      "X": [
+        "RejectionExplanation",
+        "ReassessmentConditions"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "opt-targets-local",
+      "label": "Recommander les objectifs de stock magasin ou centre",
+      "capabilities": [
+        "BC-040"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Recommander les objectifs de stock magasin ou centre sur commande explicite ou résultat corrélé.",
+      "E": [
+        "LocalTargetOptimizationRequest"
+      ],
+      "R": [
+        "DemandStatistics",
+        "LeadTime",
+        "ServiceObjectives",
+        "StorageConstraints",
+        "CostAssumptions"
+      ],
+      "W": [
+        "TargetRecommendation"
+      ],
+      "X": [
+        "TargetTradeoffs"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "opt-targets-network",
+      "label": "Recommander conjointement les cibles multi-échelon",
+      "capabilities": [
+        "BC-040"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Recommander conjointement les cibles multi-échelon sur commande explicite ou résultat corrélé.",
+      "E": [
+        "NetworkTargetOptimizationRequest"
+      ],
+      "R": [
+        "NetworkTopology",
+        "DemandStatistics",
+        "LeadTime",
+        "ServiceObjectives",
+        "CostAssumptions",
+        "ExistingTargets"
+      ],
+      "W": [
+        "NetworkTargetRecommendation"
+      ],
+      "X": [
+        "NetworkTradeoffs"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "opt-group",
+      "label": "Recommander droits et plafonds entre bénéficiaires",
+      "capabilities": [
+        "BC-041"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Recommander droits et plafonds entre bénéficiaires sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ProtectionOptimizationRequest"
+      ],
+      "R": [
+        "GroupDemand",
+        "ActivePolicy",
+        "StockProjection",
+        "ServiceObjectives"
+      ],
+      "W": [
+        "ProtectionRecommendation"
+      ],
+      "X": [
+        "BeneficiaryImpacts"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "opt-reservation",
+      "label": "Recommander les conditions de réservation selon service et risque",
+      "capabilities": [
+        "BC-042"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Recommander les conditions de réservation selon service et risque sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ReservationRuleOptimizationRequest"
+      ],
+      "R": [
+        "DemandRisk",
+        "ShortageProjection",
+        "ServiceCommitments",
+        "ExistingReservationRules"
+      ],
+      "W": [
+        "ReservationRuleRecommendation"
+      ],
+      "X": [
+        "ReservationTradeoffs"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "opt-replenish",
+      "label": "Proposer un apport pour besoin daté ou cible",
+      "capabilities": [
+        "BC-043"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Proposer un apport pour besoin daté ou cible sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ReplenishmentRequest"
+      ],
+      "R": [
+        "NetRequirements",
+        "ExistingSupply",
+        "ActiveTargets",
+        "PurchaseConstraints",
+        "PackagingConstraints"
+      ],
+      "W": [
+        "ReplenishmentProposal"
+      ],
+      "X": [
+        "ProposedSupply",
+        "UncoveredNeed"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "opt-adjust",
+      "label": "Proposer une révision des apports déjà attendus",
+      "capabilities": [
+        "BC-043"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Proposer une révision des apports déjà attendus sur commande explicite ou résultat corrélé.",
+      "E": [
+        "SupplyAdjustmentRequest"
+      ],
+      "R": [
+        "ExistingSupply",
+        "ChangedRequirements",
+        "SupplierCommitment",
+        "LeadTime"
+      ],
+      "W": [
+        "SupplyAdjustmentProposal"
+      ],
+      "X": [
+        "AdjustmentRequest"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "opt-redistribute",
+      "label": "Proposer rééquilibrage ou consolidation physique",
+      "capabilities": [
+        "BC-044"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Proposer rééquilibrage ou consolidation physique sur commande explicite ou résultat corrélé.",
+      "E": [
+        "RedistributionRequest"
+      ],
+      "R": [
+        "NetworkStock",
+        "ActiveTargets",
+        "ProtectedDemand",
+        "TransportConditions"
+      ],
+      "W": [
+        "RedistributionProposal"
+      ],
+      "X": [
+        "ProposedTransfers",
+        "SiteImpacts"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "opt-submit",
+      "label": "Soumettre la recommandation à l’autorité compétente",
+      "capabilities": [
+        "BC-040",
+        "BC-041",
+        "BC-042",
+        "BC-043",
+        "BC-044"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Soumettre la recommandation à l’autorité compétente sur commande explicite ou résultat corrélé.",
+      "E": [
+        "OptimizationSubmission"
+      ],
+      "R": [
+        "Recommendation",
+        "Authority",
+        "ActivePolicy"
+      ],
+      "W": [
+        "SubmittedRecommendation"
+      ],
+      "X": [
+        "ApprovalRequest"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "promise-atp",
+      "label": "Calculer sur stock courant ou projeté admissible",
+      "capabilities": [
+        "BC-046"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Calculer sur stock courant ou projeté admissible sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ATPRequest"
+      ],
+      "R": [
+        "OrderRequirements",
+        "StockSnapshot",
+        "ExpectedSupply",
+        "GroupRights",
+        "ExistingCommitments",
+        "Calendars"
+      ],
+      "W": [
+        "ATPOption"
+      ],
+      "X": [
+        "ATPResult"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "promise-ctp",
+      "label": "Établir la faisabilité d’un nouvel apport",
+      "capabilities": [
+        "BC-047"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Établir la faisabilité d’un nouvel apport sur commande explicite ou résultat corrélé.",
+      "E": [
+        "CTPRequest"
+      ],
+      "R": [
+        "OrderRequirements",
+        "QualifiedSources",
+        "MaterialAvailability",
+        "LeadTime",
+        "PackagingConstraints"
+      ],
+      "W": [
+        "CTPOption"
+      ],
+      "X": [
+        "SupplyFeasibility"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "promise-capacity",
+      "label": "Vérifier la faisabilité à capacité finie",
+      "capabilities": [
+        "BC-047"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Vérifier la faisabilité à capacité finie sur commande explicite ou résultat corrélé.",
+      "E": [
+        "FiniteCapacityRequest"
+      ],
+      "R": [
+        "CTPOption",
+        "CapacityOffers",
+        "ExistingLoad",
+        "Calendars",
+        "Dependencies",
+        "MaterialAvailability"
+      ],
+      "W": [
+        "FiniteCapacityResult"
+      ],
+      "X": [
+        "FeasibleOption",
+        "BlockingConstraints"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "promise-common",
+      "label": "Construire une possibilité commune à plusieurs lignes",
+      "capabilities": [
+        "BC-046",
+        "BC-047"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Construire une possibilité commune à plusieurs lignes sur commande explicite ou résultat corrélé.",
+      "E": [
+        "CommonPromiseRequest"
+      ],
+      "R": [
+        "ATPOption",
+        "FiniteCapacityResult",
+        "OrderRequirements",
+        "AssortmentRequirement",
+        "SharedResources"
+      ],
+      "W": [
+        "CommonPromiseOption"
+      ],
+      "X": [
+        "CommonDateAndQuantities"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "promise-cost",
+      "label": "Évaluer les coûts comparables et coûts inconnus",
+      "capabilities": [
+        "BC-048"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Évaluer les coûts comparables et coûts inconnus sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PromiseCostRequest"
+      ],
+      "R": [
+        "CommonPromiseOption",
+        "ServicePriceBook",
+        "Agreement",
+        "CostAssumptions"
+      ],
+      "W": [
+        "PromiseCost"
+      ],
+      "X": [
+        "KnownCosts",
+        "UnknownCosts"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "promise-choice",
+      "label": "Choisir la possibilité économiquement admissible",
+      "capabilities": [
+        "BC-048"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Choisir la possibilité économiquement admissible sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PromiseChoiceRequest"
+      ],
+      "R": [
+        "PromiseCost",
+        "ServiceConstraints",
+        "EconomicCriteria",
+        "Authority"
+      ],
+      "W": [
+        "PromiseChoice"
+      ],
+      "X": [
+        "ChosenOption",
+        "RejectedOptions"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "promise-revalidate",
+      "label": "Réexaminer la possibilité avant sa confirmation",
+      "capabilities": [
+        "BC-046",
+        "BC-047",
+        "BC-048"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Réexaminer la possibilité avant sa confirmation sur commande explicite ou résultat corrélé.",
+      "E": [
+        "PromiseRevalidationRequest"
+      ],
+      "R": [
+        "PromiseChoice",
+        "CurrentResourceVersions",
+        "ActivePolicy",
+        "CurrentCapacity"
+      ],
+      "W": [
+        "PromiseValidity"
+      ],
+      "X": [
+        "ValidOption",
+        "ReassessmentConditions"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "capacity-admit",
+      "label": "Qualifier une offre de capacité avec ses réserves",
+      "capabilities": [
+        "BC-049"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Qualifier une offre de capacité avec ses réserves sur commande explicite ou résultat corrélé.",
+      "E": [
+        "CapacityContribution"
+      ],
+      "R": [
+        "ServiceReference",
+        "OfferIdentity",
+        "CapacityUnits"
+      ],
+      "W": [
+        "CapacityOffer"
+      ],
+      "X": [
+        "QualifiedCapacity"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "capacity-hold",
+      "label": "Demander une capacité fournisseur avant achat ferme",
+      "capabilities": [
+        "BC-049",
+        "BC-051"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Demander une capacité fournisseur avant achat ferme sur commande explicite ou résultat corrélé.",
+      "E": [
+        "CapacityHoldRequest"
+      ],
+      "R": [
+        "CapacityOffer",
+        "SharedCapacityUse",
+        "ActivePolicy",
+        "Agreement"
+      ],
+      "W": [
+        "CapacityHoldRequest"
+      ],
+      "X": [
+        "ProviderHoldRequest"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "capacity-result",
+      "label": "Reconnaître confirmation révision ou libération de capacité",
+      "capabilities": [
+        "BC-049",
+        "BC-051"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Reconnaître confirmation révision ou libération de capacité sur commande explicite ou résultat corrélé.",
+      "E": [
+        "CapacityResponse"
+      ],
+      "R": [
+        "CapacityHoldRequest",
+        "ProviderResponse",
+        "SharedCapacityUse"
+      ],
+      "W": [
+        "CapacityCommitment",
+        "SharedCapacityUse"
+      ],
+      "X": [
+        "CapacityOutcome",
+        "UnconfirmedCapacity"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "service-requirements",
+      "label": "Déterminer prestations et résultats nécessaires",
+      "capabilities": [
+        "BC-050"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Déterminer prestations et résultats nécessaires sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ServiceRequirementRequest"
+      ],
+      "R": [
+        "OrderRequirements",
+        "BusinessReferences",
+        "AcceptedPromise"
+      ],
+      "W": [
+        "ServiceRequirements"
+      ],
+      "X": [
+        "RequiredServices"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "service-selection",
+      "label": "Choisir prestation et exécutant admissibles",
+      "capabilities": [
+        "BC-051"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Choisir prestation et exécutant admissibles sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ServiceSelectionRequest"
+      ],
+      "R": [
+        "ServiceRequirements",
+        "CapacityOffer",
+        "EligibilityResult",
+        "ServiceConditions"
+      ],
+      "W": [
+        "ServiceSelection"
+      ],
+      "X": [
+        "ChosenService",
+        "RejectedServices"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "transport-load",
+      "label": "Construire les chargements sous contraintes",
+      "capabilities": [
+        "BC-052"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Construire les chargements sous contraintes sur commande explicite ou résultat corrélé.",
+      "E": [
+        "LoadPlanningRequest"
+      ],
+      "R": [
+        "ServiceRequirements",
+        "GoodsVolumes",
+        "CapacityOffer",
+        "CompatibilityRules",
+        "DeliveryWindows"
+      ],
+      "W": [
+        "LoadPlan"
+      ],
+      "X": [
+        "AdmissibleLoads",
+        "UnassignedGoods"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "transport-route",
+      "label": "Déterminer trajets arrêts et horaires compatibles",
+      "capabilities": [
+        "BC-052"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Déterminer trajets arrêts et horaires compatibles sur commande explicite ou résultat corrélé.",
+      "E": [
+        "RoutePlanningRequest"
+      ],
+      "R": [
+        "LoadPlan",
+        "TravelTimes",
+        "Calendars",
+        "DeliveryWindows",
+        "ServiceConditions"
+      ],
+      "W": [
+        "RoutePlan"
+      ],
+      "X": [
+        "AdmissibleRoute",
+        "BlockingConstraints"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "transport-replan",
+      "label": "Réviser le plan local ou signaler la promesse intenable",
+      "capabilities": [
+        "BC-052",
+        "BC-054"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Réviser le plan local ou signaler la promesse intenable sur commande explicite ou résultat corrélé.",
+      "E": [
+        "TransportReplanRequest"
+      ],
+      "R": [
+        "RoutePlan",
+        "ChangedConstraints",
+        "AcceptedPromise",
+        "CurrentCommitments"
+      ],
+      "W": [
+        "TransportAdaptationProposal"
+      ],
+      "X": [
+        "LocalAdaptation",
+        "UnmetPromise"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "coordination-prepare",
+      "label": "Définir les dépendances de prestations du besoin",
+      "capabilities": [
+        "BC-053"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Définir les dépendances de prestations du besoin sur commande explicite ou résultat corrélé.",
+      "E": [
+        "FulfilmentCoordinationRequest"
+      ],
+      "R": [
+        "ServiceSelection",
+        "ServiceRequirements",
+        "AcceptedPromise"
+      ],
+      "W": [
+        "FulfilmentPlan"
+      ],
+      "X": [
+        "AuthorizedServiceRequests"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "coordination-event",
+      "label": "Reconnaître progression et impact d’un aléa",
+      "capabilities": [
+        "BC-053",
+        "BC-054"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Reconnaître progression et impact d’un aléa sur commande explicite ou résultat corrélé.",
+      "E": [
+        "RecognizedServiceEvent"
+      ],
+      "R": [
+        "FulfilmentPlan",
+        "RecognizedServiceResult",
+        "EventIdentity"
+      ],
+      "W": [
+        "FulfilmentProgress"
+      ],
+      "X": [
+        "ProgressImpact",
+        "AdaptationNeed"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "coordination-adapt",
+      "label": "Autoriser puis demander une adaptation locale",
+      "capabilities": [
+        "BC-054"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Autoriser puis demander une adaptation locale sur commande explicite ou résultat corrélé.",
+      "E": [
+        "AdaptationCommand"
+      ],
+      "R": [
+        "FulfilmentProgress",
+        "LocalAdaptationProposal",
+        "Authority",
+        "AcceptedPromise"
+      ],
+      "W": [
+        "AuthorizedAdaptation"
+      ],
+      "X": [
+        "ServiceChangeRequests"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    },
+    {
+      "id": "service-release",
+      "label": "Décider lot ou regroupement utile des prestations",
+      "capabilities": [
+        "BC-055"
+      ],
+      "scenario_refs": [
+        "seasonal-order-backlog",
+        "shortage-reassessment",
+        "complete-order-multiline",
+        "no-admissible-promise",
+        "transport-loads-six-stores",
+        "transport-missed-connection",
+        "redistribute-protected-stock",
+        "preorder-future-availability"
+      ],
+      "trigger": "Décider lot ou regroupement utile des prestations sur commande explicite ou résultat corrélé.",
+      "E": [
+        "ServiceReleaseRequest"
+      ],
+      "R": [
+        "FulfilmentPlan",
+        "DeliveryAuthorization",
+        "ProviderWindow",
+        "CompletenessConditions"
+      ],
+      "W": [
+        "ServiceReleaseDecision"
+      ],
+      "X": [
+        "ReleasedServiceOrders",
+        "HeldServices"
+      ],
+      "scope_reason": "Comptage des demandes métier distinctes, sur modèles bornés et solveurs réutilisés. Aucun optimum global ni temps de réponse garanti sans mesure. Politiques et droits collectifs sont configurés et consommés dans contrôles. Les réservations restent dans Stock, les engagements dans Orders, le calcul net dans Master Plan."
+    }
+  ],
+  "basis_path": "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-decisions.json",
+  "benchmark": {
+    "hours_per_CFP": 20,
+    "factor": 1,
+    "day_hours": 7
+  },
+  "baseline_CFP": 166,
+  "removed_process_ids": [
+    "backlog-P01",
+    "backlog-P02",
+    "backlog-P03",
+    "backlog-P04",
+    "optimization-P01",
+    "optimization-P02",
+    "optimization-P03",
+    "optimization-P04",
+    "optimization-P05",
+    "promising-P01",
+    "promising-P02",
+    "promising-P03",
+    "promising-P04",
+    "service-planning-P01",
+    "service-planning-P02",
+    "service-planning-P03",
+    "service-planning-P04",
+    "coordination-P01",
+    "coordination-P02",
+    "coordination-P03",
+    "coordination-P04"
+  ],
+  "kept_process_ids": [],
+  "CFP": 249,
+  "raw_jh": 711.4285714285714,
+  "rounding_jh": 10,
+  "proposal_jh": 710,
+  "recipe": "scenario_scope_revision_v1",
+  "status": "proposal_not_adopted",
+  "baseline_jh": 530,
+  "unit_id": "supply-decisions-java-spring",
+  "inputs_sha256": {
+    "source/estimations-core-retenues.yaml": "a65ab4a496f7e5bc1c8859ee7abcebf2ce79a48b36ed55242cc065a27e7cee6f",
+    "source/calibration-couts.yaml": "702fd01024f2dca6de2bb6005df7ddf81f01264558dcd055e3432f9b0fb65852",
+    "audits/2026-11-02-revue-perimetre-scenarios/results.json": "7f6fae9a6b26934249d89cca31f97e53a9b5554be3965ec28844ac4ee48110c3",
+    "audits/2026-11-02-audit-politiques-allocation/results.json": "05091a8b68b774d00b2882310e86452cba8c2510b96a9179daa7509bab62ad5c",
+    "audits/2026-11-02-proposition-perimetre-complete/closure.json": "0ec0313c275543d7e85b9e68f5cb7d7a9d5257afd09a2277b9ab6bbf86fbaeab",
+    "audits/2026-11-02-proposition-perimetre-complete/scope-controls.json": "1a6b50da97c005e57ed98a81b8e9054e945187312fa6cc852b24202ea705402a",
+    "audits/2026-11-02-proposition-perimetre-complete/scope-decisions.json": "575526efa8660be6133c7331f7d6446435501b043aef2df793fc0f01b6a4e7f6",
+    "audits/2026-11-02-proposition-perimetre-complete/scope-orders.json": "261efa9c232afa7155e7b40b73cd9bc20fec86502bc20d8a9e6c2e2b3ac16b26",
+    "audits/2026-11-02-proposition-perimetre-complete/scope-planning.json": "d7411898bd8a2618a665b7ccd1e5fa3c0d1399c9bc325623fd8d6c3ccbed40a6",
+    "audits/2026-11-02-proposition-perimetre-complete/scope-services.json": "a526f3b5009fccd6f3dbe7db14403a06c9da71490874c43795ad798735786f4a",
+    "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-controls.json": "c7342f97edf10dfc633543657ea17b50be83566c25cc0c65f2d7021d8de3af43",
+    "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-decisions.json": "b6cea9d63853dcc8ea867f7f047b40ab5a9ef1c47d1fdb832c2964e906112f82",
+    "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-orders.json": "fbc367f4efb6b85c8ae5fedbcd22660f66d02ebeca3c26d9a9431e0063a98cea",
+    "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-planning.json": "5007fafe1c377eb818dd1fdf607b1222379cbbc3933084f9d86c7e9d43f72f1d",
+    "audits/2026-10-30-chiffrage-complet/iteration-07/cosmic-services.json": "9ee51b130d1484f57cf37016ecbe3d9faa4595c327d12267f39c3038cae0dc5e",
+    "audits/2026-11-02-proposition-perimetre-complete/prepare.py": "763acefce08929685660d7237b3f0f90077d87d4c2b9d35109d0bbbb1652e8d2"
+  },
+  "delta_jh": 180,
+  "supersedes_policy_revision": false
+}

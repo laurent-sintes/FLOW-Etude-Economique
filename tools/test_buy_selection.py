@@ -14,9 +14,9 @@ class BuySelectionTests(unittest.TestCase):
     def test_selection_is_once_and_preparation_is_zero(self):
         self.assertEqual(read(ROOT/'source/calibration-couts.yaml')['couts_communs']['preparation_buy'],0)
         for o in self.study.baseline['options'][3:]:
-            self.assertEqual(o['selection_buy'],103200)
+            self.assertEqual(o['selection_buy'],66800)
             self.assertEqual(o['build'],0)
-            self.assertEqual(o['obtention'],103200)
+            self.assertEqual(o['obtention'],558200)
             selection=[l for l in o['funding_ledger'] if l['id']=='selection_contractualisation']
             self.assertEqual(len(selection),1)
             self.assertEqual((selection[0]['start'],selection[0]['end']),(0,6))
@@ -38,7 +38,7 @@ class BuySelectionTests(unittest.TestCase):
             for row,want in zip(r['annual'],expected):
                 for key in ('build','integration','mco_run','total'):self.assertEqual(cents(row[key]),want[key])
             for horizon in r['horizons']:
-                self.assertEqual(horizon['totals']['build'],103200)
+                self.assertEqual(horizon['totals']['build'],558200)
                 self.assertEqual(horizon['service_years'],max(0,horizon['years']*12-r['service_start_month'])/12)
 
     def test_buy_duration_excludes_selection_and_does_not_move_make(self):
