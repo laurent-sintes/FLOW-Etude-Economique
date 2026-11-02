@@ -90,3 +90,34 @@ test('an option-specific evidence link never falls back to Java costs',()=>{
  assert.equal(contextualEconomicLink('#evaluation-core?view=financements&horizon=7&focus=G01','sap'),'#evaluation-core?option=sap&horizon=7&view=financements&focus=G01');
  for(const href of ['#complexite','#synvance-microsoft','source/offres-synvance.md','https://example.org/proof'])assert.equal(contextualEconomicLink(href,'microsoft','3'),href);
 });
+
+
+test('all reading windows round-trip through pages and evidence without changing the option',async()=>{
+ const {economicReadingContext,readingOrigin,shownOptions}=await import('../src/economicNavigation.ts');
+ for(const horizon of ['1','6','15'])for(const origin of ['project','core','production']){
+  const context={horizon,origin,options:'microsoft,sap'};
+  for(const page of ['comparer','evaluation-core','parametres']){
+   const route=economicDestination(page,new URLSearchParams({option:'sap',...context}));
+   assert.equal(economicPeriod(route),Number(horizon));assert.equal(readingOrigin(route),origin);
+   assert.deepEqual(shownOptions(route),['microsoft','sap']);
+   assert.deepEqual(economicReadingContext(route),context);
+   const loaded=economicDestination(page,new URLSearchParams(economicHash(route).split('?')[1]));
+   assert.deepEqual(loaded,route);
+   const proof=new URLSearchParams(phaseReadingHash({page:'charges-integration',option:'sap',...economicReadingContext(route)}).split('?')[1]);
+   assert.equal(proof.get('origin'),origin);assert.equal(proof.get('options'),'microsoft,sap');assert.equal(proof.get('horizon'),horizon);
+  }
+ }
+ for(const horizon of ['0','16','1.5','-1','NaN'])assert.equal(economicPeriod({horizon}),10);
+ assert.equal(readingOrigin({origin:'unknown'}),'project');
+ assert.deepEqual(shownOptions({options:'sap,sap,unknown,microsoft'}),['microsoft','sap']);
+ assert.deepEqual(shownOptions({options:''}),['java-spring','microsoft','sap']);
+});
+
+
+test('method links preserve all reading criteria',()=>{
+ const context={origin:'production',options:'microsoft,sap'};
+ const url=contextualEconomicLink('#evaluation-core?view=financements','sap','15',context);
+ const query=new URLSearchParams(url.split('?')[1]);
+ assert.equal(query.get('horizon'),'15');assert.equal(query.get('origin'),'production');
+ assert.equal(query.get('options'),'microsoft,sap');assert.equal(query.get('option'),'sap');
+});

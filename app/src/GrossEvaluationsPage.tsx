@@ -1,4 +1,5 @@
-import {useEffect,useRef,useState} from 'react';
+import {ReadingScopeContext,useReadingContext} from './ReadingScopeContext';
+import {useContext,useEffect,useRef,useState} from 'react';
 import {ArrowRight} from 'lucide-react';
 import {request,useStudy,useFormat,type Data} from './context';
 import {DossierSheet,useDossierFocus} from './Dossier';
@@ -19,7 +20,8 @@ function Takeaway({summary,labels:L}:{summary:string;labels:Data}){
 function CoreResults({core,labels:L,focus,summary}:{core:Data;labels:Data;focus?:string;summary:string}){
  const {n}=useFormat();
  const signed=(value:number)=>`${value>0?'+':''}${n(value,0)}`;
- const href=(id:string)=>'#charges-acquisition?option=java-spring&focus='+encodeURIComponent(id);
+ const context=useReadingContext();
+ const href=(id:string)=>phaseReadingHash({...context,page:'charges-acquisition',option:'java-spring',focus:id})!;
  return <>
   <div className="gross-metrics" data-core-status={core.status}><section className="gross-metric gross-adopted"><h3>{L.adopted}</h3><p><strong>{n(core.adopted_jh,0)}</strong> {L.jh}</p></section></div>
   <Takeaway summary={summary} labels={L}/><Text text={L.reference_note}/>
@@ -55,6 +57,7 @@ function Quotes({quotes,phase,labels:L}:{quotes:Data[];phase:string;labels:Data}
 
 export function GrossEvaluationsPage({phase,option,focus,returnTo,horizon,onChoose}:{phase:string;option?:string;focus?:string;returnTo?:string;horizon?:string;onChoose:(id:string)=>void}){
  const {data}=useStudy(),{n}=useFormat(),J=data.ui.essential.framework_vision.journey;
+ const scope=useContext(ReadingScopeContext),context=useReadingContext();
  const current=J.options.find((o:Data)=>o.id===option)||J.options[0];
  const [reading,setReading]=useState<Data|null>(null),[error,setError]=useState(''),[retry,setRetry]=useState(0);
  const heading=useRef<HTMLHeadingElement>(null),previous=useRef(current.id);
@@ -75,13 +78,13 @@ export function GrossEvaluationsPage({phase,option,focus,returnTo,horizon,onChoo
  return <div className="essential-page framework-journey gross-evaluations" data-gross-phase={phase}>
   <>{returnTo&&<a className="text-button" href={returnTo}>{returnTo.startsWith('#parametres')?data.ui.essential.economic_dossier.return_assumptions:data.ui.essential.economic_dossier.back} →</a>}</><PhaseOptionNavigation journey={J} phase={phase} option={current.id} onChoose={onChoose} prefix="charges-" horizon={horizon}/>
   <DossierSheet view={phase+'-'+current.id}><h2 ref={heading} tabIndex={-1} className="gross-option-heading">{current.label}</h2>
-   <div className="gross-reading-links"><a className="text-button" href={phaseReadingHash({page:phase,option:current.id,horizon})!}>{L.method}<ArrowRight size={16} aria-hidden="true"/></a><a href="#glossaire?term=charge_brute">{L.glossary}</a></div>
+   <div className="gross-reading-links"><a className="text-button" href={phaseReadingHash({...context,page:phase,option:current.id,horizon})!}>{L.method}<ArrowRight size={16} aria-hidden="true"/></a><a href="#glossaire?term=charge_brute">{L.glossary}</a></div>
    {R.core?<CoreResults core={R.core} labels={L} focus={focus} summary={R.summary}/>:<>{R.total_jh!==null?<div className="gross-metrics"><section className="gross-metric gross-adopted"><h3>{R.total_label}</h3><p><strong>{n(R.total_jh,Number.isInteger(R.total_jh)?0:1)}</strong> {R.total_unit}</p></section></div>:<p className="gross-unknown-human">{L.unknown_human}</p>}<Takeaway summary={R.summary} labels={L}/>{R.scope&&<Text text={R.scope}/>}</>}
    <WorkGroups groups={R.groups} labels={L} focus={focus}/>
    <Quotes quotes={R.quotes} phase={phase} labels={L}/>
    {R.construction.length>0&&<details className="gross-detail gross-construction"><summary>{L.assumptions}</summary>{R.construction.map((text:string)=><Text key={text} text={text}/>)}</details>}
    <section className="gross-proofs"><h3>{L.evidence}</h3><ul>{proofs.map(proof=><li key={proof.path}><SourceLink path={proof.path}>{proof.short_label||proof.label}</SourceLink></li>)}<li><a className="text-button" href="#telechargements">{L.audit_link}</a></li></ul></section>
   </DossierSheet>
-  <a className="framework-phase-next text-button" href={next?phaseReadingHash({page:'charges-'+next.id,option:current.id,horizon})!:economicHash({page:'evaluation-core',option:current.id,horizon})!}>{next?J.labels.next+' · '+next.title:L.more_results}<ArrowRight size={18} aria-hidden="true"/></a>
+  <a className="framework-phase-next text-button" href={next?phaseReadingHash({...context,page:'charges-'+next.id,returnTo:scope.returnTo,family:scope.family,option:current.id,horizon})!:economicHash({...context,page:'evaluation-core',option:current.id,horizon})!}>{next?J.labels.next+' · '+next.title:L.more_results}<ArrowRight size={18} aria-hidden="true"/></a>
  </div>;
 }

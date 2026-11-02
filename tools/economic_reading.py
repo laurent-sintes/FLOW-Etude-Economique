@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from jsonschema import Draft202012Validator
 
-from project_investment import phase_expense, subscription_expense
+from project_investment import financing_period, phase_expense, subscription_expense
 from content_model import resolve_text_tree, validate_glossary_literals
 from validate_stacks import ROOT, read
 
@@ -62,8 +62,8 @@ def _require(condition, reason):
         raise ValueError(f'{ERROR}:{reason}')
 
 
-def compile_economic_evaluations(baseline, content, editorial, glossary, document_path, inputs):
-    """Project from one loaded reference, without reading sources or recalculating it."""
+def compile_economic_evaluations(baseline, content, editorial, glossary, document_path, inputs, projection_data):
+    """Compile a frozen reading using the single funding and projection engine."""
     errors = sorted(Draft202012Validator(SCHEMA).iter_errors(editorial), key=lambda error:str(error.path))
     if errors:
         error = errors[0]
@@ -178,10 +178,53 @@ def compile_economic_evaluations(baseline, content, editorial, glossary, documen
     return dict(model_version=baseline['model_version'], editorial=text, options=options,
                 drivers=dict(perimeter=deepcopy(inputs['volumes']['perimetre']),
                              annual_volumes=deepcopy(inputs['volumes']['volumes'])),
-                price_convention=dict(text=content['calibration']['convention']['prix'], source=price_source))
+                price_convention=dict(text=content['calibration']['convention']['prix'], source=price_source),
+                periods=compile_reading_periods(baseline,projection_data))
 
 
-def build_economic_evaluations(baseline, content, glossary, document_path, inputs):
+def build_economic_evaluations(baseline, content, glossary, document_path, inputs, projection_data):
     """Compile once during Study loading; endpoints serve the frozen result only."""
     document_path(SOURCE)
-    return compile_economic_evaluations(baseline, content, read(ROOT / SOURCE), glossary, document_path, inputs)
+    return compile_economic_evaluations(baseline, content, read(ROOT / SOURCE), glossary, document_path, inputs, projection_data)
+
+
+def compile_reading_periods(baseline, projection_data):
+    """1–15 years from each milestone. No repricing or restart of indexation."""
+    output=[]
+    originals={row['stack']:row for row in projection_data['options']}
+    for option in baseline['options']:
+        source=deepcopy(originals[option['stack']])
+        # The adopted budgets, service parts and journal already own the amounts.
+        ledger=option['funding_ledger']; parts=option['annual_services']
+        anchors={'project':0,'core':option['initial_months'],'production':option['service_start_month']}
+        periods=[]
+        for anchor,start in anchors.items():
+            annual=[]; horizons=[]
+            for year in range(1,16):
+                lo=start+(year-1)*12; hi=start+year*12
+                row=financing_period(source,ledger,parts,projection_data['taux'],lo,hi)
+                row.update(annee=year,start_month=lo,end_month=hi,
+                    stage='full_service' if lo>=option['service_start_month'] else
+                          'before_service' if hi<=option['service_start_month'] else 'partial_service')
+                annual.append(row)
+                totals={key:round(sum(r[key] for r in annual),2) for key in ('build','integration','mco_run','total')}
+                transition=round(sum(phase_expense(line['amount'],line['start'],line['end']-line['start'],start,hi)
+                                     for line in ledger if line['phase']=='mco_run'),2)
+                remaining=round(sum(phase_expense(line['amount'],line['start'],line['end']-line['start'],hi,line['end'])
+                                    for line in ledger if hi<line['end']),2)
+                horizons.append(dict(years=year,start_month=start,end_month=hi,totals=totals,
+                    service_years=max(0,hi-max(start,option['service_start_month']))/12,
+                    remaining=remaining,transition_eur_ht=transition,
+                    recurring_eur_ht=round(totals['mco_run']-transition,2),
+                    stage='stage_build' if hi<option['initial_months'] else
+                          'stage_integration' if hi<option['service_start_month'] else 'stage_service'))
+            periods.append(dict(anchor=anchor,start_month=start,annual=annual,horizons=horizons))
+        output.append(dict(stack=option['stack'],periods=periods))
+    reference=next(row for row in output if row['stack']=='java-spring')
+    for option in output:
+        for period,ref_period in zip(option['periods'],reference['periods']):
+            for horizon,ref_horizon in zip(period['horizons'],ref_period['horizons']):
+                difference=round(horizon['totals']['total']-ref_horizon['totals']['total'],2)
+                horizon['comparison']=dict(reference='java-spring',difference_eur_ht=difference,
+                    amount_eur_ht=abs(difference),direction='higher' if difference>0 else 'lower' if difference<0 else 'equal')
+    return output

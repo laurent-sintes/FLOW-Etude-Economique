@@ -244,7 +244,7 @@ class Study:
         content['business_map'] = build_business_map(content['complexity'],content['business'],content['buy_review'],content['integration_paths'],content['scope'])
         content['journey'] = build_sponsor_reading(content,self.baseline,self.glossary,self.document_path)
         content['framework'] = self._framework_content(stacks,content['calibration'])
-        content['economic_evaluations'] = build_economic_evaluations(self.baseline, content, self.glossary, self.document_path, self.data['options'][0]['composable']['inputs'])
+        content['economic_evaluations'] = build_economic_evaluations(self.baseline, content, self.glossary, self.document_path, self.data['options'][0]['composable']['inputs'], self.data)
         content['core_product_scope'] = build_core_product_scope(self.economic)
         content['synvance_reference'] = build_synvance_reference(
             content['guide'], self.glossary, self.document_path, self.baseline, self.architecture, content['economic_evaluations'])

@@ -18,9 +18,64 @@ class EconomicReadingTests(unittest.TestCase):
     def compile(self, **changes):
         arguments = dict(baseline=self.study.baseline, content=self.study.content,
                          editorial=self.editorial, glossary=self.study.glossary,
-                         document_path=self.study.document_path, inputs=self.study.data['options'][0]['composable']['inputs'])
+                         document_path=self.study.document_path, inputs=self.study.data['options'][0]['composable']['inputs'], projection_data=self.study.data)
         arguments.update(changes)
         return compile_economic_evaluations(**arguments)
+
+    def test_reading_windows_preserve_legacy_totals_and_cover_fifteen_years_after_each_milestone(self):
+        periods=self.study.content['economic_evaluations']['periods']
+        for option,reading in zip(self.study.baseline['options'],periods):
+            self.assertEqual(reading['stack'],option['stack'])
+            anchors={'project':0,'core':option['initial_months'],'production':option['service_start_month']}
+            for period in reading['periods']:
+                start=anchors[period['anchor']]
+                self.assertEqual(period['start_month'],start)
+                self.assertEqual([r['years'] for r in period['horizons']],list(range(1,16)))
+                self.assertEqual(len(period['annual']),15)
+                last=period['horizons'][-1]
+                self.assertEqual(last['end_month'],start+180)
+                for horizon in period['horizons']:
+                    rows=period['annual'][:horizon['years']]
+                    for key in ('build','integration','mco_run','total'):
+                        self.assertEqual(horizon['totals'][key],round(sum(r[key] for r in rows),2))
+                    self.assertEqual(round(horizon['transition_eur_ht']+horizon['recurring_eur_ht'],2),horizon['totals']['mco_run'])
+                if period['anchor']=='project':
+                    for legacy in option['horizons']:
+                        self.assertEqual(period['horizons'][legacy['years']-1]['totals'],legacy['totals'])
+                if period['anchor']=='production':
+                    self.assertGreater(last['end_month'],180)
+                    for horizon in period['horizons']:
+                        self.assertEqual(horizon['totals']['build'],0)
+                        self.assertEqual(horizon['totals']['integration'],0)
+                        self.assertEqual(horizon['transition_eur_ht'],0)
+                        self.assertEqual(horizon['remaining'],0)
+                        self.assertEqual(horizon['service_years'],horizon['years'])
+
+    def test_exact_month_windows_conserve_cents_without_restarting_indexation_or_contracts(self):
+        from project_investment import financing_period, RESPONSIBILITIES
+        option=dict(mode='Buy',build_mois=0,selection_mois=6,integration_mois=8,
+            base_annuelle=dict(services_mco=120,hebergement=0,ipaas=0,licences_complementaires=0),
+            prix_abonnements=[120,240],ipaas_indexation_logiciel=False)
+        parts={key:0 for key in RESPONSIBILITIES};parts['grouped_buy']=120
+        rate=dict(tjm_ingenierie=0.1,cloud=0,licences_logiciels=0.2)
+        ledger=[dict(id='integration_initiale',amount=100.01,start=6,end=14,phase='integration',responsibility='integration_client')]
+        # Months 14–18 consume the last four months of the first subscription.
+        # Months 18–26 consume eight months of its second (240/year) annuity.
+        # Services remain indexed by project year: 10*11 + 2*12.1 = 134.20.
+        result=financing_period(option,ledger,parts,rate,14,26)
+        self.assertEqual(result['total'],334.20)
+        self.assertEqual(result['build'],0);self.assertEqual(result['integration'],0)
+        whole=financing_period(option,ledger,parts,rate,0,38)
+        pieces=[financing_period(option,ledger,parts,rate,a,b) for a,b in [(0,7),(7,14),(14,26),(26,38)]]
+        for key in ('build','integration','mco_run','total'):
+            self.assertEqual(whole[key],round(sum(row[key] for row in pieces),2))
+        self.assertEqual(whole['integration'],100.01)
+        for key in ('responsibilities','cost_natures'):
+            for name,value in whole[key].items():
+                self.assertEqual(value,round(sum(row[key][name] for row in pieces),2))
+        for bounds in [(3,3),(-1,5),(0,float('inf')),(False,12)]:
+            with self.assertRaises(ValueError):financing_period(option,ledger,parts,rate,*bounds)
+
 
     def test_every_amount_and_duration_follows_its_loaded_owner(self):
         result = self.compile()

@@ -244,53 +244,81 @@ def subscription_expense(prices, inflation, start, lo, hi):
     return round(total,2)
 
 
+def _financing_year_prefix(option, ledger, parts, rate, year, boundary):
+    """The existing yearly calculation, stopped at an exact month boundary."""
+    o=option; end=o["build_mois"]+o.get('selection_mois',0)+o["integration_mois"]
+    base=o["base_annuelle"]; prices=o["prix_abonnements"]
+    y=year; lo=(y-1)*12; hi=boundary
+    detail={k:0.0 for k in RESPONSIBILITIES}
+    initial={k:0.0 for k in ('build','integration','mco_run')}
+    for line in ledger:
+        paid=phase_expense(line['amount'],line['start'],line['end']-line['start'],lo,hi)
+        detail[line['responsibility']]+=paid; initial[line['phase']]+=paid
+    build=round(initial['build'],2);integration=round(initial['integration'],2)
+    service=max(0,hi-max(lo,end))/12
+    licence=0 if not prices else subscription_expense(prices,rate['licences_logiciels'],o.get('selection_mois',0),lo,hi)
+    ipaas_rate=rate['licences_logiciels'] if o['ipaas_indexation_logiciel'] else rate['cloud']
+    mco=service*(base['services_mco']*(1+rate['tjm_ingenierie'])**(y-1)
+                 +base['hebergement']*(1+rate['cloud'])**(y-1)
+                 +base['ipaas']*(1+ipaas_rate)**(y-1)
+                 +base['licences_complementaires']*(1+rate['licences_logiciels'])**(y-1))+licence
+    recurring={k:0.0 for k in RESPONSIBILITIES}
+    for key,value in parts.items(): recurring[key]+=service*value*(1+rate['tjm_ingenierie'])**(y-1)
+    recurring['run']+=service*(base['hebergement']*(1+rate['cloud'])**(y-1)+base['ipaas']*(1+ipaas_rate)**(y-1)+base['licences_complementaires']*(1+rate['licences_logiciels'])**(y-1))
+    recurring['grouped_buy']+=licence
+    recurring={k:round(v,2) for k,v in recurring.items()}
+    residual=round(round(mco,2)-sum(recurring.values()),2)
+    recurring['grouped_buy' if prices else 'run']+=residual
+    detail={k:round(detail[k]+recurring[k],2) for k in RESPONSIBILITIES}
+    pieces=dict(build=build,integration=integration,mco_run=round(round(mco,2)+round(initial['mco_run'],2),2))
+    total=round(sum(pieces.values()),2)
+    assert round(sum(detail.values()),2)==total
+    # Orthogonal reading of the same paid amounts. Legacy responsibilities
+    # and budget buckets retain their meaning for saved simulations.
+    cloud_initial=sum(phase_expense(l['amount'],l['start'],l['end']-l['start'],lo,hi)
+        for l in ledger if l['id'].startswith('hebergement_build/') or l['id']=='moyens_transition/hebergement')
+    purchases_initial=sum(phase_expense(l['amount'],l['start'],l['end']-l['start'],lo,hi)
+        for l in ledger if l['id'] in ('moyens_transition/ipaas','moyens_transition/droits'))
+    cloud=round(cloud_initial+service*base['hebergement']*(1+rate['cloud'])**(y-1),2)
+    purchases=round(purchases_initial+service*(base['ipaas']*(1+ipaas_rate)**(y-1)
+        +base['licences_complementaires']*(1+rate['licences_logiciels'])**(y-1)),2)
+    natures=dict(obtention=build,integration=integration,
+        core_care=round(detail['core_lifecycle']-(build if o['mode']=='Make' else 0),2),
+        client_care=round(detail['mco_client']+detail['client_evolutions'],2),
+        run_cloud=cloud,technical_purchases=purchases,
+        operations_support=round(detail['run']-cloud-purchases,2),grouped_buy=detail['grouped_buy'])
+    assert round(sum(natures.values()),2)==total
+    return dict(annee=y,**pieces,total=total,responsibilities=detail,cost_natures=natures)
+
+
+def financing_period(option, ledger, parts, rate, lo, hi):
+    """Difference of yearly prefixes, preserving cents and original indexation.
+
+    Boundaries are months since project start. Supplier contract anniversaries
+    and calendar-year indexation keep their original origins for every window.
+    """
+    if not all(isinstance(v,(int,float)) and not isinstance(v,bool) and math.isfinite(v) for v in (lo,hi)) or not 0 <= lo < hi:
+        raise ValueError('ERR_READING_PERIOD')
+    rows=[]
+    for year in range(math.floor(lo/12)+1,math.ceil(hi/12)+1):
+        start=max(lo,(year-1)*12); stop=min(hi,year*12)
+        before=_financing_year_prefix(option,ledger,parts,rate,year,start)
+        after=_financing_year_prefix(option,ledger,parts,rate,year,stop)
+        row={key:round(after[key]-before[key],2) for key in ('build','integration','mco_run','total')}
+        for key in ('responsibilities','cost_natures'):
+            row[key]={name:round(value-before[key][name],2) for name,value in after[key].items()}
+        rows.append(row)
+    result={key:round(sum(row[key] for row in rows),2) for key in ('build','integration','mco_run','total')}
+    for key in ('responsibilities','cost_natures'):
+        result[key]={name:round(sum(row[key][name] for row in rows),2) for name in rows[0][key]}
+    assert round(sum(result[k] for k in ('build','integration','mco_run')),2)==result['total']
+    assert all(round(sum(result[key].values()),2)==result['total'] for key in ('responsibilities','cost_natures'))
+    return result
+
+
 def project_financing(option, ledger, parts, rate, years=10):
     """Pure annual projection of one explicit funding ledger and recurring services."""
-    o=option; end=o["build_mois"]+o.get('selection_mois',0)+o["integration_mois"]
-    base=o["base_annuelle"]; prices=o["prix_abonnements"]; rows=[]
-    for y in range(1,years+1):
-        lo=(y-1)*12; hi=y*12
-        detail={k:0.0 for k in RESPONSIBILITIES}
-        initial={k:0.0 for k in ('build','integration','mco_run')}
-        for line in ledger:
-            paid=phase_expense(line['amount'],line['start'],line['end']-line['start'],lo,hi)
-            detail[line['responsibility']]+=paid; initial[line['phase']]+=paid
-        build=round(initial['build'],2);integration=round(initial['integration'],2)
-        service=max(0,hi-max(lo,end))/12
-        licence=0 if not prices else subscription_expense(prices,rate['licences_logiciels'],o.get('selection_mois',0),lo,hi)
-        ipaas_rate=rate['licences_logiciels'] if o['ipaas_indexation_logiciel'] else rate['cloud']
-        mco=service*(base['services_mco']*(1+rate['tjm_ingenierie'])**(y-1)
-                     +base['hebergement']*(1+rate['cloud'])**(y-1)
-                     +base['ipaas']*(1+ipaas_rate)**(y-1)
-                     +base['licences_complementaires']*(1+rate['licences_logiciels'])**(y-1))+licence
-        recurring={k:0.0 for k in RESPONSIBILITIES}
-        for key,value in parts.items(): recurring[key]+=service*value*(1+rate['tjm_ingenierie'])**(y-1)
-        recurring['run']+=service*(base['hebergement']*(1+rate['cloud'])**(y-1)+base['ipaas']*(1+ipaas_rate)**(y-1)+base['licences_complementaires']*(1+rate['licences_logiciels'])**(y-1))
-        recurring['grouped_buy']+=licence
-        recurring={k:round(v,2) for k,v in recurring.items()}
-        residual=round(round(mco,2)-sum(recurring.values()),2)
-        recurring['grouped_buy' if prices else 'run']+=residual
-        detail={k:round(detail[k]+recurring[k],2) for k in RESPONSIBILITIES}
-        pieces=dict(build=build,integration=integration,mco_run=round(round(mco,2)+round(initial['mco_run'],2),2))
-        total=round(sum(pieces.values()),2)
-        assert round(sum(detail.values()),2)==total
-        # Orthogonal reading of the same paid amounts. Legacy responsibilities
-        # and budget buckets retain their meaning for saved simulations.
-        cloud_initial=sum(phase_expense(l['amount'],l['start'],l['end']-l['start'],lo,hi)
-            for l in ledger if l['id'].startswith('hebergement_build/') or l['id']=='moyens_transition/hebergement')
-        purchases_initial=sum(phase_expense(l['amount'],l['start'],l['end']-l['start'],lo,hi)
-            for l in ledger if l['id'] in ('moyens_transition/ipaas','moyens_transition/droits'))
-        cloud=round(cloud_initial+service*base['hebergement']*(1+rate['cloud'])**(y-1),2)
-        purchases=round(purchases_initial+service*(base['ipaas']*(1+ipaas_rate)**(y-1)
-            +base['licences_complementaires']*(1+rate['licences_logiciels'])**(y-1)),2)
-        natures=dict(obtention=build,integration=integration,
-            core_care=round(detail['core_lifecycle']-(build if o['mode']=='Make' else 0),2),
-            client_care=round(detail['mco_client']+detail['client_evolutions'],2),
-            run_cloud=cloud,technical_purchases=purchases,
-            operations_support=round(detail['run']-cloud-purchases,2),grouped_buy=detail['grouped_buy'])
-        assert round(sum(natures.values()),2)==total
-        rows.append(dict(annee=y,**pieces,total=total,responsibilities=detail,cost_natures=natures))
-    return rows
+    return [_financing_year_prefix(option,ledger,parts,rate,year,year*12) for year in range(1,years+1)]
 
 
 def project(data, horizon_years=None):
