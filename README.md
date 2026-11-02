@@ -1,3 +1,5 @@
+[Accéder à l’application — GitHub Pages](https://laurent-sintes.github.io/FLOW-Etude-Economique/)
+
 # Étude économique FLOW
 
 L’application compare une voie Make — Java / Spring — et deux Buy — Microsoft Dynamics 365 + K3 et SAP. Elle aide à décider des voies et conditions de réalisation du Core System, première étape d’une plateforme de marques, en distinguant périmètres, hypothèses et prix documentés. La Plateforme Flow désigne le produit métier construit en Make. Le calendrier part d’un départ commun, avec comparaisons à 3, 5, 7 et 10 ans. Les paramètres historiques .NET et Rust sont conservés pour relire les anciennes sauvegardes.
