@@ -94,6 +94,15 @@ class ApiTests(unittest.TestCase):
         self.assertIn('model_scope',full['content']['synvance_reference']['costs']['rows'][0])
         self.assertEqual(set(small['content']['synvance_reference']['overview']),{'cards'})
         self.assertIn('title',full['content']['synvance_reference']['overview'])
+        full_reference=full['content']['synvance_reference']
+        light_reference=small['content']['synvance_reference']
+        self.assertEqual(light_reference['delays'],full_reference['delays'])
+        self.assertEqual(light_reference['business']['oms']['rows'],full_reference['business']['oms']['rows'])
+        def oms_proofs(reference):
+            oms=reference['business']['oms']
+            return {(p['path'],p['location']) for item in [oms,*oms['rows']] for p in item['proofs']}
+        self.assertEqual(oms_proofs(light_reference),oms_proofs(full_reference))
+        self.assertTrue({'architecture','oms-b2c'}.isdisjoint(row['id'] for row in light_reference['business']['axes']))
         # Includes the current pre-study editorial summaries. Documentary charge
         # details remain lazy. Bound both the decoded payload and real transfer.
         self.assertLess(len(light),1_120_000)

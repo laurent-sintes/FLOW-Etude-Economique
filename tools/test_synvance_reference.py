@@ -54,6 +54,25 @@ class SynvanceReferenceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'duplicate id:brief/questions'):
             self.compile(editorial=editorial)
 
+    def test_delays_resolve_evidence_and_reject_broken_sources(self):
+        result = self.compile()
+        self.assertEqual(result['reading']['pages'][-1]['id'], 'delays')
+        delays = result['delays']
+        self.assertEqual(delays['rows'][0]['proofs'][0]['path'], 'sources/client/copil-5.pdf#page=7')
+        self.assertEqual(delays['providers'][0]['proofs'][-1]['path'], 'sources/client/microsoft-1.pdf#page=40')
+        for target in ('root', 'row', 'provider', 'condition'):
+            editorial = deepcopy(self.editorial)
+            block = editorial['delays']
+            item = {'root': block, 'row': block['rows'][0], 'provider': block['providers'][0],
+                    'condition': block['conditions'][0]}[target]
+            item['proof_refs'] = ['missing']
+            with self.assertRaisesRegex(ValueError, 'unknown proof'):
+                self.compile(editorial=editorial)
+        editorial = deepcopy(self.editorial)
+        editorial['delays']['providers'].reverse()
+        with self.assertRaisesRegex(ValueError, 'delay provider order'):
+            self.compile(editorial=editorial)
+
     def test_document_dates_sort_unknowns_and_keep_provenance(self):
         guide = deepcopy(self.guide)
         guide['pieces'].reverse()

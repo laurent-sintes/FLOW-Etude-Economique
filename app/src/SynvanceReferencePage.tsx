@@ -178,6 +178,28 @@ function CostComparison({reference:R}:{reference:Data}){
   <SupplierLinks reference={R}/>
  </Chapter>;
 }
+function DelayEvaluation({reference:R}:{reference:Data}){
+ const D=R.delays,L=D.labels;
+ return <Chapter id="delays" title={D.title} lead={D.introduction}>
+  <aside className="core-method-callout"><p><MethodText>{D.conclusion}</MethodText></p><Proofs items={D.proofs}/></aside>
+  <div className="core-method-table-scroll" tabIndex={0} role="region" aria-label={D.comparison_title}>
+   <table className="core-method-table synvance-oms-table"><caption>{D.comparison_title}</caption><thead><tr>{['criterion','microsoft','sap','reading'].map(key=><th scope="col" key={key}>{['microsoft','sap'].includes(key)?<ProviderMark id={key} detail/>:L[key]}</th>)}</tr></thead><tbody>
+    {D.rows.map((row:Data)=><tr key={row.id}><th scope="row">{row.criterion}<Proofs items={row.proofs}/></th>{['microsoft','sap','reading'].map(key=><td key={key} data-label={L[key]} data-provider={key==='reading'?undefined:key}>{key!=='reading'&&<MobileProvider id={key}/>}<MethodText>{row[key]}</MethodText></td>)}</tr>)}
+   </tbody></table>
+  </div>
+  <ReadingNote>{D.comparison_note}</ReadingNote>
+  <section aria-labelledby="synvance-delay-trajectories"><h3 id="synvance-delay-trajectories">{D.trajectories_title}</h3>
+   <div className="synvance-pattern-proposals">{D.providers.map((provider:Data)=><article key={provider.id} data-publisher={provider.id}>
+    <ProviderMark id={provider.id} detail/><p><MethodText>{provider.summary}</MethodText></p>
+    <ul>{provider.details.map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ul><Proofs items={provider.proofs}/>
+   </article>)}</div>
+  </section>
+  <section aria-labelledby="synvance-delay-conditions"><h3 id="synvance-delay-conditions">{D.conditions_title}</h3>
+   <div className="synvance-brief-questions">{D.conditions.map((item:Data)=><section key={item.id}><h4>{item.title}</h4><p><MethodText>{item.text}</MethodText></p><Proofs items={item.proofs}/></section>)}</div>
+  </section>
+  <ReadingNote>{D.note}</ReadingNote>
+ </Chapter>;
+}
 function Documents({reference:R}:{reference:Data}){
  const {data}=useStudy(),L=R.labels;
  return <Chapter id="documents" title={R.documents.title}>
@@ -235,10 +257,10 @@ function ProviderDetails({reference:R,provider:P}:{reference:Data;provider:Data}
   </article>
  </>;
 }
-export function SynvanceReferencePage({providerId,view='overview'}:{providerId?:'microsoft'|'sap';view?:'overview'|'business'|'oms'|'costs'}){
+export function SynvanceReferencePage({providerId,view='overview'}:{providerId?:'microsoft'|'sap';view?:'overview'|'business'|'oms'|'costs'|'delays'}){
  const {data}=useStudy(),R=data.content.synvance_reference;
  const provider=providerId?R.synthesis.providers.find((item:Data)=>item.id===providerId):null;
- const evidence=provider?uniqueProofs(provider):view==='business'?uniqueProofs({architecture:{proofs:R.business.architecture_proofs},patterns:R.business.pattern_reading,axes:R.business.axes.filter((row:Data)=>!['oms-b2c','architecture'].includes(row.id)),others:R.business.others}):view==='oms'?uniqueProofs(R.business.oms):view==='costs'?uniqueProofs(R.costs):[];
+ const evidence=provider?uniqueProofs(provider):view==='business'?uniqueProofs({architecture:{proofs:R.business.architecture_proofs},patterns:R.business.pattern_reading,axes:R.business.axes.filter((row:Data)=>!['oms-b2c','architecture'].includes(row.id)),others:R.business.others}):view==='oms'?uniqueProofs(R.business.oms):view==='costs'?uniqueProofs(R.costs):view==='delays'?uniqueProofs(R.delays):[];
  return <div className="essential-page core-method-page synvance-reference-page" data-synvance-page={providerId||view} style={{'--publisher-ms':R.reading.publishers[0].accent,'--publisher-sap':R.reading.publishers[1].accent} as CSSProperties}>
   <LocalNavigation reference={R} current={provider?'costs':view} detail={Boolean(provider)}/>
   <DossierSheet view={providerId||view}>
@@ -249,6 +271,7 @@ export function SynvanceReferencePage({providerId,view='overview'}:{providerId?:
      {view==='business'&&<BusinessScope reference={R}/>}
      {view==='oms'&&<OmsComparison reference={R}/>}
      {view==='costs'&&<CostComparison reference={R}/>}
+     {view==='delays'&&<DelayEvaluation reference={R}/>}
     </ol>
    </>}
    {(provider||view!=='overview')&&<><EvidenceRegister items={evidence} reference={R}/><a className="synvance-return" href="#synvance"><ArrowLeft size={17} aria-hidden="true"/>{R.labels.back_to_overview}</a></>}

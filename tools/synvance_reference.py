@@ -33,7 +33,7 @@ SOURCE_CELL = _object(dict(status=TEXT, scope=TEXT,
 PRODUCT_URLS = ['https://help.sap.com/docs/SAP_Order_Management_for_Sourcing_and_Availability/b1914f5958b54a148b2b7580550ef9a5/f06cbc74f4c34a9e8e3a74adb8d6d0b9.html', 'https://help.sap.com/doc/08442b9d2cd744f7aecc1e08080c26f3/SHIP/en-US/FSD_SAP_OMSA.pdf', 'https://learning.sap.com/courses/exploring-sap-order-management-foundation-and-sourcing-availability/explaining-the-concept-of-order-submit-and-order-orchestration', 'https://learn.microsoft.com/en-us/dynamics365/commerce/dom', 'https://learn.microsoft.com/en-us/dynamics365/commerce/dev-itpro/commerce-architecture', 'https://learn.microsoft.com/en-us/dynamics365/commerce/dom-processing', 'https://learn.microsoft.com/en-us/dynamics365/commerce/dom-limitations']
 SCHEMA = _object(dict(
     version=dict(const=1), id=dict(const='reperes-synvance'), title=TEXT, navigation=TEXT, introduction=TEXT,
-    reading=_object(dict(navigation=TEXT, pages=_array(_object(dict(id=dict(enum=['overview','business','oms','costs']),label=TEXT,short_label=TEXT,description=TEXT))),
+    reading=_object(dict(navigation=TEXT, pages=_array(_object(dict(id=dict(enum=['overview','business','oms','costs','delays']),label=TEXT,short_label=TEXT,description=TEXT))),
         evidence_title=TEXT,evidence_intro=TEXT,piece_labels=_object({key:TEXT for key in ('demande','besoins','microsoft','sap','copil','questionnaire_microsoft','questionnaire_sap')}),
         publishers=_array(_object(dict(id=dict(enum=list(PROVIDERS)),name=TEXT,role=TEXT,asset=dict(enum=['assets/microsoft-original.svg','assets/sap-original.svg']),accent=dict(type='string',pattern='^#[0-9A-Fa-f]{6}$')))),
         details_title=TEXT,documents_link=TEXT,business_oms_link=TEXT,cost_navigation=TEXT,acquired_title=TEXT,acquired_text=TEXT,acquired_link=TEXT,architecture_status=TEXT)),
@@ -92,6 +92,13 @@ SCHEMA = _object(dict(
         annual_rows=_array(_object(dict(id=TEXT, label=TEXT))),
         model_title=TEXT, model_note=TEXT, model_limit=TEXT,
         model_links=_array(_object(dict(href=dict(enum=['#parametres','#se-projeter','#comparer']), label=TEXT))))),
+    delays=_object(dict(title=TEXT, introduction=TEXT, conclusion=TEXT, proof_refs=PROOFS,
+        comparison_title=TEXT, comparison_note=TEXT,
+        labels=_object({key:TEXT for key in ('criterion','microsoft','sap','reading')}),
+        rows=_array(_object(dict(id=ID, criterion=TEXT, microsoft=TEXT, sap=TEXT, reading=TEXT, proof_refs=PROOFS))),
+        trajectories_title=TEXT,
+        providers=_array(_object(dict(id=dict(enum=list(PROVIDERS)), summary=TEXT, details=_array(TEXT), proof_refs=PROOFS))),
+        conditions_title=TEXT, conditions=_array(_object(dict(id=ID, title=TEXT, text=TEXT, proof_refs=PROOFS))), note=TEXT)),
     documents=_object(dict(title=TEXT,date_note=TEXT, date_labels=_object({key:TEXT for key in ('document','file_modified','unknown')}))),
     usage=_object(dict(title=TEXT, introduction=TEXT, paragraphs=_array(TEXT), links=_array(_object(dict(
         href=dict(enum=['#vision', '#marche', '#etude-marche', '#evaluation-core']), label=TEXT, text=TEXT)))))
@@ -122,7 +129,7 @@ def compile_synvance_reference(editorial, guide, prices, annual, glossary, docum
     if errors:
         raise ValueError(ERROR + ':editorial:' + str(list(errors[0].path)) + ':' + errors[0].message)
     require([row['id'] for row in editorial['synthesis']['providers']] == list(PROVIDERS), 'provider order')
-    require([item['id'] for item in editorial['reading']['pages']] == ['overview','business','oms','costs'], 'reading page order')
+    require([item['id'] for item in editorial['reading']['pages']] == ['overview','business','oms','costs','delays'], 'reading page order')
     require([item['id'] for item in editorial['reading']['publishers']] == list(PROVIDERS), 'publisher identity order')
     require(set(prices) == set(annual) == set(PROVIDERS), 'source providers')
     validate_glossary_literals(editorial, glossary, path=SOURCE)
@@ -189,6 +196,13 @@ def compile_synvance_reference(editorial, guide, prices, annual, glossary, docum
     try: date.fromisoformat(result['brief']['start']['value'])
     except ValueError: raise ValueError(ERROR+':invalid study start date')
     for item in [*result['brief']['questions'], result['brief']['highlights'],result['brief']['start'],*result['brief']['actors']['items']]:
+        item['proofs'] = proofs(item.pop('proof_refs'))
+
+    delays = result['delays']
+    index(delays['rows'], 'delays/rows')
+    index(delays['conditions'], 'delays/conditions')
+    require([provider['id'] for provider in delays['providers']] == list(PROVIDERS), 'delay provider order')
+    for item in [delays, *delays['rows'], *delays['providers'], *delays['conditions']]:
         item['proofs'] = proofs(item.pop('proof_refs'))
 
     for provider in result['synthesis']['providers']:

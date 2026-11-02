@@ -528,7 +528,17 @@ class Study:
             # Only supplier-link captions remain in use from the historical overview.
             reference['overview']={'cards':[{'link_label':card['link_label']} for card in reference['overview']['cards']]}
             reference.pop('usage',None)
+            for key in ('title','navigation','introduction'):
+                reference.pop(key,None)
+            business=reference['business']
+            # Dedicated sections already render architecture and OMS comparisons.
+            business['axes']=[row for row in business['axes'] if row['id'] not in ('architecture','oms-b2c')]
+            # Keep each OMS passage beside its criterion, without duplicating it at the root.
+            oms=business['oms']
+            row_proofs={(proof['path'],proof['location']) for row in oms['rows'] for proof in row['proofs']}
+            oms['proofs']=[proof for proof in oms['proofs'] if (proof['path'],proof['location']) not in row_proofs]
             costs=content['synvance_reference']['costs']
+            costs['labels']={key:costs['labels'][key] for key in ('structure','microsoft','sap','scope','year','price_year','source_note')}
             # Legacy economic projections remain in the full compatibility payload.
             for key in ('model','bridge_title','bridge_note','annual_rows','model_title','model_note','model_limit','model_links'):
                 costs.pop(key,None)
