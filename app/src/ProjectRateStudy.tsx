@@ -1,15 +1,29 @@
 import {useReadingContext} from './ReadingScopeContext';
 import {economicHash} from './economicNavigation';
-import {useState} from 'react';
-import {useStudy,useFormat,type Data} from './context';
+import {useEffect,useState} from 'react';
+import {request,useStudy,useFormat,type Data} from './context';
 import {Drawer,SourceLink} from './components';
 import {ReadingNote} from './ReadingNote';
+import {useDossierFocus} from './Dossier';
 import {MethodText} from './MethodDocument';
 
-export function ProjectRateStudy({financial=false,zone='paris'}:{study?:Data;financial?:boolean;zone?:string}){
+export function ProjectRateStudy({financial=false,zone='paris',focus}:{financial?:boolean;zone?:string;focus?:string}){
  const {data}=useStudy(),{dailyRate,n}=useFormat(),T=data.ui.essential.market_costs;
- const rates=data.content.framework.project_rates,readingContext=useReadingContext();
+ const readingContext=useReadingContext();
+ const [reading,setReading]=useState<Data|null>(null),[error,setError]=useState(false),[attempt,setAttempt]=useState(0);
+ const version=data.model_version;
+ useEffect(()=>{
+  const controller=new AbortController();
+  setError(false);
+  request<Data>('/api/project-rates?model_version='+encodeURIComponent(version),undefined,{signal:controller.signal})
+   .then(value=>{if(!controller.signal.aborted)setReading(value);})
+   .catch(()=>{if(!controller.signal.aborted)setError(true);});
+  return ()=>controller.abort();
+ },[version,attempt]);
  const [selected,setSelected]=useState<Data|null>(null),[method,setMethod]=useState(false);
+ useDossierFocus(reading?focus:undefined);
+ if(!reading)return <><p role={error?'alert':'status'}>{error?data.ui.errors.network:data.ui.labels.loading}</p>{error&&<button className="text-button" onClick={()=>setAttempt(i=>i+1)}>{data.ui.labels.retry}</button>}</>;
+ const rates=reading.project_rates;
  const source=(id:string)=>{const s=rates.sources[id];return <section className="rate-proof-source" key={id}><h4><SourceLink path={s.url}>{s.title}</SourceLink></h4><p>{s.published_on||T.study_undated} · {T.study_recorded} {s.recorded_on}</p><p>{s.method}</p><ReadingNote>{s.limit}</ReadingNote></section>;};
  return <div className="project-rate-study">
   {!financial&&<p><MethodText>{T.price_grid_intro}</MethodText></p>}
@@ -19,6 +33,6 @@ export function ProjectRateStudy({financial=false,zone='paris'}:{study?:Data;fin
    <div className="core-method-table-scroll" role="region" tabIndex={0} aria-label={g.title}><table className="core-method-table project-price-grid"><thead><tr><th scope="col">{T.price_role}</th><th scope="col">{T.price_paris}</th><th scope="col">{T.price_province}</th><th scope="col"><span className="sr-only">{T.price_proof}</span></th></tr></thead><tbody>{rates.roles.filter((r:Data)=>r.group===g.id).map((r:Data)=><tr key={r.id}><th scope="row">{r.title}</th><td data-label={T.price_paris} className={financial&&zone==='paris'?'project-rate-active':''}>{dailyRate(r.paris)}</td><td data-label={T.price_province} className={financial&&zone==='province'?'project-rate-active':''}>{dailyRate(r.province)}</td><td><button className="text-button" onClick={()=>setSelected(r)} aria-label={T.price_proof+' · '+r.title}>{T.price_proof}</button></td></tr>)}</tbody></table></div>
   </section>)}
   {selected&&<Drawer title={selected.title} onClose={()=>setSelected(null)}><p><strong>{T.price_paris} · {dailyRate(selected.paris)}</strong><br/><strong>{T.price_province} · {dailyRate(selected.province)}</strong></p><p>{selected.rationale}</p><p><strong>{T.study_mission}</strong> · {selected.mission}</p><p><strong>{T.study_funding}</strong> · {selected.funding}</p><h3>{T.price_regional_calculation}</h3><p>{T.price_regional_methods[selected.geography_method]}</p><p>{dailyRate(selected.paris)} × {n(selected.ratio,4)} → {dailyRate(selected.province)}</p><p>{T.price_rounding}</p>{selected.peers.map((peer:Data)=><p key={peer.role}>{rates.roles.find((r:Data)=>r.id===peer.role)?.title} · {n(peer.numerator,2)} / {n(peer.denominator,2)} · {peer.segment}</p>)}<h3>{T.price_observations}</h3>{selected.observations.map((o:Data,i:number)=><section key={i}><h4>{o.segment} · {T.study_measures[o.measure]}</h4><ul>{o.areas.map((a:Data)=><li key={a.label}>{a.label} · {n(a.min,0)}{a.min!==a.max?' – '+n(a.max,0):''} {T.unit}</li>)}</ul><p>{o.scope}</p><p>{o.locator} · {T.taxes[o.tax_status]}</p></section>)}{[...new Set<string>([...selected.observations.map((o:Data)=>o.source_id),...selected.peers.map((p:Data)=>p.source_id)])].map(source)}</Drawer>}
-  {method&&<Drawer title={T.price_method} onClose={()=>setMethod(false)} wide><h3>{rates.method.title}</h3><ol>{rates.method.steps.map((s:string)=><li key={s}><p>{s}</p></li>)}</ol><h3>{T.study_channels}</h3>{data.content.framework.project_rate_channels.map((c:Data)=><section key={c.id}><h4>{c.title}</h4><p>{c.description}</p><p>{c.price}</p>{c.source_ids.map(source)}</section>)}<h3>{T.study_engagements}</h3>{data.content.framework.project_rate_engagements.map((e:Data)=><section key={e.title}><h4>{e.title}</h4><p>{e.text}</p></section>)}<ReadingNote>{data.content.framework.project_rate_portage.text}</ReadingNote>{data.content.framework.project_rate_portage.source_ids.map(source)}<h3>{T.study_geography}</h3><p>{T.study_geography_note}</p><p>{T.price_variance_note}</p></Drawer>}
+  {method&&<Drawer title={T.price_method} onClose={()=>setMethod(false)} wide><h3>{rates.method.title}</h3><ol>{rates.method.steps.map((s:string)=><li key={s}><p>{s}</p></li>)}</ol><h3>{T.study_channels}</h3>{reading.project_rate_channels.map((c:Data)=><section key={c.id}><h4>{c.title}</h4><p>{c.description}</p><p>{c.price}</p>{c.source_ids.map(source)}</section>)}<h3>{T.study_engagements}</h3>{reading.project_rate_engagements.map((e:Data)=><section key={e.title}><h4>{e.title}</h4><p>{e.text}</p></section>)}<ReadingNote>{reading.project_rate_portage.text}</ReadingNote>{reading.project_rate_portage.source_ids.map(source)}<h3>{T.study_geography}</h3><p>{T.study_geography_note}</p><p>{T.price_variance_note}</p></Drawer>}
  </div>;
 }

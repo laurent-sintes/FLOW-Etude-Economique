@@ -65,7 +65,7 @@ export function createStaticTransport(dependencies:Dependencies){
     return {id:latest.id,version:latest.model_version,server_revision:latest.server_revision,mode:'current',sources_current:true} as T;
    }
    const snapshot=await loadManifest();
-   if(['/api/capability','/api/market-build','/api/market-references','/api/economic-evaluations','/api/gross-evaluations'].includes(url.pathname)&&url.searchParams.get('model_version')!==snapshot.model_version)throw transportError('version');
+   if(['/api/capability','/api/market-build','/api/market-references','/api/project-rates','/api/economic-evaluations','/api/gross-evaluations'].includes(url.pathname)&&url.searchParams.get('model_version')!==snapshot.model_version)throw transportError('version');
    if(url.pathname==='/api/simulate'||url.pathname==='/api/document')return invoke(snapshot,path,body) as Promise<T>;
    if(body!==undefined)throw transportError('invalid');
    if(url.pathname==='/api/bootstrap'){

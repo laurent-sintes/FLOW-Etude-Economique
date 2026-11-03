@@ -1,5 +1,5 @@
 """Adopted professional estimate: portable preparation, unique funding and financial reconciliation."""
-from test_support import active_reference
+from test_support import active_reference, adopted_effort
 from collections import Counter
 from copy import deepcopy
 import json,unittest
@@ -30,7 +30,7 @@ class ProfessionalAdoptionTests(unittest.TestCase):
   b=self.docs[self.specs[0]['inputs']['adoption_basis']];before=json.loads(json.dumps(__import__('yaml').safe_load(b['source_snapshots']['source/estimations-core-retenues.yaml'])))['units']
   actual={u['id']:u for u in self.units}
   for old in before:
-   if old['id'] in ('stock-java-spring',):self.assertEqual(actual[old['id']],old)
+   if old['id'] in ('stock-java-spring',):self.assertEqual(adopted_effort(actual[old['id']]),adopted_effort(old))
   caps=[c['id'] for u in self.units for c in u['capabilities']];self.assertEqual(len(caps),88);self.assertEqual(len(set(caps)),88)
   for c in self.specs:
    if c['scope']['level']=='professional_function_group':self.assertEqual(c['scope']['capabilities'],[]);self.assertNotIn('native_id',c['scope'])
@@ -66,8 +66,11 @@ class ProfessionalAdoptionTests(unittest.TestCase):
   before=json.loads((ROOT/'audits/2026-10-31-adoption-produit-professionnel/before-financial.json').read_text('utf8'));old={o['stack']:o for o in before['baseline']['options']}
   for o in self.study.baseline['options']:
    if o['stack']!='java-spring':
-    for key in ('build','annual_base','editor_prices','initial_months','service_start_month'):
+    for key in ('build','editor_prices','initial_months','service_start_month'):
      self.assertEqual(o[key],old[o['stack']][key])
+    # Services MCO are repriced by the current role grid. Other annual bases retain their scope and amount.
+    stable_annual=lambda option:{k:v for k,v in option['annual_base'].items() if k!='services_mco'}
+    self.assertEqual(stable_annual(o),stable_annual(old[o['stack']]))
   self.assertEqual(self.study.parameters['options']['java-spring']['build_mois'],before['parameters']['options']['java-spring']['build_mois'])
   self.assertEqual(self.study.content['core_product_scope']['proposal']['cosmic_process']['CFP'],216)
   self.assertEqual(self.study.content['core_product_scope']['proposal']['it_cosmic']['CFP'],68)

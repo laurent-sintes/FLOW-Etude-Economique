@@ -17,3 +17,11 @@ def _adoption_reference():
 def active_reference():
     """Independent copy of the reviewed, frozen adoption reference."""
     return deepcopy(_adoption_reference())
+
+
+def adopted_effort(unit):
+    """Project the adopted unit independently of the current pricing references."""
+    return {**unit, 'roles': [
+        {key: value for key, value in role.items() if key != 'rate_ref'}
+        for role in unit['roles']
+    ]}

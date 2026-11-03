@@ -31,13 +31,13 @@ export function MarketCostsPage({view,focus}:{view?:string;focus?:string}){
  const pages=navigationPages('preetude-couts',N.pages),current=selectDossierPage(pages,view),{reading,error,retry}=useMarketReading();
  const C=reading?.cost_evidence,R=data.ui.essential.market_study.references,options=C?visibleOptions(data.ui,C.options,'id'):[];
  const active=data.ui.essential.active_options;
- useDossierFocus(C&&focus?focus:undefined);
+ useDossierFocus(C&&current.id!=='services'?focus:undefined);
  return <div className="essential-page core-method-page market-study-page dossier-page" data-prestudy="costs">
   <DossierNavigation pages={pages} current={current.id} label={N.navigation}/>
   <DossierSheet view={current.id}>
    <PreStudySummary topic={current.id==='services'?'rates':current.id}/>
    {!C?(error||reading?<p role="alert">{R.error} <button className="text-button" onClick={retry}>{R.retry}</button></p>:<p role="status">{R.loading}</p>):<>
-    {current.id==='services'&&<ProjectRateStudy/>}
+    {current.id==='services'&&<ProjectRateStudy focus={focus}/>}
     {current.id==='purchases'&&<><h2>{T.purchases_title}</h2><div className="market-cost-cards">{C.purchases.map((row:Data)=><article key={row.id}><h3>{row.title}</h3><p>{row.scope}</p><CostEvidence items={[row.evidence]}/></article>)}</div><h2>{T.components}</h2><p><MethodText>{T.component_note}</MethodText></p>
      <dl className="prestudy-catalogue-status">{Object.entries(T.component_statuses).map(([status,label])=><div key={status}><dt>{String(label)}</dt><dd>{C.products.filter((row:Data)=>active.includes(row.stack)&&row.status===status).length}</dd></div>)}</dl><p>{T.component_short_note}</p>
      {options.map((option:Data)=><details key={option.id} open={focus==='purchases-'+option.id||undefined} id={'purchases-'+option.id} className="prestudy-proof prestudy-price-group" tabIndex={-1}><summary>{option.label+' · '+T.catalogue}</summary><div className="prestudy-component-grid">{C.products.filter((row:Data)=>row.stack===option.id).map((row:Data)=><article key={row.id}><h3>{row.name}</h3><p className="prestudy-component-status">{T.component_statuses[row.status]||T.unknown}</p><dl><div><dt>{T.edition}</dt><dd>{row.edition||T.unknown}</dd></div><div><dt>{T.licence}</dt><dd>{row.licence||T.unknown}</dd></div><div><dt>{T.regime}</dt><dd>{T.regimes[row.pricing.regime]||T.unknown}</dd></div><div><dt>{T.basis}</dt><dd>{row.pricing.assiette||T.unknown}</dd></div></dl><p>{row.pricing.precision}</p><CostEvidence items={row.evidence}/></article>)}</div></details>)}

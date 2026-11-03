@@ -138,6 +138,7 @@ def build_pages(output, base='/', study=None):
         'bootstrap': bootstrap,
         'ui': ui,
         'market-build': {key: deepcopy(market[key]) for key in ('etude_oss', 'cadre_comparaison', 'fiches_produit', 'candidats_a_etudier')},
+        'project-rates': study.project_rate_reading(),
         'market-references': build_market_reading(study.content['market']),
         'economic-evaluations': deepcopy(study.content['economic_evaluations']),
         'financial-province': province,
@@ -166,6 +167,7 @@ def build_pages(output, base='/', study=None):
                     base=base, bootstrap=data_path + '/bootstrap.json',
                     routes={
                         '/api/ui': data_path + '/ui.json', '/api/market-build': data_path + '/market-build.json',
+                        '/api/project-rates': data_path + '/project-rates.json',
                         '/api/market-references': data_path + '/market-references.json',
                         '/api/economic-evaluations': data_path + '/economic-evaluations.json',
                         '/api/financial-province': data_path + '/financial-province.json',

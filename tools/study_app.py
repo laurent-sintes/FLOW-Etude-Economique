@@ -514,6 +514,12 @@ class Study:
             raise ValueError('ERR_ANNUAL_RECONCILIATION')
         return dict(buckets=result,total=annual['total_eur_ht'])
 
+    def project_rate_reading(self):
+        framework = self.content['framework']
+        return {key: framework[key] for key in (
+            'project_rates', 'project_rate_channels', 'project_rate_engagements', 'project_rate_portage'
+        )}
+
     def bootstrap(self, compact=False, essential=False):
         content={'complexity':self._essential_complexity(),'framework':self.content['framework'],
                  'market_method':self._essential_market_method(),
@@ -524,6 +530,8 @@ class Study:
                  'core_evaluation':self._essential_core_evaluation(unit_details=False),
                  'core_product_scope':deepcopy(self.content['core_product_scope'])} if essential else pack_content(self.content) if compact else self.content
         if essential:
+            rate_keys = self.project_rate_reading()
+            content['framework'] = {key: value for key, value in content['framework'].items() if key not in rate_keys}
             # Synvance input analysis no longer displays economic model projections.
             # Keep them in the full compatibility payload, not the initial delivery.
             content['synvance_reference'] = deepcopy(content['synvance_reference'])

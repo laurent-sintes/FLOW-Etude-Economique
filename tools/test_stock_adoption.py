@@ -34,7 +34,7 @@ class StockAdoptionTests(unittest.TestCase):
   self.assertEqual(core['jh']['core_project_roles_jh'],active_reference()['total_jh'])
   self.assertEqual(core['detail_build']['prestations'],active_reference()['cost_eur_ht'])
   stock=next(u for u in core['core_units'] if u['id']=='stock-java-spring')
-  self.assertEqual((stock['labour_eur_ht'],stock['tooling_eur_ht']),(211250,2720))
+  self.assertEqual((stock['labour_eur_ht'],stock['tooling_eur_ht']),(active_reference()['units']['stock-java-spring']['cost_eur_ht']-2720,2720))
   covered=next(x for x in study._essential_core_evaluation() if x['stack']=='java-spring')['coverage']
   self.assertEqual((covered['covered'],covered['remaining']),(88,0))
  def test_native_sizes_and_functional_count_reconstructed(self):

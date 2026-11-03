@@ -1,5 +1,5 @@
 """Adoption of the full Java/Spring scope: preserved decisions, unique funding and portable proofs."""
-from test_support import active_reference
+from test_support import active_reference, adopted_effort
 from collections import Counter
 from copy import deepcopy
 import base64,gzip,hashlib,json,unittest
@@ -25,7 +25,7 @@ class CompleteCoreAdoptionTests(unittest.TestCase):
    cls.bundle=compose(snapshot.documents,snapshot.digests)
  def test_prior_decisions_contracts_and_native_input_are_unchanged(self):
   baseline=json.loads((ROOT/'audits/2026-10-30-core-adoption-09/baseline.json').read_text(encoding='utf-8'))
-  self.assertEqual(self.units[1],baseline['units'][1])
+  self.assertEqual(adopted_effort(self.units[1]),adopted_effort(baseline['units'][1]))
   self.assertEqual(self.units[0]['capabilities'],baseline['units'][0]['capabilities'])
   self.assertEqual(self.units[2]['capabilities'],baseline['units'][2]['capabilities'])
   self.assertEqual(self.registry['calculations'][1],baseline['calculations'][1])

@@ -121,6 +121,10 @@ def make_handler(study, static_root=None):
                     if query.get('model_version',[''])[0]!=study.version:return self.reply(dict(error='version'),409)
                     build=study.content['market']['reperes_build_core']
                     return self.reply({key:build[key] for key in ('etude_oss','cadre_comparaison','fiches_produit','candidats_a_etudier')},frozen=True)
+                if url.path=='/api/project-rates':
+                    query=parse_qs(url.query)
+                    if query.get('model_version',[''])[0]!=study.version:return self.reply(dict(error='version'),409)
+                    return self.reply(study.project_rate_reading(),frozen=True)
                 if url.path=='/api/market-references':
                     query=parse_qs(url.query)
                     if query.get('model_version',[''])[0]!=study.version:return self.reply(dict(error='version'),409)

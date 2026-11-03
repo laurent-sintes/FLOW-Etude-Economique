@@ -1,5 +1,5 @@
 """Adopted Ownership: independent funding, pure reconstruction, temporal count and export."""
-from test_support import active_reference
+from test_support import active_reference, adopted_effort
 from copy import deepcopy
 import hashlib,json
 import unittest
@@ -27,7 +27,7 @@ class OwnershipAdoptionTests(unittest.TestCase):
   with model_session():return prepare(docs,self.spec,self.prior_registry,formula)
  def test_adopted_roles_schedule_and_prior_families(self):
   before=json.loads((ROOT/'audits/2026-10-30-propriete-stock-adoption-05/baseline.json').read_text(encoding='utf-8'))
-  self.assertEqual(self.units[1],before['retained_units'][1])
+  self.assertEqual(adopted_effort(self.units[1]),adopted_effort(before['retained_units'][1]))
   self.assertEqual(self.units[0]['capabilities'],before['retained_units'][0]['capabilities'])
   self.assertEqual((self.result['total_jh'],self.result['months']),(190,9))
   self.assertEqual(self.result['roles'],dict(coordination=22,analyse_produit=19,architecture=17,dev_java=70,dev_frontend=11,qa=27,plateforme=16,ux=4,securite=4))
