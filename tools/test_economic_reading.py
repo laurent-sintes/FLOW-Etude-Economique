@@ -189,8 +189,8 @@ class EconomicReadingTests(unittest.TestCase):
         self.assertEqual(self.study.baseline, before)
         java = next(row for row in self.compile()['options'] if row['stack']=='java-spring')
         last = next(row for row in java['spending_bridge'] if row['years']==10)
-        self.assertAlmostEqual(last['transition_eur_ht'], 1294824.15, places=2)
-        self.assertAlmostEqual(last['recurring_eur_ht'], 3898507.05, places=2)
+        self.assertAlmostEqual(last['transition_eur_ht'], 1335894.36, places=2)
+        self.assertAlmostEqual(last['recurring_eur_ht'], 4091472.24, places=2)
 
     def test_offer_bridge_rejects_an_unowned_supplement(self):
         content = deepcopy(self.study.content)

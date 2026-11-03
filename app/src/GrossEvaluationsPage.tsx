@@ -126,13 +126,13 @@ export function GrossEvaluationsPage({phase,option,focus,returnTo,horizon,onChoo
  useDossierFocus(reading&&focus?(focus==='lots'?'gross-lots':'gross-focus-'+focus):undefined);
  useEffect(()=>{if(previous.current!==current.id){heading.current?.focus({preventScroll:true});previous.current=current.id;}},[current.id]);
  useEffect(()=>{
-  let active=true;setReading(null);setError('');
+  let active=true;if(data.content.gross_zone_reading){setReading(data.content.gross_zone_reading);setError('');return()=>{active=false;};}setReading(null);setError('');
   request<Data>(`/api/gross-evaluations?model_version=${encodeURIComponent(data.model_version)}`).then(result=>{
    if(result.model_version!==data.model_version)throw Object.assign(new Error('version'),{code:'version'});
    if(active)setReading(result);
   }).catch(reason=>{if(active)setError(reason.code==='version'?'version':'network');});
   return()=>{active=false;};
- },[data.model_version,retry]);
+ },[data.model_version,data.content.gross_zone_reading,retry]);
  if(error)return <div className="essential-page" role="alert"><p>{error==='version'?data.ui.server_update.message:data.ui.errors.network}</p><button type="button" className="text-button" onClick={()=>error==='version'?window.location.reload():setRetry(value=>value+1)}>{error==='version'?data.ui.server_update.action:data.ui.labels.retry}</button></div>;
  if(!reading)return <p role="status">{data.ui.labels.loading}</p>;
  const L=reading.labels,P=reading.phases[phase],R=P.options[current.id],index=J.phases.findIndex((p:Data)=>p.id===phase),next=J.phases[index+1];
@@ -150,6 +150,6 @@ export function GrossEvaluationsPage({phase,option,focus,returnTo,horizon,onChoo
    {R.construction.length>0&&<details className="gross-detail gross-construction"><summary>{L.assumptions}</summary>{R.construction.map((text:string)=><Text key={text} text={text}/>)}</details>}
    <section className="gross-proofs"><h3>{L.evidence}</h3><ul>{proofs.map(proof=><li key={proof.path}><SourceLink path={proof.path}>{proof.short_label||proof.label}</SourceLink></li>)}<li><a className="text-button" href="#telechargements">{L.audit_link}</a></li></ul></section>
   </DossierSheet>
-  <a className="framework-phase-next text-button" href={next?phaseReadingHash({...context,page:'charges-'+next.id,returnTo:scope.returnTo,family:scope.family,option:current.id,horizon})!:economicHash({...context,page:'evaluation-core',option:current.id,horizon})!}>{next?J.labels.next+' · '+next.title:L.more_results}<ArrowRight size={18} aria-hidden="true"/></a>
+  <a className="framework-phase-next text-button" href={next?phaseReadingHash({...context,page:'charges-'+next.id,returnTo:scope.returnTo,family:scope.family,option:current.id,horizon})!:phaseReadingHash({...context,page:'organisation-delivery',option:current.id,horizon})!}>{next?J.labels.next+' · '+next.title:data.ui.essential.pages['organisation-delivery'].title}<ArrowRight size={18} aria-hidden="true"/></a>
  </div>;
 }

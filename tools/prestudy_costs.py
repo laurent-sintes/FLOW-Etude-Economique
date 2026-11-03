@@ -73,8 +73,33 @@ def compile_cost_evidence(spec, schema, stacks, market, inflation, proofs):
         for observation in role['observations']:
             require(urlsplit(observation['url']).scheme=='https', 'invalid transformation evidence')
             require(observation['min']<=observation['max'], 'reversed transformation range')
+    study = deepcopy(spec['rate_study'])
+    sources = study['sources']
+    for record in sources.values():
+        path = record['url']
+        require(urlsplit(path).scheme == 'https' or path.startswith('sources/client/'), 'invalid rate study source')
+    study_groups = [g['id'] for g in study['groups']]
+    role_ids = [r['id'] for r in study['roles']]
+    require(len(study_groups) == len(set(study_groups)) and len(role_ids) == len(set(role_ids)), 'duplicate study group or role')
+    require({r['id'] for r in transformation} <= set(role_ids), 'missing transformation role')
+    for role in study['roles']:
+        require(role['group'] in study_groups, 'unknown rate study group')
+        require(all(ref.startswith('source/') and '..' not in ref.split('/') for ref in role['basis_refs']), 'invalid role activity reference')
+        for observation in role['observations']:
+            require(observation['source_id'] in sources, 'unknown rate study evidence')
+            labels = [a['label'] for a in observation['areas']]
+            require(len(labels) == len(set(labels)), 'duplicate observed geography')
+            require(not ('France, non ventilée' in labels and len(labels) > 1), 'national price is not regional evidence')
+            for area in observation['areas']:
+                area['zone'] = 'national' if area['label'] == 'France, non ventilée' else 'capital' if area['label'] in ('Paris', 'Île-de-France') else 'province'
+                require(area['min'] <= area['max'], 'reversed regional range')
+                require(observation['measure'] == 'fourchette' or area['min'] == area['max'], 'statistic is not a range')
+    for row in [*study['channels'], study['portage']]:
+        require(set(row['source_ids']) <= set(sources), 'unknown purchasing evidence')
+    for row in study['regional_checks']:
+        require(row['source_id'] in sources, 'unknown regional evidence')
     # Exclude selected rates, provisions, gains and projections from this input reading.
-    return dict(recorded_on=spec['recorded_on'], provenance=spec['provenance'], rates=rates, transformation_roles=transformation,
+    return dict(recorded_on=spec['recorded_on'], provenance=spec['provenance'], rate_study=study, rates=rates, transformation_roles=transformation,
         options=[dict(id=slug, label=stack['model']['nom']) for slug, stack in stacks.items()],
         purchases=proof_rows('purchase_refs'), products=products, ai=proof_rows('ai_refs'),
         programmes=deepcopy(spec['programmes']),

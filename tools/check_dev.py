@@ -93,7 +93,7 @@ def main():
     directory = run_directory(ROOT)
     progress = Progress(directory, ROOT / 'tmp/check-dev-progress.json')
     started = time.perf_counter()
-    report = dict(mode='dev', status='failed', selection=selection, stages={}, certification=False)
+    report = dict(mode='dev', status='failed', directory=str(directory), selection=selection, stages={}, certification=False)
     def stage(name, fn):
         start = time.perf_counter()
         progress.phase(name)

@@ -51,7 +51,7 @@ class OSSRevisionTests(unittest.TestCase):
             if o['stack']!='java-spring':
                 self.assertEqual(o,counterfactual[o['stack']])
                 continue
-            self.assertEqual(o['annual_base'],before[o['stack']]['annual_base'])
+            self.assertEqual(o['annual_base'],counterfactual[o['stack']]['annual_base'])
             for h,old in zip(o['horizons'],counterfactual[o['stack']]['horizons']):
                 self.assertAlmostEqual(old['totals']['total']-h['totals']['total'],(self.before['parameters']['options']['java-spring']['build']-active_reference()['cost_eur_ht'])*h['build_progress'],places=2)
                 self.assertAlmostEqual(sum(h['cost_natures'].values()),h['totals']['total'],places=2)

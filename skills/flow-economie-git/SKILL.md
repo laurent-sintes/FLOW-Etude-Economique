@@ -37,15 +37,7 @@ Le plan conserve le périmètre explicite, les empreintes, HEAD, l’index et le
 
 Examiner l’index, les différences et les nouveaux fichiers du périmètre. Préserver les changements étrangers et l’index existant ; ne pas les inclure ou les désindexer silencieusement. Respecter `.gitignore` et `.gitattributes` : sources et preuves utiles sont conservées, dépendances et caches restent locaux, les originaux fournisseur ne sont pas réencodés.
 
-Appliquer les contrôles proportionnés de `tools/README.md`, ou réutiliser leurs résultats si les fichiers concernés sont inchangés :
-
-- `python -m tools.check_model --content` pour textes et références.
-- `python -m tools.check_model --quick` pour contrats, financements et calendriers.
-- `python -m tools.check_model --full` pour le candidat stabilisé, notamment après modification du moteur ou du transport des simulations.
-
-Pour les changements de l’application ou de Pages, suivre aussi les commandes du workflow : construction Vite avec la base `/FLOW-Etude-Economique/`, puis `python -m tools.build_pages --output app/dist-pages --base /FLOW-Etude-Economique/`. Vérifier les parcours affectés et, si le moteur ou son transport change, les simulations dans le navigateur statique face au moteur Python. Les calculs économiques restent dans le même moteur, exécuté par Pyodide sur Pages. Ne pas recalibrer pour faire passer un test et ne pas modifier le contrat de stockage personnel. Un témoin `--preserve` ne s’applique qu’à l’opération à chiffres constants concernée.
-
-Sous Codex Windows, utiliser le runtime et les dépendances isolées décrits dans le guide. Les restrictions de socket ou de dossier temporaire de `--full` se résolvent par les permissions d’exécution adaptées, sans désactiver les tests.
+Au commit local, utiliser uniquement `python -m tools.git_commit prepare --paths <fichiers-examinés> --message-file tmp/commit-message.txt`, puis `python -m tools.git_commit commit`. La préparation lance les contrôles incrémentaux légers de `check_dev`. Compléter par `--tests` et éventuellement `--targeted` pour un périmètre inconnu ou une sélection explicite. Aucun test complet, reconstruction Pages ou régression navigateur complète automatique en local. Les contrôles complets sont exécutés sur GitHub au push. En local, `python -m tools.check_model --full` et `--full --browser` restent disponibles sur demande explicite.
 
 Vérifier `git var GIT_AUTHOR_IDENT`. Indexer les chemins examinés, puis contrôler `git diff --cached --stat` et `git diff --cached --check`. Créer un message français décrivant le résultat ; un fichier UTF-8 sous `tmp/` et `git commit -F` évitent les erreurs PowerShell. Ne pas réécrire un historique ni créer un commit vide. Si rien n’a changé, le signaler et poursuivre l’envoi des commits existants si demandé.
 
@@ -58,13 +50,13 @@ python -m tools.git_push prepare
 python -m tools.git_push push
 ```
 
-Le plan fixe le SHA et la référence distante. Le script conserve les modifications et l’index en attente, vérifie les preuves contre l’arbre du commit, produit son témoin isolé et envoie uniquement ce SHA. Il ne crée pas de commit et ne force jamais. Un retard ou une divergence se résout avant de refaire la préparation, selon les règles ci-dessous.
+Le plan fixe le SHA et la référence distante. Le script conserve les modifications et l’index en attente, envoie uniquement ce SHA sans tests locaux. GitHub produit les témoins et valide ce commit. Il ne crée pas de commit et ne force jamais. Un retard ou une divergence se résout avant de refaire la préparation, selon les règles ci-dessous.
 
-`push --no-wait` confirme uniquement l’envoi. `python -m tools.git_push watch` suit ensuite le workflow exact, le job de déploiement, le SHA publié dans le manifeste et les simulations réelles du site. Après une interruption, reprendre `watch` au lieu de renvoyer les commits. Une demande de scripting seule n’exécute pas le push.
+`push --no-wait` confirme uniquement l’envoi. `python -m tools.git_push watch` suit ensuite le workflow exact, le job de déploiement, le SHA publié dans le manifeste après validation complète et simulations navigateur sur GitHub. Aucun navigateur local n’est lancé par le suivi. Après une interruption, reprendre `watch` au lieu de renvoyer les commits. Une demande de scripting seule n’exécute pas le push.
 
 
 Faire `git fetch origin`, examiner les commits à envoyer et la relation avec `origin/main`. Si le dépôt est seulement en retard et propre, avancer en fast-forward. En cas de divergence, intégrer en préservant les commits et les règles du projet ; résoudre les conflits techniques dans le périmètre autorisé et revalider les parties touchées. Une décision métier inconnue nécessite un arbitrage. Ne pas forcer, supprimer une branche distante, envoyer tous les tags ou contourner une protection.
 
-Depuis `main`, pousser explicitement vers `refs/heads/main`. Définir l’upstream si nécessaire. Vérifier que le SHA distant correspond au SHA envoyé, puis suivre le workflow `pages.yml` de ce commit précis. Après déploiement réussi, vérifier l’URL retournée par Pages, son chargement et un parcours utile. Ne pas confondre succès du push et succès du déploiement. En cas d’état réseau incertain, lire la référence distante avant toute relance ; en cas d’échec persistant, conserver le travail local et donner le diagnostic.
+Depuis `main`, pousser explicitement vers `refs/heads/main`. Définir l’upstream si nécessaire. Vérifier que le SHA distant correspond au SHA envoyé, puis suivre le workflow `pages.yml` de ce commit précis. Après déploiement réussi, vérifier l’URL retournée par Pages et le SHA du manifeste publié. Les tests des parcours et simulations sont exécutés sur GitHub. Ne pas confondre succès du push et succès du déploiement. En cas d’état réseau incertain, lire la référence distante avant toute relance ; en cas d’échec persistant, conserver le travail local et donner le diagnostic.
 
 Répondre brièvement : action exécutée, commit et sujet, résultat distant, contrôles utiles, état du déploiement et lien du site lorsqu’il est confirmé. Mentionner les modifications restantes sans annoncer une sauvegarde ou un déploiement non vérifié.

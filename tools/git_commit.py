@@ -1,8 +1,6 @@
 """Prepare a reviewable local commit, then commit exactly that unchanged scope."""
 import argparse
-from functools import partial
 import hashlib
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
 from pathlib import Path
@@ -10,7 +8,6 @@ import re
 import shutil
 import subprocess
 import sys
-from threading import Thread
 import time
 import importlib.metadata
 from urllib.request import Request, urlopen
@@ -198,58 +195,33 @@ def command(root, args):
         raise CommitError('Un contrôle a échoué. Aucun commit créé')
 
 
-def validate(root, inputs):
+def validate(root, inputs, paths, tests=(), targeted=False):
+    """Run only development checks for this commit, never build or browser suites."""
     receipt = root / 'tmp/git-commit/validation.json'
+    selection = dict(paths=paths, tests=list(tests), targeted=targeted)
     try:
         cached = json.loads(receipt.read_text(encoding='utf-8'))
-        if cached['inputs'] == inputs and cached['runtime'] == runtime_signature():
+        if cached.get('mode') == 'incremental' and cached.get('selection') == selection and cached['inputs'] == inputs and cached['runtime'] == runtime_signature():
             verify_proofs(cached['reports'])
             return dict(cached, reused=True)
     except (OSError, ValueError, KeyError, CommitError):
         pass
-    model_report = None
-    try:
-        manifest = json.loads((root / 'tmp/validation-full-manifest.json').read_text(encoding='utf-8'))
-        if {n: item['sha256'] for n, item in manifest['files'].items()} == inputs:
-            previous = check_report(manifest['report'])
-            if previous['mode'] == 'full':
-                model_report = Path(manifest['report'])
-    except (OSError, ValueError, KeyError, CommitError):
-        pass
-    if model_report is None:
-        command(root, [sys.executable, '-m', 'tools.check_model', '--auto', '--browser'])
-        last = check_report(root / 'tmp/check-model-last.json')
-        model_report = Path(last['directory']) / 'report.json'
-    # Verify the real Pages prefix too, using the existing build and browser scripts.
-    command(root, [sys.executable, '-m', 'tools.prepare_static_app', '--output', 'app/dist-pages', '--base', '/FLOW-Etude-Economique/'])
-    oracle = root / 'tmp/git-commit/pages-cases.json'
-    command(root, [sys.executable, '-m', 'tools.pages_validation', '--output', str(oracle)])
-    browser_report = root / 'tmp/git-commit/pages-browser.json'
-    from browser_checks import QuietHandler
-    class Handler(QuietHandler):
-        def translate_path(self, path):
-            path = path[len('/FLOW-Etude-Economique'):] if path.startswith('/FLOW-Etude-Economique/') else '/__not_found__'
-            return super().translate_path(path)
-    server = ThreadingHTTPServer(('127.0.0.1', 0), partial(Handler, directory=str(root / 'app/dist-pages')))
-    thread = Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    try:
-        command(root, ['node', 'app/scripts/verify-pages.mjs', '--url', f'http://127.0.0.1:{server.server_port}/FLOW-Etude-Economique/', '--cases', str(oracle), '--output', str(browser_report)])
-    finally:
-        server.shutdown()
-        server.server_close()
-        thread.join()
-    browser = check_report(browser_report)
-    if browser.get('httpApiRequests') != []:
-        raise CommitError('Une API HTTP a été appelée dans le navigateur')
+    args = [sys.executable, '-m', 'tools.check_dev', '--paths', *paths]
+    if tests:
+        args += ['--tests', *tests]
+    if targeted:
+        args += ['--targeted']
+    command(root, args)
+    last = check_report(root / 'tmp/check-dev-last.json')
+    model_report = Path(last['directory']) / 'report.json'
     if source_hashes(root) != inputs:
         raise CommitError('Les sources ont changé pendant les contrôles')
-    result = dict(inputs=inputs, runtime=runtime_signature(), reports=file_proofs([model_report, browser_report]), reused=False)
+    result = dict(mode='incremental', selection=selection, inputs=inputs, runtime=runtime_signature(), reports=file_proofs([model_report]), reused=False)
     write_json(receipt, result)
     return result
 
 
-def prepare(root, names, message, plan_only=False, validator=None, metadata=None):
+def prepare(root, names, message, plan_only=False, validator=None, metadata=None, tests=(), targeted=False):
     root = Path(root).resolve()
     git = Git(root)
     repository = git.repository()
@@ -261,7 +233,7 @@ def prepare(root, names, message, plan_only=False, validator=None, metadata=None
     runtime = runtime_signature()
     remote = (metadata or github_metadata)(root)
     public_repository(remote)
-    validation = None if plan_only else (validator or validate)(root, inputs)
+    validation = None if plan_only else (validator(root, inputs) if validator else validate(root, inputs, paths, tests, targeted))
     if validation is not None:
         verify_proofs(validation['reports'])
     if source_hashes(root) != inputs or git.entries() != entries or git.repository() != repository:
@@ -324,13 +296,15 @@ def main():
     message.add_argument('--message')
     message.add_argument('--message-file', type=Path)
     preparation.add_argument('--plan-only', action='store_true', help='Prévisualiser sans tests, plan inutilisable pour committer')
+    preparation.add_argument('--tests', nargs='+', default=[], help='Tests ciblés supplémentaires pour check_dev')
+    preparation.add_argument('--targeted', action='store_true', help='Utiliser la sélection explicite --tests')
     execution = modes.add_parser('commit', help='Créer uniquement le commit local préparé')
     execution.add_argument('--plan', type=Path, default=ROOT / 'tmp/git-commit/plan.json')
     args = parser.parse_args()
     try:
         if args.action == 'prepare':
             text = args.message if args.message is not None else args.message_file.read_text(encoding='utf-8-sig')
-            path, result = prepare(ROOT, args.paths, text, args.plan_only)
+            path, result = prepare(ROOT, args.paths, text, args.plan_only, tests=args.tests, targeted=args.targeted)
             print(json.dumps(dict(plan=str(path), ready=result['ready'], paths=result['paths'], diff=result['diff'], validation=result['validation']), ensure_ascii=False, indent=2))
         else:
             print(json.dumps(commit(ROOT, args.plan), ensure_ascii=False, indent=2))

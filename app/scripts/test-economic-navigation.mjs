@@ -63,7 +63,7 @@ test('expert details preserve an independent horizon and the original reading fo
 
 test('phase shortcuts and phase changes preserve the chosen option and independent horizon',()=>{
  for(const option of ['java-spring','microsoft','sap'])for(const horizon of ['3','5','7','10']){
-  for(const page of ['acquisition','integration','fonctionnement','scenarios','charges-acquisition','charges-integration','charges-fonctionnement']){
+  for(const page of ['acquisition','integration','fonctionnement','scenarios','charges-acquisition','charges-integration','charges-fonctionnement','organisation-delivery']){
    const route={page,option,horizon},before=structuredClone(route);
    const hash=phaseReadingHash(route),params=new URLSearchParams(hash.split('?')[1]);
    assert.equal(params.get('option'),option);assert.equal(params.get('horizon'),horizon);

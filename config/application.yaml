@@ -1266,8 +1266,7 @@ essential:
     transformation_total: Total des cinq postes
     governance_charges: Voir les charges et les manques
     coordination: Provisions de coordination et de pilotage déjà chiffrées
-    coordination_note: Les lots adoptés comprennent leur pilotage local, sans pourcentage supplémentaire. Les autres
-      travaux techniques estimés utilisent les provisions ci-dessous. La provision de direction et de coordination couvre uniquement l’intégration Make.
+    coordination_note: Les lots adoptés comprennent leur pilotage local, sans pourcentage supplémentaire. Les provisions ci-dessous couvrent la coordination des travaux techniques sur leurs assiettes respectives. La coordination de l’intégration Make concerne les travaux client valorisés et relève de leur budget.
     coordination_labels:
       build_pct: Construction hors lots déjà adoptés
       integration_make_pct: Travaux d’intégration Make
@@ -1615,6 +1614,20 @@ essential:
   - id: charges-fonctionnement
     label: '{{notion.exploiter_evoluer}}'
     icon: running
+  - id: organisation-delivery
+    label: Organisation de delivery
+    icon: grid
+    default_view: office
+    children:
+    - id: office
+      label: '{{notion.transformation_office}}'
+      href: '#organisation-delivery'
+    - id: equipes
+      label: Équipes produit
+      href: '#organisation-delivery?view=equipes'
+    - id: integration
+      label: Intégration transverse des livraisons
+      href: '#organisation-delivery?view=integration'
   - id: scenarios
     label: Construire un scénario
     icon: route
@@ -1683,6 +1696,9 @@ essential:
     - calcul-run
     - leviers
     - capacite-realisation
+  - label: Organisation de delivery
+    items:
+    - organisation-delivery
   - label: Dossier économique
     items:
     - comparer
@@ -1709,6 +1725,100 @@ essential:
       travaux Make et servent à examiner la couverture des solutions Buy.
     model_link: Comprendre son rôle dans les {{vue.concepts}}
     input_link: Consulter la cartographie utilisée par l’étude
+  delivery_organisation:
+    office_intro: >-
+      **Une équipe dédiée côté Beaumanoir**, financée à temps plein du lancement à la fin de l’intégration, pour les options Make et Buy. La direction de programme interne porte les décisions de programme. Le Transformation Office pilote l’exécution côté client.
+    office_budget: Son coût apparaît sur une ligne dédiée dans le dossier économique. Les tarifs retenus valorisent la charge de l’équipe sur la durée d’obtention du Core System et d’intégration de chaque option.
+    assumptions_link: Voir les rôles et tarifs retenus dans les hypothèses
+    teams_intro: >-
+      **Organisation proposée pour le Make Java/Spring.** Le regroupement des lots ci-dessous sert à préparer le découpage des équipes. Les affectations, la capacité par équipe et la séquence de livraison restent à valider.
+    teams_navigation: Périmètres produit
+    team_roles_title: Composition proposée
+    profile_column: Profil
+    mission_column: Contribution
+    capacity_column: Capacité
+    po_capacity: 1 ETP par équipe · hypothèse
+    variable_capacity: Selon la charge et le délai
+    shared_capacity: Mutualisée · selon la charge et le délai
+    office_capacity_unit: ETP
+    capacity_note: Les capacités variables seront dimensionnées à partir des charges par rôle, du délai de livraison et du calendrier des interventions.
+    shared_roles:
+    - label: Architecture de lot
+      mission: Concevoir les composants et préparer les décisions techniques du lot.
+    - label: UX
+      mission: Concevoir et valider les parcours et les interfaces utilisateur.
+    - label: Plateforme
+      mission: Préparer les environnements, l’intégration continue et les déploiements.
+    - label: Sécurité
+      mission: Définir les contrôles de sécurité et accompagner leur vérification.
+    office_role_column: Rôle dédié
+    office_mission_column: Mission
+    train_area_column: Responsabilité
+    train_mission_column: Fonctionnement proposé
+    product_role: Product Owner (PO)
+    analysis_role: Analyse métier et produit
+    development_role: Développeurs
+    qa_role: QA
+    teams:
+    - id: referentiels
+      title: Référentiels
+      scope: Master Data et mise à disposition des données de référence.
+      roles:
+        product: Prioriser les données de référence et leurs usages par les autres équipes.
+        analysis: Définir les objets, leurs règles de gestion et leurs conditions de publication.
+        development: Réaliser les services et interfaces de consultation et de mise à disposition.
+        qa: Vérifier les contrôles de données et leur publication vers les consommateurs.
+    - id: stocks
+      title: Stocks
+      scope: Stock, propriété du stock, politiques, éligibilité et devenir des biens.
+      roles:
+        product: Prioriser les usages de visibilité, de propriété et de gestion des stocks.
+        analysis: Décrire les mouvements, les règles d’éligibilité et les états des biens.
+        development: Réaliser les services de stock et de propriété et exposer la disponibilité.
+        qa: Tester les mouvements, les règles et la cohérence des états de stock.
+    - id: commandes
+      title: Commandes et prestations
+      scope: Gestion des commandes, suivi des prestations et reconnaissance de leurs résultats.
+      roles:
+        product: Prioriser les parcours de commande et de suivi des prestations.
+        analysis: Décrire les étapes, les exceptions et les règles de reconnaissance des résultats.
+        development: Réaliser les services et interfaces de suivi des commandes et prestations.
+        qa: Tester les transitions, les reprises et les résultats de bout en bout.
+    - id: planification
+      title: Planification Supply
+      scope: Préparation et pilotage du Master Plan, promesse, affectation et optimisation Supply, ateliers visuels de planification et de décision.
+      roles:
+        product: Prioriser les décisions de planification, de promesse et d’affectation.
+        analysis: Décrire les contraintes, les règles de décision et les scénarios d’arbitrage.
+        development: Réaliser les services de planification et les ateliers de décision.
+        qa: Vérifier les résultats sur des scénarios de capacité, de disponibilité et d’affectation.
+    - id: services
+      title: Services partagés
+      scope: Process Management, studios, portail, formulaires et pilotage, administration, robustesse et services IT complémentaires.
+      roles:
+        product: Prioriser les besoins communs des équipes qui utilisent ces services.
+        analysis: Décrire les usages transverses et les exigences d’administration et de robustesse.
+        development: Réaliser les services partagés, leurs interfaces et leur intégration.
+        qa: Vérifier les usages communs, la compatibilité et les scénarios de défaillance.
+    buy: En Buy, l’éditeur fournit le Core System et l’intégrateur réalise les prestations de son lot. Beaumanoir conserve la responsabilité de ses priorités métier, de la recette et des décisions de mise en service.
+    coordination_intro: >-
+      **L’intégration transverse réunit les équipes produit, les métiers, l’architecture, la QA et la plateforme.**
+      Son objectif est de rendre les livraisons utilisables ensemble. Le responsable de synchronisation du
+      Transformation Office fait le lien avec cette organisation et anime la planification commune, le suivi des
+      dépendances et la levée des blocages, dans un rôle proche du Release Train Engineer (RTE) de SAFe.
+    coordination_roles:
+    - label: Cadence commune
+      mission: Les équipes planifient les incréments ensemble, rendent leurs dépendances visibles et présentent un résultat intégré. Les engagements et risques qui nécessitent un arbitrage remontent à la direction de projet.
+    - label: Priorités produit
+      mission: Les responsables produit portent les priorités de leurs équipes. Le responsable de l’arbitrage entre périmètres reste à désigner avec les métiers et la direction de programme.
+    - label: Architecture et livraison
+      mission: L’architecte transverse arbitre les interfaces. Les équipes conçoivent et livrent leurs composants. Les profils QA et plateforme contribuent à la recette intégrée et à la préparation technique des mises en service.
+    - label: Recette métier et adoption
+      mission: Les métiers valident les parcours et contribuent à la décision de mise en service. La conduite du changement prépare la communication et l’adoption.
+    coordination_reference: Repère SAFe sur les rôles d’un Agile Release Train
+    example_title: Exemple de livraison commune
+    example: Pour livrer une promesse de commande, Stocks fournit la disponibilité, Planification applique les règles d’affectation et Commandes restitue la promesse. Le responsable de synchronisation aligne les versions et les dates. Les équipes et la QA testent le parcours complet avec les métiers. La conduite du changement prépare le déploiement auprès des utilisateurs.
+    costs_link: Comprendre les coûts
   pages:
     charges-acquisition:
       title: '{{notion.obtenir_core_system}}'
@@ -1716,6 +1826,9 @@ essential:
       title: '{{notion.integrer_deployer}}'
     charges-fonctionnement:
       title: '{{notion.exploiter_evoluer}}'
+    organisation-delivery:
+      title: Organisation de delivery
+      intro: Relier les charges de réalisation aux équipes qui livrent le Core System et au pilotage financé dans le dossier économique.
     cartographie:
       title: Cartographie métier
       intro: Le référentiel reçu du projet Beaumanoir Cartographie, sa provenance et le périmètre utilisé par l’étude.
@@ -1980,9 +2093,7 @@ essential:
           les preuves techniques et fonctionnelles.'
       rates:
         title: Tarifs des prestations
-        summary: '**Un tarif dépend du profil et du mode d’achat.** Le relevé Java distingue le senior parisien
-          et le backend expert. Le repère Avanade porte sur des prestations ESN de pilote. QA, architecture et support
-          disposent de repères communs, parfois sans prix retranscrit.'
+        summary: '**Un prix par rôle, pour Paris et pour la province.** La grille couvre le pilotage, les métiers, la réalisation, l’exploitation et l’accompagnement. Chaque justification donne accès aux sources et à la méthode. Paris est la référence du dossier financier, la province une variante.'
       purchases:
         title: Cloud, licences et outils
         summary: '**Le coût technique ne se résume pas aux licences.** Calcul, stockage, sauvegardes et intégration
@@ -2032,6 +2143,70 @@ essential:
       href: '#vision'
       label: Poursuivre avec le Framework
   market_costs:
+    price_grid_intro: Les prix ci-dessous sont les **tarifs de cadrage retenus pour l’étude**, en € HT / JH. Chaque
+      rôle a une référence Paris et une variante province. Ouvre « Justification » pour retrouver les observations,
+      les hypothèses et le calcul.
+    price_method: Méthode de fixation des prix et modes d’achat
+    price_role: Rôle
+    price_paris: Paris
+    price_province: Province
+    price_proof: Justification
+    price_regional_calculation: Calcul de la variante province
+    price_rounding: Résultat arrondi au multiple de 25 € le plus proche. Un prix transposé est une hypothèse de l’étude,
+      pas une transaction régionale observée.
+    price_observations: Observations de marché utilisées
+    price_regional_methods:
+      same_profile: Rapport régional du même profil dans une même publication, appliqué au tarif Paris retenu.
+      role_analogy: Rapport régional d’un rôle analogue, avec une différence de responsabilité explicitée.
+      family_analogy: Médiane des rapports régionaux de profils comparables de cette famille.
+    price_variance_note: La province est une variante de cadrage. Pour un marché à Saint-Malo, préciser la présence
+      sur site, les déplacements et le bassin de recrutement avant contractualisation.
+    price_zone: Tarifs des prestations
+    price_zones:
+      paris: Paris · référence
+      province: Province · variante
+    price_zone_scope: 'Variante province : les mêmes JH sont revalorisés avec la grille régionale. Les forfaits fournisseur,
+      les achats et les délais restent à leur base contractuelle.'
+    price_financial_intro: La colonne sélectionnée alimente les prestations déjà estimées. Les rôles sans charge adoptée
+      disposent d’un tarif pour leur dimensionnement ultérieur. Les prix de remplacement des rôles internes ne créent
+      pas une dépense externe.
+    study_title: Tous les rôles nécessaires au projet
+    study_intro: '**Les responsabilités peuvent être mutualisées ou assurées en interne.** Cet inventaire couvre les travaux du modèle et les contributions métier, de l’obtention au fonctionnement. Il ne prescrit pas un recrutement par responsabilité. Chaque rôle reste relié à ses travaux et à sa frontière de financement.'
+    study_channels: Qui vend la prestation ?
+    study_channels_intro: '**Le canal d’achat et le mode d’engagement sont deux choix distincts.** Un indépendant ou une ESN peut intervenir en régie ou sur un lot au forfait. Le prix à comparer est celui payé par le client, avec les services effectivement inclus.'
+    study_engagements: Qu’achète-t-on ?
+    study_portage: Et le portage salarial ?
+    study_geography: Paris et les régions, à profil comparable
+    study_geography_intro: '**La province n’est pas un marché unique.** Silkhom distingue Paris, les grandes villes et les autres régions. Free-Work publie Île-de-France et autres villes. Nous conservons ces périmètres, sans les fusionner et sans appliquer une remise régionale uniforme.'
+    study_geography_note: Chez Silkhom, les grandes villes regroupent Lyon, Marseille, Toulouse, Nice, Nantes, Montpellier et Strasbourg. Les autres zones sont classées Régions. Chez Free-Work, la colonne Autres villes ne fournit pas le même découpage. Une localisation personnelle ne suffit pas à fixer le tarif d’une mission hybride ou distante.
+    study_columns:
+      role: Rôle et profil du relevé
+      paris: Paris / Île-de-France
+      regions: Province · périmètre publié
+      evidence: Source et contexte
+    study_no_price: Tarif dédié à qualifier
+    study_no_price_note: Responsabilité identifiée. Aucun prix suffisamment qualifié dans ce relevé.
+    study_national: France · sans ventilation Paris / régions
+    study_unknown_geo: Ventilation non publiée
+    study_measures:
+      fourchette: Fourchette publiée
+      moyenne_declarative: Moyenne déclarée
+      mediane: Médiane publiée
+    study_modes:
+      freelance_non_isole: Prestation indépendante · canal non isolé
+      esn: Prix client intégrateur
+    study_mission: Mission dans FLOW
+    study_funding: Rattachement aux travaux
+    study_other_observations: Autres repères pour ce rôle
+    study_details: Périmètre et preuves
+    study_regional_checks: Un contrepoint local · Bretagne et Pays de la Loire
+    study_regional_intro: Freeland publie des médianes de candidatures sur des familles de métiers. Les chiffres ci-dessous comparent la même mesure entre régions. Ils ne sont ni des fourchettes de seniors ni des devis client.
+    study_sample: candidatures
+    study_sources: Sources et méthode du relevé
+    study_method: '**Les observations restent séparées.** Fourchettes de recruteur, moyennes déclarées et médianes ne sont pas moyennées. Chaque prix conserve sa population, sa date et sa fiscalité. Les spécialités ERP, les frais client et les astreintes se vérifient dans le devis. Les tarifs retenus pour FLOW restent dans les hypothèses économiques.'
+    study_recorded: Consultation des sources
+    study_undated: Publication non datée
+    study_archives: Relevés antérieurs et pièces de comparaison
     transformation_title: Transformation Office FLOW · rôles et prix de marché
     transformation_intro: Cinq rôles étudiés en France le 2 novembre 2026. Les prix ci-dessous sont des observations indépendantes des tarifs retenus pour FLOW. Leur contexte et leur date sont précisés pour chaque source.
     transformation_market_name: Intitulé utilisé sur le marché

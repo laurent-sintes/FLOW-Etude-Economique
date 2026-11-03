@@ -1,3 +1,5 @@
+import {FinancialZone,FinancialZoneChoice} from './FinancialZone';
+import {ProjectRateStudy} from './ProjectRateStudy';
 import {useContext,useEffect,useState,type CSSProperties,type ReactNode} from 'react';
 import {ArrowRight,CalendarDays,LockKeyhole} from 'lucide-react';
 import {request,useStudy,useFormat,type Data,type Option} from './context';
@@ -28,7 +30,7 @@ function periodOption(option:Option,reading:Data,route:{origin?:string}):Option|
 }
 function Dossier({route,children}:{route:EconomicRoute;children:ReactNode}){
  const {T,link,options}=useDossier();
- return <div className="essential-page economic-dossier" style={{'--eco-options':options.length} as CSSProperties}><nav className="eco-navigation" aria-label={T.navigation}>{pages.map((page,i)=><a key={page} href={link(page,route.option,String(period(route)),{family:route.family,focus:route.focus})} aria-current={route.page===page?'page':undefined}><span aria-hidden="true">{String(i+1).padStart(2,'0')}</span>{[T.compare,T.costs,T.assumptions][i]}</a>)}</nav><div className="eco-toolbar"><Reference/></div><ReadingScope route={route}/>{route.page!=='parametres'&&<ReadingPeriodNote route={route}/ >}{children}</div>;
+ return <div className="essential-page economic-dossier" style={{'--eco-options':options.length} as CSSProperties}><nav className="eco-navigation" aria-label={T.navigation}>{pages.map((page,i)=><a key={page} href={link(page,route.option,String(period(route)),{family:route.family,focus:route.focus})} aria-current={route.page===page?'page':undefined}><span aria-hidden="true">{String(i+1).padStart(2,'0')}</span>{[T.compare,T.costs,T.assumptions][i]}</a>)}</nav><div className="eco-toolbar"><Reference/><FinancialZoneChoice route={route}/></div><ReadingScope route={route}/>{route.page!=='parametres'&&<ReadingPeriodNote route={route}/ >}{children}</div>;
 }
 function Reference(){const {T}=useDossier();return <p className="eco-reference"><LockKeyhole size={14} aria-hidden="true"/>{T.reference}</p>;}
 function OptionChoice({route}:{route:EconomicRoute}){
@@ -75,7 +77,7 @@ function Determinants({reading}:{reading:Data}){
  const {T,options}=useDossier(),{n}=useFormat(),S=reading.editorial.sponsor,java=options.find((o:Option)=>o.stack==='java-spring')!,core=reading.options.find((o:Data)=>o.stack===java.stack).core;
  return <section className="eco-section eco-determinants"><h2>{S.determinant_title}</h2><p>{S.determinant_note}</p><div>{S.determinants.map((row:Data)=><article key={row.id}><header><h3>{row.title}</h3><span>{row.status}</span></header>{row.id==='calendar'&&<strong><CalendarValue option={java}/></strong>}{row.id==='core'&&<strong>{n(core.total_jh,0)} {T.jh} · {core.units.length} {S.lots}</strong>}{row.id==='service'&&<strong>{n(reading.drivers.perimeter.utilisateurs_nominatifs,0)} {S.users}</strong>}<p>{row.text}</p></article>)}</div></section>;
 }
-export function EconomicComparisonPage({route}:{route:EconomicRoute}){
+function EconomicComparisonPageContent({route}:{route:EconomicRoute}){
  const {T,data,options:originalOptions,link}=useDossier(),{amount,money,n,annualAmount}=useFormat(),{reading,error,retry}=useEconomicReading(),horizon=period(route),S=reading?.editorial.sponsor;
  const options=reading?originalOptions.map((o:Option)=>periodOption(o,reading,route)!).filter(Boolean):[];
  const result=(o:Option)=>o.horizons.find(h=>h.years===horizon)!;
@@ -92,7 +94,7 @@ export function EconomicComparisonPage({route}:{route:EconomicRoute}){
 }
 function useEconomicReading(){
  const {data,readingRoute}=useDossier();const [reading,setReading]=useState<Data|null>(null),[error,setError]=useState(''),[attempt,setAttempt]=useState(0);
- useEffect(()=>{let live=true;setReading(null);setError('');request<Data>('/api/economic-evaluations?model_version='+encodeURIComponent(data.model_version)).then(value=>{if(value.model_version!==data.model_version)throw Error('ERR_VERSION');if(live)setReading(value);}).catch(reason=>{if(live)setError(reason?.message==='ERR_VERSION'?'version':'network');});return()=>{live=false;};},[data.model_version,attempt]);
+ useEffect(()=>{let live=true;if(data.content.economic_zone_reading){setReading(data.content.economic_zone_reading);setError('');return()=>{live=false;};}setReading(null);setError('');request<Data>('/api/economic-evaluations?model_version='+encodeURIComponent(data.model_version)).then(value=>{if(value.model_version!==data.model_version)throw Error('ERR_VERSION');if(live)setReading(value);}).catch(reason=>{if(live)setError(reason?.message==='ERR_VERSION'?'version':'network');});return()=>{live=false;};},[data.model_version,data.content.economic_zone_reading,attempt]);
  const scoped:Data|null=reading?{...reading,options:reading.options.map((option:Data)=>{
   const selected=reading.periods.find((row:Data)=>row.stack===option.stack).periods.find((row:Data)=>row.anchor===readingOrigin(readingRoute));
   return {...option,spending_bridge:selected.horizons,comparison:{reference:'java-spring',horizons:selected.horizons.map((row:Data)=>({years:row.years,...row.comparison}))},annual:{...option.annual,projected_stages:selected.annual.map((row:Data)=>({year:row.annee,stage:row.stage}))}};
@@ -125,7 +127,7 @@ function FundingReading({focus}:{focus?:string}){
  const {data}=useDossier(),{reading,error,retry}=useMarketReading();
  return reading?.comparison?<MarketComparison comparison={{...reading.comparison,budget_review:visibleBudgetReview(data.ui,reading.comparison.budget_review)}} focus={focus}/>:<Loading error={error} retry={retry}/>;
 }
-export function EconomicCostsPage({route}:{route:EconomicRoute}){
+function EconomicCostsPageContent({route}:{route:EconomicRoute}){
  const {T,options,link}=useDossier(),{amount,n}=useFormat(),{reading,error,retry}=useEconomicReading(),original=options.find((o:Option)=>o.stack===route.option)||options[0],option=reading?periodOption(original,reading,route)!:original,horizon=period(route),result=reading?option.horizons.find((h:Data)=>h.years===horizon)!:null;
  const detail=reading?.options.find((o:Data)=>o.stack===option.stack);
  useEffect(()=>{if(!detail||['financements','transpositions'].includes(route.view||''))return;const id=route.family?'economic-lot-'+route.family:route.focus==='economic-expert'?'economic-expert':null;if(!id)return;const target=document.getElementById(id);target?.focus({preventScroll:true});target?.scrollIntoView({block:'start',behavior:'auto'});},[route.family,route.focus,route.view,Boolean(detail)]);
@@ -143,12 +145,12 @@ export function EconomicCostsPage({route}:{route:EconomicRoute}){
  <details className="eco-detail"><summary>{T.spending}</summary><p>{T.spending_note}</p><table className="eco-annual-table"><caption className="sr-only">{T.spending}</caption><thead><tr><th scope="col">{T.year}</th><th scope="col">{T.initial_duration}</th><th scope="col">{T.integration}</th><th scope="col">{T.ongoing}</th><th scope="col">{T.year_total}</th></tr></thead><tbody>{option.annual.filter(row=>row.annee<=horizon).map(row=><tr key={row.annee}><th scope="row">{row.annee}<small className="eco-period-bounds">{T.month} {(row as Data).start_month}–{(row as Data).end_month}</small></th><td>{amount(row.build)}</td><td>{amount(row.integration)}</td><td>{amount(row.mco_run)}</td><td><b>{amount(row.total)}</b></td></tr>)}</tbody></table><p className="eco-caption">{S.annual_pair_note}</p></details><ScopeForDecision reading={reading} option={option.stack}/><p className="eco-caption">{T.price_basis}</p></>:!detail&&<Loading error={error} retry={retry}/>}
  <section className="eco-section" id="economic-expert" tabIndex={-1}><h2>{T.expert}</h2><div className="eco-evidence-links"><a href={link('evaluation-core',option.stack,'financements',{horizon:String(horizon),family:route.family,focus:route.focus||'economic-expert'})}>{T.funding} →</a><a href={link('evaluation-core',option.stack,'transpositions',{horizon:String(horizon),family:route.family,focus:route.focus||'economic-expert'})}>{T.transpositions} →</a></div></section><Next to={link('parametres',option.stack,String(horizon),{family:route.family,focus:route.focus})} label={T.next_assumptions}/></>}</Dossier>;
 }
-export function EconomicAssumptionsPage({route}:{route:EconomicRoute}){
+function EconomicAssumptionsPageContent({route}:{route:EconomicRoute}){
  const {T,data,options,link}=useDossier(),{n,amount,dailyRate,annualAmount}=useFormat(),F=data.content.framework,{reading,error,retry}=useEconomicReading();
  const rates=F.tariffs.filter((row:Data)=>options.some((o:Option)=>o.stack===row.key));
  const selected=route.option||options[0].stack;
  const governance=data.ui.essential.application_framework.hypotheses.sections.find((section:Data)=>section.id==='coordination');
- useDossierFocus(route.focus==='programme'?'economic-programme':undefined);
+ useDossierFocus(route.focus==='programme'?'economic-programme':route.focus?.startsWith('prices-')?route.focus:undefined);
  return <Dossier route={route}><p className="eco-caption">{T.fixed}</p>
  <section className="eco-section" id="economic-programme" tabIndex={-1}><h2>{governance.title}</h2>{governance.paragraphs.map((text:string)=><p key={text}><MethodText>{text}</MethodText></p>)}
  <table className="eco-table"><caption>{F.transformation.nom}</caption><thead><tr><th>{T.transformation_role}</th><th>{T.transformation_daily}</th><th>{T.transformation_annual}</th></tr></thead><tbody>{F.transformation.roles.map((role:Data)=><tr key={role.id}><th scope="row">{role.nom}<small>{role.mission}</small></th><td>{dailyRate(role.tarif_eur_jh)}</td><td>{annualAmount(role.annuel_eur_ht)}</td></tr>)}<tr><th scope="row">{T.transformation_total}</th><td></td><td><b>{annualAmount(F.transformation.annuel_eur_ht)}</b></td></tr></tbody></table><p>{F.transformation.calendrier}</p><a href="#preetude-couts?focus=rates-transformation">{data.ui.essential.market_costs.transformation_title} →</a>
@@ -156,7 +158,7 @@ export function EconomicAssumptionsPage({route}:{route:EconomicRoute}){
  <ProofLink phase="acquisition" route={route} focus={selected==='java-spring'?'roles':undefined}>{T.governance_charges}</ProofLink></section>
  {reading?<Determinants reading={reading}/>:<Loading error={error} retry={retry}/>}
  <section className="eco-section"><h2>{T.calendars}</h2><ComparisonTable names={options.map((o:Option)=>o.name)} label={T.compare}><Matrix label={T.initial_duration} values={options.map((o:Option)=>n(o.initial_months,0)+' '+T.months)}/><Matrix label={T.integration_duration} values={options.map((o:Option)=>reading?n(reading.options.find((r:Data)=>r.stack===o.stack).integration.months,0)+' '+T.months:data.ui.labels.loading)}/><Matrix label={T.service_start} values={options.map((o:Option)=><CalendarValue option={o}/>)}/></ComparisonTable>{!reading&&<Loading error={error} retry={retry}/>}<p>{T.calendar_fixed}</p><p className="eco-caption">{T.service_note}</p></section>
- <section className="eco-section" id="economic-tariffs"><h2>{T.tariffs}</h2><p>{T.tariff_note}</p><ComparisonTable names={rates.map((o:Data)=>o.name)} label={T.tariffs}>{['expert','qa','architecte'].map(key=><Matrix key={key} label={T.profiles[key]} values={rates.map((o:Data)=>dailyRate(o.prices.find((p:Data)=>p.key===key).value))}/>)}</ComparisonTable><p><b>{T.support}</b> · {dailyRate(F.support.value)}</p><a href="#preetude-couts">{T.tariff_source} →</a><details className="eco-detail" open={route.detail==='tarifs'?true:undefined}><summary>{T.source_method}</summary>{rates.map((o:Data)=><section key={o.key}><h3>{o.name}</h3>{o.prices.map((p:Data)=><p key={p.key}><b>{T.profiles[p.key]} · {dailyRate(p.value)}</b><br/>{p.method.split(';').join('. ')}</p>)}<ul className="eco-evidence-links">{o.prices.flatMap((p:Data)=>p.evidence||[]).filter((e:Data,i:number,all:Data[])=>all.findIndex(x=>x.path===e.path)===i).map((e:Data)=><li key={e.path}><SourceLink path={e.path}>{e.title}</SourceLink></li>)}</ul></section>)}</details></section>
+ <section className="eco-section" id="economic-tariffs"><h2>{T.tariffs}</h2><p>{data.ui.essential.market_costs.price_financial_intro}</p><ProjectRateStudy financial zone={route.zone||'paris'}/></section>
  <section className="eco-section"><h2>{T.indexation}</h2><p>{T.indexation_note}</p><p>{T.indexation_timing}</p><div className="eco-indexation">{F.inflation.map((row:Data)=><article key={row.key}><h3>{row.label}</h3><strong>{n(row.value*100,1)} %</strong><p>{row.influence}</p><details className="eco-detail"><summary>{T.source_method}</summary><p>{row.method.split(';').join('. ')}</p><p>{row.limit.split(';').join('. ')}</p><ul className="eco-evidence-links">{row.evidence.map((e:Data)=><li key={e.id}><SourceLink path={e.path}>{e.title}</SourceLink></li>)}</ul></details></article>)}</div></section>
  <section className="eco-section"><h2>{T.dimensions}</h2><p>{T.dimensions_note}</p>{reading?<dl className="eco-driver-grid">{Object.entries(T.dimension_labels).map(([key,label])=><div key={key}><dt>{label as string}</dt><dd>{n(reading.drivers.perimeter[key]??reading.drivers.annual_volumes[key],0)}</dd></div>)}</dl>:<Loading error={error} retry={retry}/>}<p className="eco-caption">{T.service_scope}</p></section>
  <details className="eco-detail"><summary>{T.gains}</summary><p>{T.gains_note}</p><ComparisonTable names={options.map((o:Option)=>o.name)} label={T.gains}>{F.workload.maintenance_ia[selected].map((activity:Data)=><Matrix key={activity.id} label={activity.label} values={options.map((o:Option)=>{const row=F.workload.maintenance_ia[o.stack].find((r:Data)=>r.id===activity.id);return row.traitement==='estimation'?n(row.taux_pct,0)+' %':T.gains_included;})}/>)}</ComparisonTable></details>
@@ -170,3 +172,9 @@ function PeriodBounds({option,horizon}:{option:Option;horizon:number}){
  const {T}=useDossier(),result=option.horizons.find(row=>row.years===horizon) as Data;
  return <small className="eco-period-bounds">{T.reading_scope.period_span} · {T.month} {result.start_month}–{result.end_month}</small>;
 }
+
+export function EconomicComparisonPage({route}:{route:EconomicRoute}){return <FinancialZone route={route}><EconomicComparisonPageContent route={route}/></FinancialZone>;}
+
+export function EconomicCostsPage({route}:{route:EconomicRoute}){return <FinancialZone route={route}><EconomicCostsPageContent route={route}/></FinancialZone>;}
+
+export function EconomicAssumptionsPage({route}:{route:EconomicRoute}){return <FinancialZone route={route}><EconomicAssumptionsPageContent route={route}/></FinancialZone>;}

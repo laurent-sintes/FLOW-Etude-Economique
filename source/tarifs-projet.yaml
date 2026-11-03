@@ -1,0 +1,387 @@
+version: 1
+date: '2026-11-03'
+default_zone: paris
+rounding_eur: 25
+method:
+  title: Un prix de cadrage par rôle et par zone
+  steps:
+  - 'Paris : conserver les tarifs déjà adoptés après revue de leur positionnement. Pour les rôles complémentaires,
+    retenir un prix explicite adapté au niveau de responsabilité, arrondi à 25 €. Chaque choix est une hypothèse
+    retenue pour l’étude, distincte d’un devis.'
+  - 'Province : lorsque le même relevé publie les deux zones du profil, appliquer au prix Paris le rapport province
+    / Paris observé. Chez Silkhom, la province est le milieu des deux centres Grandes villes et Régions. Chez Free-Work,
+    utiliser Autres villes.'
+  - Sans comparaison régionale du rôle, utiliser la médiane des rapports de profils documentés de sa famille. Les
+    familles sans paire régionale utilisent les profils de pilotage. Ces transpositions sont des hypothèses explicites,
+    pas des prix régionaux observés.
+  - Arrondir le résultat province au multiple de 25 € le plus proche. Les rôles internes sont valorisés en équivalent
+    de prestation, sans conversion en salaire ni création de JH.
+  - Appliquer les tarifs seulement aux JH déjà estimés. Les forfaits, licences, cloud, achats et frais techniques
+    restent à leur montant. Les responsabilités sans charge adoptée restent à dimensionner.
+roles:
+- id: direction_programme
+  ratio_role: direction_projet
+  rationale: Équivalent externe d’une direction de transformation senior. La grille nationale de directeur de transformation
+    (1 050–1 300) sert d’appui. Le temps interne reste à dimensionner.
+  status: reference_etude
+  paris_value: 1200
+- id: direction_projet
+  ratio_role: direction_projet
+  rationale: 1 000 € HT / JH conservés pour la direction senior du projet. Les trois contributions senior conservées
+    vont de 900 à 1 200. La moyenne générale à 829 en Île-de-France décrit une population plus large.
+  status: reference_etude
+  paris_ref:
+    path: source/modele-composable.yaml
+    pointer: equipe_transformation.roles
+    role_id: direction_projet
+    field: tarif_eur_jh
+- id: pmo
+  ratio_role: pmo
+  rationale: 850 € HT / JH conservés pour un PMO senior. Un profil affiche ce prix à partir de 850. Les moyennes
+    géographiques Free-Work servent uniquement à construire la variante régionale, pas à prouver une mission à ce
+    prix.
+  status: reference_etude
+  paris_ref:
+    path: source/modele-composable.yaml
+    pointer: equipe_transformation.roles
+    role_id: pmo
+    field: tarif_eur_jh
+- id: synchronisation
+  ratio_role: synchronisation
+  rationale: Tarif existant conservé pour un responsable transverse senior. Scrum Master est une analogie régionale
+    partielle. La prime de responsabilité reste une hypothèse de cadrage.
+  status: reference_etude
+  paris_ref:
+    path: source/modele-composable.yaml
+    pointer: equipe_transformation.roles
+    role_id: synchronisation
+    field: tarif_eur_jh
+- id: chef_lot
+  ratio_role: chef_lot
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 650
+- id: product_owner
+  ratio_role: product_owner
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 600
+- id: business_analyst
+  ratio_role: business_analyst
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 650
+- id: referents_metier
+  ratio_role: business_analyst
+  rationale: Valeur de remplacement par un analyste fonctionnel senior. Ce n’est ni un salaire journalier mesuré
+    ni une nouvelle dépense externe.
+  status: reference_etude
+  paris_value: 650
+- id: ux
+  ratio_role: ux
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 525
+- id: data_owner
+  ratio_role: data_engineer
+  rationale: Analogie avec un expert de gouvernance des données, dont la grille nationale senior vaut 780–950. Référence
+    interne de valorisation prudente, distincte d’un TJM contractualisé.
+  status: reference_etude
+  paris_value: 800
+- id: architecture
+  ratio_role: architecture
+  rationale: 1 000 € HT / JH conservés pour la responsabilité transverse. Ce prix appartient à la grille ForTeam
+    senior / expert 920–1 180. Free-Work apporte un contrepoint régional pour un ensemble plus large de mandats.
+  status: reference_etude
+  paris_ref:
+    path: source/modele-composable.yaml
+    pointer: equipe_transformation.roles
+    role_id: architecture
+    field: tarif_eur_jh
+- id: lead
+  ratio_role: lead
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 650
+- id: backend
+  ratio_role: backend
+  rationale: 550 € HT / JH conservés dans la fourchette Java senior Paris 450–600 de Silkhom. Le backend senior
+    / expert ForTeam est un segment supérieur distinct.
+  status: reference_etude
+  paris_ref:
+    path: source/stacks/java-spring.yaml
+    pointer: interventions.tarifs.expert.reference
+- id: frontend
+  ratio_role: frontend
+  rationale: 600 € HT / JH, centre de la grille nationale frontend senior 550–650 de Régie Portage. L’ancrage de
+    cette grille nationale sur Paris est une hypothèse de cadrage. Le segment senior / expert ForTeam 650–850 reste
+    présenté séparément.
+  status: reference_etude
+  paris_value: 600
+- id: dynamics_functional
+  ratio_role: dynamics_functional
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 825
+- id: dynamics_technical
+  ratio_role: dynamics_technical
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_ref:
+    path: source/stacks/microsoft.yaml
+    pointer: interventions.tarifs.expert.reference
+- id: sap
+  ratio_role: sap
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_ref:
+    path: source/stacks/sap.yaml
+    pointer: interventions.tarifs.expert.reference
+- id: integration
+  ratio_role: integration
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 625
+- id: data_engineer
+  ratio_role: data_engineer
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 625
+- id: qa
+  ratio_role: qa
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_ref:
+    path: source/stacks/java-spring.yaml
+    pointer: interventions.tarifs.qa.reference
+- id: test_manager
+  ratio_role: qa
+  rationale: Analogie d’ingénierie à 750, au-dessus de l’exécution QA, pour la responsabilité de stratégie et d’acceptation.
+    Prix proposé pour l’étude, pas une cotation dédiée observée.
+  status: reference_etude
+  paris_value: 750
+- id: cloud
+  ratio_role: cloud
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 950
+- id: devops
+  ratio_role: devops
+  rationale: 850 € HT / JH pour un profil senior de plateforme et de fiabilité, dans la fourchette ForTeam 780–1
+    020. La moyenne Free-Work 5–10 ans décrit un segment différent et sert de repère géographique.
+  status: reference_etude
+  paris_value: 850
+- id: cyber
+  ratio_role: cyber
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 1000
+- id: dpo
+  ratio_role: dpo
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 750
+- id: exploitation
+  ratio_role: exploitation
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 650
+- id: service_manager
+  ratio_role: chef_lot
+  rationale: Analogie de responsabilité avec le chef de projet senior. Le mandat de service, les horaires et les
+    astreintes restent à cadrer.
+  status: reference_etude
+  paris_value: 750
+- id: support_n1
+  ratio_role: support_n1
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_ref:
+    path: source/stacks/java-spring.yaml
+    pointer: interventions.tarifs.support_utilisateur.reference
+- id: support_n2
+  ratio_role: support_n1
+  rationale: Interpolation de cadrage entre N1 à 425 et expertise N3 à 600. La séparation N1/N2/N3 n’est pas publiée
+    dans une même grille.
+  status: reference_etude
+  paris_value: 500
+- id: support_n3
+  ratio_role: support_n3
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 600
+- id: change
+  ratio_role: change
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_ref:
+    path: source/modele-composable.yaml
+    pointer: equipe_transformation.roles
+    role_id: change
+    field: tarif_eur_jh
+- id: formation
+  ratio_role: formation
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 600
+- id: deploiement
+  ratio_role: deploiement
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_value: 650
+- id: achats
+  ratio_role: achats
+  rationale: Tarif de sélection Buy déjà adopté, conservé pour les négociations ERP Groupe. Le repère national consultant
+    achats est plus général et ne mesure pas cette responsabilité.
+  status: reference_etude
+  paris_value: 1000
+- id: juridique
+  ratio_role: juridique
+  rationale: Tarif de contractualisation déjà adopté à 1 200. La grille de juriste IT n’est pas une cotation de
+    cabinet d’avocats. Maintien prudent pour négociation complexe, à confirmer par devis.
+  status: reference_etude
+  paris_value: 1200
+- id: architecture_lot
+  ratio_role: architecture_lot
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_ref:
+    path: source/stacks/java-spring.yaml
+    pointer: interventions.tarifs.architecte.reference
+- id: architecture_dynamics
+  ratio_role: architecture_dynamics
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_ref:
+    path: source/stacks/microsoft.yaml
+    pointer: interventions.tarifs.architecte.reference
+- id: architecture_sap
+  ratio_role: architecture_sap
+  rationale: Tarif de cadrage retenu pour le niveau de responsabilité de ce rôle. Les observations comparables et
+    les différences de périmètre sont conservées dans la justification.
+  status: reference_etude
+  paris_ref:
+    path: source/stacks/sap.yaml
+    pointer: interventions.tarifs.architecte.reference
+- id: qa_dynamics
+  ratio_role: qa_dynamics
+  rationale: Base QA à 550, majorée de 50 pour la spécialisation Dynamics. Cette majoration existante est une hypothèse
+    de cadrage, sans baromètre QA Dynamics dédié.
+  status: reference_etude
+  paris_ref:
+    path: source/stacks/microsoft.yaml
+    pointer: interventions.tarifs.qa.reference
+- id: qa_sap
+  ratio_role: qa_sap
+  rationale: Base QA à 550, majorée de 100 pour la spécialisation SAP. Cette majoration existante est une hypothèse
+    de cadrage, sans baromètre QA SAP dédié.
+  status: reference_etude
+  paris_ref:
+    path: source/stacks/sap.yaml
+    pointer: interventions.tarifs.qa.reference
+- id: expertise_acheteur
+  paris_value: 850
+  ratio_role: business_analyst
+  rationale: Grade d’expertise acheteur déjà adopté à 850. Le baromètre analyste est un appui régional et non une
+    mesure dédiée de la sélection ERP.
+  status: reference_etude
+stack_bindings:
+  java-spring:
+    expert: backend
+    qa: qa
+    architecte: architecture_lot
+    support_utilisateur: support_n1
+  microsoft:
+    expert: dynamics_technical
+    qa: qa_dynamics
+    architecte: architecture_dynamics
+    support_utilisateur: support_n1
+  sap:
+    expert: sap
+    qa: qa_sap
+    architecte: architecture_sap
+    support_utilisateur: support_n1
+  dotnet:
+    support_utilisateur: support_n1
+  rust:
+    support_utilisateur: support_n1
+transformation_bindings:
+  direction_projet: direction_projet
+  pmo: pmo
+  synchronisation: synchronisation
+  change: change
+  architecture: architecture
+selection_bindings:
+  perimetre: expertise_acheteur
+  qualification_ciblee: expertise_acheteur
+  actualisation_commerciale: achats
+  contractualisation: juridique
+regional_peers:
+  pilotage:
+  - direction_projet
+  - pmo
+  - chef_lot
+  produit:
+  - product_owner
+  - business_analyst
+  - ux
+  realisation:
+  - backend
+  - lead
+  - qa
+  - data_engineer
+  - architecture
+  plateforme:
+  - devops
+  - support_n1
+  adoption:
+  - formation
+  - deploiement
+  achats:
+  - direction_projet
+  - pmo
+  - chef_lot
+activity_bindings:
+  java-spring:
+    developpement: backend
+    integration: integration
+    support_n3: support_n3
+    support_n1: support_n1
+    qa: qa
+    architecte: architecture_lot
+  microsoft:
+    developpement: dynamics_technical
+    integration: dynamics_functional
+    support_n3: dynamics_technical
+    support_n1: support_n1
+    qa: qa_dynamics
+    architecte: architecture_dynamics
+  sap:
+    developpement: sap
+    integration: sap
+    support_n3: sap
+    support_n1: support_n1
+    qa: qa_sap
+    architecte: architecture_sap

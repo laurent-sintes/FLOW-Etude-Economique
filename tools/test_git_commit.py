@@ -149,9 +149,9 @@ class GitCommitTests(unittest.TestCase):
     def test_exact_validation_receipt_is_reused_without_commands(self):
         from git_commit import runtime_signature
         inputs=source_hashes(self.root)
-        write_json(self.root/'tmp/git-commit/validation.json',dict(inputs=inputs,runtime=runtime_signature(),reports=file_proofs([self.report])))
+        write_json(self.root/'tmp/git-commit/validation.json',dict(mode='incremental', selection=dict(paths=['selected.txt'], tests=[], targeted=False), inputs=inputs,runtime=runtime_signature(),reports=file_proofs([self.report])))
         with patch('git_commit.command',side_effect=AssertionError('Checks must not be repeated')):
-            self.assertTrue(validate(self.root,inputs)['reused'])
+            self.assertTrue(validate(self.root,inputs,['selected.txt'])['reused'])
 
     def test_head_changed_after_prepare_is_rejected(self):
         path,_=self.plan()
@@ -179,5 +179,22 @@ class GitCommitTests(unittest.TestCase):
         self.report.write_text('{"status":"failed"}',encoding='utf-8')
         write_json(self.root/'tmp/git-commit/validation.json',dict(inputs=inputs,runtime=runtime_signature(),reports=file_proofs([self.report])))
         with patch('git_commit.command',side_effect=CommitError('Fresh checks required')) as checks:
-            with self.assertRaisesRegex(CommitError,'Fresh checks required'):validate(self.root,inputs)
+            with self.assertRaisesRegex(CommitError,'Fresh checks required'):validate(self.root,inputs,['selected.txt'])
             checks.assert_called_once()
+
+    def test_fresh_commit_runs_only_scoped_dev_checks_and_reuses_the_report(self):
+        inputs = source_hashes(self.root)
+        directory = self.root/'tmp/dev-run'
+        report = dict(status='passed', mode='dev', directory=str(directory))
+        write_json(directory/'report.json', report)
+        write_json(self.root/'tmp/check-dev-last.json', report)
+        with patch('git_commit.command') as checks:
+            result = validate(self.root, inputs, ['selected.txt'], ['test_git_commit'], True)
+        checks.assert_called_once()
+        args = checks.call_args.args[1]
+        self.assertEqual(args[1:], ['-m', 'tools.check_dev', '--paths', 'selected.txt', '--tests', 'test_git_commit', '--targeted'])
+        self.assertEqual(result['mode'], 'incremental')
+        self.assertEqual(len(result['reports']), 1)
+        with patch('git_commit.command', side_effect=CommitError('New scope')):
+            with self.assertRaisesRegex(CommitError, 'New scope'):
+                validate(self.root, inputs, ['another.txt'])

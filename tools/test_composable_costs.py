@@ -5,7 +5,7 @@ import json
 import unittest
 from project_investment import prepare, project, phase_expense
 from composable_costs import initial_ledger, allocate
-from test_support import reference_study
+from test_support import reference_study, active_reference
 from audit_cost_separation import independent_projection, cents
 from validate_stacks import ROOT
 
@@ -74,7 +74,7 @@ class ComposableTests(unittest.TestCase):
         self.assertTrue(all(r['start']>=66 for r in client))
         self.assertTrue(all('core' not in r['id'] for r in client))
         self.assertEqual(next(r['start'] for r in ledger if r['id']=='cycle_core_transition'),48)
-        self.assertEqual(sum(r['amount'] for r in ledger if r['id'] in ('MAI-005/reception','MAI-006/reception')),18079.2)
+        self.assertEqual(sum(r['amount'] for r in ledger if r['id'] in ('MAI-005/reception','MAI-006/reception')),active_reference()['transition_reception_eur_ht'])
 
     def test_durations_and_zero_service_assumptions(self):
         for b,d in ((36,6),(37.5,33.5),(60,60)):

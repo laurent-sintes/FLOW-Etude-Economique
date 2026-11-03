@@ -1,21 +1,16 @@
 """Prepare an exact push, send it explicitly, then verify CI and the deployed site."""
 import argparse
-import hashlib
-import io
 import json
 from pathlib import Path
 import shutil
 import subprocess
 import sys
-import tarfile
-import tempfile
 import time
-from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'tools'))
-from git_commit import CommitError, Git, REPOSITORY, digest, environment, file_proofs, public_repository, verify_proofs, write_json
+from git_commit import CommitError, Git, REPOSITORY, digest, public_repository, write_json
 
 SITE = 'https://laurent-sintes.github.io/FLOW-Etude-Economique/'
 WORKFLOW = '.github/workflows/pages.yml'
@@ -41,81 +36,6 @@ class GitHub:
         return json.loads(result.stdout)
 
 
-def tree(git, sha):
-    result = {}
-    for row in git.raw('ls-tree','-r','--full-tree','-z',sha).split(b'\0'):
-        if row:
-            metadata,name = row.split(b'\t',1)
-            mode,kind,blob = metadata.decode('ascii').split()
-            if kind == 'blob':result[name.decode('utf-8')] = blob
-    return result
-
-
-def relevant(name):
-    parts = Path(name).parts
-    return ('__pycache__' not in parts and Path(name).suffix not in ('.pyc','.log') and
-            (len(parts)==1 or (parts[0]=='app' and len(parts)==2) or
-             name.startswith(('source/','sources/','config/','tools/','app/src/','app/scripts/','skills/','.github/'))))
-
-
-def local_cache(name):
-    parts = Path(name).parts
-    return (name.startswith('tools/') and 'node_modules' in parts) or (name.startswith('app/') and name.endswith('.tsbuildinfo'))
-
-
-def bound_inputs(git, sha, expected):
-    files = tree(git,sha)
-    if any(local_cache(name) for name in files):return False
-    # Older complete reports also inventoried installed tooling and TypeScript caches.
-    # Their lockfiles remain checked, but the generated files are not committed inputs.
-    expected = {name:value for name,value in expected.items() if not local_cache(name)}
-    if not {name for name in files if relevant(name)} <= set(expected):return False
-    algorithm = git.text('rev-parse','--show-object-format')
-    for name,wanted in expected.items():
-        blob = files.get(name)
-        if blob is None:return False
-        path = git.root/name
-        raw = path.read_bytes() if path.is_file() else b''
-        object_hash = hashlib.new(algorithm,b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
-        if object_hash != blob:raw = git.raw('cat-file','blob',blob)
-        if digest(raw) != wanted:return False
-    return True
-
-
-def committed_validation(git, sha):
-    # These receipts refer to source hashes, never just to the last exit code.
-    candidate = git.root/'tmp/git-commit/validation.json'
-    if candidate.is_file():
-        data = json.loads(candidate.read_text(encoding='utf-8'))
-        if bound_inputs(git,sha,data['inputs']):
-            verify_proofs(data['reports'])
-            return dict(reports=data['reports'],commit=sha)
-    candidate = git.root/'tmp/validation-full-manifest.json'
-    if candidate.is_file():
-        data = json.loads(candidate.read_text(encoding='utf-8'))
-        expected = {name:item['sha256'] for name,item in data['files'].items()}
-        if bound_inputs(git,sha,expected):
-            proofs = file_proofs([data['report']])
-            verify_proofs(proofs)
-            report = json.loads(Path(data['report']).read_text(encoding='utf-8'))
-            if report.get('mode')=='full':return dict(reports=proofs,commit=sha)
-    raise PushError('Aucune validation liée aux sources de ce commit. Préparer et valider le commit avant le push')
-
-
-def oracle_for_commit(git, sha):
-    directory = git.root/'tmp/git-push'
-    directory.mkdir(parents=True,exist_ok=True)
-    oracle = directory/('cases-'+sha+'.json')
-    # Generate the oracle with the committed engine, not with pending working files.
-    with tempfile.TemporaryDirectory(prefix='oracle-',dir=directory) as temporary:
-        with tarfile.open(fileobj=io.BytesIO(git.raw('archive','--format=tar',sha))) as archive:
-            archive.extractall(temporary,filter='data')
-        result = subprocess.run([sys.executable,'-m','tools.pages_validation','--output',str(oracle)],cwd=temporary,env=environment(),capture_output=True)
-        if result.returncode:
-            raise PushError('Impossible de produire les simulations du commit. Vérifier ses dépendances Python')
-    return oracle
-
-
 def remote_head(git):
     rows = git.text('ls-remote','--heads','origin','refs/heads/main').splitlines()
     if len(rows)!=1:raise PushError('La branche distante main doit exister et être unique')
@@ -134,13 +54,13 @@ def sign(data):
 def load_plan(root, path):
     data = json.loads(Path(path).read_text(encoding='utf-8'))
     checksum = data.pop('sha256')
-    if data.get('format')!=1 or digest(json.dumps(data,ensure_ascii=False,sort_keys=True).encode())!=checksum:
+    if data.get('format')!=2 or digest(json.dumps(data,ensure_ascii=False,sort_keys=True).encode())!=checksum:
         raise PushError('Le plan de push a été modifié. Refaire la préparation')
     if data['repository']['root']!=str(Path(root).resolve()):raise PushError('Ce plan appartient à un autre checkout')
     return data
 
 
-def prepare(root, plan_only=False, git=None, api=None, validator=None, oracle_builder=None):
+def prepare(root, plan_only=False, git=None, api=None):
     root = Path(root).resolve()
     git = git or Git(root)
     api = api or GitHub()
@@ -157,18 +77,12 @@ def prepare(root, plan_only=False, git=None, api=None, validator=None, oracle_bu
         raise PushError('Les branches ont divergé. Intégrer les changements avant le push')
     commits = git.text('-c','i18n.logOutputEncoding=UTF-8','log','--reverse','--format=%H %s',base+'..'+head).splitlines()
     provenance = b'FLOW_DEPLOYMENT_COMMIT' in git.raw('show',head+':tools/build_pages.py') and b'FLOW_DEPLOYMENT_COMMIT' in git.raw('show',head+':'+WORKFLOW)
-    validation = None
-    oracle = None
-    if not plan_only:
-        if not provenance:raise PushError('Ce commit ne publie pas encore sa provenance Pages. Committer aussi le workflow et le générateur mis à jour')
-        validation = (validator or committed_validation)(git,head)
-        oracle = (oracle_builder or oracle_for_commit)(git,head)
+    if not plan_only and not provenance:
+        raise PushError('Ce commit ne publie pas encore sa provenance Pages. Committer aussi le workflow et le générateur mis à jour')
     if git.repository()!=repository or origins(git)!=urls or remote_head(git)!=base:
         raise PushError('HEAD ou origin/main a changé pendant la préparation')
-    data = dict(format=1,repository=repository,origins=urls,remote_head=base,head=head,commits=commits,
-                pending=git.text('status','--short'),provenance_ready=provenance,ready=not plan_only,
-                validation=validation,oracle=str(oracle) if oracle else None,
-                oracle_sha256=digest(Path(oracle).read_bytes()) if oracle else None)
+    data = dict(format=2,repository=repository,origins=urls,remote_head=base,head=head,commits=commits,
+                pending=git.text('status','--short'),provenance_ready=provenance,ready=not plan_only, validation_location='github')
     path = root/'tmp/git-push/plan.json'
     write_json(path,sign(data))
     return path,data
@@ -177,11 +91,9 @@ def prepare(root, plan_only=False, git=None, api=None, validator=None, oracle_bu
 def _push(root, path, git=None):
     git = git or Git(root)
     data = load_plan(root,path)
-    if not data['ready'] or not data.get('validation'):raise PushError('Ce plan est une prévisualisation non validée')
+    if not data['ready']:raise PushError('Ce plan est une prévisualisation non validée')
     if git.repository()!=data['repository'] or origins(git)!=data['origins']:
         raise PushError('HEAD ou origin a changé. Refaire la préparation')
-    verify_proofs(data['validation']['reports'])
-    if digest(Path(data['oracle']).read_bytes())!=data['oracle_sha256']:raise PushError('Les simulations préparées ont changé')
     actual = remote_head(git)
     sent = False
     if actual!=data['head']:
@@ -212,25 +124,11 @@ def live_manifest(url):
     with urlopen(request,timeout=15) as response:return json.load(response)
 
 
-def live_browser(git, data, site):
-    output = git.root/'tmp/git-push/live-browser.json'
-    source = git.raw('show',data['head']+':app/scripts/verify-pages.mjs').decode('utf-8')
-    # ESM stdin resolves Playwright from app/node_modules and preserves the committed test code.
-    result = subprocess.run(['node','--input-type=module','-','--url',site,'--cases',data['oracle'],'--output',str(output)],
-        input=source,cwd=git.root/'app',env=environment(),text=True,capture_output=True,encoding='utf-8',errors='replace')
-    (git.root/'tmp/git-push/live-browser.log').write_text(result.stdout+'\n'+result.stderr,encoding='utf-8')
-    if result.returncode:raise PushError('Le contrôle du site déployé dans le navigateur a échoué. Consulter live-browser.log')
-    report = json.loads(output.read_text(encoding='utf-8'))
-    if report['status']!='passed' or report.get('httpApiRequests')!=[]:raise PushError('Le navigateur n’a pas validé la livraison statique')
-    return str(output)
-
-
-def watch(root,path,timeout=1800,poll=5,git=None,api=None,manifest_reader=None,browser=None,clock=time.monotonic,sleep=time.sleep):
+def watch(root,path,timeout=1800,poll=5,git=None,api=None,manifest_reader=None,clock=time.monotonic,sleep=time.sleep):
     root = Path(root).resolve()
     git = git or Git(root)
     data = load_plan(root,path)
-    if not data['ready'] or not data.get('validation'):raise PushError('La prévisualisation ne peut pas être suivie comme un envoi validé')
-    verify_proofs(data['validation']['reports'])
+    if not data['ready']:raise PushError('La prévisualisation ne peut pas être suivie comme un envoi validé')
     if origins(git)!=data['origins']:raise PushError('Origin a changé')
     api = api or GitHub()
     public_repository(api(''))
@@ -257,11 +155,9 @@ def watch(root,path,timeout=1800,poll=5,git=None,api=None,manifest_reader=None,b
                         manifest = (manifest_reader or live_manifest)(site.rstrip('/')+'/site-manifest.json?commit='+data['head'])
                     except (OSError,ValueError):manifest = {}
                     if manifest.get('deployment_commit')==data['head']:
-                        if digest(Path(data['oracle']).read_bytes())!=data['oracle_sha256']:raise PushError('Le témoin de simulation a changé')
-                        report = (browser or live_browser)(git,data,site)
                         latest = (manifest_reader or live_manifest)(site.rstrip('/')+'/site-manifest.json?commit='+data['head'])
                         if latest.get('deployment_commit')==data['head']:
-                            result.update(status='verified',deployment_verified=True,browser_report=report)
+                            result.update(status='verified',deployment_verified=True,validation_location='github')
                             write_json(root/'tmp/git-push/result.json',result)
                             return result
             write_json(root/'tmp/git-push/result.json',result)

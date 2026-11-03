@@ -25,7 +25,7 @@ Les anciens exports Excel sont retirés. Les classeurs fournisseur restent dans 
 - Répertoire de travail : `C:/Dev/FLOW-Etude-Economique`.
 - Dépôt public : [laurent-sintes/FLOW-Etude-Economique](https://github.com/laurent-sintes/FLOW-Etude-Economique).
 - Application : [GitHub Pages](https://laurent-sintes.github.io/FLOW-Etude-Economique/).
-- Branche de travail : `main`. Un push déclenche les contrôles puis le déploiement Pages.
+- Branche de travail : `main`. Chaque commit local lance uniquement les contrôles incrémentaux du périmètre. Un push déclenche les tests complets et les simulations navigateur sur GitHub, puis le déploiement Pages après succès. Les tests complets restent disponibles en local sur demande avec `python -m tools.check_model --full` (ajouter `--browser` pour le navigateur).
 
 Le skill [flow-economie-git](skills/flow-economie-git/SKILL.md) distingue **commit** (local), **push** (commits existants) et **commit et push**. Les dépendances, caches et artefacts compilés ne sont pas versionnés ; les sources, preuves et audits utiles le sont. Les octets d’origine sont préservés par `.gitattributes`.
 

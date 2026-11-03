@@ -92,4 +92,55 @@ class PreStudyCostsTests(unittest.TestCase):
             if change=='extra':spec['rates'][0]['retained_price']=550
             with self.subTest(change=change),self.assertRaisesRegex(ValueError,'ERR_PRESTUDY_COSTS'):self.build(spec=spec)
 
+    def test_all_project_responsibilities_have_missions_and_a_funding_boundary(self):
+        study=self.build()['rate_study']
+        roles={r['id']:r for r in study['roles']}
+        self.assertTrue({'direction_programme','direction_projet','pmo','synchronisation','product_owner',
+            'business_analyst','referents_metier','data_owner','ux','backend','frontend','lead','qa','test_manager',
+            'architecture','dynamics_functional','dynamics_technical','sap','integration','data_engineer','cloud',
+            'devops','cyber','dpo','exploitation','service_manager','support_n1','support_n2','support_n3',
+            'change','formation','deploiement','achats','juridique'} <= roles.keys())
+        for role in roles.values():
+            self.assertTrue(role['mission'] and role['funding'] and role['basis_refs'])
+            for ref in role['basis_refs']:
+                self.assertTrue((ROOT/ref.split('#')[0]).is_file(), ref)
+        # No external fee invented for client staff or an unobserved specialty.
+        self.assertEqual(roles['referents_metier']['observations'],[])
+        self.assertEqual(roles['test_manager']['observations'],[])
+
+    def test_regions_and_statistical_populations_are_preserved_without_discount(self):
+        roles={r['id']:r for r in self.build()['rate_study']['roles']}
+        java=roles['backend']['observations']
+        self.assertEqual([(a['label'],a['min'],a['max']) for a in java[0]['areas']],
+            [('Paris',450,600),('Grandes villes',400,500),('Régions',400,500)])
+        self.assertEqual(java[1]['measure'],'moyenne_declarative')
+        self.assertEqual([a['min'] for a in java[1]['areas']],[545,435])
+        self.assertEqual([a['min'] for a in roles['pmo']['observations'][0]['areas']],[679,702])
+        dynamics=roles['dynamics_functional']['observations'][0]
+        self.assertEqual(dynamics['areas'],[dict(label='France, non ventilée',min=825,max=825,zone='national')])
+        self.assertEqual(dynamics['measure'],'mediane')
+
+    def test_new_study_rejects_bad_evidence_geography_and_economic_fields(self):
+        for change in ('duplicate_role','group','source','range','duplicate_geo','national_geo','statistic','economic'):
+            spec=deepcopy(self.spec);study=spec['rate_study']
+            row=next(r for r in study['roles'] if r['id']=='backend')['observations'][0]
+            if change=='duplicate_role':study['roles'].append(deepcopy(study['roles'][0]))
+            if change=='group':study['roles'][0]['group']='unknown'
+            if change=='source':row['source_id']='unknown'
+            if change=='range':row['areas'][0]['min']=9999
+            if change=='duplicate_geo':row['areas'].append(deepcopy(row['areas'][0]))
+            if change=='national_geo':row['areas'][0]['label']='France, non ventilée'
+            if change=='statistic':row['measure']='mediane'
+            if change=='economic':row['retained_price']=650
+            with self.subTest(change=change),self.assertRaisesRegex(ValueError,'ERR_PRESTUDY_COSTS'):
+                self.build(spec=spec)
+
+    def test_new_market_observations_do_not_change_other_documentary_readings(self):
+        before=self.build();spec=deepcopy(self.spec)
+        role=next(r for r in spec['rate_study']['roles'] if r['id']=='backend')
+        role['observations'][0]['areas'][0].update(min=900,max=1000)
+        after=self.build(spec=spec)
+        self.assertNotEqual(before['rate_study'],after['rate_study'])
+        for key in set(before)-{'rate_study'}:self.assertEqual(before[key],after[key])
+
 if __name__=='__main__':unittest.main()

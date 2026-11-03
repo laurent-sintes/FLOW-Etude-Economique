@@ -56,7 +56,7 @@ class GrossEvaluationsTests(unittest.TestCase):
             self.assertEqual({r['id'] for r in row['comparisons']},{'erpnext','odoo','tryton','axelor','cosmic-isbsg'})
         master=next(r for r in core['rows'] if r['id']=='master-data-java-spring')
         self.assertEqual(master['adopted_cost_eur_ht'],active_reference()['units']['master-data-java-spring']['cost_eur_ht'])
-        self.assertEqual(next(r['cost_eur_ht'] for r in master['comparisons'] if r['id']=='cosmic-isbsg'),755212.5)
+        self.assertEqual(next(r['cost_eur_ht'] for r in master['comparisons'] if r['id']=='cosmic-isbsg'),780337.5)
         self.assertEqual(sum(r['adopted_jh'] for r in core['rows']),active_reference()['total_jh'])
 
     def test_module_analysis_distinguishes_interface_work_from_incremental_functional_size(self):
@@ -102,7 +102,7 @@ class GrossEvaluationsTests(unittest.TestCase):
         self.assertEqual((r['cost_eur_ht'],r['delta_cost_eur_ht']),(270590,239140))
         self.assertEqual(sum(role['jh'] for role in r['roles']),430)
         self.assertEqual(len(r['processes']),13)
-        self.assertEqual((row['adopted_jh'],row['adopted_cost_eur_ht'],core['adopted_jh']),(610,383630,active_reference()['total_jh']))
+        self.assertEqual((row['adopted_jh'],row['adopted_cost_eur_ht'],core['adopted_jh']),(610,active_reference()['units']['supply-controls-java-spring']['cost_eur_ht'],active_reference()['total_jh']))
         self.assertEqual(r['status'],'proposal_not_adopted')
         self.assertIn(r['proof']['path'],self.study.files)
         # Archived rescanned code is the measured code, independent of the checkouts.

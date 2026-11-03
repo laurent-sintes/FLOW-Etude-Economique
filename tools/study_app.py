@@ -303,7 +303,9 @@ class Study:
             row['status']='replaced' if row['key']=='accompagnement_make' else 'retained'
         from composable_costs import transformation_summary
         from model_inputs import funding_inputs
-        result = dict(transformation=transformation_summary(funding_inputs()[0]['equipe_transformation']),inflation=rates,tariffs=tariffs,
+        from project_rates import load_rates
+        market_rate_study=read(ROOT/'source/preetude-couts-marche.yaml')['rate_study']
+        result = dict(project_rates=load_rates(),project_rate_channels=market_rate_study['channels'],project_rate_engagements=market_rate_study['engagements'],project_rate_portage=market_rate_study['portage'],transformation=transformation_summary(funding_inputs()[0]['equipe_transformation']),inflation=rates,tariffs=tariffs,
             support=dict(value=support[0]['reference'],method=support[0]['justification']),
             frontend=dict(value=stacks['java-spring']['model']['interventions']['tarifs']['expert']['reference'],
                           method=calibration['calibration']['frontend']),

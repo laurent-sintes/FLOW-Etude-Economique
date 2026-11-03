@@ -66,6 +66,14 @@ jobs:
             sleep 1
           done
           node app/scripts/verify-pages.mjs --url http://127.0.0.1:8777/FLOW-Etude-Economique/ --cases tmp/pages-validation.json --output tmp/pages-validation-report.json
+      - name: Keep Pages browser reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-browser-reports
+          path: |
+            tmp/pages-validation*.json
+            tmp/pages-preview.log
       - uses: actions/upload-pages-artifact@v4
         with:
           path: app/dist-pages

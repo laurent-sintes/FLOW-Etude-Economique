@@ -26,6 +26,12 @@ def load_reference(root):
     doc=json.loads(raw);ref=doc['decision'];decision_path=(root/ref['path']).resolve();assert decision_path.is_relative_to(root)
     assert sha(decision_path.read_bytes())==ref['sha256'],'Adopted decision proof changed'
     decision=json.loads(decision_path.read_text(encoding='utf-8'))
-    assert doc['total_jh']==decision['proposal_jh'] and doc['cost_eur_ht']==decision['construction_cost_eur_ht']
+    cost=decision['construction_cost_eur_ht']
+    if 'pricing_revision' in doc:
+        price_ref=doc['pricing_revision'];price_path=(root/price_ref['path']).resolve();assert price_path.is_relative_to(root)
+        price_raw=price_path.read_bytes();assert sha(price_raw)==price_ref['sha256'],'Pricing revision proof changed'
+        pricing=json.loads(price_raw);cost=pricing['construction_cost_eur_ht']
+        assert pricing['effort_decision']==doc['decision'] and pricing['total_jh']==doc['total_jh']
+    assert doc['total_jh']==decision['proposal_jh'] and doc['cost_eur_ht']==cost
     assert doc['unit_days']==[u['proposal_jh'] for u in decision['units']]
     return deepcopy(doc)

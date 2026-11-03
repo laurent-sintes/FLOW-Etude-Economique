@@ -9,6 +9,7 @@ from validation_reporting import test_ids
 from validate_stacks import ROOT
 
 ALGORITHM_CHECKS = {
+ 'regional_role_price': 'test_project_rates.ProjectRateTests.test_region_formula_uses_explicit_ratio_and_half_up_rounding',
  'integration_unit_dimensioning': 'test_integration_units.IntegrationUnitsTests.test_dimensioning_and_funding_guards',
  'transformation_team_cost': 'test_composable_costs.ComposableTests.test_transformation_team_is_continuous_prorated_and_funded_once',
  'budget_reserve_reconciliation': 'test_budget_supplements.BudgetSupplementTests.test_all_gaps_options_phases_and_unknown_totals',

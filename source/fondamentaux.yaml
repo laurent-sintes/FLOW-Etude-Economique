@@ -579,6 +579,29 @@ estimation_model:
     - jh
     - rounding
     - assumption
+  - id: market_role_rate
+    label: Observation de tarif par rôle projet
+    owner: source/preetude-couts-marche.yaml
+    attributes:
+    - role_and_mission
+    - project_activity_refs
+    - purchase_channel_and_engagement
+    - seniority_and_population
+    - price_measure_and_tax
+    - published_geography
+    - observed_value_or_unknown
+    - source_and_dates
+    - funding_boundary
+  - id: project_rate_decision
+    label: Tarif de cadrage retenu par rôle et zone
+    owner: source/tarifs-projet.yaml
+    attributes:
+    - role_ref
+    - paris_price_or_existing_financial_reference
+    - regional_peer_refs
+    - province_ratio_and_rounding
+    - decision_basis_and_evidence
+    - financial_bindings
   - id: rate
     label: Tarif de prestation
     owner: source/stacks/java-spring.yaml
@@ -1778,6 +1801,18 @@ estimation_model:
     kind: algorithm
     note: Les JH sont des hypothèses d’ingénierie adoptées. Le délai local est indicatif. La somme ne constitue
       pas un nouveau calcul COCOMO ou COSMIC.
+  - id: regional_role_price
+    title: Tarif régional par rôle
+    expression: arrondi_half_up(prix_Paris × rapport_régional / pas) × pas
+    variables:
+      prix_Paris: Tarif de cadrage retenu, ou référence financière existante.
+      rapport_régional: Rapport de centres région / Paris du même profil. À défaut, médiane des rapports des pairs
+        déclarés.
+      pas: 25 EUR. Les transferts de rôle et les pairs sont explicites dans source/tarifs-projet.yaml.
+    unit: EUR HT / JH
+    kind: algorithm
+    note: Les observations gardent leur population et leur fiscalité. Les prix transposés sont des hypothèses. Appliquer
+      seulement aux charges adoptées et préserver forfaits, achats, JH et calendrier.
   invariants:
   - Un essai technique réussi démontre seulement ses cas et conditions déclarés. Son temps de réalisation et son
     code ne calibrent pas automatiquement les JH. Les effets sur le chiffrage sont explicités séparément.
@@ -1813,6 +1848,9 @@ estimation_model:
     compléments potentiels restent distincts des budgets adoptés. Une réserve partagée est comptée une fois et un
     montant inconnu n’est jamais converti en zéro.
   implementations:
+  - path: tools/project_rates.py
+    rules:
+    - regional_role_price
   - rules:
     - integration_unit_dimensioning
     path: tools/integration_units.py

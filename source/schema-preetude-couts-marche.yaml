@@ -11,6 +11,7 @@ required:
 - effort_groups
 - programmes
 - transformation_roles
+- rate_study
 properties:
   version:
     const: 1
@@ -274,3 +275,204 @@ properties:
       - mission
       - conclusion
       - observations
+  rate_study:
+    type: object
+    additionalProperties: false
+    properties:
+      recorded_on: &id005
+        type: string
+        minLength: 1
+      sources:
+        type: object
+        additionalProperties:
+          type: object
+          additionalProperties: false
+          properties:
+            title: *id005
+            url: *id005
+            published_on: &id006
+              type:
+              - string
+              - 'null'
+            recorded_on: *id005
+            method: *id005
+            limit: *id005
+          required:
+          - title
+          - url
+          - published_on
+          - recorded_on
+          - method
+          - limit
+        minProperties: 1
+      groups:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            id: *id005
+            title: *id005
+          required:
+          - id
+          - title
+        minItems: 1
+      roles:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            id: *id005
+            group: *id005
+            title: *id005
+            mission: *id005
+            basis_refs:
+              type: array
+              items: *id005
+              minItems: 1
+            funding: *id005
+            observations:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  source_id: *id005
+                  segment: *id005
+                  measure:
+                    enum:
+                    - fourchette
+                    - moyenne_declarative
+                    - mediane
+                  tax_status:
+                    enum:
+                    - HT
+                    - non_retranscrit
+                  purchase_mode:
+                    enum:
+                    - freelance_non_isole
+                    - esn
+                  price_date: *id006
+                  areas:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        label: *id005
+                        min: &id007
+                          type: number
+                          minimum: 0
+                        max: *id007
+                      required:
+                      - label
+                      - min
+                      - max
+                    minItems: 1
+                  scope: *id005
+                  locator:
+                    type: string
+                required:
+                - source_id
+                - segment
+                - measure
+                - tax_status
+                - purchase_mode
+                - price_date
+                - areas
+                - scope
+                - locator
+              minItems: 0
+          required:
+          - id
+          - group
+          - title
+          - mission
+          - basis_refs
+          - funding
+          - observations
+        minItems: 1
+      channels:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            id: *id005
+            title: *id005
+            description: *id005
+            price: *id005
+            source_ids:
+              type: array
+              items: *id005
+              minItems: 1
+          required:
+          - id
+          - title
+          - description
+          - price
+          - source_ids
+        minItems: 3
+      engagements:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            title: *id005
+            text: *id005
+          required:
+          - title
+          - text
+        minItems: 3
+      portage:
+        type: object
+        additionalProperties: false
+        properties:
+          text: *id005
+          source_ids:
+            type: array
+            items: *id005
+            minItems: 1
+        required:
+        - text
+        - source_ids
+      regional_checks:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            title: *id005
+            source_id: *id005
+            areas:
+              type: array
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  label: *id005
+                  value: *id007
+                  sample:
+                    type: integer
+                    minimum: 1
+                required:
+                - label
+                - value
+                - sample
+              minItems: 1
+          required:
+          - title
+          - source_id
+          - areas
+        minItems: 1
+    required:
+    - recorded_on
+    - sources
+    - groups
+    - roles
+    - channels
+    - engagements
+    - portage
+    - regional_checks

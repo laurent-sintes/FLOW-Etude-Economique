@@ -89,13 +89,13 @@ export function EconomicEvaluationsPage({familyId}:{familyId?:string}){
  const {data}=useStudy();
  const [reading,setReading]=useState<EconomicReading|null>(null),[error,setError]=useState(''),[retry,setRetry]=useState(0);
  useEffect(()=>{
-  let current=true;setReading(null);setError('');
+  let current=true;if(data.content.economic_zone_reading){setReading(data.content.economic_zone_reading);setError('');return()=>{current=false;};}setReading(null);setError('');
   request<EconomicReading>(`/api/economic-evaluations?model_version=${encodeURIComponent(data.model_version)}`).then(result=>{
    if(result.model_version!==data.model_version)throw Object.assign(new Error('version'),{code:'version'});
    if(current)setReading({...result,options:visibleOptions(data.ui,result.options)});
   }).catch(reason=>{if(current)setError(reason.code==='version'?'version':'network');});
   return ()=>{current=false;};
- },[data.model_version,retry]);
+ },[data.model_version,data.content.economic_zone_reading,retry]);
  useEffect(()=>{
   if(!reading)return;
   const heading=document.getElementById('economic-family-detail-heading')||document.querySelector('main')?.querySelector<HTMLElement>('h1');

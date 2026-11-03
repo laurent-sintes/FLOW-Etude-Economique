@@ -19,11 +19,11 @@ CSS et documentation ne déclenchent aucune suite Python. TypeScript lance les t
 
 Contrôler visuellement la page et le parcours touchés sur le serveur local. La reconstruction nécessaire à leur affichage est distincte des tests. Utiliser le lanceur habituel pour actualiser la livraison statique. `--browser` est optionnel et demande explicitement la régression navigateur complète existante. Pour une retouche visuelle, privilégier l'inspection du parcours touché. Ne pas annoncer une vérification visuelle sur la seule réussite du script.
 
-Les rapports chronométrés sont dans `tmp/validation/` et `tmp/check-dev-last.json`. Ils portent `mode: dev` et `certification: false`. Ils ne remplacent ni le manifeste complet ni les preuves des scripts de commit et push. La CI et les validations complètes existantes restent inchangées.
+Les rapports chronométrés sont dans `tmp/validation/` et `tmp/check-dev-last.json`. Ils portent `mode: dev` et `certification: false`. Le commit local conserve ces preuves ciblées. La validation complète appartient à la CI au push, ou à une demande explicite en local.
 
-## Contrôler au jalon de validation
+## Tests complets en local sur demande
 
-Depuis la racine, dans l’environnement Python du projet :
+La commande `python -m tools.check_model --full` reste disponible sur demande. Ajouter `--browser` pour inclure aussi la régression navigateur locale. Ces commandes ne sont appelées automatiquement ni au commit ni au push. Depuis la racine, dans l’environnement Python du projet :
 
 ```powershell
 python -m tools.check_model --auto
@@ -74,7 +74,7 @@ La grille est validée une fois par chargement ; un nouveau processus ou chargem
 
 ## Contrôler dans un vrai navigateur
 
-`check_model --auto` est réservé au jalon de validation et inclut le vrai navigateur pour les modifications de présentation. En Dev, utiliser `check_dev` et le parcours touché. `--full --browser` l’ajoute explicitement au contrôle complet. La CI utilise Playwright avec Chromium sur la livraison Pages. Le contrôle échoue si une requête HTTP vers une API est émise. Il vérifie toutes les vues en mobile et en bureau, les huit scénarios du témoin, la reprise des sauvegardes, les originaux téléchargeables et le clavier.
+`check_model --auto` reste un diagnostic explicite qui peut déclencher une suite complète. Il ne fait pas partie du flux automatique de commit ou de push. En Dev, utiliser `check_dev` et le parcours touché. `--full --browser` l’ajoute explicitement au contrôle complet. La CI utilise Playwright avec Chromium sur la livraison Pages. Le contrôle échoue si une requête HTTP vers une API est émise. Il vérifie toutes les vues en mobile et en bureau, les huit scénarios du témoin, la reprise des sauvegardes, les originaux téléchargeables et le clavier.
 
 ```powershell
 node app/scripts/verify-pages.mjs --url http://127.0.0.1:8766/ --allow-root true --cases tmp/validation-optimization-parity.json --output tmp/local-browser-report.json
@@ -196,7 +196,7 @@ python -m tools.git_commit commit
 
 `prepare` produit `tmp/git-commit/plan.json` et ne modifie ni les fichiers ni les entrées de l’index. Les chemins sont des fichiers explicites, sans balayage automatique du dossier. Le plan contient leurs empreintes, le message, HEAD, l’état de l’index, le périmètre et les preuves des contrôles. `--message-file chemin.txt` accepte un message UTF-8 multiligne.
 
-Une preuve de validation est réutilisée si les sources, l’environnement et les rapports correspondants sont identiques. Un contrôle complet déjà réussi peut être réutilisé. Sinon, le script appelle `check_model --auto --browser`. Il construit et vérifie également la version Pages avec son vrai préfixe. Les reçus restent dans `tmp/git-commit/`.
+Le commit exécute uniquement `check_dev --paths` sur les fichiers sélectionnés. Il ne reconstruit pas Pages et ne lance aucune suite complète ni navigateur. Les preuves incrémentales sont réutilisées si sources, sélection, environnement et rapports sont identiques. Les reçus restent dans `tmp/git-commit/`. Pour définir les contrôles d’un fichier inconnu ou limiter une sélection Python transitive, ajouter `--tests module.Classe.methode` et éventuellement `--targeted` à `prepare`. Un périmètre inconnu bloque sans bascule vers les tests complets.
 
 `commit` relit le plan, vérifie les empreintes, puis enregistre uniquement les fichiers sélectionnés avec `git commit --only`. Les fichiers hors périmètre déjà indexés restent indexés. Un fichier partiellement indexé dans le périmètre bloque la préparation, pour préserver ce choix. Une modification des sources, de HEAD, de l’index, du message ou des preuves impose une nouvelle préparation.
 
@@ -217,11 +217,11 @@ python -m tools.git_push push
 
 `prepare` vérifie `main`, les URL de lecture et d’envoi d’`origin`, le dépôt GitHub public et la relation avec `origin/main` après un fetch sans tags. Le plan `tmp/git-push/plan.json` contient le SHA exact, la référence distante observée, les commits à envoyer et les modifications locales qui resteront hors envoi. Un retard ou une divergence bloque la préparation et demande une intégration préalable. Aucun commit n’est créé.
 
-Les preuves de validation doivent correspondre aux fichiers du commit. Elles ne sont pas déduites de l’état courant du dossier. Le témoin des simulations est généré par le moteur de ce commit, extrait dans un dossier temporaire isolé. Les modifications et l’index en cours sont préservés.
+La préparation du push ne lance aucun test local et ne demande aucun reçu local de validation complète. GitHub valide les sources du SHA envoyé et y génère les témoins des simulations. Les modifications et l’index en cours sont préservés.
 
 `push` envoie le SHA préparé vers `refs/heads/main`, sans force ni tags. Il relit la référence distante après l’envoi, y compris après une erreur réseau. Si le SHA est déjà présent, il ne renvoie pas les commits. Une avancée distante non prévue bloque l’opération.
 
-Le suivi attend le workflow `pages.yml` du bon SHA sur `main`, puis la réussite du job `deploy`. Il contrôle l’URL Pages autorisée, le champ `deployment_commit` du manifeste publié et les parcours réels dans Chrome/Chromium contre les simulations du commit. La CI renseigne `FLOW_DEPLOYMENT_COMMIT` avec `github.sha`. Cette provenance est une métadonnée technique, sans effet économique.
+Le suivi attend le workflow `pages.yml` du bon SHA sur `main`, puis la réussite du job `deploy`. Il contrôle l’URL Pages autorisée, le champ `deployment_commit` du manifeste publié après réussite des tests complets et des parcours réels dans Chromium exécutés par la CI. Aucun navigateur local n’est lancé par le suivi. La CI renseigne `FLOW_DEPLOYMENT_COMMIT` avec `github.sha`. Cette provenance est une métadonnée technique, sans effet économique.
 
 ```powershell
 python -m tools.git_push prepare --plan-only
@@ -262,7 +262,7 @@ Garder `app/dist/` pour le serveur local sur 8766. Après modification, relancer
 
 Le contrat métier unique est `source/fondamentaux.yaml`, avec les règles dans `estimation_model`. `estimation_calculation.py` reproduit les références, calcule les écarts avant arrondi et la ventilation par rôle ; `retained_core.py` vérifie la concordance avec la décision puis valorise les rôles. `capability_catalog.py` restitue la capture native ; `current_cost_inputs.py` conserve les unités annuelles et compléments Buy sans les anciennes affectations Make.
 
-Le pilote `core_qualification.py --candidate` demeure un diagnostic historique et n’alimente plus le flux courant. Pour une évolution : modifier le contrat métier si nécessaire, ses instances et contrôles, puis les projections et le skill. Exécuter `python -B -m tools.check_model --full` ; ne pas publier d’instantané sans demande.
+Le pilote `core_qualification.py --candidate` demeure un diagnostic historique et n’alimente plus le flux courant. Pour une évolution : modifier le contrat métier si nécessaire, ses instances et contrôles, puis les projections et le skill. Exécuter les contrôles ciblés du domaine. La suite complète est exécutée par GitHub au push ou en local sur demande avec `python -B -m tools.check_model --full`. Ne pas publier d’instantané sans demande.
 
 ## Téléchargement du modèle métier
 

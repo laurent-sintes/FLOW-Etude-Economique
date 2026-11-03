@@ -35,6 +35,9 @@ def role_rates(stack):
     rates={r: stack['interventions']['tarifs'][a['tarif']]['reference']
            for r,a in stack['interventions']['activites'].items()}
     rates.update({role:stack['interventions']['tarifs'][role]['reference'] for role in ('qa','architecte')})
+    from project_rates import financial_role_rates
+    slug=stack['id'].removesuffix('-make').removesuffix('-buy')
+    rates.update(financial_role_rates(slug))
     return rates
 
 

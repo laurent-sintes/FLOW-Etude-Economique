@@ -5,9 +5,27 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
-from git_commit import CommitError, Git, REPOSITORY, digest, file_proofs, write_json
-from git_push import SITE, PushError, bound_inputs, committed_validation, prepare, push, remote_head, tree, watch
+from git_commit import CommitError, Git, REPOSITORY, write_json
+from git_push import SITE, PushError, prepare, push, remote_head, watch
 from validate_stacks import ROOT
+
+
+class WorkflowTests(unittest.TestCase):
+    def test_push_runs_full_and_browser_checks_before_deployment(self):
+        import yaml
+        workflow = yaml.load((ROOT/'.github/workflows/pages.yml').read_text(encoding='utf-8'), Loader=yaml.BaseLoader)
+        self.assertIn('main', workflow['on']['push']['branches'])
+        jobs = workflow['jobs']
+        self.assertEqual(jobs['deploy']['needs'], 'build')
+        steps = jobs['build']['steps']
+        commands = [step.get('run', '') for step in steps]
+        self.assertTrue(any('python -m tools.check_model --full' in command for command in commands))
+        browser = next(i for i, command in enumerate(commands) if 'node app/scripts/verify-pages.mjs' in command)
+        artifact = next(i for i, step in enumerate(steps) if step.get('uses', '').startswith('actions/upload-pages-artifact@'))
+        self.assertLess(browser, artifact)
+        for step in steps:
+            if step.get('run'):
+                self.assertNotEqual(step.get('continue-on-error'), 'true')
 
 
 class NativeGit(Git):
@@ -66,21 +84,15 @@ class PushTests(unittest.TestCase):
         self.report=self.root/'tmp/proof.json'
         write_json(self.report,dict(status='passed'))
 
-    def validation(self,git,sha):
-        return dict(reports=file_proofs([self.report]),commit=sha)
-    def oracle(self,git,sha):
-        path=self.root/'tmp/oracle.json'
-        write_json(path,dict(commit=sha))
-        return path
     def plan(self,**kwargs):
-        return prepare(self.root,git=self.git,api=self.api,validator=self.validation,oracle_builder=self.oracle,**kwargs)
+        return prepare(self.root,git=self.git,api=self.api,**kwargs)
     def watch(self,path,**kwargs):
         ticks=[0]
         def sleep(seconds):ticks[0]+=max(seconds,.01)
         with patch('sys.stdout',io.StringIO()):
             return watch(self.root,path,timeout=2,poll=1,git=self.git,api=self.api,
                 manifest_reader=kwargs.pop('manifest_reader',lambda url:dict(deployment_commit=self.head)),
-                browser=kwargs.pop('browser',lambda git,data,site:'fixture-browser.json'),clock=lambda:ticks[0],sleep=sleep,**kwargs)
+                clock=lambda:ticks[0],sleep=sleep,**kwargs)
 
     def test_prepare_and_push_preserve_pending_work_and_use_exact_sha(self):
         (self.root/'file.txt').write_text('pending work',encoding='utf-8')
@@ -146,15 +158,20 @@ class PushTests(unittest.TestCase):
         self.assertFalse(push(self.root,path,git=self.git)['sent'])
         self.assertEqual(remote_head(self.git),self.head)
 
-    def test_proof_or_oracle_change_blocks_push(self):
-        path,_=self.plan()
-        self.report.write_text('{"status":"failed"}',encoding='utf-8')
-        with self.assertRaises(CommitError):push(self.root,path,git=self.git)
-        self.assertEqual(remote_head(self.git),self.original)
-        write_json(self.report,dict(status='passed'))
-        path,_=self.plan()
-        (self.root/'tmp/oracle.json').write_text('changed',encoding='utf-8')
-        with self.assertRaisesRegex(PushError,'simulations'):push(self.root,path,git=self.git)
+    def test_push_requires_no_local_test_receipt_or_simulation(self):
+        self.report.unlink()
+        import subprocess
+        original = subprocess.run
+        def git_only(args, **kwargs):
+            self.assertIn(Path(args[0]).name.lower(), ('git', 'git.exe'))
+            return original(args, **kwargs)
+        with patch('git_push.subprocess.run', side_effect=git_only):
+            path, data = self.plan()
+            self.assertEqual(data['validation_location'], 'github')
+            self.assertNotIn('oracle', data)
+            self.assertNotIn('validation', data)
+            self.assertTrue(push(self.root, path, git=self.git)['remote_verified'])
+            self.assertEqual(self.watch(path)['validation_location'], 'github')
 
     def test_exact_ci_success_and_deployment_are_required(self):
         path,_=self.plan()
@@ -172,7 +189,7 @@ class PushTests(unittest.TestCase):
         with self.assertRaisesRegex(PushError,'Délai'):
             self.watch(path,manifest_reader=lambda url:dict(deployment_commit=self.original))
 
-    def test_site_changing_during_browser_check_cannot_be_marked_verified(self):
+    def test_site_changing_during_manifest_check_cannot_be_marked_verified(self):
         path,_=self.plan()
         reads=[0]
         def published(url):
@@ -181,21 +198,6 @@ class PushTests(unittest.TestCase):
         with self.assertRaisesRegex(PushError,'Délai'):self.watch(path,manifest_reader=published)
         report=json.loads((self.root/'tmp/git-push/result.json').read_text())
         self.assertFalse(report['deployment_verified'])
-
-    def test_failed_live_browser_remains_a_failed_verification(self):
-        path,_=self.plan()
-        def failed(*args):raise PushError('Browser failed')
-        with self.assertRaisesRegex(PushError,'Browser failed'):self.watch(path,browser=failed)
-        report=json.loads((self.root/'tmp/git-push/result.json').read_text())
-        self.assertFalse(report['deployment_verified'])
-        self.assertEqual(report['status'],'verification_failed')
-
-    def test_validation_binds_committed_sources_not_dirty_workspace(self):
-        expected={name:digest(self.git.raw('cat-file','blob',blob)) for name,blob in tree(self.git,self.head).items()}
-        (self.root/'file.txt').write_text('uncommitted',encoding='utf-8')
-        self.assertTrue(bound_inputs(self.git,self.head,expected))
-        expected['file.txt']='0'*64
-        self.assertFalse(bound_inputs(self.git,self.head,expected))
 
     def test_real_guard_refuses_an_unapproved_repository(self):
         with self.assertRaisesRegex(CommitError,'Origin'):
@@ -210,20 +212,6 @@ class PushTests(unittest.TestCase):
         self.git.raw('add','--','tools/build_pages.py')
         self.git.raw('commit','-m','Old provenance fixture')
         with self.assertRaisesRegex(PushError,'provenance'):self.plan()
-
-    def test_full_validation_receipt_is_bound_to_commit_and_rejects_unproved_code(self):
-        expected={name:dict(sha256=digest(self.git.raw('cat-file','blob',blob))) for name,blob in tree(self.git,self.head).items()}
-        expected['app/tsconfig.tsbuildinfo']=dict(sha256='generated-cache')
-        expected['tools/syntax-check/node_modules/tool/package.json']=dict(sha256='installed-package')
-        write_json(self.report,dict(status='passed',mode='full'))
-        write_json(self.root/'tmp/validation-full-manifest.json',dict(files=expected,report=str(self.report)))
-        (self.root/'file.txt').write_text('pending work',encoding='utf-8')
-        self.assertEqual(committed_validation(self.git,self.head)['commit'],self.head)
-        (self.root/'tools/unproved.py').write_text('new code',encoding='utf-8')
-        self.git.raw('add','--','tools/unproved.py')
-        self.git.raw('commit','-m','Unproved code fixture')
-        with self.assertRaisesRegex(PushError,'Aucune validation'):
-            committed_validation(self.git,self.git.text('rev-parse','HEAD'))
 
     def test_watching_a_sent_commit_does_not_require_freezing_local_head(self):
         path,_=self.plan()

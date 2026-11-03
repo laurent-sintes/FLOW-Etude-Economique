@@ -13,6 +13,12 @@ SCHEMA = 'source/schema-estimations-core-retenues.yaml'
 
 
 def referenced_value(ref):
+    if ref['path'] == 'source/tarifs-projet.yaml':
+        from project_rates import adopted_price
+        parts=ref['pointer'].split('.')
+        if len(parts)!=3 or parts[0]!='roles' or parts[2]!='reference':
+            raise ValueError('ERR_RETAINED_CORE_RATE_REFERENCE')
+        return adopted_price(parts[1])
     value = read(ROOT / ref['path'])
     for key in ref['pointer'].split('.'):
         value = value[key]
