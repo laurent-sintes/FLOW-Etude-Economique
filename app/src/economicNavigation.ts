@@ -43,10 +43,10 @@ export function economicPeriod(route:{horizon?:string;view?:string}){
 }
 
 /** Reading links keep the phase context across summaries, evidence and costs. */
-export function phaseReadingHash(route:{page:string;option?:string;horizon?:string;origin?:string;options?:string;focus?:string;returnTo?:string;family?:string;zone?:string;view?:string}){
- if(!['acquisition','integration','fonctionnement','scenarios','methodes','organisation-delivery'].includes(route.page)&&!['charges-acquisition','charges-integration','charges-fonctionnement'].includes(route.page))return null;
+export function phaseReadingHash(route:{page:string;option?:string;horizon?:string;origin?:string;options?:string;focus?:string;returnTo?:string;family?:string;zone?:string}){
+ if(!['acquisition','integration','fonctionnement','scenarios','methodes','organisation-delivery','equipes-produit','integration-transverse'].includes(route.page)&&!['charges-acquisition','charges-integration','charges-fonctionnement'].includes(route.page))return null;
  const query=new URLSearchParams();
- for(const key of ['option','focus','horizon','origin','options','returnTo','family','zone','view'] as const)if(route[key]&&(key!=='view'||route.page==='organisation-delivery')&&(key!=='horizon'||horizons.includes(route[key]!)))query.set(key,route[key]!);
+ for(const key of ['option','focus','horizon','origin','options','returnTo','family','zone'] as const)if(route[key]&&(key!=='horizon'||horizons.includes(route[key]!)))query.set(key,route[key]!);
  return '#'+route.page+(query.size?'?'+query.toString():'');
 }
 export function contextualEconomicLink(href:string,option:string,horizon?:string,context:{origin?:string;options?:string}={}){

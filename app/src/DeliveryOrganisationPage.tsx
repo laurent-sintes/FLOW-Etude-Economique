@@ -11,34 +11,28 @@ function Responsibilities({headers,rows}:{headers:string[];rows:{id:string;label
  </table>;
 }
 
-export function DeliveryOrganisationPage({option,view,focus}:{option:string;view?:string;focus?:string}){
+export function DeliveryOrganisationPage({page,option,focus}:{page:'organisation-delivery'|'equipes-produit'|'integration-transverse';option:string;focus?:string}){
  const {data}=useStudy();
  const copy=data.ui.essential.delivery_organisation;
  const office=data.content.framework.transformation;
- const organisation=data.ui.essential.nav.find((item:Data)=>item.id==='organisation-delivery');
- const current=view||organisation.default_view;
  const team=copy.teams.find((item:Data)=>item.id===focus)||copy.teams[0];
- const next=organisation.children[organisation.children.findIndex((item:Data)=>item.id===current)+1];
+ const next=page==='organisation-delivery'?'equipes-produit':page==='equipes-produit'?'integration-transverse':null;
  const context=useReadingContext();
  const assumptions=economicHash({...context,page:'parametres',option,focus:'programme'})!;
- const organisationLink=(id:string,teamId?:string)=>phaseReadingHash({...context,page:'organisation-delivery',option,focus:teamId,view:id===organisation.default_view?undefined:id})!;
- const nextLink=next?organisationLink(next.id):economicHash({...context,page:'evaluation-core',option})!;
+ const nextLink=next?phaseReadingHash({...context,page:next,option})!:economicHash({...context,page:'evaluation-core',option})!;
 
  return <div className="economic-dossier">
-  <nav className="eco-navigation" aria-label={organisation.label}>
-   {organisation.children.map((item:Data)=><a key={item.id} href={organisationLink(item.id)} aria-current={item.id===current?'page':undefined}>{item.label}</a>)}
-  </nav>
-  {current==='office'&&<section className="eco-section">
+  {page==='organisation-delivery'&&<section className="eco-section">
    <p><MethodText>{copy.office_intro}</MethodText></p>
    <Responsibilities headers={[copy.office_role_column,copy.office_mission_column,copy.capacity_column]}
     rows={office.roles.map((role:Data)=>({id:role.id,label:role.nom,mission:role.mission,capacity:role.etp+' '+copy.office_capacity_unit}))}/>
    <p>{copy.office_budget}</p>
    <a className="text-button" href={assumptions}>{copy.assumptions_link} →</a>
   </section>}
-  {current==='equipes'&&<section className="eco-section">
+  {page==='equipes-produit'&&<section className="eco-section">
    <p><MethodText>{copy.teams_intro}</MethodText></p>
    <nav className="eco-options delivery-team-navigation" aria-label={copy.teams_navigation}>
-    {copy.teams.map((item:Data)=><a key={item.id} href={organisationLink('equipes',item.id)} aria-current={item.id===team.id?'true':undefined}>{item.title}</a>)}
+    {copy.teams.map((item:Data)=><a key={item.id} href={phaseReadingHash({...context,page,option,focus:item.id})!} aria-current={item.id===team.id?'true':undefined}>{item.title}</a>)}
    </nav>
    <h2>{team.title}</h2>
    <p>{team.scope}</p>
@@ -51,7 +45,7 @@ export function DeliveryOrganisationPage({option,view,focus}:{option:string;view
    <p>{copy.capacity_note}</p>
    <p>{copy.buy}</p>
   </section>}
-  {current==='integration'&&<section className="eco-section">
+  {page==='integration-transverse'&&<section className="eco-section">
    <p><MethodText>{copy.coordination_intro}</MethodText></p>
    <Responsibilities headers={[copy.train_area_column,copy.train_mission_column]}
     rows={copy.coordination_roles.map((role:Data)=>({id:role.label,label:role.label,mission:role.mission}))}/>
@@ -59,6 +53,6 @@ export function DeliveryOrganisationPage({option,view,focus}:{option:string;view
    <p>{copy.example}</p>
    <p><a className="text-button" href="https://framework.scaledagile.com/team-and-technical-agility-discipline/">{copy.coordination_reference}</a></p>
   </section>}
-  <a className="framework-phase-next text-button" href={nextLink}>{next?.label||copy.costs_link}<ArrowRight size={18} aria-hidden="true"/></a>
+  <a className="framework-phase-next text-button" href={nextLink}>{next?data.ui.essential.pages[next].title:copy.costs_link}<ArrowRight size={18} aria-hidden="true"/></a>
  </div>;
 }
