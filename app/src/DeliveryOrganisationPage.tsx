@@ -21,7 +21,7 @@ export function DeliveryOrganisationPage({page,option,focus}:{page:'organisation
  const assumptions=economicHash({...context,page:'parametres',option,focus:'programme'})!;
  const nextLink=next?phaseReadingHash({...context,page:next,option})!:economicHash({...context,page:'evaluation-core',option})!;
 
- return <div className="economic-dossier">
+ return <div className="essential-page economic-dossier">
   {page==='organisation-delivery'&&<section className="eco-section">
    <p><MethodText>{copy.office_intro}</MethodText></p>
    <Responsibilities headers={[copy.office_role_column,copy.office_mission_column,copy.capacity_column]}

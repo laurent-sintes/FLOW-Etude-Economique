@@ -21,7 +21,7 @@ const output=path.resolve(flags.get('--output')||'tmp/pages-validation-report.js
 await fs.mkdir(path.dirname(output),{recursive:true});
 const oracle=JSON.parse((await fs.readFile(casesPath,'utf8')).replace(/^\uFEFF/,''));
 assert.equal(Object.keys(oracle.cases).length,6,'Six current model scenarios are required.');
-const navRoutes=['preetudes','preetude-projets','preetude-solutions','preetude-couts','preetude-productivite','charges-acquisition','charges-integration','charges-fonctionnement','synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','acquisition','integration','fonctionnement','scenarios','methodes','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire','telechargements'];
+const navRoutes=['preetudes','preetude-projets','preetude-solutions','preetude-couts','preetude-productivite','charges-acquisition','charges-integration','charges-fonctionnement','organisation-delivery','equipes-produit','integration-transverse','synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','acquisition','integration','fonctionnement','scenarios','methodes','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire','telechargements'];
 const synvanceProviders=['microsoft','sap'];
 const routes=[navRoutes[0],...['business','oms','costs',...synvanceProviders].map(page=>'synvance-'+page),...navRoutes.slice(1)];
 const report={url:site.href,status:'running',routes:{},worker:{},proofs:{},storage:{},errors:[],warnings:[]};
@@ -115,7 +115,13 @@ async function checkFrameworkJourney(data){
    }else assert.equal(await page.locator('.make-audit').count(),0);
    assert.ok(await page.locator('.journey-limits li').count()>0);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));combinations.push({width,phase,option});
   }
-  await route('charges-fonctionnement?option=microsoft&horizon=3');await page.locator('a.framework-phase-next').click();await page.waitForURL(/#evaluation-core\?option=microsoft&horizon=3(?:&origin=project&options=java-spring%2Cmicrosoft%2Csap)?$/);
+  await route('charges-fonctionnement?option=microsoft&horizon=3');
+  for(const destination of ['organisation-delivery','equipes-produit','integration-transverse']){
+   await page.locator('a.framework-phase-next').click();
+   await page.waitForURL(new RegExp('#'+destination+'[?]option=microsoft&horizon=3'));
+   await page.locator('main .delivery-responsibilities').waitFor();
+  }
+  await page.locator('a.framework-phase-next').click();await page.waitForURL(/#evaluation-core\?option=microsoft&horizon=3(?:&origin=project&options=java-spring%2Cmicrosoft%2Csap)?$/);
   await page.locator('.eco-options a[aria-current="true"]').waitFor();assert.match(await page.locator('.eco-options a[aria-current="true"]').innerText(),/Microsoft/);
   await route('scenarios?option=sap&horizon=7');assert.equal(await page.locator('.journey-scenario-steps>li').count(),4);assert.equal(await page.locator('a.framework-primary-link').getAttribute('href'),'#comparer?option=sap&horizon=7&origin=project&options=java-spring%2Cmicrosoft%2Csap');
   await route('methodes');assert.equal(await page.locator('.journey-methods article').count(),7);await page.locator('.journey-methods a[href="#modele"]').click();await page.locator('.model-reading').waitFor();await page.locator('a.journey-method-back').click();await page.locator('.journey-methods').waitFor();
