@@ -265,8 +265,29 @@ def build_gross_evaluations(economic, data, baseline, content, glossary, version
                         core['revision_summary']=dict(jh=core['adopted_jh']+delta,delta_jh=delta,
                             cost_eur_ht=money_round(sum((Decimal(str(r['adopted_cost_eur_ht'])) for r in core['rows']),Decimal(0))+cost_delta),
                             delta_cost_eur_ht=money_round(cost_delta),rows=[dict(id=r['id'],label=r['label'],baseline_jh=r['adopted_jh'],jh=r['detail']['revision']['jh'],cost_eur_ht=r['detail']['revision']['cost_eur_ht']) for r in revised])
+                    core['comparison_totals'] = []
+                    for reference in core['rows'][0]['comparisons']:
+                        values = [
+                            next(item['jh'] for item in row['comparisons'] if item['id'] == reference['id'])
+                            for row in core['rows']
+                        ]
+                        total = None if None in values else math.fsum(values)
+                        core['comparison_totals'].append(dict(id=reference['id'], jh=total))
                     core['analysis_order'] = list(spec['analysis_order'])
                     core['roles'] = list(role_totals.values())
+                    activity_totals = {}
+                    for unit in units:
+                        for activity in unit['activities']:
+                            item = activity_totals.setdefault(activity['id'], dict(
+                                id=activity['id'], label=activity['label'], values=[]))
+                            _require(item['label'] == activity['label'], 'Conflicting activity labels')
+                            item['values'].append(activity['jh'])
+                    core['activities'] = [
+                        dict(id=item['id'], label=item['label'], jh=math.fsum(item['values']))
+                        for item in activity_totals.values()
+                    ]
+                    _require(math.isclose(math.fsum(a['jh'] for a in core['activities']),
+                                          core['adopted_jh'], abs_tol=1e-8), 'Activity effort does not reconcile')
                     reading['construction'] = [L['core_note'],L['core_construction']]
                 else:
                     rows = [_row(r['id'],_prose(r['livrable']),r['jh'],L['jh'],L['initial']) for r in selection['travaux']]

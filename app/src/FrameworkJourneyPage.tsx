@@ -34,6 +34,7 @@ export function FrameworkJourneyPage({page,option,horizon,focus,onChoose}:{page:
  </div>;
  if(!phase)return null;
  const provider=phase.providers.find((p:Data)=>p.option_ref===current.id),index=J.phases.findIndex((p:Data)=>p.id===page);
+ const detailedMethod=current.id==='java-spring'?<section className="journey-detailed-method" id={target('method')} tabIndex={-1}><FrameworkMakeAudit plan={phase.make_audit}/><a className="text-button" href={phaseReadingHash({...context,page,option:current.id,horizon,focus:'summary'})!}>{'↑ '+L.output}</a></section>:null;
  const next=J.phases[index+1],nextHref=next?phaseReadingHash({...context,page:next.id,option:current.id,horizon})!:phaseReadingHash({...context,page:'scenarios',option:current.id,horizon})!,nextLabel=L.next+' · '+(next?next.title:data.ui.essential.pages.scenarios.title),resultHref=phaseReadingHash({...context,page:'charges-'+page,option:current.id,horizon})!;
  return <div className="essential-page framework-journey" data-framework-phase={page}>
   <Text text={phase.intro}/>
@@ -41,13 +42,14 @@ export function FrameworkJourneyPage({page,option,horizon,focus,onChoose}:{page:
   <PhaseOptionNavigation journey={J} phase={page} option={current.id} onChoose={onChoose} horizon={horizon}/>
   <DossierSheet view={current.id}><h2 ref={heading} id={target('summary')} tabIndex={-1}>{current.label}</h2><section className="journey-result"><h3>{L.output}</h3><Text text={provider.output}/></section>
    <p className="journey-option-status"><strong>{L.state+' : '}</strong>{provider.status}</p>
-   <nav className="journey-reading-shortcuts" aria-label={L.secondary}><a href={resultHref}>{data.ui.essential.gross_evaluations.results}<ArrowRight size={16} aria-hidden="true"/></a><a href={nextHref}>{nextLabel}<ArrowRight size={16} aria-hidden="true"/></a>{current.id==='java-spring'&&<a href={phaseReadingHash({...context,page,option:current.id,horizon,focus:'method'})!}>{L.audit}</a>}</nav>
+   <nav className="journey-reading-shortcuts" aria-label={L.secondary}><a href={resultHref}>{data.ui.essential.gross_evaluations.results}<ArrowRight size={16} aria-hidden="true"/></a><a href={nextHref}>{nextLabel}<ArrowRight size={16} aria-hidden="true"/></a>{current.id==='java-spring'&&<a href={phaseReadingHash({...context,page,option:current.id,horizon,focus:'method'})!}>{phase.make_audit.mapping?.shortcut||L.audit}</a>}</nav>
    <p className="journey-phase-principle"><strong>{current.id==='java-spring'?V.approach.matrix.make_label:V.approach.matrix.buy_label}{' · '}</strong><MethodText>{current.id==='java-spring'?phase.make:phase.buy}</MethodText></p>
 
    <div className="journey-treatment">{['inputs','treatment'].map(key=><section key={key}><h3>{L[key]}</h3>{key==='treatment'?<ol>{provider[key].map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ol>:<ul>{provider[key].map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ul>}</section>)}</div>
-   <aside className="journey-example"><h3>{L.example}</h3><Text text={provider.example}/></aside>
+   {phase.make_audit.mapping&&detailedMethod}
+   {(!phase.make_audit.mapping||current.id!=='java-spring')&&<aside className="journey-example"><h3>{L.example}</h3><Text text={provider.example}/></aside>}
    <section className="journey-limits"><h3>{L.limits}</h3><ul>{provider.limits.map((text:string)=><li key={text}><MethodText>{text}</MethodText></li>)}</ul></section>
-   {current.id==='java-spring'&&<section className="journey-detailed-method" id={target('method')} tabIndex={-1}><FrameworkMakeAudit plan={phase.make_audit}/><a className="text-button" href={phaseReadingHash({...context,page,option:current.id,horizon,focus:'summary'})!}>{'↑ '+L.output}</a></section>}
+   {!phase.make_audit.mapping&&detailedMethod}
    <nav className="journey-links" aria-label={L.references}>{provider.links.map((link:Data)=><a className="text-button" key={link.href} href={contextualEconomicLink(link.href,current.id,horizon,context)}>{link.label}<ArrowRight size={15} aria-hidden="true"/></a>)}</nav>
    <a className="framework-primary-link" href={resultHref}>{data.ui.essential.gross_evaluations.results}<ArrowRight size={18} aria-hidden="true"/></a>
   </DossierSheet>

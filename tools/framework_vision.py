@@ -28,8 +28,11 @@ SCHEMA = _object(dict(
     opening=TITLE_TEXT,
     adaptation=_object(dict(title=TEXT, text=TEXT, href=dict(const='#comparer'), label=TEXT,
         reference_link=_object(dict(href=dict(const='#parametres'), label=TEXT)))),
-    approach=_object(dict(title=TEXT, steps=dict(type='array', minItems=1,
-        items=_object(dict(id=IDENTIFIER, title=TEXT, text=TEXT))),
+    approach=_object(dict(title=TEXT,intro=TEXT,
+        labels=_object(dict(inputs=TEXT,treatment=TEXT,output=TEXT,links=TEXT)),
+        steps=dict(type='array',minItems=7,maxItems=7,
+        items=_object(dict(id=IDENTIFIER,title=TEXT,text=TEXT,inputs=TEXT,treatment=TEXT,output=TEXT,
+            links=dict(type='array',minItems=1,items=READING_LINK)))),
         matrix=_object(dict(caption=TEXT, activity_label=TEXT, make_label=TEXT, buy_label=TEXT,
             rows=dict(type='array', minItems=3, maxItems=3, items=MATRIX_ROW), notes=PARAGRAPHS)))),
     evidence=_object(dict(title=TEXT, items=dict(type='array', minItems=1,
@@ -50,6 +53,20 @@ STACK_READING = _object(dict(title=TEXT, intro=TEXT, choices=TEXT,
 PROVIDER['properties']['stack_reading'] = STACK_READING
 
 MAKE_AUDIT = _object(dict(title=TEXT,intro=TEXT,steps=dict(type='array',minItems=1,items=_object(dict(title=TEXT,text=TEXT,rule_refs=dict(type='array',uniqueItems=True,items=TEXT)))),method=dict(enum=['core_method','net_method','run_method']),sections=dict(type='array',uniqueItems=True,items=TEXT),links=dict(type='array',minItems=1,items=READING_LINK)))
+MAPPING = _object(dict(
+    title=TEXT, intro=TEXT, shortcut=TEXT, relation=TEXT,
+    steps=dict(type='array', minItems=5, maxItems=5, items=TITLE_TEXT),
+    example=_object(dict(
+        title=TEXT, capability_label=TEXT, function_label=TEXT, feature_label=TEXT,
+        code_label=TEXT, boundary_label=TEXT,
+        capability_ref=TEXT, function_ref=TEXT, component_source=TEXT, component_ref=TEXT,
+        references=dict(type='array', minItems=1, items=_object(dict(
+            title=TEXT, source=TEXT, repository=dict(type='string',pattern=r'^https://github[.]com/[^/]+/[^/]+$'),
+            file_refs=dict(type='array',minItems=1,uniqueItems=True,items=TEXT)))))),
+    estimation=TITLE_TEXT, roles=_object(dict(title=TEXT,text=TEXT,href=TEXT,label=TEXT)), appendix=READING_LINK, return_label=TEXT,
+))
+MAKE_AUDIT['properties']['mapping'] = MAPPING
+
 SCHEMA['properties']['journey'] = _object(dict(title=TEXT,
     options=dict(type='array', minItems=3, maxItems=3, items=_object(dict(id=TEXT,label=TEXT,short_label=TEXT,status=TEXT))),
     pending=TEXT, flow=ARRAY_TEXT, consolidation=TITLE_TEXT, method_groups=dict(type='array',minItems=1,items=_object(dict(id=TEXT,title=TEXT))), labels=_object({key:TEXT for key in ('common','inputs','treatment','output','limits','compare','option','next','references','steps','future','state','example','phase','phases','secondary','formula','variables','implementation','audit')}),
@@ -62,6 +79,36 @@ SCHEMA['required'].append('journey')
 
 
 
+def _mapping_example(spec):
+    from capability_catalog import catalog
+    def evidence(path):
+        target=(ROOT/path).resolve()
+        if not target.is_relative_to(ROOT.resolve()) or not target.is_file():
+            raise ValueError(f'{ERROR}:mapping:unknown evidence:{path}')
+        return read(target)
+    try:
+        capability=next(row for row in catalog()['rows'] if row['id']==spec['capability_ref'])
+        function=next(row for row in capability['fonctions'] if row['id']==spec['function_ref'])
+        component=next(row for row in evidence(spec['component_source'])['components'] if row['id']==spec['component_ref'])
+        if capability['id'] not in component['capabilities']:
+            raise ValueError(f'{ERROR}:mapping:component does not cover capability')
+        references=[]
+        for reference in spec['references']:
+            perimeter=evidence(reference['source'])
+            files=next(row for row in perimeter['components'] if row['component']==component['id'])['files']
+            if not set(reference['file_refs'])<=set(files):
+                raise ValueError(f'{ERROR}:mapping:file outside component')
+            references.append(dict(title=reference['title'],revision=perimeter['source_revision'],
+                files=[dict(path=path,url=reference['repository']+'/blob/'+perimeter['source_revision']+'/'+path)
+                       for path in reference['file_refs']]))
+    except (KeyError,StopIteration) as error:
+        raise ValueError(f'{ERROR}:mapping:unresolved capability, function or component') from error
+    return dict(capability=dict(id=capability['id'],native_id=capability['capacite_id'],
+                                label=capability['capacite']['nom'],definition=capability['capacite']['definition']),
+                function=deepcopy(function),feature=dict(id=component['id'],label=component['label'],
+                   outcome=component['common_outcome'],boundary=component['common_boundary']),references=references)
+
+
 def compile_vision(document, glossary, routes, documents):
     """Keep one editable text owner and reject unresolvable reading links."""
     errors = sorted(Draft202012Validator(SCHEMA).iter_errors(document), key=lambda e: str(e.path))
@@ -69,8 +116,8 @@ def compile_vision(document, glossary, routes, documents):
         error = errors[0]
         raise ValueError(f'{ERROR}:{SOURCE}:{list(error.path)}:{error.message}')
 
-    if [step['id'] for step in document['approach']['steps']] != ['besoin', 'investissement']:
-        raise ValueError(f'{ERROR}:{SOURCE}:approach.steps:expected need and investment reading order')
+    if [step['id'] for step in document['approach']['steps']] != ['besoin','acquisition','integration','fonctionnement','delivery','valorisation','comparaison']:
+        raise ValueError(f'{ERROR}:{SOURCE}:approach.steps:expected complete evaluation reading order')
 
     if [row['id'] for row in document['approach']['matrix']['rows']] != ['acquisition', 'integration', 'fonctionnement']:
         raise ValueError(f'{ERROR}:{SOURCE}:approach.matrix:expected acquisition, integration and operation reading order')
@@ -91,6 +138,8 @@ def compile_vision(document, glossary, routes, documents):
         path for path in documents if path.startswith(('source/', 'sources/'))}
     if 'synvance' in routes:
         allowed.update('#synvance-'+key for key in ('microsoft','sap','costs','business','oms'))
+    if 'complexite' in routes:
+        allowed.update(('#complexite?focus=formules','#complexite?focus=roles'))
     if 'modele' in routes:
         allowed.add('#modele?section=scope')
     for link in [document['adaptation'], document['adaptation']['reference_link'], *document['evidence']['items'],
@@ -135,6 +184,16 @@ def compile_vision(document, glossary, routes, documents):
             for child in value.values():check_links(child)
         elif isinstance(value,list):
             for child in value:check_links(child)
+    for phase in journey['phases']:
+        if 'mapping' in phase['make_audit']:
+            if phase['id']!='acquisition':
+                raise ValueError(f'{ERROR}:mapping:expected acquisition phase')
+            _mapping_example(phase['make_audit']['mapping']['example'])
+    check_links(document['approach'])
+    for step in document['approach']['steps']:
+        hrefs=[link['href'] for link in step['links']]
+        if len(hrefs)!=len(set(hrefs)):
+            raise ValueError(f'{ERROR}:approach.steps:duplicate reading link')
     check_links(journey)
 
     try:
@@ -153,6 +212,9 @@ def hydrate_framework_vision(ui, glossary):
     routes = {item['id'] for item in essential['nav']} & set(essential['pages'])
     documents = read(ROOT / 'config/publication.yaml')['documents']
     document = compile_vision(read(ROOT / SOURCE), glossary, routes, documents)
+    mapping=document['journey']['phases'][0]['make_audit'].get('mapping')
+    if mapping:
+        mapping['example']['resolved']=_mapping_example(mapping['example'])
     elements = {element['id']: element for element in read(ROOT / 'source/stacks/java-spring.yaml')['elements']}
     for provider in document['journey']['phases'][0]['providers']:
         if 'stack_reading' in provider:

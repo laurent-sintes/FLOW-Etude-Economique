@@ -42,6 +42,10 @@ class GrossEvaluationsTests(unittest.TestCase):
             self.assertEqual(len(row['references']),4)
             self.assertEqual(row['rationale'],self.spec['unit_arbitrations'][row['id']])
         self.assertEqual(sum(u['total_jh'] for u in self.units),active_reference()['total_jh'])
+        self.assertAlmostEqual(sum(a['jh'] for a in core['activities']),core['adopted_jh'])
+        for activity in core['activities']:
+            expected=sum(a['jh'] for unit in self.units for a in unit['activities'] if a['id']==activity['id'])
+            self.assertAlmostEqual(activity['jh'],expected)
 
     def test_five_comparisons_are_priced_without_changing_retained_decisions(self):
         from gross_evaluations import value_unit_comparisons
@@ -58,6 +62,10 @@ class GrossEvaluationsTests(unittest.TestCase):
         self.assertEqual(master['adopted_cost_eur_ht'],active_reference()['units']['master-data-java-spring']['cost_eur_ht'])
         self.assertEqual(next(r['cost_eur_ht'] for r in master['comparisons'] if r['id']=='cosmic-isbsg'),780337.5)
         self.assertEqual(sum(r['adopted_jh'] for r in core['rows']),active_reference()['total_jh'])
+        self.assertEqual([t['id'] for t in core['comparison_totals']],[r['id'] for r in core['rows'][0]['comparisons']])
+        for total in core['comparison_totals']:
+            values=[next(c['jh'] for c in row['comparisons'] if c['id']==total['id']) for row in core['rows']]
+            self.assertAlmostEqual(total['jh'],sum(values))
 
     def test_module_analysis_distinguishes_interface_work_from_incremental_functional_size(self):
         core=self.reading['phases']['acquisition']['options']['java-spring']['core']

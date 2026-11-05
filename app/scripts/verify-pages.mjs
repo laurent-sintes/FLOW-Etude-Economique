@@ -21,7 +21,7 @@ const output=path.resolve(flags.get('--output')||'tmp/pages-validation-report.js
 await fs.mkdir(path.dirname(output),{recursive:true});
 const oracle=JSON.parse((await fs.readFile(casesPath,'utf8')).replace(/^\uFEFF/,''));
 assert.equal(Object.keys(oracle.cases).length,6,'Six current model scenarios are required.');
-const navRoutes=['preetudes','preetude-projets','preetude-solutions','preetude-couts','preetude-productivite','charges-acquisition','charges-integration','charges-fonctionnement','organisation-delivery','equipes-produit','integration-transverse','synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','acquisition','integration','fonctionnement','scenarios','methodes','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire','telechargements'];
+const navRoutes=['accueil','preetudes','preetude-projets','preetude-solutions','preetude-couts','preetude-productivite','charges-acquisition','charges-integration','charges-fonctionnement','organisation-delivery','equipes-produit','integration-transverse','synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','acquisition','integration','fonctionnement','scenarios','methodes','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire','telechargements'];
 const synvanceProviders=['microsoft','sap'];
 const routes=[navRoutes[0],...['business','oms','costs',...synvanceProviders].map(page=>'synvance-'+page),...navRoutes.slice(1)];
 const report={url:site.href,status:'running',routes:{},worker:{},proofs:{},storage:{},errors:[],warnings:[]};
@@ -95,16 +95,26 @@ async function checkFrameworkNavigation(){
 async function checkFrameworkJourney(data){
  const combinations=[];
  for(const width of [1440,390]){
-  await page.setViewportSize({width,height:1000});await route('vision');
+  await page.setViewportSize({width,height:1000});await route('accueil');
   assert.deepEqual(await page.locator('.vision-decision-links a').evaluateAll(els=>els.map(el=>el.getAttribute('href'))),['#comparer','#modele','#conditions-realisation']);
   assert.equal(await page.locator('.vision-readiness-links a').count(),4);
-  if(width===390){assert.equal(await page.locator('.vision-phase-mobile>article:visible').count(),3);assert.equal(await page.locator('.vision-phase-desktop:visible').count(),0);}
+  await route('vision');
+  assert.equal(await page.locator('.vision-evaluation-step').count(),7);
+  for(const stage of await page.locator('.vision-evaluation-step').all()){
+   assert.equal(await stage.locator('.vision-stage-chain>div').count(),3);
+   assert.ok(await stage.locator('.vision-stage-links a').count()>0);
+  }
   for(const phase of ['acquisition','integration','fonctionnement'])for(const option of ['java-spring','microsoft','sap']){
    await route(phase+'?option='+option+'&horizon=5');
    assert.equal(await page.locator('.journey-treatment section').count(),2);assert.equal(await page.locator('.journey-example').count(),1);
    assert.equal(await page.locator('.journey-option-navigation a[aria-current="page"]').getAttribute('href'),'#'+phase+'?option='+option+'&horizon=5&origin=project&options=java-spring%2Cmicrosoft%2Csap');
    assert.equal(await page.locator('.journey-reading-shortcuts a').count(),option==='java-spring'?3:2);
    assert.equal(await page.locator('.journey-reading-shortcuts a').first().getAttribute('href'),'#charges-'+phase+'?option='+option+'&horizon=5&origin=project&options=java-spring%2Cmicrosoft%2Csap');
+   if(phase==='acquisition'&&option==='java-spring'){
+    assert.equal(await page.locator('.make-mapping-example>ol>li').count(),5);
+    assert.equal(await page.locator('.make-mapping-example a[href*="/blob/"]').count(),4);
+    assert.equal(await page.locator('.make-rule').count(),0);
+   }
    if(option==='java-spring'){
     assert.ok(await page.locator('.make-audit-steps>li').count()>1);
     for(const element of await page.locator('.make-rule').all()){
@@ -149,7 +159,7 @@ try{
  const bootstrapUrl=new URL(manifest.bootstrap,manifestUrl).href,bootstrapResponse=await page.request.get(bootstrapUrl);assert.ok(bootstrapResponse.ok());const data=await bootstrapResponse.json();
  equalProjection(data.baseline,oracle.cases.reference.result,'Static reference differs from Python');assert.deepEqual(data.ui.essential.nav.map(row=>row.id).sort(),[...navRoutes].sort());
  assert.deepEqual(data.ui.essential.active_options,['java-spring','microsoft','sap']);assert.equal(data.baseline.options.length,5,'Historical options remain in the engine');
- await page.waitForFunction(()=>location.hash==='#vision');assert.equal(await page.locator('.brand-home').getAttribute('href'),'#vision');
+ await page.waitForFunction(()=>location.hash==='#accueil');assert.equal(await page.locator('.brand-home').getAttribute('href'),'#accueil');
  for(const width of [1440,390]){
   await page.setViewportSize({width,height:width===390?844:1000});report.routes[width]=[];
   for(const id of routes){
@@ -170,8 +180,21 @@ try{
  const assets=await page.locator('img').evaluateAll(els=>els.map(el=>({src:el.src,loaded:el.complete&&el.naturalWidth>0})));assert.ok(assets.length);for(const asset of assets){assert.ok(asset.loaded);assert.ok(new URL(asset.src).pathname.startsWith(site.pathname));}report.assets=assets.length;
  await route('charges-acquisition?option=java-spring');const grossResponse=await page.request.get(new URL(manifest.routes['/api/gross-evaluations'],manifestUrl).href);assert.ok(grossResponse.ok());const gross=await grossResponse.json();
  const core=gross.phases.acquisition.options['java-spring'].core;assert.equal(core.adopted_jh,data.baseline.options.find(o=>o.stack==='java-spring').obtention?.total_jh??data.content.core_product_scope.proposal.adopted_jh);
- assert.equal(await page.locator('.gross-adopted-lots tbody tr').count(),core.rows.length);assert.equal(await page.locator('.gross-completeness').getAttribute('data-core-status'),core.status);assert.ok((await page.locator('#gross-focus-proposal').innerText()).includes(gross.labels.adoption_note.replaceAll('**','')));assert.equal(await page.locator('.gross-proposal').count(),0);
- for(const row of core.rows){await route('charges-acquisition?option=java-spring&focus='+encodeURIComponent(row.id));assert.equal(await page.locator('#gross-focus-'+row.id).getAttribute('open'),'');assert.ok((await page.locator('#gross-focus-'+row.id).innerText()).length>80);}
+ assert.equal(await page.locator('.gross-effort-matrix tbody tr').count(),core.rows.length);
+ assert.equal(await page.locator('[data-core-status]').getAttribute('data-core-status'),core.status);
+ assert.equal(await page.locator('.gross-activity-table tbody tr').count(),core.activities.length);
+ assert.doesNotMatch(await page.locator('.gross-development').innerText(),/€|tarif|TJM/);
+ for(const row of core.rows){
+  const cell=page.locator('[data-unit="'+row.id+'"]');
+  await cell.getByRole('button').focus();
+  await page.locator('[role="tooltip"]:popover-open').waitFor();
+  assert.ok((await page.locator('[role="tooltip"]:popover-open').innerText()).length>40);
+  await page.keyboard.press('Escape');
+  await route('charges-acquisition?option=java-spring&focus='+encodeURIComponent(row.id));
+  await page.getByRole('dialog').waitFor();
+  assert.ok((await page.getByRole('dialog').innerText()).length>80);
+  await page.keyboard.press('Escape');
+ }
  report.proofs.phaseCharges={adopted_jh:core.adopted_jh,units:core.rows.length,adoptionStatus:core.status};
  await route('evaluation-core?option=java-spring&horizon=10');assert.equal(await page.locator('.eco-cost-overview>article').count(),3);assert.equal(await page.locator('.eco-year-chart li').count(),10);
  await route('parametres');assert.equal(await page.locator('.eco-determinants article').count(),4);report.proofs.fixedEconomicDossier=true;
@@ -188,7 +211,7 @@ try{
  await route('capacite-realisation?view=hotspots');assert.equal(await page.locator('[data-hotspot]').count(),delivery.hotspots.length);await route('capacite-realisation?view=gates');assert.equal(await page.locator('[data-delivery-gate]').count(),delivery.gates.length);
  await route('cartographie');const scope=delivery.scope;assert.equal(await page.locator('.cartography-page .model-map a').getAttribute('href'),scope.link.href);assert.ok((await page.locator('.cartography-page').innerText()).includes(scope.source.version));
  await page.locator('main a[href="#modele?section=scope"]').click();await page.waitForFunction(()=>document.activeElement?.id==='model-chapter-scope');assert.equal(await page.locator('.model-map-systems').count(),1);assert.equal(await page.locator('.model-scope-areas').count(),0);
- await page.goto(new URL('#perimetre-retenu',site).href);await page.waitForFunction(()=>location.hash==='#cartographie');await page.locator('.cartography-page').waitFor();assert.equal(await page.locator('.model-scope-areas li').count(),scope.hierarchy.flatMap(domain=>domain.subdomains.flatMap(sub=>sub.areas)).length);assert.equal(await page.locator('.cartography-provenance time').getAttribute('datetime'),scope.source.date);report.proofs.sponsorJourney={visionLanding:true,realizationCriteria:true,readinessDossier:true,nativeCartography:true};
+ await page.goto(new URL('#perimetre-retenu',site).href);await page.waitForFunction(()=>location.hash==='#cartographie');await page.locator('.cartography-page').waitFor();assert.equal(await page.locator('.model-scope-areas li').count(),scope.hierarchy.flatMap(domain=>domain.subdomains.flatMap(sub=>sub.areas)).length);assert.equal(await page.locator('.cartography-provenance time').getAttribute('datetime'),scope.source.date);report.proofs.sponsorJourney={siteLanding:true,realizationCriteria:true,readinessDossier:true,nativeCartography:true};
  await route('synvance');for(const provider of synvanceProviders){await page.locator(`main a[href="#synvance-${provider}"]`).first().click();await route('synvance-'+provider);assert.equal(await page.locator('.synvance-provider').count(),1);assert.equal(await page.locator(`.synvance-provider[data-provider="${provider}"]`).count(),1);assert.equal(await page.locator('.synvance-document').count(),0);await page.locator('main a[href="#synvance"]').first().click();await route('synvance');}
  const documents=data.content.synvance_reference.documents.items;assert.equal(documents.filter(row=>row.format==='pdf').length,5);assert.equal(documents.filter(row=>row.format==='xlsx').length,2);assert.equal(await page.locator('.synvance-document').count(),documents.length);
  for(let index=0;index<documents.length;index++){const doc=documents[index],link=page.locator('.synvance-document').nth(index).locator('a[download]'),url=new URL(await link.getAttribute('href'),page.url()).href;assert.ok(new URL(url).pathname.startsWith(site.pathname));const response=await page.request.get(url);assert.ok(response.ok());const bytes=await response.body();assert.equal(createHash('sha256').update(bytes).digest('hex'),manifest.documents[doc.path.split('#')[0]].sha256);if(doc.format==='pdf')assert.equal(bytes.subarray(0,5).toString(),'%PDF-');}

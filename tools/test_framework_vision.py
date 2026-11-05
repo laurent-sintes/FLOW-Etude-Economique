@@ -38,6 +38,10 @@ class FrameworkVisionTests(unittest.TestCase):
         for group in hydrated_vision['journey']['phases'][0]['providers'][0]['stack_reading']['groups']:
             elements = group.pop('elements')
             self.assertEqual(elements, [dict(id=ref, name=stack_elements[ref]['nom'], description=stack_elements[ref]['description']) for ref in group['element_refs']])
+        resolved=hydrated_vision['journey']['phases'][0]['make_audit']['mapping']['example'].pop('resolved')
+        self.assertEqual(resolved['capability']['native_id'],'D01.g')
+        self.assertEqual(resolved['function']['id'],'BC-010.01')
+        self.assertEqual(resolved['feature']['id'],'K1')
         self.assertEqual(hydrated_vision, compiled)
         self.assertEqual(self.ui['essential']['framework_vision'], {'source': SOURCE})
         compiled['opening']['text'] = 'Périmètre : {{notion.core_system}}.'
@@ -100,6 +104,22 @@ class FrameworkVisionTests(unittest.TestCase):
             with self.subTest(change=change.__name__), self.assertRaisesRegex(ValueError, 'ERR_FRAMEWORK_VISION'):
                 self.compile(document)
 
+    def test_overview_requires_complete_stage_handoffs_and_resolvable_links(self):
+        compiled=self.compile(self.document)
+        self.assertEqual([s['id'] for s in compiled['approach']['steps']],
+                         ['besoin','acquisition','integration','fonctionnement','delivery','valorisation','comparaison'])
+        for field in ('inputs','treatment','output','links'):
+            broken=deepcopy(self.document)
+            broken['approach']['steps'][0].pop(field)
+            with self.subTest(field=field),self.assertRaisesRegex(ValueError,'ERR_FRAMEWORK_VISION'):
+                self.compile(broken)
+        for links in ([dict(href='#missing-stage',label='Missing')],
+                      [dict(href='#acquisition',label='A'),dict(href='#acquisition',label='B')]):
+            broken=deepcopy(self.document)
+            broken['approach']['steps'][0]['links']=links
+            with self.assertRaisesRegex(ValueError,'ERR_FRAMEWORK_VISION'):
+                self.compile(broken)
+
     def test_hydration_rejects_local_copies_and_undeclared_routes(self):
         for reference in (None, {'source': 'source/fondamentaux.yaml'},
                           {'source': SOURCE, 'text': 'Local override.'}):
@@ -115,7 +135,7 @@ class FrameworkVisionTests(unittest.TestCase):
 
     def test_pre_studies_are_visible_inputs_and_readiness_has_no_standalone_group(self):
         groups = [group for group in self.ui['essential']['nav_groups'] if not group.get('hidden')]
-        self.assertEqual(groups[0]['items'], ['preetudes', 'synvance', 'cartographie', 'preetude-projets', 'preetude-solutions', 'preetude-couts', 'preetude-productivite'])
+        self.assertEqual(next(group for group in groups if group['label']=='Études préalables')['items'], ['preetudes', 'synvance', 'cartographie', 'preetude-projets', 'preetude-solutions', 'preetude-couts', 'preetude-productivite'])
         self.assertNotIn('capacite-realisation', [page for group in groups for page in group['items']])
         self.assertEqual(next(group for group in groups if group['label'] == 'Dossier économique')['items'], ['comparer', 'evaluation-core', 'parametres'])
         links = {item['href'] for item in self.document['evidence']['items']}
@@ -160,6 +180,24 @@ class FrameworkVisionTests(unittest.TestCase):
         document['journey']['methods'][0]['group']='missing'
         with self.assertRaisesRegex(ValueError,'invalid method group'):
             self.compile(document)
+
+    def test_mapping_rejects_a_different_function_component_or_file(self):
+        for field in ('function','component','file'):
+            document=deepcopy(self.document)
+            example=document['journey']['phases'][0]['make_audit']['mapping']['example']
+            if field=='function':example['function_ref']='BC-011.01'
+            elif field=='component':example['component_ref']='K2'
+            else:example['references'][0]['file_refs']=['README.md']
+            with self.subTest(field=field),self.assertRaisesRegex(ValueError,'ERR_FRAMEWORK_VISION:mapping'):
+                self.compile(document)
+        compiled=hydrate_framework_vision(self.ui,self.glossary)['essential']['framework_vision']
+        example=compiled['journey']['phases'][0]['make_audit']['mapping']['example']
+        for spec,actual in zip(example['references'],example['resolved']['references']):
+            perimeter=read(ROOT/spec['source'])
+            self.assertEqual(actual['revision'],perimeter['source_revision'])
+            self.assertEqual([f['path'] for f in actual['files']],spec['file_refs'])
+            for file in actual['files']:
+                self.assertEqual(file['url'],spec['repository']+'/blob/'+actual['revision']+'/'+file['path'])
 
     def test_snapshot_freezes_overview_and_sources_without_affecting_simulations(self):
         study = study_copy()

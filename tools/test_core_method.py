@@ -134,6 +134,41 @@ class CoreMethodTests(unittest.TestCase):
         with patch('core_method.read',side_effect=changed),self.assertRaisesRegex(ValueError,'invalid measured code size'):
             compile_method(original)
 
+    def test_activity_role_table_projects_the_recorded_matrix_and_rejects_drift(self):
+        source=deepcopy(self.document)
+        section=next(s for s in source['sections'] if s['id']=='repartir-roles')
+        binding=next(b for b in section['blocks'] if b['kind']=='activity_roles')
+        allocation=read(ROOT/binding['allocation_source'])
+        result=read(ROOT/binding['source'])
+        rendered=compile_method(source)
+        table=next(b for s in rendered['sections'] if s['id']=='repartir-roles'
+                   for b in s['blocks'] if b['kind']=='table' and b['caption']==binding['caption'])
+        self.assertEqual(len(table['rows']),len(allocation['activity_role_weights']))
+        labels={r['id']:r['label'] for r in result['roles']}
+        notes={note['activity_ref']:note for note in binding['activity_notes']}
+        for row,activity in zip(table['rows'],result['activities']):
+            weights=allocation['activity_role_weights'][activity['id']]
+            self.assertEqual(row[0],activity['label'])
+            for role,weight in weights.items():
+                self.assertIn(f"{weight*100:g} % {labels[role]}",row[1])
+            self.assertEqual(row[2:], [notes[activity['id']]['rationale'],notes[activity['id']]['adapt_when']])
+        self.assertEqual(source,self.document)
+        for missing in ('missing','duplicate'):
+            changed=deepcopy(source)
+            block=next(b for s in changed['sections'] if s['id']=='repartir-roles'
+                       for b in s['blocks'] if b['kind']=='activity_roles')
+            block['activity_notes'][0]['activity_ref']='unknown' if missing=='missing' else block['activity_notes'][1]['activity_ref']
+            with self.assertRaisesRegex(ValueError,'activity role coverage'):
+                compile_method(changed)
+        real_read=read
+        for weights in ({'qa':1},{'qa':.6,'dev_java':.2,'dev_frontend':.05,'securite':.05}):
+            changed=deepcopy(allocation)
+            changed['activity_role_weights']['assessment']=weights
+            def changed_read(path):
+                return changed if path==ROOT/binding['allocation_source'] else real_read(path)
+            with patch('core_method.read',side_effect=changed_read),self.assertRaisesRegex(ValueError,'activity role mapping drift'):
+                compile_method(source)
+
     def test_release_freezes_method_and_presentation_is_not_an_economic_input(self):
         study=study_copy()
         economics=deepcopy(study.baseline)

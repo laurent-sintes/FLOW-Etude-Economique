@@ -41,10 +41,39 @@ BLOCK = dict(oneOf=[
     _object(dict(kind=dict(const='links'), items=dict(type='array', minItems=1,
                  items=_object(dict(href=dict(enum=READING_ROUTES), label=TEXT))))),
     _object(dict(kind=dict(const='example'), ref=IDENTIFIER)),
+    _object(dict(kind=dict(const='activity_roles'), caption=TEXT,
+                 columns=dict(type='array', minItems=4, maxItems=4, items=TEXT),
+                 source=dict(const='audits/2026-10-30-stock-consolidation-09/results.json'),
+                 allocation_source=dict(const='audits/2026-10-30-stock-consolidation-09/inputs.json'),
+                 activity_notes=dict(type='array',minItems=7,maxItems=7,items=_object(dict(
+                     activity_ref=TEXT, rationale=TEXT, adapt_when=TEXT))))),
 ])
 REFERENCE_CARD_SCHEMA = next(item for item in BLOCK['oneOf'] if item['properties']['kind'].get('const') == 'reference_cards')['properties']['cards']['items']
 REFERENCE_CARD_SCHEMA['properties']['measurement'] = _object(dict(
     product_ref=dict(enum=['erpnext','odoo-community','tryton','axelor-open-suite']), label=TEXT))
+
+
+def _activity_roles(block):
+    """Project default keys and editorial guidance without reallocating adopted effort."""
+    result=read(ROOT/block['source'])
+    allocation=read(ROOT/block['allocation_source'])
+    roles={role['id']:role['label'] for role in result['roles']}
+    activities=result['activities']
+    notes={note['activity_ref']:note for note in block['activity_notes']}
+    if (len(notes)!=len(block['activity_notes'])
+            or set(notes)!={a['id'] for a in activities}
+            or set(notes)!=set(allocation['activity_role_weights'])):
+        raise ValueError('ERR_CORE_METHOD:activity role coverage')
+    rows=[]
+    for activity in activities:
+        weights=allocation['activity_role_weights'][activity['id']]
+        if (weights!=activity['role_weights'] or not math.isclose(sum(weights.values()),1)
+                or any(role not in roles or not math.isfinite(weight) or weight<0 for role,weight in weights.items())):
+            raise ValueError('ERR_CORE_METHOD:activity role mapping drift')
+        mapping=' · '.join(f"{weight*100:g} % {roles[role]}" for role,weight in weights.items())
+        note=notes[activity['id']]
+        rows.append([activity['label'],mapping,note['rationale'],note['adapt_when']])
+    return dict(kind='table',caption=block['caption'],columns=block['columns'],rows=rows)
 
 
 def _reference_measurement(card, registry):
@@ -115,6 +144,10 @@ def _compile_document(document, schema, source, error_code):
         if source==METHOD_SOURCE and any(block['kind']=='example' for block in section['blocks']) and section.get('kind')!='example':
             raise ValueError(f'{error_code}:{source}:{section["id"]}:illustration must be separate from method steps')
         for block in section['blocks']:
+            if block['kind']=='activity_roles':
+                table=_activity_roles(block)
+                block.clear()
+                block.update(table)
             if block['kind']=='reference_cards':
                 for card in block['cards']:
                     if 'measurement' in card:
