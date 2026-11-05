@@ -54,12 +54,17 @@ class WorkUnitTests(unittest.TestCase):
             self.assertEqual(u['measurements'][0]['roles'],[{k:r[k] for k in ('id','label','jh','rate_eur_jh')} for r in unit['roles']])
         original=partition(records,[t['id'] for t in self.org['teams']])
         actual=partition(c['allocations'],[t['id'] for t in self.org['teams']])
+        shared_phases = {rule['phase_ref'] for rule in c['abaque']['overrides']}
         for p,q in zip(original,actual):
             self.assertEqual(p['totals'],q['totals'])
-            self.assertEqual([{k:v for k,v in r.items() if k!='record_ids'} for r in p['buckets']], [{k:v for k,v in r.items() if k!='record_ids'} for r in q['buckets']])
+            if p['id'] not in shared_phases:
+                self.assertEqual([{k:v for k,v in r.items() if k!='record_ids'} for r in p['buckets']],
+                                 [{k:v for k,v in r.items() if k!='record_ids'} for r in q['buckets']])
 
     def test_candidates_capabilities_and_details_do_not_allocate_budget(self):
-        u=next(u for u in self.catalog['units'] if u['id']=='core/orders-java-spring')
+        abaque = {**self.catalog['abaque'], 'overrides': []}
+        without_specific_keys = build_work_units(self.study.economic, self.org, abaque=abaque)
+        u = next(u for u in without_specific_keys['units'] if u['id'] == 'core/orders-java-spring')
         self.assertIn('b2c',u['candidate_refs'])
         self.assertEqual([c['team_ref'] for c in u['contributions']],[None])
         details=[u for u in self.catalog['units'] if u['integration_unit_ref']]

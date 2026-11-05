@@ -45,7 +45,11 @@ class DeliveryOrganisationTests(unittest.TestCase):
         for phase in org['reading']['phases']:
             rows=[r for r in table['rows'] if r['phase_ref']==phase['id']]
             refs=[id for r in rows for id in r['record_ids']]
-            self.assertEqual(len(refs),len(set(refs)))
+            for cell in rows:
+                actor = 'governance' if cell['owner_kind'] == 'governance' else cell['team_ref']
+                expected = {part['record_ref'] for part in org['work_catalog']['allocations']
+                            if part['phase'] == phase['id'] and part['team_ref'] == actor}
+                self.assertCountEqual(cell['record_ids'], expected)
             self.assertEqual(set(refs),{r['id'] for r in table['records'] if r['phase']==phase['id']})
             for field in ('jh','cost_eur_ht'):
                 values=[r[field] for r in rows if r[field] is not None]
@@ -55,8 +59,6 @@ class DeliveryOrganisationTests(unittest.TestCase):
         unallocated=next(r for r in table['rows'] if r['owner_kind']=='unallocated' and r['phase_ref']=='integration')
         self.assertGreater(unallocated['cost_eur_ht'],0)
         self.assertIsNone(unallocated['team_ref'])
-        b2c=next(r for r in table['rows'] if r['team_ref']=='b2c')
-        self.assertIsNone(b2c['cost_eur_ht'])
 
     def test_lifecycle_types_and_governance_are_separate(self):
         org=self.study.content['delivery_organisation']
@@ -73,10 +75,11 @@ class DeliveryOrganisationTests(unittest.TestCase):
         row=next(r for r in org['reading']['records'] if r['id']=='core/orders-java-spring')
         self.assertIsNone(row['team_ref'])
         self.assertEqual(set(row['candidate_refs']),{'b2c','wholesale','sourcing-procurement'})
-        for phase in org['reading']['phases']:
-            b=next(b for b in phase['buckets'] if b['team_ref']=='b2c')
-            self.assertIsNone(b['jh'])
-            self.assertIsNone(b['cost_eur_ht'])
+        from work_units import split_record
+        abaque = {**org['work_catalog']['abaque'], 'overrides': []}
+        parts = split_record(row, 'core/orders-java-spring', abaque)
+        self.assertEqual([(part['team_ref'], part['jh'], part['cost_eur_ht']) for part in parts],
+                         [(None, row['jh'], row['cost_eur_ht'])])
         # A known zero remains distinct from an unknown, empty bucket.
         record=dict(id='zero',phase='acquisition',team_ref='known',jh=0,cost_eur_ht=0)
         buckets=partition([record],['known','unknown'])[0]['buckets']

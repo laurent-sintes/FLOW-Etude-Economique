@@ -1,102 +1,62 @@
 # Audit du modèle métier, des calculs et de la logique
 
-Date : 5 novembre 2026. Modèle examiné : révision 13. Audit local, sans publication distante.
+Actualisé le 5 novembre 2026 sur la révision 28 du modèle.
 
-## Conclusion
+Le chiffrage de construction du MDM est **délimité et adopté**. Le dossier Team Topologies présente désormais les équipes durables de delivery, leurs périmètres et leurs interactions dans un graphe consultable. La ventilation des **4 130 JH de Build communs est adoptée**. La priorité suivante est d’affecter le MCO aux équipes et de dimensionner la capacité nécessaire pour tenir leurs responsabilités dans le temps.
 
-Les contrôles arithmétiques effectués ne font apparaître aucun écart dans les charges retenues du Core, leur valorisation, les annuités et les cumuls des options. Les défauts de validation repérés dans l’organisation ont été corrigés sans changer les budgets ni les hypothèses économiques.
+L’estimation de l’intégration est mise de côté dans les priorités de cette revue. Ses jours restent au statut « Non évalué » dans la ventilation et ses totaux.
 
-**La charge d’intégration reste à reprendre. À la demande du porteur de l’étude, ses jours sont exclus de la ventilation et de ses totaux.** Les anciens calculs et financements sont conservés pour la traçabilité. Leur présence dans le moteur ne valide ni leur dimensionnement ni leur répartition entre équipes.
+## Constats traités
 
-L’organisation cible constitue une proposition cohérente de responsabilités durables. Elle ne constitue pas encore un plan de capacité ni une preuve de disponibilité des équipes. Les postes partagés et les travaux restant à affecter sont conservés comme reliquats explicites.
+| Sujet | État sur la révision 27 |
+| --- | --- |
+| Construction du MDM | Le scénario Java/Spring adopté couvre l’autonomie des administrateurs et des data stewards, le studio de schéma et les plugins JAR. Le lot Master Data est retenu à **4 145 JH et 2 695 410 € HT**. Le mappage libre des imports et la recherche avancée restent des options distinctes. [Décision et valorisation](../2026-11-05-adoption-core-923b1e9a7b857870/audit.md) |
+| Frontière Master Data et SCM | Les **400 JH** d’Operational References constituent un lot séparé dans le domaine SCM. L’équipe Master Data porte le producteur et ce composant de lecture opérationnelle. Les consommateurs conservent leurs décisions et leurs usages. [Affectations et frontières](../../source/organisation-delivery.yaml) |
+| Organisation et présentation Team Topologies | La cible distingue six équipes Stream-aligned, deux Platform, deux Complicated-subsystem et une Enabling. L’équipe Intégration est durable et ses accompagnements sont temporaires. Le Transformation Office est présenté comme instance de gouvernance. Les fiches par type et le graphe React Flow donnent accès aux contrats proposés. Les interactions utilisent la notation du livre. [Audit Team Topologies](../2026-11-05-audit-team-topologies.md) · [Notation des interactions](../2026-11-05-notation-livre-interactions.md) |
+| Ventilation dans le modèle | La table calculée `team_phase_allocation` est affichée dans « Comprendre les coûts » et figure dans l’export du modèle métier. Le catalogue relie les unités de travail à leurs contributions. L’abaque accepte des clés documentées par unité ou rôle et conserve les reliquats. Les responsabilités sources connues sont déjà reprises. [Unités de travail](../../source/unites-travail.yaml) · [Abaque](../../source/abaque-ventilation.yaml) |
+| Contrôles du modèle | Les corrections de la révision 13 autorisent les contributions Enabling compatibles avec leur mission, refusent une période de financement qui franchit la limite Build / intégration sans découpage explicite, et détectent les affectations contradictoires ou les doublons de partition. [Preuves de la révision 13](verification.json) |
 
-## Périmètre et preuves
+## Ventilation adoptée des lots Make communs
 
-L’examen porte sur le métamodèle canonique `source/fondamentaux.yaml#estimation_model`, ses propriétaires d’instances, les contrôles structurels, le moteur de calcul Python et les écrans correspondants.
+La décision du 5 novembre 2026 attribue les **4 130 JH** des cinq lots partagés. Les clés reprennent le ratio entre les JH validés de chaque équipe et le total du lot, appliqué aux rôles retenus. Les deux lots COSMIC utilisent les groupes de processus adoptés. Les trois autres utilisent les livrables chiffrés. [Abaque adopté](../../source/abaque-ventilation.yaml) · [Comptages COSMIC](../2026-11-02-adoption-perimetre-scenarios/scope.json) · [Livrables chiffrés](../2026-11-02-adoption-quatre-lots/scope.json)
 
-- Identité et références des unités retenues, rôles, tarifs et coût des lots.
-- Unicité des financements, périodes, annuités, natures et responsabilités.
-- Cumuls des horizons configurés pour les options actives et historiques conservées.
-- Types d’équipes, interactions, affectations, reliquats et conservation des financements.
-- Différence entre charge, coût financé et capacité disponible.
-- Concordance du métamodèle avec sa représentation graphique et avec l’export téléchargeable.
+| Lot | Affectation retenue | JH |
+| --- | --- | ---: |
+| Commandes | Sourcing & Procurement 266, B2C 74, Wholesale 80 | 420 |
+| Décisions Supply | Master Plan et Supply Policy 334, Inventory et Availability 122, Services 254 | 710 |
+| Process Management | Case Management 1 890, Portal 170 | 2 060 |
+| Ateliers Supply | Master Plan et Supply Policy 190, Portal 130, Services 80 | 400 |
+| IT transverse | PaaS 290, Portal 250 | 540 |
+| **Total** | | **4 130** |
 
-`avant.json` conserve les contrôles indépendants antérieurs aux corrections. `apres.json` contient leur reprise sur le modèle final. Les conclusions de méthode sont distinctes de ces contrôles arithmétiques.
+Les coûts de rôle suivent les mêmes clés, aux tarifs retenus. Les **33 040 € HT** d’outillage de ces lots restent à ventiler. Leur attribution relève d’une clé de frais distincte.
 
-## Constats et impacts
+## Charges et financements vérifiés
 
-| Priorité | Constat | Traitement et impact |
-| --- | --- | --- |
-| Haute | Les jours d’intégration ne sont pas suffisamment instruits et sont récusés par le porteur de l’étude. | Exclusion explicite dans le modèle d’organisation. Aucune affectation ni total de JH d’intégration dans la ventilation. Affichage « Non évalué — étude d’intégration à reprendre ». Coûts existants conservés, sans validation implicite des jours. |
-| Haute | Plusieurs lots couvrent plusieurs équipes. Une clé de partage justifiée manque, notamment pour les commandes. | Aucun partage arbitraire entre B2C, Wholesale et Sourcing & Procurement. Les équipes candidates restent des hypothèses de responsabilité, distinctes des affectations. |
-| Haute | Le MCO humain n’est pas réparti entre équipes. | Maintien du reliquat annuel. Aucun zéro fictif dans les équipes. Les disponibilités et contributions simultanées Build / intégration / Run restent à dimensionner. |
-| Haute | La cible Master Data vise un MDM de référence pour Business Operations, plus large que le périmètre local déjà estimé. | La cible organisationnelle reste visible. Une instruction de périmètre et de financement est nécessaire avant de conclure que le budget actuel la couvre. |
-| Moyenne | Le validateur interdisait toute contribution d’une équipe Enabling, même à une activité d’accompagnement. | Correction : l’interdiction concerne la propriété d’un produit logiciel maintenu. Une contribution d’accompagnement devient modélisable. Aucune charge supplémentaire affectée. |
-| Moyenne | Une future ligne de financement traversant la frontière Build / intégration aurait été affectée entièrement à la seconde phase. | Rejet de cette entrée ambiguë. Les périodes financées doivent être explicitement séparées. Aucun financement courant ne traversait cette frontière. |
-| Moyenne | Une affectation particulière et son alias de financement partagé pouvaient se contredire silencieusement. | Rejet des propriétaires contradictoires. Contrôle des identités d’équipes réservées et des doublons de partition. |
-| Moyenne | Les seuls objets d’affectation ne rendaient pas la table de ventilation et ses valeurs explicites dans le modèle exporté. | Ajout de `team_phase_allocation`, de ses relations, de son contrat structurel et de sa table calculée. Les cellules, unités, références sources et valeurs figurent dans l’export. |
-| Moyenne | La gouvernance cible et les rôles opérationnels déjà financés sous Transformation Office ne sont pas équivalents. | La gouvernance reste hors typologie Team Topologies. Les moyens financés restent conservés et isolés. Leur rapprochement organisationnel reste à instruire. |
+La construction générique Java/Spring représente **10 575 JH et 6 860 000 € HT**. La lecture par phase ajoute au Build les travaux de gouvernance et les moyens financés pendant la période. Le MCO est une base annuelle complète. Les montants ci-dessous utilisent la référence tarifaire Paris, avant projection sur un horizon.
 
-## Cohérence des calculs
+| Destination | Build · JH | Build · € HT | MCO et évolutions · JH/an | MCO et évolutions · € HT/an |
+| --- | ---: | ---: | ---: | ---: |
+| Équipes, affectations justifiées | 10 575 | 6 928 960 | — | 96 000 |
+| Gouvernance financée | 4 320 | 3 931 200 | — | — |
+| Travaux et moyens à ventiler | — | **33 040** | **1 421,9** | **881 562,88** |
+| Total connu | 14 895 | 10 893 200 | 1 421,9 | 977 562,88 |
 
-La charge du Core System retenue est de **7 630 JH**. Chaque coût de lot est rapproché de la somme des JH par rôle multipliés par leur tarif, augmentée de l’outillage explicitement financé.
+Le tiret signale une valeur absente. Les 96 000 € annuels affectés à PaaS correspondent à des moyens techniques. Les charges humaines du MCO figurent intégralement dans le reliquat. Les JH annuels sont arrondis pour la lecture. [Sources d’affectation](../../source/organisation-delivery.yaml) · [Décisions retenues](../../source/estimations-core-retenues.yaml)
 
-Les contrôles indépendants reconstruisent les identités suivantes, avec contrôle des euros au centime et des charges à la précision de calcul :
+## Priorités restantes
 
-- Somme des rôles = charge de l’unité.
-- Somme des JH × tarifs + outillage = coût retenu de l’unité.
-- Annuité = somme des agrégats budgétaires = somme des natures = somme des responsabilités.
-- Cumul d’un horizon = somme des annuités correspondantes.
-- Équipes + gouvernance + reliquat = total de la phase, pour chaque mesure disponible.
-- Cellule de ventilation = somme des postes sources référencés, avec absence de valeur conservée.
+1. **Répartir le MCO et les évolutions.** Distinguer les travaux annuels du produit générique, les adaptations Beaumanoir et les moyens transverses. Rattacher les activités aux propriétaires durables, dont les responsabilités annuelles sur le MDM et les vues consommatrices. [Activités de maintenance](../../source/maintenance.yaml) · [Périmètres des équipes](../../source/organisation-delivery.yaml)
+2. **Éprouver les contrats Team Topologies.** Les 29 interactions sont documentées au statut proposé. Confirmer les consommateurs, les conditions de service des plateformes et les fenêtres d’accompagnement Enabling. Vérifier si l’expertise et la charge cognitive justifient deux équipes Complicated-subsystem distinctes. [Points de fond de l’audit Team Topologies](../2026-11-05-audit-team-topologies.md)
+3. **Rapprocher la gouvernance et les fonctions financées.** Définir qui porte la direction de projet, le PMO, la synchronisation, la conduite du changement et l’architecture transverse dans la cible. Relier ces missions aux décisions du board et aux responsabilités des équipes. [Gouvernance et rôles](../../source/organisation-delivery.yaml) · [Financement des rôles](../../source/modele-composable.yaml)
+4. **Dimensionner la capacité des équipes durables.** À partir des travaux affectés, établir les besoins et disponibilités par rôle et période, les renforts et la trajectoire de transfert. Distinguer charge estimée, capacité réservée et coût financé. La capacité des équipes reste à renseigner dans le modèle. [Capacités déclarées](../../source/organisation-delivery.yaml)
 
-Les arrondis de présentation en k€ restent distincts des calculs en euros HT. La table des phases repose sur le calendrier réel des financements. Elle n’est pas une reprise directe des anciens tags budgétaires « obtention », « intégration » et « mco_run ».
+## Vérifications et traçabilité
 
-### Lecture des coûts conservés
+L’instantané de la révision 28 a réussi **560 contrôles indépendants** avec `tools.audit_delivery_model`. Ils couvrent les JH par rôle, la valorisation des lots, l’unicité des financements, les annuités et cumuls, ainsi que la conservation des charges, coûts et tarifs lors de la ventilation. Le contrôle réconcilie chaque cellule avec ses contributions et ses mesures sources. Les hypothèses de périmètre, de productivité et de capacité relèvent d’une validation métier distincte. [Commande et contrôles](../../tools/audit_delivery_model.py)
 
-Montants HT exacts pour la référence tarifaire Paris, avant projection temporelle :
+La vérification de livraison a comparé les clés et les valeurs de ventilation entre l’instantané, l’export YAML et les données de l’application. La référence financière se réconcilie à l’identique avec la révision 27. Les **95 tests ciblés** passent après la reprise du scénario de test de consolidation. Les tableaux de charges et de coûts ont été vérifiés dans le navigateur local. Les rapports des deux passes sont conservés dans `tmp/validation/20261105T214208Z-778ad1a4` et `tmp/validation/20261105T214538Z-cb7ab172`.
 
-| Destination | Build Core System | Intégration Beaumanoir | MCO et évolutions, par an |
-| --- | ---: | ---: | ---: |
-| Équipes, affectations justifiées | 2 370 400 € | 240 000 € | 96 000 € |
-| Gouvernance financée | 3 931 200 € | 2 457 000 € | Non renseigné |
-| Travaux et moyens à ventiler | 2 676 390 € | 3 108 865,44 € | 881 562,88 € |
-| Total connu | 8 977 990 € | 5 805 865,44 € | 977 562,88 € |
+Le métamodèle canonique alimente « Modèle et relations » dans le Framework. Les objets et leurs relations, les règles et leurs implémentations, et les interactions d’équipes se lisent dans des vues distinctes. [Métamodèle](../../source/fondamentaux.yaml) · [Source des interactions](../../source/organisation-delivery.yaml)
 
-La colonne d’intégration décrit les financements historiques, **sans ventilation de ses jours ni certification de son estimation**. Un coût attaché à des moyens techniques ne produit pas des JH. Les charges brutes et les charges valorisées peuvent avoir des assiettes différentes, notamment par l’application explicite des gains retenus.
-
-La troisième colonne est une **base annuelle complète**, tandis que les deux premières portent sur leurs périodes initiales. Les trois colonnes ne se somment pas sans horizon, calendrier de service et indexation. Les vues Paris et Province reprennent les mêmes charges autorisées et revalorisent les coûts par le moteur existant.
-
-## Table de ventilation du modèle métier
-
-La table `team_phase_allocation` est un résultat calculé du modèle. Elle contient une cellule par phase et destination, soit les équipes produit, la gouvernance ou le reliquat non affecté. Elle comporte les références d’option et de zone tarifaire, les JH autorisés, les euros HT, la base de période et les identifiants des postes sources.
-
-Les règles et les instances d’affectation restent respectivement dans le métamodèle canonique et `source/organisation-delivery.yaml`. Les valeurs sont produites par `tools/delivery_organisation.py`, contrôlées par `source/schema-ventilation-equipes.yaml`, affichées dans « Comprendre les coûts » et « Coûts par équipe et par phase », et exportées dans `derived.team_phase_allocation` avec les postes qui permettent de les retracer.
-
-Une valeur absente reste `null`. Une cellule sans affectation justifiée n’est pas un zéro. Pour l’intégration, tous les JH de la table et de son total restent absents. Les euros ne sont ni recalculés à partir de ces JH exclus ni complétés automatiquement.
-
-## Schéma interactif du framework
-
-React Flow est retenu pour la navigation dans un modèle riche. La version utilisée reprend celle du projet Beaumanoir Cartographie, avec ELK pour le placement automatique. L’application charge ces composants à l’ouverture de la page « Modèle et relations », dans « Framework et méthodes ».
-
-Les vues permettent d’explorer la chaîne d’évaluation, les charges, les financements, les concepts d’organisation, les interactions des équipes, les règles et leurs implémentations, puis le métamodèle complet. Le détail d’un objet présente ses attributs, son propriétaire et ses relations. Recherche, voisinage et filtre d’étape limitent la densité. Une liste textuelle conserve l’accès au clavier et à l’impression.
-
-Les objets et relations viennent directement du métamodèle. Les interactions d’équipes viennent du modèle d’organisation avec ses couleurs Team Topologies. Les flèches de gouvernance non documentées ne sont pas inventées. Les règles affichent leur implémentation déclarée sans assimiler ce lien à une validation de méthode.
-
-Références techniques : [React Flow](https://reactflow.dev/api-reference/react-flow), [commandes de navigation](https://reactflow.dev/api-reference/components/controls) et [accessibilité](https://reactflow.dev/learn/advanced-use/accessibility), consultées le 5 novembre 2026. Le choix repose aussi sur l’examen local des composants du projet Beaumanoir Cartographie.
-
-## Travaux restant à instruire
-
-1. Reprendre l’estimation de l’intégration avec ses activités, livrables, périmètres et preuves. Adopter cette base avant toute ventilation de JH.
-2. Rapprocher les lots communs de leurs contributeurs et propriétaires durables, avec des clés de partage justifiées.
-3. Répartir les travaux annuels entre produit générique, adaptations client et moyens transverses.
-4. Dimensionner la capacité par rôle et période, en tenant compte de la coexistence des évolutions produit, des intégrations et du MCO.
-5. Instruire le périmètre MDM cible et clarifier les rôles de gouvernance opérationnelle.
-
-Les tests de calcul ne permettent pas de conclure à la pertinence d’une hypothèse de productivité, à la validité d’une transposition de marché ou à la disponibilité d’une équipe. Les résultats du présent audit portent sur les propriétés effectivement vérifiées.
-
-## Vérifications de livraison
-
-Les preuves finales de contrôles ciblés, de conservation des résultats économiques et de vérification navigateur sont référencées dans `verification.json` à côté de cet audit.
-
-Validation finale : **98 tests Python ciblés, 86 tests JavaScript et 226 contrôles indépendants réussis**. Types TypeScript et règles de contenu validés. Construction statique réussie. Vérification navigateur bureau et mobile, recherche, filtres, inspection, sélection au clavier et variantes tarifaires réussies sans erreur console. La table exportée est identique à la table affichée en référence Paris. La comparaison intégrale des résultats économiques avant et après est identique.
+Les fichiers [avant.json](avant.json), [apres.json](apres.json) et [verification.json](verification.json) retracent la révision 13 et ses vérifications navigateur. Les chiffres Master Data actifs proviennent de la décision d’adoption. Les rapports d’ingénierie antérieurs retracent les propositions qui l’ont précédée.

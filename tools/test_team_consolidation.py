@@ -24,7 +24,10 @@ class TeamConsolidationTests(unittest.TestCase):
             selections.append(dict(work_unit_ref=uid,estimate_source='proposal',estimate_version=1,work_kind='mixed',accounting='additional',basis='Périmètre nouveau confirmé',period=dict(start_month=i*12,end_month=(i+1)*12,billing_period=None)))
             for measure,component in [('effort','dev'),('cost','expense:non-labour')]:
                 assignments.append(dict(id=uid+'/'+measure,work_unit_ref=uid,phase_ref=phase,measure=measure,component_ref=component,shares=[dict(team_ref='master-data',share_pct=100,contribution_kind='technical',basis='Contrôle')],basis='Contrôle',estimate_source='proposal',estimate_version=1))
-        org=dict(teams=[dict(id='master-data')],reading=dict(service_start_month=24),work_catalog=dict(units=units,abaque=read(ROOT/'source/abaque-ventilation.yaml')))
+        abaque = read(ROOT/'source/abaque-ventilation.yaml')
+        # This synthetic catalogue uses only the scenario's own assignments.
+        abaque['overrides'] = []
+        org=dict(teams=[dict(id='master-data')],reading=dict(service_start_month=24),work_catalog=dict(units=units,abaque=abaque))
         scenario=dict(version=1,id='test',option_ref='java-spring',selections=selections,assignments=assignments,coverage_groups=[],scope_reviews=[dict(phase_ref=p,complete=True,basis='Inventaire complet') for p in ('acquisition','integration','fonctionnement')],projection=dict(start_month=0,end_month=36,price_basis='source_constant'))
         return org,scenario
 
