@@ -1,0 +1,1204 @@
+version: 1
+id: flow-delivery-organisation
+date: '2026-11-05'
+excluded_workload_phases:
+- integration
+principle:
+  id: durable-product-teams
+  title: Équipes durables de delivery
+  text: Des équipes stables portent les flux de valeur, les services de plateforme et les sous-systèmes spécialisés
+    pendant la construction, l’intégration et la vie en service. L’équipe Enabling développe leur autonomie par
+    des accompagnements temporaires. Relier les responsabilités, les charges, les coûts et la capacité dans le temps.
+team_types:
+- id: stream-aligned
+  label: Stream-aligned
+  definition: Une équipe alignée sur un flux de valeur, responsable de sa livraison de bout en bout et de sa vie en service.
+  color: '#FFEDB8'
+- id: platform
+  label: Platform
+  definition: Une plateforme pensée comme un produit interne. Ses services en libre-service réduisent la charge cognitive des équipes consommatrices.
+  color: '#BBD2F6'
+- id: complicated-subsystem
+  label: Complicated-subsystem
+  definition: Une équipe dédiée à un sous-système exigeant une expertise rare. Cette séparation se justifie par la complexité qui dépasserait la capacité des équipes alignées sur un flux.
+  color: '#FBDBBA'
+- id: enabling
+  label: Enabling
+  definition: Une équipe qui transmet des compétences aux autres équipes. Chaque accompagnement est temporaire et vise leur autonomie, sans reprendre la propriété de leurs composants.
+  color: '#C9DFBE'
+interaction_modes:
+- id: collaboration
+  label: Collaboration
+  definition: Explorer et construire ensemble pendant une période définie. La zone commune hachurée représente ce travail partagé.
+  color: '#75529B'
+- id: x-as-a-service
+  label: X-as-a-Service
+  definition: Fournir et consommer un service avec peu de coordination au quotidien, un contrat clair et une expérience de consommation simple. Le connecteur noir représente cette relation de service.
+  color: '#222222'
+- id: facilitating
+  label: Facilitating
+  definition: Accompagner temporairement une équipe pour lever un obstacle ou acquérir une compétence. La zone commune pointillée représente cet accompagnement.
+  color: '#75529B'
+phases:
+- id: acquisition
+  label: Build Core System
+  charge_unit: JH
+  cost_unit: k€ HT
+  period: Construction initiale
+  note: Produit générique, gouvernance et moyens de construction. Les charges brutes connues et les coûts financés
+    ont des assiettes distinctes.
+- id: integration
+  label: Intégration Beaumanoir
+  charge_unit: JH
+  cost_unit: k€ HT
+  period: Intégration initiale
+  note: Jours non évalués et non ventilés, étude d’intégration à reprendre. Les coûts conservent les financements existants, dont le maintien du produit et les moyens consommés pendant cette période.
+- id: fonctionnement
+  label: MCO et évolutions
+  charge_unit: JH / an
+  cost_unit: k€ HT / an
+  period: Régime annuel complet
+  note: Base annuelle de service, à distinguer du cumul sur un horizon. Produit générique, adaptations et moyens
+    restent identifiés.
+teams:
+- id: case-management
+  label: Case Management
+  type: platform
+  mission: Socle de case management, moteur de règles générique, process mining et analytics engine.
+  boundary: Les équipes métier conservent leurs règles et processus. Le moteur générique fournit les mécanismes
+    de leur exécution.
+  status: target
+  responsibilities:
+    acquisition: Construire les moteurs, contrats, studios et mécanismes génériques.
+    integration: Accompagner leur configuration et qualifier les usages Beaumanoir.
+    fonctionnement: Maintenir les moteurs, leurs contrats et la compatibilité.
+  capacity:
+    acquisition: null
+    integration: null
+    fonctionnement: null
+- id: paas
+  label: PaaS
+  type: platform
+  mission: Outils de développement, IA, harnais, CI/CD et moyens techniques du delivery.
+  boundary: Les services fournis et les moyens consommés sont distincts. Les contributions d’exploitation restent
+    à contractualiser.
+  status: target
+  responsibilities:
+    acquisition: Fournir les outils, environnements et la chaîne industrielle.
+    integration: Industrialiser la livraison et les environnements du contexte client.
+    fonctionnement: Maintenir l’outillage et ses services, avec les achats identifiés.
+  capacity:
+    acquisition: null
+    integration: null
+    fonctionnement: null
+- id: master-plan-supply-policy
+  label: Master Plan et Supply Policy
+  type: complicated-subsystem
+  mission: Plans, politiques Supply, arbitrages et décisions de planification.
+  boundary: Le contrat avec Inventory et Availability distingue affectation du plan, possibilité de promesse et
+    engagement. Le type spécialisé reste à éprouver.
+  status: target
+  responsibilities:
+    acquisition: Réaliser les mécanismes de planification, politiques et arbitrages.
+    integration: Configurer et éprouver les politiques et contraintes du Groupe.
+    fonctionnement: Maintenir et faire évoluer les mécanismes et politiques selon leur objet.
+  capacity:
+    acquisition: null
+    integration: null
+    fonctionnement: null
+- id: inventory-availability
+  label: Inventory et Availability
+  type: complicated-subsystem
+  mission: Faits de stock, propriété, réservations et possibilités de promesse.
+  boundary: Les interfaces séparent fait de stock, réservation, disponibilité et décision de planification. Le type
+    spécialisé reste à éprouver.
+  status: target
+  responsibilities:
+    acquisition: Réaliser les mécanismes de stock, de réservation et de disponibilité.
+    integration: Intégrer les sources de stock et les engagements Beaumanoir.
+    fonctionnement: Maintenir la cohérence, les performances et les contrats de disponibilité.
+  capacity:
+    acquisition: null
+    integration: null
+    fonctionnement: null
+- id: services
+  label: Services
+  type: stream-aligned
+  mission: Service Management et Fulfilment Orchestration.
+  boundary: L’équipe possède l’exécution métier des prestations et consomme les moteurs génériques de Case Management.
+  status: target
+  responsibilities:
+    acquisition: Construire les comportements standard de gestion et d’orchestration des prestations.
+    integration: Intégrer les prestataires, contrats et parcours d’exécution du Groupe.
+    fonctionnement: Maintenir les comportements génériques et les adaptations d’exécution.
+  capacity:
+    acquisition: null
+    integration: null
+    fonctionnement: null
+- id: master-data
+  label: Master Data
+  type: stream-aligned
+  mission: Produit MDM cible, destiné à devenir une base de vérité pour Business Operations.
+  boundary: Le périmètre actuellement chiffré décrit des références locales. L’extension à un MDM faisant autorité
+    reste à instruire séparément.
+  status: target
+  responsibilities:
+    acquisition: Construire les fonctions génériques du produit de références retenu.
+    integration: Rapprocher, migrer et publier les données selon les autorités décidées.
+    fonctionnement: Maintenir le produit et ses adaptations avec une gouvernance des données explicite.
+  capacity:
+    acquisition: null
+    integration: null
+    fonctionnement: null
+- id: sourcing-procurement
+  label: Sourcing & Procurement
+  type: stream-aligned
+  mission: Parcours et Orders du monde achat.
+  boundary: Définir les accords fournisseur, engagements, variantes de commande et la propriété des mécanismes communs
+    d’Orders.
+  status: target
+  responsibilities:
+    acquisition: Construire les comportements standard des Orders achat.
+    integration: Adapter les parcours et les échanges avec le SI et les fournisseurs.
+    fonctionnement: Maintenir le standard et les adaptations des parcours d’achat.
+  capacity:
+    acquisition: null
+    integration: null
+    fonctionnement: null
+- id: b2c
+  label: B2C
+  type: stream-aligned
+  mission: Comportements et parcours des Orders B2C.
+  boundary: Un standard générique comparable aux comportements préétablis d’un OMS, puis les spécificités Beaumanoir.
+    Les mécanismes communs restent à ventiler.
+  status: target
+  responsibilities:
+    acquisition: Construire les états, comportements et contrats standard des Orders B2C.
+    integration: Configurer et intégrer les parcours, canaux et spécificités Beaumanoir.
+    fonctionnement: Maintenir le produit générique et les adaptations B2C.
+  capacity:
+    acquisition: null
+    integration: null
+    fonctionnement: null
+- id: wholesale
+  label: Wholesale
+  type: stream-aligned
+  mission: Comportements et parcours des Orders B2B et Wholesale.
+  boundary: Les engagements et parcours Wholesale restent distincts du B2C. Les mécanismes communs ont un propriétaire
+    à préciser.
+  status: target
+  responsibilities:
+    acquisition: Construire les comportements standard des Orders B2B et Wholesale.
+    integration: Intégrer les spécificités et échanges avec les partenaires Beaumanoir.
+    fonctionnement: Maintenir le produit et les adaptations Wholesale.
+  capacity:
+    acquisition: null
+    integration: null
+    fonctionnement: null
+- id: portal
+  label: Flow Core System Portal
+  type: stream-aligned
+  mission: Produit d’accès à FLOW réunissant XP APIs, sécurité applicative et portail UI pour accueillir les clients.
+  boundary: L’équipe porte l’expérience d’accès. Les équipes de domaine possèdent leurs API, règles métier et contrôles
+    d’autorisation.
+  status: target
+  responsibilities:
+    acquisition: Construire l’onboarding, les XP APIs et l’expérience UI transversale.
+    integration: Intégrer les identités, accès et parcours du contexte Beaumanoir.
+    fonctionnement: Maintenir l’expérience, la sécurité applicative et la compatibilité des interfaces.
+  capacity:
+    acquisition: null
+    integration: null
+    fonctionnement: null
+- id: integration
+  label: Intégration
+  type: enabling
+  mission: Faciliter l’intégration des composants et les flux SI en accompagnant les équipes et les contributions
+    iPaaS.
+  boundary: L’accompagnement doit accroître l’autonomie. Les flux et leur exploitation restent attribués à des propriétaires
+    durables à identifier.
+  status: target
+  responsibilities:
+    acquisition: Accompagner la conception des contrats et pratiques de tests intégrés.
+    integration: Faciliter les raccordements au SI et les contributions iPaaS.
+    fonctionnement: Accompagner les évolutions d’intégration et transmettre les compétences.
+  capacity:
+    acquisition: null
+    integration: null
+    fonctionnement: null
+governance:
+  id: transformation-office
+  label: Transformation Office FLOW
+  mission: Instance de gouvernance hors typologie Team Topologies, pour les décisions, arbitrages et conditions
+    de réalisation.
+  roles_ref: source/modele-composable.yaml#equipe_transformation
+  funding_note: Les missions opérationnelles actuellement financées restent identifiées. La cible de board ne supprime
+    pas la direction de projet, le PMO, la synchronisation, le changement ou l’architecture transverse.
+work_owners:
+- kind: core_unit
+  ref: master-data-java-spring
+  team_ref: master-data
+  candidate_refs:
+  - master-data
+  basis: Affectation du lot entier au périmètre produit correspondant, en conservant les JH de chaque rôle et les
+    tarifs du lot.
+- kind: core_unit
+  ref: stock-java-spring
+  team_ref: inventory-availability
+  candidate_refs:
+  - inventory-availability
+  basis: Affectation du lot entier au périmètre produit correspondant, en conservant les JH de chaque rôle et les
+    tarifs du lot.
+- kind: core_unit
+  ref: inventory-ownership-java-spring
+  team_ref: inventory-availability
+  candidate_refs:
+  - inventory-availability
+  basis: Affectation du lot entier au périmètre produit correspondant, en conservant les JH de chaque rôle et les
+    tarifs du lot.
+- kind: core_unit
+  ref: supply-controls-java-spring
+  team_ref: master-plan-supply-policy
+  candidate_refs:
+  - master-plan-supply-policy
+  basis: Affectation du lot entier au périmètre produit correspondant, en conservant les JH de chaque rôle et les
+    tarifs du lot.
+- kind: core_unit
+  ref: orders-java-spring
+  team_ref: null
+  candidate_refs:
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  basis: Le lot couvre plusieurs équipes. Détailler les travaux et rôles avant de partager les JH et le coût. Aucun
+    partage forfaitaire.
+- kind: core_unit
+  ref: master-plan-java-spring
+  team_ref: master-plan-supply-policy
+  candidate_refs:
+  - master-plan-supply-policy
+  basis: Affectation du lot entier au périmètre produit correspondant, en conservant les JH de chaque rôle et les
+    tarifs du lot.
+- kind: core_unit
+  ref: supply-decisions-java-spring
+  team_ref: null
+  candidate_refs:
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  basis: Le lot couvre plusieurs équipes. Détailler les travaux et rôles avant de partager les JH et le coût. Aucun
+    partage forfaitaire.
+- kind: core_unit
+  ref: service-fulfilment-java-spring
+  team_ref: services
+  candidate_refs:
+  - services
+  basis: Affectation du lot entier au périmètre produit correspondant, en conservant les JH de chaque rôle et les
+    tarifs du lot.
+- kind: core_unit
+  ref: process-management-java-spring
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - portal
+  basis: Le lot couvre plusieurs équipes. Détailler les travaux et rôles avant de partager les JH et le coût. Aucun
+    partage forfaitaire.
+- kind: core_unit
+  ref: supply-workbenches-java-spring
+  team_ref: null
+  candidate_refs:
+  - master-plan-supply-policy
+  - inventory-availability
+  - portal
+  basis: Le lot couvre plusieurs équipes. Détailler les travaux et rôles avant de partager les JH et le coût. Aucun
+    partage forfaitaire.
+- kind: core_unit
+  ref: professional-it-java-spring
+  team_ref: null
+  candidate_refs:
+  - paas
+  - portal
+  - case-management
+  basis: Le lot couvre plusieurs équipes. Détailler les travaux et rôles avant de partager les JH et le coût. Aucun
+    partage forfaitaire.
+- kind: integration_activity
+  ref: INT-001
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: integration_activity
+  ref: INT-002
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: integration_activity
+  ref: INT-003
+  team_ref: null
+  candidate_refs:
+  - master-plan-supply-policy
+  - inventory-availability
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: integration_activity
+  ref: INT-004
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: integration_activity
+  ref: INT-005
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: integration_activity
+  ref: INT-006
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: integration_activity
+  ref: INT-007
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: integration_activity
+  ref: INT-008
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: integration_activity
+  ref: INT-009
+  team_ref: paas
+  candidate_refs:
+  - paas
+  basis: Industrialisation de la chaîne de fabrication et de livraison, rattachée à PaaS.
+- kind: integration_activity
+  ref: INT-010
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: integration_activity
+  ref: INT-011
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: integration_activity
+  ref: INT-012
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: integration_activity
+  ref: INT-013
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: maintenance_activity
+  ref: MAI-001
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: maintenance_activity
+  ref: MAI-002
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: maintenance_activity
+  ref: MAI-003
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: maintenance_activity
+  ref: MAI-004
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: maintenance_activity
+  ref: MAI-005
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: maintenance_activity
+  ref: MAI-006
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: maintenance_activity
+  ref: MAI-007
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: maintenance_activity
+  ref: MAI-008
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: maintenance_activity
+  ref: MAI-009
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: maintenance_activity
+  ref: MAI-010
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: maintenance_activity
+  ref: MAI-011
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: maintenance_activity
+  ref: MAI-012
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: maintenance_activity
+  ref: MAI-013
+  team_ref: null
+  candidate_refs:
+  - case-management
+  - paas
+  - master-plan-supply-policy
+  - inventory-availability
+  - services
+  - master-data
+  - sourcing-procurement
+  - b2c
+  - wholesale
+  - portal
+  basis: Les quantités couvrent plusieurs périmètres. Rapprocher les travaux des équipes et des contributeurs SI
+    avant répartition.
+- kind: funding
+  ref: hebergement_build
+  team_ref: paas
+  candidate_refs:
+  - paas
+  basis: Coût des moyens consommés par la plateforme de delivery. Cette attribution ne crée ni JH ni capacité humaine.
+- kind: funding
+  ref: moyens_transition/hebergement
+  team_ref: paas
+  candidate_refs:
+  - paas
+  basis: Coût des moyens consommés par la plateforme de delivery. Cette attribution ne crée ni JH ni capacité humaine.
+- kind: funding
+  ref: moyens_transition/outillage
+  team_ref: paas
+  candidate_refs:
+  - paas
+  basis: Coût des moyens consommés par la plateforme de delivery. Cette attribution ne crée ni JH ni capacité humaine.
+- kind: annual_cost
+  ref: cloud_hors_panier
+  team_ref: paas
+  candidate_refs:
+  - paas
+  basis: Coût des moyens consommés par la plateforme de delivery. Cette attribution ne crée ni JH ni capacité humaine.
+- kind: annual_cost
+  ref: outillage_audits
+  team_ref: paas
+  candidate_refs:
+  - paas
+  basis: Coût des moyens consommés par la plateforme de delivery. Cette attribution ne crée ni JH ni capacité humaine.
+interactions:
+- id: paas-case-management
+  source: paas
+  target: case-management
+  mode: x-as-a-service
+  object: Outils, environnements et chaîne de livraison
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: paas-master-plan-supply-policy
+  source: paas
+  target: master-plan-supply-policy
+  mode: x-as-a-service
+  object: Outils, environnements et chaîne de livraison
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: paas-inventory-availability
+  source: paas
+  target: inventory-availability
+  mode: x-as-a-service
+  object: Outils, environnements et chaîne de livraison
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: paas-services
+  source: paas
+  target: services
+  mode: x-as-a-service
+  object: Outils, environnements et chaîne de livraison
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: paas-master-data
+  source: paas
+  target: master-data
+  mode: x-as-a-service
+  object: Outils, environnements et chaîne de livraison
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: paas-sourcing-procurement
+  source: paas
+  target: sourcing-procurement
+  mode: x-as-a-service
+  object: Outils, environnements et chaîne de livraison
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: paas-b2c
+  source: paas
+  target: b2c
+  mode: x-as-a-service
+  object: Outils, environnements et chaîne de livraison
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: paas-wholesale
+  source: paas
+  target: wholesale
+  mode: x-as-a-service
+  object: Outils, environnements et chaîne de livraison
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: paas-portal
+  source: paas
+  target: portal
+  mode: x-as-a-service
+  object: Outils, environnements et chaîne de livraison
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: paas-integration
+  source: paas
+  target: integration
+  mode: x-as-a-service
+  object: Outils, environnements et chaîne de livraison
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: case-sourcing-procurement
+  source: case-management
+  target: sourcing-procurement
+  mode: x-as-a-service
+  object: Moteurs et contrats de case management
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: case-b2c
+  source: case-management
+  target: b2c
+  mode: x-as-a-service
+  object: Moteurs et contrats de case management
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: case-wholesale
+  source: case-management
+  target: wholesale
+  mode: x-as-a-service
+  object: Moteurs et contrats de case management
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: case-services
+  source: case-management
+  target: services
+  mode: x-as-a-service
+  object: Moteurs et contrats de case management
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: master-plan-supply-policy-sourcing-procurement
+  source: master-plan-supply-policy
+  target: sourcing-procurement
+  mode: x-as-a-service
+  object: Services spécialisés du Core
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: master-plan-supply-policy-b2c
+  source: master-plan-supply-policy
+  target: b2c
+  mode: x-as-a-service
+  object: Services spécialisés du Core
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: master-plan-supply-policy-wholesale
+  source: master-plan-supply-policy
+  target: wholesale
+  mode: x-as-a-service
+  object: Services spécialisés du Core
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: master-plan-supply-policy-services
+  source: master-plan-supply-policy
+  target: services
+  mode: x-as-a-service
+  object: Services spécialisés du Core
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: inventory-availability-sourcing-procurement
+  source: inventory-availability
+  target: sourcing-procurement
+  mode: x-as-a-service
+  object: Services spécialisés du Core
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: inventory-availability-b2c
+  source: inventory-availability
+  target: b2c
+  mode: x-as-a-service
+  object: Services spécialisés du Core
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: inventory-availability-wholesale
+  source: inventory-availability
+  target: wholesale
+  mode: x-as-a-service
+  object: Services spécialisés du Core
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: inventory-availability-services
+  source: inventory-availability
+  target: services
+  mode: x-as-a-service
+  object: Services spécialisés du Core
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: integration-sourcing-procurement
+  source: integration
+  target: sourcing-procurement
+  mode: facilitating
+  object: Accompagnement des contrats, flux et tests intégrés
+  phases:
+  - integration
+  - fonctionnement
+  exit_criterion: L’équipe sait faire évoluer et qualifier son intégration avec ses partenaires SI.
+  status: proposed
+- id: integration-b2c
+  source: integration
+  target: b2c
+  mode: facilitating
+  object: Accompagnement des contrats, flux et tests intégrés
+  phases:
+  - integration
+  - fonctionnement
+  exit_criterion: L’équipe sait faire évoluer et qualifier son intégration avec ses partenaires SI.
+  status: proposed
+- id: integration-wholesale
+  source: integration
+  target: wholesale
+  mode: facilitating
+  object: Accompagnement des contrats, flux et tests intégrés
+  phases:
+  - integration
+  - fonctionnement
+  exit_criterion: L’équipe sait faire évoluer et qualifier son intégration avec ses partenaires SI.
+  status: proposed
+- id: integration-services
+  source: integration
+  target: services
+  mode: facilitating
+  object: Accompagnement des contrats, flux et tests intégrés
+  phases:
+  - integration
+  - fonctionnement
+  exit_criterion: L’équipe sait faire évoluer et qualifier son intégration avec ses partenaires SI.
+  status: proposed
+- id: integration-master-data
+  source: integration
+  target: master-data
+  mode: facilitating
+  object: Accompagnement des contrats, flux et tests intégrés
+  phases:
+  - integration
+  - fonctionnement
+  exit_criterion: L’équipe sait faire évoluer et qualifier son intégration avec ses partenaires SI.
+  status: proposed
+- id: integration-portal
+  source: integration
+  target: portal
+  mode: facilitating
+  object: Accompagnement des contrats, flux et tests intégrés
+  phases:
+  - integration
+  - fonctionnement
+  exit_criterion: L’équipe sait faire évoluer et qualifier son intégration avec ses partenaires SI.
+  status: proposed
+- id: portal-b2c
+  source: portal
+  target: b2c
+  mode: collaboration
+  object: Découverte du parcours d’accès et des XP APIs
+  phases:
+  - acquisition
+  - integration
+  exit_criterion: Contrat d’expérience et responsabilités API établis, puis collaboration terminée.
+  status: proposed
+labels:
+  integration_workload_pending: Non évalué — étude d’intégration à reprendre
+  integration_workload_note: Les jours d’intégration ne sont pas ventilés. L’étude de cette charge est à reprendre et ne permet pas de justifier une répartition ou un total. Les coûts affichés reprennent les financements existants et ne valident pas cette charge.
+  allocation_title: Ventilation des coûts par équipe et par phase
+  allocation_note: "Les équipes responsables de composants les accompagnent pendant leur construction, leur intégration Beaumanoir et leur MCO. La table restitue les coûts connus, la gouvernance et les travaux et moyens restant à ventiler."
+  allocation_details: Consulter les travaux et financements de la ventilation
+  principle_title: "Équipes durables de delivery"
+  theory_title: Organiser le delivery pour accélérer le flux de valeur
+  theory_intro: "La stabilité des équipes soutient le flux de valeur. Leurs frontières et leurs interactions doivent limiter la charge cognitive et permettre de livrer avec autonomie."
+  types_title: Quatre types d’équipes
+  modes_title: Trois modes d’interaction
+  conway_title: Concevoir ensemble organisation et architecture
+  conway: La loi de Conway relie la structure d’un système aux structures de communication de l’organisation qui
+    le conçoit. Les frontières des équipes FLOW et les contrats logiciels doivent être travaillés ensemble.
+  book: Team Topologies, Matthew Skelton et Manuel Pais. Première édition 2019, seconde édition 2025.
+  target_title: "Une cible organisée autour des flux de valeur"
+  target_note: Cible proposée. Les équipes se constituent progressivement selon les besoins et les compétences.
+    Le type des deux sous-systèmes spécialisés reste à éprouver.
+  scope_title: Périmètre et frontières
+  responsibilities_title: Une responsabilité sur tout le cycle de vie
+  capacity_title: Dimensionner la capacité dans le temps
+  capacity_note: La charge de travail, la capacité réservée et le coût financé sont trois informations distinctes.
+    Les effectifs et disponibilités restent à dimensionner par rôle et par période.
+  capacity_unknown: Capacité à dimensionner
+  unknown: À ventiler
+  known_zero: '0'
+  all_teams: Toutes les équipes
+  team: Équipe
+  phase: Étape
+  totals: Total connu
+  governance: Gouvernance
+  unallocated: Travaux et moyens à ventiler
+  assigned: Affectations connues
+  charges_title: Charges par équipe et par phase
+  costs_title: Coûts par équipe et par phase
+  charges_note: Charges brutes des travaux connus. Le MCO est une base annuelle. Les contributions non dimensionnées
+    et les postes uniquement en euros restent distincts.
+  costs_note: Coûts financés, calculés par le moteur économique. Les coûts humains et les moyens consommés sont
+    distingués dans les travaux. Le MCO présente une base annuelle complète.
+  unallocated_reason: Rapprochement des travaux, responsabilités et contributions encore nécessaire.
+  unknown_note: À ventiler signifie que le financement ou la charge existe sans répartition justifiée entre équipes.
+    Cela ne signifie pas zéro travail ou zéro budget.
+  workload: Charge brute connue
+  cost: Coût financé
+  source: Travail ou financement
+  object: Objet
+  period: Période
+  no_records: "Aucune affectation justifiée à cette équipe à ce stade. Sa mission et son périmètre restent définis."
+  records_title: Travaux et financements rattachés
+  candidates: Équipes concernées à confirmer
+  basis: Fondement du rattachement
+  interactions_title: Des interactions explicites et évolutives
+  interaction_note: "Cible proposée. Les équipes suivent les couches de l’architecture, de PaaS en bas aux parcours métier en haut. Intégration accompagne les équipes de façon transverse. Chaque relation apparaît avec son symbole et le nom de l’équipe concernée, dans l’équipe qui la propose."
+  source_team: Équipe qui fournit ou accompagne
+  target_team: Équipe consommatrice ou accompagnée
+  mode: Mode
+  interaction_object: Objet de l’interaction
+  exit: Critère de sortie
+  permanent_service: Contrat de service à entretenir
+  graph_label: Équipes FLOW regroupées par type et reliées à leurs fiches
+  graph_services: "Plateformes et expertise spécialisée"
+  graph_streams: "Équipes alignées sur les flux de valeur"
+  graph_enable: "Développer l’autonomie"
+  governance_title: Gouvernance et trajectoire de constitution
+  lifecycle_note: "Les équipes qui possèdent un périmètre logiciel en gardent la responsabilité pendant sa construction, son intégration et sa vie en service. L’équipe Enabling intervient temporairement auprès de chaque équipe accompagnée, puis se retire lorsque celle-ci devient autonome."
+  buy_note: Cette organisation décrit la cible Make Java/Spring. En Buy, l’éditeur porte son produit et l’intégrateur
+    ses prestations. Les contrats restent financés selon leurs propres périmètres.
+  reconciliation: Les affectations, la gouvernance et les reliquats restituent les mêmes charges et financements.
+    Aucun budget supplémentaire n’est créé par cette lecture.
+  nav_label: Parcours du delivery
+  phase_filter: Filtrer les interactions par étape
+  team_filter: Choisir une équipe
+  all_phases: Toutes les étapes
+  responsibilities: Responsabilités
+  method_link: Comprendre les méthodes
+  charges_link: Examiner les charges par équipe
+  costs_link: Examiner les coûts par équipe
+  org_link: Comprendre l’organisation
+  next: Poursuivre
+  economic_link: Comparer les options
+  months: mois depuis le lancement
+  annual_period: Après réception, base annuelle complète
+  team_directory: "Équipes et missions"
+  team_types_note: "« Équipe produit » n’est pas un type Team Topologies. Le cadre distingue quatre types d’équipes selon leur contribution au flux de valeur. Une plateforme se pilote comme un produit interne. Une équipe Enabling accompagne les autres équipes vers l’autonomie."
+  mode_filter: "Filtrer les interactions par mode"
+  all_modes: "Tous les modes"
+  relationship_contracts: "Contrats de toutes les interactions proposées"
+  graph_gestures: "Sélectionner le nom d’une équipe pour lire sa mission, ou un symbole pour examiner une interaction. Déplacer le fond pour parcourir le schéma. Utiliser + et − pour zoomer."
+  graph_reset: "Recadrer"
+  graph_details: "Détail de la sélection"
+  graph_inspect_title: "Explorer les relations"
+  graph_inspect_help: "Choisir une équipe pour lire sa mission, ou un symbole accompagné d’un nom d’équipe pour examiner le contrat d’interaction. Le schéma et le tableau présentent toutes les relations proposées."
+  graph_open_team: "Ouvrir la fiche de l’équipe"
+  flow_direction: "Architecture · lecture de bas en haut"
+  graph_reading: "Notation du livre Team Topologies : hachures pour Collaboration, connecteur noir pour X-as-a-Service et pointillés pour Facilitating. Chaque symbole est associé au nom de l’équipe concernée. La sélection ouvre le détail et conserve toutes les équipes et interactions visibles."
+  shapes_credit: "Interactions représentées selon la notation du livre Team Topologies de Matthew Skelton et Manuel Pais. Illustrations vectorielles adaptées par FLOW. Les formes des types d’équipes proviennent du kit officiel sous CC BY-SA 4.0."
+  shapes_license: CC BY-SA 4.0
+  shapes_kit: "Références et conventions Team Topologies"
+  graph_empty: "Aucune interaction proposée."
+  objects:
+    core_system: Produit générique
+    adaptations_client: Adaptations Beaumanoir
+    plateforme: Moyens techniques
+    programme: Gouvernance
+    annual_work: Travaux annuels
+    shared_services: Services et moyens partagés
+  build_scope: Construction du produit et gouvernance dimensionnée
+  integration_scope: Travaux d’intégration, déploiement et gouvernance dimensionnée
+  annual_scope: Travaux annuels connus
+  phase_nav: Lecture des trois étapes
+  role: Rôle
+  jh: JH
+  roles_title: Charges par rôle
+  costs_period_note: Les étapes initiales sont des montants sur leur période. Le MCO est un montant par an. Ces
+    trois colonnes ne doivent pas être additionnées sans horizon de projection.
+references:
+- label: Team Topologies et ses auteurs
+  href: https://teamtopologies.com/book
+- label: Concepts et principes
+  href: https://teamtopologies.com/key-concepts
+- label: Modéliser les interactions
+  href: https://teamtopologies.com/key-concepts-content/team-interaction-modeling-with-team-topologies
+- label: Kit officiel de modélisation des équipes et interactions
+  href: https://github.com/TeamTopologies/Team-Shape-Templates
+- label: Loi de Conway
+  href: https://www.melconway.com/Home/Conways_Law.html
+funding_labels:
+  construction_core: Construction générique du Core System
+  hebergement_build: Hébergement de la construction
+  travaux_communs: Travaux communs d’intégration
+  coordination_commune: Coordination des travaux communs
+  deploiements: Déploiements Groupe
+  coordination_deploiements: Coordination des déploiements
+  cycle_core_transition: Maintien du Core pendant l’intégration
+  moyens_transition: Moyens techniques pendant l’intégration
+  transformation_direction_projet: Directeur de projet
+  transformation_pmo: PMO
+  transformation_synchronisation: Responsable de synchronisation
+  transformation_change: Responsable de la conduite du changement
+  transformation_architecture: Architecte de solution transverse

@@ -28,6 +28,6 @@ export function PreStudyPage({kind,view,focus}:{kind:'projects'|'solutions';view
     {current.id==='products'&&(reading?.documentary_products?<MarketProducts documentaryStudy={reading.documentary_products} focus={focus}/>:loading)}
    </>}
   </DossierSheet>
-  <a className="text-button essential-structure-next" href={T.next.href}>{T.next.label} <span aria-hidden="true">→</span></a>
+
  </div>;
 }

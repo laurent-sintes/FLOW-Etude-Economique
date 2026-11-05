@@ -26,7 +26,7 @@ export function ScopeDiagram({heading='h3',children}:{heading?:'h2'|'h3';childre
 
 export function ModelMap(){
  const {data}=useStudy();
- return <ScopeDiagram><p><a className="text-button" href="#cartographie">{data.ui.essential.cartography.input_link} →</a></p></ScopeDiagram>;
+ return <ScopeDiagram/>;
 }
 
 export function BusinessAreaSummary({heading='h3',provenance=true}:{heading?:'h2'|'h3';provenance?:boolean}){

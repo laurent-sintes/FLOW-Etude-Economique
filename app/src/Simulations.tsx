@@ -6,7 +6,7 @@ import {useStudy,useFormat,request,type Data,type Parameters,type Projection,typ
 import {Disclosure,Drawer,Metric,Notice,Section,SourceLink} from './components';
 import {createSavedScenario,readScenarioCollection,restoreSavedScenario,scenarioRecovery,serializeScenarioCollection,type SavedScenario} from './savedScenarios';
 import {AnnualProjection,Comparison,EvidenceButton,HorizonPicker} from './EssentialViews';
-import {EconomicContext,EconomicNext} from './EconomicJourney';
+import {EconomicContext} from './EconomicJourney';
 import {MethodText} from './MethodDocument';
 import {visibleProjection} from './applicationScope';
 
@@ -78,7 +78,7 @@ export function Simulations({view}:{view:string}){
     </section>
    <aside className="essential-edit economic-diagnostic"><h3>{S.diagnostic_title}</h3><p>{S.diagnostic_note}</p>{ui.parameters.common.filter((spec:Data)=>spec.key==='bonus_continuite_pct').map((spec:Data)=><div className="essential-field" key={spec.key}><div><label htmlFor={'simulation-common.'+spec.key}>{spec.label}</label><EvidenceButton proof={{title:spec.label,text:spec.help,source:spec.source}} label={S.help+' · '+spec.label}/></div><ParameterInput id={'simulation-common.'+spec.key} label={spec.label+' · '+spec.unit} spec={spec} value={draft.common[spec.key]} onChange={v=>field(spec.key,v)} changed={draft.common[spec.key]!==baseline.parameters.common[spec.key]} invalid={issue?.field==='common.'+spec.key}/></div>)}<p>{S.diagnostic_result} : {result.anchor.budget_apres_bonus_eur_ht===null?S.counterpoint_unavailable:amount(result.anchor.budget_apres_bonus_eur_ht)}</p></aside>
    <section id="economic-simulation-annual" tabIndex={-1}><AnnualProjection projection={result} stack={chosen.stack} onStackChange={stack=>setSession(s=>({...s,chosen:stack}))} showOptionPicker={false}/></section>
-   <EconomicNext page="simuler"/>
+
    {saving&&<Drawer title={L.saved_scenarios} onClose={()=>{setSaving(false);setNotice('');}}><p>{ui.pages.simulations.save_note}</p>{recovery!==null&&<Notice><p>{ui.saved_scenarios.recovery_note}</p><button className="secondary" onClick={()=>download(recovery,ui.id+'-saved-recovery.json')}>{ui.saved_scenarios.recovery_download}</button></Notice>}<div className="scenario-file-actions"><button className="secondary" disabled={busy||pending||!!issue} onClick={exportScenario}>{L.export}</button><button className="secondary" disabled={busy} onClick={()=>inputRef.current?.click()}>{L.import}</button><input ref={inputRef} hidden type="file" accept="application/json,.json" onChange={e=>importScenario(e.target.files?.[0])}/></div><label className="scenario-name">{L.scenario_name}<input value={name} maxLength={120} onChange={e=>setName(e.target.value)}/></label><button className="primary" disabled={busy||pending||!!issue||savedCollection.recovery!==null} onClick={save}>{saved.some(s=>s.name===name.trim())?W.replace_saved:L.save}</button>{notice&&<Notice quiet>{notice}</Notice>}<div className="saved-list">{saved.length===0?<p className="empty">{L.no_scenario}</p>:saved.map(s=><div key={s.name}><div><strong>{s.name}</strong><small>{s.model_version.slice(0,10)}</small></div><button className="secondary" disabled={busy} onClick={()=>load(s)}>{L.load}</button><button className="icon-button" aria-label={L.remove+' '+s.name} onClick={()=>persist(saved.filter(x=>x.name!==s.name))}><Trash2 size={17}/></button></div>)}</div></Drawer>}
   </div>;
  }

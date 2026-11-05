@@ -148,21 +148,21 @@ export function GrossEvaluationsPage({phase,option,focus,returnTo,horizon,onChoo
  },[data.model_version,data.content.gross_zone_reading,retry]);
  if(error)return <div className="essential-page" role="alert"><p>{error==='version'?data.ui.server_update.message:data.ui.errors.network}</p><button type="button" className="text-button" onClick={()=>error==='version'?window.location.reload():setRetry(value=>value+1)}>{error==='version'?data.ui.server_update.action:data.ui.labels.retry}</button></div>;
  if(!reading)return <p role="status">{data.ui.labels.loading}</p>;
- const L=reading.labels,P=reading.phases[phase],R=P.options[current.id],index=J.phases.findIndex((p:Data)=>p.id===phase),next=J.phases[index+1];
+ const L=reading.labels,P=reading.phases[phase],R=P.options[current.id];
  const proofs=[...new Map<string,Data>(R.quotes.flatMap((q:Data)=>q.proofs).map((proof:Data)=>[proof.path,proof] as [string,Data])).values()];
  return <div className="essential-page framework-journey gross-evaluations" data-gross-phase={phase}>
   <>{returnTo&&<a className="text-button" href={returnTo}>{returnTo.startsWith('#parametres')?data.ui.essential.economic_dossier.return_assumptions:data.ui.essential.economic_dossier.back} →</a>}</><PhaseOptionNavigation journey={J} phase={phase} option={current.id} onChoose={onChoose} prefix="charges-" horizon={horizon}/>
   {phase==='integration'&&current.id!=='java-spring'&&<Quotes quotes={R.quotes} phase={phase} labels={L}/>}
   <DossierSheet view={phase+'-'+current.id}><h2 ref={heading} tabIndex={-1} className="gross-option-heading" hidden={Boolean(R.core)}>{current.label}</h2>
-   <div className="gross-reading-links"><a className="text-button" href={phaseReadingHash({...context,page:phase,option:current.id,horizon})!}>{L.method}<ArrowRight size={16} aria-hidden="true"/></a><a href="#glossaire?term=charge_brute">{L.glossary}</a></div>
+   <div className="gross-reading-links"><a href="#glossaire?term=charge_brute">{L.glossary}</a></div>
    {R.core?<CoreResults core={R.core} labels={L} focus={focus}/>:<>{R.total_jh!==null?<div className="gross-metrics"><section className="gross-metric gross-adopted"><h3>{R.total_label}</h3><p><strong>{n(R.total_jh,Number.isInteger(R.total_jh)?0:1)}</strong> {R.total_unit}</p></section></div>:<p className="gross-unknown-human">{L.unknown_human}</p>}<Takeaway summary={R.summary} labels={L}/>{R.scope&&<Text text={R.scope}/>}</>}
    <WorkGroups groups={R.groups} labels={L} focus={focus}/>
    {!R.core&&R.remaining.length>0&&<section className="gross-gap-reviews"><h3>{L.remaining}</h3>{R.remaining.map((item:Data)=><article key={item.id}><h4>{item.label}</h4><Text text={item.scope}/><p><strong>{L.unknown}</strong></p><Text text={item.proof_to_price}/></article>)}</section>}
    {phase==='integration'&&reading.integration_units&&<IntegrationUnits grid={reading.integration_units}/>}
    {phase!=='integration'&&<Quotes quotes={R.quotes} phase={phase} labels={L}/>}
    {!R.core&&R.construction.length>0&&<details className="gross-detail gross-construction"><summary>{L.assumptions}</summary>{R.construction.map((text:string)=><Text key={text} text={text}/>)}</details>}
-   {!R.core&&<section className="gross-proofs"><h3>{L.evidence}</h3><ul>{proofs.map(proof=><li key={proof.path}><SourceLink path={proof.path}>{proof.short_label||proof.label}</SourceLink></li>)}<li><a className="text-button" href="#telechargements">{L.audit_link}</a></li></ul></section>}
+   {!R.core&&<section className="gross-proofs"><h3>{L.evidence}</h3><ul>{proofs.map(proof=><li key={proof.path}><SourceLink path={proof.path}>{proof.short_label||proof.label}</SourceLink></li>)}</ul></section>}
   </DossierSheet>
-  <a className="framework-phase-next text-button" href={next?phaseReadingHash({...context,page:'charges-'+next.id,returnTo:scope.returnTo,family:scope.family,option:current.id,horizon})!:phaseReadingHash({...context,page:'organisation-delivery',option:current.id,horizon})!}>{next?J.labels.next+' · '+next.title:data.ui.essential.pages['organisation-delivery'].title}<ArrowRight size={18} aria-hidden="true"/></a>
+
  </div>;
 }

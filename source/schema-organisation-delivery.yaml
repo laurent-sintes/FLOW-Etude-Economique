@@ -1,0 +1,451 @@
+type: object
+additionalProperties: false
+properties:
+  excluded_workload_phases:
+    const: [integration]
+  version:
+    const: 1
+  id:
+    const: flow-delivery-organisation
+  date: &id001
+    type: string
+    minLength: 1
+  principle:
+    type: object
+    additionalProperties: false
+    properties:
+      id:
+        const: durable-product-teams
+      title: *id001
+      text: *id001
+    required:
+    - id
+    - title
+    - text
+  team_types:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          enum:
+          - stream-aligned
+          - platform
+          - complicated-subsystem
+          - enabling
+        label: *id001
+        definition: *id001
+        color:
+          type: string
+          pattern: ^#[0-9A-Fa-f]{6}$
+      required:
+      - id
+      - label
+      - definition
+      - color
+    minItems: 1
+  interaction_modes:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          enum:
+          - collaboration
+          - x-as-a-service
+          - facilitating
+        label: *id001
+        definition: *id001
+        color:
+          type: string
+          pattern: ^#[0-9A-Fa-f]{6}$
+      required:
+      - id
+      - label
+      - definition
+      - color
+    minItems: 1
+  phases:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        label: *id001
+        charge_unit: *id001
+        cost_unit: *id001
+        period: *id001
+        note: *id001
+      required:
+      - id
+      - label
+      - charge_unit
+      - cost_unit
+      - period
+      - note
+    minItems: 1
+  teams:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        label: *id001
+        type: *id001
+        mission: *id001
+        boundary: *id001
+        status:
+          const: target
+        responsibilities:
+          type: object
+          additionalProperties: false
+          properties:
+            acquisition: *id001
+            integration: *id001
+            fonctionnement: *id001
+          required:
+          - acquisition
+          - integration
+          - fonctionnement
+        capacity:
+          type: object
+          additionalProperties: false
+          properties:
+            acquisition:
+              type: 'null'
+            integration:
+              type: 'null'
+            fonctionnement:
+              type: 'null'
+          required:
+          - acquisition
+          - integration
+          - fonctionnement
+      required:
+      - id
+      - label
+      - type
+      - mission
+      - boundary
+      - status
+      - responsibilities
+      - capacity
+    minItems: 1
+  governance:
+    type: object
+    additionalProperties: false
+    properties:
+      id: *id001
+      label: *id001
+      mission: *id001
+      roles_ref: *id001
+      funding_note: *id001
+    required:
+    - id
+    - label
+    - mission
+    - roles_ref
+    - funding_note
+  work_owners:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          enum:
+          - core_unit
+          - integration_activity
+          - maintenance_activity
+          - funding
+          - annual_cost
+        ref: *id001
+        team_ref:
+          type:
+          - string
+          - 'null'
+        candidate_refs:
+          type: array
+          items: *id001
+          minItems: 0
+        basis: *id001
+      required:
+      - kind
+      - ref
+      - team_ref
+      - candidate_refs
+      - basis
+    minItems: 1
+  interactions:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        source: *id001
+        target: *id001
+        mode: *id001
+        object: *id001
+        phases:
+          type: array
+          items:
+            enum:
+            - acquisition
+            - integration
+            - fonctionnement
+          minItems: 1
+        exit_criterion:
+          type: string
+        status:
+          const: proposed
+      required:
+      - id
+      - source
+      - target
+      - mode
+      - object
+      - phases
+      - exit_criterion
+      - status
+    minItems: 1
+  labels:
+    type: object
+    additionalProperties: false
+    properties:
+      team_directory: *id001
+      team_types_note: *id001
+      mode_filter: *id001
+      all_modes: *id001
+      relationship_contracts: *id001
+      graph_gestures: *id001
+      graph_reset: *id001
+      graph_details: *id001
+      graph_inspect_title: *id001
+      graph_inspect_help: *id001
+      graph_open_team: *id001
+      flow_direction: *id001
+      graph_reading: *id001
+      shapes_credit: *id001
+      shapes_license: *id001
+      shapes_kit: *id001
+      graph_empty: *id001
+      integration_workload_pending: *id001
+      integration_workload_note: *id001
+      allocation_title: *id001
+      allocation_note: *id001
+      allocation_details: *id001
+      principle_title: *id001
+      theory_title: *id001
+      theory_intro: *id001
+      types_title: *id001
+      modes_title: *id001
+      conway_title: *id001
+      conway: *id001
+      book: *id001
+      target_title: *id001
+      target_note: *id001
+      scope_title: *id001
+      responsibilities_title: *id001
+      capacity_title: *id001
+      capacity_note: *id001
+      capacity_unknown: *id001
+      unknown: *id001
+      known_zero: *id001
+      all_teams: *id001
+      team: *id001
+      phase: *id001
+      totals: *id001
+      governance: *id001
+      unallocated: *id001
+      assigned: *id001
+      charges_title: *id001
+      costs_title: *id001
+      charges_note: *id001
+      costs_note: *id001
+      unallocated_reason: *id001
+      unknown_note: *id001
+      workload: *id001
+      cost: *id001
+      source: *id001
+      object: *id001
+      period: *id001
+      no_records: *id001
+      records_title: *id001
+      candidates: *id001
+      basis: *id001
+      interactions_title: *id001
+      interaction_note: *id001
+      source_team: *id001
+      target_team: *id001
+      mode: *id001
+      interaction_object: *id001
+      exit: *id001
+      permanent_service: *id001
+      graph_label: *id001
+      graph_services: *id001
+      graph_streams: *id001
+      graph_enable: *id001
+      governance_title: *id001
+      lifecycle_note: *id001
+      buy_note: *id001
+      reconciliation: *id001
+      nav_label: *id001
+      phase_filter: *id001
+      team_filter: *id001
+      all_phases: *id001
+      responsibilities: *id001
+      method_link: *id001
+      charges_link: *id001
+      costs_link: *id001
+      org_link: *id001
+      next: *id001
+      economic_link: *id001
+      months: *id001
+      annual_period: *id001
+      objects:
+        type: object
+        additionalProperties: false
+        properties:
+          core_system: *id001
+          adaptations_client: *id001
+          plateforme: *id001
+          programme: *id001
+          annual_work: *id001
+          shared_services: *id001
+        required:
+        - core_system
+        - adaptations_client
+        - plateforme
+        - programme
+        - annual_work
+        - shared_services
+      build_scope: *id001
+      integration_scope: *id001
+      annual_scope: *id001
+      phase_nav: *id001
+      role: *id001
+      jh: *id001
+      roles_title: *id001
+      costs_period_note: *id001
+    required:
+    - integration_workload_pending
+    - integration_workload_note
+    - allocation_title
+    - allocation_note
+    - allocation_details
+    - principle_title
+    - theory_title
+    - theory_intro
+    - types_title
+    - modes_title
+    - conway_title
+    - conway
+    - book
+    - target_title
+    - target_note
+    - scope_title
+    - responsibilities_title
+    - capacity_title
+    - capacity_note
+    - capacity_unknown
+    - unknown
+    - known_zero
+    - all_teams
+    - team
+    - phase
+    - totals
+    - governance
+    - unallocated
+    - assigned
+    - charges_title
+    - costs_title
+    - charges_note
+    - costs_note
+    - unallocated_reason
+    - unknown_note
+    - workload
+    - cost
+    - source
+    - object
+    - period
+    - no_records
+    - records_title
+    - candidates
+    - basis
+    - interactions_title
+    - interaction_note
+    - source_team
+    - target_team
+    - mode
+    - interaction_object
+    - exit
+    - permanent_service
+    - graph_label
+    - graph_services
+    - graph_streams
+    - graph_enable
+    - governance_title
+    - lifecycle_note
+    - buy_note
+    - reconciliation
+    - nav_label
+    - phase_filter
+    - team_filter
+    - all_phases
+    - responsibilities
+    - method_link
+    - charges_link
+    - costs_link
+    - org_link
+    - next
+    - economic_link
+    - months
+    - annual_period
+    - objects
+    - build_scope
+    - integration_scope
+    - annual_scope
+    - phase_nav
+    - role
+    - jh
+    - roles_title
+    - costs_period_note
+  references:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        label: *id001
+        href:
+          type: string
+          pattern: ^https://
+      required:
+      - label
+      - href
+    minItems: 1
+  funding_labels:
+    type: object
+    additionalProperties: *id001
+required:
+- excluded_workload_phases
+- version
+- id
+- date
+- principle
+- team_types
+- interaction_modes
+- phases
+- teams
+- governance
+- work_owners
+- interactions
+- labels
+- references
+- funding_labels
+$schema: https://json-schema.org/draft/2020-12/schema

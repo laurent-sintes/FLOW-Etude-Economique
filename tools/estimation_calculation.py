@@ -22,6 +22,9 @@ def metamodel(document=None):
         ids = [r['id'] for r in model[collection]]
         if len(ids) != len(set(ids)):
             raise ValueError('Duplicate metamodel ' + collection)
+    domains = {d['id'] for d in model['domains']}
+    if len(domains) != len(model['domains']) or any(o['domain_ref'] not in domains for o in model['objects']):
+        raise ValueError('Unknown or duplicate metamodel domain')
     ids = {o['id'] for o in model['objects']}
     for r in model['relations']:
         if r['source'] not in ids or r['target'] not in ids:

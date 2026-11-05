@@ -1,3 +1,4 @@
+import {TeamAllocationCosts} from './TeamPhasePage';
 import {FinancialZone,FinancialZoneChoice} from './FinancialZone';
 import {ProjectRateStudy} from './ProjectRateStudy';
 import {useContext,useEffect,useState,type CSSProperties,type ReactNode} from 'react';
@@ -16,7 +17,6 @@ import {ReadingScopeContext} from './ReadingScopeContext';
 import {ReadingScope,ReadingPeriodNote} from './ReadingScope';
 import './economicDossier.css';
 
-const pages:EconomicPage[]=['comparer','evaluation-core','parametres'];
 const period=economicPeriod;
 function useDossier(){
  const {data}=useStudy(),readingRoute=useContext(ReadingScopeContext),allOptions=visibleOptions(data.ui,data.baseline.options);
@@ -29,8 +29,8 @@ function periodOption(option:Option,reading:Data,route:{origin?:string}):Option|
  return selected?{...option,horizons:selected.horizons,annual:selected.annual}:null;
 }
 function Dossier({route,children}:{route:EconomicRoute;children:ReactNode}){
- const {T,link,options}=useDossier();
- return <div className="essential-page economic-dossier" style={{'--eco-options':options.length} as CSSProperties}><nav className="eco-navigation" aria-label={T.navigation}>{pages.map((page,i)=><a key={page} href={link(page,route.option,String(period(route)),{family:route.family,focus:route.focus})} aria-current={route.page===page?'page':undefined}><span aria-hidden="true">{String(i+1).padStart(2,'0')}</span>{[T.compare,T.costs,T.assumptions][i]}</a>)}</nav><div className="eco-toolbar"><Reference/><FinancialZoneChoice route={route}/></div><ReadingScope route={route}/>{route.page!=='parametres'&&<ReadingPeriodNote route={route}/ >}{children}</div>;
+ const {options}=useDossier();
+ return <div className="essential-page economic-dossier" style={{'--eco-options':options.length} as CSSProperties}><div className="eco-toolbar"><Reference/><FinancialZoneChoice route={route}/></div><ReadingScope route={route}/>{route.page!=='parametres'&&<ReadingPeriodNote route={route}/ >}{children}</div>;
 }
 function Reference(){const {T}=useDossier();return <p className="eco-reference"><LockKeyhole size={14} aria-hidden="true"/>{T.reference}</p>;}
 function OptionChoice({route}:{route:EconomicRoute}){
@@ -46,7 +46,7 @@ function ProofLink({phase,route,focus,children}:{phase:string;route:EconomicRout
  return <a href={'#charges-'+phase+'?'+query.toString()}>{children} →</a>;
 }
 function CalendarValue({option}:{option:Option}){const {T}=useDossier(),{n}=useFormat();return <span>{T.month} <b>{n(option.service_start_month,0)}</b></span>;}
-function Next({to,label}:{to:string;label:string}){return <a className="eco-next" href={to}>{label}<ArrowRight size={18} aria-hidden="true"/></a>;}
+function DetailReturn({to,label}:{to:string;label:string}){return <a className="text-button" href={to}>{label}<ArrowRight size={18} aria-hidden="true"/></a>;}
 
 function CompletionInclusion({stage}:{stage:string}){
  const {T,readingRoute}=useDossier(),relation=completionRelation(stage);
@@ -90,7 +90,7 @@ function EconomicComparisonPageContent({route}:{route:EconomicRoute}){
  <section className="eco-section"><h2>{S.compare_parts} · {horizon} {T.years}</h2><p>{S.compare_parts_note}</p><ComparisonTable names={options.map((o:Option)=>o.name)} label={S.compare_parts}>{[['build',S.acquisition],['integration',T.integration],['mco_run',T.ongoing]].map(([key,label])=><Matrix key={key} label={label} values={options.map((o:Option)=>amount(result(o).totals[key as 'build'|'integration'|'mco_run']))}/>)}<Matrix label={S.difference} values={options.map((o:Option)=>o.stack==='java-spring'?<small>{S.reference_option}</small>:<><b>{amount(detail(o).comparison.horizons.find((row:Data)=>row.years===horizon).amount_eur_ht)}</b><small>{S.difference_labels[detail(o).comparison.horizons.find((row:Data)=>row.years===horizon).direction]}</small></>)}/></ComparisonTable><div className="eco-option-drivers">{options.map((o:Option)=><article key={o.stack}><h3>{o.name}</h3><p>{S.drivers[o.stack]}</p></article>)}</div></section>
  <details className="eco-detail"><summary>{S.budgets_detail}</summary><p>{T.initial_note}</p><ComparisonTable names={options.map((o:Option)=>o.name)} label={T.initial_title}><Matrix label={T.initial_duration} values={options.map((o:Option)=>amount(o.obtention))}/><Matrix label={T.integration} values={options.map((o:Option)=>amount(o.integration))}/><Matrix label={T.remaining} values={options.map((o:Option)=>amount(result(o).remaining))}/></ComparisonTable><p>{T.remaining_note}</p></details>
  <ScopeForDecision reading={reading!}/><p className="eco-caption">{T.price_basis}</p><FundingDecision reading={reading!}/></>:<Loading error={error} retry={retry}/>}
- <Next to={link('evaluation-core',route.option,String(horizon))} label={T.next_costs}/></Dossier>;
+ </Dossier>;
 }
 function useEconomicReading(){
  const {data,readingRoute}=useDossier();const [reading,setReading]=useState<Data|null>(null),[error,setError]=useState(''),[attempt,setAttempt]=useState(0);
@@ -134,16 +134,17 @@ function EconomicCostsPageContent({route}:{route:EconomicRoute}){
  const expert=['financements','transpositions'].includes(route.view||'');
  const S=reading?.editorial.sponsor,annual=option.annual.find(row=>row.annee===horizon)!;
  if(!reading||!result)return <Dossier route={route}><Loading error={error} retry={retry}/></Dossier>;
- return <Dossier route={route}>{expert?<><Next to={link('evaluation-core',option.stack,String(horizon),{family:route.family,focus:route.focus})} label={T.back}/><section className="eco-section"><h2>{route.view==='transpositions'?T.transpositions:T.funding}</h2><ExpertReading view={route.view!} focus={route.focus}/></section></>:<><OptionChoice route={route}/><PeriodBounds option={option} horizon={horizon}/><ReadingContext option={option}/>
+ return <Dossier route={route}>{expert?<><DetailReturn to={link('evaluation-core',option.stack,String(horizon),{family:route.family,focus:route.focus})} label={T.back}/><section className="eco-section"><h2>{route.view==='transpositions'?T.transpositions:T.funding}</h2><ExpertReading view={route.view!} focus={route.focus}/></section></>:<><OptionChoice route={route}/><PeriodBounds option={option} horizon={horizon}/><ReadingContext option={option}/>
  <section className="eco-cost-overview"><article><h2>{T.reading_scope.period_costs} · {horizon} {horizon===1?T.reading_scope.one_year:T.years}</h2><strong>{amount(result.totals.total)}</strong><small>{T.service_years} · {n(result.service_years,1)} {T.years}</small></article>{detail&&S?<><article><h2>{S.completion}</h2><strong>{amount(detail.service_completion.total_eur_ht)}</strong><small>{T.service_start} <CalendarValue option={option}/></small><CompletionInclusion stage={result.stage}/></article><article><h2>{T.reading_scope.period_year} {horizon}</h2><strong>{amount(annual.total)}</strong><small>{S.stages[detail.annual.projected_stages.find((row:Data)=>row.year===horizon).stage]}</small><small className="eco-inclusion">{T.reading_notes.annual}</small></article></>:<Loading error={error} retry={retry}/>}</section>
  {S&&<><aside className="eco-reading-rule"><b>{T.reading_notes.non_additive}</b><p>{S.completion_note}</p></aside><p className="eco-caption">{S.scope_short}</p></>}
+ <TeamAllocationCosts option={option.stack}/>
  <section className="eco-section"><h2>{T.decomposition}</h2><Breakdown option={option} horizon={horizon}/>{S&&<p>{S.drivers[option.stack]}</p>}</section>
  {detail&&S&&reading?<><AnnualTrajectory option={option} horizon={horizon} reading={reading}/><details className="eco-detail" open={route.family?true:undefined}><summary>{S.budgets_detail}</summary><InitialDetails option={option} reading={detail} route={route}/><dl className="eco-money-lines"><div><dt>{T.remaining}</dt><dd>{amount(result.remaining)}</dd></div></dl><p className="eco-caption">{T.remaining_note}</p></details>
  <details className="eco-detail"><summary>{S.completion_detail}</summary><dl className="eco-money-lines"><div><dt>{S.initial_ledger}</dt><dd>{amount(detail.service_completion.initial_eur_ht)}</dd></div><div><dt>{S.subscriptions}</dt><dd>{amount(detail.service_completion.subscriptions_eur_ht)}</dd></div></dl><p>{S.completion_note}</p></details>
  <details className="eco-detail"><summary>{T.ongoing_bridge}</summary><dl className="eco-money-lines"><div><dt>{T.transition_cost}</dt><dd>{amount(detail.spending_bridge.find((h:Data)=>h.years===horizon).transition_eur_ht)}</dd></div><div><dt>{T.recurring_cost}</dt><dd>{amount(detail.spending_bridge.find((h:Data)=>h.years===horizon).recurring_eur_ht)}</dd></div></dl><p>{T.ongoing_bridge_note}</p></details>
  <AnnualDetails route={route} option={option} reading={{...detail,sponsor:S,rows:reading.editorial.sections.annual.rows}}/>
  <details className="eco-detail"><summary>{T.spending}</summary><p>{T.spending_note}</p><table className="eco-annual-table"><caption className="sr-only">{T.spending}</caption><thead><tr><th scope="col">{T.year}</th><th scope="col">{T.initial_duration}</th><th scope="col">{T.integration}</th><th scope="col">{T.ongoing}</th><th scope="col">{T.year_total}</th></tr></thead><tbody>{option.annual.filter(row=>row.annee<=horizon).map(row=><tr key={row.annee}><th scope="row">{row.annee}<small className="eco-period-bounds">{T.month} {(row as Data).start_month}–{(row as Data).end_month}</small></th><td>{amount(row.build)}</td><td>{amount(row.integration)}</td><td>{amount(row.mco_run)}</td><td><b>{amount(row.total)}</b></td></tr>)}</tbody></table><p className="eco-caption">{S.annual_pair_note}</p></details><ScopeForDecision reading={reading} option={option.stack}/><p className="eco-caption">{T.price_basis}</p></>:!detail&&<Loading error={error} retry={retry}/>}
- <section className="eco-section" id="economic-expert" tabIndex={-1}><h2>{T.expert}</h2><div className="eco-evidence-links"><a href={link('evaluation-core',option.stack,'financements',{horizon:String(horizon),family:route.family,focus:route.focus||'economic-expert'})}>{T.funding} →</a><a href={link('evaluation-core',option.stack,'transpositions',{horizon:String(horizon),family:route.family,focus:route.focus||'economic-expert'})}>{T.transpositions} →</a></div></section><Next to={link('parametres',option.stack,String(horizon),{family:route.family,focus:route.focus})} label={T.next_assumptions}/></>}</Dossier>;
+ <section className="eco-section" id="economic-expert" tabIndex={-1}><h2>{T.expert}</h2><div className="eco-evidence-links"><a href={link('evaluation-core',option.stack,'financements',{horizon:String(horizon),family:route.family,focus:route.focus||'economic-expert'})}>{T.funding} →</a><a href={link('evaluation-core',option.stack,'transpositions',{horizon:String(horizon),family:route.family,focus:route.focus||'economic-expert'})}>{T.transpositions} →</a></div></section></>}</Dossier>;
 }
 function EconomicAssumptionsPageContent({route}:{route:EconomicRoute}){
  const {T,data,options,link}=useDossier(),{n,amount,dailyRate,annualAmount}=useFormat(),F=data.content.framework,{reading,error,retry}=useEconomicReading();
@@ -165,7 +166,7 @@ function EconomicAssumptionsPageContent({route}:{route:EconomicRoute}){
  <details className="eco-detail"><summary>{T.purchases}</summary><p>{T.purchase_note}</p><dl className="eco-money-lines">{F.other.filter((row:Data)=>row.status==='retained').map((row:Data)=><div key={row.key}><dt>{T.purchase_labels[row.key]||row.key}<small>{T.purchase_scopes[row.key]}</small></dt><dd>{row.unit==='daily'?dailyRate(row.value):row.unit==='annual'?annualAmount(row.value):n(row.value,0)+' '+T.jh}</dd></div>)}</dl></details>
  <details className="eco-detail"><summary>{T.licences}</summary><p>{T.licences_note}</p>{options.filter((o:Option)=>o.mode==='Buy').map((o:Option)=><section key={o.stack}><h3>{o.name}</h3><p>{T.subscription_start} · {T.month} {n(o.selection_months,0)}</p><dl className="eco-money-lines">{o.editor_prices.map((value:number,i:number)=><div key={i}><dt>{T.sequence} {i+1}</dt><dd>{amount(value)}</dd></div>)}</dl></section>)}</details>
  <details className="eco-detail" open={route.detail==='diagnostics'?true:undefined}><summary>{T.technical}</summary><p>{T.technical_note}</p><div className="eco-evidence-links">{['acquisition','integration','fonctionnement'].map(phase=><a key={phase} href={'#charges-'+phase+'?'+new URLSearchParams({option:selected,...economicReadingContext(route),returnTo:'parametres'}).toString()}>{data.ui.essential.nav.find((nav:Data)=>nav.id==='charges-'+phase).label} →</a>)}</div></details>
- <Next to={link('comparer',route.option,String(period(route)),{family:route.family,focus:route.focus})} label={T.next_compare}/></Dossier>;
+ </Dossier>;
 }
 
 function PeriodBounds({option,horizon}:{option:Option;horizon:number}){

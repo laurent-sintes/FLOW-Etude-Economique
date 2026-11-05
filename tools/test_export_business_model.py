@@ -51,6 +51,8 @@ class ExportBusinessModelTests(unittest.TestCase):
             self.assertEqual(metadata['source_fingerprint'],value['source_fingerprint'])
             self.assertEqual(metadata['model_revision'],self.study.model_revision)
             self.assertNotIn('source/glossaire.md',value['model'])
+            self.assertEqual(value['derived']['team_phase_allocation'], self.study.content['delivery_organisation']['allocation_table'])
+            self.assertEqual(value['derived']['team_consolidations'], self.study.content['delivery_organisation']['team_consolidations'])
 
     def test_model_and_metamodel_changes_invalidate_content(self):
         for relative in (METAMODEL, 'source/estimations-core-retenues.yaml'):

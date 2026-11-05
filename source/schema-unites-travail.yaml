@@ -1,0 +1,108 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+additionalProperties: false
+required:
+- version
+- id
+- labels
+- team_scopes
+- units
+properties:
+  version:
+    const: 1
+  id:
+    const: generic-work-units
+  labels:
+    type: object
+    minProperties: 1
+    additionalProperties:
+      oneOf:
+      - &id001
+        type: string
+        minLength: 1
+      - type: object
+        additionalProperties: *id001
+  team_scopes:
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - team_ref
+      - scope_kind
+      - status
+      - core_scope_refs
+      - basis
+      properties:
+        team_ref: *id001
+        scope_kind:
+          enum:
+          - direct
+          - indirect
+        status:
+          const: proposed
+        core_scope_refs:
+          type: array
+          uniqueItems: true
+          items: *id001
+        basis: *id001
+  units:
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - label
+      - nature
+      - phase_ref
+      - object
+      - recurrence
+      - record_refs
+      - core_scope_refs
+      - integration_unit_ref
+      - parent_ref
+      - basis
+      - estimation_contract
+      properties:
+        id: *id001
+        label: *id001
+        nature:
+          enum:
+          - core_build
+          - integration
+          - mco
+          - run
+          - governance
+        phase_ref:
+          enum:
+          - acquisition
+          - integration
+          - fonctionnement
+        object: *id001
+        recurrence:
+          enum:
+          - initial
+          - annual
+        record_refs:
+          type: array
+          uniqueItems: true
+          items: *id001
+        core_scope_refs:
+          type: array
+          uniqueItems: true
+          items: *id001
+        integration_unit_ref:
+          type:
+          - string
+          - 'null'
+        parent_ref:
+          type:
+          - string
+          - 'null'
+        basis: *id001
+        estimation_contract:
+          type: object
+          description: Contrôle fermé par source/schema-contrat-estimation.yaml dans tools/work_estimation.py.

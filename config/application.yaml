@@ -1117,6 +1117,7 @@ composable:
     de services client. Une part non ventilée ne vaut pas zéro.'
 essential:
   economic_dossier:
+    team_costs: Coûts par équipe et par phase
     navigation: Dossier économique
     compare: Comparer les options
     costs: Comprendre les coûts
@@ -1618,13 +1619,13 @@ essential:
     label: '{{notion.exploiter_evoluer}}'
     icon: running
   - id: organisation-delivery
-    label: '{{notion.transformation_office}}'
+    label: Principes et Team Topologies
     icon: grid
   - id: equipes-produit
-    label: Équipes produit
+    label: Équipes et missions
     icon: grid
   - id: integration-transverse
-    label: Intégration transverse des livraisons
+    label: Interactions entre équipes
     icon: puzzle
   - id: scenarios
     label: Construire un scénario
@@ -1659,6 +1660,24 @@ essential:
   - id: telechargements
     label: Téléchargements
     icon: download
+  - id: organisation-cible
+    label: Organisation cible
+    icon: grid
+  - id: gouvernance-delivery
+    label: Gouvernance et trajectoire
+    icon: grid
+  - id: unites-travail
+    label: Unités de travail
+    icon: grid
+  - id: charges-equipes
+    label: Charges par équipe et par phase
+    icon: grid
+  - id: couts-equipes
+    label: Coûts par équipe et par phase
+    icon: calculator
+  - id: schema-modele
+    label: Graphe du métamodèle
+    icon: grid
   nav_groups:
   - label: L’étude FLOW
     sequential: false
@@ -1674,19 +1693,35 @@ essential:
     - preetude-solutions
     - preetude-couts
     - preetude-productivite
-  - label: Framework d’évaluation
+  - label: Organisation du delivery
     items:
-    - vision
-    - acquisition
-    - integration
-    - fonctionnement
-    - scenarios
-    - methodes
-  - label: Évaluation des charges brutes
+    - organisation-delivery
+    - organisation-cible
+    - equipes-produit
+    - integration-transverse
+    - gouvernance-delivery
+  - label: Évaluation des charges
     items:
+    - unites-travail
+    - charges-equipes
     - charges-acquisition
     - charges-integration
     - charges-fonctionnement
+  - label: Dossier économique
+    items:
+    - couts-equipes
+    - comparer
+    - evaluation-core
+    - parametres
+    - scenarios
+  - label: Framework et méthodes
+    items:
+    - vision
+    - schema-modele
+    - acquisition
+    - integration
+    - fonctionnement
+    - methodes
   - label: Approfondissements du Framework
     hidden: true
     items:
@@ -1698,16 +1733,6 @@ essential:
     - calcul-run
     - leviers
     - capacite-realisation
-  - label: Organisation de delivery
-    items:
-    - organisation-delivery
-    - equipes-produit
-    - integration-transverse
-  - label: Dossier économique
-    items:
-    - comparer
-    - evaluation-core
-    - parametres
   - label: Repères de lecture
     sequential: false
     items:
@@ -1729,103 +1754,21 @@ essential:
       travaux Make et servent à examiner la couverture des solutions Buy.
     model_link: Comprendre son rôle dans les {{vue.concepts}}
     input_link: Consulter la cartographie utilisée par l’étude
-  delivery_organisation:
-    office_intro: >-
-      **Une équipe dédiée côté Beaumanoir**, financée à temps plein du lancement à la fin de l’intégration, pour les options Make et Buy. La direction de programme interne porte les décisions de programme. Le Transformation Office pilote l’exécution côté client.
-    office_budget: Son coût apparaît sur une ligne dédiée dans le dossier économique. Les tarifs retenus valorisent la charge de l’équipe sur la durée d’obtention du Core System et d’intégration de chaque option.
-    assumptions_link: Voir les rôles et tarifs retenus dans les hypothèses
-    teams_intro: >-
-      **Organisation proposée pour le Make Java/Spring.** Le regroupement des lots ci-dessous sert à préparer le découpage des équipes. Les affectations, la capacité par équipe et la séquence de livraison restent à valider.
-    teams_navigation: Périmètres produit
-    team_roles_title: Composition proposée
-    profile_column: Profil
-    mission_column: Contribution
-    capacity_column: Capacité
-    po_capacity: 1 ETP par équipe · hypothèse
-    variable_capacity: Selon la charge et le délai
-    shared_capacity: Mutualisée · selon la charge et le délai
-    office_capacity_unit: ETP
-    capacity_note: Les capacités variables seront dimensionnées à partir des charges par rôle, du délai de livraison et du calendrier des interventions.
-    shared_roles:
-    - label: Architecture de lot
-      mission: Concevoir les composants et préparer les décisions techniques du lot.
-    - label: UX
-      mission: Concevoir et valider les parcours et les interfaces utilisateur.
-    - label: Plateforme
-      mission: Préparer les environnements, l’intégration continue et les déploiements.
-    - label: Sécurité
-      mission: Définir les contrôles de sécurité et accompagner leur vérification.
-    office_role_column: Rôle dédié
-    office_mission_column: Mission
-    train_area_column: Responsabilité
-    train_mission_column: Fonctionnement proposé
-    product_role: Product Owner (PO)
-    analysis_role: Analyse métier et produit
-    development_role: Développeurs
-    qa_role: QA
-    teams:
-    - id: referentiels
-      title: Référentiels
-      scope: Master Data et mise à disposition des données de référence.
-      roles:
-        product: Prioriser les données de référence et leurs usages par les autres équipes.
-        analysis: Définir les objets, leurs règles de gestion et leurs conditions de publication.
-        development: Réaliser les services et interfaces de consultation et de mise à disposition.
-        qa: Vérifier les contrôles de données et leur publication vers les consommateurs.
-    - id: stocks
-      title: Stocks
-      scope: Stock, propriété du stock, politiques, éligibilité et devenir des biens.
-      roles:
-        product: Prioriser les usages de visibilité, de propriété et de gestion des stocks.
-        analysis: Décrire les mouvements, les règles d’éligibilité et les états des biens.
-        development: Réaliser les services de stock et de propriété et exposer la disponibilité.
-        qa: Tester les mouvements, les règles et la cohérence des états de stock.
-    - id: commandes
-      title: Commandes et prestations
-      scope: Gestion des commandes, suivi des prestations et reconnaissance de leurs résultats.
-      roles:
-        product: Prioriser les parcours de commande et de suivi des prestations.
-        analysis: Décrire les étapes, les exceptions et les règles de reconnaissance des résultats.
-        development: Réaliser les services et interfaces de suivi des commandes et prestations.
-        qa: Tester les transitions, les reprises et les résultats de bout en bout.
-    - id: planification
-      title: Planification Supply
-      scope: Préparation et pilotage du Master Plan, promesse, affectation et optimisation Supply, ateliers visuels de planification et de décision.
-      roles:
-        product: Prioriser les décisions de planification, de promesse et d’affectation.
-        analysis: Décrire les contraintes, les règles de décision et les scénarios d’arbitrage.
-        development: Réaliser les services de planification et les ateliers de décision.
-        qa: Vérifier les résultats sur des scénarios de capacité, de disponibilité et d’affectation.
-    - id: services
-      title: Services partagés
-      scope: Process Management, studios, portail, formulaires et pilotage, administration, robustesse et services IT complémentaires.
-      roles:
-        product: Prioriser les besoins communs des équipes qui utilisent ces services.
-        analysis: Décrire les usages transverses et les exigences d’administration et de robustesse.
-        development: Réaliser les services partagés, leurs interfaces et leur intégration.
-        qa: Vérifier les usages communs, la compatibilité et les scénarios de défaillance.
-    buy: En Buy, l’éditeur fournit le Core System et l’intégrateur réalise les prestations de son lot. Beaumanoir conserve la responsabilité de ses priorités métier, de la recette et des décisions de mise en service.
-    coordination_intro: >-
-      **L’intégration transverse réunit les équipes produit, les métiers, l’architecture, la QA et la plateforme.**
-      Son objectif est de rendre les livraisons utilisables ensemble. Le responsable de synchronisation du
-      Transformation Office fait le lien avec cette organisation et anime la planification commune, le suivi des
-      dépendances et la levée des blocages, dans un rôle proche du Release Train Engineer (RTE) de SAFe.
-    coordination_roles:
-    - label: Cadence commune
-      mission: Les équipes planifient les incréments ensemble, rendent leurs dépendances visibles et présentent un résultat intégré. Les engagements et risques qui nécessitent un arbitrage remontent à la direction de projet.
-    - label: Priorités produit
-      mission: Les responsables produit portent les priorités de leurs équipes. Le responsable de l’arbitrage entre périmètres reste à désigner avec les métiers et la direction de programme.
-    - label: Architecture et livraison
-      mission: L’architecte transverse arbitre les interfaces. Les équipes conçoivent et livrent leurs composants. Les profils QA et plateforme contribuent à la recette intégrée et à la préparation technique des mises en service.
-    - label: Recette métier et adoption
-      mission: Les métiers valident les parcours et contribuent à la décision de mise en service. La conduite du changement prépare la communication et l’adoption.
-    coordination_reference: Repère SAFe sur les rôles d’un Agile Release Train
-    example_title: Exemple de livraison commune
-    example: Pour livrer une promesse de commande, Stocks fournit la disponibilité, Planification applique les règles d’affectation et Commandes restitue la promesse. Le responsable de synchronisation aligne les versions et les dates. Les équipes et la QA testent le parcours complet avec les métiers. La conduite du changement prépare le déploiement auprès des utilisateurs.
-    costs_link: Comprendre les coûts
   introduction:
     begin: Parcourir les études préalables
   pages:
+    unites-travail:
+      title: Unités de travail et contributions
+    schema-modele:
+      title: Graphe du métamodèle
+    organisation-cible:
+      title: Organisation cible
+    gouvernance-delivery:
+      title: Gouvernance et trajectoire
+    charges-equipes:
+      title: Charges par équipe et par phase
+    couts-equipes:
+      title: Coûts par équipe et par phase
     charges-acquisition:
       title: '{{notion.obtenir_core_system}}'
     charges-integration:
@@ -1833,11 +1776,11 @@ essential:
     charges-fonctionnement:
       title: '{{notion.exploiter_evoluer}}'
     organisation-delivery:
-      title: '{{notion.transformation_office}}'
+      title: Équipes durables et Team Topologies
     equipes-produit:
-      title: Équipes produit
+      title: Équipes et missions
     integration-transverse:
-      title: Intégration transverse des livraisons
+      title: Interactions entre équipes
     cartographie:
       title: Cartographie métier
       intro: Le référentiel reçu du projet Beaumanoir Cartographie, sa provenance et le périmètre utilisé par l’étude.
@@ -2152,8 +2095,8 @@ essential:
         question: Comprendre un repère de productivité
         description: Mesures de productivité du logiciel et résultats des expériences IA.
     productivity_next:
-      href: '#vision'
-      label: Poursuivre avec le Framework
+      href: '#organisation-delivery'
+      label: Poursuivre avec l’organisation du delivery
   market_costs:
     price_grid_intro: Les prix ci-dessous sont les **tarifs de cadrage retenus pour l’étude**, en € HT / JH. Chaque
       rôle a une référence Paris et une variante province. Ouvre « Justification » pour retrouver les observations,

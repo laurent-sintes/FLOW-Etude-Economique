@@ -307,8 +307,255 @@ estimation_model:
   purpose: Point unique de définition des objets métier, relations, règles de calcul et indicateurs. Les fichiers
     propriétaires contiennent les instances. Les schémas et le moteur contrôlent leur conformité. Les attributs
     sont des concepts métier. Les schémas précisent leur représentation physique chez les propriétaires.
+  domains:
+  - id: scope
+    label: Périmètre métier et produit
+    definition: Capacités natives, fonctions du produit et frontières retenues.
+  - id: solutions
+    label: Solutions et réutilisation
+    definition: Qualifications des solutions, écarts et patrimoine réutilisable.
+  - id: evidence
+    label: Preuves et publication
+    definition: Pièces, essais, traçabilité et diffusion du modèle.
+  - id: work
+    label: Travaux et delivery
+    definition: Unités génériques, mesures et spécialisations par activité ou cycle de vie.
+  - id: estimation
+    label: Estimation et décisions
+    definition: Méthodes, mesures de taille, comparaisons, efforts et décisions d’adoption.
+  - id: organisation
+    label: Équipes et contributions
+    definition: Périmètres durables, contributions, interactions et clés de ventilation.
+  - id: economics
+    label: Coûts et trajectoire
+    definition: Tarifs, financements, offres, calendriers et scénarios économiques.
   objects:
+  - id: work_estimate
+    domain_ref: estimation
+    label: Contrat d’estimation d’un travail
+    owner: source/unites-travail.yaml
+    attributes:
+    - id
+    - version
+    - work_unit_ref
+    - option_ref
+    - phase_ref
+    - method
+    - scope
+    - period
+    - terms
+    - reference
+    - proposal
+    - missing
+    - source_refs
+    - decision_status
+    - cost_mode
+    - billing_period
+    - included_in_ref
+    description: Contrat commun aux trois phases. Il distingue les mesures retenues, les entrées du détail et la
+      proposition. Les inconnus restent null et une proposition ne modifie jamais le budget retenu.
+  - id: work_cost_bridge
+    domain_ref: economics
+    label: Passage des JH aux coûts
+    owner: tools/work_estimation.py
+    attributes:
+    - record_ref
+    - roles
+    - gross_jh
+    - gain_pct
+    - net_jh
+    - rate_eur_jh
+    - labour_eur_ht
+    - non_labour_eur_ht
+    - rounding_eur_ht
+    - calculated_eur_ht
+    - retained_eur_ht
+    - status
+    description: Relie les charges valorisées aux tarifs, frais et montants retenus. Les montants sans assiette
+      de JH restent identifiés comme tels. Les écarts d’arrondi sont visibles et les enveloppes ne sont pas recalibrées.
+  - id: work_unit
+    domain_ref: work
+    label: Unité de travail
+    owner: source/unites-travail.yaml
+    attributes:
+    - id
+    - nature
+    - phase_ref
+    - object
+    - recurrence
+    - record_refs
+    - core_scope_refs
+    - integration_unit_ref
+    - estimation_contract
+    - parent_ref
+    - basis
+    description: Travail cohérent à réaliser pour le projet, ponctuel ou récurrent. Les mesures restent référencées
+      chez leur propriétaire. Les détails sans chiffrage restent inconnus.
+  - id: work_capability_link
+    domain_ref: work
+    label: Périmètre métier du travail
+    owner: tools/work_units.py
+    attributes:
+    - work_unit_ref
+    - capability_ref
+    - status
+    description: Association de périmètre entre un travail et des capacités natives. Plusieurs capacités ne multiplient
+      ni ne ventilent ses JH et ses coûts.
+  - id: team_capability_scope
+    domain_ref: organisation
+    label: Périmètre durable de l’équipe
+    owner: source/unites-travail.yaml
+    attributes:
+    - team_ref
+    - scope_kind
+    - status
+    - core_scope_refs
+    - basis
+    description: Capacités gérées ou desservies durablement par une équipe. Le lien direct ou indirect reste distinct
+      de ses contributions à un travail.
+  - id: team_contribution
+    domain_ref: organisation
+    label: Contribution d’une équipe
+    owner: tools/work_units.py
+    attributes:
+    - work_unit_ref
+    - record_ref
+    - team_ref
+    - phase
+    - roles
+    - jh
+    - cost_eur_ht
+    - rule_refs
+    - contribution_kinds
+    - estimate_source
+    - estimate_version
+    - source_jh
+    - gross_jh
+    - net_jh
+    - period
+    - component_kind
+    - projected_cost_eur_ht
+    - missing
+    - human_applicable
+    - cost_applicable
+    - share_pct
+    - billing_period
+    description: Part documentée d’une mesure de travail attribuée à une équipe. Plusieurs équipes peuvent contribuer.
+      Les rôles conservent leurs tarifs et les parts restantes demeurent non ventilées.
+  - id: allocation_abaque
+    domain_ref: organisation
+    label: Abaque générale de ventilation
+    owner: source/abaque-ventilation.yaml
+    attributes:
+    - rules
+    - overrides
+    - work_unit_ref
+    - phase_ref
+    - measure
+    - component_ref
+    - shares
+    - basis
+    description: Clés de ventilation par unité, période et rôle. Une clé spécifique prime sur la clé générale. Les
+      frais ont une clé distincte et une candidature ne déclenche aucune affectation.
+  - id: work_measurement
+    domain_ref: work
+    label: Mesure retenue du travail
+    owner: tools/delivery_organisation.py
+    attributes:
+    - id
+    - phase
+    - jh
+    - cost_eur_ht
+    - roles
+    - source_ref
+    - start_month
+    - end_month
+    description: JH connus, coûts valorisés, rôles et périodes issus des décisions et financements existants. Une
+      mesure source est consommée une seule fois par le catalogue.
+  - id: delivery_team_type
+    domain_ref: organisation
+    label: Type Team Topologies d’une équipe
+    owner: source/organisation-delivery.yaml
+    attributes:
+    - id
+    - label
+    - definition
+  - id: delivery_interaction_mode
+    domain_ref: organisation
+    label: Mode d’interaction entre équipes
+    owner: source/organisation-delivery.yaml
+    attributes:
+    - id
+    - label
+    - definition
+  - id: delivery_principle
+    domain_ref: organisation
+    label: Principe des équipes durables de delivery
+    owner: source/organisation-delivery.yaml
+    attributes:
+    - id
+    - title
+    - text
+  - id: delivery_team
+    domain_ref: organisation
+    label: Équipe durable de delivery
+    owner: source/organisation-delivery.yaml
+    attributes:
+    - id
+    - type
+    - mission
+    - boundary
+    - responsibilities
+    - capacity
+  - id: delivery_governance
+    domain_ref: organisation
+    label: Instance de gouvernance hors typologie
+    owner: source/organisation-delivery.yaml
+    attributes:
+    - id
+    - mission
+    - roles_ref
+  - id: team_interaction
+    domain_ref: organisation
+    label: Interaction entre équipes
+    owner: source/organisation-delivery.yaml
+    attributes:
+    - source
+    - target
+    - mode
+    - object
+    - phases
+    - exit_criterion
+  - id: team_work_assignment
+    domain_ref: organisation
+    description: Responsabilité source initiale. Cette liaison alimente l’abaque. Les contributions effectives,
+      éventuellement partagées, sont portées par team_contribution.
+    label: Affectation des travaux et financements aux équipes
+    owner: source/organisation-delivery.yaml
+    attributes:
+    - kind
+    - ref
+    - team_ref
+    - candidate_refs
+    - basis
+  - id: team_phase_allocation
+    domain_ref: organisation
+    label: Table de ventilation par équipe et par phase
+    owner: tools/delivery_organisation.py
+    attributes:
+    - id
+    - option
+    - zone
+    - phase_ref
+    - owner_kind
+    - team_ref
+    - governance_ref
+    - jh
+    - cost_eur_ht
+    - period_basis
+    - record_ids
   - id: native_business_area
+    domain_ref: scope
     label: Business Area reçue
     owner: source/referentiel-capacites.yaml
     attributes:
@@ -317,6 +564,7 @@ estimation_model:
     - capability_refs
     - source_ref
   - id: functional_assessment
+    domain_ref: solutions
     label: Qualification fonctionnelle détaillée
     owner: source/instruction-marche.yaml
     attributes:
@@ -328,6 +576,7 @@ estimation_model:
     - unknowns
     - review
   - id: solution_comparison_context
+    domain_ref: solutions
     label: Contexte de comparaison des solutions
     owner: source/comparaison-solutions.yaml
     attributes:
@@ -337,6 +586,7 @@ estimation_model:
     - architecture_status
     - historical_offers
   - id: business_area_assessment
+    domain_ref: solutions
     label: Lecture comparative par Business Area
     owner: source/comparaison-solutions.yaml
     attributes:
@@ -349,6 +599,7 @@ estimation_model:
     - complete_ba_coverage
     - review
   - id: solution_gap
+    domain_ref: solutions
     label: Écart ou qualification transverse
     owner: source/comparaison-solutions.yaml
     attributes:
@@ -362,6 +613,7 @@ estimation_model:
     - net_extra_initial_eur_ht
     - net_extra_annual_eur_ht
   - id: gap_instruction
+    domain_ref: solutions
     label: Instruction du manque résiduel
     owner: source/comparaison-solutions.yaml
     attributes:
@@ -373,6 +625,7 @@ estimation_model:
     - next_steps
     - buy_followup
   - id: requirement_crosswalk
+    domain_ref: scope
     label: Rapprochement proposé RFI et capacités
     owner: source/comparaison-solutions.yaml
     attributes:
@@ -383,6 +636,7 @@ estimation_model:
     - gap_ref
     - mapping_status
   - id: native_capability
+    domain_ref: scope
     label: Capacité métier reçue
     owner: source/referentiel-capacites.yaml
     attributes:
@@ -393,6 +647,7 @@ estimation_model:
     - hierarchy
     - source_refs
   - id: scope_analysis
+    domain_ref: scope
     label: Analyse du périmètre
     owner: source/analyse-perimetre-core.yaml
     attributes:
@@ -401,6 +656,7 @@ estimation_model:
     - boundary
     - assumptions
   - id: evaluation_unit
+    domain_ref: work
     label: Unité évaluée
     owner: source/estimations-core-retenues.yaml
     attributes:
@@ -413,6 +669,7 @@ estimation_model:
     - purpose_partition_status
     - professional_group_id
   - id: integration_work_unit
+    domain_ref: work
     label: Unité de travail d’intégration comparable
     owner: source/unites-integration.yaml
     attributes:
@@ -430,6 +687,7 @@ estimation_model:
     - source_refs
     - options
   - id: integration_coverage_package
+    domain_ref: economics
     label: Poste chiffré rapproché de la grille commune
     owner: source/unites-integration.yaml
     attributes:
@@ -441,6 +699,7 @@ estimation_model:
     - measures
     - note
   - id: integration_funding_group
+    domain_ref: economics
     label: Financement d’intégration à rapprocher
     owner: source/unites-integration.yaml
     attributes:
@@ -448,6 +707,7 @@ estimation_model:
     - path
     - scope
   - id: market_reference
+    domain_ref: solutions
     label: Référence produit et framework
     owner: source/references-couts-integration.yaml
     attributes:
@@ -457,6 +717,7 @@ estimation_model:
     - source_paths
     - evidence
   - id: mechanism
+    domain_ref: solutions
     label: Mécanisme réutilisable
     owner: source/calculs-estimation-core.yaml
     attributes:
@@ -466,6 +727,7 @@ estimation_model:
     - funding_owner
     - adaptation_work
   - id: flow_complement
+    domain_ref: solutions
     label: Complément requis par FLOW
     owner: source/calculs-estimation-core.yaml
     attributes:
@@ -475,6 +737,7 @@ estimation_model:
     - evidence
     - funding_owner
   - id: calculation
+    domain_ref: estimation
     label: Calcul reproductible
     owner: source/calculs-estimation-core.yaml
     attributes:
@@ -487,6 +750,7 @@ estimation_model:
     - unrounded_result
     - units
   - id: cocomo_input
+    domain_ref: estimation
     label: Entrées COCOMO II
     owner: source/calculs-estimation-core.yaml
     attributes:
@@ -499,6 +763,7 @@ estimation_model:
     - phase_factors
     - hours
   - id: cosmic_measure
+    domain_ref: estimation
     label: Taille fonctionnelle COSMIC
     owner: source/calculs-estimation-core.yaml
     attributes:
@@ -510,6 +775,7 @@ estimation_model:
     - boundary
     - count_status
   - id: isbsg_reference
+    domain_ref: estimation
     label: Productivité issue des références ISBSG
     owner: source/calculs-estimation-core.yaml
     attributes:
@@ -520,6 +786,7 @@ estimation_model:
     - evidence
     - limitations
   - id: comparison
+    domain_ref: estimation
     label: Comparaison des calculs
     owner: tools/estimation_calculation.py
     attributes:
@@ -531,6 +798,7 @@ estimation_model:
     - assumptions
     - comparability_status
   - id: alignment
+    domain_ref: estimation
     label: Indicateur d’alignement
     owner: tools/estimation_calculation.py
     attributes:
@@ -541,6 +809,7 @@ estimation_model:
     - spread_pct
     - shared_assumptions
   - id: uncertainty
+    domain_ref: estimation
     label: Incertitude étayée
     owner: source/estimations-core-retenues.yaml
     attributes:
@@ -551,6 +820,7 @@ estimation_model:
     - evidence
     - limitations
   - id: decision
+    domain_ref: estimation
     label: Estimation retenue
     owner: source/estimations-core-retenues.yaml
     attributes:
@@ -562,6 +832,7 @@ estimation_model:
     - rounding
     - rationale
   - id: activity
+    domain_ref: work
     label: Activité du projet logiciel
     owner: source/calculs-estimation-core.yaml
     attributes:
@@ -571,6 +842,7 @@ estimation_model:
     - source_page
     - inclusions
   - id: role_allocation
+    domain_ref: estimation
     label: Ventilation par rôle
     owner: source/estimations-core-retenues.yaml
     attributes:
@@ -580,6 +852,7 @@ estimation_model:
     - rounding
     - assumption
   - id: market_role_rate
+    domain_ref: economics
     label: Observation de tarif par rôle projet
     owner: source/preetude-couts-marche.yaml
     attributes:
@@ -593,6 +866,7 @@ estimation_model:
     - source_and_dates
     - funding_boundary
   - id: project_rate_decision
+    domain_ref: economics
     label: Tarif de cadrage retenu par rôle et zone
     owner: source/tarifs-projet.yaml
     attributes:
@@ -603,6 +877,7 @@ estimation_model:
     - decision_basis_and_evidence
     - financial_bindings
   - id: rate
+    domain_ref: economics
     label: Tarif de prestation
     owner: source/stacks/java-spring.yaml
     attributes:
@@ -612,6 +887,7 @@ estimation_model:
     - source
     - assumption
   - id: funding
+    domain_ref: economics
     label: Financement unique
     owner: source/modele-composable.yaml
     attributes:
@@ -621,6 +897,7 @@ estimation_model:
     - responsibility
     - period
   - id: schedule
+    domain_ref: economics
     label: Délai et calendrier
     owner: source/deploiement-groupe.yaml
     attributes:
@@ -631,6 +908,7 @@ estimation_model:
     - global_calendar
     - capacity
   - id: economic_option
+    domain_ref: economics
     label: Option Make ou Buy
     owner: source/stacks/java-spring.yaml
     attributes:
@@ -640,6 +918,7 @@ estimation_model:
     - pricing
     - inclusions
   - id: cost_structure
+    domain_ref: economics
     label: Structure de coût
     owner: source/architecture.yaml
     attributes:
@@ -649,6 +928,7 @@ estimation_model:
     - layer
     - responsibility
   - id: annual_work
+    domain_ref: work
     label: Travaux annuels
     owner: source/unites-maintenance.yaml
     attributes:
@@ -659,6 +939,7 @@ estimation_model:
     - gains
     - rates
   - id: buy_contract
+    domain_ref: economics
     label: Offre et séquence commerciale Buy
     owner: source/selection-buy.yaml
     attributes:
@@ -670,6 +951,7 @@ estimation_model:
     - recurring_price
     - inclusions
   - id: deployment
+    domain_ref: work
     label: Déploiement et intégration Groupe
     owner: source/deploiement-groupe.yaml
     attributes:
@@ -680,6 +962,7 @@ estimation_model:
     - end
     - stabilization
   - id: economic_scenario
+    domain_ref: economics
     label: Scénario économique
     owner: source/deploiement-groupe.yaml
     attributes:
@@ -688,7 +971,13 @@ estimation_model:
     - sensitivity
     - calendar
     - horizons
+    - estimate_selections
+    - scope_reviews
+    - coverage_groups
+    - assignments
+    - projection_price_basis
   - id: ledger
+    domain_ref: economics
     label: Journal de financement
     owner: tools/composable_costs.py
     attributes:
@@ -700,6 +989,7 @@ estimation_model:
     - start
     - end
   - id: calculation_evidence
+    domain_ref: evidence
     label: Preuve de calcul versionnée
     owner: source/calculs-estimation-core.yaml
     attributes:
@@ -708,6 +998,7 @@ estimation_model:
     - dépendances vérifiées
     - mesures enregistrées distinctes des décisions adoptées
   - id: component_attribution
+    domain_ref: estimation
     label: Taille attribuée à un composant métier
     owner: source/calculs-estimation-core.yaml
     attributes:
@@ -717,6 +1008,7 @@ estimation_model:
     - plancher métier déjà mesuré
     - propriétaire du mécanisme réutilisé
   - id: product_purpose
+    domain_ref: scope
     label: 'Contribution du produit : Core Domain ou Support'
     owner: source/fonctions-produit-core.yaml
     attributes:
@@ -728,6 +1020,7 @@ estimation_model:
     - criterion
     - definition_ref
   - id: professional_function
+    domain_ref: scope
     label: Fonction professionnelle du produit hors hiérarchie métier native
     owner: source/fonctions-produit-core.yaml
     attributes:
@@ -741,6 +1034,7 @@ estimation_model:
     - additional_effort_status
     - purpose_basis
   - id: purpose_partition
+    domain_ref: estimation
     label: Ventilation des efforts adoptés par finalité
     owner: source/fonctions-produit-core.yaml
     attributes:
@@ -752,6 +1046,7 @@ estimation_model:
     - unallocated_cost
     - classification_basis
   - id: product_estimate_proposal
+    domain_ref: estimation
     label: Chiffrage professionnel et décision d’adoption
     owner: source/proposition-produit-core.yaml
     attributes:
@@ -771,6 +1066,7 @@ estimation_model:
     - adoption
     - frozen_previous_decisions
   - id: technical_trial
+    domain_ref: evidence
     label: Essai technique ciblé et limite de preuve
     owner: source/proposition-produit-core.yaml
     attributes:
@@ -785,6 +1081,7 @@ estimation_model:
     - remaining_hypotheses
     - effect_on_proposal
   - id: model_package
+    domain_ref: evidence
     label: Téléchargement unique du modèle métier et du métamodèle
     owner: source/telechargements.yaml
     attributes:
@@ -797,6 +1094,7 @@ estimation_model:
     - bytes
     - format_version
   - id: download_catalog
+    domain_ref: evidence
     label: Catalogue des téléchargements de l’application
     owner: source/telechargements.yaml
     attributes:
@@ -805,6 +1103,7 @@ estimation_model:
     - reading_document_refs
     - personal_route
   - id: gap_funding_review
+    domain_ref: economics
     label: Rapprochement du périmètre et des financements
     owner: source/complements-budgetaires.yaml
     attributes:
@@ -817,6 +1116,7 @@ estimation_model:
     - addition_refs
     - residual
   - id: reference_arbitration_proposal
+    domain_ref: solutions
     label: Proposition d’arbitrage des références OSS non adoptée
     owner: source/evaluation-charges-brutes.yaml
     attributes:
@@ -825,6 +1125,7 @@ estimation_model:
     - proposal.status
     - unit_arbitrations
   - id: budget_supplement_reserve
+    domain_ref: economics
     label: Complément potentiel non adopté
     owner: source/complements-budgetaires.yaml
     attributes:
@@ -842,7 +1143,286 @@ estimation_model:
     - net_extra_initial_eur_ht
     - net_extra_annual_eur_ht
     - existing_funding_refs
+  - id: estimate_selection
+    domain_ref: estimation
+    label: Version d’estimation choisie
+    owner: source/scenarios-chiffrage.yaml
+    attributes:
+    - work_unit_ref
+    - estimate_source
+    - estimate_version
+    - accounting
+    - work_kind
+    - basis
+    - period
+    description: Choisit la référence ou la proposition d’un travail pour le scénario, avec sa version, son assiette
+      et sa période.
+  - id: scope_coverage
+    domain_ref: work
+    label: Couverture et remplacement de périmètre
+    owner: source/scenarios-chiffrage.yaml
+    attributes:
+    - replaced_refs
+    - replacing_refs
+    - confirmed
+    - basis
+    - remaining_work_refs
+    description: Les enveloppes sont remplacées après confirmation explicite du périmètre. Le reste à estimer est
+      représenté par des travaux du détail, ou par une liste vide lorsque son absence est confirmée. Un reste inconnu
+      empêche la confirmation.
+  - id: work_expense
+    domain_ref: economics
+    label: Achat ou consommation d’un travail
+    owner: source/unites-travail.yaml
+    attributes:
+    - cost_mode
+    - quantity
+    - unit_price_eur_ht
+    - expenses_eur_ht
+    - billing_period
+    - included_in_ref
+    description: Achats, forfaits, abonnements et consommations se valorisent sans rôle humain fictif. Une inclusion
+      référence un unique porteur de financement.
+  - id: team_estimation_reading
+    domain_ref: organisation
+    label: Chiffrage consolidé par équipe
+    owner: tools/team_consolidation.py
+    attributes:
+    - phase_ref
+    - team_ref
+    - source_jh
+    - gross_jh
+    - net_jh
+    - cost_eur_ht
+    - projected_cost_eur_ht
+    - contribution_ids
+    - status
+    - missing
+    - metric_states
+    - phase_readings
+    - unit_readings
+    description: La matrice et le détail utilisent les mêmes contributions versionnées. Le sous-total connu reste
+      distinct d’une estimation complète. Les coûts initiaux et annuels ont des assiettes distinctes.
   relations:
+  - id: work_estimate_contract
+    label: Possède un contrat
+    source: work_unit
+    target: work_estimate
+    cardinality: one-to-many
+    meaning: Décrit la même estimation pour chaque phase, option et version sans changer la référence retenue.
+  - id: estimate_cost_bridge
+    label: Explique sa valorisation
+    source: work_estimate
+    target: work_cost_bridge
+    cardinality: one-to-many
+    meaning: Distingue charge brute, gain, charge valorisée, tarif, frais et arrondi. Le montant retenu reste chez
+      son propriétaire.
+  - id: bridge_measure_source
+    label: Rapproche une mesure
+    source: work_cost_bridge
+    target: work_measurement
+    cardinality: many-to-one
+    meaning: Référence chaque mesure monétaire une fois et explicite la charge valorisée lorsqu’elle est documentée.
+  - id: estimate_core_calculation
+    label: Réutilise un calcul
+    source: work_estimate
+    target: calculation
+    cardinality: many-to-one
+    meaning: Référence les calculs existants du Core System et leur périmètre, sans nouvelle calibration.
+  - id: estimate_roles
+    label: Décrit les rôles
+    source: work_estimate
+    target: role_allocation
+    cardinality: one-to-many
+    meaning: Conserve les rôles et les deux assiettes de charge, brute et valorisée, avec leurs preuves.
+  - id: bridge_rate
+    label: Applique un tarif
+    source: work_cost_bridge
+    target: rate
+    cardinality: many-to-many
+    meaning: Valorise chaque rôle au tarif source. Un tarif inconnu conserve un coût calculé inconnu.
+  - id: estimate_option
+    label: S’inscrit dans une option
+    source: work_estimate
+    target: economic_option
+    cardinality: many-to-one
+    meaning: Identifie l’option de référence de l’estimation. Une inclusion commerciale conserve son forfait non
+      ventilable.
+  - id: estimate_period
+    label: Décrit sa période
+    source: work_estimate
+    target: schedule
+    cardinality: many-to-one
+    meaning: Sépare la période initiale, la base annuelle et les dates restant à établir.
+  - id: bridge_contribution
+    label: Valorise les contributions
+    source: work_cost_bridge
+    target: team_contribution
+    cardinality: one-to-many
+    meaning: Les clés par rôle ventilent les JH sources et leur coût valorisé. Les frais gardent une clé distincte.
+  - id: work_has_scope
+    label: Déclare le périmètre
+    source: work_unit
+    target: work_capability_link
+    cardinality: one-to-many
+    meaning: Déclare son périmètre métier, sans clé de répartition budgétaire.
+  - id: scope_targets_capability
+    label: Cible une capacité
+    source: work_capability_link
+    target: native_capability
+    cardinality: many-to-one
+    meaning: Référence une capacité métier native, sans modifier son identité ni sa définition.
+  - id: team_has_scope
+    label: Porte un périmètre
+    source: delivery_team
+    target: team_capability_scope
+    cardinality: one-to-many
+    meaning: Porte un périmètre durable direct ou indirect, distinct des affectations de charges.
+  - id: team_scope_capability
+    label: Gère ou dessert
+    source: team_capability_scope
+    target: native_capability
+    cardinality: many-to-many
+    meaning: Gère ou dessert une capacité. Plusieurs équipes peuvent contribuer à la même capacité.
+  - id: work_has_contribution
+    label: Reçoit une contribution
+    source: work_unit
+    target: team_contribution
+    cardinality: one-to-many
+    meaning: Reçoit les contributions de plusieurs équipes, pour une phase et une mesure identifiées.
+  - id: contribution_to_team
+    label: Attribue à une équipe
+    source: team_contribution
+    target: delivery_team
+    cardinality: many-to-one
+    meaning: Attribue une part documentée à une équipe. Les candidats restent séparés.
+  - id: contribution_rule
+    label: Applique une clé
+    source: team_contribution
+    target: allocation_abaque
+    cardinality: many-to-one
+    meaning: Applique les clés documentées et conserve le reliquat non ventilé.
+  - id: work_measurement_source
+    label: Référence une mesure
+    source: work_unit
+    target: work_measurement
+    cardinality: one-to-many
+    meaning: Référence chaque mesure source une fois. Les JH et coûts peuvent être complémentaires.
+  - id: contribution_measure
+    label: Ventile une mesure
+    source: team_contribution
+    target: work_measurement
+    cardinality: many-to-one
+    meaning: Ventile une mesure retenue sans modifier son total ni les tarifs de ses rôles.
+  - id: work_core_specialisation
+    label: Spécialise un travail
+    source: evaluation_unit
+    target: work_unit
+    cardinality: one-to-one
+    meaning: Spécialise une unité de travail pour l’évaluation du Build du Core System.
+  - id: work_integration_specialisation
+    label: Décrit un livrable
+    source: integration_work_unit
+    target: work_unit
+    cardinality: one-to-one
+    meaning: Spécialise une unité de travail par livrable, quantité et critères de recette d’intégration.
+  - id: work_annual_specialisation
+    label: Décrit un travail récurrent
+    source: annual_work
+    target: work_unit
+    cardinality: one-to-many
+    meaning: Alimente les unités récurrentes de MCO, de Run et de service, sans créer de nouvelles annuités.
+  - id: work_decomposition
+    label: Décompose
+    source: work_unit
+    target: work_unit
+    cardinality: one-to-many
+    meaning: Décompose un travail. Les détails sans mesure ne reprennent pas le budget de leur parent.
+  - id: work_retained_decision
+    label: Provient d’une décision
+    source: work_measurement
+    target: decision
+    cardinality: many-to-many
+    meaning: Conserve la provenance des charges adoptées au lieu de les recalibrer.
+  - id: work_funding_source
+    label: Provient d’un financement
+    source: work_measurement
+    target: funding
+    cardinality: many-to-many
+    meaning: Conserve la provenance des financements. Un montant connu ne devient pas une charge humaine implicite.
+  - id: work_source_assignment
+    label: Rattache une responsabilité
+    source: team_work_assignment
+    target: work_unit
+    cardinality: many-to-many
+    meaning: Référence les responsabilités sources utilisées comme affectations initiales par l’abaque.
+  - id: allocation_from_assignment
+    source: team_phase_allocation
+    target: team_work_assignment
+    cardinality: many-to-many
+    meaning: Les cellules sont calculées depuis les affectations justifiées et les travaux et financements sources.
+      Les reliquats gardent leurs références sans affectation fictive.
+  - id: allocation_to_team
+    source: team_phase_allocation
+    target: delivery_team
+    cardinality: many-to-one
+    meaning: Une cellule d’équipe concerne une seule équipe et une phase, pour une option et une zone tarifaire.
+      Les cellules de gouvernance et de reliquat ne portent aucune équipe.
+  - id: allocation_to_governance
+    source: team_phase_allocation
+    target: delivery_governance
+    cardinality: many-to-one
+    meaning: Les cellules de gouvernance isolent les moyens déjà financés, hors typologie Team Topologies.
+  - id: allocation_from_funding
+    source: team_phase_allocation
+    target: funding
+    cardinality: many-to-many
+    meaning: Les montants de phase et la base annuelle restent rattachés à leurs postes sources. Chaque montant
+      est ventilé une seule fois.
+  - id: delivery_team_has_type
+    source: delivery_team
+    target: delivery_team_type
+    cardinality: many-to-one
+    meaning: Le type décrit le rôle de l’équipe indépendamment des phases et des objets financés.
+  - id: delivery_interaction_has_mode
+    source: team_interaction
+    target: delivery_interaction_mode
+    cardinality: many-to-one
+    meaning: Le mode décrit une relation pour un objet et une période.
+  - id: delivery_assignment_annual_work
+    source: team_work_assignment
+    target: annual_work
+    cardinality: many-to-many
+    meaning: Les activités annuelles du produit et du client sont rapprochées sans nouveau financement.
+  - id: delivery_assignment_funding
+    source: team_work_assignment
+    target: funding
+    cardinality: many-to-many
+    meaning: Les montants dérivent du financement existant, avec reliquat explicite et séparation des périodes initiales
+      et du régime annuel.
+  - id: delivery_team_principle
+    source: delivery_team
+    target: delivery_principle
+    cardinality: many-to-one
+    meaning: Chaque équipe conserve sa mission sur les étapes applicables. L’accompagnement Enabling vise l’autonomie
+      et prend fin selon son critère de sortie.
+  - id: delivery_interaction_endpoints
+    source: team_interaction
+    target: delivery_team
+    cardinality: many-to-many
+    meaning: Un mode qualifie une interaction sur un objet et une période, distinctement du type d’équipe.
+  - id: delivery_assignment_owner
+    source: team_work_assignment
+    target: delivery_team
+    cardinality: many-to-many
+    meaning: Affecte une source une seule fois ou conserve son reliquat explicite. Les candidats ne sont pas des
+      affectations.
+  - id: delivery_assignment_work
+    source: team_work_assignment
+    target: evaluation_unit
+    cardinality: many-to-many
+    meaning: Rapproche les travaux des unités retenues sans réestimer les lots ou leurs rôles. Les activités et
+      financements gardent leurs propriétaires.
   - id: arbitration_compares_adopted_units
     source: reference_arbitration_proposal
     target: evaluation_unit
@@ -1153,19 +1733,121 @@ estimation_model:
     source: integration_work_unit
     target: integration_coverage_package
     cardinality: many-to-many
-    meaning: Chaque option documente les postes couvrant le travail et les points restant à estimer. Le même poste peut éclairer plusieurs lignes sans être compté plusieurs fois.
+    meaning: Chaque option documente les postes couvrant le travail et les points restant à estimer. Le même poste
+      peut éclairer plusieurs lignes sans être compté plusieurs fois.
   - id: integration_unit_funding
     source: integration_work_unit
     target: integration_funding_group
     cardinality: many-to-many
-    meaning: Chaque option rapproche le livrable de son financement existant. Plusieurs lignes peuvent référencer un forfait sans le multiplier ni lui attribuer une ventilation supposée.
+    meaning: Chaque option rapproche le livrable de son financement existant. Plusieurs lignes peuvent référencer
+      un forfait sans le multiplier ni lui attribuer une ventilation supposée.
   - id: review_reconciles_funding
     source: gap_funding_review
     target: funding
     cardinality: many-to-many
     meaning: Référence les financements existants. Les montants de lots affichés pour plusieurs écarts ne sont pas
       additionnables.
+  - id: scenario_estimate_selection
+    source: economic_scenario
+    target: estimate_selection
+    cardinality: one-to-many
+    meaning: Sélectionne exactement une version par travail. Le scénario de travail reste séparé des décisions retenues.
+  - id: selection_estimate
+    source: estimate_selection
+    target: work_estimate
+    cardinality: many-to-one
+    meaning: Référence le contrat et sa version, puis sa lecture retenue ou proposée.
+  - id: selection_work
+    source: estimate_selection
+    target: work_unit
+    cardinality: many-to-one
+    meaning: Porte le travail sélectionné et sa période de contribution.
+  - id: scenario_scope_coverage
+    source: economic_scenario
+    target: scope_coverage
+    cardinality: one-to-many
+    meaning: Déclare les enveloppes remplacées et les détails qui couvrent entièrement leur périmètre.
+  - id: scope_replaced_work
+    source: scope_coverage
+    target: work_unit
+    cardinality: many-to-many
+    meaning: Désigne les travaux remplacés. Leur exclusion est conditionnée à une couverture confirmée et justifiée.
+  - id: scope_replacing_work
+    source: scope_coverage
+    target: estimate_selection
+    cardinality: many-to-many
+    meaning: Désigne les versions détaillées qui couvrent le périmètre remplacé dans la même phase et la même assiette.
+  - id: estimate_expense
+    source: work_estimate
+    target: work_expense
+    cardinality: one-to-zero-or-one
+    meaning: Valorise les frais ou la consommation avec une périodicité explicite, sans inventer de JH.
+  - id: expense_inclusion_owner
+    source: work_expense
+    target: work_unit
+    cardinality: many-to-one
+    meaning: Une inclusion renvoie au travail qui porte son financement. Les cycles et les inclusions entre phases
+      sont interdits.
+  - id: contribution_selected_version
+    source: team_contribution
+    target: estimate_selection
+    cardinality: many-to-one
+    meaning: Conserve la version, le rôle ou les frais et la période qui ont produit la contribution.
+  - id: reading_contributions
+    source: team_estimation_reading
+    target: team_contribution
+    cardinality: one-to-many
+    meaning: Somme les mêmes lignes que le détail affiché et conserve les sous-totaux connus, la gouvernance et
+      le reliquat.
+  - id: reading_scenario
+    source: team_estimation_reading
+    target: economic_scenario
+    cardinality: many-to-one
+    meaning: Consolide une lecture retenue ou de travail sans adopter automatiquement de nouvelles valeurs.
+  - id: reading_team
+    source: team_estimation_reading
+    target: delivery_team
+    cardinality: many-to-one
+    meaning: Associe le résultat à l’équipe contributrice. Les reliquats et la gouvernance restent explicites.
   rules:
+  - id: common_work_estimation_contract
+    title: Estimer les travaux et rapprocher leurs coûts sans modifier les décisions
+    kind: algorithm
+    expression: Charge valorisée par rôle × tarif + frais + arrondi = coût retenu. Les propositions restent séparées
+      et les inconnus restent null.
+    variables:
+      reference: Mesures source retenues, leur phase et leur période.
+      detail: Quantité, préparation, charge unitaire, gain et tarif par rôle avec justification.
+      proposal: Calcul séparé sans adoption automatique ni modification du journal de financement.
+      bridge: Rapprochement des tarifs et JH valorisés avec chaque mesure monétaire, sans conversion implicite d’un
+        forfait en JH.
+    unit: JH, EUR HT, quantités et pourcentages
+    note: Les charges brutes et nettes du MCO restent distinctes. Les charges d’intégration en attente ne sont pas
+      réintroduites. Les coûts des rôles suivent les clés de leurs contributions.
+  - id: generic_work_contribution_conservation
+    title: Ventiler les unités de travail sans modifier les mesures retenues
+    expression: mesure source = contributions des équipes + gouvernance + reliquat. Conserver chaque rôle, son tarif
+      et chaque centime.
+    variables:
+      mesure_source: Mesure unique rattachée à une unité, une phase et une période.
+      contributions: Clés par unité et rôle. Les capacités sont des liens de périmètre, sans poids budgétaire.
+      reliquat: Part non attribuée. Les inconnus restent null, les candidats restent sans affectation.
+    unit: JH, EUR HT et pourcentages de ventilation
+    kind: algorithm
+    note: Les coûts de rôles suivent les parts des JH aux tarifs existants. Les frais se ventilent séparément par
+      différences de cumuls arrondis. Une décomposition ne duplique pas un budget parent.
+  - id: delivery_allocation_conservation
+    title: Conserver les charges et coûts dans la lecture par équipe
+    expression: source = affectations + gouvernance + reliquat, pour chaque phase et mesure
+    variables:
+      source: JH des travaux connus ou coûts déjà valorisés, sur une assiette explicitement identifiée.
+      affectations: Sources rattachées à une équipe. Un candidat ne reçoit aucune charge par défaut.
+      gouvernance: Postes de gouvernance conservés hors typologie.
+      reliquat: Sources connues restant à ventiler. Une absence de dimensionnement reste null.
+    unit: JH ou EUR HT, avec régime initial ou annuel explicite
+    kind: algorithm
+    note: La construction et l’intégration sont des périodes initiales. Le MCO est une base annuelle. Les montants
+      dérivent du moteur existant et ne créent aucun budget. La capacité disponible reste distincte.
   - id: market_comparison_contract
     title: Comparer les solutions sans inventer couverture ou budget
     expression: Dériver les BA et capacités du référentiel natif. Séparer preuves, correspondances, inclusion commerciale
@@ -1451,7 +2133,11 @@ estimation_model:
       inputs: Livrable et recette communs, quantité justifiée, charges par rôle propres à chaque option.
     unit: JH
     kind: algorithm
-    note: Une inconnue conserve un résultat inconnu. Les difficultés sont décrites sans coefficient ordinal. Les financements existants et forfaits partagés sont rapprochés sans ventilation inventée ni addition automatique aux budgets. Chaque option qualifie la couverture de la ligne, les postes sources et le travail restant. Les charges Make sont lues dans les activités actives. Les observations Buy conservent le périmètre du pilote ou du lot et les recouvrements entre vues.
+    note: Une inconnue conserve un résultat inconnu. Les difficultés sont décrites sans coefficient ordinal. Les
+      financements existants et forfaits partagés sont rapprochés sans ventilation inventée ni addition automatique
+      aux budgets. Chaque option qualifie la couverture de la ligne, les postes sources et le travail restant. Les
+      charges Make sont lues dans les activités actives. Les observations Buy conservent le périmètre du pilote
+      ou du lot et les recouvrements entre vues.
   - id: transformation_team_cost
     title: Financer le Transformation Office sur les deux phases
     expression: somme(ETP_rôle × jours_annuels × tarif_rôle × mois_phase / 12)
@@ -1514,12 +2200,12 @@ estimation_model:
       inputs: Paramètres des instances propriétaires, avec unités et périodes explicites.
     unit: EUR HT
     kind: algorithm
-    note: Les périodes de lecture couvrent 1 à 15 années entières depuis le début du projet, la disponibilité du Core System
-      ou la fin de l’intégration Groupe. Les raccourcis 3/5/7/10/15 ans sont conservés. Les dépenses antérieures au jalon
-      sont exclues. La projection couvre la fin de la période choisie, même au-delà de quinze ans depuis le début du
-      projet. Les différences de cumuls annuels conservent les centimes, les séquences fournisseur et l’origine de
-      l’indexation. Les budgets initiaux complets et les bases annuelles restent séparés. Le reste à financer est
-      apprécié à la fin de la période et ne crée pas de nouvelle dépense.
+    note: Les périodes de lecture couvrent 1 à 15 années entières depuis le début du projet, la disponibilité du
+      Core System ou la fin de l’intégration Groupe. Les raccourcis 3/5/7/10/15 ans sont conservés. Les dépenses
+      antérieures au jalon sont exclues. La projection couvre la fin de la période choisie, même au-delà de quinze
+      ans depuis le début du projet. Les différences de cumuls annuels conservent les centimes, les séquences fournisseur
+      et l’origine de l’indexation. Les budgets initiaux complets et les bases annuelles restent séparés. Le reste
+      à financer est apprécié à la fin de la période et ne crée pas de nouvelle dépense.
   - id: reuse_assimilation
     title: Assimilation et intégration du patrimoine réutilisé
     expression: (AA + 0.3 * IM) / 100
@@ -1813,7 +2499,37 @@ estimation_model:
     kind: algorithm
     note: Les observations gardent leur population et leur fiscalité. Les prix transposés sont des hypothèses. Appliquer
       seulement aux charges adoptées et préserver forfaits, achats, JH et calendrier.
+  - id: working_team_consolidation
+    title: Consolider les versions par équipe sans double compte
+    kind: algorithm
+    expression: Sélectionner une version par travail. Exclure les enveloppes remplacées après confirmation de la
+      couverture. Ventiler chaque rôle et chaque dépense une fois, puis agréger les contributions de la matrice
+      et du détail.
+    variables:
+      versions: Référence ou proposition choisie par travail, version et période.
+      coverage: Remplacement intégral confirmé et justifié dans une même phase. Les propositions en attente restent
+        hors du total.
+      valuation: JH bruts, JH valorisés et tarifs distincts des achats et frais. Une inclusion ne crée pas de second
+        montant.
+      completeness: Les motifs de complétude sont locaux à chaque contribution et à la mesure lue. Un achat sans
+        JH est sans objet pour les charges. Les trous de périmètre et de ventilation restent visibles à la phase.
+      projection: Valoriser une consommation mensuelle ou annuelle sur sa période, puis projeter une fois chaque
+        mesure source ou composant. Ventiler le résultat par cumuls arrondis en conservant chaque centime.
+    unit: JH, EUR HT, mois et base annuelle
+    note: Les données manquantes restent null. Les lectures par travail, équipe, phase et abaque proviennent de
+      la même sélection et des mêmes contributions. Les montants retenus et leurs simulations restent inchangés.
   invariants:
+  - Chaque unité de travail possède un contrat d’estimation versionné. La référence, le calcul détaillé proposé
+    et son adoption sont distincts. Les données manquantes restent null. Les charges et coûts retenus sont conservés
+    par phase et période.
+  - Les capacités décrivent un périmètre sans poids budgétaire implicite. Chaque mesure appartient à une unité de
+    travail unique. Les contributions multiples conservent les rôles, les tarifs, la gouvernance et le reliquat.
+  - Les équipes durables de delivery conservent leur mission sur le cycle de vie. Chaque accompagnement Enabling
+    reste temporaire. Les charges, coûts, capacités et calendriers restent distincts.
+  - Une équipe Enabling peut contribuer aux travaux d’accompagnement sans posséder les composants logiciels. Les
+    périodes financées restent dans une étape explicite et les attributions contradictoires sont refusées.
+  - Les affectations par équipe conservent chaque source une fois. Gouvernance, moyens partagés et reliquats restent
+    visibles sans nouveau financement.
   - Un essai technique réussi démontre seulement ses cas et conditions déclarés. Son temps de réalisation et son
     code ne calibrent pas automatiquement les JH. Les effets sur le chiffrage sont explicités séparément.
   - Le référentiel reçu conserve identifiants, libellés, définitions, périmètres, hiérarchie et relations. Aucun
@@ -1848,6 +2564,15 @@ estimation_model:
     compléments potentiels restent distincts des budgets adoptés. Une réserve partagée est comptée une fois et un
     montant inconnu n’est jamais converti en zéro.
   implementations:
+  - path: tools/work_estimation.py
+    rules:
+    - common_work_estimation_contract
+  - path: tools/work_units.py
+    rules:
+    - generic_work_contribution_conservation
+  - path: tools/delivery_organisation.py
+    rules:
+    - delivery_allocation_conservation
   - path: tools/project_rates.py
     rules:
     - regional_role_price
@@ -1946,6 +2671,9 @@ estimation_model:
     - oss_reference_revision
     - scenario_scope_adoption
     - work_package_adoption
+  - path: tools/team_consolidation.py
+    rules:
+    - working_team_consolidation
   labels:
     alignment: Alignement entre calculs
     reference: Référence de comparaison

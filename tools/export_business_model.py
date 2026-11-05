@@ -21,7 +21,7 @@ METADATA_ASSET = 'exports/flow-modele-metier.json'
 DEFAULT_OUTPUT = ROOT / 'tmp/model-download' / Path(ASSET).name
 
 
-def compose(documents, digests, root=ROOT):
+def compose(documents, digests, root=ROOT, derived=None):
     """Use the actual dependency closure, without scanning retired source files."""
     model, schemas, provenance, evidence = {}, {}, {}, {}
     metamodel = None
@@ -48,7 +48,7 @@ def compose(documents, digests, root=ROOT):
         description='Modèle métier courant et métamodèle. Export généré, non éditable. Les chemins sont ceux des sources d’origine.',
         scope='Instances actives dans model ; pièces historiques utilisées par les calculs dans evidence, distinctes des décisions adoptées. La chaîne des mesures, paramètres, dépendances et empreintes est incluse. Les dépôts OSS complets et PDF externes restent référencés ; les scénarios personnels ne sont pas inclus.',
         source_fingerprint=fingerprint, sources=provenance,
-        metamodel=metamodel, model=model, schemas=schemas, evidence=evidence)
+        metamodel=metamodel, model=model, schemas=schemas, evidence=evidence, derived=deepcopy(derived or {}))
 
 
 def encode(document):
@@ -140,7 +140,8 @@ def export(output=DEFAULT_OUTPUT, study=None):
                     read(path)
                 if snapshot.digests[path.resolve()] != expected:
                     raise ValueError('Source changed since application loading: ' + name)
-        document = compose(snapshot.documents, snapshot.digests)
+        table = getattr(loaded, 'content', {}).get('delivery_organisation', {}).get('allocation_table')
+        document = compose(snapshot.documents, snapshot.digests, derived={'team_phase_allocation': table, 'work_catalog': loaded.content['delivery_organisation']['work_catalog'], 'team_consolidations': loaded.content['delivery_organisation']['team_consolidations']} if table else None)
         raw = encode(document)
         names = {p.relative_to(ROOT).as_posix() for p in snapshot.digests}
         names.update(loaded.files)

@@ -19,9 +19,9 @@ export function MarketStudyPage({view,focus}:{view?:string;focus?:string}){
   <DossierNavigation pages={pages} current={current.id} label={N.navigation}/>
   <DossierSheet view={current.id}>
    {current.id==='comparison'&&(reading?.comparison?<MarketComparison comparison={reading.comparison} focus={focus}/>:loading)}
-   {current.id==='construction'&&<><p><MethodText>{E.construction}</MethodText></p><FrameworkStackReading reading={stack}/><a className="text-button" href="#evaluation-core">{E.evaluations}</a></>}
+   {current.id==='construction'&&<><p><MethodText>{E.construction}</MethodText></p><FrameworkStackReading reading={stack}/></>}
    {current.id==='references'&&<><ReadingNote>{E.transposition}</ReadingNote><MarketReferences view="projects"/></>}
   </DossierSheet>
-  <a className="text-button essential-structure-next" href={T.next.href}>{T.next.label} <span aria-hidden="true">→</span></a>
+
  </div>;
 }

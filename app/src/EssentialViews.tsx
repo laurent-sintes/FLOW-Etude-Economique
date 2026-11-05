@@ -7,7 +7,7 @@ import {useStudy,useFormat,request,type Data,type Option,type Projection} from '
 import {isModelDataReference} from './documentVisibility';
 import {Drawer,SourceLink} from './components';
 import {MethodText} from './MethodDocument';
-import {EconomicContext,EconomicNext} from './EconomicJourney';
+import {EconomicContext} from './EconomicJourney';
 import {MarketSourceLink,MarketSourceList} from './MarketSources';
 import './essential.css';
 import './marketProducts.css';
@@ -92,7 +92,7 @@ export function ComparePage(){
    const unestimated=phase.key==='obtention'&&hasUnestimatedConstruction(data.content.core_evaluation,o.stack,value),partial=phase.key==='obtention'&&isPartialMake(data.content.core_evaluation,o.stack);
    return <div className="essential-structure-row" key={o.stack}><div className="essential-structure-option"><strong>{o.name}</strong><span className={'essential-mode essential-mode-'+o.mode.toLowerCase()}><ModeIcon size={14} aria-hidden="true"/>{o.mode}</span></div><div className="essential-structure-bar" role="img" aria-label={unestimated?E.core_results.pending:segments.map(p=>p.label+' : '+format(p.value)).join(' · ')}><div style={{width:100*value/max+'%'}}>{segments.map(p=><span key={p.key} style={{width:(value>0?100*p.value/value:0)+'%',background:p.color}} title={unestimated?E.core_results.pending:p.label+' · '+format(p.value)}/>)}</div></div><strong className="essential-structure-amount">{unestimated?<span className="economic-unestimated">{E.core_results.pending}</span>:<>{format(value)}{partial&&<small className="economic-partial-label">{E.economic_context.partial_amount}</small>}</>}</strong></div>;
   })}</div>{legend.length>0&&<div className="essential-structure-legend">{legend.map(p=><span key={p.key}><i style={{background:p.color}}/>{p.annual_label||p.label}</span>)}</div>}</section>;
- })}<EconomicNext page="comparer"/></div>;
+ })}</div>;
 }
 
 export function ProjectionPage(){
@@ -105,7 +105,7 @@ export function ProjectionPage(){
  return <div className="essential-page essential-projection"><EconomicContext page="se-projeter"/><div className="essential-toolbar"><HorizonPicker value={session.horizon} onChange={horizon=>setSession(s=>({...s,horizon}))}/><span>{E.reference}</span></div>
   <section className="essential-projection-panel"><div className="essential-section-top"><h2>{P.horizon_title} · {session.horizon} {E.years}</h2><EvidenceButton proof={E.proofs.total}/></div><p>{P.horizon_note}</p><div className="essential-projection-bars">{options.map(o=><div key={o.stack} className="economic-projection-option"><div className="essential-projection-bar-row"><strong>{o.name}</strong><div role="img" aria-label={o.name+' · '+amount(horizonValue(o))}><span style={{width:100*horizonValue(o)/horizonMax+'%',background:data.ui.option_colors[o.stack]}}/></div><b>{amount(horizonValue(o))}{isPartialMake(data.content.core_evaluation,o.stack)&&<small className="economic-partial-label">{E.economic_context.partial_reference}</small>}</b></div><dl className="economic-budget-parts">{(['build','integration','mco_run'] as const).map(key=><div key={key}><dt>{E.costs[key==='mco_run'?'services':key]}</dt><dd>{key==='build'&&hasUnestimatedConstruction(data.content.core_evaluation,o.stack,o.build)?E.core_results.pending:amount(o.horizons.find(h=>h.years===session.horizon)!.totals[key])}</dd></div>)}</dl><CoreBuildPartition stack={o.stack}/><HorizonFacts option={o} horizon={session.horizon}/></div>)}</div><p className="essential-caveat">{E.economic_context.remaining_note}</p></section>
   <section className="essential-projection-panel"><div className="essential-section-top"><h2>{P.chart_title}</h2><EvidenceButton proof={E.proofs.calendar}/></div><p>{E.economic_context.schedule_note}</p><label className="essential-select">{P.selected_option}<select value={chosen.stack} onChange={e=>setStack(e.target.value)}>{options.map(o=><option key={o.stack} value={o.stack}>{o.name}</option>)}</select></label><small className="essential-chart-unit">{P.chart_unit}</small><div className="essential-chart-scroll"><svg viewBox="0 0 760 220" role="img" aria-label={P.chart_title+' · '+chosen.name}>{[0,0.5,1].map(f=><g key={f}><line x1="60" x2="745" y1={180-f*150} y2={180-f*150} className="chart-grid"/><text x="54" y={184-f*150} textAnchor="end">{money(yearMax*f)}</text></g>)}{chosen.annual.map((row,index)=>{const x=70+index*45,height=row.total/yearMax*150;return <g key={row.annee}><rect x={x} y={180-height} width="27" height={height} rx="3" fill={data.ui.option_colors[chosen.stack]}><title>{P.year+' '+row.annee+' · '+amount(row.total)}</title></rect><text x={x+13.5} y="205" textAnchor="middle">{row.annee}</text></g>;})}</svg></div></section>
-  <AnnualProjection projection={data.baseline} stack={chosen.stack} onStackChange={setStack} showOptionPicker={false}/><EconomicNext page="se-projeter"/>
+  <AnnualProjection projection={data.baseline} stack={chosen.stack} onStackChange={setStack} showOptionPicker={false}/>
  </div>;
 }
 

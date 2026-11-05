@@ -63,3 +63,14 @@ class ProjectRateTests(unittest.TestCase):
         for a,b in zip(self.base.content['economic_evaluations']['options'],self.variant.content['economic_evaluations']['options']):
             if a['core'] and b['core']:
                 self.assertEqual(a['core']['total_jh'],b['core']['total_jh'])
+
+    def test_team_phase_reading_is_revalued_with_the_regional_reference(self):
+        from unittest.mock import patch
+        from project_rates import financial_variant
+        before=self.base.content['delivery_organisation']['reading']
+        after=self.variant.content['delivery_organisation']['reading']
+        self.assertEqual([p['totals']['jh'] for p in before['phases']],[p['totals']['jh'] for p in after['phases']])
+        self.assertEqual([r['id'] for r in before['records']],[r['id'] for r in after['records']])
+        self.assertNotEqual(before['phases'][0]['totals']['cost_eur_ht'],after['phases'][0]['totals']['cost_eur_ht'])
+        with patch('project_rates.regional_study',return_value=self.variant):
+            self.assertEqual(financial_variant(self.base)['organisation'],self.variant.content['delivery_organisation'])

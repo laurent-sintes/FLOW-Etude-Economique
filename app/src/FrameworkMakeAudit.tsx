@@ -1,3 +1,4 @@
+import {ContentLinks} from './ContentLinks';
 import {useStudy,type Data} from './context';
 import {SourceLink} from './components';
 import {MethodText} from './MethodDocument';
@@ -43,6 +44,6 @@ export function FrameworkMakeAudit({plan,technical=false}:{plan:Data;technical?:
    </section>;})}
   </li>)}</ol>
   {method.sections.filter((section:Data)=>plan.sections.includes(section.id)).map((section:Data)=><section className="make-method-formulas" key={section.id}><h4>{section.title}</h4>{section.blocks.filter((block:Data)=>block.kind==='formula').map((block:Data)=><p className="make-formula" key={block.text}>{block.text}</p>)}</section>)}
-  <nav className="journey-links" aria-label={L.audit}>{plan.links.map((link:Data)=><a className="text-button" href={link.href} key={link.href}>{link.label}</a>)}<a className="text-button" href={import.meta.env.BASE_URL+'exports/flow-modele-metier.yaml'} download="flow-modele-metier.yaml">{data.ui.model_download.label}</a></nav>
+  <div className="journey-links"><ContentLinks links={plan.links} label={L.audit} className="journey-links"/><a className="text-button" href={import.meta.env.BASE_URL+'exports/flow-modele-metier.yaml'} download="flow-modele-metier.yaml">{data.ui.model_download.label}</a></div>
  </section>;
 }

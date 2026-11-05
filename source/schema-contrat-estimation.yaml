@@ -1,0 +1,177 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+additionalProperties: false
+required:
+- version
+- option_ref
+- proposal
+properties:
+  version:
+    type: integer
+    minimum: 1
+  option_ref:
+    enum:
+    - java-spring
+    - microsoft
+    - sap
+  proposal:
+    type: object
+    additionalProperties: false
+    required:
+    - deliverable
+    - acceptance
+    - quantity
+    - count_unit
+    - counting_rule
+    - quantity_basis
+    - roles
+    - expenses_eur_ht
+    - assumptions
+    - evidence_refs
+    properties:
+      deliverable: &id001
+        type:
+        - string
+        - 'null'
+        minLength: 1
+      acceptance:
+        type:
+        - array
+        - 'null'
+        minItems: 1
+        uniqueItems: true
+        items: &id002
+          type: string
+          minLength: 1
+      quantity: &id003
+        type: &id004
+        - number
+        - 'null'
+        minimum: 0
+      count_unit: *id001
+      counting_rule: *id001
+      quantity_basis: *id001
+      roles:
+        type:
+        - array
+        - 'null'
+        minItems: 0
+        uniqueItems: true
+        items:
+          type: object
+          additionalProperties: false
+          required:
+          - id
+          - label
+          - fixed_jh
+          - unit_jh
+          - gain_pct
+          - rate_ref
+          - rate_eur_jh
+          properties:
+            id: *id002
+            label: *id002
+            fixed_jh: *id003
+            unit_jh: *id003
+            gain_pct:
+              type: *id004
+              minimum: 0
+              maximum: 100
+            rate_ref:
+              oneOf:
+              - type: 'null'
+              - type: object
+                additionalProperties: false
+                required:
+                - path
+                - pointer
+                properties:
+                  path: *id002
+                  pointer: *id002
+            rate_eur_jh: *id003
+      expenses_eur_ht: *id003
+      assumptions:
+        type:
+        - array
+        - 'null'
+        minItems: 1
+        uniqueItems: true
+        items: *id002
+      evidence_refs:
+        type:
+        - array
+        - 'null'
+        minItems: 1
+        uniqueItems: true
+        items: *id002
+      cost_mode:
+        enum:
+        - null
+        - human
+        - fixed_purchase
+        - resource_usage
+        - included
+      unit_price_eur_ht:
+        type:
+        - number
+        - 'null'
+        minimum: 0
+      billing_period:
+        enum:
+        - null
+        - once
+        - month
+        - year
+      included_in_ref:
+        type:
+        - string
+        - 'null'
+        minLength: 1
+    allOf:
+    - if:
+        properties:
+          cost_mode:
+            enum:
+            - fixed_purchase
+            - resource_usage
+            - included
+        required:
+        - cost_mode
+      then:
+        properties:
+          roles:
+            type:
+            - array
+            - 'null'
+            maxItems: 0
+      else:
+        properties:
+          roles:
+            minItems: 1
+  scope:
+    type: object
+    additionalProperties: false
+    required:
+    - deliverable
+    - acceptance
+    - boundary
+    properties:
+      deliverable:
+        type:
+        - string
+        - 'null'
+        minLength: 1
+      acceptance:
+        type:
+        - array
+        - 'null'
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: string
+          minLength: 1
+      boundary:
+        type:
+        - string
+        - 'null'
+        minLength: 1

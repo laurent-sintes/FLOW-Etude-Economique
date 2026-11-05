@@ -108,8 +108,8 @@ async function checkFrameworkJourney(data){
    await route(phase+'?option='+option+'&horizon=5');
    assert.equal(await page.locator('.journey-treatment section').count(),2);assert.equal(await page.locator('.journey-example').count(),1);
    assert.equal(await page.locator('.journey-option-navigation a[aria-current="page"]').getAttribute('href'),'#'+phase+'?option='+option+'&horizon=5&origin=project&options=java-spring%2Cmicrosoft%2Csap');
-   assert.equal(await page.locator('.journey-reading-shortcuts a').count(),option==='java-spring'?3:2);
-   assert.equal(await page.locator('.journey-reading-shortcuts a').first().getAttribute('href'),'#charges-'+phase+'?option='+option+'&horizon=5&origin=project&options=java-spring%2Cmicrosoft%2Csap');
+   assert.equal(await page.locator('.framework-phase-track,.framework-phase-next').count(),0);
+   assert.equal(await page.locator('.journey-reading-shortcuts a').count(),option==='java-spring'?1:0);
    if(phase==='acquisition'&&option==='java-spring'){
     assert.equal(await page.locator('.make-mapping-example>ol>li').count(),5);
     assert.equal(await page.locator('.make-mapping-example a[href*="/blob/"]').count(),4);
@@ -126,15 +126,21 @@ async function checkFrameworkJourney(data){
    assert.ok(await page.locator('.journey-limits li').count()>0);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));combinations.push({width,phase,option});
   }
   await route('charges-fonctionnement?option=microsoft&horizon=3');
+  const sidebar=async destination=>{
+   if(width<=900)await page.locator('.topbar .mobile').click();
+   await page.locator('#study-navigation a[href^="#'+destination+'?"]').click();
+   await page.waitForFunction(({destination})=>location.hash.startsWith('#'+destination+'?'),{destination});
+   assert.equal(new URLSearchParams(page.url().split('?')[1]).get('option'),'microsoft');
+   assert.equal(new URLSearchParams(page.url().split('?')[1]).get('horizon'),'3');
+  };
   for(const destination of ['organisation-delivery','equipes-produit','integration-transverse']){
-   await page.locator('a.framework-phase-next').click();
-   await page.waitForURL(new RegExp('#'+destination+'[?]option=microsoft&horizon=3'));
-   await page.locator('main .delivery-responsibilities').waitFor();
+   await sidebar(destination);await page.locator('main .delivery-page').waitFor();
+   assert.equal(await page.locator('main .delivery-page>.delivery-reading-navigation,main .framework-phase-next').count(),0);
   }
-  await page.locator('a.framework-phase-next').click();await page.waitForURL(/#evaluation-core\?option=microsoft&horizon=3(?:&origin=project&options=java-spring%2Cmicrosoft%2Csap)?$/);
+  await sidebar('evaluation-core');
   await page.locator('.eco-options a[aria-current="true"]').waitFor();assert.match(await page.locator('.eco-options a[aria-current="true"]').innerText(),/Microsoft/);
-  await route('scenarios?option=sap&horizon=7');assert.equal(await page.locator('.journey-scenario-steps>li').count(),4);assert.equal(await page.locator('a.framework-primary-link').getAttribute('href'),'#comparer?option=sap&horizon=7&origin=project&options=java-spring%2Cmicrosoft%2Csap');
-  await route('methodes');assert.equal(await page.locator('.journey-methods article').count(),7);await page.locator('.journey-methods a[href="#modele"]').click();await page.locator('.model-reading').waitFor();await page.locator('a.journey-method-back').click();await page.locator('.journey-methods').waitFor();
+  await route('scenarios?option=sap&horizon=7');assert.equal(await page.locator('.journey-scenario-steps>li').count(),4);assert.equal(await page.locator('a.framework-primary-link').count(),0);
+  await route('methodes');assert.equal(await page.locator('.journey-methods article').count(),7);await page.locator('.journey-methods a[href="#modele"]').click();await page.locator('.model-reading').waitFor();if(width<=900)await page.locator('.topbar .mobile').click();await page.locator('#study-navigation a[href^="#methodes"]').click();await page.locator('.journey-methods').waitFor();
  }
  report.frameworkJourney={combinations,optionAndHorizonPreserved:true,methodAnchors:true,legacyMethodsReachable:true};
 }

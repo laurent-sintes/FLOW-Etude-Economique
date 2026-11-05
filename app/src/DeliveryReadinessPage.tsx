@@ -44,7 +44,7 @@ export function DeliveryReadinessPage({view,focus}:{view?:string;focus?:string})
    {section('partenaire',<div className="core-method-table-scroll" tabIndex={0} role="region" aria-label={D.sections[2].title}><table className="core-method-table delivery-proof-register"><thead><tr>{L.proof_columns.map((text:string)=><th scope="col" key={text}>{text}</th>)}</tr></thead><tbody>{D.proofs.map((proof:Data)=><tr key={proof.id} data-delivery-proof={proof.id}><th scope="row"><h3 id={targetId('proof',proof.id)} tabIndex={-1}>{proof.title}</h3>{partnerProofs.has(proof.id)&&<small className="delivery-partner-requirement">{L.partner_requirement}</small>}</th><td><span className="delivery-state" data-status={proof.status}>{L.proof_states[proof.status]}</span>{proof.href&&<SourceLink path={proof.href}>{L.proof_access}</SourceLink>}</td><td>{proof.detail}</td></tr>)}</tbody></table></div>)}
    {section('jalons',<div className="delivery-gates">{D.gates.map((gate:Data)=><article key={gate.id} data-delivery-gate={gate.id}><header><h3 id={targetId('gate',gate.id)} tabIndex={-1}>{gate.title}</h3>{state(gate.status)}</header><p>{gate.expected}</p><p className="delivery-validation" title={gate.validation_owner}><strong>{L.validation_label} : </strong>{validation(gate.validation_owner)}</p><dl><div><dt>{L.proceed_label}</dt><dd>{gate.proceed}</dd></div><div><dt>{L.reconsider_label}</dt><dd>{gate.reconsider}</dd></div></dl>{proofLinks(gate.proof_refs)}</article>)}</div>)}
   </ol>
-  <a className="text-button essential-structure-next" href={D.next.href}>{D.next.label} →</a>
+
   </DossierSheet>
  </div>;
 }

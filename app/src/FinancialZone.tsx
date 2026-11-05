@@ -12,6 +12,6 @@ export function FinancialZone({route,children}:{route:EconomicRoute;children:Rea
  useEffect(()=>{let live=true;if(province){setError(false);request<Data>('/api/financial-province').then(value=>{if(value.source_model_version!==context.data.model_version)throw Error('ERR_VERSION');if(live)setVariant(value);}).catch(()=>{if(live)setError(true);});}return()=>{live=false;};},[province,context.data.model_version,attempt]);
  if(!province)return <>{children}</>;
  if(!variant)return <><FinancialZoneChoice route={route}/><p role={error?'alert':'status'}>{error?context.data.ui.errors.network:context.data.ui.labels.loading}</p>{error&&<button className="text-button" onClick={()=>setAttempt(i=>i+1)}>{context.data.ui.labels.retry}</button>}</>;
- const data={...context.data,baseline:variant.baseline,content:{...context.data.content,framework:variant.framework,economic_zone_reading:variant.reading,gross_zone_reading:variant.gross}};
+ const data={...context.data,baseline:variant.baseline,content:{...context.data.content,framework:variant.framework,economic_zone_reading:variant.reading,gross_zone_reading:variant.gross,delivery_organisation:variant.organisation}};
  return <StudyContext.Provider value={{...context,data}}><p className="eco-caption">{T.price_zone_scope}</p>{children}</StudyContext.Provider>;
 }

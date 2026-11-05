@@ -54,6 +54,15 @@ def volume(scenario, ref):
     return value
 
 
+def annual_work_valuation(row, roles, rates, scenario, tools, factor=1, gain_pct=None):
+    """One source-owned calculation for annual effort and its current valuation."""
+    gross=row['jh_fixes_avant_ia']+sum(volume(scenario,c['volume_ref'])*c['jh_unitaire'] for c in row['charges'])
+    effective_gain=row['gain_ia_pct'] if gain_pct is None else gain_pct
+    net=gross*factor*(1-effective_gain/100)
+    cost=mixed_cost(net,roles,rates,tools) if roles else 0
+    return dict(gross_jh=gross,gain_pct=effective_gain,net_jh=net,cost_eur_ht=cost)
+
+
 def maintenance_specialist_adjustment(doc, maintenance, cal, rates, scenario, sensitivity='central'):
     """Reprice an inherited subset of funded N3 days, without adding any effort."""
     spec=cal['specialisation_maintenance_make']
@@ -225,10 +234,9 @@ def calculate_option(slug, doc, cal, sensitivity='central', service_years=15):
     maintenance_rows=[]
     maintenance_labour=maintenance_jh=0
     for a in doc['maintenance']['activites']:
-        gross=a['jh_fixes_avant_ia']+sum(volume(scenario,c['volume_ref'])*c['jh_unitaire'] for c in a['charges'])
-        net=gross*jhf*(1-gain(a['gain_ia_pct'])/100)
         original=ma[a['activite']]
-        cost=mixed_cost(net,original['roles'],rates,tools) if original['roles'] else 0
+        valued=annual_work_valuation(a,original['roles'],rates,scenario,tools,jhf,gain(a['gain_ia_pct']))
+        net,cost=valued['net_jh'],valued['cost_eur_ht']
         maintenance_rows.append(dict(activite=a['activite'],jh=round(net,2),traitement=a['traitement'],cout_diagnostique_eur_ht=round(cost,2)))
         if a['traitement']=='estimation': maintenance_labour+=cost;maintenance_jh+=net
     extra_jh=doc['maintenance']['maintenance_complements_buy_jh_annuels']*jhf

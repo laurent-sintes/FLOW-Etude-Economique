@@ -156,9 +156,10 @@ def regional_study(base, zone):
 
 def financial_variant(base):
     variant = regional_study(base, 'province')
+    variant.content['delivery_organisation']['allocation_table']['zone'] = 'province'
     return dict(zone='province', source_model_version=base.version, baseline=variant.baseline,
         framework=variant.content['framework'], reading=variant.content['economic_evaluations'],
-        gross=variant.content['gross_evaluations'])
+        gross=variant.content['gross_evaluations'],organisation=variant.content['delivery_organisation'])
 
 
 def adopted_price(id):

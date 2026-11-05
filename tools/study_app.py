@@ -34,6 +34,8 @@ from application_framework import hydrate_application_framework
 from economic_reading import build_economic_evaluations
 from gross_evaluations import build_gross_evaluations, hydrate_gross_ui, dependencies as gross_dependencies
 from synvance_reference import build_synvance_reference
+from framework_graph import build_graph, dependencies as framework_graph_dependencies
+from delivery_organisation import build_organisation, dependencies as organisation_dependencies
 from delivery_readiness import build_delivery_readiness
 from download_catalog import build_download_catalog
 from model_revision import load_revision
@@ -122,7 +124,7 @@ class Study:
         assert manifest['version']==1
         paths=manifest['documents']
         assert all(isinstance(p,str) for p in paths) and len(paths)==len(set(paths))
-        files=set(paths)|set(self.data['empreintes'])|core_product_dependencies()|gross_dependencies()
+        files=set(paths)|set(self.data['empreintes'])|core_product_dependencies()|gross_dependencies()|organisation_dependencies()|framework_graph_dependencies()
         for path in files:
             file=(ROOT/path).resolve()
             assert file.is_relative_to(ROOT.resolve()) and file.is_file(), ('Missing publication document',path)
@@ -249,6 +251,8 @@ class Study:
         content['synvance_reference'] = build_synvance_reference(
             content['guide'], self.glossary, self.document_path, self.baseline, self.architecture, content['economic_evaluations'])
         content['gross_evaluations'] = build_gross_evaluations(self.economic, self.data, self.baseline, content, self.glossary, self.version)
+        content['delivery_organisation'] = build_organisation(self.economic, self.baseline, content)
+        content['framework_graph'] = build_graph(self.fundamentals['estimation_model'], content['delivery_organisation'])
         content['delivery_method'], content['delivery_readiness'] = build_delivery_readiness(
             content['complexity'], self.glossary, self.document_path)
         content['downloads'] = build_download_catalog(self.ui, content['synvance_reference']['documents'], self.files)
@@ -524,6 +528,8 @@ class Study:
         content={'complexity':self._essential_complexity(),'framework':self.content['framework'],
                  'market_method':self._essential_market_method(),
                  'synvance_reference':self.content['synvance_reference'],
+                 'framework_graph':self.content['framework_graph'],
+                 'delivery_organisation':self.content['delivery_organisation'],
                  'delivery_method':self.content['delivery_method'],
                  'delivery_readiness':self.content['delivery_readiness'],
                  'downloads':self.content['downloads'],

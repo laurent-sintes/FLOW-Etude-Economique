@@ -247,8 +247,8 @@ export function FrameworkPage({detail}:{detail?:'tarifs'|'diagnostics'}){
     <SourceLink path={F.sources.allocation}>{T.allocation_source}</SourceLink>
    </ParameterSection>
   </ol>
-  <div className="framework-links">{T.method_links.map((link:Data)=><a key={link.href} href={link.href}>{link.label}</a>)}<a className="text-button" href="#simuler">{T.simulate_action} →</a></div>
-  <a className="text-button essential-structure-next" href="#evaluation-core">{T.next} →</a>
+  <div className="framework-links">{T.method_links.map((link:Data)=><a key={link.href} href={link.href}>{link.label}</a>)}</div>
+
   </DossierSheet>
  </div>;
 }

@@ -1,3 +1,4 @@
+import {ContentLinks} from './ContentLinks';
 import type {ReactNode} from 'react';
 import {Bot} from 'lucide-react';
 import Markdown from 'react-markdown';
@@ -55,6 +56,7 @@ export function MethodReferenceCards({cards,headingLevel=3}:{cards:Extract<Metho
 }
 
 function MethodContent({block,examples,format,prefix}:{block:MethodBlock;examples:MethodExample[];format:(value:number)=>string;prefix:string}){
+ const {data}=useStudy();
  switch(block.kind){
   case 'paragraphs':return <div className="core-method-paragraphs">{block.items.map((text,index)=><p key={index}><MethodText>{text}</MethodText></p>)}</div>;
   case 'bullets':return <ul className="core-method-bullets">{block.items.map((text,index)=><li key={index}><MethodText>{text}</MethodText></li>)}</ul>;
@@ -64,7 +66,7 @@ function MethodContent({block,examples,format,prefix}:{block:MethodBlock;example
   case 'formula':return <p className="core-method-formula">{block.text}</p>;
   case 'links':{
    const links=block.items.filter(link=>!isModelDataReference(link.href));
-   return links.length?<ul className="core-method-bullets">{links.map(link=><li key={link.href}><a className="text-button" href={link.href}>{link.label} <span aria-hidden="true">→</span></a></li>)}</ul>:null;
+   return <ContentLinks links={links} label={data.ui.essential.pages.methodes.title} className="core-method-bullets"/>;
   }
   case 'example':{
    const example=examples.find(item=>item.id===block.ref);
@@ -109,6 +111,6 @@ export function MethodDocument({method,children,prefix=method.id,className='',ad
   <ol className="core-method-sections">{method.sections.filter((section:Data)=>section.kind!=='example').map((section:Data)=><li key={section.id}>{renderSection(section)}</li>)}</ol>
   {method.sections.filter((section:Data)=>section.kind==='example').map(renderSection)}
   {children}
-  <a className="text-button essential-structure-next" href={method.next.href}>{method.next.label} <span aria-hidden="true">→</span></a>
+
  </div>;
 }

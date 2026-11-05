@@ -137,7 +137,7 @@ class FrameworkVisionTests(unittest.TestCase):
         groups = [group for group in self.ui['essential']['nav_groups'] if not group.get('hidden')]
         self.assertEqual(next(group for group in groups if group['label']=='Études préalables')['items'], ['preetudes', 'synvance', 'cartographie', 'preetude-projets', 'preetude-solutions', 'preetude-couts', 'preetude-productivite'])
         self.assertNotIn('capacite-realisation', [page for group in groups for page in group['items']])
-        self.assertEqual(next(group for group in groups if group['label'] == 'Dossier économique')['items'], ['comparer', 'evaluation-core', 'parametres'])
+        self.assertEqual(next(group for group in groups if group['label'] == 'Dossier économique')['items'], ['couts-equipes', 'comparer', 'evaluation-core', 'parametres', 'scenarios'])
         links = {item['href'] for item in self.document['evidence']['items']}
         self.assertTrue({'#preetude-projets', '#preetude-solutions', '#preetude-couts'} <= links)
 

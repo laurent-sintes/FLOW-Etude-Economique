@@ -121,3 +121,23 @@ test('method links preserve all reading criteria',()=>{
  assert.equal(query.get('horizon'),'15');assert.equal(query.get('origin'),'production');
  assert.equal(query.get('options'),'microsoft,sap');assert.equal(query.get('option'),'sap');
 });
+
+test('delivery routes preserve team phase and financial context without mutation',()=>{
+ for(const page of ['organisation-cible','gouvernance-delivery','charges-equipes','couts-equipes','integration-transverse']){
+  const route={page,option:'java-spring',horizon:'7',focus:'b2c',view:'integration',zone:'province'};
+  const before={...route};
+  const hash=phaseReadingHash(route);
+  assert.equal(hash.split('?')[0],'#'+page);
+  const params=new URLSearchParams(hash.split('?')[1]);
+  for(const key of ['option','horizon','focus','view','zone'])assert.equal(params.get(key),route[key]);
+  assert.deepEqual(route,before);
+ }
+});
+
+test('framework map links preserve view object phase and financial reading context',()=>{
+ const route={page:'schema-modele',option:'java-spring',horizon:'7',origin:'core',view:'teams',focus:'b2c',phase:'integration',zone:'province'};
+ const before={...route},hash=phaseReadingHash(route),params=new URLSearchParams(hash.split('?')[1]);
+ assert.equal(hash.split('?')[0],'#schema-modele');
+ for(const key of ['option','horizon','origin','view','focus','phase','zone'])assert.equal(params.get(key),route[key]);
+ assert.deepEqual(route,before);
+});

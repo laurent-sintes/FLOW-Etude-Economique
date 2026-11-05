@@ -1,0 +1,233 @@
+type: object
+additionalProperties: false
+required:
+- version
+- id
+- option_ref
+- selections
+- assignments
+- coverage_groups
+- scope_reviews
+- projection
+properties:
+  version:
+    const: 1
+  id: &id001
+    type: string
+    minLength: 1
+  option_ref:
+    const: java-spring
+  selections:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - work_unit_ref
+      - estimate_source
+      - estimate_version
+      - work_kind
+      - accounting
+      - basis
+      - period
+      properties:
+        work_unit_ref: *id001
+        estimate_source:
+          enum:
+          - reference
+          - proposal
+        estimate_version:
+          type: integer
+          minimum: 1
+        work_kind:
+          enum:
+          - null
+          - human
+          - expense
+          - mixed
+        accounting:
+          enum:
+          - null
+          - reference
+          - additional
+          - replacement
+          - included
+        basis: &id004
+          type:
+          - string
+          - 'null'
+          minLength: 1
+        period:
+          type: object
+          additionalProperties: false
+          required:
+          - start_month
+          - end_month
+          - billing_period
+          properties:
+            start_month: &id002
+              type:
+              - number
+              - 'null'
+              minimum: 0
+            end_month: *id002
+            billing_period:
+              enum:
+              - null
+              - once
+              - month
+              - year
+  assignments:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - work_unit_ref
+      - phase_ref
+      - measure
+      - component_ref
+      - shares
+      - basis
+      - estimate_source
+      - estimate_version
+      properties:
+        id: &id003
+          type: string
+          minLength: 1
+        work_unit_ref: *id003
+        phase_ref:
+          enum:
+          - acquisition
+          - integration
+          - fonctionnement
+        measure:
+          enum:
+          - effort
+          - cost
+        component_ref: *id003
+        shares:
+          type: array
+          uniqueItems: true
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - team_ref
+            - share_pct
+            - contribution_kind
+            - basis
+            properties:
+              team_ref: *id003
+              share_pct:
+                type: number
+                minimum: 0
+                maximum: 100
+              contribution_kind:
+                enum:
+                - responsibility
+                - functional
+                - technical
+                - platform
+                - enabling
+              basis: *id003
+        basis: *id003
+        estimate_source:
+          enum:
+          - reference
+          - proposal
+        estimate_version:
+          type: integer
+          minimum: 1
+      allOf:
+      - if:
+          properties:
+            measure:
+              const: cost
+        then:
+          properties:
+            component_ref:
+              enum:
+              - expense:total
+              - expense:non-labour
+      - if:
+          properties:
+            measure:
+              const: effort
+        then:
+          properties:
+            component_ref:
+              pattern: ^(?!expense:).+
+  coverage_groups:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - replaced_refs
+      - replacing_refs
+      - confirmed
+      - basis
+      - remaining_work_refs
+      properties:
+        id: *id001
+        replaced_refs:
+          type: array
+          items: *id001
+          minItems: 1
+          uniqueItems: true
+        replacing_refs:
+          type: array
+          items: *id001
+          minItems: 1
+          uniqueItems: true
+        confirmed:
+          type:
+          - boolean
+          - 'null'
+        basis: *id004
+        remaining_work_refs:
+          type:
+          - array
+          - 'null'
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+  scope_reviews:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - phase_ref
+      - complete
+      - basis
+      properties:
+        phase_ref:
+          enum:
+          - acquisition
+          - integration
+          - fonctionnement
+        complete:
+          type:
+          - boolean
+          - 'null'
+        basis: *id004
+  projection:
+    type: object
+    additionalProperties: false
+    required:
+    - start_month
+    - end_month
+    - price_basis
+    properties:
+      start_month:
+        type: number
+        minimum: 0
+      end_month: *id002
+      price_basis:
+        const: source_constant
+$schema: https://json-schema.org/draft/2020-12/schema

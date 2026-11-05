@@ -1,3 +1,5 @@
+import {ContentLinks} from './ContentLinks';
+import {DurableTeamsPrinciple} from './TeamPhasePage';
 import {FileFormatMark} from './FileFormatMark';
 import type {ReactNode} from 'react';
 import {Hammer,ShoppingCart,Boxes,Cloud,Layers3,CalendarClock,ChartNoAxesCombined,type LucideIcon} from 'lucide-react';
@@ -19,7 +21,7 @@ export function ModelPage({view}:{view?:string}){
  const {data}=useStudy(),E=data.ui.essential,R=E.model_reading;
  const N=E.dossiers.model,pages=navigationPages('modele',N.pages),current=selectDossierPage(pages,view);
  const chapters=R.chapters.filter((chapter:Data)=>current.sections?.includes(chapter.id));
- const links=(items:Data[])=><div className="model-reading-links">{items.map(link=>link.href.startsWith('source/')?<SourceLink path={link.href} key={link.href}>{link.label}</SourceLink>:<a className="text-button" href={link.href} key={link.href}>{link.label} <span aria-hidden="true">→</span></a>)}</div>;
+ const links=(items:Data[])=><div className="model-reading-links">{items.filter(link=>link.href.startsWith('source/')).map(link=><SourceLink path={link.href} key={link.href}>{link.label}</SourceLink>)}<ContentLinks links={items.filter(link=>!link.href.startsWith('source/')).map(link=>({href:link.href,label:link.label}))} label={E.pages.modele.title}/></div>;
  const content:Record<string,ReactNode>={
   scope:<>
    <Text>{R.scope}</Text>
@@ -60,14 +62,14 @@ export function ModelPage({view}:{view?:string}){
    <Text className="model-reading-limit">{E.model_limit}</Text>
   </>
  };
- return <div className="essential-page essential-model model-reading">
+ return <div className="essential-page essential-model model-reading"><DurableTeamsPrinciple/>
   <section className="model-download dossier-download"><a className="text-button" href={import.meta.env.BASE_URL+'exports/flow-modele-metier.yaml'} download="flow-modele-metier.yaml" title={data.ui.model_download.description}><FileFormatMark format={data.content.downloads.reading.model_format}/>{data.ui.model_download.label}</a><Text>{data.ui.model_download.description}</Text></section>
   <aside className="model-reading-callout model-reading-status" role="status"><Text>{E.core_status_summary}</Text></aside>
   <DossierNavigation pages={pages} current={current.id} label={N.navigation}/>
   <DossierSheet view={current.id}>
   {current.id==='modes'&&<section className="model-reading-summary" aria-labelledby="model-modes-summary"><h2 id="model-modes-summary">{current.label}</h2><dl className="model-reading-axis-list">{E.model_purposes.axes.map((axis:Data)=><div key={axis.label}><dt><MethodText>{axis.label}</MethodText></dt><dd><MethodText>{axis.text}</MethodText></dd></div>)}</dl></section>}
   {chapters.map((chapter:Data,index:number)=><section className="model-reading-chapter" key={chapter.id} data-chapter={chapter.id} aria-labelledby={sectionId(chapter.id)}><h2 id={sectionId(chapter.id)} tabIndex={-1}><span aria-hidden="true">{index+1}</span>{chapter.title}</h2>{chapter.id!=='scope'&&<Text className="model-reading-lead">{chapter.lead}</Text>}{content[chapter.id]}</section>)}
-  <a className="text-button essential-structure-next" href={R.next_href}>{R.next_label} <span aria-hidden="true">→</span></a>
+
   </DossierSheet>
  </div>;
 }

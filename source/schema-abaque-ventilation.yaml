@@ -1,0 +1,137 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+additionalProperties: false
+required:
+- version
+- id
+- labels
+- rules
+- overrides
+properties:
+  version:
+    const: 1
+  id:
+    const: work-allocation-abaque
+  labels:
+    type: object
+    additionalProperties: false
+    required:
+    - remainder
+    properties:
+      remainder: &id001
+        type: string
+        minLength: 1
+  rules:
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - label
+      - condition
+      - share_pct
+      - basis
+      properties:
+        id: *id001
+        label: *id001
+        condition: *id001
+        share_pct:
+          type: number
+          minimum: 0
+          maximum: 100
+        basis: *id001
+    minItems: 3
+    maxItems: 3
+    allOf:
+    - contains:
+        properties:
+          id:
+            const: source-owner
+          share_pct:
+            const: 100
+    - contains:
+        properties:
+          id:
+            const: governance
+          share_pct:
+            const: 100
+    - contains:
+        properties:
+          id:
+            const: unallocated
+          share_pct:
+            const: 0
+  overrides:
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - work_unit_ref
+      - phase_ref
+      - measure
+      - component_ref
+      - shares
+      - basis
+      properties:
+        id: *id001
+        work_unit_ref: *id001
+        phase_ref:
+          enum:
+          - acquisition
+          - integration
+          - fonctionnement
+        measure:
+          enum:
+          - effort
+          - cost
+        component_ref: *id001
+        shares:
+          type: array
+          uniqueItems: true
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - team_ref
+            - share_pct
+            - contribution_kind
+            - basis
+            properties:
+              team_ref: *id001
+              share_pct:
+                type: number
+                minimum: 0
+                maximum: 100
+              contribution_kind:
+                enum:
+                - responsibility
+                - functional
+                - technical
+                - platform
+                - enabling
+              basis: *id001
+        basis: *id001
+      allOf:
+      - if:
+          properties:
+            measure:
+              const: cost
+        then:
+          properties:
+            component_ref:
+              enum:
+              - expense:total
+              - expense:non-labour
+      - if:
+          properties:
+            measure:
+              const: effort
+        then:
+          properties:
+            component_ref:
+              pattern: ^(?!expense:).+

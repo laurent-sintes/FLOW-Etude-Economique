@@ -1,0 +1,29 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+additionalProperties: false
+required: [id, option, zone, calculation_ref, ownership_ref, rows, records, totals]
+properties:
+  id: {const: team-phase-allocation}
+  option: {const: java-spring}
+  zone: {enum: [paris, province]}
+  calculation_ref: {const: tools/delivery_organisation.py}
+  ownership_ref: {const: source/abaque-ventilation.yaml}
+  rows:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required: [id, phase_ref, owner_kind, team_ref, governance_ref, jh, cost_eur_ht, period_basis, record_ids]
+      properties:
+        id: {type: string, minLength: 1}
+        phase_ref: {enum: [acquisition, integration, fonctionnement]}
+        owner_kind: {enum: [team, governance, unallocated]}
+        team_ref: {type: [string, 'null']}
+        governance_ref: {type: [string, 'null']}
+        jh: {type: [number, 'null'], minimum: 0}
+        cost_eur_ht: {type: [number, 'null'], minimum: 0}
+        period_basis: {enum: [phase, annual]}
+        record_ids: {type: array, uniqueItems: true, items: {type: string}}
+  records: {type: array, items: {type: object}}
+  totals: {type: array, items: {type: object}}

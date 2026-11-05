@@ -1,3 +1,4 @@
+import {ContentLinks} from './ContentLinks';
 import {useStudy,useFormat,type Data} from './context';
 import {MethodText} from './MethodDocument';
 import {SourceLink} from './components';
@@ -115,7 +116,7 @@ export function CoreEvaluationPage(){
  return <div className="essential-page core-evaluation-page">
   <section><h2>{R.make_title}</h2><CoreEvaluationResults/></section>
   <section className="core-method-note"><h2>{R.buy_title}</h2><p>{R.buy_note}</p><p>{buy.map(row=>row.name).join(' · ')}</p></section>
-  <a className="text-button essential-structure-next" href="#comparer">{R.next} →</a>
+
  </div>;
 }
 
@@ -127,6 +128,6 @@ export function CoreEvaluationTrace({options,editorial}:{options:Data[];editoria
    <h3>{unit.label}</h3><dl className="economic-value-summary"><div><dt>{R.days}</dt><dd>{n(unit.total_jh,0)} {R.jh_unit}</dd></div><div><dt>{R.duration}</dt><dd>{n(unit.months,1)} {R.months}</dd></div><div><dt>{R.total}</dt><dd>{amount(unit.cost_eur_ht)}</dd></div></dl>
    <a className="text-button" href={'#evaluation-core?family='+encodeURIComponent(unit.id)}>{R.family_details} →</a>
   </article>)}</div>
-  <p><MethodText>{S.note}</MethodText></p><ul className="economic-reading-links">{S.links.map((link:Data)=><li key={link.href}><a className="text-button" href={link.href}>{link.label} →</a></li>)}</ul>
+  <p><MethodText>{S.note}</MethodText></p><ContentLinks links={S.links} label={data.ui.essential.pages['evaluation-core'].title} className="economic-reading-links"/>
  </div>;
 }
