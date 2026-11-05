@@ -172,11 +172,16 @@ async function checkAuditCorrections(data){
   assert.equal(cells[4],C.labels.unknown);assert.equal(cells[5],C.labels.unknown);
   if(width===390){assert.equal(await row.evaluate(e=>getComputedStyle(e).display),'block');assert.equal(await row.locator('td').first().evaluate(e=>getComputedStyle(e).display),'grid');assert.ok(await row.locator('td').first().evaluate(e=>e.getBoundingClientRect().width>innerWidth*.65));assert.ok(await page.locator('[data-consolidation-details]').evaluate(e=>e.scrollWidth<=e.parentElement.clientWidth+1));}
   assert.equal(unclassified.labour_eur_ht,null);assert.equal(unclassified.non_labour_eur_ht,null);
-  await route('unites-travail?focus=core%2Fmaster-data-java-spring');
+  const masterData=W.units.find(unit=>unit.id==='core/master-data-java-spring');
+  const missingDeliverable=W.units.find(unit=>unit.id.startsWith('core/')&&unit.estimation.missing.includes('deliverable'));
+  assert.ok(masterData.estimation.scope.deliverable);
+  await route('unites-travail?focus='+encodeURIComponent(masterData.id));
   await page.locator('.work-overview').waitFor();
-  assert.ok((await page.locator('.work-overview').innerText()).includes(W.estimate_labels.work_page.result_pending));
+  assert.deepEqual(await page.locator('.work-outcomes li').allTextContents(),masterData.estimation.scope.deliverable.split(' · '));
+  assert.deepEqual(await page.locator('.work-included-activities li').allTextContents(),masterData.included_activities);
+  await route('unites-travail?focus='+encodeURIComponent(missingDeliverable.id));
+  await page.locator('.work-overview').getByText(W.estimate_labels.work_page.result_pending,{exact:true}).waitFor();
   assert.ok((await page.locator('.work-gaps').innerText()).includes(W.estimate_labels.missing_labels.deliverable));
-  assert.ok(await page.locator('.work-included-activities li').count()>0);
   for(const destination of ['integration-transverse','schema-modele?view=teams']){
    await route(destination);await page.locator('.tt-node').first().waitFor();
    assert.equal(await page.locator('.tt-node').count(),D.teams.length);
@@ -253,20 +258,30 @@ try{
  const assets=await page.locator('img').evaluateAll(els=>els.map(el=>({src:el.src,loaded:el.complete&&el.naturalWidth>0})));assert.ok(assets.length);for(const asset of assets){assert.ok(asset.loaded);assert.ok(new URL(asset.src).pathname.startsWith(site.pathname));}report.assets=assets.length;
  await route('charges-acquisition?option=java-spring');const grossResponse=await page.request.get(new URL(manifest.routes['/api/gross-evaluations'],manifestUrl).href);assert.ok(grossResponse.ok());const gross=await grossResponse.json();
  const core=gross.phases.acquisition.options['java-spring'].core;assert.equal(core.adopted_jh,data.baseline.options.find(o=>o.stack==='java-spring').obtention?.total_jh??data.content.core_product_scope.proposal.adopted_jh);
- assert.equal(await page.locator('.gross-effort-matrix tbody tr').count(),core.rows.length);
+ const effortMatrix=page.locator('.gross-effort-matrix');
+ assert.deepEqual(await effortMatrix.locator('tbody[data-domain-group]').evaluateAll(groups=>groups.map(group=>group.dataset.domainGroup)),core.domain_reading.buckets.map(bucket=>bucket.id));
+ assert.deepEqual(await effortMatrix.locator('tr[data-unit]').evaluateAll(rows=>rows.map(row=>row.dataset.unit).sort()),core.rows.map(row=>row.id).sort());
  assert.equal(await page.locator('[data-core-status]').getAttribute('data-core-status'),core.status);
  assert.equal(await page.locator('.gross-activity-table tbody tr').count(),core.activities.length);
- assert.doesNotMatch(await page.locator('.gross-development').innerText(),/€|tarif|TJM/);
+ assert.doesNotMatch(await effortMatrix.innerText(),/€|tarif|TJM/);
+ assert.doesNotMatch(await page.locator('.gross-activity-table').innerText(),/€|tarif|TJM/);
  for(const row of core.rows){
-  const cell=page.locator('[data-unit="'+row.id+'"]');
-  await cell.getByRole('button').focus();
-  await page.locator('[role="tooltip"]:popover-open').waitFor();
-  assert.ok((await page.locator('[role="tooltip"]:popover-open').innerText()).length>40);
+  const cell=effortMatrix.locator('[data-unit="'+row.id+'"]');
+  const button=cell.getByRole('button');
+  await button.scrollIntoViewIfNeeded();
+  await button.focus();
+  const tooltip=cell.locator('[role="tooltip"]:popover-open');
+  await tooltip.waitFor();
+  assert.ok((await tooltip.innerText()).length>40);
   await page.keyboard.press('Escape');
-  await route('charges-acquisition?option=java-spring&focus='+encodeURIComponent(row.id));
-  await page.getByRole('dialog').waitFor();
-  assert.ok((await page.getByRole('dialog').innerText()).length>80);
-  await page.keyboard.press('Escape');
+  await tooltip.waitFor({state:'hidden'});
+  await cell.getByRole('link').click();
+  const dialog=page.getByRole('dialog');
+  await dialog.waitFor();
+  assert.ok((await dialog.innerText()).length>80);
+  await dialog.getByRole('button',{name:data.ui.labels.close,exact:true}).click();
+  await dialog.waitFor({state:'hidden'});
+  await page.waitForFunction(()=>document.activeElement?.id==='gross-focus-comparisons');
  }
  report.proofs.phaseCharges={adopted_jh:core.adopted_jh,units:core.rows.length,adoptionStatus:core.status};
  await route('evaluation-core?option=java-spring&horizon=10');assert.equal(await page.locator('.eco-cost-overview>article').count(),3);assert.equal(await page.locator('.eco-year-chart li').count(),10);

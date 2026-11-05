@@ -117,6 +117,14 @@ class DeliveryOrganisationTests(unittest.TestCase):
             build_organisation(self.study.economic,baseline,self.study.content)
         self.assertEqual(result,self.study.content['delivery_organisation'])
 
+    def test_published_master_data_team_uses_glossary_labels(self):
+        teams = self.study.organisation_reading()['delivery_organisation']['teams']
+        master_data = next(team for team in teams if team['id'] == 'master-data')
+        for field, term in [('mission', 'flow_core_system'), ('boundary', 'core_system')]:
+            with self.subTest(field=field):
+                self.assertIn(self.study.glossary['notions'][term]['libelle'], master_data[field])
+                self.assertNotIn('{{', master_data[field])
+
     def test_bootstrap_and_model_export_include_the_same_authority(self):
         bootstrap=self.study.bootstrap(essential=True)
         self.assertTrue(bootstrap['content']['delivery_organisation']['deferred'])

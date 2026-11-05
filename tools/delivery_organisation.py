@@ -7,6 +7,7 @@ from decimal import Decimal
 import math
 
 from jsonschema import Draft202012Validator
+from content_model import resolve_text_tree
 from validate_stacks import ROOT, read
 
 SOURCE = 'source/organisation-delivery.yaml'
@@ -21,7 +22,7 @@ def require(condition, message):
 
 
 def dependencies():
-    return {SOURCE, SCHEMA, TABLE_SCHEMA, 'tools/delivery_organisation.py'} | work_dependencies() | revision_dependencies() | consolidation_dependencies()
+    return {SOURCE, SCHEMA, TABLE_SCHEMA, 'tools/delivery_organisation.py', 'source/glossaire.yaml', 'tools/content_model.py'} | work_dependencies() | revision_dependencies() | consolidation_dependencies()
 
 
 def validate(document):
@@ -115,6 +116,7 @@ def allocation_table(organisation, zone='paris'):
 
 def build_organisation(economic, baseline, content, source=None):
     document = validate(source if source is not None else read(ROOT / SOURCE))
+    document = resolve_text_tree(document, read(ROOT / 'source/glossaire.yaml'), path=SOURCE)
     owners = {(r['kind'], r['ref']): r for r in document['work_owners']}
     units = next(o for o in economic['options'] if o['stack'] == 'java-spring')['core_units']
     option = next(o for o in baseline['options'] if o['stack'] == 'java-spring')

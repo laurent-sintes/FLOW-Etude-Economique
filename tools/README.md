@@ -254,7 +254,7 @@ Pour une vérification indépendante, servir `app/dist-pages/` sous le chemin `/
 node app/scripts/verify-pages.mjs --url http://127.0.0.1:8777/FLOW-Etude-Economique/ --cases tmp/pages-validation.json --output tmp/pages-validation-report.json
 ```
 
-Le script vérifie les pages, les preuves, les simulations réelles dans Pyodide et la reprise des sauvegardes. Installer Chromium avec `pnpm --dir app exec playwright install chromium`, ou définir `PLAYWRIGHT_CHROMIUM_EXECUTABLE` vers un Chrome installé. Le workflow prépare une prévisualisation isolée et installe les dépendances système du navigateur sur son runner Linux. Les cas de référence de ce contrôle sont recalculés à chaque exécution, sans geler les hypothèses économiques.
+Le script vérifie les pages, les preuves, les simulations réelles dans Pyodide et la reprise des sauvegardes. Installer Chromium avec `pnpm --dir app exec playwright install chromium`, ou définir `PLAYWRIGHT_CHROMIUM_EXECUTABLE` vers un Chrome installé. Le workflow prépare une prévisualisation isolée et installe le Chromium de Playwright sur son runner Linux. Les cas de référence de ce contrôle sont recalculés à chaque exécution, sans geler les hypothèses économiques.
 
 Garder `app/dist/` pour le serveur local sur 8766. Après modification, relancer `tools/start_study_app.ps1 -NoOpen` depuis `C:/Dev/FLOW-Etude-Economique`, puis vérifier le manifeste `site-manifest.json` et le chargement de l’application. Le serveur statique ne fournit pas de route HTTP `/api/health`.
 
