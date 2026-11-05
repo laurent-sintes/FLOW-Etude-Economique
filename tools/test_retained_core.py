@@ -1,5 +1,6 @@
 """Guard the adopted project effort against double funding and false precision."""
 from test_support import active_reference
+from capability_catalog import analysis
 from copy import deepcopy
 import unittest
 from model_context import scoped_model
@@ -44,9 +45,11 @@ class RetainedCoreTests(unittest.TestCase):
     def test_unknown_coverage_and_family_delay_are_not_global_delivery(self):
         rows = {r['stack']:r for r in self.study._essential_core_evaluation()}
         java = rows['java-spring']
-        self.assertEqual((java['coverage']['covered'],java['coverage']['total'],java['coverage']['remaining']),(88,88,0))
+        blocks = {b['id'] for b in analysis()['blocs']}
+        self.assertEqual((java['coverage']['covered'],java['coverage']['total'],java['coverage']['remaining']),
+                         (len(blocks),len(blocks),0))
         self.assertIsNone(java['uncertainty_pct'])
-        self.assertEqual(set(java['coverage']['remaining_capabilities']), {f'BC-{i:03}' for i in range(1,89)}-{c['id'] for u in java['units'] for c in u['capabilities']})
+        self.assertEqual(set(java['coverage']['remaining_capabilities']), blocks-{c['id'] for u in java['units'] for c in u['capabilities']})
         for slug in ('dotnet','rust'):
             self.assertEqual(rows[slug]['coverage']['covered'],0)
             self.assertEqual(rows[slug]['estimation_status'],'pending_reestimation')
@@ -78,7 +81,7 @@ class RetainedCoreTests(unittest.TestCase):
         self.assertEqual(family['family_jh'],active_reference()['total_jh'])
         caps=metrics['map']['capabilities']
         covered=[c for c in caps.values() if c['stacks']['java-spring']['retained_units']]
-        self.assertEqual(len(covered),88)
+        self.assertEqual(len(covered),len(analysis()['blocs']))
         self.assertTrue(all(c['stacks']['java-spring']['raw_jh']['central'] is None for c in covered))
         retained_ids = {unit['id'] for unit in validate()['units']}
         self.assertTrue(all(c['stacks']['java-spring']['retained_units'][0]['id'] in retained_ids for c in covered))

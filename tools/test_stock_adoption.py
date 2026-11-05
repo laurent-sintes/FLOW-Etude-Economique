@@ -1,5 +1,6 @@
 """Stock adoption: pure reconstruction, reuse ownership, rejection and export."""
 from test_support import active_reference
+from capability_catalog import analysis
 from copy import deepcopy
 import hashlib
 import unittest
@@ -36,7 +37,7 @@ class StockAdoptionTests(unittest.TestCase):
   stock=next(u for u in core['core_units'] if u['id']=='stock-java-spring')
   self.assertEqual((stock['labour_eur_ht'],stock['tooling_eur_ht']),(active_reference()['units']['stock-java-spring']['cost_eur_ht']-2720,2720))
   covered=next(x for x in study._essential_core_evaluation() if x['stack']=='java-spring')['coverage']
-  self.assertEqual((covered['covered'],covered['remaining']),(88,0))
+  self.assertEqual((covered['covered'],covered['remaining']),(len(analysis()['blocs']),0))
  def test_native_sizes_and_functional_count_reconstructed(self):
   p=self.prepared();self.assertEqual((p['trace']['component_files'],p['trace']['recorded_files']),(62,63))
   self.assertEqual((p['trace']['CFP'],p['trace']['processes'],p['trace']['groups']),(169,21,20))
@@ -57,11 +58,11 @@ class StockAdoptionTests(unittest.TestCase):
  def test_master_data_source_and_prior_decision_are_preserved(self):
   import json
   before=json.loads((ROOT/'audits/2026-10-30-stock-adoption-10/baseline.json').read_text(encoding='utf-8'))
-  self.assertEqual(self.units[0]['capabilities'],before['retained_master_data']['capabilities'])
-  historical=self.proofs['audits/2026-11-02-adoption-quatre-lots/basis.json']['units'][0]
+  historical=next(u for u in self.proofs['audits/2026-11-02-adoption-quatre-lots/basis.json']['units']
+                  if u['id']=='master-data-java-spring')
   self.assertEqual(historical,before['retained_master_data'])
-  for path,key in [('sources/cartographie-scm-2026-10-24.yaml','capability_source_sha256'),('source/referentiel-capacites.yaml','capability_reference_sha256')]:
-   self.assertEqual(hashlib.sha256((ROOT/path).read_bytes()).hexdigest(),before[key])
+  original=ROOT/'sources/cartographie-scm-2026-10-24.yaml'
+  self.assertEqual(hashlib.sha256(original.read_bytes()).hexdigest(),before['capability_source_sha256'])
  def test_stock_cannot_claim_master_data_funding_or_drop_owner(self):
   doc=registry();stock=next(c for c in doc['calculations'] if c['unit_id']=='stock-java-spring')
   next(c for c in stock['funding_claims'] if c['mode']=='consumed')['mode']='funded'

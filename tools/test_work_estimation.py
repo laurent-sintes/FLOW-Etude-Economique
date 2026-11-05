@@ -39,18 +39,22 @@ class WorkEstimationTests(unittest.TestCase):
     def test_core_comments_never_supply_a_missing_deliverable(self):
         units=[u for u in self.catalog['units'] if u['nature']=='core_build']
         self.assertTrue(units)
+        source=read(ROOT/'source/unites-travail.yaml')
+        declared={u['id']:u for u in source['units']}
         for u in units:
-            self.assertIsNone(u['estimation']['scope']['deliverable'])
-            self.assertIn('deliverable',u['estimation']['missing'])
+            deliverable=declared[u['id']]['estimation_contract']['scope']['deliverable']
+            self.assertEqual(u['estimation']['scope']['deliverable'],deliverable)
+            self.assertEqual('deliverable' in u['estimation']['missing'], deliverable is None)
             self.assertTrue(u['included_activities'])
             self.assertEqual(u['estimation']['reference']['cost_eur_ht'],u['totals']['cost_eur_ht'])
-        source=read(ROOT/'source/unites-travail.yaml');unit=next(u for u in source['units'] if u['id']==units[0]['id'])
+        missing=next(u for u in units if u['estimation']['scope']['deliverable'] is None)
+        unit=declared[missing['id']]
         unit['estimation_contract']['scope']['deliverable']='Résultat explicite à réceptionner'
         catalog=build_work_units(self.study.economic,self.org,source=source)
         after=next(u for u in catalog['units'] if u['id']==unit['id'])
         self.assertEqual(after['estimation']['scope']['deliverable'],unit['estimation_contract']['scope']['deliverable'])
         self.assertNotIn('deliverable',after['estimation']['missing'])
-        self.assertEqual(after['totals'],units[0]['totals'])
+        self.assertEqual(after['totals'],missing['totals'])
 
     def test_maintenance_gross_net_and_prices_are_distinct(self):
         u=next(u for u in self.catalog['units'] if u['id']=='maintenance/MAI-003');e=u['estimation'];r=e['reference']

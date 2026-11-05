@@ -23,8 +23,8 @@ class SponsorReadingTests(unittest.TestCase):
         atlas = self.study.content['journey']['metrics']['map']
         expected = {row['capacite_id'] for row in source['rows']}
         self.assertEqual(set(atlas['capabilities']), expected)
-        self.assertEqual(len(atlas['areas']), 9)
-        self.assertEqual(len(atlas['business_areas']), 28)
+        self.assertEqual({group['id'] for group in atlas['areas']}, {row['chemin'][1] for row in source['rows']})
+        self.assertEqual({group['id'] for group in atlas['business_areas']}, {row['chemin'][2] for row in source['rows']})
         for groups in (atlas['areas'], atlas['business_areas']):
             self.assertEqual(Counter(cap for group in groups for cap in group['capabilities']),
                              Counter({identifier: 1 for identifier in expected}))

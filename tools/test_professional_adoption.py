@@ -1,4 +1,5 @@
 """Adopted professional estimate: portable preparation, unique funding and financial reconciliation."""
+from capability_catalog import analysis
 from test_support import active_reference, adopted_effort
 from collections import Counter
 from copy import deepcopy
@@ -31,7 +32,8 @@ class ProfessionalAdoptionTests(unittest.TestCase):
   actual={u['id']:u for u in self.units}
   for old in before:
    if old['id'] in ('stock-java-spring',):self.assertEqual(adopted_effort(actual[old['id']]),adopted_effort(old))
-  caps=[c['id'] for u in self.units for c in u['capabilities']];self.assertEqual(len(caps),88);self.assertEqual(len(set(caps)),88)
+  caps=[c['id'] for u in self.units for c in u['capabilities']]
+  self.assertCountEqual(caps,[b['id'] for b in analysis()['blocs']])
   for c in self.specs:
    if c['scope']['level']=='professional_function_group':self.assertEqual(c['scope']['capabilities'],[]);self.assertNotIn('native_id',c['scope'])
  def test_three_calculations_replay_from_exported_documents_without_io(self):

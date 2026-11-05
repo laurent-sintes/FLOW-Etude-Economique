@@ -27,6 +27,11 @@ class MarketComparisonTests(unittest.TestCase):
   excluded=[r for r in c['rows'] if not r['included']];self.assertEqual(len(excluded),6)
   self.assertTrue(all(x['reading_status']=='hors_perimetre' for row in excluded for x in row['cells']))
   self.assertTrue(all(x['complete_ba_coverage'] is None for r in c['rows'] for x in r['cells']))
+  mdm=[r for r in c['rows'] if r['hierarchy'][0]['name']=='Master Data']
+  self.assertTrue(mdm)
+  self.assertTrue(all(r['included'] and r['target'] and r['next_qualification'] for r in mdm))
+  self.assertTrue(all(x['reading_status']=='non_etabli' and not x['evidence_refs']
+                      for r in mdm for x in r['cells']))
  def test_hierarchy_is_native_and_documentary_comparison_excludes_estimates(self):
   c=self.build();nodes={n['id']:n for n in self.snapshot['nodes']}
   for row in c['rows']:

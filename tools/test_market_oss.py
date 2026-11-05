@@ -3,6 +3,7 @@
 from copy import deepcopy
 import unittest
 
+from capability_catalog import analysis
 from market_oss import enrich_market_products
 from validate_stacks import ROOT, read
 
@@ -11,7 +12,7 @@ class MarketOSSStudyTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.raw = read(ROOT / 'source/references-couts-integration.yaml')['reperes_build_core']
-        cls.capabilities = {item['id'] for item in read(ROOT / 'source/grille-complexite.yaml')['blocs']}
+        cls.capabilities = {item['id'] for item in analysis()['blocs']}
 
     def test_one_nominal_effort_is_derived_without_market_price(self):
         enriched = enrich_market_products(self.raw, self.capabilities)
@@ -49,6 +50,7 @@ class MarketOSSStudyTests(unittest.TestCase):
     def test_invalid_scope_and_price_cannot_enter_market_reading(self):
         for mutate in (
             lambda x: x['etude_oss'].update(prix_observe_eur_ht=1),
+            lambda x: x['etude_oss']['perimetre'].update(bc_total=len(self.capabilities) - 1),
             lambda x: x['cadre_comparaison']['axes'][0]['bc_refs'].append('BC-074'),
             lambda x: x['etude_oss']['mesure']['composants']['insights']['v3'].update(pncloc=1),
             lambda x: x['etude_oss']['calcul_cocomo']['selections'].update(frappe='unknown'),

@@ -214,14 +214,19 @@ class StudyTests(unittest.TestCase):
 
     def test_complexity_grid_has_separate_reviewed_calibration(self):
         grid=self.study.content['complexity']
-        self.assertEqual(len(grid['rows']),88)
-        self.assertEqual(sum(len(r['fonctions']) for r in grid['rows']),258)
-        self.assertEqual(sum(len(r['variantes']) for r in grid['rows']),74)
-        self.assertEqual(len({r['hierarchie'][1]['id'] for r in grid['rows']}),9)
-        self.assertEqual(len({r['hierarchie'][2]['id'] for r in grid['rows']}),28)
+        from capability_catalog import analysis
+        blocks = {b['id']: b for b in analysis()['blocs']}
+        self.assertCountEqual([row['id'] for row in grid['rows']], blocks.keys())
+        for row in grid['rows']:
+            block = blocks[row['id']]
+            self.assertEqual(row['fonctions'], block['fonctions'])
+            self.assertEqual([v['id'] for v in row['variantes']], block['variantes_source'])
+            self.assertEqual([n['id'] for n in row['hierarchie']], block['chemin'][:3])
         self.assertTrue(all('calibration' not in r and 'complexite' not in r for r in grid['rows']))
         self.assertTrue(all(not stack['features'] for slug,stack in self.study.content['stacks'].items() if self.study.options[slug]['mode']=='Make'))
-        self.assertEqual(len(self.study.content['buy_review']['revues']),178)
+        reviews = self.study.content['buy_review']['revues']
+        self.assertCountEqual([(r['bloc'],r['stack']) for r in reviews if r['bloc'] in blocks],
+                              [(bc,stack) for bc in blocks for stack in ('microsoft','sap')])
         self.assertEqual(len(self.study.content['integration_paths']['scenarios']),43)
 
     def test_sponsor_summary_reconciles_all_horizons_with_service_and_remaining(self):
@@ -302,7 +307,7 @@ class StudyTests(unittest.TestCase):
     def test_essential_complexity_keeps_native_capabilities_and_ordinal_axes(self):
         compact=self.study.bootstrap(essential=True)['content']['complexity']
         grid=self.study.content['complexity']
-        self.assertEqual(len(compact['rows']),88)
+        self.assertEqual(len(compact['rows']),len(grid['rows']))
         self.assertFalse(compact['axes'])
         self.assertEqual([r['capacite_id'] for r in compact['rows']],[r['capacite_id'] for r in grid['rows']])
         for row in compact['rows']:

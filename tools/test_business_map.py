@@ -45,8 +45,12 @@ class BusinessMapTests(unittest.TestCase):
     def test_funding_instances_remain_distinct_from_reused_templates(self):
         m=self.study.content['business_map']
         self.assertFalse(m['funding'])
-        self.assertEqual(len(m['family_funding']),11)
-        self.assertEqual(sorted(len(f['beneficiaries']) for f in m['family_funding']),[0,0,2,3,6,8,8,10,13,18,20])
+        units = {u['id']: u for o in self.study.economic['options'] for u in o['core_units']}
+        families = {f['id']: f for f in m['family_funding']}
+        self.assertEqual(len(families), len(m['family_funding']))
+        self.assertEqual(families.keys(), units.keys())
+        for id, unit in units.items():
+            self.assertCountEqual(families[id]['beneficiaries'], [c['native_id'] for c in unit['capabilities']])
         for o in self.study.economic['options']:
             if o['stack'] not in ('java-spring','dotnet','rust'):continue
             family=sum(Decimal(str(f['cout_eur_ht'])) for f in m['family_funding'] if f['stack']==o['stack'])

@@ -1,4 +1,5 @@
 """Adoption of the full Java/Spring scope: preserved decisions, unique funding and portable proofs."""
+from capability_catalog import analysis
 from test_support import active_reference, adopted_effort
 from collections import Counter
 from copy import deepcopy
@@ -8,7 +9,7 @@ from validate_stacks import ROOT
 from model_context import model_session
 from estimation_inputs import registry,contract,load_proofs,validate_binding
 from estimation_preparation import prepare
-from estimation_calculation import calculate,formula,evaluate_rule
+from estimation_calculation import calculate,formula,evaluate_rule,rounded
 from estimation_components import unpack_archives
 from retained_core import validate
 from export_business_model import compose
@@ -19,43 +20,53 @@ class CompleteCoreAdoptionTests(unittest.TestCase):
  def setUpClass(cls):
   with model_session() as snapshot:
    cls.units=validate()['units'];cls.registry=registry();cls.docs=load_proofs(cls.registry)
-   cls.original_registry=cls.docs['audits/2026-11-02-adoption-revision-oss/basis.json']['registry']
-   cls.new=[u for u in cls.units if next(c for c in cls.original_registry['calculations'] if c['id']==u['calculation']['id'])['recipe']=='coherent_components_v1']
-   cls.results={u['id']:calculate(u['calculation']) for u in cls.new}
+   prior=cls.docs['audits/2026-11-02-adoption-revision-oss/basis.json']
+   cls.original_registry=prior['registry']
+   cls.original_specs={c['unit_id']:c for c in cls.original_registry['calculations'] if c['recipe']=='coherent_components_v1'}
+   cls.new=[u for u in prior['units'] if u['id'] in cls.original_specs]
+   cls.results={uid:prepare(cls.docs,spec,cls.original_registry,formula) for uid,spec in cls.original_specs.items()}
    cls.bundle=compose(snapshot.documents,snapshot.digests)
  def test_prior_decisions_contracts_and_native_input_are_unchanged(self):
   baseline=json.loads((ROOT/'audits/2026-10-30-core-adoption-09/baseline.json').read_text(encoding='utf-8'))
-  self.assertEqual(adopted_effort(self.units[1]),adopted_effort(baseline['units'][1]))
-  self.assertEqual(self.units[0]['capabilities'],baseline['units'][0]['capabilities'])
-  self.assertEqual(self.units[2]['capabilities'],baseline['units'][2]['capabilities'])
-  self.assertEqual(self.registry['calculations'][1],baseline['calculations'][1])
-  for p in ('source/referentiel-capacites.yaml','source/analyse-perimetre-core.yaml','sources/cartographie-scm-2026-10-24.yaml'):
-   self.assertEqual(hashlib.sha256((ROOT/p).read_bytes()).hexdigest(),baseline['source_hashes'][p])
+  previous={u['id']:u for u in baseline['units']}
+  current={u['id']:u for u in self.units}
+  self.assertEqual(adopted_effort(current['stock-java-spring']),adopted_effort(previous['stock-java-spring']))
+  self.assertEqual(current['inventory-ownership-java-spring']['capabilities'],previous['inventory-ownership-java-spring']['capabilities'])
+  historical=next(u for u in self.docs['audits/2026-11-02-adoption-quatre-lots/basis.json']['units']
+                  if u['id']=='master-data-java-spring')
+  self.assertEqual(historical['capabilities'],previous['master-data-java-spring']['capabilities'])
+  stock=lambda entries:next(c for c in entries if c['unit_id']=='stock-java-spring')
+  self.assertEqual(stock(self.registry['calculations']),stock(baseline['calculations']))
+  original='sources/cartographie-scm-2026-10-24.yaml'
+  self.assertEqual(hashlib.sha256((ROOT/original).read_bytes()).hexdigest(),baseline['source_hashes'][original])
  def test_global_roles_coverage_and_valuation_reconcile_without_common_surcharge(self):
-  self.assertEqual(len(self.units),11);self.assertEqual(len(self.new),5)
-  self.assertEqual(sum(u['total_jh'] for u in self.units),active_reference()['total_jh'])
-  self.assertEqual(sum(u['total_jh'] for u in self.new),sum(active_reference()['units'][u['id']]['jh'] for u in self.new))
-  caps=[c['id'] for u in self.units for c in u['capabilities']]
-  self.assertEqual(len(caps),len(set(caps)));self.assertEqual(set(caps),{f'BC-{n:03}' for n in range(1,89)})
+  reference=active_reference()
+  self.assertCountEqual([u['id'] for u in self.units],reference['units'].keys())
+  self.assertEqual(len(self.new),5)
+  self.assertEqual(sum(u['total_jh'] for u in self.units),reference['total_jh'])
+  blocks=[b['id'] for b in analysis()['blocs']]
+  self.assertCountEqual([c['id'] for u in self.units for c in u['capabilities']],blocks)
   totals=Counter()
   for u in self.units:
    totals.update({r['id']:r['jh'] for r in u['roles']})
   self.assertEqual(totals,active_reference()['role_totals'])
   study=study_copy();java=next(x for x in study._essential_core_evaluation() if x['stack']=='java-spring')
   self.assertEqual(java['estimation_status'],'fully_estimated')
-  self.assertEqual((java['coverage']['covered'],java['coverage']['remaining']),(88,0))
+  self.assertEqual((java['coverage']['covered'],java['coverage']['remaining']),(len(blocks),0))
   economic=study.content['stacks']['java-spring']['economic']
   self.assertEqual(economic['detail_build'],dict(prestations=active_reference()['cost_eur_ht'],pilotage=0))
   for u in self.new:
    result=self.results[u['id']]
    self.assertTrue(result['trace']['no_common_280_added'])
+   allocation=result['allocation']
+   anchor=next(r for r in result['rows'] if r['id']==allocation['selected_reference'])
+   self.assertEqual(rounded(anchor['jh'],allocation['rounding_jh']),u['total_jh'])
    self.assertEqual(sum(p['jh'] for p in result['trace']['component_allocations']),u['total_jh'])
-   self.assertEqual((u['total_jh'],u['months']),(result['total_jh'],result['months']))
-   self.assertEqual(result['consolidation']['schedule_aggregation'],'none')
+  self.assertEqual(self.original_registry['consolidation']['schedule_aggregation'],'none')
  def test_initial_payload_keeps_summaries_and_calculations_keep_proofs_isolated(self):
   from estimation_inputs import _frozen_calculation_proofs,digest
   study=study_copy();summary=next(r for r in study.bootstrap(essential=True)['content']['core_evaluation'] if r['stack']=='java-spring')
-  self.assertEqual(len(summary['units']),11)
+  self.assertCountEqual([u['id'] for u in summary['units']],active_reference()['units'].keys())
   self.assertTrue(all(set(u)=={'id','label','total_jh','months','capabilities'} for u in summary['units']))
   self.assertEqual(sum(u['total_jh'] for u in summary['units']),active_reference()['total_jh'])
   self.assertTrue(all('alignment' in u for u in study._essential_core_evaluation()[0]['units']))
@@ -69,11 +80,12 @@ class CompleteCoreAdoptionTests(unittest.TestCase):
   funded=Counter(x['mechanism'] for c in self.registry['calculations'] for x in c['funding_claims'] if x['mode']=='funded')
   new=[m for m in self.registry['mechanisms'] if m['id'].startswith('flow-')]
   self.assertEqual(len(new),70);self.assertTrue(all(funded[m['id']]==1 for m in new))
-  for u in self.new:
-   clone=deepcopy(u);clone['calculation']=self.new[0]['calculation'] if u!=self.new[0] else self.new[1]['calculation']
+  for u in self.units:
+   clone=deepcopy(u);clone['calculation']=self.units[0]['calculation'] if u!=self.units[0] else self.units[1]['calculation']
    with self.assertRaisesRegex(ValueError,'does not belong'):validate_binding(clone)
- def test_all_six_calculations_reconstruct_from_download_without_disk(self):
-  bundle=self.bundle;reg=bundle['model']['source/calculs-estimation-core.yaml']
+ def test_archived_calculations_reconstruct_from_download_without_disk(self):
+  bundle=self.bundle
+  reg=bundle['evidence']['audits/2026-11-02-adoption-revision-oss/basis.json']['registry']
   rules={x['id']:x for x in bundle['metamodel']['estimation_model']['rules']}
   for u in self.new:
    spec=next(c for c in reg['calculations'] if c['id']==u['calculation']['id'])
@@ -81,8 +93,8 @@ class CompleteCoreAdoptionTests(unittest.TestCase):
     p=prepare(bundle['evidence'],spec,reg,lambda id,**v:evaluate_rule(rules[id],**v))
    expected=self.results[u['id']]
    self.assertEqual(p['trace']['CFP'],expected['trace']['CFP'])
-   self.assertEqual(len(p['rows']),len(expected['alignment']['rows']))
-   for row,retained in zip(p['rows'],expected['alignment']['rows']):
+   self.assertEqual(len(p['rows']),len(expected['rows']))
+   for row,retained in zip(p['rows'],expected['rows']):
     self.assertAlmostEqual(row['jh'],retained['jh'])
     self.assertAlmostEqual(row['common_jh']+row['complements_jh'],row['jh'])
  def test_archives_preserve_original_bytes_and_integrity(self):
@@ -104,7 +116,7 @@ class CompleteCoreAdoptionTests(unittest.TestCase):
    docs=deepcopy(self.docs);archive=docs[spec['inputs']['archives']];entry=archive['documents']['proposal_inputs']
    inputs=json.loads(gzip.decompress(base64.b64decode(entry['data'])));mutate(inputs)
    raw=json.dumps(inputs,ensure_ascii=False).encode();entry.update(sha256=hashlib.sha256(raw).hexdigest(),data=base64.b64encode(gzip.compress(raw,mtime=0)).decode())
-   with model_session(),self.assertRaises(ValueError):prepare(docs,spec,self.registry,formula)
+   with model_session(),self.assertRaises(ValueError):prepare(docs,spec,self.original_registry,formula)
  def test_bad_functional_boundary_or_reuse_is_rejected(self):
   spec=next(c for c in self.original_registry['calculations'] if c['id']==self.new[0]['calculation']['id'])
   for key,mutate in (
@@ -115,6 +127,6 @@ class CompleteCoreAdoptionTests(unittest.TestCase):
    ('specification',lambda d:d.update(group_id='orders')),
   ):
    docs=deepcopy(self.docs);mutate(docs[spec['inputs'][key]])
-   with model_session(),self.assertRaises(ValueError):prepare(docs,spec,self.registry,formula)
+   with model_session(),self.assertRaises(ValueError):prepare(docs,spec,self.original_registry,formula)
 
 if __name__=='__main__':unittest.main()

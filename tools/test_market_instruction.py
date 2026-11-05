@@ -2,6 +2,7 @@
 from copy import deepcopy
 import unittest
 
+from capability_catalog import analysis
 from market_instruction import build_market_instruction, SOURCE
 from market_oss import enrich_market_products
 from validate_stacks import ROOT, read
@@ -11,7 +12,7 @@ class MarketInstructionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.market = read(ROOT / 'source/references-couts-integration.yaml')
-        cls.grid = read(ROOT / 'source/grille-complexite.yaml')
+        cls.grid = analysis()
         cls.source = read(ROOT / SOURCE)
 
     def record(self):
@@ -37,17 +38,25 @@ class MarketInstructionTests(unittest.TestCase):
         instruction['qualifications'] = []
         matrix = build_market_instruction(self.market, grid=self.grid, instruction=instruction)
         self.assertEqual(self.market, before)
-        self.assertEqual(matrix['summary']['pairs'], 84 * 6)
-        self.assertEqual(matrix['summary']['pairs_by_status'], dict(non_etudie=354, reperes_axes=150, qualification_detaillee=0))
+        frame = self.market['reperes_build_core']
+        excluded = set(frame['etude_oss']['perimetre']['bc_exclus'])
+        capabilities = {b['capacite_id'] for b in self.grid['blocs'] if b['id'] not in excluded}
+        products = set(frame['fiches_produit'])
+        observed = {bc for axis in frame['cadre_comparaison']['axes'] for bc in axis['bc_refs']}
+        self.assertEqual(matrix['summary']['pairs'], len(capabilities) * len(products))
+        self.assertEqual(matrix['summary']['pairs_by_status'],
+                         dict(non_etudie=(len(capabilities)-len(observed))*len(products),
+                              reperes_axes=len(observed)*len(products), qualification_detaillee=0))
         self.assertEqual(matrix['summary']['retained_qualifications'], 0)
-        self.assertEqual(len({(row['capability_ref'], row['product_ref']) for row in matrix['rows']}), 504)
+        self.assertEqual({(row['capability_ref'], row['product_ref']) for row in matrix['rows']},
+                         {(capability, product) for capability in capabilities for product in products})
         for row in matrix['rows']:
             self.assertEqual(row['functional_status'], 'non_qualifie')
             self.assertTrue(row['pending_need_refs'])
             self.assertNotIn(row['bc_ref'], {'BC-016', 'BC-017', 'BC-074', 'BC-075'})
             self.assertEqual(bool(row['observation_refs']), row['status'] == 'reperes_axes')
         for progress in matrix['progress']:
-            self.assertEqual((progress['non_etudie'], progress['reperes_axes'], progress['qualification_detaillee']), (59, 25, 0))
+            self.assertEqual((progress['non_etudie'], progress['reperes_axes'], progress['qualification_detaillee']), (len(capabilities) - len(observed), len(observed), 0))
 
     def test_precise_qualification_keeps_gaps_and_does_not_claim_whole_capability(self):
         instruction = deepcopy(self.source)

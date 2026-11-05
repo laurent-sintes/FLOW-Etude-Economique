@@ -75,8 +75,11 @@ class OSSRevisionTests(unittest.TestCase):
         self.assertEqual(self.docs['audits/2026-11-01-proposition-references-oss/results.json']['status'],'proposal_not_adopted')
         old=self.docs['audits/2026-11-02-adoption-revision-oss/basis.json']
         current={u['id']:u for u in s.economic['options'][0]['core_units']}
+        prior_scope=self.docs['audits/2026-11-05-adoption-master-data-scm/basis.json']
+        prior={u['id']:u for u in prior_scope['units']}
         for u in old['units']:
-            if u['id'] in ('stock-java-spring',):
+            if u['id']=='stock-java-spring':
                 self.assertEqual(current[u['id']]['total_jh'],u['total_jh'])
-            self.assertEqual(current[u['id']]['capabilities'],u['capabilities'])
+            preserved=prior if u['id']=='master-data-java-spring' else current
+            self.assertEqual(preserved[u['id']]['capabilities'],u['capabilities'])
 if __name__=='__main__':unittest.main()

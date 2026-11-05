@@ -1,6 +1,7 @@
 """Adopted Ownership: independent funding, pure reconstruction, temporal count and export."""
 from test_support import active_reference, adopted_effort
 from copy import deepcopy
+from capability_catalog import analysis
 import hashlib,json
 import unittest
 from unittest.mock import patch
@@ -27,13 +28,17 @@ class OwnershipAdoptionTests(unittest.TestCase):
   with model_session():return prepare(docs,self.spec,self.prior_registry,formula)
  def test_adopted_roles_schedule_and_prior_families(self):
   before=json.loads((ROOT/'audits/2026-10-30-propriete-stock-adoption-05/baseline.json').read_text(encoding='utf-8'))
-  self.assertEqual(adopted_effort(self.units[1]),adopted_effort(before['retained_units'][1]))
-  self.assertEqual(self.units[0]['capabilities'],before['retained_units'][0]['capabilities'])
+  stock=next(u for u in self.units if u['id']=='stock-java-spring')
+  previous={u['id']:u for u in before['retained_units']}
+  self.assertEqual(adopted_effort(stock),adopted_effort(previous['stock-java-spring']))
+  prior=self.docs['audits/2026-11-02-adoption-quatre-lots/basis.json']['units']
+  historical=next(u for u in prior if u['id']=='master-data-java-spring')
+  self.assertEqual(historical['capabilities'],previous['master-data-java-spring']['capabilities'])
   self.assertEqual((self.result['total_jh'],self.result['months']),(190,9))
   self.assertEqual(self.result['roles'],dict(coordination=22,analyse_produit=19,architecture=17,dev_java=70,dev_frontend=11,qa=27,plateforme=16,ux=4,securite=4))
   self.assertAlmostEqual(self.result['unrounded_months'],8.674090564782492)
-  for p in ('source/referentiel-capacites.yaml','sources/cartographie-scm-2026-10-24.yaml'):
-   self.assertEqual(hashlib.sha256((ROOT/p).read_bytes()).hexdigest(),before['file_hashes'][p])
+  source='sources/cartographie-scm-2026-10-24.yaml'
+  self.assertEqual(hashlib.sha256((ROOT/source).read_bytes()).hexdigest(),before['file_hashes'][source])
  def test_native_new_sizes_and_COSMIC_reconstructed(self):
   p=self.prepared()
   for row in p['rows']:
@@ -65,7 +70,7 @@ class OwnershipAdoptionTests(unittest.TestCase):
   self.assertEqual(len([m for m in family['funding'] if m['funding_mode']=='funded']),6)
   self.assertIsNone(family['uncertainty']['confidence_level'])
   coverage=next(r for r in study._essential_core_evaluation() if r['stack']=='java-spring')['coverage']
-  self.assertEqual((coverage['covered'],coverage['remaining']),(88,0))
+  self.assertEqual((coverage['covered'],coverage['remaining']),(len(analysis()['blocs']),0))
  def test_funding_and_cross_family_binding_rejected(self):
   doc=registry();own=next(c for c in doc['calculations'] if c['id']==self.spec['id'])
   next(c for c in own['funding_claims'] if c['mode']=='consumed')['mode']='funded'
