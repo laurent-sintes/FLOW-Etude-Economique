@@ -1,0 +1,312 @@
+type: object
+additionalProperties: false
+required:
+- version
+- id
+- status
+- date
+- work_unit_ref
+- option_ref
+- phase_ref
+- capture
+- baseline
+- svg_ref
+- groups
+- packages
+- assumptions
+- unknowns
+- evidence_refs
+- impacts
+- crosswalk
+- lots
+properties:
+  version:
+    const: 1
+  id:
+    type: string
+    minLength: 1
+  status:
+    enum:
+    - proposal
+    - adopted
+  date:
+    type: string
+    minLength: 1
+  work_unit_ref:
+    type: string
+    minLength: 1
+  option_ref:
+    type: string
+    minLength: 1
+  phase_ref:
+    type: string
+    minLength: 1
+  capture:
+    type: object
+    additionalProperties: false
+    required:
+    - path
+    - sha256
+    - origin
+    - as_of
+    properties:
+      path:
+        type: string
+        minLength: 1
+      sha256:
+        type: string
+        minLength: 1
+      origin:
+        type: string
+        minLength: 1
+      as_of:
+        type: string
+        minLength: 1
+  baseline:
+    type: object
+    additionalProperties: false
+    required:
+    - path
+    - unit_ref
+    - proof
+    - sha256
+    - scope
+    properties:
+      path:
+        type: string
+        minLength: 1
+      unit_ref:
+        type: string
+        minLength: 1
+      proof:
+        type: string
+        minLength: 1
+      sha256:
+        type: string
+        minLength: 1
+      scope:
+        type: object
+        additionalProperties: false
+        required:
+        - path
+        - sha256
+        properties:
+          path:
+            type: string
+            minLength: 1
+          sha256:
+            type: string
+            minLength: 1
+  svg_ref:
+    type: string
+    minLength: 1
+  groups:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - label
+      properties:
+        id:
+          type: string
+          minLength: 1
+        label:
+          type: string
+          minLength: 1
+  packages:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - group
+      - label
+      - jh
+      - capability_refs
+      - deliverable
+      - acceptance
+      - estimate_kind
+      properties:
+        id:
+          type: string
+          minLength: 1
+        group:
+          type: string
+          minLength: 1
+        label:
+          type: string
+          minLength: 1
+        jh:
+          type: number
+          minimum: 0
+        capability_refs:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        deliverable:
+          type: string
+          minLength: 1
+        acceptance:
+          type: string
+          minLength: 1
+        estimate_kind:
+          type: string
+          minLength: 1
+    minItems: 1
+  assumptions:
+    type: array
+    items:
+      type: string
+      minLength: 1
+  unknowns:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - label
+      - value
+      properties:
+        id:
+          type: string
+          minLength: 1
+        label:
+          type: string
+          minLength: 1
+        value:
+          type: 'null'
+  evidence_refs:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - url
+      - label
+      - use
+      properties:
+        url:
+          type: string
+          minLength: 1
+        label:
+          type: string
+          minLength: 1
+        use:
+          type: string
+          minLength: 1
+  impacts:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - phase
+      - area
+      - effect
+      - status
+      - extra_jh
+      - extra_eur_ht
+      - owner_refs
+      properties:
+        id:
+          type: string
+          minLength: 1
+        phase:
+          type: string
+          minLength: 1
+        area:
+          type: string
+          minLength: 1
+        effect:
+          type: string
+          minLength: 1
+        status:
+          type: string
+          minLength: 1
+        extra_jh:
+          type: 'null'
+        extra_eur_ht:
+          type: 'null'
+        owner_refs:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
+  crosswalk:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - baseline_package
+      - target_packages
+      properties:
+        baseline_package:
+          type: string
+          minLength: 1
+        target_packages:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+  lots:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - group_refs
+      properties:
+        id:
+          type: string
+          minLength: 1
+        group_refs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+  adoption:
+    type: object
+    additionalProperties: false
+    required:
+    - decision_ref
+    - baseline_ref
+    properties:
+      decision_ref: &id001
+        type: object
+        additionalProperties: false
+        required:
+        - path
+        - sha256
+        properties:
+          path:
+            type: string
+            minLength: 1
+          sha256:
+            type: string
+            minLength: 1
+      baseline_ref: *id001
+$schema: https://json-schema.org/draft/2020-12/schema
+allOf:
+- if:
+    properties:
+      status:
+        const: adopted
+  then:
+    required:
+    - adoption

@@ -34,8 +34,8 @@ class FundamentalsTests(unittest.TestCase):
         view = hydrate_fundamentals(self.ui, model)['essential']['model_map']
         sales = next(d for s in view['systems'] for d in s['domains'] if d['id'] == 'domain-sales')
         self.assertEqual(sales['label'], 'Commerce renommé à la source')
-        self.assertEqual(len(model['native_map']['nodes']), 16)
-        self.assertEqual(len(model['native_map']['relations']), 12)
+        self.assertEqual(len(model['native_map']['nodes']), 17)
+        self.assertEqual(len(model['native_map']['relations']), 13)
         self.assertTrue(all(r['type'] == 'presents' for r in model['native_map']['relations']))
         self.assertTrue(all('label' not in s for s in self.document['business_map']['systems']))
         self.assertEqual(next(s['id'] for s in view['systems'] if s.get('program_scope')),
@@ -57,7 +57,7 @@ class FundamentalsTests(unittest.TestCase):
         def missing_system(d): d['business_map']['systems'][0]['node_ref'] = 'missing'
         def missing_relation(d): d['business_map']['systems'][0]['domain_relation_refs'][0] = 'missing'
         def bad_scope(d): d['business_map']['outside_scope'].append('system-business-operations')
-        def bad_position(d): d['business_map']['positioning']['domain_ref'] = 'domain-finance'
+        def bad_position(d): d['business_map']['positioning']['domain_refs'] = ['domain-finance']
         def wrong_workload_direction(d): d['estimation']['relations'][0]['source_ref'] = 'net'
         def missing_workload_stage(d): d['estimation']['relations'][1]['target_ref'] = 'missing'
         def current_application_status(d): d['estimation']['status_ref'] = 'core'

@@ -147,7 +147,17 @@ def validate_binding(unit, document=None):
     c, doc = contract(unit['calculation'], document)
     require((unit['id'], unit['stack'], unit['capabilities']) ==
             (c['unit_id'], c['stack'], c['scope']['capabilities']), 'Calculation does not belong to this unit, stack or capability scope')
-    require(c['scope']['native_source'] == read(ROOT / 'source/referentiel-capacites.yaml'), 'Native scope version changed')
+    current=read(ROOT/'source/referentiel-capacites.yaml')
+    if c['scope']['native_source'] != current:
+        # An unchanged calculation keeps its immutable input version. Compatibility
+        # still requires its exact interpretation and every native path below.
+        source=c['scope']['native_source'];path=(ROOT/source['source']).resolve()
+        require(path.is_relative_to(ROOT.resolve()) and path.is_file(),'Invalid historical native source')
+        require(hashlib.sha256(path.read_bytes()).hexdigest()==source['sha256'],'Historical native source changed')
+        prior=read(path);require(source['version']==1 and prior['domaine_id']==source['domain_id'],'Historical native version mismatch');old_edges={(r['source_id'],r['target_id']) for r in prior['relations']}
+        old_caps={n['id'] for n in prior['nodes'] if n['kind']=='capability'}
+        require(all(x['native_id'] in old_caps for x in unit['capabilities']),'Historical capability binding changed')
+        require(all(all(pair in old_edges for pair in zip(b['chemin'],b['chemin'][1:])) for b in analysis()['blocs'] if b['id'] in {x['id'] for x in unit['capabilities']}),'Historical native path changed')
     selected = [b for b in analysis()['blocs'] if b['id'] in {x['id'] for x in unit['capabilities']}]
     nodes = native_kinds()
     scope = c['scope']

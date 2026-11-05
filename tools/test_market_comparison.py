@@ -18,21 +18,22 @@ class MarketComparisonTests(unittest.TestCase):
   return build_market_comparison(self.market if market is None else market,spec=self.spec if spec is None else spec,snapshot=self.snapshot,grid=self.grid,mechanisms=self.mechanisms,retained=self.retained)
  def test_native_matrix_exclusions_and_unknowns_are_preserved(self):
   original=deepcopy(self.spec);c=self.build();self.assertEqual(self.spec,original)
-  self.assertEqual(c['summary']['compared_capabilities'],84);self.assertEqual(c['summary']['compared_business_areas'],27)
-  pairs={(r['id'],s['product_ref']) for r in c['rows'] for s in r['cells']};self.assertEqual(len(pairs),28*6)
+  self.assertEqual(c['summary']['compared_capabilities'],112);self.assertEqual(c['summary']['compared_business_areas'],43)
+  pairs={(r['id'],s['product_ref']) for r in c['rows'] for s in r['cells']};self.assertEqual(len(pairs),49*6)
   nodes={n['id']:n for n in self.snapshot['nodes']}
   for r in c['rows']:
    self.assertEqual(r['name'],nodes[r['id']]['fields']['name'])
    self.assertEqual({x['id'] for x in r['capabilities']},{b['capacite_id'] for b in self.grid['blocs'] if b['chemin'][-2]==r['id']})
-  excluded=[r for r in c['rows'] if not r['included']];self.assertEqual(len(excluded),1)
-  self.assertTrue(all(x['reading_status']=='hors_perimetre' for x in excluded[0]['cells']))
+  excluded=[r for r in c['rows'] if not r['included']];self.assertEqual(len(excluded),6)
+  self.assertTrue(all(x['reading_status']=='hors_perimetre' for row in excluded for x in row['cells']))
   self.assertTrue(all(x['complete_ba_coverage'] is None for r in c['rows'] for x in r['cells']))
  def test_hierarchy_is_native_and_documentary_comparison_excludes_estimates(self):
   c=self.build();nodes={n['id']:n for n in self.snapshot['nodes']}
   for row in c['rows']:
-   block=next(b for b in self.grid['blocs'] if b['chemin'][-2]==row['id'])
-   self.assertEqual([n['id'] for n in row['hierarchy']],block['chemin'][:-2])
-   self.assertEqual([n['name'] for n in row['hierarchy']],[nodes[k]['fields']['name'] for k in block['chemin'][:-2]])
+   parents={r['target_id']:r['source_id'] for r in self.snapshot['relations'] if r['type'] in {'presents','contains'} and nodes[r['source_id']]['kind'] in {'domain','area'} and nodes[r['target_id']]['kind'] in {'area','business_area'}}
+   parent=parents[row['id']];path=[parents[parent],parent]
+   self.assertEqual([n['id'] for n in row['hierarchy']],path)
+   self.assertEqual([n['name'] for n in row['hierarchy']],[nodes[k]['fields']['name'] for k in path])
   market=deepcopy(self.market);market['comparison']=c
   shown=build_market_reading(market)['documentary_comparison']
   self.assertNotIn('summary',shown);self.assertNotIn('budget_review',shown)

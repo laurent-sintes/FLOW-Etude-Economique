@@ -1,4 +1,5 @@
 """HTTP checks isolated from economic and editorial tests."""
+from copy import deepcopy
 from test_support import study_copy
 from http.server import ThreadingHTTPServer
 from threading import Thread
@@ -77,17 +78,25 @@ class ApiTests(unittest.TestCase):
         self.assertIsNone(h.get('Content-Encoding'));self.assertEqual(refused,light)
         self.assertLess(len(packed),len(light)/2)
         small=json.loads(light);full=json.loads(get('/api/bootstrap')[0])
-        self.assertEqual(set(small['content']),{'complexity','framework','market_method','core_evaluation','synvance_reference','delivery_method','delivery_readiness','core_product_scope','downloads'})
+        self.assertEqual(set(small['content']),{'complexity','framework','market_method','core_evaluation','synvance_reference','delivery_method','delivery_readiness','core_product_scope','downloads','framework_graph','delivery_organisation'})
+        self.assertTrue(small['content']['delivery_organisation']['deferred'])
+        self.assertNotIn('work_catalog',small['content']['delivery_organisation'])
+        reading=json.loads(get('/api/organisation-model?model_version='+self.study.version)[0])
+        self.assertEqual(reading,self.study.organisation_reading())
+        with self.assertRaises(HTTPError) as stale:urlopen(self.url+'/api/organisation-model?model_version=obsolete')
+        self.assertEqual(stale.exception.code,409)
         rates=self.study.project_rate_reading()
         self.assertTrue(rates.keys().isdisjoint(small['content']['framework']))
         self.assertEqual({key:full['content']['framework'][key] for key in rates},rates)
         self.assertEqual(json.loads(get('/api/project-rates?model_version='+self.study.version)[0]),rates)
-        self.assertEqual(len(small['content']['complexity']['rows']),88)
+        self.assertEqual(len(small['content']['complexity']['rows']),len(self.study.content['business_map']['rows']))
         self.assertEqual(len(small['content']['core_evaluation']),5)
         self.assertEqual(small['content']['core_product_scope'],full['content']['core_product_scope'])
         self.assertEqual(small['content']['core_product_scope']['proposal']['status'],'retained')
-        for key in ('delivery_method','delivery_readiness'):
-            self.assertEqual(small['content'][key],full['content'][key])
+        self.assertEqual(small['content']['delivery_method'],full['content']['delivery_method'])
+        expected=deepcopy(full['content']['delivery_readiness'])
+        expected['scope']['rows']=[{key:row[key] for key in ('id','capability_id','name','href')} for row in expected['scope']['rows']]
+        self.assertEqual(small['content']['delivery_readiness'],expected)
         self.assertEqual([row['capability_id'] for row in small['content']['delivery_readiness']['scope']['rows']],
                          [row['capacite_id'] for row in small['content']['complexity']['rows']])
         for key in small:

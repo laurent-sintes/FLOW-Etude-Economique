@@ -1,0 +1,136 @@
+{
+  "version": 1,
+  "repo": "unidata",
+  "measurements_sha256": "965a206d6c583d96cc76477e9ba9a27cbd96e32a56c5f28f194480184e033487",
+  "exclusions": [
+    {
+      "id": "legacy-model-xml",
+      "label": "Import direct du modèle XML historique d’Unidata",
+      "boundary": "Le second assistant charge un fichier XML au format du métamodèle Unidata. FLOW définit son propre modèle et son déploiement ne prévoit aucune reprise de ce format.",
+      "preserved": "Le paramétrage des modèles, les versions de schéma et l’ingestion des données métier restent dans le calcul.",
+      "files": [
+        {
+          "path": "frontend/app/view/admin/entity/wizard/step/oldmodelimport/UploadFileStep.js",
+          "sha256": "0c31965ddf70f167a3e06bc0f0d2745bfca644df1502f1beb599d247e2022a77"
+        },
+        {
+          "path": "backend/src/main/java/com/unidata/mdm/backend/api/rest/MetaModelRestService.java",
+          "sha256": "5a930ce71ed93aa1a5655f62bbe3e4fe7ffe682e8c4eb970ff2d29f8dda32036",
+          "segments": [
+            {
+              "symbol": "importModel",
+              "start_byte": 10677,
+              "end_byte": 13658,
+              "start_line": 283,
+              "end_line": 336,
+              "sha256": "bafda28f575cd77606634a286e50151967b412e941acbe9adb0566a90b31efbd",
+              "program_units": 20
+            },
+            {
+              "symbol": "enrichDefaultFunctions",
+              "start_byte": 13881,
+              "end_byte": 14845,
+              "start_line": 345,
+              "end_line": 363,
+              "sha256": "dcd6809568107db1105c00a4830cf91d80ba0e20aff0cd76a7ee9cd12a451c16",
+              "program_units": 13
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shared-process",
+      "label": "Gestion générique des tâches et déploiement BPMN d’Unidata",
+      "boundary": "Le lot Process Management fournit l’affectation générique des tâches, le portail et la gestion des définitions de processus. La proposition retire l’affectation et la désaffectation Activiti, le rendu PNG des processus et le déploiement et l’export des fichiers BPMN d’Unidata.",
+      "preserved": "Les décisions MDM, l’autorité de certification, les déclenchements liés aux fiches et la liaison aux tâches restent dans le calcul.",
+      "files": [
+        {
+          "path": "backend/src/main/java/com/unidata/mdm/backend/service/wf/impl/WorkflowServiceImpl.java",
+          "sha256": "1fae1bc2fd417517297868777d8b8802ab293f03df77cbb3ab80cad894e87187",
+          "segments": [
+            {
+              "symbol": "deployProcess",
+              "start_byte": 10047,
+              "end_byte": 10289,
+              "start_line": 262,
+              "end_line": 268,
+              "sha256": "618af9717687457698d363d6091b529b468f9049c633cca1f5b23749872725e9",
+              "program_units": 2
+            },
+            {
+              "symbol": "assign",
+              "start_byte": 29147,
+              "end_byte": 30139,
+              "start_line": 668,
+              "end_line": 686,
+              "sha256": "b53b2ded609843e09f646841e7358bfe9f0dbff1b255705a6ed872627b182c28",
+              "program_units": 14
+            },
+            {
+              "symbol": "unassign",
+              "start_byte": 30317,
+              "end_byte": 31302,
+              "start_line": 691,
+              "end_line": 709,
+              "sha256": "1ced6904c22e3cda1a8413bdabd71a2b55f4c40a21ec5fb7bec3a34910b1f5b4",
+              "program_units": 14
+            },
+            {
+              "symbol": "generateDiagram",
+              "start_byte": 59361,
+              "end_byte": 61740,
+              "start_line": 1415,
+              "end_line": 1465,
+              "sha256": "645c6ac0c06424be74115059a43aa99a3b39e474f68977379377a27d7dc82844",
+              "program_units": 24
+            }
+          ]
+        },
+        {
+          "path": "backend/src/main/java/com/unidata/mdm/backend/service/model/ie/MetaIEServiceImpl.java",
+          "sha256": "31486515af30527583c5c9d540e531abb01d06a6c65c00db4e845e8afe0ba775",
+          "segments": [
+            {
+              "symbol": "exportBPM",
+              "start_byte": 68011,
+              "end_byte": 69099,
+              "start_line": 1518,
+              "end_line": 1541,
+              "sha256": "fcf2e1ec0536e03f9be6936c3b6c12fc48610ca2d0386cc1b48f6c52cbceeffe",
+              "program_units": 14
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "retained": [
+    {
+      "label": "Modèles, règles et sources",
+      "detail": "Administration des familles, attributs, relations, classifications, règles de qualité et systèmes sources."
+    },
+    {
+      "label": "Recherche et gestion des fiches",
+      "detail": "Consultation et saisie, données sources et consolidées, enrichissement, relations, historique et dates d’effet."
+    },
+    {
+      "label": "Qualité et rapprochement",
+      "detail": "Contrôles, configuration des règles de rapprochement, examen des doublons, fusion, séparation et correction à la source."
+    },
+    {
+      "label": "Certification et publication",
+      "detail": "Décisions, retraits, habilitations, abonnements, suivi des livraisons et reprises. Les compléments spécifiques à FLOW sont conservés."
+    }
+  ],
+  "open_questions": [
+    {
+      "label": "Import et export de fiches Excel",
+      "detail": "Les assistants et services XLSX restent dans le calcul. Les formats d’échange et le besoin d’un parcours manuel restent à préciser."
+    },
+    {
+      "label": "Étendue des écrans de configuration",
+      "detail": "L’éditeur de schémas, les formulaires, les traitements en masse et la visualisation des relations restent mesurés. Le nombre et le niveau de paramétrage des écrans FLOW restent à préciser."
+    }
+  ]
+}

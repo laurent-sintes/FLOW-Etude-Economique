@@ -9,6 +9,9 @@ from validation_reporting import test_ids
 from validate_stacks import ROOT
 
 ALGORITHM_CHECKS = {
+ 'mdm_oss_size_projection': 'test_mdm_oss_estimation.MdmOssTests.test_pinned_measurements_and_conditional_estimate_reconcile',
+ 'domain_cost_partition': 'test_domain_costs.DomainCostTests.test_domain_totals_conserve_and_shared_remains_pending',
+ 'scope_revision_replacement': 'test_scope_revision.ScopeRevisionTests.test_replacement_conserves_retained_decisions',
  'working_team_consolidation': 'test_team_consolidation.TeamConsolidationTests.test_matrix_detail_conservation_and_immutable_reference',
  'common_work_estimation_contract': 'test_work_estimation.WorkEstimationTests.test_all_phases_reconcile_sources_without_adopting_proposals',
  'generic_work_contribution_conservation': 'test_work_units.WorkUnitTests.test_role_shares_preserve_effort_rates_costs_and_remainder',

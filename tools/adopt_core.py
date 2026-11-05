@@ -37,6 +37,7 @@ def validate_proposal(doc,study,registry,documents):
     allocations={a['unit_id']:a for a in read(ROOT/'source/fonctions-produit-core.yaml')['allocations']}
     known=set()
     for c in registry['calculations']:
+        if c['recipe']=='native_scope_adoption_v1':known.add(documents[c['inputs']['revision_proposal']]['revision']['id'])
         if c['recipe']=='work_package_adoption_v1':known.update(documents[c['inputs']['revision_proposal']]['scenario_ids'])
     require(bool(doc['units']) and len({u['id'] for u in doc['units']})==len(doc['units']),'Duplicate or empty proposed units')
     ids=set()
@@ -186,7 +187,11 @@ def prepare_adoption(proposal,note):
     with model_session() as snapshot:
         study=Study();timings['load']=time.perf_counter()-started
         registry=read(ROOT/SOURCES[1]);documents=_frozen_calculation_proofs(registry)
-        changes,summary=(project_contracts if proposal.get('method')=='prepared_contracts' else project)(proposal,study,registry,documents,note)
+        if proposal.get('method')=='native_scope_adoption':
+            from scope_adoption import project_scope
+            changes,summary=project_scope(proposal,study,registry,documents,note)
+        else:
+            changes,summary=(project_contracts if proposal.get('method')=='prepared_contracts' else project)(proposal,study,registry,documents,note)
         if changes is None:return dict(status='no_change',summary=summary,timings=timings)
         refresh_reading(changes)
         timings['projection']=time.perf_counter()-started-timings['load']
@@ -207,7 +212,9 @@ def prepare_adoption(proposal,note):
     parameters=deepcopy(validated['baseline']['parameters']);parameters['options']['java-spring']['build']=before_record['parameters']['options']['java-spring']['build']
     require(parameters==before_record['parameters'],'Adoption changes parameters other than construction')
     previous_units=describe(study)['units']
-    require({k:v['rates'] for k,v in validated['summary']['units'].items()}=={k:v['rates'] for k,v in previous_units.items()},'Adoption changes project rates')
+    require(all(validated['summary']['units'][k]['rates']==v['rates'] for k,v in previous_units.items()),'Adoption changes project rates')
+    added=set(validated['summary']['units'])-set(previous_units)
+    require(not added or proposal.get('method')=='native_scope_adoption' and added=={'operational-references-java-spring'} and validated['summary']['units']['operational-references-java-spring']['rates']==previous_units['master-data-java-spring']['rates'],'Unexpected new unit or rates')
     old={o['stack']:o for o in before['options']}
     for o in validated['baseline']['options']:
         if o['stack']!='java-spring':require(o==old[o['stack']],'Another option changed')

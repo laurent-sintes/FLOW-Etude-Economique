@@ -1,0 +1,50 @@
+version: 1
+labels:
+  title: Construction par domaine métier
+  intro: Les montants affectés aux deux domaines et le reste à ventiler reconstituent le budget de construction.
+    Les coûts complets de chaque domaine demandent une clé pour les travaux communs.
+  domain: Domaine métier
+  effort: Charge affectée · JH
+  cost: Coût affecté · k€ HT
+  total: Total de construction
+  unallocated: Commun ou rattachement à renseigner
+  pending: À renseigner
+  native_basis: Classement issu du domaine parent des capacités natives. Le financement reste unique, même si
+    plusieurs équipes contribuent.
+  pending_basis: Le rattachement au domaine et la clé de ventilation restent à renseigner.
+  shared_note: Le socle technique commun dessert Master Data et la {{notion.supply_chain_management}}. Sa ventilation
+    reste à renseigner. Les ateliers logistiques sont affectés à la {{notion.supply_chain_management}}.
+  phases_note: Ce tableau concerne le build générique Java/Spring. Les charges d’intégration, de fonctionnement
+    et les contrats Buy conservent leurs enveloppes. Leur ventilation par domaine reste à renseigner.
+  classification: Classement métier
+  direct: Domaine affecté
+  shared_pending: Commun aux domaines · ventilation à renseigner
+  to_classify: Domaine à renseigner
+  grouped_list: Travaux classés par domaine métier
+  known_note: Sous-totaux affectés. Les coûts complets par domaine restent à renseigner tant que les travaux communs
+    ne sont pas ventilés.
+  team_scope_note: Une équipe peut contribuer aux deux domaines. Le domaine financé est porté par chaque unité
+    de travail. Les contributions des équipes ne constituent pas une clé de ventilation entre domaines.
+  phase_pending: La ventilation de cette phase entre Master Data et la {{notion.supply_chain_management}} reste
+    à renseigner. Les enveloppes et les montants inconnus sont conservés.
+  rounding_note: Les totaux sont calculés en euros avant l’arrondi d’affichage en k€.
+overrides:
+- work_unit_ref: core/supply-workbenches-java-spring
+  status: direct
+  domain_refs:
+  - supply-chain-orchestration
+  basis: Les ateliers de planification, décision et exécution logistique prolongent les fonctions de la {{notion.supply_chain_management}}.
+    Le classement porte sur le produit financé, indépendamment des rôles.
+  evidence_refs:
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-02-adoption-quatre-lots/decision.json
+- work_unit_ref: core/professional-it-java-spring
+  status: shared_pending
+  domain_refs:
+  - domain-master-data
+  - supply-chain-orchestration
+  basis: Administration, sécurité et exploitation techniques sont communes aux deux domaines du produit. Aucune
+    clé de consommation par domaine n’est établie.
+  evidence_refs:
+  - source/fonctions-produit-core.yaml
+  - source/revision-master-data.yaml

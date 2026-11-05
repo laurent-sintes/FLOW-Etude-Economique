@@ -10,6 +10,7 @@ import math
 from jsonschema import Draft202012Validator
 from validate_stacks import ROOT, read
 from capability_catalog import native
+from domain_costs import context as domain_context, classify, summarize, dependencies as domain_dependencies
 
 SOURCE = 'source/unites-travail.yaml'
 SCHEMA = 'source/schema-unites-travail.yaml'
@@ -18,7 +19,7 @@ ABAQUE_SCHEMA = 'source/schema-abaque-ventilation.yaml'
 
 
 def dependencies():
-    return {SOURCE, SCHEMA, ABAQUE, ABAQUE_SCHEMA, 'tools/work_units.py', 'source/unites-integration.yaml'} | estimate_dependencies()
+    return {SOURCE, SCHEMA, ABAQUE, ABAQUE_SCHEMA, 'tools/work_units.py', 'source/unites-integration.yaml'} | estimate_dependencies() | domain_dependencies()
 
 
 def require(condition, message):
@@ -144,15 +145,17 @@ def build_work_units(economic, organisation, source=None, abaque=None):
         require(set(refs) <= core.keys(), 'Unknown capability scope unit')
         found = sorted({c['native_id'] for ref in refs for c in core[ref]['capabilities']})
         require(set(found) <= caps.keys(), 'Unknown native capability')
-        return [dict(id=c, label=caps[c]) for c in found]
+        return [dict(id=c, label=caps[c], domain_ref=domains['capabilities'][c]) for c in found]
     activities = {r['id']: r for path in ('source/integration.yaml','source/maintenance.yaml') for r in read(ROOT / path)['activites']}
     estimate_context = annual_context()
+    domains = domain_context()
     allocations, used = [], set()
     for unit in doc['units']:
         require(unit['parent_ref'] is None or unit['parent_ref'] in ids and unit['parent_ref'] != unit['id'], 'Invalid parent')
         bound = [records[r] for r in unit['record_refs']]
         require(all(r['phase'] == unit['phase_ref'] for r in bound), 'Work unit phase drift')
         unit['capabilities'] = capabilities(unit['core_scope_refs'])
+        unit['domain_classification'] = classify(unit['id'], [c['id'] for c in unit['capabilities']], domains)
         unit['capability_status'] = 'linked' if unit['capabilities'] else 'to_establish'
         detail = integration.get(unit['integration_unit_ref'])
         if unit['integration_unit_ref'] is not None:
@@ -161,7 +164,8 @@ def build_work_units(economic, organisation, source=None, abaque=None):
         else:
             unit['detail'] = None
         activity = activities.get(unit['id'].split('/')[-1])
-        unit['outcome'] = activity.get('livrable') if activity else ' · '.join(core[unit['core_scope_refs'][0]].get('includes', [])) if unit['nature']=='core_build' and unit['core_scope_refs'] else None
+        unit['outcome'] = activity.get('livrable') if activity else None
+        unit['included_activities'] = deepcopy(core[unit['core_scope_refs'][0]].get('includes', [])) if unit['nature']=='core_build' and unit['core_scope_refs'] else []
         unit['measurements'] = deepcopy(bound)
         unit['totals'] = {field: known_sum([r[field] for r in bound]) for field in ('jh','cost_eur_ht')}
         unit['estimation'] = build_estimate(unit, core, estimate_context)
@@ -205,5 +209,8 @@ def build_work_units(economic, organisation, source=None, abaque=None):
     doc['abaque'] = rules
     doc['estimate_labels'] = read(ROOT/ESTIMATE_LABELS)['labels']
     doc['estimation_summary'] = [dict(phase_ref=p,units=sum(u['phase_ref']==p for u in doc['units']),pending=sum(u['phase_ref']==p and bool(u['estimation']['missing']) for u in doc['units'])) for p in ('acquisition','integration','fonctionnement')]
+    doc['domains'] = domains['domains']
+    doc['domain_labels'] = domains['labels']
+    doc['domain_readings'] = {phase:summarize([dict(id=u['id'],jh=u['totals']['jh'],cost_eur_ht=u['totals']['cost_eur_ht'],domain_classification=u['domain_classification']) for u in doc['units'] if u['phase_ref']==phase], domains) for phase in ('acquisition','integration','fonctionnement')}
     doc['option'] = 'java-spring'
     return doc

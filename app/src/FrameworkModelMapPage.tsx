@@ -1,5 +1,6 @@
 import {useCallback,useEffect,useMemo,useState,type CSSProperties} from 'react';
 import {Background,Controls,Handle,MiniMap,Position,ReactFlow,applyNodeChanges,type Edge,type Node,type NodeProps,type ReactFlowInstance} from '@xyflow/react';
+import {TeamInteractionMap} from './TeamInteractionMap';
 import {modelLineage} from './modelLineage';
 import {useStudy,type Data} from './context';
 import {MethodText} from './MethodDocument';
@@ -50,6 +51,7 @@ export function FrameworkModelMapPage({view,focus,phase}:{view?:string;focus?:st
   markerEnd:{type:'arrowclosed' as const,color:lineage.relations.has(e.id)?'#236159':'#677985'},selectable:false})),[graph.edges,profile.kind,lineage,L]);
  useEffect(()=>{
   let active=true;setLoading(true);setError(false);
+  if(profile.kind==='teams'){setNodes([]);setLoading(false);return()=>{active=false;};}
   if(!graph.nodes.length){setNodes([]);setLoading(false);return()=>{active=false;};}
   if(profile.kind==='model'){
    const shown:Data[]=G.domains.filter((d:Data)=>graph.nodes.some(n=>n.domain_ref===d.id));
@@ -78,9 +80,11 @@ export function FrameworkModelMapPage({view,focus,phase}:{view?:string;focus?:st
   return {...n,selected:n.type!=='domain'&&n.id===focus,className:n.type!=='domain'&&active?'framework-map-lineage-node':undefined,data:{...n.data,lineage:active}};
  }),[nodes,focus,lineage,graph]);
  const shownDomains:Data[]=profile.kind==='model'?G.domains.filter((d:Data)=>graph.nodes.some(n=>n.domain_ref===d.id)):[];
+ const profiles=<nav className="framework-map-profiles" aria-label={L.views}>{G.profiles.filter((p:Data)=>p.id!=='all').map((p:Data)=><a key={p.id} href={phaseReadingHash({...context,page:'schema-modele',view:p.id})!} aria-current={p.id===profile.id?'page':undefined}>{p.label}</a>)}</nav>;
+ if(profile.kind==='teams')return <div className="essential-page framework-model-map delivery-page"><p className="framework-map-intro">{L.intro}</p>{profiles}<TeamInteractionMap option="java-spring"/></div>;
  return <div className="essential-page framework-model-map">
   <p className="framework-map-intro">{L.intro}</p>
-  <nav className="framework-map-profiles" aria-label={L.views}>{G.profiles.map((p:Data)=><a key={p.id} href={phaseReadingHash({...context,page:'schema-modele',view:p.id})!} aria-current={p.id===profile.id?'page':undefined}>{p.label}</a>)}</nav>
+  {profiles}
   <p>{profile.description}</p>
   {shownDomains.length>0&&<section className="framework-map-domain-key" aria-label={L.domains}><h2>{L.domains}</h2><p>{L.domain_help}</p><div>{shownDomains.map((d:Data)=><button type="button" key={d.id} style={{'--domain-color':d.color} as CSSProperties} onClick={()=>{void flow?.fitView({nodes:[{id:'domain:'+d.id}],padding:.08,maxZoom:1,duration:0});}}><span aria-hidden="true"/><strong>{d.label}</strong><small>{graph.nodes.filter(n=>n.domain_ref===d.id).length}</small></button>)}</div></section>}
   <div className="framework-map-toolbar"><label>{L.search}<input type="search" value={query} onChange={event=>setQuery(event.target.value)} placeholder={L.search_placeholder}/></label><label>{L.select}<select value={selected?.id||''} onChange={event=>navigate({focus:event.target.value||undefined})}><option value="">{L.select_empty}</option>{graph.nodes.map(n=><option key={n.id} value={n.id}>{n.label}</option>)}</select></label>{profile.kind==='teams'&&<label>{L.phase}<select value={phaseId||''} onChange={event=>navigate({phase:event.target.value||undefined})}><option value="">{L.all_phases}</option>{G.phases.map((p:Data)=><option key={p.id} value={p.id}>{p.label}</option>)}</select></label>}<label className="framework-map-neighbours"><input type="checkbox" checked={neighbours} onChange={event=>setNeighbours(event.target.checked)}/>{L.neighbours}</label></div>

@@ -1,0 +1,478 @@
+{
+  "version": 1,
+  "status": "proposal_not_adopted",
+  "work_unit_ref": "core/master-data-java-spring",
+  "assumption": "Les administrateurs MDM font évoluer les familles, champs et relations dans un studio de schéma. Ils peuvent charger et activer des plugins Java JAR autorisés. Les data stewards corrigent les données et configurent les règles de qualité et d’enrichissement dans leur périmètre.",
+  "activity_basis": "Estimation d’ingénierie par livrable. La conception inclut analyse, architecture, UX et coordination de lot. La réalisation inclut développement, adaptation, DevOps et tests développeur. La QA couvre les scénarios fonctionnels et de sécurité du composant.",
+  "kept_groups": [
+    "families"
+  ],
+  "kept_packages": [
+    "MDM12"
+  ],
+  "groups": [
+    {
+      "id": "engine",
+      "label": "Moteur de données",
+      "components": [
+        {
+          "id": "model",
+          "label": "Registre de modèles et d’autorités",
+          "package_refs": [
+            "MDM01"
+          ],
+          "activities": {
+            "design": 45,
+            "delivery": 120,
+            "qa": 45
+          },
+          "build": "Un registre versionné des schémas, des relations, des règles d’autorité et de leurs portées. Vérifier les dépendances et la compatibilité avant activation. Cycle commun de règles métier versionnées par famille et portée. Brouillon, validation selon délégation, activation et désactivation sans redéploiement.",
+          "adapt": "Brancher le registre et la validation au pipeline de déploiement et aux opérations de publication du studio. L’équipe produit prend en charge les migrations incompatibles. Utiliser les habilitations communes pour dissocier l’administration du cadre et la configuration métier.",
+          "reuse": "Infrastructure de configuration, migrations et publication applicative. Le lot MDM finance son intégration spécifique.",
+          "funding_refs": [
+            "java-spring-framework-services",
+            "professional-operations-lifecycle"
+          ],
+          "acceptance": "Un schéma incompatible est rejeté. Une règle d’autorité est évaluée à la bonne version et dans le bon périmètre. Une règle ne s’active que dans une portée autorisée. Les résultats antérieurs restent liés à la version appliquée."
+        },
+        {
+          "id": "records",
+          "label": "Écriture des fiches sources et consolidées",
+          "package_refs": [
+            "MDM02",
+            "MDM04",
+            "MDM08"
+          ],
+          "activities": {
+            "design": 35,
+            "delivery": 125,
+            "qa": 55
+          },
+          "build": "Contrats de lecture et d’écriture, conservation des fiches sources, fiche consolidée, relations typées et contrôle de concurrence. Commande de redressement unitaire et par lot, avec origine, justification et nouvelle version de fiche. Un changement relève de la source lorsque celle-ci garde l’autorité.",
+          "adapt": "Mapper les objets MDM et leurs invariants sur la persistance transactionnelle. Réutiliser le même contrat d’écriture et le même contrôle de concurrence pour la correction et la reprise de lot.",
+          "reuse": "Stockage et transactions du socle. Spring Data est un candidat pour les repositories.",
+          "funding_refs": [
+            "java-spring-framework-services"
+          ],
+          "acceptance": "Deux écritures concurrentes conservent les origines et les relations valides. Une écriture périmée reçoit un diagnostic. Une correction est traçable et respecte les droits. Une correction compensatoire laisse la version certifiée d’origine intacte."
+        },
+        {
+          "id": "versions",
+          "label": "Versions, historique et décision de certification",
+          "package_refs": [
+            "MDM08",
+            "MDM09"
+          ],
+          "activities": {
+            "design": 40,
+            "delivery": 110,
+            "qa": 50
+          },
+          "build": "Versions immuables, dates d’effet, différences, journal métier et décision de certification par autorité et périmètre.",
+          "adapt": "Raccorder la décision aux tâches communes et conserver son résultat sur la version concernée.",
+          "reuse": "Portail et runtime de tâches. Journal technique pour les traces d’exécution.",
+          "funding_refs": [
+            "professional-human-forms",
+            "flow-human-task",
+            "professional-operations-lifecycle"
+          ],
+          "acceptance": "Un brouillon peut évoluer. Une version certifiée reste intacte. La décision, la date d’effet et l’identité de l’autorité sont traçables."
+        },
+        {
+          "id": "ingestion",
+          "label": "Admission des contributions et reprise",
+          "package_refs": [
+            "MDM02"
+          ],
+          "activities": {
+            "design": 35,
+            "delivery": 85,
+            "qa": 35
+          },
+          "build": "Contrat d’entrée versionné, provenance, validation, quarantaine, idempotence et reprise des rejets.",
+          "adapt": "Raccorder un canal générique et la file de traitements. L’assistant d’import utilise le même contrat.",
+          "reuse": "File technique, console de traitements et outillage d’import générique.",
+          "funding_refs": [
+            "professional-operations-lifecycle",
+            "professional-data-services"
+          ],
+          "acceptance": "Une contribution rejouée ne crée pas de doublon. Une anomalie reste liée à sa source et à la version reçue."
+        },
+        {
+          "id": "identity",
+          "label": "Rapprochement, fusion et séparation",
+          "package_refs": [
+            "MDM03"
+          ],
+          "activities": {
+            "design": 45,
+            "delivery": 120,
+            "qa": 55
+          },
+          "build": "Candidats et scores configurés, file de décisions, fusion autorisée, séparation et conservation des identifiants d’origine.",
+          "adapt": "Qualifier les opérateurs de comparaison et raccorder les décisions au journal métier.",
+          "reuse": "Primitives de recherche et traitements de fond. Le moteur de rapprochement métier reste à réaliser.",
+          "funding_refs": [
+            "java-spring-framework-services",
+            "professional-operations-lifecycle"
+          ],
+          "acceptance": "Une fusion puis une séparation conservent les identifiants et les décisions. Des faux positifs représentatifs sont rejoués."
+        },
+        {
+          "id": "survivorship",
+          "label": "Consolidation, survivance et enrichissement",
+          "package_refs": [
+            "MDM04",
+            "MDM07"
+          ],
+          "activities": {
+            "design": 50,
+            "delivery": 135,
+            "qa": 55
+          },
+          "build": "Normalisation, choix de la valeur par autorité et priorité, provenance par valeur et enrichissement justifié. Appliquer les règles d’enrichissement configurées, prévisualiser l’impact sur un échantillon et recalculer avec provenance par valeur.",
+          "adapt": "Configurer un catalogue borné d’opérateurs et de priorités par attribut. Exposer des opérateurs paramétrables de normalisation, de calcul et de classification dans le catalogue de règles. Les opérateurs fournis par les plugins approuvés utilisent le même contrat d’enrichissement.",
+          "reuse": "Exécution technique des traitements et validation de forme.",
+          "funding_refs": [
+            "professional-operations-lifecycle",
+            "java-spring-framework-services"
+          ],
+          "acceptance": "Pour chaque valeur consolidée, on retrouve l’origine et la règle appliquée. Une contribution d’enrichissement non autorisée est rejetée. Le steward voit les valeurs proposées avant activation. La priorité des sources et les autorisations restent opposables."
+        },
+        {
+          "id": "quality",
+          "label": "Qualité et correction à la source",
+          "package_refs": [
+            "MDM05",
+            "MDM06"
+          ],
+          "activities": {
+            "design": 45,
+            "delivery": 130,
+            "qa": 60
+          },
+          "build": "Profils de contrôle, anomalies typées, demande à la source et clôture après recontrôle. Contrôles configurables par population, sévérité et seuil. Aperçu des anomalies avant activation et recontrôle sur demande après correction.",
+          "adapt": "Relier les anomalies au dossier et aux tâches. Les règles MDM restent évaluées sur le serveur. Brancher les contrôles à la file commune et lier chaque anomalie à la version de règle exécutée. Les plugins approuvés sont sélectionnables comme opérateurs de contrôle.",
+          "reuse": "Dossiers, tâches, notifications et suivi technique des exécutions.",
+          "funding_refs": [
+            "flow-human-task",
+            "professional-human-forms",
+            "professional-data-services",
+            "professional-operations-lifecycle"
+          ],
+          "acceptance": "Le simple accusé de réception laisse l’anomalie ouverte. Un recontrôle réussi autorise la clôture. Une anomalie est clôturée après un recontrôle réussi. Un aperçu de règle ne modifie aucune fiche."
+        },
+        {
+          "id": "publication",
+          "label": "Publication, retrait et livraison",
+          "package_refs": [
+            "MDM10",
+            "MDM11"
+          ],
+          "activities": {
+            "design": 35,
+            "delivery": 120,
+            "qa": 50
+          },
+          "build": "Préconditions de publication, remplacement et retrait cohérents, souscriptions, état par destinataire et reprise.",
+          "adapt": "Brancher la transaction de publication et les états métier au mécanisme de transport et à son suivi.",
+          "reuse": "Transport et traitements de fond génériques. Le registre des livraisons MDM reste spécifique.",
+          "funding_refs": [
+            "professional-operations-lifecycle",
+            "professional-data-services",
+            "java-spring-framework-services"
+          ],
+          "acceptance": "Une version non certifiée ne part pas. Un destinataire en échec peut reprendre sans doubler la livraison logique."
+        },
+        {
+          "id": "protection",
+          "label": "Contrôles d’accès et cohérence après restauration",
+          "package_refs": [
+            "MDM11",
+            "MDM13"
+          ],
+          "activities": {
+            "design": 35,
+            "delivery": 100,
+            "qa": 55
+          },
+          "build": "Contrôle contextuel côté serveur, droits de consommation, journal de preuves et rapprochement après restauration.",
+          "adapt": "Mapper les rôles et champs MDM, relier les journaux au socle, rejouer les versions, abonnements et preuves après restauration.",
+          "reuse": "Identité, habilitations génériques, sauvegardes et audit technique. Le contrôle des valeurs restaurées reste dans le MDM.",
+          "funding_refs": [
+            "professional-admin-security",
+            "professional-operations-lifecycle"
+          ],
+          "acceptance": "Une lecture interdite reste interdite via API. Une restauration conserve la provenance et identifie les livraisons à réconcilier."
+        },
+        {
+          "id": "query",
+          "label": "Recherche et lectures MDM pour les écrans",
+          "package_refs": [
+            "MDM01",
+            "MDM04",
+            "MDM08"
+          ],
+          "activities": {
+            "design": 25,
+            "delivery": 75,
+            "qa": 30
+          },
+          "build": "Requêtes paginées sur fiches, origines, versions et liens directs. Projections nécessaires à l’affichage.",
+          "adapt": "Configurer les index, tris et filtres sur un catalogue borné. Raccorder les prédicats de sécurité définis dans le bloc protection.",
+          "reuse": "Pagination, accès aux données et primitives de recherche de la pile Java.",
+          "funding_refs": [
+            "java-spring-framework-services"
+          ],
+          "acceptance": "Une fiche est retrouvable par identifiant source et référence. Les projections appliquent les droits et les filtres temporels définis."
+        },
+        {
+          "id": "schema-studio-engine",
+          "label": "Services du studio de schéma",
+          "package_refs": [
+            "MDM01",
+            "MDM08"
+          ],
+          "activities": {
+            "design": 25,
+            "delivery": 70,
+            "qa": 30
+          },
+          "build": "Créer et modifier familles, champs et relations en brouillon. Calculer les impacts sur les fiches, les règles et les API. Activer les évolutions compatibles dans une nouvelle version.",
+          "adapt": "Brancher les commandes du studio sur le registre commun, la validation et la file de traitements. Signaler les changements qui demandent une migration.",
+          "reuse": "Registre MDM, habilitations, traitements de fond et outillage de migration.",
+          "funding_refs": [
+            "java-spring-framework-services",
+            "professional-admin-security",
+            "professional-operations-lifecycle"
+          ],
+          "acceptance": "Le studio affiche les dépendances avant activation. Une évolution incompatible reste en brouillon avec les actions nécessaires. Les versions certifiées restent lisibles."
+        },
+        {
+          "id": "plugin-runtime",
+          "label": "Contrat, registre et exécution des plugins JAR",
+          "package_refs": [
+            "MDM05",
+            "MDM07",
+            "MDM13"
+          ],
+          "activities": {
+            "design": 30,
+            "delivery": 85,
+            "qa": 35
+          },
+          "build": "Contrat Java versionné des opérateurs, dépôt des JAR, catalogue, contrôle de signature et de compatibilité, activation et retrait. Exécuter les plugins dans un processus isolé avec des droits et ressources limités.",
+          "adapt": "Raccorder les plugins approuvés au moteur de qualité et d’enrichissement. Conserver les versions nécessaires au rejeu et aux preuves.",
+          "reuse": "Vérification de signature du JDK, stockage des fichiers, traitements de fond, habilitations et journal technique.",
+          "funding_refs": [
+            "java-spring-framework-services",
+            "professional-data-services",
+            "professional-operations-lifecycle",
+            "professional-admin-security"
+          ],
+          "acceptance": "Un paquet non approuvé ou incompatible ne s’active pas. Un opérateur qui dépasse ses limites s’arrête avec un diagnostic. La version exécutée reste traçable."
+        }
+      ]
+    },
+    {
+      "id": "interfaces",
+      "label": "Écrans d’administration et de gestion",
+      "components": [
+        {
+          "id": "admin",
+          "label": "Administration des modèles, sources et règles",
+          "package_refs": [
+            "MDM01",
+            "MDM02",
+            "MDM03",
+            "MDM05"
+          ],
+          "activities": {
+            "design": 45,
+            "delivery": 105,
+            "qa": 45
+          },
+          "build": "Consulter les modèles actifs, consulter leurs versions, gérer les sources, priorités et règles autorisées. Éditeur commun des règles de qualité et d’enrichissement. Sélection du périmètre, opérateurs, paramètres, aperçu d’impact et historique.",
+          "adapt": "Rendre les formulaires d’administration à partir des schémas versionnés. Adapter les formulaires et le portail à la délégation entre administrateurs, data stewards et valideurs.",
+          "reuse": "Navigation, composants de grille et rendu de formulaire partagé à qualifier. JSON Forms est un candidat pour le rendu.",
+          "funding_refs": [
+            "professional-admin-security",
+            "professional-human-forms"
+          ],
+          "acceptance": "Un administrateur peut faire évoluer les paramètres autorisés. Un utilisateur autorisé prépare et active une règle validée dans sa portée depuis le portail."
+        },
+        {
+          "id": "forms",
+          "label": "Recherche et formulaires de fiche",
+          "package_refs": [
+            "MDM04",
+            "MDM07",
+            "MDM08"
+          ],
+          "activities": {
+            "design": 30,
+            "delivery": 85,
+            "qa": 35
+          },
+          "build": "Un parcours liste, détail et modification commun aux familles, avec filtres, relations et erreurs de contribution.",
+          "adapt": "Brancher les schémas aux composants React et ajouter les contrôles pour les relations, la provenance et la lecture seule.",
+          "reuse": "Rendu standard des champs et composants de navigation. Les huit paramétrages métier restent dans les lots familles.",
+          "funding_refs": [
+            "professional-admin-security",
+            "professional-human-forms"
+          ],
+          "acceptance": "Une fiche peut être recherchée, lue et modifiée selon les droits. Une erreur du serveur est restituée au bon champ."
+        },
+        {
+          "id": "steward",
+          "label": "Écrans de rapprochement et historique",
+          "package_refs": [
+            "MDM03",
+            "MDM04",
+            "MDM08"
+          ],
+          "activities": {
+            "design": 30,
+            "delivery": 85,
+            "qa": 35
+          },
+          "build": "Comparaison des candidats, fusion et séparation explicables, comparaison des versions et consultation de la provenance. Parcours de redressement sur fiche. Comparer les valeurs, indiquer un motif et orienter la correction vers la source si elle seule est autorisée.",
+          "adapt": "Brancher les décisions aux API du moteur. Adapter grilles et panneaux de détail. Présenter le résultat du recontrôle, l’origine et l’historique dans le panneau de détail.",
+          "reuse": "Composants visuels du portail et grille commune. La comparaison de valeurs MDM et son ergonomie restent spécifiques.",
+          "funding_refs": [
+            "professional-admin-security",
+            "professional-human-forms"
+          ],
+          "acceptance": "Un steward voit les valeurs en conflit et peut justifier une fusion. Il retrouve la provenance et l’historique après décision. Le steward peut corriger la valeur autorisée ou saisir une demande à la source et suivre son résultat."
+        },
+        {
+          "id": "decisions",
+          "label": "Écrans d’anomalies, certification et publication",
+          "package_refs": [
+            "MDM05",
+            "MDM06",
+            "MDM09",
+            "MDM10",
+            "MDM11"
+          ],
+          "activities": {
+            "design": 38,
+            "delivery": 95,
+            "qa": 37
+          },
+          "build": "Vues des anomalies, versions à certifier, rejets et états de livraison. Actions contextualisées et restitution des preuves. File de travail par règle, sévérité et portée. Affecter une anomalie, consulter son état et relancer le recontrôle.",
+          "adapt": "Étendre la file de tâches et la console avec les vues et actions MDM. Chaque action appelle l’API de son bloc métier. Étendre le portail de tâches avec les filtres et actions MDM. Partager les états du moteur de qualité.",
+          "reuse": "Portail des tâches, dossiers et console des traitements.",
+          "funding_refs": [
+            "professional-human-forms",
+            "flow-human-task",
+            "professional-operations-lifecycle"
+          ],
+          "acceptance": "Le steward voit le résultat du recontrôle, la portée de certification et les échecs de livraison. Chaque action est auditée. Le steward retrouve les anomalies qui lui sont accessibles, traite un dossier et voit le résultat du recontrôle."
+        },
+        {
+          "id": "bulk",
+          "label": "Écran d’import et d’export en masse",
+          "package_refs": [
+            "MDM02",
+            "MDM11"
+          ],
+          "activities": {
+            "design": 23,
+            "delivery": 67,
+            "qa": 30
+          },
+          "build": "Parcours avec modèle tabulaire versionné par famille, aperçu, rapport d’erreurs et relance contrôlée. Redressement en masse depuis une sélection bornée ou un gabarit tabulaire. Aperçu avant/après, motifs, erreurs et suivi par ligne.",
+          "adapt": "Brancher le traitement générique aux contrats d’admission et d’accès. XLSX est le format d’interface chiffré. Relier l’aperçu et la relance au contrat de redressement et à la console de traitements déjà financée.",
+          "reuse": "Téléversement, traitement de fond et export tabulaire génériques.",
+          "funding_refs": [
+            "professional-data-services",
+            "professional-operations-lifecycle"
+          ],
+          "acceptance": "Un fichier peut être prévisualisé et ses lignes invalides expliquées. La reprise respecte les droits, la provenance et l’idempotence. L’exécution est limitée aux lignes et champs autorisés. Les lignes en erreur sont isolées et la relance ne rejoue pas les corrections réussies."
+        },
+        {
+          "id": "schema-studio-ui",
+          "label": "Studio d’édition des schémas",
+          "package_refs": [
+            "MDM01",
+            "MDM08"
+          ],
+          "activities": {
+            "design": 20,
+            "delivery": 50,
+            "qa": 25
+          },
+          "build": "Éditeur de familles, champs et relations. Prévisualiser le schéma, comparer le brouillon à la version active, afficher les impacts et demander l’activation.",
+          "adapt": "Brancher les écrans aux commandes de brouillon et d’activation. Restituer les erreurs, les dépendances et les besoins de migration.",
+          "reuse": "Composants de formulaire et de navigation, droits d’administration et journal.",
+          "funding_refs": [
+            "professional-admin-security",
+            "professional-human-forms",
+            "professional-operations-lifecycle"
+          ],
+          "acceptance": "Un administrateur autorisé prépare, compare et publie un changement compatible depuis le portail."
+        },
+        {
+          "id": "plugin-admin",
+          "label": "Administration des plugins JAR",
+          "package_refs": [
+            "MDM05",
+            "MDM07",
+            "MDM13"
+          ],
+          "activities": {
+            "design": 12,
+            "delivery": 32,
+            "qa": 16
+          },
+          "build": "Écran de dépôt, validation, activation et désactivation. Afficher version, signataire, fonctions, règles utilisatrices et diagnostics.",
+          "adapt": "Intégrer les opérateurs activés au catalogue visible dans l’éditeur de règles et afficher les dépendances avant retrait.",
+          "reuse": "Téléversement, habilitations, composants du portail et suivi des traitements.",
+          "funding_refs": [
+            "professional-data-services",
+            "professional-admin-security",
+            "professional-operations-lifecycle",
+            "professional-human-forms"
+          ],
+          "acceptance": "Un administrateur suit le statut d’un dépôt et peut désactiver un plugin après examen des règles concernées. Un steward peut choisir les opérateurs activés dans sa portée."
+        }
+      ]
+    }
+  ],
+  "variants": [
+    {
+      "id": "mapping",
+      "label": "Mappage en masse en libre-service",
+      "activities": {
+        "design": 20,
+        "delivery": 55,
+        "qa": 25
+      },
+      "change": "Association libre des colonnes, transformations, gabarits enregistrés et essais à blanc."
+    },
+    {
+      "id": "navigation",
+      "label": "Recherche avancée sur les relations",
+      "activities": {
+        "design": 25,
+        "delivery": 75,
+        "qa": 30
+      },
+      "change": "Navigation sur plusieurs liens, requêtes enregistrées et contrôles des droits sur les chemins interrogés."
+    }
+  ],
+  "decision_gate": "Les schémas et plugins suivent un cycle de version et d’activation contrôlé. Les règles peuvent combiner les opérateurs standard et les plugins autorisés. Le moteur conserve les versions de schéma, de règle et de plugin utilisées pour chaque traitement.",
+  "unknowns": [
+    "Délégations pour la modification des schémas et l’activation des plugins, par famille et périmètre.",
+    "Changements de schéma activables directement et migrations qui demandent une intervention de l’équipe produit.",
+    "Signataires autorisés, limites de ressources et dépendances acceptées pour les plugins JAR.",
+    "Délégation des droits d’écriture et conditions de validation des règles ou corrections de masse, par famille et périmètre.",
+    "Catalogue d’opérateurs de qualité et d’enrichissement, seuils, volumes de corrections et délais de reprise.",
+    "Couverture réelle du rendu de formulaires, des tâches et des traitements partagés dans FLOW."
+  ],
+  "previous_proposal": {
+    "path": "audits/2026-11-05-mdm-autonomie-stewardship/engineering.json",
+    "sha256": "f31d317bf903635d1466bd9150601f3179ea4a40bb8640298a8fee4251676706"
+  }
+}

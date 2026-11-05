@@ -160,3 +160,10 @@ Les pages Charges et Coûts par équipe proposent une lecture retenue et un chif
 La revue de consolidation propage la lecture retenue ou de travail au catalogue, au contrat, à l’abaque et aux fiches d’équipe. Les tableaux de complétude renvoient aux unités concernées. Le contexte régional accompagne les liens de détail. Les consommations périodiques restent normalisées dans le moteur Python.
 
 La page Unités de travail présente une liste regroupée par phase, une recherche et un accès explicite à chaque fiche. Les fiches séparent le travail à réaliser, le chiffrage, les équipes et les sources. Les vues `reference-estimate`, `working-estimate`, `reference-teams`, `working-teams`, `reference-sources` et `working-sources` conservent des adresses directes. Les anciennes adresses du catalogue et de l’abaque restent accessibles. La page est une consultation du modèle.
+
+
+## Organisation et estimation détaillée
+
+Le bootstrap conserve le principe des équipes durables. La lecture statique versionnée `/api/organisation-model` fournit le catalogue, les consolidations et le graphe à leur ouverture. `OrganisationData` partage ces objets dans le contexte des écrans et conserve l’organisation déjà valorisée par la variante régionale. Les réponses sont mises en cache par le transport de la livraison chargée. Une erreur propose de réessayer sans mélanger les versions.
+
+Les matrices par équipe ouvrent les contributions de la cellule choisie. Le paramètre `phase` conserve cette sélection dans le lien, avec l’équipe, la référence ou le chiffrage de travail et la zone de prix. Les fiches Buy gardent leur périmètre explicite et ne reprennent pas les charges Make. Les deux cartes d’interactions réutilisent le même composant Team Topologies.

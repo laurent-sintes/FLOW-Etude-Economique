@@ -34,7 +34,14 @@ def build_market_comparison(market, *, spec=None, snapshot=None, grid=None, mech
     _refs(spec['context']['product_refs'],fiches,'context.product_refs')
     if set(spec['context']['product_refs'])!=set(fiches):_fail('context','all compared products required')
     nodes={n['id']:n for n in snapshot['nodes']}
-    bas={b['chemin'][-2]:nodes[b['chemin'][-2]] for b in grid['blocs']}
+    parents={r['target_id']:r['source_id'] for r in snapshot['relations'] if r['type'] in ('contains','presents')}
+    def context_path(id):
+        chain=[]
+        while id in parents:
+            id=parents[id]
+            if nodes[id]['kind'] in ('domain','area'):chain.insert(0,id)
+        return chain
+    bas={id:n for id,n in nodes.items() if n['kind']=='business_area'}
     specs=_index(spec['business_areas'],'business_area_ref','business_areas')
     if set(specs)!=set(bas):_fail('business_areas','native Business Area universe required')
     sources=_index(spec['sources'],'id','sources')
@@ -87,7 +94,7 @@ def build_market_comparison(market, *, spec=None, snapshot=None, grid=None, mech
             c['gap_refs']=[g['id'] for g in gaps.values() if bid in g['business_area_refs'] and pid in g['product_refs']]
             cells.append(c)
         rows.append(dict(id=bid,name=n['fields']['name'],target=r['target'],next_qualification=r['next_qualification'],
-            hierarchy=[dict(id=k,name=nodes[k]['fields']['name'],kind=nodes[k]['kind']) for k in blocks[0]['chemin'][:-2]],
+            hierarchy=[dict(id=k,name=nodes[k]['fields']['name'],kind=nodes[k]['kind']) for k in (blocks[0]['chemin'][:-2] if blocks else context_path(bid))],
             capabilities=[dict(id=b['capacite_id'],bc_ref=b['id'],name=nodes[b['capacite_id']]['fields']['name'],included=b['id'] not in excluded,needs=deepcopy(b['fonctions'])) for b in blocks],
             included=bool(included),cells=cells,crosswalk_refs=[x['id'] for x in crosswalk.values() if x['business_area_ref']==bid]))
     from gap_instruction import compile_gap_instruction

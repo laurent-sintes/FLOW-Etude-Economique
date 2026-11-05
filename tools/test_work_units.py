@@ -121,7 +121,7 @@ class WorkUnitTests(unittest.TestCase):
         self.assertEqual(g['profiles'][0]['object_refs'],[])
         self.assertEqual({n['id'] for n in g['objects']},{o['id'] for o in m['objects']})
         self.assertEqual({r['id'] for r in g['relations']},{r['id'] for r in m['relations']})
-        self.assertEqual(self.study.bootstrap(essential=True)['content']['delivery_organisation']['work_catalog'],self.catalog)
+        self.assertEqual(self.study.organisation_reading()['delivery_organisation']['work_catalog'],self.catalog)
         self.assertTrue(dependencies()<=self.study.files)
         from study_snapshot import ENGINE_FILES,candidate,load
         self.assertIn('work_units.py',ENGINE_FILES)

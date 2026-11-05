@@ -29,9 +29,9 @@ export function TeamDirectory({selected,option,view}:{selected:string;option:str
  const {data}=useStudy(),D=data.content.delivery_organisation,L=D.labels,context=useReadingContext();
  return <nav className="delivery-team-directory" aria-label={L.team_filter}><p className="delivery-directory-title">{L.team_directory}</p>{D.team_types.map((kind:Data)=><section key={kind.id}><h3><TeamMark type={kind.id} color={kind.color}/>{kind.label}</h3>{D.teams.filter((t:Data)=>t.type===kind.id).map((t:Data)=><a key={t.id} href={phaseReadingHash({...context,page:'equipes-produit',option,view,focus:t.id})!} aria-current={selected===t.id?'page':undefined}><span>{t.label}</span><ArrowUpRight size={15} aria-hidden="true"/></a>)}</section>)}</nav>;
 }
-export function TeamSelect({value,onChange}:{value:string;onChange:(value:string)=>void}){
+export function TeamSelect({value,onChange,shared=false}:{value:string;onChange:(value:string)=>void;shared?:boolean}){
  const {data}=useStudy(),D=data.content.delivery_organisation,L=D.labels,id=useId();
- return <label className="delivery-selector delivery-select-field"><span id={id}>{L.team_filter}</span><span className="delivery-select-control"><select aria-labelledby={id} value={value} onChange={event=>onChange(event.target.value)}><option value="">{L.all_teams}</option>{D.team_types.map((kind:Data)=><optgroup key={kind.id} label={kind.label}>{D.teams.filter((t:Data)=>t.type===kind.id).map((t:Data)=><option key={t.id} value={t.id}>{t.label}</option>)}</optgroup>)}</select><ChevronDown size={18} aria-hidden="true"/></span></label>;
+ return <label className="delivery-selector delivery-select-field"><span id={id}>{L.team_filter}</span><span className="delivery-select-control"><select aria-labelledby={id} value={value} onChange={event=>onChange(event.target.value)}><option value="">{L.all_teams}</option>{D.team_types.map((kind:Data)=><optgroup key={kind.id} label={kind.label}>{D.teams.filter((t:Data)=>t.type===kind.id).map((t:Data)=><option key={t.id} value={t.id}>{t.label}</option>)}</optgroup>)}{shared&&<><option value="governance">{L.governance}</option><option value="unallocated">{L.unallocated}</option></>}</select><ChevronDown size={18} aria-hidden="true"/></span></label>;
 }
 export function TopologyAttribution(){
  const {data}=useStudy(),L=data.content.delivery_organisation.labels;

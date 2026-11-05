@@ -1,0 +1,163 @@
+{
+  "date": "2026-11-05",
+  "scope": "Audit local complet de l’application, sans correction du produit",
+  "commit": "519b5da4dd43b0d98d26c64188b0a5f8bdd3770b",
+  "model_revision": {
+    "date": "2026-11-05",
+    "number": 17
+  },
+  "counts": {
+    "P1": 3,
+    "P2": 6
+  },
+  "findings": [
+    {
+      "id": "A01",
+      "priority": "P1",
+      "title": "La validation complète bloque la livraison",
+      "source_locations": [
+        "tools/test_gross_evaluations.py:33",
+        "tools/test_study_http.py:80",
+        "app/scripts/verify-pages.mjs:24",
+        "app/scripts/verify-pages.mjs:166",
+        ".github/workflows/pages.yml:41"
+      ],
+      "evidence": [
+        "preuves/validation-python.json",
+        "preuves/browser.json"
+      ],
+      "reproduction": "python -m tools.check_model --full --browser, puis contrôle navigateur indépendant",
+      "recommendation": "Mettre les assertions de contrat à jour et ajouter les sept adresses absentes, avec contrôle de cohérence financière entre vues.",
+      "status": "open"
+    },
+    {
+      "id": "A02",
+      "priority": "P1",
+      "title": "Les JH historiques d’intégration paraissent validés",
+      "source_locations": [
+        "source/organisation-delivery.yaml:5",
+        "app/src/GrossEvaluationsPage.tsx:158"
+      ],
+      "evidence": [
+        "preuves/integration-dimensionnee.png",
+        "preuves/focused-proofs.json"
+      ],
+      "reproduction": "#charges-integration?option=java-spring",
+      "recommendation": "Afficher le statut historique à reprendre auprès des 5 825 JH. Conserver les valeurs et leur exclusion des charges retenues par équipe.",
+      "status": "open"
+    },
+    {
+      "id": "A03",
+      "priority": "P1",
+      "title": "Une fiche Buy expose des charges et coûts Make",
+      "source_locations": [
+        "app/src/DeliveryOrganisationPage.tsx:29",
+        "app/src/DeliveryOrganisationPage.tsx:32",
+        "app/src/TeamConsolidationPage.tsx:25"
+      ],
+      "evidence": [
+        "preuves/buy-montants-make.png",
+        "preuves/focused-proofs.json",
+        "preuves/deep-checks.json"
+      ],
+      "reproduction": "#equipes-produit?option=microsoft&focus=master-data, puis option=sap",
+      "recommendation": "Conditionner les matrices à leur périmètre ou expliciter Make auprès des montants, sans inventer de ventilation Buy.",
+      "status": "open"
+    },
+    {
+      "id": "A04",
+      "priority": "P2",
+      "title": "Des composantes inconnues sont affichées Sans objet",
+      "source_locations": [
+        "app/src/TeamConsolidationPage.tsx:20"
+      ],
+      "evidence": [
+        "preuves/inconnu-sans-objet.png",
+        "preuves/focused-proofs.json"
+      ],
+      "reproduction": "#couts-equipes?option=java-spring, ligne funding/travaux_communs",
+      "recommendation": "Distinguer null inconnu et inapplicabilité explicite, y compris lorsque le total est connu.",
+      "status": "open"
+    },
+    {
+      "id": "A05",
+      "priority": "P2",
+      "title": "Le livrable peut provenir de commentaires de chiffrage",
+      "source_locations": [
+        "tools/work_units.py:164",
+        "tools/work_estimation.py:113"
+      ],
+      "evidence": [
+        "preuves/livrable-commentaire.png",
+        "preuves/focused-proofs.json"
+      ],
+      "reproduction": "#unites-travail?focus=core%2Fmaster-data-java-spring",
+      "recommendation": "Séparer activités incluses, justification de chiffrage et résultat à réceptionner. Compléter le diagnostic sans réestimer les charges.",
+      "status": "open"
+    },
+    {
+      "id": "A06",
+      "priority": "P2",
+      "title": "Les vues des interactions utilisent deux notations",
+      "source_locations": [
+        "app/src/FrameworkModelMapPage.tsx:50",
+        "app/src/TeamInteractionMap.tsx:48"
+      ],
+      "evidence": [
+        "preuves/autre-notation-interactions.png",
+        "preuves/deep-checks.json"
+      ],
+      "reproduction": "Comparer #schema-modele?view=teams et #integration-transverse",
+      "recommendation": "Réutiliser la notation des trois modes dans le profil équipes. Préserver les flèches de sens des relations du métamodèle.",
+      "status": "open"
+    },
+    {
+      "id": "A07",
+      "priority": "P2",
+      "title": "Les consolidations imposent trop de détail à parcourir",
+      "source_locations": [
+        "app/src/TeamConsolidationPage.tsx:15",
+        "app/src/TeamConsolidationPage.tsx:30"
+      ],
+      "evidence": [
+        "preuves/coverage.json"
+      ],
+      "reproduction": "#charges-equipes et #couts-equipes sans filtre",
+      "recommendation": "Ouvrir le détail par cellule équipe et phase, rendre les reliquats visibles dans la synthèse et limiter le détail initial.",
+      "status": "open"
+    },
+    {
+      "id": "A08",
+      "priority": "P2",
+      "title": "Le premier contenu exige 33 tabulations",
+      "source_locations": [
+        "app/src/App.tsx:144"
+      ],
+      "evidence": [
+        "preuves/focused-proofs.json"
+      ],
+      "reproduction": "Charger #accueil dans un contexte neuf sur ordinateur, tabuler jusqu’au premier contrôle dans main",
+      "recommendation": "Ajouter un lien Aller au contenu au premier focus et une cible principale stable.",
+      "status": "open"
+    },
+    {
+      "id": "A09",
+      "priority": "P2",
+      "title": "Des textes utiles passent sous 11 px",
+      "source_locations": [
+        "app/BRANDING.md:20",
+        "app/src/workUnits.css:1",
+        "app/src/deliveryOrganisation.css:1"
+      ],
+      "evidence": [
+        "preuves/typographie.json"
+      ],
+      "reproduction": "Mesurer les textes secondaires des unités, matrices et sélecteurs dans le navigateur",
+      "recommendation": "Respecter le seuil de taille de la charte et contrôler les statuts et unités sur mobile et au zoom.",
+      "status": "open"
+    }
+  ],
+  "application_changed": false,
+  "economic_values_changed": false,
+  "remote_deployment_tested": false
+}

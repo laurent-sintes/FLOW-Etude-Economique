@@ -307,7 +307,8 @@ properties:
     - scope_summary
     properties:
       source:
-        const: sources/client/cartographie-2026-10-17.1.yaml
+        type: string
+        pattern: ^sources/[^.].*\.yaml$
       systems:
         type: array
         minItems: 1
@@ -345,13 +346,19 @@ properties:
         additionalProperties: false
         required:
         - entity_ref
-        - domain_ref
+        - domain_refs
         - status
         properties:
           entity_ref: *id002
-          domain_ref: *id002
           status:
             const: indicative
+          domain_refs:
+            type: array
+            minItems: 1
+            uniqueItems: true
+            items:
+              type: string
+              minLength: 1
       note: *id003
       estimation: *id003
       scope: *id003
@@ -443,7 +450,10 @@ properties:
         items:
           type: object
           additionalProperties: false
-          required: [id, label, definition]
+          required:
+          - id
+          - label
+          - definition
           properties:
             id: *id005
             label: *id005

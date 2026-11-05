@@ -1,4 +1,6 @@
 import {ReadingScopeContext,useReadingContext} from './ReadingScopeContext';
+import {MdmOssAssessment} from './MdmOssAssessment';
+import {DomainCostSummary} from './DomainCostSummary';
 import {IntegrationUnits} from './IntegrationUnits';
 import {useContext,useEffect,useId,useRef,useState} from 'react';
 import {ArrowRight,Info} from 'lucide-react';
@@ -74,6 +76,8 @@ function CoreResults({core,labels:L,focus}:{core:Data;labels:Data;focus?:string}
   <section className="gross-metric gross-adopted" data-core-status={core.status}>
    <h3>{L.development_total}</h3><p><strong>{n(core.adopted_jh,0)}</strong> {L.jh}</p>
   </section>
+  <DomainCostSummary reading={core.domain_reading}/>
+  <MdmOssAssessment assessment={core.mdm_oss_assessment}/>
   <p className="gross-development-scope">{L.development_scope}</p>
   <section id="gross-focus-roles" tabIndex={-1} className="gross-activities">
    <h3>{L.activity_breakdown}</h3>
@@ -89,11 +93,11 @@ function CoreResults({core,labels:L,focus}:{core:Data;labels:Data;focus?:string}
    <div className="gross-comparison-scroll" role="region" aria-label={L.feature_breakdown} tabIndex={0}>
     <table className="core-method-table gross-comparison-matrix gross-effort-matrix" aria-label={L.feature_breakdown}>
      <thead><tr><th scope="col">{L.feature_column}</th><th scope="col">{L.effort_retained}</th>{core.rows[0].comparisons.map((ref:Data)=><th scope="col" key={ref.id}>{ref.label}<small>{ref.label===ref.method?L.jh:ref.method+' · '+L.jh}</small></th>)}</tr></thead>
-     <tbody>{core.rows.map((row:Data)=><tr key={row.id} id={'gross-focus-'+row.id} data-unit={row.id}>
+     {core.domain_reading.buckets.map((bucket:Data)=><tbody key={bucket.id} data-domain-group={bucket.id}><tr className="gross-domain-heading"><th scope="rowgroup" colSpan={2+core.rows[0].comparisons.length}>{bucket.label}</th></tr>{core.rows.filter((row:Data)=>bucket.unit_refs.includes('core/'+row.id)).map((row:Data)=><tr key={row.id} id={'gross-focus-'+row.id} data-unit={row.id}>
       <th scope="row"><a href={href(row.id)}>{row.label}</a></th>
       <td className="gross-retained-effort"><strong>{n(row.adopted_jh,0)}</strong><RetainedEffortInfo row={row} labels={L}/></td>
       {row.comparisons.map((ref:Data)=><td key={ref.id}>{ref.jh===null?L.unknown:n(ref.jh,1)}</td>)}
-     </tr>)}</tbody>
+     </tr>)}</tbody>)}
      <tfoot><tr><th scope="row">{L.total}</th><td className="gross-retained-effort">{n(core.adopted_jh,0)}</td>
       {core.comparison_totals.map((total:Data)=><td key={total.id}>{total.jh===null?L.unknown:n(total.jh,1)}</td>)}
      </tr></tfoot>
@@ -103,6 +107,7 @@ function CoreResults({core,labels:L,focus}:{core:Data;labels:Data;focus?:string}
   {selected&&<Drawer title={selected.label} onClose={()=>{location.hash=href('comparisons');}} wide>
    <p><strong>{n(selected.adopted_jh,0)} {L.jh}</strong> · {selected.detail.method}</p>
    <Text text={selected.detail.analysis.decision}/>
+   {selected.detail.historical_comparisons&&<p className="delivery-note">{L.historical_comparisons_note}</p>}
    <details className="gross-detail"><summary>{L.effort_detail}</summary>
     <UnitAnalysis row={selected} labels={L}/>
     <h3>{L.included}</h3><ul>{selected.detail.includes.map((text:string)=><li key={text}>{text}</li>)}</ul>
@@ -113,10 +118,10 @@ function CoreResults({core,labels:L,focus}:{core:Data;labels:Data;focus?:string}
  </div>;
 }
 
-function WorkGroups({groups,labels:L,focus}:{groups:Data[];labels:Data;focus?:string}){
+function WorkGroups({groups,labels:L,focus,historical=false}:{groups:Data[];labels:Data;focus?:string;historical?:boolean}){
  const {n,amount,annualAmount}=useFormat();
  const value=(row:Data)=>row.value===null?L.unknown:row.unit===L.euro?amount(row.value):row.unit===L.annual_euro?annualAmount(row.value):`${n(row.value,Number.isInteger(row.value)?0:1)} ${row.unit}`;
- return <>{groups.map(group=>{const hasProof=(row:Data)=>Boolean(row.factors||row.terms||row.context||row.exclusions||(row.note&&![group.note,L.initial,L.annual_reference].includes(row.note)));const withDetails=group.rows.some(hasProof);return <section className="gross-group" key={group.id} data-gross-group={group.id}><h3>{group.title}{group.subtotal_jh!==undefined&&<span className="gross-subtotal">{n(group.subtotal_jh,0)} {L.jh}</span>}</h3>{group.note&&<Text text={group.note}/>}<table className={'core-method-table gross-work '+(withDetails?'gross-with-details':'gross-values-only')} aria-label={group.title}><thead><tr><th scope="col">{L.item}</th><th scope="col">{L.workload+' / '+L.amount}</th>{withDetails&&<th scope="col">{L.details}</th>}</tr></thead><tbody>{group.rows.map((row:Data)=><tr key={row.id}><th scope="row">{row.label}</th><td className="gross-work-value">{value(row)}</td>{withDetails&&<td>{hasProof(row)&&<details className="gross-row-proof" id={'gross-focus-'+row.id} tabIndex={-1} open={focus===row.id||undefined}><summary>{L.basis}</summary>{row.note!==group.note&&<Text text={row.note}/>} {row.context&&<Text text={row.context}/>} {row.exclusions&&<><h4>{L.excluded}</h4><Text text={row.exclusions}/></>}{row.factors&&<><dl>{row.factors.map((factor:Data)=><div key={factor.label}><dt>{factor.label}</dt><dd>{n(factor.value,Number.isInteger(factor.value)?0:2)}</dd></div>)}</dl><p className="gross-formula">{row.factors.map((factor:Data,index:number)=><span key={factor.label}>{index>0&&<> × </>}{n(factor.value,Number.isInteger(factor.value)?0:2)}</span>)} = {value(row)}</p></>}{row.terms&&<><dl>{row.terms.map((term:Data)=><div key={term.label}><dt>{term.label}</dt><dd>{n(term.quantity,0)} × {n(term.unit_jh,Number.isInteger(term.unit_jh)?0:6)} {L.jh}{term.note&&<Text text={term.note}/>}</dd></div>)}{row.fixed_jh>0&&<div><dt>{L.fixed}</dt><dd>{n(row.fixed_jh,0)} {L.jh}</dd></div>}</dl></>}</details>}</td>}</tr>)}</tbody></table></section>;})}</>;
+ return <>{groups.map(group=>{const hasProof=(row:Data)=>Boolean(row.factors||row.terms||row.context||row.exclusions||(row.note&&![group.note,L.initial,L.annual_reference].includes(row.note)));const withDetails=group.rows.some(hasProof);return <section className="gross-group" key={group.id} data-gross-group={group.id}><h3>{group.title}{group.subtotal_jh!==undefined&&<span className="gross-subtotal">{historical&&<small>{L.historical_human_total}</small>}{n(group.subtotal_jh,0)} {L.jh}</span>}</h3>{group.note&&<Text text={group.note}/>}<table className={'core-method-table gross-work '+(withDetails?'gross-with-details':'gross-values-only')} aria-label={group.title}><thead><tr><th scope="col">{L.item}</th><th scope="col">{L.workload+' / '+L.amount}</th>{withDetails&&<th scope="col">{L.details}</th>}</tr></thead><tbody>{group.rows.map((row:Data)=><tr key={row.id}><th scope="row">{row.label}</th><td className="gross-work-value">{value(row)}</td>{withDetails&&<td>{hasProof(row)&&<details className="gross-row-proof" id={'gross-focus-'+row.id} tabIndex={-1} open={focus===row.id||undefined}><summary>{L.basis}</summary>{row.note!==group.note&&<Text text={row.note}/>} {row.context&&<Text text={row.context}/>} {row.exclusions&&<><h4>{L.excluded}</h4><Text text={row.exclusions}/></>}{row.factors&&<><dl>{row.factors.map((factor:Data)=><div key={factor.label}><dt>{factor.label}</dt><dd>{n(factor.value,Number.isInteger(factor.value)?0:2)}</dd></div>)}</dl><p className="gross-formula">{row.factors.map((factor:Data,index:number)=><span key={factor.label}>{index>0&&<> × </>}{n(factor.value,Number.isInteger(factor.value)?0:2)}</span>)} = {value(row)}</p></>}{row.terms&&<><dl>{row.terms.map((term:Data)=><div key={term.label}><dt>{term.label}</dt><dd>{n(term.quantity,0)} × {n(term.unit_jh,Number.isInteger(term.unit_jh)?0:6)} {L.jh}{term.note&&<Text text={term.note}/>}</dd></div>)}{row.fixed_jh>0&&<div><dt>{L.fixed}</dt><dd>{n(row.fixed_jh,0)} {L.jh}</dd></div>}</dl></>}</details>}</td>}</tr>)}</tbody></table></section>;})}</>;
 }
 
 function Quotes({quotes,phase,labels:L}:{quotes:Data[];phase:string;labels:Data}){
@@ -155,8 +160,10 @@ export function GrossEvaluationsPage({phase,option,focus,returnTo,horizon,onChoo
   {phase==='integration'&&current.id!=='java-spring'&&<Quotes quotes={R.quotes} phase={phase} labels={L}/>}
   <DossierSheet view={phase+'-'+current.id}><h2 ref={heading} tabIndex={-1} className="gross-option-heading" hidden={Boolean(R.core)}>{current.label}</h2>
    <div className="gross-reading-links"><a href="#glossaire?term=charge_brute">{L.glossary}</a></div>
+   {R.domain_note&&<p className="delivery-note">{R.domain_note}</p>}
+   {R.workload_note&&<aside className="gross-workload-status" data-workload-status={R.workload_status}><strong>{R.total_label}</strong><p>{R.workload_note}</p></aside>}
    {R.core?<CoreResults core={R.core} labels={L} focus={focus}/>:<>{R.total_jh!==null?<div className="gross-metrics"><section className="gross-metric gross-adopted"><h3>{R.total_label}</h3><p><strong>{n(R.total_jh,Number.isInteger(R.total_jh)?0:1)}</strong> {R.total_unit}</p></section></div>:<p className="gross-unknown-human">{L.unknown_human}</p>}<Takeaway summary={R.summary} labels={L}/>{R.scope&&<Text text={R.scope}/>}</>}
-   <WorkGroups groups={R.groups} labels={L} focus={focus}/>
+   <WorkGroups groups={R.groups} labels={L} focus={focus} historical={R.workload_status==='historical_pending_review'}/>
    {!R.core&&R.remaining.length>0&&<section className="gross-gap-reviews"><h3>{L.remaining}</h3>{R.remaining.map((item:Data)=><article key={item.id}><h4>{item.label}</h4><Text text={item.scope}/><p><strong>{L.unknown}</strong></p><Text text={item.proof_to_price}/></article>)}</section>}
    {phase==='integration'&&reading.integration_units&&<IntegrationUnits grid={reading.integration_units}/>}
    {phase!=='integration'&&<Quotes quotes={R.quotes} phase={phase} labels={L}/>}

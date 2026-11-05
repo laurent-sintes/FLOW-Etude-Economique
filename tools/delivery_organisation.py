@@ -1,6 +1,7 @@
 """Delivery ownership and conserved readings of existing effort and funding."""
 from copy import deepcopy
 from work_units import build_work_units, dependencies as work_dependencies
+from scope_revision import compile_revision, dependencies as revision_dependencies
 from team_consolidation import consolidate, dependencies as consolidation_dependencies
 from decimal import Decimal
 import math
@@ -20,7 +21,7 @@ def require(condition, message):
 
 
 def dependencies():
-    return {SOURCE, SCHEMA, TABLE_SCHEMA, 'tools/delivery_organisation.py'} | work_dependencies() | consolidation_dependencies()
+    return {SOURCE, SCHEMA, TABLE_SCHEMA, 'tools/delivery_organisation.py'} | work_dependencies() | revision_dependencies() | consolidation_dependencies()
 
 
 def validate(document):
@@ -203,6 +204,8 @@ def build_organisation(economic, baseline, content, source=None):
         phase.update(next(p for p in document['phases'] if p['id'] == phase['id']))
     document['reading'] = dict(phases=phases, records=records, service_start_month=option['service_start_month'],
                                build_months=end_build, capacity_status='to_dimension', option='java-spring')
+    document['scope_revision'] = compile_revision(units)
+    document['mdm_oss_assessment'] = deepcopy(gross['acquisition']['options']['java-spring']['core']['mdm_oss_assessment'])
     document['work_catalog'] = build_work_units(economic, document)
     contributed = document['work_catalog']['allocations']
     allocated_phases = partition(contributed, [t['id'] for t in document['teams']])

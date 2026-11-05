@@ -100,7 +100,7 @@ class AdoptionCommandTests(unittest.TestCase):
   from adopt_core import template,prepare_adoption
   from core_adoption_reference import POINTER
   proposal=template(self.study);proposal['units']=proposal['units'][:1];row=proposal['units'][0]
-  next(w for w in row['work'] if w['id']=='MD09')['jh']+=10;row['purpose_totals']['core-domain']+=10
+  row['work'][0]['jh']+=10;row['purpose_totals']['core-domain']+=10
   before=(ROOT/'source/estimations-core-retenues.yaml').read_bytes();result=prepare_adoption(proposal,'Test in isolated workspace only')
   self.assertEqual(result['summary']['delta_jh'],10);self.assertTrue(result['timings']['validation']>0);self.assertEqual((ROOT/'source/estimations-core-retenues.yaml').read_bytes(),before)
   plan,root=tx.load_plan(result['plan']);stage=Path(plan['validation']['workspace']);self.assertNotEqual(stage,ROOT)

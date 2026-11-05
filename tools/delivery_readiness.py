@@ -159,7 +159,11 @@ def compile_delivery(method, dossier, complexity, snapshot, decision, glossary, 
         require(question['proof_ref'] in proofs, 'unknown partner proof')
     document_path('source/decision-make-buy.yaml')
     document_path(complexity['source'])
-    require(snapshot['domaine_id'] == complexity['rows'][0]['chemin'][0], 'scope snapshot mismatch')
+    domain_ids={row['chemin'][0] for row in complexity['rows']}
+    if domain_ids!={snapshot['domaine_id']}:
+        root=next((n for n in snapshot['nodes'] if n['id']==snapshot['domaine_id']),None)
+        presented={r['target_id'] for r in snapshot['relations'] if r['source_id']==snapshot['domaine_id'] and r['type']=='presents'}
+        require(root is not None and root['kind']=='business_system' and domain_ids==presented,'scope snapshot mismatch')
     native = {node['id']: node for node in snapshot['nodes']}
     require(set(capabilities) <= set(native), 'scope absent from capture')
 
@@ -182,6 +186,16 @@ def compile_delivery(method, dossier, complexity, snapshot, decision, glossary, 
         path=[node['nom'] for node in row['hierarchie']], boundary=row['capacite']['perimetre'], definition=row['capacite']['definition'],
         href=ATLAS + '#/sheet?' + urlencode({'node': row['capacite_id']})) for row in complexity['rows']]
     domains = {}
+    parent={r['target_id']:r['source_id'] for r in snapshot['relations'] if r['type'] in ('contains','presents')}
+    native_nodes={n['id']:n for n in snapshot['nodes']}
+    for node in snapshot['nodes']:
+        if node['kind']!='business_area':continue
+        sub_id=parent.get(node['id']);domain_id=parent.get(sub_id)
+        if domain_id not in domain_ids:continue
+        domain=native_nodes[domain_id];sub=native_nodes[sub_id]
+        dg=domains.setdefault(domain_id,dict(id=domain_id,label=domain['fields']['name'],subdomains={}))
+        sg=dg['subdomains'].setdefault(sub_id,dict(id=sub_id,label=sub['fields']['name'],areas={}))
+        sg['areas'][node['id']]=dict(id=node['id'],label=node['fields']['name'],capability_ids=[])
     for row in complexity['rows']:
         domain, subdomain, area = row['hierarchie']
         domain_group = domains.setdefault(domain['id'], dict(id=domain['id'], label=domain['nom'], subdomains={}))

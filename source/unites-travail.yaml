@@ -82,8 +82,9 @@ team_scopes:
 - team_ref: case-management
   scope_kind: indirect
   status: proposed
-  core_scope_refs: &id001
+  core_scope_refs:
   - master-data-java-spring
+  - operational-references-java-spring
   - stock-java-spring
   - inventory-ownership-java-spring
   - supply-controls-java-spring
@@ -99,7 +100,19 @@ team_scopes:
 - team_ref: paas
   scope_kind: indirect
   status: proposed
-  core_scope_refs: *id001
+  core_scope_refs:
+  - master-data-java-spring
+  - operational-references-java-spring
+  - stock-java-spring
+  - inventory-ownership-java-spring
+  - supply-controls-java-spring
+  - orders-java-spring
+  - master-plan-java-spring
+  - supply-decisions-java-spring
+  - service-fulfilment-java-spring
+  - process-management-java-spring
+  - supply-workbenches-java-spring
+  - professional-it-java-spring
   basis: Périmètre métier desservi par les services ou l’accompagnement de cette équipe. Association indirecte proposée,
     sans part budgétaire.
 - team_ref: master-plan-supply-policy
@@ -135,6 +148,7 @@ team_scopes:
   status: proposed
   core_scope_refs:
   - master-data-java-spring
+  - operational-references-java-spring
   basis: Périmètre issu des lots dont l’équipe est propriétaire ou candidate. Association durable proposée, distincte
     de la ventilation des travaux.
 - team_ref: sourcing-procurement
@@ -161,13 +175,37 @@ team_scopes:
 - team_ref: portal
   scope_kind: indirect
   status: proposed
-  core_scope_refs: *id001
+  core_scope_refs:
+  - master-data-java-spring
+  - operational-references-java-spring
+  - stock-java-spring
+  - inventory-ownership-java-spring
+  - supply-controls-java-spring
+  - orders-java-spring
+  - master-plan-java-spring
+  - supply-decisions-java-spring
+  - service-fulfilment-java-spring
+  - process-management-java-spring
+  - supply-workbenches-java-spring
+  - professional-it-java-spring
   basis: Périmètre métier desservi par les services ou l’accompagnement de cette équipe. Association indirecte proposée,
     sans part budgétaire.
 - team_ref: integration
   scope_kind: indirect
   status: proposed
-  core_scope_refs: *id001
+  core_scope_refs:
+  - master-data-java-spring
+  - operational-references-java-spring
+  - stock-java-spring
+  - inventory-ownership-java-spring
+  - supply-controls-java-spring
+  - orders-java-spring
+  - master-plan-java-spring
+  - supply-decisions-java-spring
+  - service-fulfilment-java-spring
+  - process-management-java-spring
+  - supply-workbenches-java-spring
+  - professional-it-java-spring
   basis: Périmètre métier desservi par les services ou l’accompagnement de cette équipe. Association indirecte proposée,
     sans part budgétaire.
 units:
@@ -203,9 +241,88 @@ units:
       billing_period: null
       included_in_ref: null
     scope:
+      deliverable: Règles de données, périmètres et autorités configurables. · Contrats génériques de contribution
+        et préparation des données entrantes. · Rapprochement, dédoublonnage, fusion et séparation des identités.
+        · Règles de normalisation, priorités de sources et consolidation des valeurs. · Profils de contrôle et anomalies
+        qualifiées. · Cycle de remédiation, demande à la source et vérification de correction. · Règles et contributions
+        d’enrichissement avec provenance. · Modifications autorisées, différences et historique versionné. · Certification
+        d’une version pour un périmètre et une date d’effet. · Publication cohérente et retrait des références certifiées.
+        · Accès, souscription, distribution et reprise par destinataire. · Qualification inter-familles, résilience
+        et essais de performance. · Lignage, contrôles de protection et scénarios de restauration. · Structures,
+        règles et vues des tiers. · Références des accords et de leurs versions approuvées. · Adaptation des structures,
+        identifiants et variantes de produits. · Références publiées des assortiments, catalogues et prix. · Références
+        de lieux, réseaux et fournitures. · Catalogue de services et tarifs approuvés. · Références et spécifications
+        d’emballage. · Codes, classifications, conversions, calendriers et valeurs partagées.
+      acceptance:
+      - Une modification respecte les autorités déclarées et leur périmètre.
+      - Chaque contribution garde sa provenance et ses erreurs. Les connecteurs propres aux SI restent à dimensionner.
+      - Une fusion ou séparation est explicable et conserve les références sources.
+      - Une valeur consolidée est reliée à sa règle et à ses origines.
+      - Une anomalie possède sa règle, son périmètre et son résultat vérifiable.
+      - Un accusé de réception ne clôt pas une anomalie. La correction est recontrôlée.
+      - Les enrichissements conservent leurs droits et leurs justificatifs.
+      - Une modification est auditée et ne modifie pas une version déjà certifiée.
+      - Qualité, certification et entrée en vigueur restent des états distincts.
+      - Seule une version autorisée est publiée. Son retrait est traçable.
+      - Émis, reçu et rejeté restent distincts. La livraison ne prouve pas l’application métier.
+      - Les scénarios transverses sont rejouables. Les cibles de volume et de service restent à préciser.
+      - Une référence restaurée conserve son origine. Les services techniques communs sont réutilisés.
+      - Les vues 360 citent les transactions sources sans en prendre la propriété.
+      - La négociation et l’approbation des contrats restent dans leur domaine métier.
+      - La définition produit et les droits de contribution restent explicites.
+      - Les décisions d’offre et de prix restent chez leurs propriétaires métier.
+      - Les stocks physiques et capacités réelles ne deviennent pas des données maîtres.
+      - Les règles de prestation et les transactions de service restent externes.
+      - Les opérations réelles d’emballage restent dans l’exécution logistique.
+      - Les valeurs de configuration ne remplacent pas un moteur de décision métier.
+      boundary: Produit générique. Les adaptations Beaumanoir, le MCO et l’exploitation supplémentaires restent
+        à dimensionner.
+- id: core/operational-references-java-spring
+  label: Operational References SCM Java/Spring
+  nature: core_build
+  phase_ref: acquisition
+  object: core_system
+  recurrence: initial
+  record_refs:
+  - core/operational-references-java-spring
+  core_scope_refs:
+  - operational-references-java-spring
+  integration_unit_ref: null
+  parent_ref: null
+  basis: Référence des mesures retenues. Le rapprochement ne crée aucune estimation supplémentaire.
+  estimation_contract:
+    version: 1
+    option_ref: java-spring
+    proposal:
       deliverable: null
       acceptance: null
-      boundary: null
+      quantity: null
+      count_unit: null
+      counting_rule: null
+      quantity_basis: null
+      roles: null
+      expenses_eur_ht: null
+      assumptions: null
+      evidence_refs: null
+      cost_mode: null
+      unit_price_eur_ht: null
+      billing_period: null
+      included_in_ref: null
+    scope:
+      deliverable: Contrats de réception et contrôles de format, version et provenance. · Concevoir les modèles
+        de lecture, les correspondances avec les versions MDM et les règles d’actualisation, puis réaliser les vues
+        de consultation des cinq familles documentaires existantes. · Contrôle des dépendances, dates de validité
+        et versions manquantes. · Accusés de réception, rejet et reprise technique après correction publiée. · Scénarios
+        de réception croisés avec les flux commerce, finance et conception.
+      acceptance:
+      - Une version invalide est rejetée avec un diagnostic traçable.
+      - Les vues restituent la version reçue, sa provenance et sa validité. Elles ne permettent pas de corriger
+        le référentiel maître. Leur conception et leur qualification sont incluses dans cette ligne.
+      - Les incompatibilités restent visibles et ne sont pas corrigées silencieusement.
+      - Une reprise ne duplique pas les versions et ne clôt pas une anomalie métier.
+      - Les trois provenances existantes et les erreurs de version sont qualifiées.
+      boundary: Produit générique. Les adaptations Beaumanoir, le MCO et l’exploitation supplémentaires restent
+        à dimensionner.
 - id: core/stock-java-spring
   label: Stock Java/Spring
   nature: core_build

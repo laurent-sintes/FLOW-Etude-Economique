@@ -35,14 +35,16 @@ def dependencies():
     source = _document(SOURCE)
     path = source['proposal']['path']
     proposal = _document(path, source['proposal']['sha256'])
-    paths = {SOURCE, path}
+    paths = {SOURCE, path, 'source/organisation-delivery.yaml'}
     for relative, sha in proposal['inputs_sha256'].items():
         # The proposal records its local hypotheses by basename.
         relative = str((PurePosixPath(path).parent / relative)) if '/' not in relative else relative
         _document(relative, sha)
         paths.add(relative)
     from integration_units import dependencies as unit_dependencies
-    return paths | _revision_dependencies(source) | unit_dependencies()
+    from domain_costs import dependencies as domain_dependencies
+    from mdm_oss_estimation import dependencies as mdm_dependencies
+    return paths | _revision_dependencies(source) | unit_dependencies() | domain_dependencies() | mdm_dependencies()
 
 
 def _revision_dependencies(spec):
@@ -211,6 +213,7 @@ def build_gross_evaluations(economic, data, baseline, content, glossary, version
     integration_names = {r['id']:r['nom'] for r in _document('source/integration.yaml')['activites']}
     annual_names = {r['id']:r['nom'] for r in _document('source/maintenance.yaml')['activites']}
     selection = _document('source/selection-buy.yaml')
+    excluded_phases = _document('source/organisation-delivery.yaml')['excluded_workload_phases']
     phases = {}
     for phase in PHASES:
         phases[phase] = dict(intro=spec['phases'][phase]['intro'], options={})
@@ -222,6 +225,11 @@ def build_gross_evaluations(economic, data, baseline, content, glossary, version
             phases[phase]['options'][slug] = reading
             reading['summary'] = spec['phases'][phase]['summaries'][slug]
             reading['scope'] = ''
+            reading['workload_status'] = 'historical_pending_review' if phase in excluded_phases and slug=='java-spring' else 'current'
+            reading['workload_note'] = L['historical_workload_note'] if reading['workload_status']=='historical_pending_review' else None
+            if reading['workload_note']:reading['total_label'] = L['historical_human_total']
+            from domain_costs import context as domain_context
+            reading['domain_note'] = domain_context()['labels']['phase_pending'] if phase!='acquisition' or slug!='java-spring' else None
             if phase == 'acquisition':
                 if slug == 'java-spring':
                     active = {u['id']:u for u in units}
@@ -233,6 +241,10 @@ def build_gross_evaluations(economic, data, baseline, content, glossary, version
                             references=[{key:ref[key] for key in ('id','label','jh')} for ref in active[r['id']]['alignment']['rows'] if ref['id']!='selected-oss']) for r in proposal_rows])
                     reading['scope'] = L['reference_note']
                     core = reading['core']
+                    from domain_costs import core_reading
+                    core['domain_reading'] = core_reading(units)
+                    from mdm_oss_estimation import build_mdm_assessment
+                    core['mdm_oss_assessment'] = build_mdm_assessment(units)
                     role_totals = {}
                     for row in core['rows']:
                         unit = active[row['id']]
@@ -247,6 +259,9 @@ def build_gross_evaluations(economic, data, baseline, content, glossary, version
                         for role in unit['roles']:
                             item = role_totals.setdefault(role['id'],dict(id=role['id'],label=role['label'],jh=0))
                             item['jh'] += role['jh']
+                        if unit['trace'].get('native_scope_adoption'):
+                            row['detail']['historical_comparisons'] = deepcopy(row['comparisons'])
+                            row['comparisons'] = [dict(c,jh=None,cost_eur_ht=None) for c in row['comparisons']]
                         row['detail']['work_packages'] = deepcopy(unit['trace'].get('work_package_adoption',{}).get('work',[]))
                         row['detail']['method'] = unit['method']
                         row['detail']['functional_retained'] = unit['method'] == 'COSMIC × ISBSG'

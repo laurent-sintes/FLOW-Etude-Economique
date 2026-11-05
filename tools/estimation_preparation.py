@@ -25,6 +25,9 @@ def close(a, b, name):
 
 def prepare(documents, contract, registry, formula, use_cache=False):
     """Pure adapter; documents and formulas may come from the single YAML export."""
+    if contract['recipe'] == 'native_scope_adoption_v1':
+        from scope_revision import prepare_scope_adoption
+        return prepare_scope_adoption(documents,contract,registry,formula,use_cache=use_cache)
     if contract['recipe'] == 'work_package_adoption_v1':
         from estimation_revision import prepare_work_package_adoption
         return prepare_work_package_adoption(documents, contract, registry, formula, use_cache=use_cache)

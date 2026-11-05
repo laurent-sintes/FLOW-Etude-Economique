@@ -183,12 +183,12 @@ def compile_fundamentals(document, glossary, architecture, options, native):
         fail('program_scope', 'scope belongs to another program')
     if not set(mapping['outside_scope']) <= set(selected_systems) or scope['system_ref'] in mapping['outside_scope']:
         fail('outside_scope', 'unknown system or conflicting program scope')
-    if positioning['entity_ref'] not in entities or positioning['domain_ref'] not in domains:
+    if positioning['entity_ref'] not in entities or not set(positioning['domain_refs']) <= domains:
         fail('positioning', 'unknown platform or domain')
     if entities[positioning['entity_ref']]['kind'] != 'platform':
         fail('positioning', 'positioned entity must be a platform')
     scope_domains = {native_relations[ref]['target_id'] for ref in selected_systems[scope['system_ref']]['domain_relation_refs']}
-    if positioning['domain_ref'] not in scope_domains:
+    if not set(positioning['domain_refs']) <= scope_domains:
         fail('positioning', 'platform positioned outside the program scope')
     prose = deepcopy(document)
     for strategy in prose['strategies']:
@@ -321,7 +321,7 @@ def hydrate_fundamentals(ui, document):
         for relation_ref in systems[ref]['domain_relation_refs']:
             domain = nodes[relations[relation_ref]['target_id']]
             child = {'id': domain['id'], 'label': domain['label']}
-            if domain['id'] == mapping['positioning']['domain_ref']:
+            if domain['id'] in mapping['positioning']['domain_refs']:
                 child['flow'] = True
             item['domains'].append(child)
         compiled['systems'].append(item)

@@ -74,7 +74,7 @@ class ComposableTests(unittest.TestCase):
         self.assertTrue(all(r['start']>=66 for r in client))
         self.assertTrue(all('core' not in r['id'] for r in client))
         self.assertEqual(next(r['start'] for r in ledger if r['id']=='cycle_core_transition'),48)
-        self.assertEqual(sum(r['amount'] for r in ledger if r['id'] in ('MAI-005/reception','MAI-006/reception')),active_reference()['transition_reception_eur_ht'])
+        self.assertEqual(sum(r['amount'] for r in ledger if r['id'] in ('MAI-005/reception','MAI-006/reception')),sum(r['amount'] for o in active_reference()['before']['baseline']['options'] if o['stack']=='java-spring' for r in o['funding_ledger'] if r['id'] in ('MAI-005/reception','MAI-006/reception')))
 
     def test_durations_and_zero_service_assumptions(self):
         for b,d in ((36,6),(37.5,33.5),(60,60)):

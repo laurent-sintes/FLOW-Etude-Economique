@@ -1,0 +1,399 @@
+{
+  "date": "2026-11-05",
+  "id": "adopted-work-packages",
+  "scenario_ids": [
+    "additional-purchase-partial",
+    "b2b-partial-stock",
+    "b2b-release-deadline",
+    "complete-order-multiline",
+    "consignment-launch-replenishment",
+    "consignment-sale-pickup",
+    "customer-credit-hold",
+    "damaged-stock-disposition",
+    "export-remote-services",
+    "fashion-launch",
+    "forecast-to-shortage-arbitration",
+    "gift-kits-crossdock",
+    "intercompany-direct-delivery",
+    "intercompany-partial-return",
+    "intercompany-stock-transfer",
+    "last-item-concurrency",
+    "master-data-scope-2026-11-05",
+    "no-admissible-promise",
+    "order-structuring-engaged",
+    "ownership-transit-deadline",
+    "packaging-receipt-variance",
+    "partial-receiving",
+    "pickup-or-direct-shipment",
+    "planning-actuals-feedback",
+    "preorder-future-availability",
+    "process-approval-bottleneck",
+    "product-quality-feedback",
+    "redistribute-protected-stock",
+    "reference-plan-correction",
+    "remote-payment-ambiguous",
+    "return-credit-refund",
+    "return-customer-replacement",
+    "return-fashion-recovery",
+    "seasonal-order-backlog",
+    "service-policy-deactivation",
+    "shortage-reassessment",
+    "stocktaking-variance",
+    "substitution-price-service",
+    "supplier-return-outcomes",
+    "trace-accessory-kits",
+    "transfer-replenishment-order-driven",
+    "transport-loads-six-stores",
+    "transport-missed-connection",
+    "workflow-version-change"
+  ],
+  "status": "adopted",
+  "units": [
+    {
+      "id": "master-data-java-spring",
+      "purpose_basis": "Les 90 JH de protection générique sont conservés dans Support. Le studio de schéma et le chargement de plugins ajoutent 430 JH d’outillage générique. Les règles métier, le redressement et les adaptations de familles relèvent du Core Domain.",
+      "purpose_totals": {
+        "core-domain": 3625,
+        "support": 520
+      },
+      "work": [
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM-model",
+          "jh": 210,
+          "label": "Registre de modèles et d’autorités",
+          "reuse": "Brancher le registre et la validation au pipeline de déploiement et aux opérations de publication du studio. L’équipe produit prend en charge les migrations incompatibles. Utiliser les habilitations communes pour dissocier l’administration du cadre et la configuration métier. Infrastructure de configuration, migrations et publication applicative. Le lot MDM finance son intégration spécifique.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Un registre versionné des schémas, des relations, des règles d’autorité et de leurs portées. Vérifier les dépendances et la compatibilité avant activation. Cycle commun de règles métier versionnées par famille et portée. Brouillon, validation selon délégation, activation et désactivation sans redéploiement. Un schéma incompatible est rejeté. Une règle d’autorité est évaluée à la bonne version et dans le bon périmètre. Une règle ne s’active que dans une portée autorisée. Les résultats antérieurs restent liés à la version appliquée."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-admission",
+          "id": "MDM-records",
+          "jh": 215,
+          "label": "Écriture des fiches sources et consolidées",
+          "reuse": "Mapper les objets MDM et leurs invariants sur la persistance transactionnelle. Réutiliser le même contrat d’écriture et le même contrôle de concurrence pour la correction et la reprise de lot. Stockage et transactions du socle. Spring Data est un candidat pour les repositories.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Contrats de lecture et d’écriture, conservation des fiches sources, fiche consolidée, relations typées et contrôle de concurrence. Commande de redressement unitaire et par lot, avec origine, justification et nouvelle version de fiche. Un changement relève de la source lorsque celle-ci garde l’autorité. Deux écritures concurrentes conservent les origines et les relations valides. Une écriture périmée reçoit un diagnostic. Une correction est traçable et respecte les droits. Une correction compensatoire laisse la version certifiée d’origine intacte."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-versions",
+          "id": "MDM-versions",
+          "jh": 200,
+          "label": "Versions, historique et décision de certification",
+          "reuse": "Raccorder la décision aux tâches communes et conserver son résultat sur la version concernée. Portail et runtime de tâches. Journal technique pour les traces d’exécution.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Versions immuables, dates d’effet, différences, journal métier et décision de certification par autorité et périmètre. Un brouillon peut évoluer. Une version certifiée reste intacte. La décision, la date d’effet et l’identité de l’autorité sont traçables."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-admission",
+          "id": "MDM-ingestion",
+          "jh": 155,
+          "label": "Admission des contributions et reprise",
+          "reuse": "Raccorder un canal générique et la file de traitements. L’assistant d’import utilise le même contrat. File technique, console de traitements et outillage d’import générique.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Contrat d’entrée versionné, provenance, validation, quarantaine, idempotence et reprise des rejets. Une contribution rejouée ne crée pas de doublon. Une anomalie reste liée à sa source et à la version reçue."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM-identity",
+          "jh": 220,
+          "label": "Rapprochement, fusion et séparation",
+          "reuse": "Qualifier les opérateurs de comparaison et raccorder les décisions au journal métier. Primitives de recherche et traitements de fond. Le moteur de rapprochement métier reste à réaliser.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Candidats et scores configurés, file de décisions, fusion autorisée, séparation et conservation des identifiants d’origine. Une fusion puis une séparation conservent les identifiants et les décisions. Des faux positifs représentatifs sont rejoués."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM-survivorship",
+          "jh": 240,
+          "label": "Consolidation, survivance et enrichissement",
+          "reuse": "Configurer un catalogue borné d’opérateurs et de priorités par attribut. Exposer des opérateurs paramétrables de normalisation, de calcul et de classification dans le catalogue de règles. Les opérateurs fournis par les plugins approuvés utilisent le même contrat d’enrichissement. Exécution technique des traitements et validation de forme.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Normalisation, choix de la valeur par autorité et priorité, provenance par valeur et enrichissement justifié. Appliquer les règles d’enrichissement configurées, prévisualiser l’impact sur un échantillon et recalculer avec provenance par valeur. Pour chaque valeur consolidée, on retrouve l’origine et la règle appliquée. Une contribution d’enrichissement non autorisée est rejetée. Le steward voit les valeurs proposées avant activation. La priorité des sources et les autorisations restent opposables."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM-quality",
+          "jh": 235,
+          "label": "Qualité et correction à la source",
+          "reuse": "Relier les anomalies au dossier et aux tâches. Les règles MDM restent évaluées sur le serveur. Brancher les contrôles à la file commune et lier chaque anomalie à la version de règle exécutée. Les plugins approuvés sont sélectionnables comme opérateurs de contrôle. Dossiers, tâches, notifications et suivi technique des exécutions.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Profils de contrôle, anomalies typées, demande à la source et clôture après recontrôle. Contrôles configurables par population, sévérité et seuil. Aperçu des anomalies avant activation et recontrôle sur demande après correction. Le simple accusé de réception laisse l’anomalie ouverte. Un recontrôle réussi autorise la clôture. Une anomalie est clôturée après un recontrôle réussi. Un aperçu de règle ne modifie aucune fiche."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-service",
+          "id": "MDM-publication",
+          "jh": 205,
+          "label": "Publication, retrait et livraison",
+          "reuse": "Brancher la transaction de publication et les états métier au mécanisme de transport et à son suivi. Transport et traitements de fond génériques. Le registre des livraisons MDM reste spécifique.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Préconditions de publication, remplacement et retrait cohérents, souscriptions, état par destinataire et reprise. Une version non certifiée ne part pas. Un destinataire en échec peut reprendre sans doubler la livraison logique."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-protection",
+          "id": "MDM-protection",
+          "jh": 190,
+          "label": "Contrôles d’accès et cohérence après restauration",
+          "reuse": "Mapper les rôles et champs MDM, relier les journaux au socle, rejouer les versions, abonnements et preuves après restauration. Identité, habilitations génériques, sauvegardes et audit technique. Le contrôle des valeurs restaurées reste dans le MDM.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Contrôle contextuel côté serveur, droits de consommation, journal de preuves et rapprochement après restauration. Une lecture interdite reste interdite via API. Une restauration conserve la provenance et identifie les livraisons à réconcilier."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM-query",
+          "jh": 130,
+          "label": "Recherche et lectures MDM pour les écrans",
+          "reuse": "Configurer les index, tris et filtres sur un catalogue borné. Raccorder les prédicats de sécurité définis dans le bloc protection. Pagination, accès aux données et primitives de recherche de la pile Java.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Requêtes paginées sur fiches, origines, versions et liens directs. Projections nécessaires à l’affichage. Une fiche est retrouvable par identifiant source et référence. Les projections appliquent les droits et les filtres temporels définis."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM-schema-studio-engine",
+          "jh": 125,
+          "label": "Services du studio de schéma",
+          "reuse": "Brancher les commandes du studio sur le registre commun, la validation et la file de traitements. Signaler les changements qui demandent une migration. Registre MDM, habilitations, traitements de fond et outillage de migration.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Créer et modifier familles, champs et relations en brouillon. Calculer les impacts sur les fiches, les règles et les API. Activer les évolutions compatibles dans une nouvelle version. Le studio affiche les dépendances avant activation. Une évolution incompatible reste en brouillon avec les actions nécessaires. Les versions certifiées restent lisibles."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM-plugin-runtime",
+          "jh": 150,
+          "label": "Contrat, registre et exécution des plugins JAR",
+          "reuse": "Raccorder les plugins approuvés au moteur de qualité et d’enrichissement. Conserver les versions nécessaires au rejeu et aux preuves. Vérification de signature du JDK, stockage des fichiers, traitements de fond, habilitations et journal technique.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Contrat Java versionné des opérateurs, dépôt des JAR, catalogue, contrôle de signature et de compatibilité, activation et retrait. Exécuter les plugins dans un processus isolé avec des droits et ressources limités. Un paquet non approuvé ou incompatible ne s’active pas. Un opérateur qui dépasse ses limites s’arrête avec un diagnostic. La version exécutée reste traçable."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM-admin",
+          "jh": 195,
+          "label": "Administration des modèles, sources et règles",
+          "reuse": "Rendre les formulaires d’administration à partir des schémas versionnés. Adapter les formulaires et le portail à la délégation entre administrateurs, data stewards et valideurs. Navigation, composants de grille et rendu de formulaire partagé à qualifier. JSON Forms est un candidat pour le rendu.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Consulter les modèles actifs, consulter leurs versions, gérer les sources, priorités et règles autorisées. Éditeur commun des règles de qualité et d’enrichissement. Sélection du périmètre, opérateurs, paramètres, aperçu d’impact et historique. Un administrateur peut faire évoluer les paramètres autorisés. Un utilisateur autorisé prépare et active une règle validée dans sa portée depuis le portail."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM-forms",
+          "jh": 150,
+          "label": "Recherche et formulaires de fiche",
+          "reuse": "Brancher les schémas aux composants React et ajouter les contrôles pour les relations, la provenance et la lecture seule. Rendu standard des champs et composants de navigation. Les huit paramétrages métier restent dans les lots familles.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Un parcours liste, détail et modification commun aux familles, avec filtres, relations et erreurs de contribution. Une fiche peut être recherchée, lue et modifiée selon les droits. Une erreur du serveur est restituée au bon champ."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM-steward",
+          "jh": 150,
+          "label": "Écrans de rapprochement et historique",
+          "reuse": "Brancher les décisions aux API du moteur. Adapter grilles et panneaux de détail. Présenter le résultat du recontrôle, l’origine et l’historique dans le panneau de détail. Composants visuels du portail et grille commune. La comparaison de valeurs MDM et son ergonomie restent spécifiques.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Comparaison des candidats, fusion et séparation explicables, comparaison des versions et consultation de la provenance. Parcours de redressement sur fiche. Comparer les valeurs, indiquer un motif et orienter la correction vers la source si elle seule est autorisée. Un steward voit les valeurs en conflit et peut justifier une fusion. Il retrouve la provenance et l’historique après décision. Le steward peut corriger la valeur autorisée ou saisir une demande à la source et suivre son résultat."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM-decisions",
+          "jh": 170,
+          "label": "Écrans d’anomalies, certification et publication",
+          "reuse": "Étendre la file de tâches et la console avec les vues et actions MDM. Chaque action appelle l’API de son bloc métier. Étendre le portail de tâches avec les filtres et actions MDM. Partager les états du moteur de qualité. Portail des tâches, dossiers et console des traitements.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Vues des anomalies, versions à certifier, rejets et états de livraison. Actions contextualisées et restitution des preuves. File de travail par règle, sévérité et portée. Affecter une anomalie, consulter son état et relancer le recontrôle. Le steward voit le résultat du recontrôle, la portée de certification et les échecs de livraison. Chaque action est auditée. Le steward retrouve les anomalies qui lui sont accessibles, traite un dossier et voit le résultat du recontrôle."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-admission",
+          "id": "MDM-bulk",
+          "jh": 120,
+          "label": "Écran d’import et d’export en masse",
+          "reuse": "Brancher le traitement générique aux contrats d’admission et d’accès. XLSX est le format d’interface chiffré. Relier l’aperçu et la relance au contrat de redressement et à la console de traitements déjà financée. Téléversement, traitement de fond et export tabulaire génériques.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Parcours avec modèle tabulaire versionné par famille, aperçu, rapport d’erreurs et relance contrôlée. Redressement en masse depuis une sélection bornée ou un gabarit tabulaire. Aperçu avant/après, motifs, erreurs et suivi par ligne. Un fichier peut être prévisualisé et ses lignes invalides expliquées. La reprise respecte les droits, la provenance et l’idempotence. L’exécution est limitée aux lignes et champs autorisés. Les lignes en erreur sont isolées et la relance ne rejoue pas les corrections réussies."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM-schema-studio-ui",
+          "jh": 95,
+          "label": "Studio d’édition des schémas",
+          "reuse": "Brancher les écrans aux commandes de brouillon et d’activation. Restituer les erreurs, les dépendances et les besoins de migration. Composants de formulaire et de navigation, droits d’administration et journal.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Éditeur de familles, champs et relations. Prévisualiser le schéma, comparer le brouillon à la version active, afficher les impacts et demander l’activation. Un administrateur autorisé prépare, compare et publie un changement compatible depuis le portail."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM-plugin-admin",
+          "jh": 60,
+          "label": "Administration des plugins JAR",
+          "reuse": "Intégrer les opérateurs activés au catalogue visible dans l’éditeur de règles et afficher les dépendances avant retrait. Téléversement, habilitations, composants du portail et suivi des traitements.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Écran de dépôt, validation, activation et désactivation. Afficher version, signataire, fonctions, règles utilisatrices et diagnostics. Un administrateur suit le statut d’un dépôt et peut désactiver un plugin après examen des règles concernées. Un steward peut choisir les opérateurs activés dans sa portée."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "MDM12",
+          "jh": 200,
+          "label": "Qualification transverse du MDM",
+          "reuse": "Authentification, socle applicatif, stockage, automatisation de livraison et audit technique réutilisent les moyens déjà financés par les autres lots. Aucun nouveau rabais forfaitaire de réutilisation n’est appliqué.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Qualification inter-familles, résilience et essais de performance."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "PF01",
+          "jh": 100,
+          "label": "Clients et fournisseurs",
+          "reuse": "Authentification, socle applicatif, stockage, automatisation de livraison et audit technique réutilisent les moyens déjà financés par les autres lots. Aucun nouveau rabais forfaitaire de réutilisation n’est appliqué.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Structures, règles et vues des tiers."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "PF02",
+          "jh": 60,
+          "label": "Accords approuvés",
+          "reuse": "Authentification, socle applicatif, stockage, automatisation de livraison et audit technique réutilisent les moyens déjà financés par les autres lots. Aucun nouveau rabais forfaitaire de réutilisation n’est appliqué.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Références des accords et de leurs versions approuvées."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "PF03",
+          "jh": 150,
+          "label": "Produits, variantes et unités commerciales",
+          "reuse": "Authentification, socle applicatif, stockage, automatisation de livraison et audit technique réutilisent les moyens déjà financés par les autres lots. Aucun nouveau rabais forfaitaire de réutilisation n’est appliqué.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Adaptation des structures, identifiants et variantes de produits."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "PF04",
+          "jh": 90,
+          "label": "Catalogues, assortiments et prix",
+          "reuse": "Authentification, socle applicatif, stockage, automatisation de livraison et audit technique réutilisent les moyens déjà financés par les autres lots. Aucun nouveau rabais forfaitaire de réutilisation n’est appliqué.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Références publiées des assortiments, catalogues et prix."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "PF05",
+          "jh": 80,
+          "label": "Réseau et fournitures internes",
+          "reuse": "Authentification, socle applicatif, stockage, automatisation de livraison et audit technique réutilisent les moyens déjà financés par les autres lots. Aucun nouveau rabais forfaitaire de réutilisation n’est appliqué.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Références de lieux, réseaux et fournitures."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "PF06",
+          "jh": 70,
+          "label": "Services et tarifs",
+          "reuse": "Authentification, socle applicatif, stockage, automatisation de livraison et audit technique réutilisent les moyens déjà financés par les autres lots. Aucun nouveau rabais forfaitaire de réutilisation n’est appliqué.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Catalogue de services et tarifs approuvés."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "PF07",
+          "jh": 60,
+          "label": "Matériaux et spécifications d’emballage",
+          "reuse": "Authentification, socle applicatif, stockage, automatisation de livraison et audit technique réutilisent les moyens déjà financés par les autres lots. Aucun nouveau rabais forfaitaire de réutilisation n’est appliqué.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Références et spécifications d’emballage."
+        },
+        {
+          "effort_status": "engineering_assumption_not_observed",
+          "funding_ref": "master-data-common-domain",
+          "id": "PF08",
+          "jh": 120,
+          "label": "Références partagées et configuration",
+          "reuse": "Authentification, socle applicatif, stockage, automatisation de livraison et audit technique réutilisent les moyens déjà financés par les autres lots. Aucun nouveau rabais forfaitaire de réutilisation n’est appliqué.",
+          "scenario_refs": [
+            "master-data-scope-2026-11-05"
+          ],
+          "scope": "Codes, classifications, conversions, calendriers et valeurs partagées."
+        }
+      ]
+    }
+  ]
+}

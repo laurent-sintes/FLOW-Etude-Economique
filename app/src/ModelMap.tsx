@@ -30,14 +30,14 @@ export function ModelMap(){
 }
 
 export function BusinessAreaSummary({heading='h3',provenance=true}:{heading?:'h2'|'h3';provenance?:boolean}){
- const {data}=useStudy(),S=data.content.delivery_readiness.scope,R=data.ui.essential.model_reading,id=useId(),Heading=heading;
+ const {data}=useStudy(),S=data.content.delivery_readiness.scope,R=data.ui.essential.model_reading,id=useId(),Heading=heading,DomainHeading=heading==='h2'?'h3':'h4';
  return (
   <section className="model-scope-summary" aria-labelledby={id+'-areas'}>
    <Heading id={id+'-areas'}>{R.scope_areas_title}</Heading>
    <p>{R.scope_areas_note}</p>
-   <dl className="model-scope-areas">{S.hierarchy.flatMap((domain:Data)=>domain.subdomains.map((subdomain:Data)=><div key={subdomain.id} data-subdomain={subdomain.id}>
+   {S.hierarchy.map((domain:Data)=><section className="model-scope-domain" data-native-domain={domain.id} key={domain.id}><DomainHeading>{domain.label}</DomainHeading><dl className="model-scope-areas">{domain.subdomains.map((subdomain:Data)=><div key={subdomain.id} data-subdomain={subdomain.id}>
     <dt>{subdomain.label}</dt><dd><ul>{subdomain.areas.map((area:Data)=><li key={area.id} data-area={area.id}>{area.label}</li>)}</ul></dd>
-   </div>))}</dl>
+   </div>)}</dl></section>)}
    {provenance&&<><p className="model-scope-provenance">{R.scope_source_label} <time dateTime={S.source.date}>{new Intl.DateTimeFormat(data.ui.locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(S.source.date))}</time></p>
    <div className="model-reading-links"><SourceLink path={S.link.href}>{S.link.label}</SourceLink></div></>}
   </section>

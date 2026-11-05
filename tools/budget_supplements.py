@@ -31,7 +31,7 @@ def baseline(calculation_ref):
     result=calculate({'id':calculation_ref})
     require(result['total_jh']==unit['total_jh'],'baseline does not reproduce adopted decision')
     families={};processes=[]
-    while contract['recipe'] in ('oss_reference_revision_v1','scenario_scope_adoption_v1','work_package_adoption_v1'):
+    while contract['recipe'] in ('oss_reference_revision_v1','scenario_scope_adoption_v1','work_package_adoption_v1','native_scope_adoption_v1'):
         basis=read(ROOT/contract['inputs']['revision_basis'])
         contract=next(c for c in basis['registry']['calculations'] if c['unit_id']==unit['id'])
     if contract['recipe']=='coherent_components_v1':

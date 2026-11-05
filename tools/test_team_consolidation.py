@@ -171,13 +171,23 @@ class TeamConsolidationTests(unittest.TestCase):
             if row['cost_eur_ht'] is not None:
                 self.assertAlmostEqual(sum(row.get(k) or 0 for k in ('labour_eur_ht','non_labour_eur_ht','unclassified_eur_ht')),row['cost_eur_ht'],places=2)
 
+    def test_component_applicability_never_turns_an_unknown_envelope_into_not_applicable(self):
+        c=consolidate(self.org)
+        unknown=next(r for r in c['reference']['contributions'] if r['work_unit_ref']=='funding/travaux_communs' and r['unclassified_eur_ht'] is not None)
+        self.assertIsNone(unknown['labour_eur_ht']);self.assertIsNone(unknown['non_labour_eur_ht'])
+        self.assertTrue(all(unknown['component_applicability'].values()))
+        core=next(r for r in c['reference']['contributions'] if r['work_unit_ref']=='core/master-data-java-spring')
+        self.assertIsNone(core['unclassified_eur_ht'])
+        self.assertFalse(core['component_applicability']['unclassified_eur_ht'])
+        self.assertIsNotNone(core['labour_eur_ht']);self.assertIsNotNone(core['non_labour_eur_ht'])
+
     def test_bootstrap_snapshot_export_and_canonical_graph(self):
         from study_snapshot import ENGINE_FILES,candidate
         from team_consolidation import dependencies
         self.assertIn('team_consolidation.py',ENGINE_FILES)
         self.assertTrue(dependencies()<=self.study.files)
         self.assertIn(SOURCE,candidate(self.study)['payload']['documents'])
-        self.assertEqual(self.study.bootstrap(essential=True)['content']['delivery_organisation']['team_consolidations'],self.org['team_consolidations'])
+        self.assertEqual(self.study.organisation_reading()['delivery_organisation']['team_consolidations'],self.org['team_consolidations'])
         ids={o['id'] for o in self.study.fundamentals['estimation_model']['objects']}
         self.assertTrue({'estimate_selection','scope_coverage','work_expense','team_estimation_reading'}<=ids)
 

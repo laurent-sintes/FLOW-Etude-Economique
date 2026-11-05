@@ -158,7 +158,7 @@ class EconomicReadingTests(unittest.TestCase):
             if option['mode']=='Make':
                 core=option['core']
                 self.assertEqual(core['total_jh'],sum(u['total_jh'] for u in core['units']))
-                self.assertEqual(len(core['features']),88)
+                self.assertEqual(len(core['features']),len(self.study.content['business_map']['rows']))
                 self.assertTrue(all(not row['charges'] for row in core['features']))
                 self.assertFalse(core['natures'])
             else:self.assertIsNone(option['core'])

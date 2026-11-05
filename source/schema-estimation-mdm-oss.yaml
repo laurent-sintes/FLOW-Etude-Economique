@@ -1,0 +1,178 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+type: object
+required:
+- version
+- id
+- status
+- date
+- work_unit_ref
+- proofs
+- method_ref
+- report_ref
+- refinement_report_ref
+- engineering_report_ref
+- cocomo
+- rounding_jh
+- labels
+- products
+additionalProperties: false
+properties:
+  version:
+    const: 1
+  id: &id001
+    type: string
+    minLength: 1
+  status:
+    const: proposal_not_adopted
+  date:
+    type: string
+    format: date
+  work_unit_ref: *id001
+  proofs:
+    type: object
+    required:
+    - scope
+    - measures
+    - code
+    - measurement_script
+    - unidata_selection
+    - engineering
+    additionalProperties: false
+    properties:
+      scope: &id002
+        type: object
+        required:
+        - path
+        - sha256
+        additionalProperties: false
+        properties:
+          path: *id001
+          sha256:
+            type: string
+            pattern: ^[0-9a-f]{64}$
+      measures: *id002
+      code: *id002
+      measurement_script: *id002
+      unidata_selection: *id002
+      engineering: *id002
+  method_ref: *id001
+  report_ref: *id001
+  refinement_report_ref: *id001
+  engineering_report_ref: *id001
+  cocomo:
+    type: object
+    required:
+    - A
+    - B
+    - SF_sum
+    - C
+    - D
+    - month_hours
+    - day_hours
+    - effort_phase_factor
+    - schedule_phase_factor
+    - other_EM
+    - SCED
+    additionalProperties: false
+    properties:
+      A: &id003
+        type: number
+        exclusiveMinimum: 0
+      B: *id003
+      SF_sum: *id003
+      C: *id003
+      D: *id003
+      month_hours: *id003
+      day_hours: *id003
+      effort_phase_factor: *id003
+      schedule_phase_factor: *id003
+      other_EM: *id003
+      SCED: *id003
+  rounding_jh:
+    type: integer
+    minimum: 1
+  labels:
+    type: object
+    required:
+    - title
+    - status
+    - intro
+    - boundary
+    - retained
+    - candidate
+    - candidate_note
+    - unchanged
+    - reference
+    - size
+    - effort
+    - cost
+    - months
+    - files
+    - revision
+    - components
+    - mapping
+    - assumptions
+    - unknowns
+    - group
+    - capability
+    - qualification
+    - qualifications
+    - groups
+    - native
+    - additional
+    - family_count
+    - activity_scope
+    - sensitivity
+    - sensitivity_note
+    - frozen_source
+    - proof
+    - jh
+    - delta
+    - days_only
+    - observed_scope
+    - evidence_note
+    - prototype_note
+    - comparison_low
+    - comparison_high
+    - comparison_equal
+    - proposed_total
+    - no_functional
+    - refinement_title
+    - refinement_initial
+    - refinement_selected
+    - refinement_removed
+    - refinement_retained
+    - refinement_open
+    - refinement_proof
+    - logical_units
+    - engineering
+    additionalProperties:
+      oneOf:
+      - *id001
+      - type: object
+        additionalProperties: *id001
+  products:
+    type: array
+    minItems: 3
+    maxItems: 3
+    items:
+      type: object
+      required:
+      - id
+      - label
+      - repos
+      - license
+      - technology
+      - scope
+      additionalProperties: false
+      properties:
+        id: *id001
+        label: *id001
+        repos:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items: *id001
+        license: *id001
+        technology: *id001
+        scope: *id001

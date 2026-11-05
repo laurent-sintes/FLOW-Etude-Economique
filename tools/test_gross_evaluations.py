@@ -30,8 +30,18 @@ class GrossEvaluationsTests(unittest.TestCase):
             self.assertEqual(tuple(self.reading['phases'][phase]['options']),('java-spring','microsoft','sap'))
             self.assertEqual(self.study.ui['essential']['pages']['charges-'+phase],self.study.ui['essential']['pages'][phase])
         groups=[g for g in self.study.ui['essential']['nav_groups'] if not g.get('hidden')]
-        i=next(i for i,g in enumerate(groups) if g['label']=='Framework d’évaluation')
-        self.assertEqual(groups[i+1]['items'],['charges-'+p for p in phases])
+        charge_group=next(g for g in groups if 'charges-acquisition' in g['items'])
+        self.assertTrue({'unites-travail','charges-equipes',*('charges-'+p for p in phases)} <= set(charge_group['items']))
+        self.assertTrue(any('schema-modele' in g['items'] for g in groups))
+
+    def test_integration_history_is_explicit_without_changing_retained_amounts(self):
+        r=self.reading['phases']['integration']['options']['java-spring']
+        self.assertEqual(r['workload_status'],'historical_pending_review')
+        self.assertTrue(r['workload_note'])
+        self.assertEqual(r['total_jh'],sum(g.get('subtotal_jh',0) for g in r['groups']))
+        self.assertNotEqual(r['total_label'],self.reading['labels']['human_total'])
+        for phase in ('acquisition','fonctionnement'):
+            self.assertEqual(self.reading['phases'][phase]['options']['java-spring']['workload_status'],'current')
 
     def test_proposal_is_distinct_and_all_lots_reconcile(self):
         core=self.reading['phases']['acquisition']['options']['java-spring']['core']
@@ -54,18 +64,23 @@ class GrossEvaluationsTests(unittest.TestCase):
         self.assertEqual([r['cost_eur_ht'] for r in rows],[6100,3050])
         self.assertEqual(unit,before)
         core=self.reading['phases']['acquisition']['options']['java-spring']['core']
-        self.assertEqual(len(core['rows']),11)
+        self.assertEqual(len(core['rows']),len(active_reference()['units']))
         for row in core['rows']:
             self.assertEqual(len(row['comparisons']),5)
             self.assertEqual({r['id'] for r in row['comparisons']},{'erpnext','odoo','tryton','axelor','cosmic-isbsg'})
         master=next(r for r in core['rows'] if r['id']=='master-data-java-spring')
         self.assertEqual(master['adopted_cost_eur_ht'],active_reference()['units']['master-data-java-spring']['cost_eur_ht'])
-        self.assertEqual(next(r['cost_eur_ht'] for r in master['comparisons'] if r['id']=='cosmic-isbsg'),780337.5)
+        self.assertIsNone(next(r['cost_eur_ht'] for r in master['comparisons'] if r['id']=='cosmic-isbsg'))
+        historic=next(r for r in master['detail']['historical_comparisons'] if r['id']=='cosmic-isbsg')
+        self.assertEqual(historic['jh'],1200)
+        adopted=active_reference()['units']['master-data-java-spring']
+        self.assertEqual(historic['cost_eur_ht'],round(1200*adopted['cost_eur_ht']/adopted['jh'],2))
         self.assertEqual(sum(r['adopted_jh'] for r in core['rows']),active_reference()['total_jh'])
         self.assertEqual([t['id'] for t in core['comparison_totals']],[r['id'] for r in core['rows'][0]['comparisons']])
         for total in core['comparison_totals']:
             values=[next(c['jh'] for c in row['comparisons'] if c['id']==total['id']) for row in core['rows']]
-            self.assertAlmostEqual(total['jh'],sum(values))
+            if None in values:self.assertIsNone(total['jh'])
+            else:self.assertAlmostEqual(total['jh'],sum(values))
 
     def test_module_analysis_distinguishes_interface_work_from_incremental_functional_size(self):
         core=self.reading['phases']['acquisition']['options']['java-spring']['core']

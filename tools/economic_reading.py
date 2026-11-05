@@ -121,7 +121,8 @@ def compile_economic_evaluations(baseline, content, editorial, glossary, documen
             _require(total_jh == stack['economic']['jh']['core_avant_ia'], f'core charge ownership:{slug}')
             for feature in features:
                 feature['retained_unit'] = next((u['id'] for u in units if feature['id'] in {c['id'] for c in u['capabilities']}), None)
-            core = dict(natures=natures, units=units, features=features, total_jh=total_jh,
+            from domain_costs import core_reading
+            core = dict(domain_reading=core_reading(units) if slug=='java-spring' else None, natures=natures, units=units, features=features, total_jh=total_jh,
                         amounts=deepcopy(stack['economic']['detail_build']), total_eur_ht=option['build'])
             _require(abs(sum(Decimal(str(value)) for value in core['amounts'].values()) -
                          Decimal(str(option['build']))) < Decimal('0.005'), f'core cost ownership:{slug}')

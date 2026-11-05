@@ -255,3 +255,24 @@ Le scénario de travail `scenarios-chiffrage.yaml` choisit une version par unit�
 La couverture d’une enveloppe déclare `remaining_work_refs`. `null` signifie que le reste de périmètre est à revoir, une liste vide confirme son absence, les identifiants désignent les travaux restants inclus dans le détail remplaçant. Le moteur dérive les lacunes par contribution et par mesure, puis les lectures par travail, équipe et phase.
 
 Le champ `estimation_contract.scope` complète le livrable, les critères de réception et la frontière d’un travail indépendamment de sa proposition de prix. Les champs null conservent les informations documentées chez les propriétaires existants, sans inventer les données absentes.
+
+
+### Résultat attendu d’une unité de travail
+
+`unites-travail.yaml#units/estimation_contract/scope` déclare le livrable réceptionnable, ses critères et sa frontière. Les livrables documentés des activités et des unités d’intégration gardent leur provenance. Les listes `includes` des évaluations Core alimentent uniquement le contenu et la justification du chiffrage retenu. Elles ne renseignent pas implicitement un livrable. Un résultat absent reste null et figure parmi les données à renseigner, sans changer les JH, tarifs ou coûts de référence.
+
+Le statut des JH historiques des phases exclues de la ventilation provient de `organisation-delivery.yaml#excluded_workload_phases`. Leur conservation dans les lectures brutes et les preuves ne vaut pas dimensionnement courant. Un total financier connu conserve ses composantes inconnues à renseigner.
+
+
+### Périmètre Flow Core System du 5 novembre 2026
+
+Le périmètre cible réunit Master Data et Supply Chain Management. `fondamentaux.yaml#business_map/positioning/domain_refs` référence les deux domaines. La capture datée est distincte de `referentiel-capacites.yaml`, qui conserve la base des décisions retenues. `revision-master-data.yaml` porte les 26 livrables, les hypothèses de la réévaluation et les impacts encore inconnus. `scope_revision.py` calcule le remplacement complet du lot, sa valorisation aux tarifs courants et le différentiel. Cette proposition reste hors du journal et des scénarios financiers. Les autres phases et les offres Buy restent à requalifier, sans montants inventés.
+
+
+### Adoption du périmètre MDM et vues SCM
+
+La décision du 5 novembre 2026 est intégrée aux sources retenues. `source/referentiel-capacites.yaml` pointe vers la capture des deux domaines. Le lot Master Data et le lot Operational References sont distincts. `native_scope_adoption_v1` reproduit leurs livrables et rôles depuis les preuves figées, sans reconstruire les services communs chez le consommateur. Les contrats non concernés conservent leur capture historique et ne sont compatibles que si leurs capacités, chemins et interprétations restent identiques. Les preuves antérieures restent intactes.
+
+Le classement par domaine métier est dérivé de la hiérarchie native. `classement-domaines.yaml` porte uniquement les exceptions fonctionnelles justifiées et les libellés. `tools/domain_costs.py` conserve chaque mesure une fois, avec un reste non ventilé pour les travaux communs ou les rattachements inconnus. Les affectations aux équipes et Core Domain / Support restent indépendants.
+
+La proposition COCOMO du domaine Master Data est portée par `estimation-mdm-oss.yaml`. Le module `tools/mdm_oss_estimation.py` vérifie les mesures figées, les rattachements natifs et les compléments par analogie, puis utilise les formules canoniques. Les résultats restent distincts de `estimations-core-retenues.yaml` et des simulations.

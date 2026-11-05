@@ -20,7 +20,8 @@ class FrameworkGraphTests(unittest.TestCase):
             for key in ('source','target','cardinality','meaning'):self.assertEqual(r[key],canonical[key])
         self.assertEqual({r['id'] for r in G['interactions']},{r['id'] for r in self.study.content['delivery_organisation']['interactions']})
         self.assertFalse(any(r['source']=='transformation-office' or r['target']=='transformation-office' for r in G['interactions']))
-        self.assertEqual(G,self.study.bootstrap(essential=True)['content']['framework_graph'])
+        self.assertEqual(G,self.study.organisation_reading()['framework_graph'])
+        self.assertEqual(self.study.bootstrap(essential=True)['content']['framework_graph'],dict(deferred=True))
 
     def test_domains_are_canonical_and_every_object_has_one_domain(self):
         g=self.study.content['framework_graph'];m=self.study.fundamentals['estimation_model']

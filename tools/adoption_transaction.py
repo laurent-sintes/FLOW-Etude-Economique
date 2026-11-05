@@ -1,7 +1,7 @@
 """Stage validated model changes, reject stale plans, and recover interrupted file transactions."""
 from contextlib import contextmanager
 from pathlib import Path, PurePosixPath
-import base64, hashlib, json, os, tempfile, uuid
+import base64, hashlib, json, os, tempfile, uuid, re
 
 
 def digest(raw): return hashlib.sha256(raw).hexdigest()
@@ -12,7 +12,7 @@ def require(ok, message):
 def target(root, name):
     rel=PurePosixPath(name)
     require(isinstance(name,str) and '\\' not in name and not rel.is_absolute() and '..' not in rel.parts, 'Invalid relative path')
-    allowed=(name.startswith('source/') and rel.suffix in ('.yaml','.yml')) or name=='config/publication.yaml' or (name.startswith('audits/') and rel.suffix in ('.json','.yaml','.yml','.md')) or name=='tools/fixtures/active-adoption.json'
+    allowed=(name.startswith('source/') and rel.suffix in ('.yaml','.yml')) or name=='config/publication.yaml' or (name.startswith('audits/') and rel.suffix in ('.json','.yaml','.yml','.md')) or name=='tools/fixtures/active-adoption.json' or (rel.parent==PurePosixPath('sources') and re.fullmatch(r'cartographie-(?:core-system|frontieres-core-system)-[0-9]{4}-[0-9]{2}-[0-9]{2}\.yaml',rel.name) is not None)
     require(allowed,'Path is not an adoption document: '+name)
     path=(root/name).resolve();require(path.is_relative_to(root) and path!=root,'Path escapes project')
     return path
@@ -55,6 +55,8 @@ def create_plan(root, changes, inputs, summary, validation):
     for name,raw in changes.items():
         path=target(root,name);old=path.read_bytes() if path.exists() else None
         require(isinstance(raw,bytes),'Document must be encoded bytes')
+        if name.startswith('sources/'):
+            require(old is None or old==raw,'Native captures are immutable')
         if old==raw:continue
         entries.append(dict(path=name,before=None if old is None else base64.b64encode(old).decode('ascii'),before_sha256=None if old is None else digest(old),after=base64.b64encode(raw).decode('ascii'),after_sha256=digest(raw)))
     require(bool(entries),'No files changed')

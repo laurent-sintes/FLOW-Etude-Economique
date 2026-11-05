@@ -24,88 +24,18 @@ blocs:
   - master-data-ingestion
   fonctions:
   - id: BC-002.01
-    resultat: Recevoir les référentiels complets et leurs changements
+    resultat: Recevoir les versions de référence publiées par le MDM et contrôler leur provenance et leur validité
   - id: BC-002.02
-    resultat: Rapprocher les identités et versions
+    resultat: Actualiser les vues opérationnelles et signaler les versions manquantes ou incompatibles
   - id: BC-002.03
-    resultat: Mettre en quarantaine puis rejouer les rejets
+    resultat: Accuser la réception, tracer les rejets et reprendre une version corrigée sans modifier la donnée
+      maître
   variantes_source:
   - master-data-ingestion-commerce
   - master-data-ingestion-finance
   - master-data-ingestion-design
-  frontiere: Ne nettoie pas les données Beaumanoir et ne remplace pas les maîtres PLM ou MDM.
-- id: BC-003
-  capacite_id: cap-partner-agreement-reference-stewardship
-  chemin:
-  - supply-chain-orchestration
-  - business-references
-  - ba-partner-agreement-references
-  - cap-partner-agreement-reference-stewardship
-  fonctions:
-  - id: BC-003.01
-    resultat: Contrôler parties et rôles utiles
-  - id: BC-003.02
-    resultat: Restituer les accords applicables et leurs dates
-  variantes_source: []
-  frontiere: Ne négocie pas les contrats et ne tient pas le référentiel maître des partenaires.
-- id: BC-004
-  capacite_id: cap-merchandise-reference-stewardship
-  chemin:
-  - supply-chain-orchestration
-  - business-references
-  - ba-product-references
-  - cap-merchandise-reference-stewardship
-  fonctions:
-  - id: BC-004.01
-    resultat: Rapprocher produits et variantes
-  - id: BC-004.02
-    resultat: Qualifier les catalogues et assortiments utilisables
-  - id: BC-004.03
-    resultat: Exposer les contextes de planification reçus
-  variantes_source: []
-  frontiere: Ne conçoit pas les collections et n’impose pas une hiérarchie saisonnière.
-- id: BC-005
-  capacite_id: cap-packaging-reference-stewardship
-  chemin:
-  - supply-chain-orchestration
-  - business-references
-  - ba-packaging-references
-  - cap-packaging-reference-stewardship
-  fonctions:
-  - id: BC-005.01
-    resultat: Distinguer matériaux et spécifications de conditionnement
-  - id: BC-005.02
-    resultat: Contrôler la validité des références locales
-  variantes_source: []
-  frontiere: Une spécification ne représente pas une unité logistique physiquement préparée.
-- id: BC-006
-  capacite_id: cap-internal-supplies-reference-stewardship
-  chemin:
-  - supply-chain-orchestration
-  - business-references
-  - ba-internal-supplies-equipment-references
-  - cap-internal-supplies-reference-stewardship
-  fonctions:
-  - id: BC-006.01
-    resultat: Qualifier fournitures et équipements utilisables
-  - id: BC-006.02
-    resultat: Restituer leurs unités et restrictions
-  variantes_source: []
-  frontiere: Ne gère ni les immobilisations ni l’entretien des équipements.
-- id: BC-007
-  capacite_id: cap-service-reference-stewardship
-  chemin:
-  - supply-chain-orchestration
-  - business-references
-  - ba-service-references
-  - cap-service-reference-stewardship
-  fonctions:
-  - id: BC-007.01
-    resultat: Restituer le réseau et le catalogue des prestations
-  - id: BC-007.02
-    resultat: Qualifier les conditions de prix applicables
-  variantes_source: []
-  frontiere: Le catalogue ne prouve pas la disponibilité opérationnelle d’un exécutant.
+  frontiere: Vues locales de consultation alimentées par Master Data. La consolidation, la qualité et la correction
+    du référentiel maître appartiennent au domaine producteur.
 - id: BC-008
   capacite_id: demand-fulfilment-policy-management
   chemin:
@@ -1471,3 +1401,443 @@ blocs:
     resultat: Partager des vues explicables et traçables
   variantes_source: []
   frontiere: Ne reconstruit pas une plateforme BI universelle.
+- id: BC-089
+  capacite_id: cap-mdm-standards
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-governance-quality
+  - ba-mdm-governance
+  - cap-mdm-standards
+  fonctions:
+  - id: BC-089.01
+    resultat: Définir le modèle commun, les règles de qualité et les critères de publication.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-090
+  capacite_id: cap-mdm-authority
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-governance-quality
+  - ba-mdm-governance
+  - cap-mdm-authority
+  fonctions:
+  - id: BC-090.01
+    resultat: Définir sources autorisées, responsabilités et règles de priorité entre contributions.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-091
+  capacite_id: cap-mdm-quality-assessment
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-governance-quality
+  - ba-mdm-quality
+  - cap-mdm-quality-assessment
+  fonctions:
+  - id: BC-091.01
+    resultat: Mesurer conformité, complétude, cohérence, unicité et fraîcheur ; identifier les anomalies.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-092
+  capacite_id: cap-mdm-quality-remediation
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-governance-quality
+  - ba-mdm-quality
+  - cap-mdm-quality-remediation
+  fonctions:
+  - id: BC-092.01
+    resultat: Faire corriger les anomalies selon les responsabilités établies et vérifier leur résolution.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-093
+  capacite_id: cap-mdm-source-contribution
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-acquisition-preparation
+  - ba-mdm-source-contribution
+  - cap-mdm-source-contribution
+  fonctions:
+  - id: BC-093.01
+    resultat: Organiser contenu, signification, fréquence et format des apports attendus.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-094
+  capacite_id: cap-mdm-ingestion
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-acquisition-preparation
+  - ba-mdm-source-contribution
+  - cap-mdm-ingestion
+  fonctions:
+  - id: BC-094.01
+    resultat: Recevoir les données et leurs évolutions, conserver leur provenance et traiter rejets et reprises.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-095
+  capacite_id: cap-mdm-identity
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-acquisition-preparation
+  - ba-mdm-consolidation
+  - cap-mdm-identity
+  fonctions:
+  - id: BC-095.01
+    resultat: Tenir les identités communes et correspondances ; gérer rapprochements, fusions et séparations autorisées.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-096
+  capacite_id: cap-mdm-consolidation
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-acquisition-preparation
+  - ba-mdm-consolidation
+  - cap-mdm-consolidation
+  fonctions:
+  - id: BC-096.01
+    resultat: Normaliser les valeurs et construire les enregistrements consolidés.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-097
+  capacite_id: cap-mdm-enrichment
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-acquisition-preparation
+  - ba-mdm-enrichment
+  - cap-mdm-enrichment
+  fonctions:
+  - id: BC-097.01
+    resultat: Compléter les données par saisie autorisée, calcul, classification ou contribution externe, avec traçabilité.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-098
+  capacite_id: cap-mdm-change
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-lifecycle-delivery
+  - ba-mdm-certified-reference
+  - cap-mdm-change
+  fonctions:
+  - id: BC-098.01
+    resultat: Conduire créations, corrections, changements et retraits, avec versions et dates d’effet.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-099
+  capacite_id: cap-mdm-certification
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-lifecycle-delivery
+  - ba-mdm-certified-reference
+  - cap-mdm-certification
+  fonctions:
+  - id: BC-099.01
+    resultat: Autoriser ou refuser l’usage d’une version dans une portée définie.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-100
+  capacite_id: cap-mdm-publication
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-lifecycle-delivery
+  - ba-mdm-certified-reference
+  - cap-mdm-publication
+  fonctions:
+  - id: BC-100.01
+    resultat: Rendre disponibles les versions certifiées, leurs remplacements et leurs retraits.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-101
+  capacite_id: cap-mdm-access-subscription
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-lifecycle-delivery
+  - ba-mdm-access-distribution
+  - cap-mdm-access-subscription
+  fonctions:
+  - id: BC-101.01
+    resultat: Tenir droits de consommation et abonnements par objet, attribut et périmètre.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-102
+  capacite_id: cap-mdm-distribution
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-lifecycle-delivery
+  - ba-mdm-access-distribution
+  - cap-mdm-distribution
+  fonctions:
+  - id: BC-102.01
+    resultat: Distribuer les versions publiées et suivre livraisons, échecs et reprises.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-103
+  capacite_id: cap-mdm-customer
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-party-agreement
+  - ba-mdm-customer
+  - cap-mdm-customer
+  fonctions:
+  - id: BC-103.01
+    resultat: Constituer et maintenir les identités, comptes sources, contacts, adresses et relations clients.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-104
+  capacite_id: cap-mdm-supplier
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-party-agreement
+  - ba-mdm-supplier
+  - cap-mdm-supplier
+  fonctions:
+  - id: BC-104.01
+    resultat: Constituer et maintenir les identités, établissements, contacts et qualifications fournisseurs sourcées.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-105
+  capacite_id: cap-mdm-agreement
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-party-agreement
+  - ba-mdm-agreement
+  - cap-mdm-agreement
+  fonctions:
+  - id: BC-105.01
+    resultat: 'Consolider les références des accords approuvés : parties, objets, conditions, engagements convenus,
+      versions, périodes et liens documentaires.'
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-106
+  capacite_id: cap-mdm-product
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-product-commercial
+  - ba-mdm-product
+  - cap-mdm-product
+  fonctions:
+  - id: BC-106.01
+    resultat: Maintenir les références communes des produits, caractéristiques, classifications, unités et [variantes](glossary:TER058).
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-107
+  capacite_id: cap-mdm-variant
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-product-commercial
+  - ba-mdm-product
+  - cap-mdm-variant
+  fonctions:
+  - id: BC-107.01
+    resultat: Produire les références opérationnelles des [variantes](glossary:TER058) autorisées ou reprendre celles
+      déjà identifiées en amont.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-108
+  capacite_id: cap-mdm-trade-item
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-product-commercial
+  - ba-mdm-product
+  - cap-mdm-trade-item
+  fonctions:
+  - id: BC-108.01
+    resultat: Associer ou attribuer les identifiants commerciaux, dont les [GTIN](glossary:TER062), sous le mandat
+      prévu.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-109
+  capacite_id: cap-mdm-assortment
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-product-commercial
+  - ba-mdm-assortment-catalog
+  - cap-mdm-assortment
+  fonctions:
+  - id: BC-109.01
+    resultat: Consolider les [assortiments](glossary:TER087) approuvés, leurs affectations, inclusions, exclusions
+      et périodes.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-110
+  capacite_id: cap-mdm-catalog
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-product-commercial
+  - ba-mdm-assortment-catalog
+  - cap-mdm-catalog
+  fonctions:
+  - id: BC-110.01
+    resultat: Consolider les offres publiées et leurs liens aux produits, [assortiments](glossary:TER087) et tarifs.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-111
+  capacite_id: cap-mdm-product-pricing
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-product-commercial
+  - ba-mdm-product-pricing
+  - cap-mdm-product-pricing
+  fonctions:
+  - id: BC-111.01
+    resultat: Consolider les tarifs et conditions produits approuvés, avec unités, devises, contextes et validités.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-112
+  capacite_id: cap-mdm-internal-supplies
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-product-commercial
+  - ba-mdm-internal-supplies
+  - cap-mdm-internal-supplies
+  fonctions:
+  - id: BC-112.01
+    resultat: 'Constituer et maintenir les références des fournitures et équipements à usage interne : identifiants,
+      désignations, catégories, caractéristiques, unités et contraintes utiles à leur commande et à leur acheminement.'
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-113
+  capacite_id: cap-mdm-location-network
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-location-network
+  - ba-mdm-location-network
+  - cap-mdm-location-network
+  fonctions:
+  - id: BC-113.01
+    resultat: Maintenir les références communes des sites, leurs identifiants, adresses, rôles, rattachements et
+      relations approuvées.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-114
+  capacite_id: cap-mdm-service-catalog
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-service
+  - ba-mdm-service-catalog
+  - cap-mdm-service-catalog
+  fonctions:
+  - id: BC-114.01
+    resultat: 'Consolider les prestations proposées : résultat rendu, prestataire, périmètre desservi, conditions,
+      unités et niveaux de service configurés.'
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-115
+  capacite_id: cap-mdm-service-pricing
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-service
+  - ba-mdm-service-pricing
+  - cap-mdm-service-pricing
+  fonctions:
+  - id: BC-115.01
+    resultat: Consolider les tarifs de prestations, leurs unités de facturation, devises, conditions et périodes
+      ; les relier aux services et accords concernés.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-116
+  capacite_id: cap-mdm-packaging-material
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-packaging
+  - ba-mdm-packaging-material
+  - cap-mdm-packaging-material
+  fonctions:
+  - id: BC-116.01
+    resultat: 'Maintenir les références des cartons, palettes, cintres et autres supports : identifiants, dimensions,
+      poids, capacités et compatibilités connues.'
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-117
+  capacite_id: cap-mdm-packaging-specification
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-packaging
+  - ba-mdm-packaging-specification
+  - cap-mdm-packaging-specification
+  fonctions:
+  - id: BC-117.01
+    resultat: 'Consolider les consignes réutilisables : biens, matières, quantités, unités, niveaux de conditionnement
+      et contraintes approuvées.'
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-118
+  capacite_id: cap-mdm-codes-classification
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-shared-reference-configuration
+  - ba-mdm-shared-reference
+  - cap-mdm-codes-classification
+  fonctions:
+  - id: BC-118.01
+    resultat: Maintenir les valeurs approuvées des listes de codes, classifications, hiérarchies et leurs correspondances.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-119
+  capacite_id: cap-mdm-unit-conversion
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-shared-reference-configuration
+  - ba-mdm-shared-reference
+  - cap-mdm-unit-conversion
+  fonctions:
+  - id: BC-119.01
+    resultat: Maintenir les unités et conversions autorisées, avec leur contexte d’application.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-120
+  capacite_id: cap-mdm-calendar
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-shared-reference-configuration
+  - ba-mdm-shared-reference
+  - cap-mdm-calendar
+  fonctions:
+  - id: BC-120.01
+    resultat: Maintenir calendriers et périodes de référence, jours ouvrés, fermetures et rattachements approuvés.
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.
+- id: BC-121
+  capacite_id: cap-mdm-shared-configuration
+  chemin:
+  - domain-master-data
+  - subdomain-mdm-shared-reference-configuration
+  - ba-mdm-shared-configuration
+  - cap-mdm-shared-configuration
+  fonctions:
+  - id: BC-121.01
+    resultat: 'Consolider les paramètres et règles métier approuvés à partager : valeurs, portée, dépendances, versions
+      et dates d’effet.'
+  variantes_source: []
+  frontiere: Périmètre métier générique de la capacité. Les adaptations des SI, autorités Beaumanoir, volumes et
+    exploitation restent à dimensionner.

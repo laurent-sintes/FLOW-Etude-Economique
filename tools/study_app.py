@@ -524,14 +524,17 @@ class Study:
             'project_rates', 'project_rate_channels', 'project_rate_engagements', 'project_rate_portage'
         )}
 
+    def organisation_reading(self):
+        return dict(model_version=self.version,delivery_organisation=self.content['delivery_organisation'],framework_graph=self.content['framework_graph'])
+
     def bootstrap(self, compact=False, essential=False):
         content={'complexity':self._essential_complexity(),'framework':self.content['framework'],
                  'market_method':self._essential_market_method(),
                  'synvance_reference':self.content['synvance_reference'],
-                 'framework_graph':self.content['framework_graph'],
-                 'delivery_organisation':self.content['delivery_organisation'],
+                 'framework_graph':dict(deferred=True),
+                 'delivery_organisation':dict(deferred=True,principle=self.content['delivery_organisation']['principle']),
                  'delivery_method':self.content['delivery_method'],
-                 'delivery_readiness':self.content['delivery_readiness'],
+                 'delivery_readiness':self._essential_delivery_readiness(),
                  'downloads':self.content['downloads'],
                  'core_evaluation':self._essential_core_evaluation(unit_details=False),
                  'core_product_scope':deepcopy(self.content['core_product_scope'])} if essential else pack_content(self.content) if compact else self.content
@@ -566,6 +569,12 @@ class Study:
         return dict(ui=self.ui,glossary=self.glossary,baseline=self.baseline,content=content,
                     edition=self.edition,model_revision=self.model_revision,
                     model_version=self.version,simulation_contract=self.simulation_contract(),date=self.data['scenario']['date'])
+
+    def _essential_delivery_readiness(self):
+        result=deepcopy(self.content['delivery_readiness'])
+        # Native definitions already travel in complexity. These links need identities only.
+        result['scope']['rows']=[{key:row[key] for key in ('id','capability_id','name','href')} for row in result['scope']['rows']]
+        return result
 
     def _essential_complexity(self):
         grid=self.content['complexity']

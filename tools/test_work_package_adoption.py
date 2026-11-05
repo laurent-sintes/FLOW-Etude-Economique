@@ -15,7 +15,7 @@ class WorkPackageAdoptionTests(unittest.TestCase):
  @classmethod
  def setUpClass(cls):
   cls.study=reference_study();cls.reg=registry();cls.docs=load_proofs(cls.reg)
-  cls.specs=[c for c in cls.reg['calculations'] if c['recipe']=='work_package_adoption_v1']
+  cls.specs=[c for c in cls.reg['calculations'] if c['recipe'] in ('work_package_adoption_v1','native_scope_adoption_v1')]
   cls.rules={r['id']:r for r in metamodel()['rules']}
  def formula(self,id,**v):return evaluate_rule(self.rules[id],**v)
  def test_portable_replay_and_input_immutability(self):
@@ -39,14 +39,14 @@ class WorkPackageAdoptionTests(unittest.TestCase):
    if kind=='case':w['scenario_refs']=['missing-case']
    if kind=='observed':w['effort_status']='observed'
    if kind=='decision':next(r for r in docs[c['inputs']['revision_hypotheses']]['units'] if r['id']==c['unit_id'])['proposal_jh']+=1
-   if kind=='editing':row['work']=[w for w in row['work'] if w['id']!='MD09']
+   if kind=='editing':row['work']=[w for w in row['work'] if w['id']!='MDM-steward']
    with self.subTest(kind=kind),self.assertRaises(ValueError):prepare(docs,c,self.reg,self.formula)
  def test_budget_scope_and_correction_are_adopted(self):
   s=self.study;units=s.economic['options'][0]['core_units']
   self.assertEqual(sum(u['total_jh'] for u in units),active_reference()['total_jh']);self.assertEqual(sum(u['cost_eur_ht'] for u in units),active_reference()['cost_eur_ht'])
   self.assertEqual(Counter(u['method'] for u in units),active_reference()['methods'])
-  caps=[c['id'] for u in units for c in u['capabilities']];self.assertEqual(len(caps),len(set(caps)));self.assertEqual(len(caps),88)
-  md=next(u for u in units if u['id']=='master-data-java-spring');work=md['trace']['work_package_adoption']['work'];self.assertEqual(next(w['jh'] for w in work if w['id']=='MD09'),active_reference()['units']['master-data-java-spring']['work']['MD09'])
+  caps=[c['id'] for u in units for c in u['capabilities']];self.assertEqual(len(caps),len(set(caps)));self.assertEqual(len(caps),116)
+  md=next(u for u in units if u['id']=='master-data-java-spring');work=md['trace']['work_package_adoption']['work'];self.assertEqual({w['id']:w['jh'] for w in work},active_reference()['units']['master-data-java-spring']['work'])
   claims=Counter(x['mechanism'] for c in self.reg['calculations'] for x in c['funding_claims'] if x['mode']=='funded');self.assertTrue(all(n==1 for n in claims.values()))
   core=s.content['gross_evaluations']['phases']['acquisition']['options']['java-spring']['core'];self.assertEqual(core['adopted_jh'],active_reference()['total_jh']);self.assertNotIn('revision_summary',core)
   self.assertEqual(sum(len(r['detail']['work_packages']) for r in core['rows']),sum(len(u['work']) for u in active_reference()['units'].values()))

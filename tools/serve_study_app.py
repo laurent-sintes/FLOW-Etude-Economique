@@ -129,6 +129,10 @@ def make_handler(study, static_root=None):
                     query=parse_qs(url.query)
                     if query.get('model_version',[''])[0]!=study.version:return self.reply(dict(error='version'),409)
                     return self.reply(build_market_reading(study.content['market']),frozen=True)
+                if url.path=='/api/organisation-model':
+                    query=parse_qs(url.query)
+                    if query.get('model_version',[''])[0]!=study.version:return self.reply(dict(error='version'),409)
+                    return self.reply(study.organisation_reading(),frozen=True)
                 if url.path=='/api/gross-evaluations':
                     query=parse_qs(url.query)
                     if query.get('model_version',[''])[0]!=study.version:return self.reply(dict(error='version'),409)

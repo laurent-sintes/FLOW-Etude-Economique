@@ -36,6 +36,22 @@ class WorkEstimationTests(unittest.TestCase):
         self.assertEqual(len(seen),len(set(seen)))
         self.assertEqual(set(seen),{r['id'] for r in self.org['reading']['records'] if r['cost_eur_ht'] is not None})
 
+    def test_core_comments_never_supply_a_missing_deliverable(self):
+        units=[u for u in self.catalog['units'] if u['nature']=='core_build']
+        self.assertTrue(units)
+        for u in units:
+            self.assertIsNone(u['estimation']['scope']['deliverable'])
+            self.assertIn('deliverable',u['estimation']['missing'])
+            self.assertTrue(u['included_activities'])
+            self.assertEqual(u['estimation']['reference']['cost_eur_ht'],u['totals']['cost_eur_ht'])
+        source=read(ROOT/'source/unites-travail.yaml');unit=next(u for u in source['units'] if u['id']==units[0]['id'])
+        unit['estimation_contract']['scope']['deliverable']='Résultat explicite à réceptionner'
+        catalog=build_work_units(self.study.economic,self.org,source=source)
+        after=next(u for u in catalog['units'] if u['id']==unit['id'])
+        self.assertEqual(after['estimation']['scope']['deliverable'],unit['estimation_contract']['scope']['deliverable'])
+        self.assertNotIn('deliverable',after['estimation']['missing'])
+        self.assertEqual(after['totals'],units[0]['totals'])
+
     def test_maintenance_gross_net_and_prices_are_distinct(self):
         u=next(u for u in self.catalog['units'] if u['id']=='maintenance/MAI-003');e=u['estimation'];r=e['reference']
         work=next(a for a in self.study.data['options'][0]['composable']['inputs']['work']['maintenance']['activites'] if a['activite']=='MAI-003')
@@ -116,7 +132,7 @@ class WorkEstimationTests(unittest.TestCase):
 
     def test_bootstrap_export_and_graph_share_the_contract(self):
         self.assertTrue(dependencies()<=self.study.files)
-        self.assertEqual(self.study.bootstrap(essential=True)['content']['delivery_organisation']['work_catalog']['units'][0]['estimation'],self.catalog['units'][0]['estimation'])
+        self.assertEqual(self.study.organisation_reading()['delivery_organisation']['work_catalog']['units'][0]['estimation'],self.catalog['units'][0]['estimation'])
         from study_snapshot import ENGINE_FILES,candidate
         self.assertIn('work_estimation.py',ENGINE_FILES)
         self.assertIn(SCHEMA,candidate(self.study)['payload']['documents'])

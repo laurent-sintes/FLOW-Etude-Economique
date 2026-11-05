@@ -11,7 +11,7 @@ export function CartographyPage(){
  return <div className="essential-page cartography-page">
   <section aria-labelledby="cartography-source"><h2 id="cartography-source">{T.source_title}</h2><p><strong>{T.source_name}</strong></p><p><MethodText>{T.intro}</MethodText></p>
    <dl className="cartography-provenance"><div><dt>{S.labels.capture_date}</dt><dd><time dateTime={S.source.date}>{new Intl.DateTimeFormat(data.ui.locale,{dateStyle:'long',timeZone:'UTC'}).format(new Date(S.source.date))}</time></dd></div><div><dt>{S.labels.version}</dt><dd>{S.source.version}</dd></div></dl>
-   <p><MethodText>{summary}</MethodText></p><p><MethodText>{S.introduction}</MethodText></p><p className="cartography-boundary"><MethodText>{S.note}</MethodText></p>
+   <p><MethodText>{summary}</MethodText></p><p><MethodText>{S.introduction}</MethodText></p>
   </section>
   <ScopeDiagram heading="h2"><div className="model-reading-links"><SourceLink path={S.link.href}>{S.link.label}</SourceLink></div></ScopeDiagram>
   <BusinessAreaSummary heading="h2" provenance={false}/>

@@ -83,7 +83,7 @@ class EstimationCalculationTests(unittest.TestCase):
             self.assertFalse(active_doc(slug)['core'])
         study=study_copy()
         self.assertEqual(study.baseline['options'][0]['build'],active_reference()['cost_eur_ht'])
-        self.assertEqual(len(study.content['business_map']['family_funding']),11)
+        self.assertEqual(len(study.content['business_map']['family_funding']),len(active_reference()['units']))
         self.assertFalse(study.content['business_map']['funding'])
 
 if __name__=='__main__':unittest.main()

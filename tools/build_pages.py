@@ -143,6 +143,7 @@ def build_pages(output, base='/', study=None):
         'economic-evaluations': deepcopy(study.content['economic_evaluations']),
         'financial-province': province,
         'gross-evaluations': deepcopy(study.content['gross_evaluations']),
+        'organisation-model': deepcopy(study.organisation_reading()),
         'capabilities': capabilities,
     }
     _clean_generated(output)
@@ -172,6 +173,7 @@ def build_pages(output, base='/', study=None):
                         '/api/economic-evaluations': data_path + '/economic-evaluations.json',
                         '/api/financial-province': data_path + '/financial-province.json',
                         '/api/gross-evaluations': data_path + '/gross-evaluations.json',
+                        '/api/organisation-model': data_path + '/organisation-model.json',
                         '/api/capability': data_path + '/capabilities.json',
                     }, documents=documents,
                     python=dict(archive=data_path + '/engine.zip', model=data_path + '/model.json.gz',

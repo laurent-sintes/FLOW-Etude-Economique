@@ -116,7 +116,9 @@ class DeliveryOrganisationTests(unittest.TestCase):
 
     def test_bootstrap_and_model_export_include_the_same_authority(self):
         bootstrap=self.study.bootstrap(essential=True)
-        self.assertEqual(bootstrap['content']['delivery_organisation'],self.study.content['delivery_organisation'])
+        self.assertTrue(bootstrap['content']['delivery_organisation']['deferred'])
+        self.assertEqual(bootstrap['content']['delivery_organisation']['principle'],self.study.content['delivery_organisation']['principle'])
+        self.assertEqual(self.study.organisation_reading()['delivery_organisation'],self.study.content['delivery_organisation'])
         self.assertIn(SOURCE,self.study.files)
         self.assertIn('source/schema-organisation-delivery.yaml',self.study.files)
         model=self.study.fundamentals['estimation_model']

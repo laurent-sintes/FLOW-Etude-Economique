@@ -112,7 +112,7 @@ class ConsolidationReviewTests(unittest.TestCase):
         source=read(ROOT/'source/unites-travail.yaml')
         unit=next(u for u in org['work_catalog']['units'] if u['id'].startswith('core/') and u['contributions'][0]['team_ref'] is not None)
         raw=next(u for u in source['units'] if u['id']==unit['id'])
-        raw['estimation_contract']['scope']=dict(deliverable=None,acceptance=['Critères documentés pour le contrôle'],boundary=None)
+        raw['estimation_contract']['scope']=dict(deliverable='Résultat explicite pour le contrôle',acceptance=['Critères documentés pour le contrôle'],boundary=None)
         org['work_catalog']=build_work_units(study.economic,org,source=source)
         revised=next(u for u in org['work_catalog']['units'] if u['id']==unit['id'])
         self.assertEqual(revised['estimation']['reference'],unit['estimation']['reference'])

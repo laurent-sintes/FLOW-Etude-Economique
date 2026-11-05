@@ -93,6 +93,9 @@ class PagesTests(unittest.TestCase):
             gross=json.loads((output / manifest['routes']['/api/gross-evaluations']).read_text(encoding='utf-8'))
             self.assertEqual(gross,self.study.content['gross_evaluations'])
             self.assertNotIn('gross_evaluations',exported['content'])
+            self.assertTrue(exported['content']['delivery_organisation']['deferred'])
+            organisation=json.loads((output/manifest['routes']['/api/organisation-model']).read_text(encoding='utf-8'))
+            self.assertEqual(organisation,self.study.organisation_reading())
             for url in [manifest['bootstrap'], *manifest['routes'].values(), manifest['python']['archive'], manifest['python']['model']]:
                 self.assertIn(manifest['server_revision'], url)
                 self.assertTrue((output / url).is_file())

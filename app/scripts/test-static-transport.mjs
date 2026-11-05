@@ -100,3 +100,17 @@ test('gross phase results load lazily under the Pages subpath and require the lo
  assert.equal(f.workers.length,0);
  assert.ok(f.fetched.every(({url})=>url.startsWith(f.root)&&!url.includes('/api/')));
 });
+test('organisation detail stays lazy, versioned and isolated under the Pages prefix',async()=>{
+ const f=fixture();
+ f.manifest.routes['/api/organisation-model']='data/delivery-1/organisation-model.json';
+ const value={model_version:'model-1',delivery_organisation:{work_catalog:{units:[{id:'work'}]}},framework_graph:{objects:[{id:'work_unit'}]}};
+ f.files.set(f.root+f.manifest.routes['/api/organisation-model'],value);
+ await f.client.request('/api/bootstrap?view=essential');assert.equal(f.fetched.length,2);
+ await assert.rejects(f.client.request('/api/organisation-model'),{code:'version'});
+ await assert.rejects(f.client.request('/api/organisation-model?model_version=obsolete'),{code:'version'});
+ const reading=await f.client.request('/api/organisation-model?model_version=model-1');assert.deepEqual(reading,value);
+ reading.delivery_organisation.work_catalog.units[0].id='mutated';
+ assert.equal((await f.client.request('/api/organisation-model?model_version=model-1')).delivery_organisation.work_catalog.units[0].id,'work');
+ assert.equal(f.fetched.length,3);assert.equal(f.workers.length,0);
+ assert.ok(f.fetched.every(({url})=>url.startsWith(f.root)&&!url.includes('/api/')));
+});

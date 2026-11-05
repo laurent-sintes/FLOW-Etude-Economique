@@ -138,7 +138,8 @@ class AuditCorrectionsTests(unittest.TestCase):
         self.assertEqual(row['coverage']['status'],'fully_estimated')
 
     def test_coverage_states_include_full_and_empty(self):
-        ids=[f'BC-{i:03}' for i in range(1,89)]
+        from capability_catalog import analysis
+        ids=[b['id'] for b in analysis()['blocs']]
         self.assertEqual(coverage([],[])['status'],'not_applicable')
         self.assertEqual(coverage([],ids)['status'],'pending_reestimation')
         self.assertEqual(coverage([self.unit],ids)['status'],'partially_estimated')

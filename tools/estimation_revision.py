@@ -200,7 +200,7 @@ def prepare_work_package_adoption(documents, contract, registry, formula, use_ca
         require(w['scope'] and w['reuse'] and w['scenario_refs'] and set(w['scenario_refs'])<=allowed,'Incomplete work-package boundary')
         require(w['effort_status']=='engineering_assumption_not_observed','Work-package assumption cannot become observed effort')
     require(bool(row['work']),'Empty work-package scope')
-    if unit['id']=='master-data-java-spring':
+    if unit['id']=='master-data-java-spring' and contract['scope'].get('native_id')=='business-references':
         require(any(w['id']=='MD09' and w['jh']>0 for w in row['work']),'Missing correction editing')
     days=sum(w['jh'] for w in row['work']);close(days,selected['proposal_jh'],'Adopted work-package sum')
     prior['method']='Estimation détaillée par livrable'

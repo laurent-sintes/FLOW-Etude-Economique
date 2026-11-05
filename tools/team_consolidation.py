@@ -70,6 +70,7 @@ def _reference_rows(org, unit, rules, selection, horizon):
             rows.append(dict(piece, labour_eur_ht=labour,non_labour_eur_ht=fees,unclassified_eur_ht=unclassified, id=piece.get('id', record['id']) + '/'+str(i), record_ref=record['id'],
                 source_jh=source_jh, gross_jh=known_sum(gross) if gross and all(v is not None for v in gross) else None,
                 net_jh=known_sum(net) if net and all(v is not None for v in net) else source_jh if unit['estimation']['method'] in ('retained_core','capacity_period') else None,
+                component_applicability=dict(labour_eur_ht=selection.get('work_kind')!='expense',non_labour_eur_ht=True,unclassified_eur_ht=not(record['cost_eur_ht'] is not None and bool(priced_roles) or selection.get('work_kind')=='expense')),
                 period=period, component_kind='source', human_applicable=source_jh is not None,
                 cost_applicable=record['cost_eur_ht'] is not None or record['jh'] is None or not any(r['cost_eur_ht'] is not None for r in unit['measurements']),
                 projected_cost_eur_ht=project(piece['cost_eur_ht'], period, unit['recurrence'], horizon)))
@@ -149,6 +150,7 @@ def _proposal_rows(org, unit, rules, selection, horizon):
             rows.append(dict(id='proposal/'+unit['id']+'/'+component+'/'+str(i), record_ref=None, team_ref=share['team_ref'],
                 **values, labour_eur_ht=values['cost_eur_ht'] if applicable else None,non_labour_eur_ht=values['cost_eur_ht'] if not applicable else None,unclassified_eur_ht=None, jh=values['net_jh'], roles=[r for r in roles if r['id']==component], component_kind='labour' if applicable else 'expense',
                 component_ref=component, rule_refs=[rule], share_pct=share['share_pct'], contribution_kinds=[share.get('contribution_kind','unallocated')], period=period, billing_period=billing, billing_compatible=compatible,
+                component_applicability=dict(labour_eur_ht=applicable,non_labour_eur_ht=not applicable,unclassified_eur_ht=False),
                 human_applicable=applicable, projected_cost_eur_ht=project(values['cost_eur_ht'], period, unit['recurrence'], horizon)))
     return rows
 
