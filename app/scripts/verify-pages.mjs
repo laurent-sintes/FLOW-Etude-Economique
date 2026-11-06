@@ -291,7 +291,7 @@ try{
  const phase=dossier.phases.find(p=>p.id==='acquisition');
  assert.deepEqual(await page.locator('[data-charge-function]').evaluateAll(rows=>rows.map(row=>row.dataset.chargeFunction).sort()),phase.rows.map(row=>row.id).sort());
  assert.doesNotMatch(await page.locator('.charge-dossier').innerText(),/€|TJM/);
- assert.equal(await page.locator('[data-governance-annual] dl div').count(),4);
+ assert.equal(await page.locator('[data-governance-annual]').count(),0,'Governance has its own page');
  for(const row of phase.rows){
   const cell=page.locator('[data-charge-function="'+row.id+'"]');
   const button=cell.getByRole('button');await button.focus();
