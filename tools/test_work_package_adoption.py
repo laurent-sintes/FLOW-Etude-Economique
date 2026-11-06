@@ -54,8 +54,20 @@ class WorkPackageAdoptionTests(unittest.TestCase):
   s=self.study;self.assertEqual(s.simulate(s.parameters),s.baseline)
   before=active_reference()['before']
   self.assertEqual(before['parameters']['options']['java-spring']['build']+active_reference()['delta_cost_eur_ht'],active_reference()['cost_eur_ht'])
-  current=s.simulate(before['parameters']);self.assertEqual({k:v for k,v in current.items() if k!='model_version'},{k:v for k,v in before['baseline'].items() if k!='model_version'})
-  original={o['stack']:o for o in before['baseline']['options']}
+  current=s.simulate(before['parameters'])
+  historical={o['stack']:o for o in before['baseline']['options']}
+  for option in current['options']:
+   old=historical[option['stack']]
+   if option['mode']!='Make':self.assertEqual(option,old);continue
+   # The frozen adoption predates the approved governance change. Only that
+   # nature changes: (0.2 + 0.6) ETP * 216 days * 850 EUR * 48 / 12 = 587520.
+   for horizon,previous in zip(option['horizons'],old['horizons']):
+    saving=587520*horizon['build_progress']
+    self.assertAlmostEqual(horizon['totals']['total'],previous['totals']['total']-saving,places=2)
+    for nature,value in horizon['cost_natures'].items():
+     self.assertAlmostEqual(value,previous['cost_natures'][nature]-(saving if nature=='transformation' else 0),places=2)
+  # Compare product adoption under the same current governance on both sides.
+  original={o['stack']:o for o in current['options']}
   for o in s.baseline['options']:
    old=original[o['stack']]
    if o['stack']!='java-spring':self.assertEqual(o,old);continue

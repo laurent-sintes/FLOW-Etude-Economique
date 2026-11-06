@@ -375,7 +375,10 @@ class StudyTests(unittest.TestCase):
         for option in self.study.baseline['options']:
             self.assertNotIn('programme',[l['id'] for l in option['funding_ledger']])
             funded=sum(l['amount'] for l in option['funding_ledger'] if l['id'].startswith('transformation_'))
-            self.assertAlmostEqual(funded,office['annuel_eur_ht']*option['service_start_month']/12,places=2)
+            build_months=option['initial_months']
+            annual_build=office['build_annuel_eur_ht'] if option['mode']=='Make' else office['annuel_eur_ht']
+            expected=annual_build*build_months/12+office['annuel_eur_ht']*(option['service_start_month']-build_months)/12
+            self.assertAlmostEqual(funded,expected,places=2)
         self.assertEqual(programme['direction_jh'],programme['direction_jh_par_mois']*programme['duree_mois'])
         self.assertEqual(programme['coordination_jh'],programme['coordination_jh_par_mois']*programme['duree_mois'])
         self.assertEqual(framework['pilotage']['programme']['choix'],deployment['justifications_centrales']['programme'])

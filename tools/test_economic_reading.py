@@ -209,6 +209,10 @@ class EconomicReadingTests(unittest.TestCase):
     def test_completion_spending_includes_early_contracts_and_all_transition_costs(self):
         result = self.compile()
         known = active_reference()['completion_costs']
+        # Governance adopted on 2026-11-06: PMO 1 -> 0.8, change 1 -> 0.4,
+        # 216 days/year at 850 EUR/day over 48 build months. Integration/Buy unchanged.
+        for stack in ('java-spring','dotnet','rust'):
+            known[stack] -= 587520
         for option in result['options']:
             original = next(o for o in self.study.baseline['options'] if o['stack']==option['stack'])
             completion = option['service_completion']
