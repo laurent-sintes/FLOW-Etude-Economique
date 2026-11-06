@@ -1,5 +1,6 @@
 """Delivery ownership and conserved readings of existing effort and funding."""
 from copy import deepcopy
+from release_dependencies import build_dependencies, dependencies as release_dependencies
 from work_units import build_work_units, dependencies as work_dependencies
 from scope_revision import compile_revision, dependencies as revision_dependencies
 from team_consolidation import consolidate, dependencies as consolidation_dependencies
@@ -8,6 +9,7 @@ import math
 
 from jsonschema import Draft202012Validator
 from content_model import resolve_text_tree
+from charge_dossier import build_dossier, LABELS as CHARGE_LABELS, dependencies as charge_dependencies
 from validate_stacks import ROOT, read
 
 SOURCE = 'source/organisation-delivery.yaml'
@@ -22,7 +24,7 @@ def require(condition, message):
 
 
 def dependencies():
-    return {SOURCE, SCHEMA, TABLE_SCHEMA, 'tools/delivery_organisation.py', 'source/glossaire.yaml', 'tools/content_model.py'} | work_dependencies() | revision_dependencies() | consolidation_dependencies()
+    return {SOURCE, SCHEMA, TABLE_SCHEMA, 'tools/delivery_organisation.py', 'source/glossaire.yaml', 'tools/content_model.py', 'tools/charge_dossier.py', CHARGE_LABELS} | release_dependencies() | charge_dependencies() | work_dependencies() | revision_dependencies() | consolidation_dependencies()
 
 
 def validate(document):
@@ -30,6 +32,18 @@ def validate(document):
     teams = {t['id']: t for t in document['teams']}
     require(len(teams) == len(document['teams']), 'Duplicate team')
     require(not {'governance', 'unallocated'} & teams.keys(), 'Reserved team identity')
+    topology = document['target_topology']
+    layers = topology['layers']
+    require(len({layer['id'] for layer in layers}) == len(layers), 'Duplicate topology layer')
+    for layer in layers:
+        if 'rows' in layer:
+            require([t for row in layer['rows'] for t in row] == layer['team_refs'], 'Topology rows must match ordered team references')
+    transverse = topology['transverse']['team_refs']
+    placements = [team for layer in layers for team in layer['team_refs']] + transverse
+    require(len(placements) == len(teams) and set(placements) == teams.keys(),
+            'Topology must place every delivery team exactly once')
+    require(set(transverse) == {team['id'] for team in teams.values() if team['type'] == 'enabling'},
+            'Enabling teams belong in the transverse topology')
     types = {t['id'] for t in document['team_types']}
     require(len(types) == len(document['team_types']), 'Duplicate team type')
     require(types == {'stream-aligned', 'platform', 'complicated-subsystem', 'enabling'}, 'Team type scope')
@@ -219,4 +233,6 @@ def build_organisation(economic, baseline, content, source=None):
     document['reading']['phases'] = allocated_phases
     document['allocation_table'] = allocation_table(document)
     document['team_consolidations'] = consolidate(document)
+    document['charge_dossier'] = build_dossier(document, gross)
+    document['release_dependencies'] = build_dependencies(document)
     return document

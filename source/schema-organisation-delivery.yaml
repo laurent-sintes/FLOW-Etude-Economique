@@ -87,6 +87,37 @@ properties:
       - period
       - note
     minItems: 1
+  target_topology:
+    type: object
+    additionalProperties: false
+    properties:
+      layers:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            id: *id001
+            label: *id001
+            team_refs: &team_refs
+              type: array
+              minItems: 1
+              uniqueItems: true
+              items: *id001
+            rows:
+              type: array
+              minItems: 1
+              items: *team_refs
+          required: [id, label, team_refs]
+      transverse:
+        type: object
+        additionalProperties: false
+        properties:
+          label: *id001
+          team_refs: *team_refs
+        required: [label, team_refs]
+    required: [layers, transverse]
   teams:
     type: array
     items:
@@ -249,6 +280,7 @@ properties:
       book: *id001
       target_title: *id001
       target_note: *id001
+      target_evolution: *id001
       scope_title: *id001
       responsibilities_title: *id001
       capacity_title: *id001
@@ -287,9 +319,6 @@ properties:
       exit: *id001
       permanent_service: *id001
       graph_label: *id001
-      graph_services: *id001
-      graph_streams: *id001
-      graph_enable: *id001
       governance_title: *id001
       lifecycle_note: *id001
       buy_note: *id001
@@ -348,6 +377,7 @@ properties:
     - book
     - target_title
     - target_note
+    - target_evolution
     - scope_title
     - responsibilities_title
     - capacity_title
@@ -386,9 +416,6 @@ properties:
     - exit
     - permanent_service
     - graph_label
-    - graph_services
-    - graph_streams
-    - graph_enable
     - governance_title
     - lifecycle_note
     - buy_note
@@ -441,6 +468,7 @@ required:
 - team_types
 - interaction_modes
 - phases
+- target_topology
 - teams
 - governance
 - work_owners

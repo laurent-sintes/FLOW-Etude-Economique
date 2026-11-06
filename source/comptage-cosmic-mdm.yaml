@@ -1,0 +1,1011 @@
+version: 1
+id: mdm-cosmic-2026-11-06
+work_unit_ref: core/master-data-java-spring
+status: comparison
+counting_basis: Hypothèses de processus explicites dérivées du périmètre MDM et des postes de construction. Aucun
+  comptage déduit des JH.
+boundary: Produit MDM générique, studio et plugins compris. Les systèmes contributeurs et consommateurs sont extérieurs.
+  Les processus génériques de Case Management et les vues Operational References sont financés ailleurs.
+family_rule: Les processus communs sont comptés une fois. Chaque famille ajoute ses groupes de données distincts
+  pour la maintenance de ses objets. Pas de multiplication du moteur, de la certification ou de la distribution
+  par famille. Les noms et attributs supplémentaires ne créent pas de mouvements.
+activity_scope: La conversion couvre les activités projet de la référence de productivité. Aucun supplément QA ou
+  coordination n’est ajouté. Le comptage mesure les échanges fonctionnels, pas la complexité ergonomique du studio
+  ni les garanties de performance.
+benchmark_ref: audits/2026-10-30-master-data-decomposition-gap/benchmark-decision.json
+day_hours: 7
+proof_refs:
+- source/revision-master-data.yaml
+- audits/2026-11-05-estimation-mdm-oss/scope.json
+- audits/2026-11-05-mdm-studio-plugins/engineering.json
+- audits/2026-11-05-affinage-unidata/selection.json
+- audits/2026-11-06-justifications-et-cosmic-mdm.md
+processes:
+- id: schema
+  label: Publier un modèle et ses règles
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Publier un modèle et ses règles
+  capability_refs:
+  - cap-mdm-standards
+  movements:
+    E:
+    - modèle
+    - règles de qualité
+    R:
+    - modèle
+    - autorités
+    W:
+    - modèle
+    - règles de qualité
+    X:
+    - modèle
+    - diagnostic
+- id: authority
+  label: Définir les responsabilités et priorités
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Définir les responsabilités et priorités
+  capability_refs:
+  - cap-mdm-authority
+  movements:
+    E:
+    - autorités
+    - priorités
+    R:
+    - sources
+    - modèle
+    W:
+    - autorités
+    - priorités
+    X:
+    - autorités
+    - diagnostic
+- id: contract
+  label: Définir un contrat de contribution
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Définir un contrat de contribution
+  capability_refs:
+  - cap-mdm-source-contribution
+  movements:
+    E:
+    - contrat
+    R:
+    - sources
+    - modèle
+    - autorités
+    W:
+    - contrat
+    X:
+    - contrat
+    - diagnostic
+- id: ingest
+  label: Recevoir une contribution
+  group: common
+  functional_user: Système contributeur
+  trigger: Recevoir une contribution
+  capability_refs:
+  - cap-mdm-ingestion
+  movements:
+    E:
+    - contribution
+    R:
+    - contrat
+    - modèle
+    - autorités
+    - versions
+    W:
+    - fiche source
+    - provenance
+    - anomalies
+    X:
+    - accusé de réception
+    - anomalies
+- id: retry
+  label: Reprendre une contribution rejetée
+  group: common
+  functional_user: Système contributeur
+  trigger: Reprendre une contribution rejetée
+  capability_refs:
+  - cap-mdm-ingestion
+  movements:
+    E:
+    - contribution corrigée
+    R:
+    - rejet
+    - contrat
+    - versions
+    W:
+    - fiche source
+    - provenance
+    - état de reprise
+    X:
+    - résultat de reprise
+- id: assess
+  label: Évaluer la qualité des données
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Évaluer la qualité des données
+  capability_refs:
+  - cap-mdm-quality-assessment
+  movements:
+    E:
+    - demande de contrôle
+    R:
+    - fiches
+    - règles de qualité
+    - modèle
+    W:
+    - résultats de qualité
+    - anomalies
+    X:
+    - résultats de qualité
+    - anomalies
+- id: remediate
+  label: Demander une correction à la source
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Demander une correction à la source
+  capability_refs:
+  - cap-mdm-quality-remediation
+  movements:
+    E:
+    - demande de correction
+    R:
+    - anomalie
+    - autorités
+    - fiche source
+    W:
+    - demande de correction
+    X:
+    - demande au contributeur
+    - résultat
+- id: resolve
+  label: Vérifier la résolution d’une anomalie
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Vérifier la résolution d’une anomalie
+  capability_refs:
+  - cap-mdm-quality-remediation
+  movements:
+    E:
+    - correction
+    R:
+    - anomalie
+    - fiche source
+    - règles de qualité
+    W:
+    - état de correction
+    - résultats de qualité
+    X:
+    - résultat de correction
+- id: match
+  label: Proposer des rapprochements
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Proposer des rapprochements
+  capability_refs:
+  - cap-mdm-identity
+  movements:
+    E:
+    - demande de rapprochement
+    R:
+    - identités
+    - fiches sources
+    - règles de rapprochement
+    W:
+    - propositions
+    X:
+    - propositions
+- id: merge
+  label: Fusionner des identités
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Fusionner des identités
+  capability_refs:
+  - cap-mdm-identity
+  movements:
+    E:
+    - décision de fusion
+    R:
+    - identités
+    - correspondances
+    - autorités
+    W:
+    - identité
+    - correspondances
+    - historique
+    X:
+    - résultat de fusion
+- id: split
+  label: Séparer une identité
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Séparer une identité
+  capability_refs:
+  - cap-mdm-identity
+  movements:
+    E:
+    - décision de séparation
+    R:
+    - identité
+    - correspondances
+    - historique
+    - autorités
+    W:
+    - identités
+    - correspondances
+    - historique
+    X:
+    - résultat de séparation
+- id: consolidate
+  label: Consolider un enregistrement
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Consolider un enregistrement
+  capability_refs:
+  - cap-mdm-consolidation
+  movements:
+    E:
+    - demande de consolidation
+    R:
+    - fiches sources
+    - priorités
+    - règles de normalisation
+    W:
+    - fiche consolidée
+    - lignage
+    X:
+    - fiche consolidée
+    - conflits
+- id: enrich
+  label: Enrichir une fiche
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Enrichir une fiche
+  capability_refs:
+  - cap-mdm-enrichment
+  movements:
+    E:
+    - enrichissement
+    R:
+    - fiche
+    - règles
+    - autorités
+    W:
+    - fiche
+    - provenance
+    X:
+    - résultat
+- id: change
+  label: Créer ou corriger une version
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Créer ou corriger une version
+  capability_refs:
+  - cap-mdm-change
+  movements:
+    E:
+    - version proposée
+    R:
+    - version courante
+    - modèle
+    - autorités
+    W:
+    - version
+    - historique
+    X:
+    - version
+    - diagnostic
+- id: retire
+  label: Retirer une version
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Retirer une version
+  capability_refs:
+  - cap-mdm-change
+  movements:
+    E:
+    - demande de retrait
+    R:
+    - version
+    - dépendances
+    - autorités
+    W:
+    - état de version
+    - historique
+    X:
+    - résultat de retrait
+- id: certify
+  label: Décider une certification
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Décider une certification
+  capability_refs:
+  - cap-mdm-certification
+  movements:
+    E:
+    - décision de certification
+    R:
+    - version
+    - qualité
+    - autorités
+    W:
+    - certification
+    - historique
+    X:
+    - certification
+    - diagnostic
+- id: publish
+  label: Publier une version certifiée
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Publier une version certifiée
+  capability_refs:
+  - cap-mdm-publication
+  movements:
+    E:
+    - demande de publication
+    R:
+    - version
+    - certification
+    - abonnements
+    W:
+    - publication
+    - livraisons
+    X:
+    - version publiée
+    - résultat
+- id: withdraw
+  label: Publier un retrait
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Publier un retrait
+  capability_refs:
+  - cap-mdm-publication
+  movements:
+    E:
+    - demande de retrait publié
+    R:
+    - publication
+    - abonnements
+    W:
+    - retrait
+    - livraisons
+    X:
+    - avis de retrait
+    - résultat
+- id: subscription
+  label: Gérer un abonnement et sa portée
+  group: common
+  functional_user: Système consommateur
+  trigger: Gérer un abonnement et sa portée
+  capability_refs:
+  - cap-mdm-access-subscription
+  movements:
+    E:
+    - abonnement
+    - droits de consommation
+    R:
+    - modèles
+    - autorités
+    W:
+    - abonnement
+    - droits de consommation
+    X:
+    - abonnement
+    - diagnostic
+- id: delivery
+  label: Livrer une publication
+  group: common
+  functional_user: Système consommateur
+  trigger: Livrer une publication
+  capability_refs:
+  - cap-mdm-distribution
+  movements:
+    E:
+    - demande de livraison
+    R:
+    - publication
+    - abonnement
+    - droits
+    W:
+    - état de livraison
+    X:
+    - version publiée
+    - diagnostic
+- id: ack
+  label: Enregistrer un accusé de livraison
+  group: common
+  functional_user: Système consommateur
+  trigger: Enregistrer un accusé de livraison
+  capability_refs:
+  - cap-mdm-distribution
+  movements:
+    E:
+    - accusé consommateur
+    R:
+    - livraison
+    W:
+    - état de livraison
+    X:
+    - résultat
+- id: replay
+  label: Rejouer une livraison échouée
+  group: common
+  functional_user: Système consommateur
+  trigger: Rejouer une livraison échouée
+  capability_refs:
+  - cap-mdm-distribution
+  movements:
+    E:
+    - demande de reprise
+    R:
+    - livraison
+    - publication
+    - droits
+    W:
+    - état de reprise
+    X:
+    - publication
+    - résultat
+- id: search
+  label: Rechercher les fiches et leurs versions
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Rechercher les fiches et leurs versions
+  capability_refs:
+  - cap-mdm-change
+  movements:
+    E:
+    - critères de recherche
+    R:
+    - fiches
+    - versions
+    - droits
+    W: []
+    X:
+    - résultats de recherche
+- id: history
+  label: Consulter le lignage et les décisions
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Consulter le lignage et les décisions
+  capability_refs:
+  - cap-mdm-change
+  - cap-mdm-certification
+  movements:
+    E:
+    - demande de consultation
+    R:
+    - historique
+    - lignage
+    - certifications
+    - droits
+    W: []
+    X:
+    - historique
+    - lignage
+    - certifications
+- id: export
+  label: Exporter les données autorisées
+  group: common
+  functional_user: Gestionnaire MDM
+  trigger: Exporter les données autorisées
+  capability_refs:
+  - cap-mdm-access-subscription
+  movements:
+    E:
+    - demande d’export
+    R:
+    - fiches
+    - modèle
+    - droits
+    W:
+    - état d’export
+    X:
+    - données exportées
+    - résultat
+- id: plugin-register
+  label: Enregistrer un plugin JAR
+  group: studio
+  functional_user: Gestionnaire MDM
+  trigger: Enregistrer un plugin JAR
+  capability_refs:
+  - cap-mdm-standards
+  movements:
+    E:
+    - descripteur de plugin
+    - binaire
+    R:
+    - contrat de plugin
+    - autorités
+    W:
+    - plugin
+    - version de plugin
+    X:
+    - résultat de validation
+- id: plugin-activate
+  label: Activer ou retirer une version de plugin
+  group: studio
+  functional_user: Gestionnaire MDM
+  trigger: Activer ou retirer une version de plugin
+  capability_refs:
+  - cap-mdm-standards
+  movements:
+    E:
+    - commande d’activation
+    R:
+    - plugin
+    - modèle
+    - dépendances
+    - autorités
+    W:
+    - état de plugin
+    X:
+    - résultat
+- id: plugin-run
+  label: Exécuter un traitement de plugin
+  group: studio
+  functional_user: Gestionnaire MDM
+  trigger: Exécuter un traitement de plugin
+  capability_refs:
+  - cap-mdm-enrichment
+  movements:
+    E:
+    - demande de traitement
+    R:
+    - fiche
+    - plugin
+    - contrat
+    W:
+    - résultat de traitement
+    - provenance
+    X:
+    - résultat
+    - diagnostic
+- id: schema-preview
+  label: Prévisualiser une évolution de schéma
+  group: studio
+  functional_user: Gestionnaire MDM
+  trigger: Prévisualiser une évolution de schéma
+  capability_refs:
+  - cap-mdm-standards
+  movements:
+    E:
+    - schéma proposé
+    R:
+    - schéma courant
+    - dépendances
+    - fiches
+    W: []
+    X:
+    - différences
+    - diagnostic
+- id: restore-check
+  label: Contrôler la cohérence après restauration
+  group: common
+  functional_user: Exploitant produit
+  trigger: Contrôler la cohérence après restauration
+  capability_refs:
+  - cap-mdm-ingestion
+  - cap-mdm-distribution
+  movements:
+    E:
+    - demande de contrôle
+    R:
+    - versions
+    - publications
+    - livraisons
+    W:
+    - anomalies de cohérence
+    X:
+    - rapport de cohérence
+- id: family-customer
+  label: 'Maintenir les références : clients, contacts, adresses, relations clients'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-customer
+  movements:
+    E:
+    - clients
+    - contacts
+    - adresses
+    - relations clients
+    R:
+    - clients
+    - contacts
+    - adresses
+    - relations clients
+    - modèle de famille
+    W:
+    - clients
+    - contacts
+    - adresses
+    - relations clients
+    X:
+    - résultat de validation
+- id: family-supplier
+  label: 'Maintenir les références : fournisseurs, établissements, contacts fournisseurs, qualifications'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-supplier
+  movements:
+    E:
+    - fournisseurs
+    - établissements
+    - contacts fournisseurs
+    - qualifications
+    R:
+    - fournisseurs
+    - établissements
+    - contacts fournisseurs
+    - qualifications
+    - modèle de famille
+    W:
+    - fournisseurs
+    - établissements
+    - contacts fournisseurs
+    - qualifications
+    X:
+    - résultat de validation
+- id: family-agreement
+  label: 'Maintenir les références : accords, parties, conditions, engagements'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-agreement
+  movements:
+    E:
+    - accords
+    - parties
+    - conditions
+    - engagements
+    R:
+    - accords
+    - parties
+    - conditions
+    - engagements
+    - modèle de famille
+    W:
+    - accords
+    - parties
+    - conditions
+    - engagements
+    X:
+    - résultat de validation
+- id: family-product
+  label: 'Maintenir les références : produits, caractéristiques, classifications produit'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-product
+  movements:
+    E:
+    - produits
+    - caractéristiques
+    - classifications produit
+    R:
+    - produits
+    - caractéristiques
+    - classifications produit
+    - modèle de famille
+    W:
+    - produits
+    - caractéristiques
+    - classifications produit
+    X:
+    - résultat de validation
+- id: family-variant
+  label: 'Maintenir les références : variantes, axes de variation'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-variant
+  movements:
+    E:
+    - variantes
+    - axes de variation
+    R:
+    - variantes
+    - axes de variation
+    - modèle de famille
+    W:
+    - variantes
+    - axes de variation
+    X:
+    - résultat de validation
+- id: family-trade-item
+  label: 'Maintenir les références : unités commerciales, identifiants commerciaux'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-trade-item
+  movements:
+    E:
+    - unités commerciales
+    - identifiants commerciaux
+    R:
+    - unités commerciales
+    - identifiants commerciaux
+    - modèle de famille
+    W:
+    - unités commerciales
+    - identifiants commerciaux
+    X:
+    - résultat de validation
+- id: family-assortment
+  label: 'Maintenir les références : assortiments, affectations, inclusions'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-assortment
+  movements:
+    E:
+    - assortiments
+    - affectations
+    - inclusions
+    R:
+    - assortiments
+    - affectations
+    - inclusions
+    - modèle de famille
+    W:
+    - assortiments
+    - affectations
+    - inclusions
+    X:
+    - résultat de validation
+- id: family-catalog
+  label: 'Maintenir les références : catalogues, offres'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-catalog
+  movements:
+    E:
+    - catalogues
+    - offres
+    R:
+    - catalogues
+    - offres
+    - modèle de famille
+    W:
+    - catalogues
+    - offres
+    X:
+    - résultat de validation
+- id: family-product-pricing
+  label: 'Maintenir les références : tarifs produit, conditions tarifaires'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-product-pricing
+  movements:
+    E:
+    - tarifs produit
+    - conditions tarifaires
+    R:
+    - tarifs produit
+    - conditions tarifaires
+    - modèle de famille
+    W:
+    - tarifs produit
+    - conditions tarifaires
+    X:
+    - résultat de validation
+- id: family-internal-supplies
+  label: 'Maintenir les références : fournitures internes, caractéristiques fournitures'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-internal-supplies
+  movements:
+    E:
+    - fournitures internes
+    - caractéristiques fournitures
+    R:
+    - fournitures internes
+    - caractéristiques fournitures
+    - modèle de famille
+    W:
+    - fournitures internes
+    - caractéristiques fournitures
+    X:
+    - résultat de validation
+- id: family-location-network
+  label: 'Maintenir les références : sites, rattachements réseau'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-location-network
+  movements:
+    E:
+    - sites
+    - rattachements réseau
+    R:
+    - sites
+    - rattachements réseau
+    - modèle de famille
+    W:
+    - sites
+    - rattachements réseau
+    X:
+    - résultat de validation
+- id: family-service-catalog
+  label: 'Maintenir les références : services, périmètres de service'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-service-catalog
+  movements:
+    E:
+    - services
+    - périmètres de service
+    R:
+    - services
+    - périmètres de service
+    - modèle de famille
+    W:
+    - services
+    - périmètres de service
+    X:
+    - résultat de validation
+- id: family-service-pricing
+  label: 'Maintenir les références : tarifs service, conditions de facturation'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-service-pricing
+  movements:
+    E:
+    - tarifs service
+    - conditions de facturation
+    R:
+    - tarifs service
+    - conditions de facturation
+    - modèle de famille
+    W:
+    - tarifs service
+    - conditions de facturation
+    X:
+    - résultat de validation
+- id: family-packaging-material
+  label: 'Maintenir les références : matériaux emballage, caractéristiques emballage'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-packaging-material
+  movements:
+    E:
+    - matériaux emballage
+    - caractéristiques emballage
+    R:
+    - matériaux emballage
+    - caractéristiques emballage
+    - modèle de famille
+    W:
+    - matériaux emballage
+    - caractéristiques emballage
+    X:
+    - résultat de validation
+- id: family-packaging-specification
+  label: 'Maintenir les références : consignes emballage, compositions emballage'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-packaging-specification
+  movements:
+    E:
+    - consignes emballage
+    - compositions emballage
+    R:
+    - consignes emballage
+    - compositions emballage
+    - modèle de famille
+    W:
+    - consignes emballage
+    - compositions emballage
+    X:
+    - résultat de validation
+- id: family-codes-classification
+  label: 'Maintenir les références : codes, hiérarchies, correspondances'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-codes-classification
+  movements:
+    E:
+    - codes
+    - hiérarchies
+    - correspondances
+    R:
+    - codes
+    - hiérarchies
+    - correspondances
+    - modèle de famille
+    W:
+    - codes
+    - hiérarchies
+    - correspondances
+    X:
+    - résultat de validation
+- id: family-unit-conversion
+  label: 'Maintenir les références : unités, conversions'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-unit-conversion
+  movements:
+    E:
+    - unités
+    - conversions
+    R:
+    - unités
+    - conversions
+    - modèle de famille
+    W:
+    - unités
+    - conversions
+    X:
+    - résultat de validation
+- id: family-calendar
+  label: 'Maintenir les références : calendriers, périodes'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-calendar
+  movements:
+    E:
+    - calendriers
+    - périodes
+    R:
+    - calendriers
+    - périodes
+    - modèle de famille
+    W:
+    - calendriers
+    - périodes
+    X:
+    - résultat de validation
+- id: family-shared-configuration
+  label: 'Maintenir les références : paramètres partagés, dépendances paramètres'
+  group: families
+  functional_user: Gestionnaire MDM
+  trigger: Le gestionnaire soumet une création ou une correction des références de cette famille.
+  capability_refs:
+  - cap-mdm-shared-configuration
+  movements:
+    E:
+    - paramètres partagés
+    - dépendances paramètres
+    R:
+    - paramètres partagés
+    - dépendances paramètres
+    - modèle de famille
+    W:
+    - paramètres partagés
+    - dépendances paramètres
+    X:
+    - résultat de validation

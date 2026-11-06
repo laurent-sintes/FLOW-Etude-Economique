@@ -21,7 +21,7 @@ const output=path.resolve(flags.get('--output')||'tmp/pages-validation-report.js
 await fs.mkdir(path.dirname(output),{recursive:true});
 const oracle=JSON.parse((await fs.readFile(casesPath,'utf8')).replace(/^\uFEFF/,''));
 assert.equal(Object.keys(oracle.cases).length,6,'Six current model scenarios are required.');
-const navRoutes=['accueil','unites-travail','schema-modele','organisation-cible','gouvernance-delivery','charges-equipes','couts-equipes','preetudes','preetude-projets','preetude-solutions','preetude-couts','preetude-productivite','charges-acquisition','charges-integration','charges-fonctionnement','organisation-delivery','equipes-produit','integration-transverse','synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','acquisition','integration','fonctionnement','scenarios','methodes','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire','telechargements'];
+const navRoutes=['accueil','unites-travail','schema-modele','organisation-cible','dependances-equipes','gouvernance-delivery','charges-equipes','couts-equipes','preetudes','preetude-projets','preetude-solutions','preetude-couts','preetude-productivite','charges-acquisition','charges-gouvernance','charges-integration','charges-fonctionnement','organisation-delivery','equipes-produit','integration-transverse','synvance','cartographie','vision','modele','conditions-realisation','marche','complexite','calcul-net','calcul-run','leviers','acquisition','integration','fonctionnement','scenarios','methodes','capacite-realisation','etude-marche','parametres','evaluation-core','comparer','se-projeter','simuler','glossaire','telechargements'];
 const synvanceProviders=['microsoft','sap'];
 const routes=[navRoutes[0],...['business','oms','costs','delays',...synvanceProviders].map(page=>'synvance-'+page),...navRoutes.slice(1)];
 const report={url:site.href,status:'running',routes:{},worker:{},proofs:{},storage:{},errors:[],warnings:[]};
@@ -64,7 +64,7 @@ function watch(target){
 }
 
 const baseRoute=id=>id.split('?')[0];
-const currentRoute=id=>({ 'etude-marche':'evaluation-core','se-projeter':'comparer','simuler':'comparer' }[baseRoute(id)]||baseRoute(id));
+const currentRoute=id=>({ 'unites-travail':'charges-equipes','etude-marche':'evaluation-core','se-projeter':'comparer','simuler':'comparer' }[baseRoute(id)]||baseRoute(id));
 const sidebarRoute=id=>{const route=currentRoute(id);return route.startsWith('synvance-')?'synvance':['modele','conditions-realisation','capacite-realisation','marche','complexite','calcul-net','calcul-run','leviers'].includes(route)?'methodes':route;};
 async function route(id){
  await page.evaluate(value=>{location.hash='#'+value;},id);
@@ -75,7 +75,7 @@ async function route(id){
  },expected);
  await page.locator('main .essential-page:visible').first().waitFor();
  const resolved=currentRoute(id);
- if(resolved.startsWith('charges-')&&resolved!=='charges-equipes')await page.locator('.gross-evaluations').waitFor();
+ if(resolved.startsWith('charges-')&&resolved!=='charges-equipes')await page.locator('.charge-dossier').waitFor();
  if(['comparer','evaluation-core','parametres'].includes(resolved))await page.locator(baseRoute(id)==='etude-marche'||/[?&]view=(financements|transpositions)/.test(id)?'.eco-evidence-links,.market-comparison':'.eco-decision-scope,.eco-determinants').first().waitFor();
  if(resolved==='preetude-solutions')await page.locator('[data-prestudy=solutions] .dossier-sheet :is(.comparison-table,.essential-market-panel,.market-qualification-reading)').first().waitFor();
  if(resolved==='synvance'||resolved.startsWith('synvance-'))await page.locator(`[data-synvance-page="${resolved==='synvance'?'overview':resolved.slice('synvance-'.length)}"]`).waitFor();
@@ -149,9 +149,19 @@ async function checkAuditCorrections(data){
  const visited=[];
  for(const width of [1440,390]){
   await page.setViewportSize({width,height:width===390?844:1000});
+  await route('organisation-cible');
+  const target=page.locator('.delivery-target');
+  await target.waitFor();
+  assert.deepEqual(await target.locator('[data-topology-layer]').evaluateAll(layers=>layers.map(layer=>({
+   id:layer.dataset.topologyLayer,
+   team_refs:[...layer.querySelectorAll('[data-team]')].map(team=>team.dataset.team),
+  }))),D.target_topology.layers.map(({id,team_refs})=>({id,team_refs})));
+  assert.deepEqual(await target.locator('.delivery-target-transverse [data-team]').evaluateAll(teams=>teams.map(team=>team.dataset.team)),D.target_topology.transverse.team_refs);
+  const targetBox=await target.boundingBox(),principleBox=await page.locator('.delivery-principle').boundingBox();
+  assert.ok(targetBox.y+targetBox.height<=principleBox.y,'The architecture map belongs at the start of the target page');
   await route('charges-integration?option=java-spring');
-  assert.equal(await page.locator('[data-workload-status]').getAttribute('data-workload-status'),'historical_pending_review');
-  assert.ok((await page.locator('[data-workload-status] p').innerText()).length>80,'Historical status stays beside the old total');
+  assert.equal(await page.locator('[data-integration-pending]').innerText(),D.charge_dossier.labels.integration_note);
+  assert.equal(await page.locator('[data-charge-function]').count(),0);
   for(const option of ['microsoft','sap']){
    await route('equipes-produit?option='+option+'&focus=master-data');
    assert.equal(await page.locator('.delivery-team-sheet .delivery-matrix').count(),0);
@@ -172,16 +182,35 @@ async function checkAuditCorrections(data){
   assert.equal(cells[4],C.labels.unknown);assert.equal(cells[5],C.labels.unknown);
   if(width===390){assert.equal(await row.evaluate(e=>getComputedStyle(e).display),'block');assert.equal(await row.locator('td').first().evaluate(e=>getComputedStyle(e).display),'grid');assert.ok(await row.locator('td').first().evaluate(e=>e.getBoundingClientRect().width>innerWidth*.65));assert.ok(await page.locator('[data-consolidation-details]').evaluate(e=>e.scrollWidth<=e.parentElement.clientWidth+1));}
   assert.equal(unclassified.labour_eur_ht,null);assert.equal(unclassified.non_labour_eur_ht,null);
-  const masterData=W.units.find(unit=>unit.id==='core/master-data-java-spring');
-  const missingDeliverable=W.units.find(unit=>unit.id.startsWith('core/')&&unit.estimation.missing.includes('deliverable'));
-  assert.ok(masterData.estimation.scope.deliverable);
+  const masterData=D.charge_dossier.phases[0].rows.find(unit=>unit.id==='core/master-data-java-spring');
   await route('unites-travail?focus='+encodeURIComponent(masterData.id));
-  await page.locator('.work-overview').waitFor();
-  assert.deepEqual(await page.locator('.work-outcomes li').allTextContents(),masterData.estimation.scope.deliverable.split(' · '));
-  assert.deepEqual(await page.locator('.work-included-activities li').allTextContents(),masterData.included_activities);
-  await route('unites-travail?focus='+encodeURIComponent(missingDeliverable.id));
-  await page.locator('.work-overview').getByText(W.estimate_labels.work_page.result_pending,{exact:true}).waitFor();
-  assert.ok((await page.locator('.work-gaps').innerText()).includes(W.estimate_labels.missing_labels.deliverable));
+  const popup=page.getByRole('dialog');await popup.waitFor();
+  assert.ok((await popup.innerText()).includes(masterData.scope.split(' · ')[0]));
+  await popup.getByRole('button',{name:data.ui.labels.close,exact:true}).click();
+  await route('charges-equipes');
+  assert.equal(await page.locator('.charge-team').count(),D.teams.length);
+  assert.equal(await page.locator('main select,main input').count(),0);
+  assert.doesNotMatch(await page.locator('.charge-dossier').innerText(),/€|TJM/);
+  await route('charges-gouvernance');
+  assert.equal(await page.locator('[data-charge-function]').count(),D.charge_dossier.governance.rows.length);
+  assert.equal(await page.locator('.charge-options').count(),0);
+  assert.equal(await page.locator('[data-governance-annual] dd').count(),D.charge_dossier.governance.horizons.length);
+  await route('charges-acquisition?option=java-spring&view=teams');
+  assert.equal(await page.locator('.charge-team').count(),D.teams.length);
+  assert.equal(await page.locator('[data-charge-function]').count(),0);
+  assert.equal(await page.locator('.charge-team dl div').count(),D.teams.length);
+  await route('charges-acquisition?option=java-spring&view=table');
+  assert.equal(await page.locator('[data-governance-annual]').count(),0);
+  for(const row of D.charge_dossier.phases[0].rows.filter(r=>r.kind==='core_build')){
+   assert.deepEqual(await page.locator('[data-charge-function="'+row.id+'"] [data-scope-summary]').evaluateAll(es=>es.map(e=>e.dataset.scopeSummary).sort()),row.scope_summary.map(item=>item.kind+':'+item.ref).sort());
+  }
+  for(const option of ['microsoft','sap']){
+   await route('charges-equipes?option='+option);
+   assert.equal(await page.locator('.charge-team').count(),0);
+   assert.equal(await page.locator('.charge-totals a').count(),3);
+   assert.ok((await page.locator('.charge-options [aria-current=page]').getAttribute('href')).includes('option='+option));
+  }
+
   for(const destination of ['integration-transverse','schema-modele?view=teams']){
    await route(destination);await page.locator('.tt-node').first().waitFor();
    assert.equal(await page.locator('.tt-node').count(),D.teams.length);
@@ -258,32 +287,21 @@ try{
  const assets=await page.locator('img').evaluateAll(els=>els.map(el=>({src:el.src,loaded:el.complete&&el.naturalWidth>0})));assert.ok(assets.length);for(const asset of assets){assert.ok(asset.loaded);assert.ok(new URL(asset.src).pathname.startsWith(site.pathname));}report.assets=assets.length;
  await route('charges-acquisition?option=java-spring');const grossResponse=await page.request.get(new URL(manifest.routes['/api/gross-evaluations'],manifestUrl).href);assert.ok(grossResponse.ok());const gross=await grossResponse.json();
  const core=gross.phases.acquisition.options['java-spring'].core;assert.equal(core.adopted_jh,data.baseline.options.find(o=>o.stack==='java-spring').obtention?.total_jh??data.content.core_product_scope.proposal.adopted_jh);
- const effortMatrix=page.locator('.gross-effort-matrix');
- assert.deepEqual(await effortMatrix.locator('tbody[data-domain-group]').evaluateAll(groups=>groups.map(group=>group.dataset.domainGroup)),core.domain_reading.buckets.map(bucket=>bucket.id));
- assert.deepEqual(await effortMatrix.locator('tr[data-unit]').evaluateAll(rows=>rows.map(row=>row.dataset.unit).sort()),core.rows.map(row=>row.id).sort());
- assert.equal(await page.locator('[data-core-status]').getAttribute('data-core-status'),core.status);
- assert.equal(await page.locator('.gross-activity-table tbody tr').count(),core.activities.length);
- assert.doesNotMatch(await effortMatrix.innerText(),/€|tarif|TJM/);
- assert.doesNotMatch(await page.locator('.gross-activity-table').innerText(),/€|tarif|TJM/);
- for(const row of core.rows){
-  const cell=effortMatrix.locator('[data-unit="'+row.id+'"]');
-  const button=cell.getByRole('button');
-  await button.scrollIntoViewIfNeeded();
-  await button.focus();
-  const tooltip=cell.locator('[role="tooltip"]:popover-open');
-  await tooltip.waitFor();
-  assert.ok((await tooltip.innerText()).length>40);
-  await page.keyboard.press('Escape');
-  await tooltip.waitFor({state:'hidden'});
-  await cell.getByRole('link').click();
-  const dialog=page.getByRole('dialog');
-  await dialog.waitFor();
-  assert.ok((await dialog.innerText()).length>80);
+ const dossier=data.content.delivery_organisation.charge_dossier;
+ const phase=dossier.phases.find(p=>p.id==='acquisition');
+ assert.deepEqual(await page.locator('[data-charge-function]').evaluateAll(rows=>rows.map(row=>row.dataset.chargeFunction).sort()),phase.rows.map(row=>row.id).sort());
+ assert.doesNotMatch(await page.locator('.charge-dossier').innerText(),/€|TJM/);
+ assert.equal(await page.locator('[data-governance-annual] dl div').count(),4);
+ for(const row of phase.rows){
+  const cell=page.locator('[data-charge-function="'+row.id+'"]');
+  const button=cell.getByRole('button');await button.focus();
+  await cell.locator('[role="tooltip"]').waitFor();
+  await button.click();const dialog=page.getByRole('dialog');await dialog.waitFor();
+  assert.ok((await dialog.innerText()).includes(row.label));
   await dialog.getByRole('button',{name:data.ui.labels.close,exact:true}).click();
   await dialog.waitFor({state:'hidden'});
-  await page.waitForFunction(()=>document.activeElement?.id==='gross-focus-comparisons');
  }
- report.proofs.phaseCharges={adopted_jh:core.adopted_jh,units:core.rows.length,adoptionStatus:core.status};
+ report.proofs.phaseCharges={product_jh:phase.product_jh,total_jh:phase.total_jh,units:phase.rows.length};
  await route('evaluation-core?option=java-spring&horizon=10');assert.equal(await page.locator('.eco-cost-overview>article').count(),3);assert.equal(await page.locator('.eco-year-chart li').count(),10);
  await route('parametres');assert.equal(await page.locator('.eco-determinants article').count(),4);report.proofs.fixedEconomicDossier=true;
  await route('modele');const modelDownload=page.locator('.model-download a[download]'),downloadHref=await modelDownload.getAttribute('href');assert.equal(new URL(downloadHref,site).pathname,site.pathname+'exports/flow-modele-metier.yaml');

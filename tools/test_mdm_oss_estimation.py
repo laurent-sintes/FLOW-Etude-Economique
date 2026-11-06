@@ -33,7 +33,7 @@ class MdmOssTests(unittest.TestCase):
         self.assertEqual({r['id'] for r in d['coverage']},{c['id'] for c in self.unit['capabilities']})
         self.assertEqual(len(d['coverage']),33);self.assertNotIn('BC-002',{r['id'] for r in d['coverage']})
         self.assertEqual(len(d['family_adapters']),8)
-        self.assertIsNone(d['confidence_interval']);self.assertIsNone(d['cosmic_jh'])
+        self.assertIsNone(d['confidence_interval']);self.assertEqual(d['cosmic_jh'],d['cosmic']['jh'])
         expected={'atrocore':(15450,948,17.078,1710), 'unidata':(47082,948,48.710,5410), 'pimcore':(33524,1022,35.226,3780)}
         for id,p in rows.items():
             self.assertEqual((p['measured_units'],p['additional_units'],p['ksloc'],p['jh']),expected[id])
@@ -61,11 +61,15 @@ class MdmOssTests(unittest.TestCase):
     def test_replay_from_frozen_documents_has_no_source_checkout_dependency(self):
         rules={r['id']:r for r in self.study.fundamentals['estimation_model']['rules']}
         with model_session():spec,_,_,_=prepared()
+        from mdm_cosmic import SOURCE as COSMIC_SOURCE, project as cosmic_project
+        cosmic_doc=read(ROOT/COSMIC_SOURCE)
+        cosmic_benchmark=read(ROOT/cosmic_doc['benchmark_ref'])
         with patch.object(Path,'read_bytes',side_effect=AssertionError('unexpected file read')):
             docs={k:proof(v,self.frozen) for k,v in spec['proofs'].items()}
             products=scope_evidence(spec,docs['scope'],docs['measures'],docs['code'],self.native,self.source)
             measures=refine_unidata(spec,docs['measures'],docs['code'],docs['unidata_selection'])
             measures['engineering']=project_engineering(spec,docs['engineering'],self.revision,self.funding)
+            measures['cosmic']=cosmic_project(cosmic_doc,cosmic_benchmark,[c['native_id'] for c in docs['scope']['coverage']],lambda key,**kwargs:evaluate_rule(rules[key],**kwargs))
             result=project_assessment(spec,docs['scope'],measures,products,self.unit,lambda key,**kwargs:evaluate_rule(rules[key],**kwargs))
         self.assertEqual(result,self.assessment)
 

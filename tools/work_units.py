@@ -205,6 +205,11 @@ def build_work_units(economic, organisation, source=None, abaque=None):
     order = {ref:i for i,ref in enumerate(records)}
     allocations.sort(key=lambda r:order[r['record_ref']])
     doc['capability_links'] = [dict(work_unit_ref=u['id'],capability_ref=c['id'],status='linked') for u in doc['units'] for c in u['capabilities']]
+    # A unique capability/function association covers the capability fully.
+    # Multiple associations remain unknown until an explicit partition is established.
+    for link in doc['capability_links']:
+        siblings = [other for other in doc['capability_links'] if other['capability_ref'] == link['capability_ref']]
+        link['share_pct'] = 100 if len(siblings) == 1 else None
     doc['allocations'] = allocations
     doc['abaque'] = rules
     doc['estimate_labels'] = read(ROOT/ESTIMATE_LABELS)['labels']

@@ -75,3 +75,5 @@ Les domaines du métamodèle reprennent les fonds lavande, sable, gris, menthe, 
 Le contrat d’estimation emploie le vert FLOW pour la référence et le passage des JH aux coûts. La proposition séparée utilise un fond lavande clair, avec son statut textuel. Les champs absents affichent « À renseigner ». Les tableaux de rôles restent défilants dans leur région sur mobile et le texte courant garde son contraste. Les montants restent issus du moteur Python.
 
 La consolidation par équipe distingue la référence retenue et le travail en cours par des intercalaires internes. Chaque phase garde son assiette initiale ou annuelle. Les valeurs inconnues sont libellées « À renseigner », les sous-totaux sont qualifiés et les périodes restent visibles près des contributions.
+
+Le sélecteur compact des charges reprend les logos Microsoft et SAP existants et le pictogramme Java de Devicon v2.17.0 (`https://github.com/devicons/devicon/blob/v2.17.0/icons/java/java-original.svg`, collection sous licence MIT). Les blocs de justification sont vert pâle, les exclusions pêche et les postes de charge lavande. Les titres des panneaux de détail utilisent le vert FLOW avec texte blanc.

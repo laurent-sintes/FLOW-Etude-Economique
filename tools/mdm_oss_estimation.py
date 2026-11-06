@@ -1,4 +1,5 @@
 """Replay the MDM-specific COCOMO proposal from pinned, scoped code evidence."""
+from mdm_cosmic import calculate as cosmic_calculate, dependencies as cosmic_dependencies
 from base64 import b64decode
 from copy import deepcopy
 from decimal import Decimal
@@ -32,7 +33,7 @@ def require(ok, text):
 
 def dependencies():
     spec=read(ROOT/SOURCE)
-    return {SOURCE,SCHEMA,REVISION,FUNDING,'tools/mdm_oss_estimation.py','source/glossaire.yaml',spec['method_ref'],spec['report_ref'],spec['refinement_report_ref'],spec['engineering_report_ref'],*(r['path'] for r in spec['proofs'].values())}|native_dependencies()
+    return {SOURCE,SCHEMA,REVISION,FUNDING,'tools/mdm_oss_estimation.py','source/glossaire.yaml',spec['method_ref'],spec['report_ref'],spec['refinement_report_ref'],spec['engineering_report_ref'],*(r['path'] for r in spec['proofs'].values())}|native_dependencies()|cosmic_dependencies()
 
 
 def sha(raw):
@@ -213,6 +214,7 @@ def prepared():
     spec['labels']=resolve_text_tree(spec['labels'],glossary,path=SOURCE)
     measures=refine_unidata(spec,docs['measures'],docs['code'],docs['unidata_selection'])
     measures['engineering']=project_engineering(spec,docs['engineering'],read(ROOT/REVISION),read(ROOT/FUNDING))
+    measures['cosmic']=cosmic_calculate([c['native_id'] for c in docs['scope']['coverage']])
     return spec,docs['scope'],measures,products
 
 
@@ -262,4 +264,4 @@ def project_assessment(spec,scope,measures,products,unit,rule_function=formula):
         engineering=dict(engineering,status='adopted')
     else:
         engineering=dict(engineering,retained_jh=unit['total_jh'],gap_jh=engineering['central_jh']-unit['total_jh'])
-    return dict(engineering=engineering,unidata_review=review,id=spec['id'],date=spec['date'],status=spec['status'],labels=spec['labels'],anchor=scope['anchor'],anchor_basis=scope['anchor_basis'],products=results,retained=dict(jh=unit['total_jh'],cost_eur_ht=unit['cost_eur_ht']),coverage=[{k:row[k] for k in ('id','native_id','label','group','qualification','completion_refs')} for row in scope['coverage']],family_adapters=scope['family_adapters'],family_prototypes=scope['family_prototypes'],assumptions=scope['assumptions'],exclusions=scope['exclusions'],unknowns=scope['unknowns'],cosmic_jh=None,confidence_interval=None,params=dict(params,E=E,F=F),report_ref=spec['report_ref'])
+    return dict(engineering=engineering,unidata_review=review,id=spec['id'],date=spec['date'],status=spec['status'],labels=spec['labels'],anchor=scope['anchor'],anchor_basis=scope['anchor_basis'],products=results,retained=dict(jh=unit['total_jh'],cost_eur_ht=unit['cost_eur_ht']),coverage=[{k:row[k] for k in ('id','native_id','label','group','qualification','completion_refs')} for row in scope['coverage']],family_adapters=scope['family_adapters'],family_prototypes=scope['family_prototypes'],assumptions=scope['assumptions'],exclusions=scope['exclusions'],unknowns=[x for x in scope['unknowns'] if x!='Comptage COSMIC comparable du nouveau périmètre'],cosmic_jh=measures['cosmic']['jh'],cosmic=deepcopy(measures['cosmic']),confidence_interval=None,params=dict(params,E=E,F=F),report_ref=spec['report_ref'])

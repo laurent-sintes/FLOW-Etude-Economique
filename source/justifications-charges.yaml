@@ -1,0 +1,189 @@
+version: 1
+scope: construction_core
+units:
+  master-data-java-spring:
+    natures:
+    - business
+    - it
+    summary: Unidata Java sert de référence. FLOW construit le moteur MDM, les écrans, les adaptations de familles
+      et leur qualification.
+    choice: Unidata est développé en Java et couvre les mécanismes attendus du MDM. Les trois références OSS servent
+      de comparatifs, sans moyenne entre leurs charges.
+    reuse: Les composants de modèles, données, recherche et gestion sont rapprochés du périmètre FLOW. Les services
+      génériques de processus restent financés dans Process Management.
+    exclusions: Ancien import de métamodèles XML. Gestion générique des tâches et processus Unidata.
+    calculation: La charge est reconstruite par les postes du moteur, des écrans, des familles et de la qualification.
+      Le choix d’Unidata ne signifie pas que sa charge COCOMO moins les exclusions donne automatiquement le total
+      FLOW.
+    proof_refs:
+    - source/estimations-core-retenues.yaml
+    - source/evaluation-charges-brutes.yaml
+  operational-references-java-spring:
+    natures:
+    - business
+    summary: Recevoir les versions MDM et construire les vues opérationnelles, avec contrôles de validité, reprises
+      et QA.
+    choice: Ce lot est le consommateur des références publiées dans la chaîne logistique. Le MDM reste leur producteur
+      et leur autorité.
+    reuse: Versions publiées et services du MDM. Les vues opérationnelles sont construites pour leurs consommateurs.
+    exclusions: Ni correction du référentiel maître, ni seconde construction du MDM. Connecteurs spécifiques Beaumanoir
+      exclus.
+    calculation: Les postes financent admission, conception des vues, compatibilité, reprises et qualification.
+      Ils sont additionnés sans majoration de coordination.
+    proof_refs:
+    - source/estimations-core-retenues.yaml
+    - source/evaluation-charges-brutes.yaml
+  stock-java-spring:
+    natures:
+    - business
+    summary: Axelor est retenu pour les mouvements et corrections de stock, après réutilisation du patrimoine Master
+      Data et arrondi.
+    choice: Axelor fournit l’analogue Java des positions et mouvements. ERPNext et Tryton donnent des ordres de
+      grandeur proches. Odoo porte un analogue de positions plus large.
+    reuse: Le patrimoine Master Data est déduit de la base. Les positions, mouvements, corrections et sept modules
+      nouveaux sont financés dans Stock.
+    exclusions: Responsabilités déjà financées par Master Data. Le périmètre plus large d’Odoo n’est pas ajouté
+      au produit FLOW.
+    calculation: Le calcul COCOMO de la sélection Axelor est arrondi à la dizaine. Aucun supplément manuel n’est
+      ajouté à ce résultat.
+    proof_refs:
+    - source/estimations-core-retenues.yaml
+    - source/evaluation-charges-brutes.yaml
+  inventory-ownership-java-spring:
+    natures:
+    - business
+    summary: La charge combine les conditions Axelor, les quantités Odoo, les actes ERPNext et les régularisations
+      Tryton.
+    choice: Une sélection de mécanismes de plusieurs ERP représente la propriété du stock. Aucune colonne ERP prise
+      isolément ne constitue la sélection finale.
+    reuse: Le patrimoine Master Data et Stock est réutilisé. Seuls les mécanismes propres aux droits et à la propriété
+      sont reconstruits.
+    exclusions: Pas de seconde facturation des positions, mouvements ni services de Master Data.
+    calculation: Les tailles sélectionnées sont préparées ensemble puis soumises au calcul COCOMO et à l’arrondi.
+      La charge n’est pas la moyenne des comparatifs.
+    proof_refs:
+    - source/estimations-core-retenues.yaml
+    - source/evaluation-charges-brutes.yaml
+  supply-controls-java-spring:
+    natures:
+    - business
+    summary: Les règles, restrictions et conditions d’éligibilité sont évaluées par COSMIC, puis converties en JH
+      et arrondies.
+    choice: Les petits composants de règles des ERP ne couvrent pas tout le moteur de politiques Supply. La décision
+      utilise les processus du périmètre FLOW comptés dans la preuve actuelle.
+    reuse: Les mécanismes techniques communs sont consommés depuis leurs lots propriétaires. Les politiques et incompatibilités
+      Supply restent dans ce lot.
+    exclusions: Les règles commerciales de prix ou de réapprovisionnement seules ne sont pas assimilées à la couverture
+      du moteur Supply.
+    calculation: Le comptage fonctionnel est valorisé selon le benchmark documenté, puis arrondi à la dizaine. Aucun
+      forfait supplémentaire n’est ajouté.
+    proof_refs:
+    - source/estimations-core-retenues.yaml
+    - source/evaluation-charges-brutes.yaml
+  orders-java-spring:
+    natures:
+    - business
+    summary: Le cycle de commande, sa filiation et les retours sont comptés une fois, indépendamment des marques
+      et canaux.
+    choice: COSMIC porte sur les demandes et résultats métier distincts. Les colonnes COCOMO décrivent les chaînes
+      ERP antérieures, avec un périmètre différent.
+    reuse: Les structures et mécanismes communs de commande sont partagés entre les équipes achat, B2C et Wholesale.
+    exclusions: Le périmètre complet d’un OMS et les adaptations propres aux marques ne sont pas ajoutés au Core
+      générique.
+    calculation: La charge provient du comptage fonctionnel et du rendement documenté. Les répartitions entre équipes
+      partagent ce total sans le multiplier.
+    proof_refs:
+    - source/estimations-core-retenues.yaml
+    - source/evaluation-charges-brutes.yaml
+  master-plan-java-spring:
+    natures:
+    - business
+    summary: Contributions au plan, projections et comparaisons de scénarios sont évaluées par COSMIC.
+    choice: Le périmètre FLOW retient les demandes, prévisions et apports utiles au plan. Une chaîne de fabrication
+      ERP complète ne représente pas ce besoin.
+    reuse: Les composants de planification sélectionnés et la structure Java éclairent le comparatif COCOMO. Les
+      services partagés restent dans leurs financements.
+    exclusions: Nomenclatures de fabrication, sous-assemblages et ordres de fabrication exclus de la sélection.
+    calculation: Le comptage des processus FLOW est converti en JH puis arrondi. Les interfaces des ateliers sont
+      financées dans leur lot distinct.
+    proof_refs:
+    - source/estimations-core-retenues.yaml
+    - source/evaluation-charges-brutes.yaml
+  supply-decisions-java-spring:
+    natures:
+    - business
+    summary: Promesse, affectation et optimisation sont comptées par processus, en réutilisant les moteurs de calcul.
+    choice: Le périmètre combine réservation et disponibilité, calendriers de ressources, optimisation et coordination.
+      Aucun petit analogue isolé ne représente tout cet ensemble.
+    reuse: Sélection ERPNext pour disponibilité et réservation, calendriers Odoo et analogues Axelor pour optimisation
+      et coordination.
+    exclusions: Picking physique, prix, taxes et fabrication ne sont pas inclus dans la sélection ERPNext.
+    calculation: Le calcul retenu valorise les processus COSMIC et arrondit à la dizaine. Le total est réparti entre
+      Inventory/Availability, Master Plan/Supply Policy et Services.
+    proof_refs:
+    - source/estimations-core-retenues.yaml
+    - source/evaluation-charges-brutes.yaml
+  service-fulfilment-java-spring:
+    natures:
+    - business
+    summary: Suivi des prestations et reconnaissance de leurs résultats sont évalués par COSMIC.
+    choice: La sélection conserve les demandes, instructions et résultats des prestations. Le dossier douanier comporte
+      sa chaîne de correction, pas seulement une métadonnée.
+    reuse: ERPNext sert d’analogue pour assurance, transport et finance. Axelor fournit la chaîne de correction
+      douanière. Les contrats de traitement marchandises partagent leur structure.
+    exclusions: Les chaînes ERP plus larges que ces traitements et les interfaces propres au Groupe ne sont pas
+      reprises intégralement.
+    calculation: Le comptage des processus retenus est converti en JH puis arrondi. Les ateliers de suivi visuel
+      ont leur financement séparé.
+    proof_refs:
+    - source/estimations-core-retenues.yaml
+    - source/evaluation-charges-brutes.yaml
+  process-management-java-spring:
+    natures:
+    - business
+    - it
+    summary: Construire le studio de processus, les formulaires, le portail des tâches et le pilotage autour du
+      runtime réutilisé.
+    choice: Temporal fournit l’exécution. Les analogues Axelor éclairent le studio et les formulaires. PM4JS et
+      Superset servent aux fonctions d’analyse. Leur assemblage doit former un produit utilisable.
+    reuse: Le moteur d’exécution est réutilisé. Les livrables financent édition, validation, publication, migration
+      des dossiers, formulaires, tâches, adaptation du runtime et analyses.
+    exclusions: Composants de configuration déjà fournis et processus métier spécifiques Beaumanoir exclus de la
+      construction générique.
+    calculation: Chaque poste du tableau de décomposition est financé une fois, y compris la qualification croisée.
+      Les tailles COCOMO historiques et le comptage COSMIC ne remplacent pas ce dimensionnement des studios et de
+      leurs interactions.
+    proof_refs:
+    - source/estimations-core-retenues.yaml
+    - source/evaluation-charges-brutes.yaml
+  supply-workbenches-java-spring:
+    natures:
+    - business
+    summary: 'Trois ateliers métier : planifier, comparer les décisions et suivre les prestations, sur un cadre
+      visuel commun.'
+    choice: Les ateliers prolongent les fonctions logistiques. Leur absence de lien direct à une capacité native
+      ne les transforme pas en fonctions IT.
+    reuse: Le cadre commun et les services des moteurs existants sont réutilisés. Les compositions visuelles propres
+      à chaque atelier sont réalisées dans ce lot.
+    exclusions: Pas de seconde construction des moteurs Master Plan, Supply Decisions et Services.
+    calculation: La décomposition finance cadre commun, trois ateliers, gestion des changements simultanés et qualification.
+      Le COSMIC historique couvre seulement la sauvegarde d’une vue.
+    proof_refs:
+    - source/estimations-core-retenues.yaml
+    - source/evaluation-charges-brutes.yaml
+  professional-it-java-spring:
+    natures:
+    - it
+    summary: Construire les consoles d’administration, les habilitations, la reprise et les services techniques
+      communs.
+    choice: Ces fonctions rendent le produit administrable et exploitable. Elles existent hors de la cartographie
+      métier native et sont financées dans les lots techniques identifiés.
+    reuse: Services standards d’identité et composants déjà fournis sont réutilisés. Les consoles, adaptations et
+      contrôles propres au produit restent à réaliser.
+    exclusions: MFA, LDAP, Pac4j et chargeurs déjà fournis sont retirés de la sélection. L’exploitation annuelle
+      et les migrations des SI Beaumanoir restent dans leurs phases respectives.
+    calculation: Les huit postes de la décomposition financent administration, configuration, reprise, audit, échanges,
+      documents, migrations produit et qualification. PaaS et Portal se partagent ce total sans nouveau budget.
+    proof_refs:
+    - source/estimations-core-retenues.yaml
+    - source/evaluation-charges-brutes.yaml

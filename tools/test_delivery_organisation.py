@@ -62,7 +62,7 @@ class DeliveryOrganisationTests(unittest.TestCase):
 
     def test_lifecycle_types_and_governance_are_separate(self):
         org=self.study.content['delivery_organisation']
-        self.assertEqual(len(org['teams']),11)
+        self.assertEqual(len(org['teams']),12)
         self.assertEqual(sum(t['type']=='stream-aligned' for t in org['teams']),6)
         self.assertNotIn(org['governance']['id'],{t['id'] for t in org['teams']})
         for team in org['teams']:
@@ -116,6 +116,51 @@ class DeliveryOrganisationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Core cost'):
             build_organisation(self.study.economic,baseline,self.study.content)
         self.assertEqual(result,self.study.content['delivery_organisation'])
+
+    def test_target_topology_places_every_team_in_one_layer_or_transverse(self):
+        topology = self.study.organisation_reading()['delivery_organisation']['target_topology']
+        self.assertEqual(topology['layers'][0]['team_refs'], ['sourcing-procurement', 'b2c', 'wholesale'])
+        self.assertEqual(topology['layers'][-1]['team_refs'], ['paas'])
+        self.assertEqual(topology['transverse']['team_refs'], ['integration'])
+        business=next(l for l in topology['layers'] if l['id']=='business-services')
+        self.assertEqual(business['rows'],[['portal'],['master-data','services']])
+        broken=deepcopy(self.document)
+        next(l for l in broken['target_topology']['layers'] if l['id']=='business-services')['rows']=[['master-data','services'],['portal']]
+        with self.assertRaisesRegex(ValueError,'Topology rows'):
+            validate(broken)
+        duplicate = deepcopy(self.document)
+        duplicate['target_topology']['layers'][0]['team_refs'].append('paas')
+        with self.assertRaisesRegex(ValueError, 'place every delivery team exactly once'):
+            validate(duplicate)
+        swapped = deepcopy(self.document)
+        swapped_topology = swapped['target_topology']
+        swapped_topology['layers'][-1]['team_refs'] = ['integration']
+        swapped_topology['transverse']['team_refs'] = ['paas']
+        with self.assertRaisesRegex(ValueError, 'Enabling teams belong in the transverse topology'):
+            validate(swapped)
+
+    def test_mdm_platform_and_references_split_preserves_effort_and_scope(self):
+        org=self.study.content['delivery_organisation']
+        teams={t['id']:t for t in org['teams']}
+        self.assertEqual(teams['mdm-platform']['type'],'platform')
+        self.assertEqual(teams['master-data']['type'],'stream-aligned')
+        units={u['id']:u for u in org['work_catalog']['units']}
+        mdm=units['core/master-data-java-spring']
+        parts={c['team_ref']:c for c in mdm['contributions'] if c['jh']}
+        self.assertAlmostEqual(parts['mdm-platform']['jh'],3315)
+        self.assertAlmostEqual(parts['master-data']['jh'],830)
+        self.assertAlmostEqual(sum(c['jh'] for c in parts.values()),mdm['totals']['jh'])
+        self.assertAlmostEqual(sum(c['cost_eur_ht'] or 0 for c in mdm['contributions']),mdm['totals']['cost_eur_ht'],places=2)
+        scopes={s['team_ref']:s for s in org['work_catalog']['team_scopes']}
+        self.assertEqual(scopes['mdm-platform']['scope_kind'],'indirect')
+        self.assertEqual(scopes['master-data']['scope_kind'],'direct')
+        charges={t['id']:t for t in org['charge_dossier']['teams']}
+        self.assertAlmostEqual(charges['mdm-platform']['totals']['acquisition'],3315)
+        self.assertAlmostEqual(charges['master-data']['totals']['acquisition'],1230)
+        for id in ('master-data','mdm-platform'):
+            self.assertIsNone(charges[id]['totals']['integration'])
+        modes={i['mode'] for i in org['interactions'] if i['source']=='mdm-platform' and i['target']=='master-data'}
+        self.assertEqual(modes,{'x-as-a-service','collaboration'})
 
     def test_published_master_data_team_uses_glossary_labels(self):
         teams = self.study.organisation_reading()['delivery_organisation']['teams']

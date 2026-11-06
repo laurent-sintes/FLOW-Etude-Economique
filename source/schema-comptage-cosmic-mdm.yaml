@@ -1,0 +1,91 @@
+type: object
+additionalProperties: false
+properties:
+  id: &id001
+    type: string
+    minLength: 1
+  work_unit_ref: *id001
+  counting_basis: *id001
+  boundary: *id001
+  family_rule: *id001
+  activity_scope: *id001
+  benchmark_ref: *id001
+  version:
+    const: 1
+  status:
+    const: comparison
+  day_hours:
+    type: number
+    exclusiveMinimum: 0
+  proof_refs:
+    type: array
+    minItems: 1
+    uniqueItems: true
+    items: *id001
+  processes:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        id: *id001
+        label: *id001
+        functional_user: *id001
+        trigger: *id001
+        group:
+          enum:
+          - common
+          - studio
+          - families
+        capability_refs:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items: *id001
+        movements:
+          type: object
+          additionalProperties: false
+          required:
+          - E
+          - R
+          - W
+          - X
+          properties:
+            E:
+              type: array
+              uniqueItems: true
+              items: *id001
+            R:
+              type: array
+              uniqueItems: true
+              items: *id001
+            W:
+              type: array
+              uniqueItems: true
+              items: *id001
+            X:
+              type: array
+              uniqueItems: true
+              items: *id001
+      required:
+      - id
+      - label
+      - functional_user
+      - trigger
+      - group
+      - capability_refs
+      - movements
+required:
+- id
+- work_unit_ref
+- counting_basis
+- boundary
+- family_rule
+- activity_scope
+- benchmark_ref
+- version
+- status
+- day_hours
+- proof_refs
+- processes

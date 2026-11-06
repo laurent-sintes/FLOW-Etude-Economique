@@ -9,6 +9,8 @@ from validation_reporting import test_ids
 from validate_stacks import ROOT
 
 ALGORITHM_CHECKS = {
+ 'initial_release_dependency_projection': 'test_release_dependencies.ReleaseDependencyTests.test_projection_conserves_build_and_freezes_initial_scope',
+ 'mdm_functional_count_projection': 'test_mdm_cosmic.MdmCosmicTests.test_independent_count_and_conversion',
  'mdm_oss_size_projection': 'test_mdm_oss_estimation.MdmOssTests.test_pinned_measurements_and_conditional_estimate_reconcile',
  'domain_cost_partition': 'test_domain_costs.DomainCostTests.test_domain_totals_conserve_and_shared_remains_pending',
  'scope_revision_replacement': 'test_scope_revision.ScopeRevisionTests.test_replacement_conserves_retained_decisions',

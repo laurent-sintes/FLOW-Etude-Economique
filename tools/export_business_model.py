@@ -141,7 +141,7 @@ def export(output=DEFAULT_OUTPUT, study=None):
                 if snapshot.digests[path.resolve()] != expected:
                     raise ValueError('Source changed since application loading: ' + name)
         table = getattr(loaded, 'content', {}).get('delivery_organisation', {}).get('allocation_table')
-        document = compose(snapshot.documents, snapshot.digests, derived={'mdm_oss_assessment': loaded.content['delivery_organisation']['mdm_oss_assessment'], 'scope_revision': loaded.content['delivery_organisation']['scope_revision'], 'team_phase_allocation': table, 'work_catalog': loaded.content['delivery_organisation']['work_catalog'], 'team_consolidations': loaded.content['delivery_organisation']['team_consolidations']} if table else None)
+        document = compose(snapshot.documents, snapshot.digests, derived={'mdm_oss_assessment': loaded.content['delivery_organisation']['mdm_oss_assessment'], 'scope_revision': loaded.content['delivery_organisation']['scope_revision'], 'team_phase_allocation': table, 'work_catalog': loaded.content['delivery_organisation']['work_catalog'], 'charge_dossier': loaded.content['delivery_organisation']['charge_dossier'], 'team_consolidations': loaded.content['delivery_organisation']['team_consolidations']} if table else None)
         raw = encode(document)
         names = {p.relative_to(ROOT).as_posix() for p in snapshot.digests}
         names.update(loaded.files)

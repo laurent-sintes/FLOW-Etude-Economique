@@ -105,7 +105,9 @@ class WorkUnitTests(unittest.TestCase):
         parts={p['team_ref']:p for p in c['allocations'] if p['work_unit_ref']==uid}
         self.assertAlmostEqual(parts['b2c']['jh'],source_role['jh']*.3)
         self.assertAlmostEqual(parts['b2c']['cost_eur_ht'],source_role['jh']*.3*source_role['rate_eur_jh'])
-        self.assertAlmostEqual(parts[None]['jh'],source_role['jh']*.1)
+        # With the shared lot's allocation removed, the other roles also remain unallocated.
+        self.assertIsNone(old['measurements'][0]['team_ref'])
+        self.assertAlmostEqual(parts[None]['jh'],old['totals']['jh']-source_role['jh']*.9)
         self.assertEqual(sum(Decimal(str(p['cost_eur_ht'])) for p in parts.values()),Decimal(str(old['totals']['cost_eur_ht'])))
 
     def test_bad_bindings_cycles_unused_keys_and_enabling_ownership_fail(self):

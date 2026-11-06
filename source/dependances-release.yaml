@@ -1,0 +1,925 @@
+version: 1
+id: initial-core-release-dependencies
+phase_ref: acquisition
+release_definition: Première release majeure complète. Les évolutions de MCO ne changent pas son périmètre.
+progress_definition: Le pourcentage porte sur les livrables achevés du périmètre initial de l’équipe, pas sur les
+  JH consommés. Le seuil exige aussi le livrable indiqué.
+labels:
+  intro: Première release majeure complète. Les évolutions de MCO ne changent pas son périmètre.
+  start: Démarrage
+  production: Mise en production
+  table: Contraintes
+  supplier: Équipe fournisseuse
+  consumer: Équipe dépendante
+  threshold: Seuil fournisseur
+  prerequisite: Livrable attendu
+  work: Travaux concernés
+  basis: Justification
+  evidence: Sources
+  hypothesis: Hypothèse de séquencement
+  release: Release initiale
+  charge: Charge de construction
+  reset: Recentrer
+  instruction: Sélectionner une équipe pour mettre en évidence ses dépendances. Cliquer sur une flèche pour lire
+    sa condition.
+  details: Détail de la contrainte
+  progress: Le pourcentage porte sur les livrables achevés du périmètre initial de l’équipe, pas sur les JH consommés.
+    Le seuil exige aussi le livrable indiqué.
+  production_note: À 100 %, la release majeure initiale du fournisseur est complète, qualifiée et disponible en
+    production. Les prérequis entrants se cumulent.
+  start_note: Le seuil débloque les travaux indiqués. L’analyse métier et la conception indépendante peuvent commencer
+    auparavant.
+  no_schedule: Les contraintes ne calculent pas encore de durée. Le dimensionnement des équipes et les durées incompressibles
+    restent à définir.
+  excluded: Intégration accompagne les équipes. Elle ne porte pas de release produit bloquante. L’intégration Beaumanoir
+    et le MCO sont hors de cette cartographie.
+  selected: Sélectionner une contrainte
+  percent: '%'
+  scope: Périmètre initial
+  phase: Construction du Core System
+  clear: Toutes les dépendances
+releases:
+- id: case-management-r1
+  team_ref: case-management
+  scope: Moteurs de processus, tâches, règles, analytics et process mining.
+- id: paas-r1
+  team_ref: paas
+  scope: Outillage, environnements, CI/CD, tests automatisés et moyens de livraison de la première release.
+- id: master-plan-supply-policy-r1
+  team_ref: master-plan-supply-policy
+  scope: Planification, politiques Supply et décisions attribuées à l’équipe.
+- id: inventory-availability-r1
+  team_ref: inventory-availability
+  scope: Stock, propriété, réservations et fonctions de disponibilité attribuées à l’équipe.
+- id: services-r1
+  team_ref: services
+  scope: Gestion des prestations, orchestration, offres de capacité et fonctions attribuées à l’équipe.
+- id: mdm-platform-r1
+  team_ref: mdm-platform
+  scope: Moteur MDM, interfaces génériques, studio, plugins et qualification technique.
+- id: master-data-r1
+  team_ref: master-data
+  scope: Familles de références, règles métier, qualification inter-familles et vues opérationnelles.
+- id: sourcing-procurement-r1
+  team_ref: sourcing-procurement
+  scope: Socle partagé des commandes typées et parcours achat.
+- id: b2c-r1
+  team_ref: b2c
+  scope: Comportements et parcours de commande B2C.
+- id: wholesale-r1
+  team_ref: wholesale
+  scope: Comportements et engagements de commande Wholesale.
+- id: portal-r1
+  team_ref: portal
+  scope: Accès à la plateforme, XP APIs, sécurité applicative, portail et expériences transverses.
+constraints:
+- id: paas--case-management--start
+  provider_release_ref: paas-r1
+  consumer_release_ref: case-management-r1
+  gate: start
+  threshold_pct: 20
+  prerequisite: Dépôt, environnement de développement et de test, pipeline minimal, publication des artefacts et
+    conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Case Management.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage. Le seuil est une hypothèse de contract first,
+    conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--case-management--production
+  provider_release_ref: paas-r1
+  consumer_release_ref: case-management-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Dépôt, environnement
+    de développement et de test, pipeline minimal, publication des artefacts et conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Case Management.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--master-plan-supply-policy--start
+  provider_release_ref: paas-r1
+  consumer_release_ref: master-plan-supply-policy-r1
+  gate: start
+  threshold_pct: 20
+  prerequisite: Dépôt, environnement de développement et de test, pipeline minimal, publication des artefacts et
+    conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Master Plan et Supply Policy.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage. Le seuil est une hypothèse de contract first,
+    conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--master-plan-supply-policy--production
+  provider_release_ref: paas-r1
+  consumer_release_ref: master-plan-supply-policy-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Dépôt, environnement
+    de développement et de test, pipeline minimal, publication des artefacts et conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Master Plan et Supply Policy.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--inventory-availability--start
+  provider_release_ref: paas-r1
+  consumer_release_ref: inventory-availability-r1
+  gate: start
+  threshold_pct: 20
+  prerequisite: Dépôt, environnement de développement et de test, pipeline minimal, publication des artefacts et
+    conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Inventory et Availability.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage. Le seuil est une hypothèse de contract first,
+    conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--inventory-availability--production
+  provider_release_ref: paas-r1
+  consumer_release_ref: inventory-availability-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Dépôt, environnement
+    de développement et de test, pipeline minimal, publication des artefacts et conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Inventory et Availability.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--services--start
+  provider_release_ref: paas-r1
+  consumer_release_ref: services-r1
+  gate: start
+  threshold_pct: 20
+  prerequisite: Dépôt, environnement de développement et de test, pipeline minimal, publication des artefacts et
+    conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Services.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage. Le seuil est une hypothèse de contract first,
+    conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--services--production
+  provider_release_ref: paas-r1
+  consumer_release_ref: services-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Dépôt, environnement
+    de développement et de test, pipeline minimal, publication des artefacts et conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Services.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--mdm-platform--start
+  provider_release_ref: paas-r1
+  consumer_release_ref: mdm-platform-r1
+  gate: start
+  threshold_pct: 20
+  prerequisite: Dépôt, environnement de développement et de test, pipeline minimal, publication des artefacts et
+    conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Plateforme MDM.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage. Le seuil est une hypothèse de contract first,
+    conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--mdm-platform--production
+  provider_release_ref: paas-r1
+  consumer_release_ref: mdm-platform-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Dépôt, environnement
+    de développement et de test, pipeline minimal, publication des artefacts et conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Plateforme MDM.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--master-data--start
+  provider_release_ref: paas-r1
+  consumer_release_ref: master-data-r1
+  gate: start
+  threshold_pct: 20
+  prerequisite: Dépôt, environnement de développement et de test, pipeline minimal, publication des artefacts et
+    conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Référentiels.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage. Le seuil est une hypothèse de contract first,
+    conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--master-data--production
+  provider_release_ref: paas-r1
+  consumer_release_ref: master-data-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Dépôt, environnement
+    de développement et de test, pipeline minimal, publication des artefacts et conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Référentiels.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--sourcing-procurement--start
+  provider_release_ref: paas-r1
+  consumer_release_ref: sourcing-procurement-r1
+  gate: start
+  threshold_pct: 20
+  prerequisite: Dépôt, environnement de développement et de test, pipeline minimal, publication des artefacts et
+    conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Sourcing & Procurement.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage. Le seuil est une hypothèse de contract first,
+    conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--sourcing-procurement--production
+  provider_release_ref: paas-r1
+  consumer_release_ref: sourcing-procurement-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Dépôt, environnement
+    de développement et de test, pipeline minimal, publication des artefacts et conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Sourcing & Procurement.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--b2c--start
+  provider_release_ref: paas-r1
+  consumer_release_ref: b2c-r1
+  gate: start
+  threshold_pct: 20
+  prerequisite: Dépôt, environnement de développement et de test, pipeline minimal, publication des artefacts et
+    conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de B2C.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage. Le seuil est une hypothèse de contract first,
+    conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--b2c--production
+  provider_release_ref: paas-r1
+  consumer_release_ref: b2c-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Dépôt, environnement
+    de développement et de test, pipeline minimal, publication des artefacts et conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de B2C.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--wholesale--start
+  provider_release_ref: paas-r1
+  consumer_release_ref: wholesale-r1
+  gate: start
+  threshold_pct: 20
+  prerequisite: Dépôt, environnement de développement et de test, pipeline minimal, publication des artefacts et
+    conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Wholesale.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage. Le seuil est une hypothèse de contract first,
+    conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--wholesale--production
+  provider_release_ref: paas-r1
+  consumer_release_ref: wholesale-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Dépôt, environnement
+    de développement et de test, pipeline minimal, publication des artefacts et conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Wholesale.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--portal--start
+  provider_release_ref: paas-r1
+  consumer_release_ref: portal-r1
+  gate: start
+  threshold_pct: 20
+  prerequisite: Dépôt, environnement de développement et de test, pipeline minimal, publication des artefacts et
+    conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Flow Core System Portal.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage. Le seuil est une hypothèse de contract first,
+    conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: paas--portal--production
+  provider_release_ref: paas-r1
+  consumer_release_ref: portal-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Dépôt, environnement
+    de développement et de test, pipeline minimal, publication des artefacts et conventions de configuration utilisables.
+  work_scope: Développement exécutable, tests et livraison des composants de Flow Core System Portal.
+  justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
+    représente ce socle minimal, pas l’achèvement de tout l’outillage.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: mdm-platform--master-data--start
+  provider_release_ref: mdm-platform-r1
+  consumer_release_ref: master-data-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrats des modèles, autorités, fiches et extensions versionnés. Simulateur et jeux de données
+    de test disponibles.
+  work_scope: Adaptation des familles, règles et vues opérationnelles.
+  justification: Les familles et les vues réutilisent le moteur générique MDM. Les contrats peuvent précéder les
+    écrans, les traitements complets et leur qualification. Le seuil est une hypothèse de contract first, conditionnée
+    aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - audits/2026-11-05-mdm-studio-plugins/engineering.json
+  - source/revision-master-data.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: mdm-platform--master-data--production
+  provider_release_ref: mdm-platform-r1
+  consumer_release_ref: master-data-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats des modèles,
+    autorités, fiches et extensions versionnés. Simulateur et jeux de données de test disponibles.
+  work_scope: Adaptation des familles, règles et vues opérationnelles.
+  justification: Les familles et les vues réutilisent le moteur générique MDM. Les contrats peuvent précéder les
+    écrans, les traitements complets et leur qualification.La première cartographie retient la disponibilité de
+    toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - audits/2026-11-05-mdm-studio-plugins/engineering.json
+  - source/revision-master-data.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: case-management--mdm-platform--start
+  provider_release_ref: case-management-r1
+  consumer_release_ref: mdm-platform-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrats de tâches, règles et formulaires réutilisés par le MDM, avec simulateurs.
+  work_scope: Branchement des parcours de stewardship sur les mécanismes communs.
+  justification: Le dossier MDM réutilise les services de processus, de formulaires et de règles financés séparément.
+    Le moteur de stockage indépendant peut commencer avant ce seuil. Le seuil est une hypothèse de contract first,
+    conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - audits/2026-11-05-mdm-studio-plugins/engineering.json
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: case-management--mdm-platform--production
+  provider_release_ref: case-management-r1
+  consumer_release_ref: mdm-platform-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats de tâches,
+    règles et formulaires réutilisés par le MDM, avec simulateurs.
+  work_scope: Branchement des parcours de stewardship sur les mécanismes communs.
+  justification: Le dossier MDM réutilise les services de processus, de formulaires et de règles financés séparément.
+    Le moteur de stockage indépendant peut commencer avant ce seuil.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - audits/2026-11-05-mdm-studio-plugins/engineering.json
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: case-management--services--start
+  provider_release_ref: case-management-r1
+  consumer_release_ref: services-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrats de processus, tâches et événements, avec exécution simulée.
+  work_scope: Implémentation des parcours d’orchestration des prestations.
+  justification: Services possède les comportements métier et consomme les moteurs génériques de Case Management.
+    Le seuil est une hypothèse de contract first, conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: case-management--services--production
+  provider_release_ref: case-management-r1
+  consumer_release_ref: services-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats de processus,
+    tâches et événements, avec exécution simulée.
+  work_scope: Implémentation des parcours d’orchestration des prestations.
+  justification: Services possède les comportements métier et consomme les moteurs génériques de Case Management.La
+    première cartographie retient la disponibilité de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: master-data--inventory-availability--start
+  provider_release_ref: master-data-r1
+  consumer_release_ref: inventory-availability-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrats des références nécessaires, identifiants, versions et vues opérationnelles, avec données
+    fictives représentatives.
+  work_scope: Modèles et traitements de stock, propriété et disponibilité.
+  justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
+    le développement avant la publication effective de toutes les familles. Le seuil est une hypothèse de contract
+    first, conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/revision-master-data.yaml
+  - source/organisation-delivery.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: master-data--inventory-availability--production
+  provider_release_ref: master-data-r1
+  consumer_release_ref: inventory-availability-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats des références
+    nécessaires, identifiants, versions et vues opérationnelles, avec données fictives représentatives.
+  work_scope: Modèles et traitements de stock, propriété et disponibilité.
+  justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
+    le développement avant la publication effective de toutes les familles.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/revision-master-data.yaml
+  - source/organisation-delivery.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: master-data--master-plan-supply-policy--start
+  provider_release_ref: master-data-r1
+  consumer_release_ref: master-plan-supply-policy-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrats des références nécessaires, identifiants, versions et vues opérationnelles, avec données
+    fictives représentatives.
+  work_scope: Calculs de planification, règles de politique et contraintes Supply.
+  justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
+    le développement avant la publication effective de toutes les familles. Le seuil est une hypothèse de contract
+    first, conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/revision-master-data.yaml
+  - source/organisation-delivery.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: master-data--master-plan-supply-policy--production
+  provider_release_ref: master-data-r1
+  consumer_release_ref: master-plan-supply-policy-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats des références
+    nécessaires, identifiants, versions et vues opérationnelles, avec données fictives représentatives.
+  work_scope: Calculs de planification, règles de politique et contraintes Supply.
+  justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
+    le développement avant la publication effective de toutes les familles.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/revision-master-data.yaml
+  - source/organisation-delivery.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: master-data--sourcing-procurement--start
+  provider_release_ref: master-data-r1
+  consumer_release_ref: sourcing-procurement-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrats des références nécessaires, identifiants, versions et vues opérationnelles, avec données
+    fictives représentatives.
+  work_scope: Contrats de commande et contrôles des références achat.
+  justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
+    le développement avant la publication effective de toutes les familles. Le seuil est une hypothèse de contract
+    first, conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/revision-master-data.yaml
+  - source/organisation-delivery.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: master-data--sourcing-procurement--production
+  provider_release_ref: master-data-r1
+  consumer_release_ref: sourcing-procurement-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats des références
+    nécessaires, identifiants, versions et vues opérationnelles, avec données fictives représentatives.
+  work_scope: Contrats de commande et contrôles des références achat.
+  justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
+    le développement avant la publication effective de toutes les familles.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/revision-master-data.yaml
+  - source/organisation-delivery.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: master-data--services--start
+  provider_release_ref: master-data-r1
+  consumer_release_ref: services-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrats des références nécessaires, identifiants, versions et vues opérationnelles, avec données
+    fictives représentatives.
+  work_scope: Catalogue de prestations et traitement des références de services.
+  justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
+    le développement avant la publication effective de toutes les familles. Le seuil est une hypothèse de contract
+    first, conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/revision-master-data.yaml
+  - source/organisation-delivery.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: master-data--services--production
+  provider_release_ref: master-data-r1
+  consumer_release_ref: services-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats des références
+    nécessaires, identifiants, versions et vues opérationnelles, avec données fictives représentatives.
+  work_scope: Catalogue de prestations et traitement des références de services.
+  justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
+    le développement avant la publication effective de toutes les familles.La première cartographie retient la disponibilité
+    de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/revision-master-data.yaml
+  - source/organisation-delivery.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: inventory-availability--master-plan-supply-policy--start
+  provider_release_ref: inventory-availability-r1
+  consumer_release_ref: master-plan-supply-policy-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrats des positions, réservations et possibilités de promesse, avec réponses simulées.
+  work_scope: Consommation des faits de stock et des disponibilités dans la planification.
+  justification: Le modèle sépare faits de stock et décisions de planification. La collaboration sur le contrat
+    ne bloque pas l’analyse des politiques ni les prototypes algorithmiques. Le seuil est une hypothèse de contract
+    first, conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/calculs-estimation-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: inventory-availability--master-plan-supply-policy--production
+  provider_release_ref: inventory-availability-r1
+  consumer_release_ref: master-plan-supply-policy-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats des positions,
+    réservations et possibilités de promesse, avec réponses simulées.
+  work_scope: Consommation des faits de stock et des disponibilités dans la planification.
+  justification: Le modèle sépare faits de stock et décisions de planification. La collaboration sur le contrat
+    ne bloque pas l’analyse des politiques ni les prototypes algorithmiques.La première cartographie retient la
+    disponibilité de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/calculs-estimation-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: sourcing-procurement--b2c--start
+  provider_release_ref: sourcing-procurement-r1
+  consumer_release_ref: b2c-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Schémas et cycle du socle de commandes typées, événements et simulateurs.
+  work_scope: Construction des comportements de commande spécifiques au canal.
+  justification: Le socle des commandes typées est porté par Sourcing & Procurement et partagé avec les deux canaux.
+    Le contrat partagé précède les parcours achat complets. Le seuil est une hypothèse de contract first, conditionnée
+    aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/abaque-ventilation.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: sourcing-procurement--b2c--production
+  provider_release_ref: sourcing-procurement-r1
+  consumer_release_ref: b2c-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Schémas et cycle
+    du socle de commandes typées, événements et simulateurs.
+  work_scope: Construction des comportements de commande spécifiques au canal.
+  justification: Le socle des commandes typées est porté par Sourcing & Procurement et partagé avec les deux canaux.
+    Le contrat partagé précède les parcours achat complets.La première cartographie retient la disponibilité de
+    toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/abaque-ventilation.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: inventory-availability--b2c--start
+  provider_release_ref: inventory-availability-r1
+  consumer_release_ref: b2c-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrats de disponibilité, réservation et revérification, avec scénarios simulés.
+  work_scope: Promesse, réservation et gestion des changements de disponibilité dans les commandes.
+  justification: Les parcours de commande doivent pouvoir travailler sur la promesse et ses échecs sans attendre
+    le moteur complet. La nécessité de ce lien est inférée des périmètres fonctionnels. Le seuil est une hypothèse
+    de contract first, conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/calculs-estimation-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: inventory-availability--b2c--production
+  provider_release_ref: inventory-availability-r1
+  consumer_release_ref: b2c-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats de disponibilité,
+    réservation et revérification, avec scénarios simulés.
+  work_scope: Promesse, réservation et gestion des changements de disponibilité dans les commandes.
+  justification: Les parcours de commande doivent pouvoir travailler sur la promesse et ses échecs sans attendre
+    le moteur complet. La nécessité de ce lien est inférée des périmètres fonctionnels.La première cartographie
+    retient la disponibilité de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/calculs-estimation-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: services--b2c--start
+  provider_release_ref: services-r1
+  consumer_release_ref: b2c-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrats de demande de prestation, offre de capacité et suivi d’exécution, avec simulateurs.
+  work_scope: Demande et suivi de fulfillment dans les parcours de commande.
+  justification: La réalisation des commandes consomme les comportements de prestation et leur orchestration. Le
+    lien est inféré des responsabilités des domaines. Le seuil est une hypothèse de contract first, conditionnée
+    aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/calculs-estimation-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: services--b2c--production
+  provider_release_ref: services-r1
+  consumer_release_ref: b2c-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats de demande
+    de prestation, offre de capacité et suivi d’exécution, avec simulateurs.
+  work_scope: Demande et suivi de fulfillment dans les parcours de commande.
+  justification: La réalisation des commandes consomme les comportements de prestation et leur orchestration. Le
+    lien est inféré des responsabilités des domaines.La première cartographie retient la disponibilité de toute
+    la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/calculs-estimation-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: sourcing-procurement--wholesale--start
+  provider_release_ref: sourcing-procurement-r1
+  consumer_release_ref: wholesale-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Schémas et cycle du socle de commandes typées, événements et simulateurs.
+  work_scope: Construction des comportements de commande spécifiques au canal.
+  justification: Le socle des commandes typées est porté par Sourcing & Procurement et partagé avec les deux canaux.
+    Le contrat partagé précède les parcours achat complets. Le seuil est une hypothèse de contract first, conditionnée
+    aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/abaque-ventilation.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: sourcing-procurement--wholesale--production
+  provider_release_ref: sourcing-procurement-r1
+  consumer_release_ref: wholesale-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Schémas et cycle
+    du socle de commandes typées, événements et simulateurs.
+  work_scope: Construction des comportements de commande spécifiques au canal.
+  justification: Le socle des commandes typées est porté par Sourcing & Procurement et partagé avec les deux canaux.
+    Le contrat partagé précède les parcours achat complets.La première cartographie retient la disponibilité de
+    toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/abaque-ventilation.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: inventory-availability--wholesale--start
+  provider_release_ref: inventory-availability-r1
+  consumer_release_ref: wholesale-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrats de disponibilité, réservation et revérification, avec scénarios simulés.
+  work_scope: Promesse, réservation et gestion des changements de disponibilité dans les commandes.
+  justification: Les parcours de commande doivent pouvoir travailler sur la promesse et ses échecs sans attendre
+    le moteur complet. La nécessité de ce lien est inférée des périmètres fonctionnels. Le seuil est une hypothèse
+    de contract first, conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/calculs-estimation-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: inventory-availability--wholesale--production
+  provider_release_ref: inventory-availability-r1
+  consumer_release_ref: wholesale-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats de disponibilité,
+    réservation et revérification, avec scénarios simulés.
+  work_scope: Promesse, réservation et gestion des changements de disponibilité dans les commandes.
+  justification: Les parcours de commande doivent pouvoir travailler sur la promesse et ses échecs sans attendre
+    le moteur complet. La nécessité de ce lien est inférée des périmètres fonctionnels.La première cartographie
+    retient la disponibilité de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/calculs-estimation-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: services--wholesale--start
+  provider_release_ref: services-r1
+  consumer_release_ref: wholesale-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrats de demande de prestation, offre de capacité et suivi d’exécution, avec simulateurs.
+  work_scope: Demande et suivi de fulfillment dans les parcours de commande.
+  justification: La réalisation des commandes consomme les comportements de prestation et leur orchestration. Le
+    lien est inféré des responsabilités des domaines. Le seuil est une hypothèse de contract first, conditionnée
+    aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/calculs-estimation-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: services--wholesale--production
+  provider_release_ref: services-r1
+  consumer_release_ref: wholesale-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats de demande
+    de prestation, offre de capacité et suivi d’exécution, avec simulateurs.
+  work_scope: Demande et suivi de fulfillment dans les parcours de commande.
+  justification: La réalisation des commandes consomme les comportements de prestation et leur orchestration. Le
+    lien est inféré des responsabilités des domaines.La première cartographie retient la disponibilité de toute
+    la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/calculs-estimation-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: case-management--portal--start
+  provider_release_ref: case-management-r1
+  consumer_release_ref: portal-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrat des tâches, files de traitement, droits et événements, avec simulateurs.
+  work_scope: Expérience de traitement des tâches dans le portail.
+  justification: Le portail porte l’expérience des tâches, le moteur et son contrat restent dans Case Management.
+    Le seuil est une hypothèse de contract first, conditionnée aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/abaque-ventilation.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: case-management--portal--production
+  provider_release_ref: case-management-r1
+  consumer_release_ref: portal-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrat des tâches,
+    files de traitement, droits et événements, avec simulateurs.
+  work_scope: Expérience de traitement des tâches dans le portail.
+  justification: Le portail porte l’expérience des tâches, le moteur et son contrat restent dans Case Management.La
+    première cartographie retient la disponibilité de toute la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/abaque-ventilation.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: b2c--portal--start
+  provider_release_ref: b2c-r1
+  consumer_release_ref: portal-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: API de demandes et de suivi du canal, erreurs et règles d’autorisation, avec simulateurs.
+  work_scope: XP APIs et parcours UI du canal.
+  justification: Le produit Portal expose les parcours de ses domaines consommateurs. Ce lien est une hypothèse
+    pour une release d’accès couvrant les deux canaux. Le seuil est une hypothèse de contract first, conditionnée
+    aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: b2c--portal--production
+  provider_release_ref: b2c-r1
+  consumer_release_ref: portal-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. API de demandes
+    et de suivi du canal, erreurs et règles d’autorisation, avec simulateurs.
+  work_scope: XP APIs et parcours UI du canal.
+  justification: Le produit Portal expose les parcours de ses domaines consommateurs. Ce lien est une hypothèse
+    pour une release d’accès couvrant les deux canaux.La première cartographie retient la disponibilité de toute
+    la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: wholesale--portal--start
+  provider_release_ref: wholesale-r1
+  consumer_release_ref: portal-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: API de demandes et de suivi du canal, erreurs et règles d’autorisation, avec simulateurs.
+  work_scope: XP APIs et parcours UI du canal.
+  justification: Le produit Portal expose les parcours de ses domaines consommateurs. Ce lien est une hypothèse
+    pour une release d’accès couvrant les deux canaux. Le seuil est une hypothèse de contract first, conditionnée
+    aux livrables décrits.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: wholesale--portal--production
+  provider_release_ref: wholesale-r1
+  consumer_release_ref: portal-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. API de demandes
+    et de suivi du canal, erreurs et règles d’autorisation, avec simulateurs.
+  work_scope: XP APIs et parcours UI du canal.
+  justification: Le produit Portal expose les parcours de ses domaines consommateurs. Ce lien est une hypothèse
+    pour une release d’accès couvrant les deux canaux.La première cartographie retient la disponibilité de toute
+    la release fournisseur, plutôt qu’une livraison partielle.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/fonctions-produit-core.yaml
+  - audits/2026-11-06-premiere-cartographie-dependances.md
+excluded_team_refs:
+- integration

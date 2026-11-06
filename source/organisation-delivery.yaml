@@ -1,6 +1,6 @@
 version: 1
 id: flow-delivery-organisation
-date: '2026-11-05'
+date: '2026-11-06'
 excluded_workload_phases:
 - integration
 principle:
@@ -68,6 +68,39 @@ phases:
   period: Régime annuel complet
   note: Base annuelle de service, à distinguer du cumul sur un horizon. Produit générique, adaptations et moyens
     restent identifiés.
+target_topology:
+  layers:
+  - id: business-journeys
+    label: Parcours métier
+    team_refs:
+    - sourcing-procurement
+    - b2c
+    - wholesale
+  - id: business-services
+    label: Couche business de la plateforme Flow
+    team_refs:
+    - portal
+    - master-data
+    - services
+    rows:
+    - - portal
+    - - master-data
+      - services
+  - id: shared-engines
+    label: Socle technique
+    team_refs:
+    - mdm-platform
+    - case-management
+    - master-plan-supply-policy
+    - inventory-availability
+  - id: technical-base
+    label: Infrastructure et outillage PaaS
+    team_refs:
+    - paas
+  transverse:
+    label: Accompagnement transverse
+    team_refs:
+    - integration
 teams:
 - id: case-management
   label: Case Management
@@ -143,20 +176,42 @@ teams:
     acquisition: null
     integration: null
     fonctionnement: null
-- id: master-data
-  label: Master Data
-  type: stream-aligned
-  mission: 'Porter le domaine Master Data de la {{notion.flow_core_system}} : gouvernance des références, acquisition,
-    consolidation, qualité, changements, certification et diffusion. Accompagner les consommateurs des versions
-    publiées.'
-  boundary: Master Data et Supply Chain Management sont deux domaines distincts de la {{notion.core_system}}. La
-    réception des références appartient aux consommateurs. Les autorités métier et les décisions opérationnelles
-    restent chez leurs responsables. L’équipe porte aussi le composant des vues opérationnelles alimentées par le MDM. Les consommateurs gardent leurs décisions et leurs usages. La capacité disponible et les contributions complémentaires restent à dimensionner.
+- id: mdm-platform
+  label: Plateforme MDM
+  type: platform
+  mission: 'Fournir le produit MDM générique en libre-service : moteur de données, versionnement, rapprochement,
+    qualité, publication, studio de schémas, plugins et écrans génériques.'
+  boundary: La plateforme possède les mécanismes et les interfaces réutilisables entre familles. Référentiels possède
+    leurs modèles et règles métier. PaaS fournit l’outillage et les moyens communs. Case Management conserve les
+    processus et moteurs génériques déjà financés.
   status: target
   responsibilities:
-    acquisition: Construire les fonctions génériques du produit de références retenu.
-    integration: Rapprocher, migrer et publier les données selon les autorités décidées.
-    fonctionnement: Maintenir le produit et ses adaptations avec une gouvernance des données explicite.
+    acquisition: Construire le moteur, les écrans génériques, le studio et les plugins. Qualifier la robustesse,
+      la résilience et les performances.
+    integration: Fournir les extensions et contrats nécessaires aux usages Beaumanoir, sans reprendre les correspondances
+      ni les règles métier.
+    fonctionnement: Maintenir le moteur et ses outils, les contrats, les performances, la sécurité et la compatibilité
+      des extensions.
+  capacity:
+    acquisition: null
+    integration: null
+    fonctionnement: null
+- id: master-data
+  label: Référentiels
+  type: stream-aligned
+  mission: 'Porter les référentiels de la {{notion.flow_core_system}} : modèles des familles, identifiants, relations,
+    règles métier, priorités des sources et critères de certification. Fournir les vues Operational References.'
+  boundary: Dans le {{notion.core_system}}, l’équipe possède les familles et leurs vues opérationnelles. Elle configure
+    les outils génériques de Plateforme MDM. Les autorités métier et les décisions des consommateurs restent chez
+    leurs responsables.
+  status: target
+  responsibilities:
+    acquisition: Construire les familles génériques, leurs règles et leurs vues opérationnelles. Qualifier la cohérence
+      inter-familles.
+    integration: Porter les correspondances, règles, reprises et validations Beaumanoir avec les responsables des
+      données.
+    fonctionnement: Maintenir les modèles, règles, configurations et vues opérationnelles. Faire évoluer les référentiels
+      avec leurs consommateurs.
   capacity:
     acquisition: null
     integration: null
@@ -240,18 +295,19 @@ governance:
   id: transformation-office
   label: Transformation Office FLOW
   mission: Instance de gouvernance hors typologie Team Topologies, pour les décisions, arbitrages et conditions
-    de réalisation.
+    de réalisation pendant la construction du Core System et son intégration Beaumanoir.
   roles_ref: source/modele-composable.yaml#equipe_transformation
   funding_note: Les missions opérationnelles actuellement financées restent identifiées. La cible de board ne supprime
     pas la direction de projet, le PMO, la synchronisation, le changement ou l’architecture transverse.
 work_owners:
 - kind: core_unit
   ref: master-data-java-spring
-  team_ref: master-data
+  team_ref: null
   candidate_refs:
+  - mdm-platform
   - master-data
-  basis: Affectation du lot entier au périmètre produit correspondant, en conservant les JH de chaque rôle et les
-    tarifs du lot.
+  basis: Lot partagé selon la ventilation build-master-data. Plateforme MDM porte le moteur et les interfaces génériques.
+    Référentiels porte les familles. La qualification transverse est partagée à parts égales.
 - kind: core_unit
   ref: stock-java-spring
   team_ref: inventory-availability
@@ -759,8 +815,8 @@ work_owners:
   team_ref: master-data
   candidate_refs:
   - master-data
-  basis: Continuité de la propriété des services de référence. L’équipe Master Data porte le producteur et ses vues
-    opérationnelles consommatrices. Les contributions des autres équipes restent à préciser.
+  basis: Référentiels porte les vues opérationnelles et leurs contrats de consommation. Les mécanismes génériques
+    de publication restent dans Plateforme MDM.
 interactions:
 - id: paas-case-management
   source: paas
@@ -1074,6 +1130,49 @@ interactions:
   - integration
   exit_criterion: Contrat d’expérience et responsabilités API établis, puis collaboration terminée.
   status: proposed
+- id: paas-mdm-platform
+  source: paas
+  target: mdm-platform
+  mode: x-as-a-service
+  object: Outils, environnements et chaîne de livraison
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: integration-mdm-platform
+  source: integration
+  target: mdm-platform
+  mode: facilitating
+  object: Accompagnement des contrats, flux et tests intégrés
+  phases:
+  - integration
+  - fonctionnement
+  exit_criterion: L’équipe sait faire évoluer et qualifier son intégration avec ses partenaires SI.
+  status: proposed
+- id: mdm-platform-references-x-as-a-service
+  source: mdm-platform
+  target: master-data
+  mode: x-as-a-service
+  object: Moteur MDM, studio, interfaces génériques et contrats de publication en libre-service
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
+- id: mdm-platform-references-collaboration
+  source: mdm-platform
+  target: master-data
+  mode: collaboration
+  object: Conception des premières familles et des nouveaux besoins structurants
+  phases:
+  - acquisition
+  - integration
+  exit_criterion: Les contrats et extensions sont disponibles et Référentiels peut faire évoluer ses familles de
+    manière autonome.
+  status: proposed
 labels:
   integration_workload_pending: Non évalué — étude d’intégration à reprendre
   integration_workload_note: Les jours d’intégration ne sont pas ventilés. L’étude de cette charge est à reprendre
@@ -1095,8 +1194,10 @@ labels:
     le conçoit. Les frontières des équipes FLOW et les contrats logiciels doivent être travaillés ensemble.
   book: Team Topologies, Matthew Skelton et Manuel Pais. Première édition 2019, seconde édition 2025.
   target_title: Une cible organisée autour des flux de valeur
-  target_note: Cible proposée. Les équipes se constituent progressivement selon les besoins et les compétences.
-    Le type des deux sous-systèmes spécialisés reste à éprouver.
+  target_note: Le socle technique et les moteurs partagés soutiennent les services et les parcours métier. Selon
+    la loi de Conway, on conçoit ensemble les frontières des équipes, leurs interactions et les contrats logiciels.
+  target_evolution: Les équipes se constituent progressivement selon les besoins et les compétences. Le type des
+    deux sous-systèmes spécialisés reste à éprouver.
   scope_title: Périmètre et frontières
   responsibilities_title: Une responsabilité sur tout le cycle de vie
   capacity_title: Dimensionner la capacité dans le temps
@@ -1140,10 +1241,7 @@ labels:
   interaction_object: Objet de l’interaction
   exit: Critère de sortie
   permanent_service: Contrat de service à entretenir
-  graph_label: Équipes FLOW regroupées par type et reliées à leurs fiches
-  graph_services: Plateformes et expertise spécialisée
-  graph_streams: Équipes alignées sur les flux de valeur
-  graph_enable: Développer l’autonomie
+  graph_label: Équipes FLOW disposées selon les couches de l’architecture
   governance_title: Gouvernance et trajectoire de constitution
   lifecycle_note: Les équipes qui possèdent un périmètre logiciel en gardent la responsabilité pendant sa construction,
     son intégration et sa vie en service. L’équipe Enabling intervient temporairement auprès de chaque équipe accompagnée,

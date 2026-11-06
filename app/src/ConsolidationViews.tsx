@@ -6,8 +6,7 @@ import './consolidation.css';
 export function useConsolidation(){const {data}=useStudy();const D=data.content.delivery_organisation,C=D.team_consolidations;return {D,C,L:C.labels};}
 export function ContributionPeriod({period}:{period:Data}){const {L}=useConsolidation(),{n}=useFormat();return <>{period.start_month===null?L.unknown:n(period.start_month,0)}{' → '}{period.end_month===null?L.unknown:n(period.end_month,0)}</>;}
 export function ReadingTabs({page,working,focus,phase,option='java-spring',abaque=false}:{page:string;working:boolean;focus?:string;phase?:string;option?:string;abaque?:boolean}){
- const {L}=useConsolidation(),context=useReadingContext();
- return <nav className="delivery-reading-navigation" aria-label={L.title}>{['reference','working'].map(v=><a key={v} href={phaseReadingHash({...context,page,option,focus,phase,view:abaque?(v==='working'?'abaque-working':'abaque'):v})!} aria-current={(working?'working':'reference')===v?'page':undefined}>{L[v]}</a>)}</nav>;
+ return null;
 }
 export function WorkReadiness({team,phase}:{team?:string;phase?:string}){
  const {D,C,L}=useConsolidation(),{n}=useFormat(),context=useReadingContext();
