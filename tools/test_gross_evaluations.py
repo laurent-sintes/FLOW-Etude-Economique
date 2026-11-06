@@ -31,7 +31,7 @@ class GrossEvaluationsTests(unittest.TestCase):
             self.assertEqual(self.study.ui['essential']['pages']['charges-'+phase],self.study.ui['essential']['pages'][phase])
         groups=[g for g in self.study.ui['essential']['nav_groups'] if not g.get('hidden')]
         charge_group=next(g for g in groups if 'charges-acquisition' in g['items'])
-        self.assertTrue({'unites-travail','charges-equipes',*('charges-'+p for p in phases)} <= set(charge_group['items']))
+        self.assertTrue({'charges-gouvernance','charges-equipes',*('charges-'+p for p in phases)} <= set(charge_group['items']))
         self.assertTrue(any('schema-modele' in g['items'] for g in groups))
 
     def test_integration_history_is_explicit_without_changing_retained_amounts(self):
