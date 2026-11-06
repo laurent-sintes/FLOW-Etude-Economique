@@ -188,7 +188,9 @@ async function checkAuditCorrections(data){
   assert.ok((await popup.innerText()).includes(masterData.scope.split(' · ')[0]));
   await popup.getByRole('button',{name:data.ui.labels.close,exact:true}).click();
   await route('charges-equipes');
-  assert.equal(await page.locator('.charge-team').count(),D.teams.length);
+  assert.equal(await page.locator('[data-distribution]').count(),4);
+  assert.equal(await page.locator('.charge-team,.charge-options').count(),0);
+  for(const axis of ['functions','roles','team_types','purposes'])assert.equal(await page.locator('[data-distribution='+axis+'] [data-distribution-item]').count(),D.charge_dossier.distribution[axis].length);
   assert.equal(await page.locator('main select,main input').count(),0);
   assert.doesNotMatch(await page.locator('.charge-dossier').innerText(),/€|TJM/);
   await route('charges-gouvernance');
@@ -207,8 +209,8 @@ async function checkAuditCorrections(data){
   for(const option of ['microsoft','sap']){
    await route('charges-equipes?option='+option);
    assert.equal(await page.locator('.charge-team').count(),0);
-   assert.equal(await page.locator('.charge-totals a').count(),3);
-   assert.ok((await page.locator('.charge-options [aria-current=page]').getAttribute('href')).includes('option='+option));
+   assert.equal(await page.locator('[data-distribution]').count(),4);
+   assert.equal(await page.locator('.charge-options').count(),0);
   }
 
   for(const destination of ['integration-transverse','schema-modele?view=teams']){

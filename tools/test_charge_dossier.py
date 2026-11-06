@@ -2,7 +2,7 @@
 from copy import deepcopy
 import unittest
 from test_support import reference_study
-from charge_dossier import build_dossier, compact_scope
+from charge_dossier import build_dossier, compact_scope, build_distribution
 
 class ChargeDossierTests(unittest.TestCase):
     @classmethod
@@ -143,3 +143,37 @@ class ChargeDossierTests(unittest.TestCase):
             elif isinstance(value,list):
                 for item in value: keys(item)
         keys(self.dossier)
+
+    def test_distribution_axes_conserve_build_and_exclude_other_phases(self):
+        from validate_stacks import ROOT, read
+        distribution = self.dossier['distribution']
+        rows = next(p['rows'] for p in self.dossier['phases'] if p['id']=='acquisition')
+        build = [r for r in rows if r['kind']=='core_build']
+        total = sum(r['jh'] for r in build)
+        self.assertEqual(distribution['total_jh'],total)
+        self.assertEqual({r['id'] for r in distribution['functions']},{r['id'] for r in build})
+        for axis in ('functions','roles','team_types','purposes'):
+            items=distribution[axis]
+            self.assertTrue(all('{{' not in item['label'] for item in items))
+            self.assertAlmostEqual(sum(r['jh'] for r in items),total)
+            self.assertAlmostEqual(sum(r['share_pct'] for r in items),100)
+            self.assertEqual([r['jh'] for r in items],sorted([r['jh'] for r in items],reverse=True))
+            self.assertAlmostEqual(items[-1]['offset_pct']+items[-1]['share_pct'],100)
+        self.assertAlmostEqual(distribution['top_two_pct'],sum(r['jh'] for r in distribution['functions'][:2])*100/total)
+        for role in distribution['roles']:
+            self.assertAlmostEqual(role['jh'],sum(r['jh'] for row in build for r in row['roles'] if r['id']==role['id']))
+        for kind in distribution['team_types']:
+            self.assertAlmostEqual(kind['jh'],sum(t['totals']['acquisition'] or 0 for t in self.dossier['teams'] if t['type']==kind['id']))
+        scope=read(ROOT/'source/fonctions-produit-core.yaml')
+        # Equal global totals cannot hide a transfer between roles in one allocation.
+        bad=deepcopy(scope)
+        roles=bad['allocations'][0]['shares'][0]['jh_by_role']
+        first,second=list(roles)[:2]
+        roles[first]+=1
+        roles[second]-=1
+        with self.assertRaisesRegex(ValueError,'PURPOSE_ROLE'):
+            build_distribution(rows,self.dossier['teams'],self.org['team_types'],bad)
+        bad_rows=deepcopy(rows)
+        bad_rows[0]['contributions'][0]['team_ref']=None
+        with self.assertRaisesRegex(ValueError,'UNALLOCATED_TEAM'):
+            build_distribution(bad_rows,self.dossier['teams'],self.org['team_types'],scope)

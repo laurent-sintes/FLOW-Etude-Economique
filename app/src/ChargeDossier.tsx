@@ -5,6 +5,7 @@ import {Drawer,SourceLink} from './components';
 import {MethodText} from './MethodDocument';
 import {TeamBadge} from './TeamTopology';
 import './chargeDossier.css';
+import {ChargeDistribution} from './ChargeDistribution';
 
 function Information({summary,label,onClick}:{summary:string;label:string;onClick:()=>void}){
  const tooltipId=useId(),[dismissed,setDismissed]=useState(false);
@@ -37,11 +38,11 @@ export function ChargeDossier({phase,option='java-spring',focus,view}:{phase?:st
  const teamValue=(t:Data,p:Data)=>t.totals[p.id]===null?(p.pending?L.pending:p.id==='fonctionnement'?L.unallocated:L.no_assignment):format(t.totals[p.id],p.unit);
  const share=(value:number|null)=>value===null?L.unknown:n(value,1)+' %';
  useEffect(()=>{
-  if(option!=='java-spring'){setSelected(null);setTeam(null);return;}
+  if(phase&&option!=='java-spring'){setSelected(null);setTeam(null);return;}
   const row=[...W.phases.flatMap((p:Data)=>p.rows),...W.governance.rows].find((r:Data)=>r.id===focus||r.id==='core/'+focus||r.id==='core/'+focus+'-java-spring');
   setSelected(row||null);
   setTeam(W.teams.find((t:Data)=>t.id===focus)||null);
- },[focus,W,option]);
+ },[focus,W,option,phase]);
  const functionTable=(rows:Data[],methods=false)=><div className="charge-table-scroll" tabIndex={0}>
   <table className="eco-table charge-table"><thead><tr><th scope="col">{L.unit}{methods&&<small>{L.covered_scope}</small>}</th>
    {methods&&<th scope="col">{L.methods}</th>}
@@ -65,25 +66,11 @@ export function ChargeDossier({phase,option='java-spring',focus,view}:{phase?:st
  };
  const acquisitionSummary=W.acquisition_summaries[option];
  const governanceCard=<article className="charge-governance" data-governance-annual><span>{L.governance_annual}</span><strong>{format(W.governance.annual_jh,L.annual_unit)}</strong><dl>{W.governance.horizons.map((h:Data)=><div key={h.years}><dt>{h.years+' '+L.years}</dt><dd>{format(h.jh)}</dd></div>)}</dl></article>;
- const summary=<div className="charge-totals">{W.phases.map((p:Data)=><a key={p.id} href={'#charges-'+p.id+'?option=java-spring'}>
-  <span>{p.label}</span><strong>{format(p.total_jh,p.unit)}</strong>
- </a>)}</div>;
  return <div className="essential-page charge-dossier" data-charge-phase={phase||'overview'}>
-  {!phase&&<section className="charge-summary" aria-label={L.total}>
-   <div><span>{option==='java-spring'?L.product:L.buy_phase_labels.acquisition}</span><strong>{format(acquisitionSummary.product_jh)}</strong></div>
-   <div data-governance-annual><span>{L.governance_annual}</span><strong>{format(W.governance.annual_jh,L.annual_unit)}</strong></div>
-   <div className="charge-global"><span>{option==='java-spring'?L.global_make:L.global_buy}</span><dl>{acquisitionSummary.horizons.map((h:Data)=><div key={h.years}><dt>{h.years+' '+L.years}</dt><dd>{format(h.jh)}</dd></div>)}</dl></div>
-  </section>}
   {phase==='acquisition'&&<nav className="charge-view-tabs" aria-label={L.overview}>{[['table',L.table_tab],['teams',L.teams_tab]].map(([id,label])=><a key={id} href={'#'+pageId+'?option='+option+'&view='+id} aria-current={(teamsView?id==='teams':id==='table')?'page':undefined}>{id==='table'?<Table2 size={18}/>:<Network size={18}/>}<span>{label}</span></a>)}</nav>}
   {phase==='acquisition'&&<div className="charge-totals"><article><span>{option==='java-spring'?L.product:L.buy_phase_labels.acquisition}</span><strong>{format(acquisitionSummary.product_jh)}</strong></article></div>}
-  {governanceView?<><div className="charge-totals">{governanceCard}</div><p>{L.governance_scope}</p>{functionTable(W.governance.rows)}</>:option!=='java-spring'?(teamsView&&phase?<p>{L.buy_team_scope}</p>:phase?<BuyCharges phase={phase} option={option}/>:<div className="charge-totals">{W.option_summaries[option].map((p:Data)=><a key={p.id} href={'#charges-'+p.id+'?option='+option}><span>{p.label}</span><strong>{format(p.jh,p.unit)}</strong></a>)}</div>):<>
-   {!active||teamsView?<>
-    {!active&&summary}
-    {!active&&<><h2>{L.teams}</h2>
-    <div className="charge-table-scroll"><table className="eco-table charge-table"><thead><tr><th>{L.teams}</th>{W.phases.map((p:Data)=><th key={p.id}>{p.label}<small>{p.unit}</small></th>)}</tr></thead>
-     <tbody>{[...W.teams,{id:'unallocated',label:L.unallocated,totals:Object.fromEntries(W.phases.map((p:Data)=>[p.id,p.pending?null:p.rows.reduce((sum:number,r:Data)=>sum+r.contributions.filter((c:Data)=>c.team_ref===null).reduce((s:number,c:Data)=>s+(c.jh||0),0),0)]))}].map(t=><tr key={t.id}><th scope="row">{t.label}</th>{W.phases.map((p:Data)=><td key={p.id}>{teamValue(t,p)}</td>)}</tr>)}</tbody>
-    </table></div></>}
-    {!active&&<h2>{L.map}</h2>}{!active&&<p className="charge-period">{L.period_note}</p>}
+  {!phase?<ChargeDistribution/>:governanceView?<><div className="charge-totals">{governanceCard}</div><p>{L.governance_scope}</p>{functionTable(W.governance.rows)}</>:option!=='java-spring'?(teamsView&&phase?<p>{L.buy_team_scope}</p>:phase?<BuyCharges phase={phase} option={option}/>:<div className="charge-totals">{W.option_summaries[option].map((p:Data)=><a key={p.id} href={'#charges-'+p.id+'?option='+option}><span>{p.label}</span><strong>{format(p.jh,p.unit)}</strong></a>)}</div>):<>
+   {teamsView?<>
     <div className="delivery-target charge-team-map"><div className="delivery-target-layers">{D.target_topology.layers.map((layer:Data)=><section className="delivery-target-layer" key={layer.id}><h3>{layer.label}</h3>{(layer.rows||[layer.team_refs]).map((row:string[],index:number)=><div className="delivery-target-teams" key={index}>{row.map(teamCard)}</div>)}</section>)}</div>
      <section className="delivery-target-transverse"><h3>{D.target_topology.transverse.label}</h3>{D.target_topology.transverse.team_refs.map(teamCard)}</section>
     </div>

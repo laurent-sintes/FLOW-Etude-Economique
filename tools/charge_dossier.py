@@ -57,6 +57,54 @@ def compact_scope(capabilities, snapshot):
     return result
 
 
+def build_distribution(rows, teams, team_types, product_scope):
+    """Project the same build effort on four independent, conserving axes."""
+    rows = [r for r in rows if r['kind'] == 'core_build']
+    total = sum(r['jh'] for r in rows)
+    def series(items):
+        items = sorted(items, key=lambda item: (-item['jh'], item['id']))
+        if abs(sum(item['jh'] for item in items)-total)>1e-7:
+            raise ValueError('ERR_CHARGE_DISTRIBUTION_CONSERVATION')
+        offset = 0
+        for item in items:
+            item['share_pct'] = item['jh']*100/total if total else 0
+            item['bar_pct'] = item['jh']*100/items[0]['jh'] if items and items[0]['jh'] else 0
+            item['offset_pct'] = offset
+            offset += item['share_pct']
+        return items
+    functions = series([dict(id=r['id'], label=r['label'], jh=r['jh']) for r in rows])
+    roles = {}
+    for row in rows:
+        for role in row['roles']:
+            if role['jh'] is None:
+                raise ValueError('ERR_CHARGE_DISTRIBUTION_UNKNOWN_ROLE')
+            item = roles.setdefault(role['id'], dict(id=role['id'],label=role['label'],jh=0))
+            item['jh'] += role['jh']
+    types = {t['id']:dict(id=t['id'],label=t['label'],color=t['color'],jh=0) for t in team_types}
+    team_index = {t['id']:t for t in teams}
+    for row in rows:
+        for contribution in row['contributions']:
+            team = team_index.get(contribution['team_ref'])
+            if team is None:
+                raise ValueError('ERR_CHARGE_DISTRIBUTION_UNALLOCATED_TEAM')
+            types[team['type']]['jh'] += contribution['jh']
+    purposes = {p['id']:dict(id=p['id'],label=p['label'],jh=0) for p in product_scope['purposes']}
+    allocations = {a['unit_id']:a for a in product_scope['allocations']}
+    for row in rows:
+        allocation = allocations[row['id'].removeprefix('core/')]
+        for role in row['roles']:
+            if abs(sum(s['jh_by_role'].get(role['id'],0) for s in allocation['shares'])-role['jh'])>1e-7:
+                raise ValueError('ERR_CHARGE_DISTRIBUTION_PURPOSE_ROLE')
+        for share in allocation['shares']:
+            if set(share['jh_by_role']) - {r['id'] for r in row['roles']}:
+                raise ValueError('ERR_CHARGE_DISTRIBUTION_UNKNOWN_ROLE')
+            purposes[share['purpose_id']]['jh'] += sum(share['jh_by_role'].values())
+    return dict(total_jh=total,functions=functions,roles=series(list(roles.values())),
+                team_types=series([t for t in types.values() if t['jh']]),
+                purposes=series(list(purposes.values())),
+                top_two_pct=sum(r['share_pct'] for r in functions[:2]))
+
+
 def build_dossier(organisation, gross):
     justifications=read(ROOT/JUSTIFICATIONS)
     Draft202012Validator(read(ROOT/JUSTIFICATION_SCHEMA)).validate(justifications)
@@ -196,4 +244,4 @@ def build_dossier(organisation, gross):
         product = phases[0]['total_jh'] if option=='java-spring' else next(p['jh'] for p in option_summaries[option] if p['id']=='acquisition')
         acquisition_summaries[option] = dict(product_jh=product, horizons=[
             dict(years=h['years'], jh=None if product is None else product+h['jh']) for h in governance['horizons']])
-    return dict(acquisition_summaries=acquisition_summaries,governance=governance,labels=labels,phases=phases,teams=teams,option_summaries=option_summaries,methods=[{key:m[key] for key in ('id','label','method')} for m in core['rows'][0]['comparisons']])
+    return dict(distribution=build_distribution(next(p['rows'] for p in phases if p['id']=='acquisition'),teams,organisation['team_types'],resolve_text_tree(read(ROOT/'source/fonctions-produit-core.yaml'),read(ROOT/'source/glossaire.yaml'))),acquisition_summaries=acquisition_summaries,governance=governance,labels=labels,phases=phases,teams=teams,option_summaries=option_summaries,methods=[{key:m[key] for key in ('id','label','method')} for m in core['rows'][0]['comparisons']])
