@@ -297,7 +297,7 @@ try{
   const button=cell.getByRole('button');await button.focus();
   await cell.locator('[role="tooltip"]').waitFor();
   await button.click();const dialog=page.getByRole('dialog');await dialog.waitFor();
-  assert.ok((await dialog.innerText()).includes(row.label));
+  assert.equal(await dialog.locator('header h2').innerText(),row.label.replace(/\bSCM\b/g,data.glossary.notions.supply_chain_management.libelle));
   await dialog.getByRole('button',{name:data.ui.labels.close,exact:true}).click();
   await dialog.waitFor({state:'hidden'});
  }
