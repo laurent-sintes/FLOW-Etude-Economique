@@ -53,3 +53,11 @@ class ReleaseDependencyTests(unittest.TestCase):
             self.assertTrue(c['prerequisite'] and c['work_scope'] and c['justification'] and c['evidence_refs'])
         mdm=next(c for c in self.doc['constraints'] if c['provider_release_ref']=='mdm-platform-r1' and c['consumer_release_ref']=='master-data-r1' and c['gate']=='start')
         self.assertIn('Simulateur',mdm['prerequisite'])
+
+    def test_operational_references_follow_portal_and_master_data_publication(self):
+        releases={r['team_ref']:r for r in self.org['release_dependencies']['releases']}
+        unit='core/operational-references-java-spring'
+        self.assertIn(unit,{c['work_unit_ref'] for c in releases['portal']['work_contributions']})
+        self.assertNotIn(unit,{c['work_unit_ref'] for c in releases['master-data']['work_contributions']})
+        conditions=[c for c in self.doc['constraints'] if c['provider_release_ref']=='master-data-r1' and c['consumer_release_ref']=='portal-r1']
+        self.assertEqual({c['gate']:c['threshold_pct'] for c in conditions},{'start':30,'production':100})

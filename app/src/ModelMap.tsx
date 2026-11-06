@@ -14,10 +14,13 @@ export function ScopeDiagram({heading='h3',children}:{heading?:'h2'|'h3';childre
     {system.program_scope&&<p className="model-map-program-label">{M.program_scope}</p>}
     <SystemHeading>{system.label}</SystemHeading>
     {system.outside_scope&&<p className="model-map-outside">{M.outside_scope}</p>}
-    {system.domains&&<div className="model-map-domains">{system.domains.map((domain:Data)=><div key={domain.id} data-domain-id={domain.id} className={domain.flow?'model-map-domain model-map-flow':'model-map-domain'}>
-     <span>{domain.label}</span>
-     {domain.flow&&<span className="model-map-product">{M.flow}</span>}
-    </div>)}</div>}
+    {system.domains&&<div className="model-map-domains">
+     {system.domains.filter((domain:Data)=>!domain.flow).map((domain:Data)=><div key={domain.id} data-domain-id={domain.id} className="model-map-domain"><span>{domain.label}</span></div>)}
+     {system.domains.some((domain:Data)=>domain.flow)&&<div className="model-map-core" role="group" aria-label={M.flow}>
+      <span className="model-map-product">{M.flow}</span>
+      {system.domains.filter((domain:Data)=>domain.flow).map((domain:Data)=><div key={domain.id} data-domain-id={domain.id} className="model-map-domain"><span>{domain.label}</span></div>)}
+     </div>}
+    </div>}
    </div>)}</div><figcaption>{M.caption}<p><MethodText>{M.scope}</MethodText></p></figcaption></figure>
   </div>
   {children}

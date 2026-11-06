@@ -97,13 +97,16 @@ def validate_funding(config, group, scenario, integration=None):
     c=deepcopy(config);g=deepcopy(group)
     assert set(c)=={'version','date','statut','dependances','contrat','definitions','cartographie','classification_make','reception','relais_service_complet','hebergement_build','buy','equipe_transformation'}
     team=c['equipe_transformation']
-    fields(team, {'nom','jours_par_an','statut','calendrier','exclusions','non_double_compte','architecture','roles'}, path='equipe_transformation')
+    fields(team, {'nom','jours_par_an','statut','calendrier','exclusions','non_double_compte','architecture','roles','pilotage'}, path='equipe_transformation')
     positive(team['jours_par_an'],False)
     assert len(team['roles'])==5 and len({r['id'] for r in team['roles']})==5
     for role in team['roles']:
-        fields(role, {'id','nom','etp','tarif_eur_jh','mission'}, path='transformation/role')
+        fields(role, {'id','nom','etp','tarif_eur_jh','mission','build_make_etp','build_make_min_etp','build_make_max_etp','build_rationale','build_justification','decision','boundary','reinforcement'}, path='transformation/role')
         positive(role['etp'],False)
         assert role['etp']==1
+        for key in ('build_make_etp','build_make_min_etp','build_make_max_etp'): positive(role[key])
+        assert role['build_make_min_etp']<=role['build_make_etp']<=role['build_make_max_etp']
+        for key in ('build_rationale','build_justification','decision','boundary','reinforcement'): assert isinstance(role[key],str) and role[key].strip()
         positive(role['tarif_eur_jh'],False)
     assert tuple(c['contrat']['responsabilites'])==RESPONSIBILITIES
     classes=c['classification_make']
@@ -181,3 +184,8 @@ def buy_selection_inputs():
     positive(source['preparation_reaffectee_eur'])
     source['budget_eur']=round(sum(r['jh']*r['tarif_eur_ht_jh'] for r in rows),2)
     return source
+
+
+def governance_etp(role, phase="build", mode="Make"):
+    """The build profile applies only to Make. Integration and Buy retain their profile."""
+    return role["build_make_etp"] if phase=="build" and mode=="Make" else role["etp"]

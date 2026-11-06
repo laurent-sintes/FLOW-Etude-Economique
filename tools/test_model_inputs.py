@@ -19,6 +19,18 @@ class ModelInputTests(unittest.TestCase):
             with self.subTest(value=value),self.assertRaises((AssertionError,ValueError)):
                 validate_funding(changed,group,annual_scenario())
 
+    def test_build_staffing_bounds_reject_invalid_values_and_preserve_other_phases(self):
+        from model_inputs import governance_etp
+        config=read(ROOT/'source/modele-composable.yaml');group=read(ROOT/'source/deploiement-groupe.yaml')
+        role=config['equipe_transformation']['roles'][1]
+        self.assertEqual(governance_etp(role),.8)
+        self.assertEqual(governance_etp(role,'integration'),1)
+        self.assertEqual(governance_etp(role,'build','Buy'),1)
+        for value in (True,-1,float('nan'),float('inf'),2):
+            changed=deepcopy(config);changed['equipe_transformation']['roles'][1]['build_make_etp']=value
+            with self.subTest(value=value),self.assertRaises((AssertionError,ValueError)):
+                validate_funding(changed,group,annual_scenario())
+
     def test_current_cycle_contracts_and_supplier_inclusions(self):
         from validate_cycle import validate
         self.assertTrue(validate())

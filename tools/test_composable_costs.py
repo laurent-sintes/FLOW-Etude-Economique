@@ -22,17 +22,18 @@ class ComposableTests(unittest.TestCase):
             self.assertNotIn('programme',[r['id'] for r in result['financements_initiaux']])
             boundary=source['build_mois']+source.get('selection_mois',0)
             end=boundary+source['integration_mois']
-            self.assertEqual(round(sum(r['amount'] for r in office),2),982800*end/12)
+            annual_build=835920 if source['mode']=='Make' else 982800
+            self.assertEqual(round(sum(r['amount'] for r in office),2),annual_build*boundary/12+982800*(end-boundary)/12)
             for identity in {r['financement_id'] for r in office}:
                 rows=[r for r in office if r['financement_id']==identity]
                 self.assertEqual([(r['start'],r['end']) for r in rows],[(0,boundary),(boundary,end)])
             for horizon in (3,5,7,10):
                 total=sum(y['cost_natures']['transformation'] for y in result['annees'][:horizon])
-                self.assertEqual(round(total,2),982800*min(horizon*12,end)/12)
+                self.assertEqual(round(total,2),annual_build*min(horizon*12,boundary)/12+982800*max(0,min(horizon*12,end)-boundary)/12)
         changed=deepcopy(self.data)
         changed['options'][0].update(build_mois=37.5,integration_mois=33.5)
         result=project(changed)['options'][0]
-        self.assertEqual(sum(r['amount'] for r in result['financements_initiaux'] if r['id'].startswith('transformation_')),5814900)
+        self.assertEqual(sum(r['amount'] for r in result['financements_initiaux'] if r['id'].startswith('transformation_')),5355900)
 
     def test_active_inputs_do_not_import_audit_prices(self):
         for path in ('tools/composable_costs.py','source/modele-composable.yaml','source/deploiement-groupe.yaml'):

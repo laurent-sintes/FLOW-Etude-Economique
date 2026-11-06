@@ -8,7 +8,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from validate_stacks import ROOT, read
 from calculate_costs import mixed_cost, role_rates, volume
 from current_cost_inputs import active_doc
-from model_inputs import annual_scenario, funding_inputs, RESPONSIBILITIES
+from model_inputs import annual_scenario, funding_inputs, RESPONSIBILITIES, governance_etp
 
 PATH = 'source/modele-composable.yaml'
 GROUP = 'source/deploiement-groupe.yaml'
@@ -179,9 +179,9 @@ def transformation_ledger(option):
     end=initial+option['integration_mois']
     rows=[]
     for role in team['roles']:
-        monthly=team['jours_par_an']/12*role['etp']*role['tarif_eur_jh']
         for phase,start,stop in [('build',0,initial),('integration',initial,end)]:
             if stop<=start: continue
+            monthly=team['jours_par_an']/12*governance_etp(role,phase,option['mode'])*role['tarif_eur_jh']
             identity='transformation_'+role['id']+'/'+phase
             rows.append(dict(id=identity,financement_id='transformation_'+role['id'],amount=money(monthly*(stop-start)),
                 start=start,end=stop,objet='programme',prestation='pilotage',responsibility='integration_client',
@@ -191,6 +191,10 @@ def transformation_ledger(option):
 
 def transformation_summary(team):
     result=dict(team)
-    result['roles']=[dict(r,annuel_eur_ht=money(team['jours_par_an']*r['etp']*r['tarif_eur_jh'])) for r in team['roles']]
+    result['roles']=[dict(r,build_annuel_eur_ht=money(team['jours_par_an']*r['build_make_etp']*r['tarif_eur_jh']),annuel_eur_ht=money(team['jours_par_an']*r['etp']*r['tarif_eur_jh'])) for r in team['roles']]
     result['annuel_eur_ht']=money(sum(r['annuel_eur_ht'] for r in result['roles']))
+    result['build_annuel_eur_ht']=money(sum(r['build_annuel_eur_ht'] for r in result['roles']))
+    result['build_staffing']=dict(etp=sum(r['build_make_etp'] for r in team['roles']),
+        min_etp=sum(r['build_make_min_etp'] for r in team['roles']),max_etp=sum(r['build_make_max_etp'] for r in team['roles']),
+        annual_jh=sum(r['build_make_etp']*team['jours_par_an'] for r in team['roles']))
     return result

@@ -5,6 +5,11 @@ release_definition: Première release majeure complète. Les évolutions de MCO 
 progress_definition: Le pourcentage porte sur les livrables achevés du périmètre initial de l’équipe, pas sur les
   JH consommés. Le seuil exige aussi le livrable indiqué.
 labels:
+  legend: Lire les dépendances
+  legend_direction: La flèche part de l’équipe qui fournit le prérequis et pointe vers celle qui en dépend.
+  legend_start: Flèche bleue — le seuil permet à l’équipe dépendante de démarrer les travaux concernés.
+  legend_production: Flèche verte — le seuil permet à l’équipe dépendante de mettre en production.
+  legend_threshold: Le pourcentage indique l’avancement attendu de la release de l’équipe fournisseuse. Tous les prérequis entrants doivent être satisfaits.
   intro: Première release majeure complète. Les évolutions de MCO ne changent pas son périmètre.
   start: Démarrage
   production: Mise en production
@@ -59,7 +64,7 @@ releases:
   scope: Moteur MDM, interfaces génériques, studio, plugins et qualification technique.
 - id: master-data-r1
   team_ref: master-data
-  scope: Familles de références, règles métier, qualification inter-familles et vues opérationnelles.
+  scope: Familles de références, règles métier et qualification inter-familles du MDM.
 - id: sourcing-procurement-r1
   team_ref: sourcing-procurement
   scope: Socle partagé des commandes typées et parcours achat.
@@ -71,7 +76,8 @@ releases:
   scope: Comportements et engagements de commande Wholesale.
 - id: portal-r1
   team_ref: portal
-  scope: Accès à la plateforme, XP APIs, sécurité applicative, portail et expériences transverses.
+  scope: Accès à la plateforme, XP APIs, sécurité applicative, portail et expériences transverses. Operational References,
+    admission des versions MDM et vues opérationnelles.
 constraints:
 - id: paas--case-management--start
   provider_release_ref: paas-r1
@@ -240,7 +246,7 @@ constraints:
   threshold_pct: 20
   prerequisite: Dépôt, environnement de développement et de test, pipeline minimal, publication des artefacts et
     conventions de configuration utilisables.
-  work_scope: Développement exécutable, tests et livraison des composants de Référentiels.
+  work_scope: Développement exécutable, tests et livraison des composants de Master Data.
   justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
     représente ce socle minimal, pas l’achèvement de tout l’outillage. Le seuil est une hypothèse de contract first,
     conditionnée aux livrables décrits.
@@ -256,7 +262,7 @@ constraints:
   threshold_pct: 100
   prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Dépôt, environnement
     de développement et de test, pipeline minimal, publication des artefacts et conventions de configuration utilisables.
-  work_scope: Développement exécutable, tests et livraison des composants de Référentiels.
+  work_scope: Développement exécutable, tests et livraison des composants de Master Data.
   justification: Les composants consomment les moyens de développement et de livraison de PaaS. Le seuil de 20 %
     représente ce socle minimal, pas l’achèvement de tout l’outillage.La première cartographie retient la disponibilité
     de toute la release fournisseur, plutôt qu’une livraison partielle.
@@ -400,8 +406,8 @@ constraints:
   threshold_pct: 30
   prerequisite: Contrats des modèles, autorités, fiches et extensions versionnés. Simulateur et jeux de données
     de test disponibles.
-  work_scope: Adaptation des familles, règles et vues opérationnelles.
-  justification: Les familles et les vues réutilisent le moteur générique MDM. Les contrats peuvent précéder les
+  work_scope: Adaptation des familles et de leurs règles métier.
+  justification: Les familles réutilisent le moteur générique MDM. Les contrats peuvent précéder les
     écrans, les traitements complets et leur qualification. Le seuil est une hypothèse de contract first, conditionnée
     aux livrables décrits.
   assessment: sequencing_assumption
@@ -416,8 +422,8 @@ constraints:
   threshold_pct: 100
   prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats des modèles,
     autorités, fiches et extensions versionnés. Simulateur et jeux de données de test disponibles.
-  work_scope: Adaptation des familles, règles et vues opérationnelles.
-  justification: Les familles et les vues réutilisent le moteur générique MDM. Les contrats peuvent précéder les
+  work_scope: Adaptation des familles et de leurs règles métier.
+  justification: Les familles réutilisent le moteur générique MDM. Les contrats peuvent précéder les
     écrans, les traitements complets et leur qualification.La première cartographie retient la disponibilité de
     toute la release fournisseur, plutôt qu’une livraison partielle.
   assessment: sequencing_assumption
@@ -490,8 +496,8 @@ constraints:
   consumer_release_ref: inventory-availability-r1
   gate: start
   threshold_pct: 30
-  prerequisite: Contrats des références nécessaires, identifiants, versions et vues opérationnelles, avec données
-    fictives représentatives.
+  prerequisite: Contrats des références nécessaires, identifiants, versions et données maîtres certifiées, avec
+    données fictives représentatives.
   work_scope: Modèles et traitements de stock, propriété et disponibilité.
   justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
     le développement avant la publication effective de toutes les familles. Le seuil est une hypothèse de contract
@@ -507,7 +513,7 @@ constraints:
   gate: production
   threshold_pct: 100
   prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats des références
-    nécessaires, identifiants, versions et vues opérationnelles, avec données fictives représentatives.
+    nécessaires, identifiants, versions et données maîtres certifiées, avec données fictives représentatives.
   work_scope: Modèles et traitements de stock, propriété et disponibilité.
   justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
     le développement avant la publication effective de toutes les familles.La première cartographie retient la disponibilité
@@ -522,8 +528,8 @@ constraints:
   consumer_release_ref: master-plan-supply-policy-r1
   gate: start
   threshold_pct: 30
-  prerequisite: Contrats des références nécessaires, identifiants, versions et vues opérationnelles, avec données
-    fictives représentatives.
+  prerequisite: Contrats des références nécessaires, identifiants, versions et données maîtres certifiées, avec
+    données fictives représentatives.
   work_scope: Calculs de planification, règles de politique et contraintes Supply.
   justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
     le développement avant la publication effective de toutes les familles. Le seuil est une hypothèse de contract
@@ -539,7 +545,7 @@ constraints:
   gate: production
   threshold_pct: 100
   prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats des références
-    nécessaires, identifiants, versions et vues opérationnelles, avec données fictives représentatives.
+    nécessaires, identifiants, versions et données maîtres certifiées, avec données fictives représentatives.
   work_scope: Calculs de planification, règles de politique et contraintes Supply.
   justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
     le développement avant la publication effective de toutes les familles.La première cartographie retient la disponibilité
@@ -554,8 +560,8 @@ constraints:
   consumer_release_ref: sourcing-procurement-r1
   gate: start
   threshold_pct: 30
-  prerequisite: Contrats des références nécessaires, identifiants, versions et vues opérationnelles, avec données
-    fictives représentatives.
+  prerequisite: Contrats des références nécessaires, identifiants, versions et données maîtres certifiées, avec
+    données fictives représentatives.
   work_scope: Contrats de commande et contrôles des références achat.
   justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
     le développement avant la publication effective de toutes les familles. Le seuil est une hypothèse de contract
@@ -571,7 +577,7 @@ constraints:
   gate: production
   threshold_pct: 100
   prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats des références
-    nécessaires, identifiants, versions et vues opérationnelles, avec données fictives représentatives.
+    nécessaires, identifiants, versions et données maîtres certifiées, avec données fictives représentatives.
   work_scope: Contrats de commande et contrôles des références achat.
   justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
     le développement avant la publication effective de toutes les familles.La première cartographie retient la disponibilité
@@ -586,8 +592,8 @@ constraints:
   consumer_release_ref: services-r1
   gate: start
   threshold_pct: 30
-  prerequisite: Contrats des références nécessaires, identifiants, versions et vues opérationnelles, avec données
-    fictives représentatives.
+  prerequisite: Contrats des références nécessaires, identifiants, versions et données maîtres certifiées, avec
+    données fictives représentatives.
   work_scope: Catalogue de prestations et traitement des références de services.
   justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
     le développement avant la publication effective de toutes les familles. Le seuil est une hypothèse de contract
@@ -603,7 +609,7 @@ constraints:
   gate: production
   threshold_pct: 100
   prerequisite: Release initiale complète du fournisseur, qualifiée et disponible en production. Contrats des références
-    nécessaires, identifiants, versions et vues opérationnelles, avec données fictives représentatives.
+    nécessaires, identifiants, versions et données maîtres certifiées, avec données fictives représentatives.
   work_scope: Catalogue de prestations et traitement des références de services.
   justification: Les traitements utilisent des références stables et leurs règles de version. Une simulation permet
     le développement avant la publication effective de toutes les familles.La première cartographie retient la disponibilité
@@ -921,5 +927,35 @@ constraints:
   - source/organisation-delivery.yaml
   - source/fonctions-produit-core.yaml
   - audits/2026-11-06-premiere-cartographie-dependances.md
+- id: master-data--portal--start
+  provider_release_ref: master-data-r1
+  consumer_release_ref: portal-r1
+  gate: start
+  threshold_pct: 30
+  prerequisite: Contrats versionnés des références publiées, identifiants, règles de compatibilité et jeux de données
+    simulés.
+  work_scope: Admission des versions MDM, construction et qualification des vues Operational References dans Portal.
+  justification: Portal consomme les références publiées par Master Data sans reprendre leur production ni leur
+    certification. Les contrats et données simulées permettent de construire les vues avant la disponibilité de
+    toutes les familles. Les autres travaux Portal conservent leurs propres dépendances.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/justifications-charges.yaml
+- id: master-data--portal--production
+  provider_release_ref: master-data-r1
+  consumer_release_ref: portal-r1
+  gate: production
+  threshold_pct: 100
+  prerequisite: Release initiale Master Data complète, qualifiée et disponible en production. Références certifiées
+    et contrats de publication versionnés.
+  work_scope: Admission des versions MDM, construction et qualification des vues Operational References dans Portal.
+  justification: Portal consomme les références publiées par Master Data sans reprendre leur production ni leur
+    certification. Les contrats et données simulées permettent de construire les vues avant la disponibilité de
+    toutes les familles. Les autres travaux Portal conservent leurs propres dépendances.
+  assessment: sequencing_assumption
+  evidence_refs:
+  - source/organisation-delivery.yaml
+  - source/justifications-charges.yaml
 excluded_team_refs:
 - integration

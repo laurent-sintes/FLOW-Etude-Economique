@@ -23,7 +23,7 @@ export function InteractionMark({mode,color,angle=0,illustrated=false}:{mode:str
 }
 export function TeamBadge({team}:{team:Data}){
  const {data}=useStudy(),kind=data.content.delivery_organisation.team_types.find((t:Data)=>t.id===team.type);
- return <span className="delivery-team-badge" data-team-type={kind.id} style={{'--team-color':kind.color} as CSSProperties}><TeamMark type={kind.id} color={kind.color}/>{kind.label}</span>;
+ return <span className="delivery-team-badge" data-team-type={kind.id} style={{'--team-color':kind.color} as CSSProperties}><span className="delivery-team-badge-symbol"><TeamMark type={kind.id} color={kind.color}/></span><span className="delivery-team-badge-label">{kind.label}</span></span>;
 }
 export function TeamDirectory({selected,option,view}:{selected:string;option:string;view?:string}){
  const {data}=useStudy(),D=data.content.delivery_organisation,L=D.labels,context=useReadingContext();

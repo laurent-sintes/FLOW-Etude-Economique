@@ -77,3 +77,9 @@ Le contrat d’estimation emploie le vert FLOW pour la référence et le passage
 La consolidation par équipe distingue la référence retenue et le travail en cours par des intercalaires internes. Chaque phase garde son assiette initiale ou annuelle. Les valeurs inconnues sont libellées « À renseigner », les sous-totaux sont qualifiés et les périodes restent visibles près des contributions.
 
 Le sélecteur compact des charges reprend les logos Microsoft et SAP existants et le pictogramme Java de Devicon v2.17.0 (`https://github.com/devicons/devicon/blob/v2.17.0/icons/java/java-original.svg`, collection sous licence MIT). Les blocs de justification sont vert pâle, les exclusions pêche et les postes de charge lavande. Les titres des panneaux de détail utilisent le vert FLOW avec texte blanc.
+
+
+La page Team Topologies présente la couverture de la deuxième édition et les portraits officiels des coauteurs, sans génération ni retouche. Usage documentaire avec attribution et liens vers https://teamtopologies.com/book et https://teamtopologies.com/people. Portrait de Matthew Skelton par Paula Brown. Ces images ne relèvent pas de la licence du kit de schémas. Sources des fichiers :
+- `team-topologies-book.jpg` : https://images.squarespace-cdn.com/content/v1/5b3296b78ab7229ecafcf4ed/ed278675-a1c5-4fb6-b701-4b58903ec371/710Ampnp-5L._SL1500_.jpg
+- `matthew-skelton.jpg` : https://images.squarespace-cdn.com/content/v1/5b3296b78ab7229ecafcf4ed/1613940522379-JJA3HE4XZC5MJSEF0LUI/Matthew-Skelton-by-Paula-Brown--square-crop.jpg
+- `manuel-pais.jpg` : https://images.squarespace-cdn.com/content/v1/5b3296b78ab7229ecafcf4ed/1546861984852-6GZ79CYHSPRDROHUYYR9/ManuelPais_2017_full_res-oreilly-292.jpg

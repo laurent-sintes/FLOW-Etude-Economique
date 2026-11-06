@@ -2,6 +2,7 @@
 from jsonschema import Draft202012Validator
 from copy import deepcopy
 from decimal import Decimal
+from model_inputs import governance_etp
 
 from validate_stacks import ROOT, read
 from content_model import resolve_text_tree
@@ -122,7 +123,7 @@ def build_dossier(organisation, gross):
         return list(paths.values())
     labels = resolve_text_tree(read(ROOT / LABELS), read(ROOT / 'source/glossaire.yaml'))
     office = read(ROOT / 'source/modele-composable.yaml')['equipe_transformation']
-    annual_governance = sum(r['etp']*office['jours_par_an'] for r in office['roles'])
+    annual_governance = sum(governance_etp(r)*office['jours_par_an'] for r in office['roles'])
     years = labels['governance_years']
     if len(set(years))!=len(years) or any(type(y) is not int or y<=0 for y in years):
         raise ValueError('Invalid governance horizons')
@@ -147,7 +148,7 @@ def build_dossier(organisation, gross):
             charge = unit['totals']['jh']
             annual_role = next((r for r in office['roles'] if r['id']==unit['id'].split('/')[-1]),None) if unit['nature']=='governance' else None
             if annual_role:
-                charge = annual_role['etp']*office['jours_par_an']
+                charge = governance_etp(annual_role)*office['jours_par_an']
             contributions = []
             for item in unit['contributions']:
                 days = charge if annual_role else item['jh']
@@ -172,7 +173,7 @@ def build_dossier(organisation, gross):
                 office = read(ROOT / 'source/modele-composable.yaml')['equipe_transformation']
                 role = next(r for r in office['roles'] if r['id']==unit['id'].split('/')[-1])
                 rationale = role['mission']
-                terms = [dict(id='capacity',quantity=role['etp'],
+                terms = [dict(id='capacity',quantity=governance_etp(role),
                               unit=labels['annual_unit'],unit_jh=office['jours_par_an'],basis=labels['annual_capacity'])]
             summary = rationale.split('. ')[0].rstrip('.') + '.' if source and not packages else ''
             exclusions, bridge = [], None
@@ -242,6 +243,6 @@ def build_dossier(organisation, gross):
     acquisition_summaries = {}
     for option in ('java-spring', 'microsoft', 'sap'):
         product = phases[0]['total_jh'] if option=='java-spring' else next(p['jh'] for p in option_summaries[option] if p['id']=='acquisition')
-        acquisition_summaries[option] = dict(product_jh=product, horizons=[
-            dict(years=h['years'], jh=None if product is None else product+h['jh']) for h in governance['horizons']])
+        acquisition_summaries[option] = dict(product_jh=product, governance_annual_jh=annual_governance if option=='java-spring' else sum(r['etp']*office['jours_par_an'] for r in office['roles']), horizons=[
+            dict(years=h['years'], jh=None if product is None else product+(h['jh'] if option=='java-spring' else h['years']*sum(r['etp']*office['jours_par_an'] for r in office['roles']))) for h in governance['horizons']])
     return dict(distribution=build_distribution(next(p['rows'] for p in phases if p['id']=='acquisition'),teams,organisation['team_types'],resolve_text_tree(read(ROOT/'source/fonctions-produit-core.yaml'),read(ROOT/'source/glossaire.yaml'))),acquisition_summaries=acquisition_summaries,governance=governance,labels=labels,phases=phases,teams=teams,option_summaries=option_summaries,methods=[{key:m[key] for key in ('id','label','method')} for m in core['rows'][0]['comparisons']])

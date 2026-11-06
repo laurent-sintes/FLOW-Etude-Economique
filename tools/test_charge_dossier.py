@@ -89,7 +89,7 @@ class ChargeDossierTests(unittest.TestCase):
     def test_governance_is_annual_and_independent_of_build_schedule(self):
         from validate_stacks import ROOT, read
         office=read(ROOT/'source/modele-composable.yaml')['equipe_transformation']
-        expected=sum(r['etp']*office['jours_par_an'] for r in office['roles'])
+        expected=sum(r['build_make_etp']*office['jours_par_an'] for r in office['roles'])
         self.assertEqual(self.dossier['governance']['annual_jh'],expected)
         self.assertEqual(self.dossier['governance']['horizons'],[dict(years=y,jh=expected*y) for y in (2,3,4,5)])
         org=deepcopy(self.org)
@@ -113,8 +113,9 @@ class ChargeDossierTests(unittest.TestCase):
         for option, summary in self.dossier['acquisition_summaries'].items():
             product = self.dossier['phases'][0]['total_jh'] if option=='java-spring' else next(p['jh'] for p in self.dossier['option_summaries'][option] if p['id']=='acquisition')
             self.assertEqual(summary['product_jh'],product)
+            self.assertAlmostEqual(summary['governance_annual_jh'],907.2 if option=='java-spring' else 1080)
             for h in summary['horizons']:
-                self.assertEqual(h['jh'],product+self.dossier['governance']['annual_jh']*h['years'])
+                self.assertEqual(h['jh'],product+summary['governance_annual_jh']*h['years'])
         self.assertNotEqual(self.dossier['acquisition_summaries']['java-spring']['product_jh'], self.dossier['acquisition_summaries']['sap']['product_jh'])
 
     def test_explicit_breakdowns_and_allocation_bases(self):

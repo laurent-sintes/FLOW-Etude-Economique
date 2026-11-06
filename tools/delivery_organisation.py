@@ -6,6 +6,7 @@ from scope_revision import compile_revision, dependencies as revision_dependenci
 from team_consolidation import consolidate, dependencies as consolidation_dependencies
 from decimal import Decimal
 import math
+from model_inputs import governance_etp
 
 from jsonschema import Draft202012Validator
 from content_model import resolve_text_tree
@@ -175,7 +176,7 @@ def build_organisation(economic, baseline, content, source=None):
     office = read(ROOT / 'source/modele-composable.yaml')['equipe_transformation']
     for role in office['roles']:
         add('governance/build/' + role['id'], 'acquisition', role['nom'],
-            jh=end_build * office['jours_par_an'] / 12 * role['etp'], team='governance',
+            jh=end_build * office['jours_par_an'] / 12 * governance_etp(role), team='governance',
             source_ref='source/modele-composable.yaml', obj='programme', start=0, end=end_build, basis=document['governance']['funding_note'])
     require(sum(Decimal(str(u['cost_eur_ht'])) for u in units) == Decimal(str(option['build'])), 'Core cost must match funded construction')
     maintenance_names = {r['id']: r['nom'] for r in read(ROOT / 'source/maintenance.yaml')['activites']}

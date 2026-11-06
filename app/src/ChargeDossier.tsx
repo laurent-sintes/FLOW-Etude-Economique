@@ -46,11 +46,11 @@ export function ChargeDossier({phase,option='java-spring',focus,view}:{phase?:st
  const functionTable=(rows:Data[],methods=false)=><div className="charge-table-scroll" tabIndex={0}>
   <table className="eco-table charge-table"><thead><tr><th scope="col">{L.unit}{methods&&<small>{L.covered_scope}</small>}</th>
    {methods&&<th scope="col">{L.methods}</th>}
-   <th scope="col">{L.charge}</th><th scope="col">{L.teams}</th><th scope="col"><span className="sr-only">{L.details}</span></th>
+   <th scope="col" className={methods?'charge-retained-column':undefined}>{L.charge}</th><th scope="col">{L.teams}</th><th scope="col"><span className="sr-only">{L.details}</span></th>
   </tr></thead><tbody>{rows.map(row=><tr key={row.id} data-charge-function={row.id}>
    <th scope="row"><span className="charge-function-name">{natureIcons(row.natures)}{row.label}</span>{methods&&(row.scope_summary.length?scopeList(row.scope_summary):<small>{row.natures.includes('it')?L.technical_scope:row.scope||L.business_scope}</small>)}</th>
    {methods&&<td>{row.methods.every((m:Data)=>m.jh===null)?L.historical_method:row.methods.map((m:Data)=><span className="charge-method" key={m.id}><span>{L.method_labels[m.id]||m.label}</span><b>{m.jh===null?L.historical_method:format(m.jh)}</b></span>)}</td>}
-   <td className="charge-final">{format(row.jh,row.unit)}{row.summary&&<small className="charge-decision-summary">{row.summary}</small>}</td>
+   <td className={'charge-final'+(methods?' charge-retained-column':'')}><strong className={methods?'charge-retained-value':undefined}>{format(row.jh,row.unit)}</strong>{row.summary&&<small className="charge-decision-summary">{row.summary}</small>}</td>
    <td>{row.contributions.map((c:Data)=><span className="charge-contribution" key={c.team_ref||'unallocated'}>{c.label} <b>{share(c.share_pct)}</b></span>)}</td>
    <td><Information summary={row.rationale} label={L.details+' · '+row.label} onClick={()=>setSelected(row)}/></td>
   </tr>)}</tbody></table>
@@ -86,7 +86,7 @@ export function ChargeDossier({phase,option='java-spring',focus,view}:{phase?:st
    {selected.justification&&<>
     <DetailSection title={L.reuse} icon={<Blocks size={20}/>}><p>{selected.justification.reuse}</p></DetailSection>
     <DetailSection title={L.exclusions} icon={<Scissors size={20}/>} tone="exclusions"><p>{selected.justification.exclusions}</p></DetailSection>
-    <DetailSection title={L.charge_calculation} icon={<Calculator size={20}/>}><p>{selected.justification.calculation}</p><strong>{format(selected.jh,selected.unit)}</strong></DetailSection>
+    <DetailSection title={L.charge_calculation} icon={<Calculator size={20}/>}><p>{selected.justification.calculation}</p><strong className="charge-retained-value">{format(selected.jh,selected.unit)}</strong></DetailSection>
    </>}
    {selected.exclusions.length>0&&<DetailSection title={L.excluded_functions} icon={<Scissors size={20}/>} tone="exclusions"><div className="charge-exclusions">{selected.exclusions.map((e:Data)=><article key={e.id}><h4>{e.label}</h4><p><MethodText>{e.boundary}</MethodText></p><p><MethodText>{e.preserved}</MethodText></p></article>)}</div></DetailSection>}
    {selected.bridge&&<DetailSection title={L.packages} icon={<Blocks size={20}/>}><p>{L.mdm_bridge}</p><div className="charge-parts">{selected.bridge.parts.map((p:Data)=><article key={p.label}><span>{p.label}</span><strong>{format(p.jh)}</strong></article>)}</div><p className="charge-reference">{L.mdm_reference} · <strong>{format(selected.bridge.reference_jh)}</strong></p></DetailSection>}

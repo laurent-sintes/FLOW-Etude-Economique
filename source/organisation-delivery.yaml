@@ -127,7 +127,7 @@ teams:
   responsibilities:
     acquisition: Fournir les outils, environnements et la chaîne industrielle.
     integration: Industrialiser la livraison et les environnements du contexte client.
-    fonctionnement: Maintenir l’outillage et ses services, avec les achats identifiés.
+    fonctionnement: Maintenir et faire évoluer l’outillage et les environnements.
   capacity:
     acquisition: null
     integration: null
@@ -137,7 +137,7 @@ teams:
   type: complicated-subsystem
   mission: Plans, politiques Supply, arbitrages et décisions de planification.
   boundary: Le contrat avec Inventory et Availability distingue affectation du plan, possibilité de promesse et
-    engagement. Le type spécialisé reste à éprouver.
+    engagement.
   status: target
   responsibilities:
     acquisition: Réaliser les mécanismes de planification, politiques et arbitrages.
@@ -151,8 +151,7 @@ teams:
   label: Inventory et Availability
   type: complicated-subsystem
   mission: Faits de stock, propriété, réservations et possibilités de promesse.
-  boundary: Les interfaces séparent fait de stock, réservation, disponibilité et décision de planification. Le type
-    spécialisé reste à éprouver.
+  boundary: Les interfaces séparent fait de stock, réservation, disponibilité et décision de planification.
   status: target
   responsibilities:
     acquisition: Réaliser les mécanismes de stock, de réservation et de disponibilité.
@@ -179,39 +178,27 @@ teams:
 - id: mdm-platform
   label: Plateforme MDM
   type: platform
-  mission: 'Fournir le produit MDM générique en libre-service : moteur de données, versionnement, rapprochement,
-    qualité, publication, studio de schémas, plugins et écrans génériques.'
-  boundary: La plateforme possède les mécanismes et les interfaces réutilisables entre familles. Référentiels possède
-    leurs modèles et règles métier. PaaS fournit l’outillage et les moyens communs. Case Management conserve les
-    processus et moteurs génériques déjà financés.
+  mission: Fournir le socle technique du MDM et ses outils génériques.
+  boundary: Plateforme MDM porte le moteur et les outils. Master Data porte les modèles et règles métier. PaaS fournit les environnements. Case Management fournit les moteurs de processus.
   status: target
   responsibilities:
-    acquisition: Construire le moteur, les écrans génériques, le studio et les plugins. Qualifier la robustesse,
-      la résilience et les performances.
-    integration: Fournir les extensions et contrats nécessaires aux usages Beaumanoir, sans reprendre les correspondances
-      ni les règles métier.
-    fonctionnement: Maintenir le moteur et ses outils, les contrats, les performances, la sécurité et la compatibilité
-      des extensions.
+    acquisition: Construire le moteur MDM, ses interfaces et ses outils de configuration.
+    integration: Adapter les extensions et interfaces aux usages Beaumanoir.
+    fonctionnement: Maintenir le socle MDM, sa sécurité, ses performances et sa compatibilité.
   capacity:
     acquisition: null
     integration: null
     fonctionnement: null
 - id: master-data
-  label: Référentiels
+  label: Master Data
   type: stream-aligned
-  mission: 'Porter les référentiels de la {{notion.flow_core_system}} : modèles des familles, identifiants, relations,
-    règles métier, priorités des sources et critères de certification. Fournir les vues Operational References.'
-  boundary: Dans le {{notion.core_system}}, l’équipe possède les familles et leurs vues opérationnelles. Elle configure
-    les outils génériques de Plateforme MDM. Les autorités métier et les décisions des consommateurs restent chez
-    leurs responsables.
+  mission: Porter les référentiels maîtres de la {{notion.flow_core_system}} et leur qualité métier.
+  boundary: Dans la {{notion.core_system}}, Master Data définit les familles de données et leurs règles sur le socle Plateforme MDM. Portal porte Operational References et les vues de consommation.
   status: target
   responsibilities:
-    acquisition: Construire les familles génériques, leurs règles et leurs vues opérationnelles. Qualifier la cohérence
-      inter-familles.
-    integration: Porter les correspondances, règles, reprises et validations Beaumanoir avec les responsables des
-      données.
-    fonctionnement: Maintenir les modèles, règles, configurations et vues opérationnelles. Faire évoluer les référentiels
-      avec leurs consommateurs.
+    acquisition: Construire les modèles des référentiels et leurs règles métier.
+    integration: Adapter et reprendre les données Beaumanoir avec leurs responsables métier.
+    fonctionnement: Faire évoluer les référentiels et maintenir leur cohérence.
   capacity:
     acquisition: null
     integration: null
@@ -263,14 +250,13 @@ teams:
 - id: portal
   label: Flow Core System Portal
   type: stream-aligned
-  mission: Produit d’accès à FLOW réunissant XP APIs, sécurité applicative et portail UI pour accueillir les clients.
-  boundary: L’équipe porte l’expérience d’accès. Les équipes de domaine possèdent leurs API, règles métier et contrôles
-    d’autorisation.
+  mission: Donner accès à FLOW par le portail, les XP APIs et la sécurité applicative.
+  boundary: Portal porte l’expérience d’accès et Operational References. Les équipes de domaine gardent leurs API et règles métier. Master Data garde les données maîtres.
   status: target
   responsibilities:
-    acquisition: Construire l’onboarding, les XP APIs et l’expérience UI transversale.
-    integration: Intégrer les identités, accès et parcours du contexte Beaumanoir.
-    fonctionnement: Maintenir l’expérience, la sécurité applicative et la compatibilité des interfaces.
+    acquisition: Construire le portail, les XP APIs et les vues Operational References.
+    integration: Adapter les accès, les identités et les vues au contexte Beaumanoir.
+    fonctionnement: Faire évoluer les parcours et maintenir la sécurité et les interfaces.
   capacity:
     acquisition: null
     integration: null
@@ -307,7 +293,7 @@ work_owners:
   - mdm-platform
   - master-data
   basis: Lot partagé selon la ventilation build-master-data. Plateforme MDM porte le moteur et les interfaces génériques.
-    Référentiels porte les familles. La qualification transverse est partagée à parts égales.
+    Master Data porte les familles. La qualification transverse est partagée à parts égales.
 - kind: core_unit
   ref: stock-java-spring
   team_ref: inventory-availability
@@ -812,11 +798,11 @@ work_owners:
   basis: Coût des moyens consommés par la plateforme de delivery. Cette attribution ne crée ni JH ni capacité humaine.
 - kind: core_unit
   ref: operational-references-java-spring
-  team_ref: master-data
+  team_ref: portal
   candidate_refs:
-  - master-data
-  basis: Référentiels porte les vues opérationnelles et leurs contrats de consommation. Les mécanismes génériques
-    de publication restent dans Plateforme MDM.
+  - portal
+  basis: Portal porte Operational References, les vues opérationnelles et leurs contrats de consommation. Master
+    Data conserve les familles et leurs règles. Plateforme MDM fournit les mécanismes génériques de publication.
 interactions:
 - id: paas-case-management
   source: paas
@@ -1170,10 +1156,58 @@ interactions:
   phases:
   - acquisition
   - integration
-  exit_criterion: Les contrats et extensions sont disponibles et Référentiels peut faire évoluer ses familles de
+  exit_criterion: Les contrats et extensions sont disponibles et Master Data peut faire évoluer ses familles de
     manière autonome.
   status: proposed
+- id: master-data-portal-operational-references
+  source: master-data
+  target: portal
+  mode: x-as-a-service
+  object: Références certifiées et contrats de publication consommés par Operational References
+  phases:
+  - acquisition
+  - integration
+  - fonctionnement
+  exit_criterion: ''
+  status: proposed
 labels:
+  book_title: Team Topologies
+  book_subtitle: Organizing Business and Technology Teams for Fast Flow
+  book_edition: Matthew Skelton et Manuel Pais · IT Revolution · 2ᵉ édition, 2025
+  book_cover: assets/team-topologies-book.jpg
+  book_alt: Couverture de Team Topologies, deuxième édition, 2025
+  book_link: Découvrir le livre
+  book_href: https://teamtopologies.com/book
+  authors_link: Les auteurs
+  authors_href: https://teamtopologies.com/people
+  author_matthew: Matthew Skelton
+  author_manuel: Manuel Pais
+  author_matthew_image: assets/matthew-skelton.jpg
+  author_manuel_image: assets/manuel-pais.jpg
+  author_matthew_role: Coauteur · architecture et conception des organisations
+  author_manuel_role: Coauteur · organisation des équipes et flux de valeur
+  book_credit: 'Couverture et portraits : site officiel Team Topologies. Portrait de Matthew Skelton : Paula
+    Brown.'
+  conway_law_title: Loi de Conway
+  conway_law_text: Les systèmes conçus reflètent les structures de communication des organisations qui les produisent.
+    Les frontières et les échanges entre équipes influencent donc les frontières et les interfaces du logiciel.
+  conway_law_from: Organisation et communications
+  conway_law_to: Architecture produite
+  conway_law_source: Melvin Conway · 1968
+  conway_law_href: https://www.melconway.com/Home/Conways_Law.html
+  conway_inverse_title: Conway inversée
+  conway_inverse_text: Partir de l’architecture souhaitée pour organiser les équipes, leurs responsabilités et
+    leurs interactions. Cette démarche, appelée « manœuvre de Conway inversée », utilise le mécanisme décrit
+    par Conway pour favoriser la cible.
+  conway_inverse_from: Architecture souhaitée
+  conway_inverse_to: Équipes et interactions adaptées
+  conway_inverse_source: La démarche expliquée par Martin Fowler
+  conway_inverse_href: https://martinfowler.com/bliki/ConwaysLaw.html
+  conway_flow_title: Application à FLOW
+  conway_flow_text: Les équipes durables portent les produits et composants de l’architecture cible. Plateforme
+    MDM possède le moteur générique, Master Data les familles et leurs règles, Portal les parcours d’accès et
+    Operational References. Les contrats entre ces produits organisent les interactions entre leurs équipes.
+  references_title: Sources et références
   integration_workload_pending: Non évalué — étude d’intégration à reprendre
   integration_workload_note: Les jours d’intégration ne sont pas ventilés. L’étude de cette charge est à reprendre
     et ne permet pas de justifier une répartition ou un total. Les coûts affichés reprennent les financements existants

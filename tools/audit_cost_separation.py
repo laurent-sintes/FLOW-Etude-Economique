@@ -47,7 +47,8 @@ def independent_projection(option, rates):
             cumulative['integration']+=Fraction(str(option['integration']))*Fraction(max(Decimal(0),min(hi,end)-max(lo,b)))/Fraction(end-b)
             team=option.get('equipe_transformation',{'jours_par_an':0,'roles':[]})
             monthly=dec(team['jours_par_an'])*sum(dec(r['etp'])*dec(r['tarif_eur_jh']) for r in team['roles'])/12
-            cumulative['build']+=Fraction(monthly*max(Decimal(0),min(hi,b)-lo))
+            monthly_build=dec(team['jours_par_an'])*sum(dec(r['build_make_etp'] if option['mode']=='Make' else r['etp'])*dec(r['tarif_eur_jh']) for r in team['roles'])/12
+            cumulative['build']+=Fraction(monthly_build*max(Decimal(0),min(hi,b)-lo))
             cumulative['integration']+=Fraction(monthly*max(Decimal(0),min(hi,end)-max(lo,b)))
             service+=max(Decimal(0),hi-max(lo,end))/12
         row={k:cents(v)-previous[k] for k,v in cumulative.items()}

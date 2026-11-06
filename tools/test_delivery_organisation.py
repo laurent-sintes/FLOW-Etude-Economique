@@ -156,7 +156,16 @@ class DeliveryOrganisationTests(unittest.TestCase):
         self.assertEqual(scopes['master-data']['scope_kind'],'direct')
         charges={t['id']:t for t in org['charge_dossier']['teams']}
         self.assertAlmostEqual(charges['mdm-platform']['totals']['acquisition'],3315)
-        self.assertAlmostEqual(charges['master-data']['totals']['acquisition'],1230)
+        self.assertAlmostEqual(charges['master-data']['totals']['acquisition'],830)
+        self.assertEqual(teams['master-data']['label'],'Master Data')
+        self.assertAlmostEqual(charges['portal']['totals']['acquisition'],950)
+        operational=units['core/operational-references-java-spring']
+        allocated=[c for c in operational['contributions'] if c['jh']]
+        self.assertEqual({c['team_ref'] for c in allocated},{'portal'})
+        self.assertAlmostEqual(sum(c['jh'] for c in allocated),400)
+        self.assertAlmostEqual(sum(c['cost_eur_ht'] or 0 for c in allocated),operational['totals']['cost_eur_ht'],places=2)
+        self.assertNotIn('operational-references-java-spring',scopes['master-data']['core_scope_refs'])
+        self.assertIn('operational-references-java-spring',scopes['portal']['core_scope_refs'])
         for id in ('master-data','mdm-platform'):
             self.assertIsNone(charges[id]['totals']['integration'])
         modes={i['mode'] for i in org['interactions'] if i['source']=='mdm-platform' and i['target']=='master-data'}
