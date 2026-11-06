@@ -166,7 +166,7 @@ async function checkAuditCorrections(data){
    await route('equipes-produit?option='+option+'&focus=master-data');
    assert.equal(await page.locator('.delivery-team-sheet .delivery-matrix').count(),0);
    assert.equal(await page.locator('.delivery-team-sheet .work-team-scope').count(),0);
-   assert.equal(await page.locator('[data-buy-team-scope]').innerText(),D.labels.buy_note);
+   assert.equal(await page.locator('.delivery-page > .delivery-note').innerText(),D.labels.buy_note);
   }
   await route('couts-equipes?option=java-spring');
   assert.equal(await page.locator('[data-consolidation-details]').count(),0);
