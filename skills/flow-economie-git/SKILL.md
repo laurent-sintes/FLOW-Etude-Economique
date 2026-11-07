@@ -1,69 +1,76 @@
 ---
 name: flow-economie-git
-description: Exécuter commit, push ou commit et push pour l’Étude économique FLOW et vérifier son déploiement GitHub Pages. Cible exclusivement laurent-sintes/FLOW-Etude-Economique, distinct du projet Etude-d-opportunite-FLOW.
+description: Commit et double push de l’Étude économique FLOW vers GitHub personnel et Beaumanoir, avec vérification des deux CI et déploiements Pages. Pour les demandes Git de FLOW-Etude-Economique uniquement, distinct de FLOW-Program, Urbanisation-SCM et Etude-d-opportunite-FLOW.
 ---
 
 # Git de l’Étude économique FLOW
 
-Le dépôt est `https://github.com/laurent-sintes/FLOW-Etude-Economique`, public, avec un site GitHub Pages public autorisé. Le checkout habituel est `C:/Dev/FLOW-Etude-Economique`. Lire `AGENTS.md`, `README.md`, `tools/README.md` et le workflow `.github/workflows/pages.yml` du checkout courant. Ne pas appliquer le workflow d’un autre projet FLOW.
+Checkout habituel : `C:/Dev/FLOW-Etude-Economique`. Lire les consignes courantes dans `AGENTS.md`, `tools/README.md` et `.github/workflows/pages.yml`. Ce skill s’applique uniquement à cette étude.
 
-## Choisir l’action demandée
+## Action autorisée
 
-- **commit** : examiner et valider les changements concernés, puis créer un commit local. Ne pas pousser.
-- **push** : envoyer les commits existants et vérifier leur déploiement. Ne pas créer de commit implicite ; signaler les modifications locales qui restent hors envoi.
-- **commit et push** : enchaîner les deux actions.
+- **commit** : créer un commit local du périmètre examiné, sans pousser.
+- **push** : envoyer systématiquement le même commit aux deux dépôts ci-dessous et vérifier les deux déploiements Pages. Ne pas créer de commit implicite. Signaler les changements locaux hors envoi.
+- **commit et push** : enchaîner les deux opérations.
 
-La demande de l’action autorise son exécution dans le périmètre indiqué, sans confirmation systématique. Une invocation sans action identifiable nécessite seulement de préciser l’action. Une demande de diagnostic ou de modification du skill n’exécute pas Git.
+La demande autorise l’action dans son périmètre sans reconfirmation. Une demande de diagnostic, de configuration ou de modification du skill ne déclenche ni commit ni push. Ne pas modifier implicitement le modèle métier, sa release, les droits, les domaines ou les visibilités.
 
-Le flux courant est `main`, sans branche de brouillon ni release métier. Un push sur `main` déclenche le workflow Pages. Il n’autorise pas un changement de visibilité, de droits ou de domaine. `release/current.json` reste distinct ; ne pas ajouter `--publish` aux contrôles.
+## Deux destinations obligatoires
 
-## Vérifier le bon dépôt
+| Remote | Dépôt | Visibilité | Site Pages |
+| --- | --- | --- | --- |
+| `origin` | `https://github.com/laurent-sintes/FLOW-Etude-Economique.git` | Public | `https://laurent-sintes.github.io/FLOW-Etude-Economique/` |
+| `beaumanoir` | `https://beaumanoir.ghe.com/solution-ai/FLOW-Etude-Economique.git` | Interne | `https://solution-ai-flow-etude-economique.pages.beaumanoir.ghe.com/` (privé) |
 
-Lire la racine Git, le statut, la branche, l’upstream et toutes les URL de lecture et d’envoi d’`origin`. Elles doivent cibler exclusivement le dépôt ci-dessus, en HTTPS ou SSH. Ne pas remplacer un remote pour rendre un autre checkout compatible. Une autre branche ou une HEAD détachée doit être résolue selon la demande avant l’envoi sur `main`.
+Pour chaque push, vérifier la racine Git, le statut, `main`, l’upstream et toutes les URL de lecture et d’envoi des deux remotes. Elles doivent cibler exclusivement ces dépôts, en HTTPS ou SSH. Ne pas remplacer un remote incorrect pour rendre un autre checkout compatible. Ne pas envoyer ce projet à FLOW-Program ou Urbanisation-SCM.
 
-Plusieurs hôtes GitHub sont configurés sur ce poste. Pour `gh api` et `gh auth status`, utiliser explicitement `--hostname github.com` pour le dépôt personnel et `--hostname beaumanoir.ghe.com` pour le miroir interne. Pour les commandes qui acceptent `--repo`, fournir `https://github.com/laurent-sintes/FLOW-Etude-Economique`. Ne jamais laisser le compte par défaut choisir la destination, afficher un jeton ou modifier l’identité Git globale. Vérifier le dépôt public par l’API ; un état différent doit être expliqué par une instruction utilisateur, sans changement automatique de visibilité.
+GitHub CLI doit être connecté aux deux hôtes. Utiliser explicitement `--hostname github.com` ou `--hostname beaumanoir.ghe.com` pour `gh api` et `gh auth status`. Pour les commandes `--repo`, fournir l’URL complète du dépôt concerné. Ne pas dépendre du compte par défaut, afficher de jeton ou modifier l’identité Git globale. Vérifier les visibilités par l’API sans les changer automatiquement.
 
-## Valider et committer
+## Commit local
 
-Utiliser le script du projet pour le chemin courant, après examen des fichiers concernés :
+Examiner les différences et l’index. Préserver les changements étrangers et les fichiers hors périmètre. Vérifier `git var GIT_AUTHOR_IDENT`. Utiliser le script du projet avec un message français dans un fichier UTF-8 :
 
 ```powershell
 python -m tools.git_commit prepare --paths <fichiers-examinés> --message-file tmp/commit-message.txt
 python -m tools.git_commit commit
 ```
 
-Le plan conserve le périmètre explicite, les empreintes, HEAD, l’index et les preuves de validation. Une prévisualisation `--plan-only` reste non exécutable pour un commit. Le script réutilise les contrôles strictement valables, conserve l’index hors périmètre et ne pousse rien. Ne pas utiliser un appel ad hoc à `git add -A` pour contourner son contrôle de périmètre. La procédure détaillée ci-dessous reste le repli de diagnostic.
+Le plan vérifie le périmètre, les empreintes, HEAD, l’index et les preuves de validation. `--plan-only` ne permet pas de committer. Ne pas contourner ces contrôles avec `git add -A` ou un commit ad hoc.
 
+La préparation utilise les contrôles incrémentaux légers de `check_dev`. Ajouter `--tests` et éventuellement `--targeted` lorsque le périmètre le nécessite. Ne pas lancer automatiquement de validation complète, de reconstruction Pages ou de régression navigateur complète en local. Les contrôles complets s’exécutent sur chaque GitHub au push. Ne pas créer de commit vide ni réécrire l’historique.
 
-Examiner l’index, les différences et les nouveaux fichiers du périmètre. Préserver les changements étrangers et l’index existant ; ne pas les inclure ou les désindexer silencieusement. Respecter `.gitignore` et `.gitattributes` : sources et preuves utiles sont conservées, dépendances et caches restent locaux, les originaux fournisseur ne sont pas réencodés.
-
-Au commit local, utiliser uniquement `python -m tools.git_commit prepare --paths <fichiers-examinés> --message-file tmp/commit-message.txt`, puis `python -m tools.git_commit commit`. La préparation lance les contrôles incrémentaux légers de `check_dev`. Compléter par `--tests` et éventuellement `--targeted` pour un périmètre inconnu ou une sélection explicite. Aucun test complet, reconstruction Pages ou régression navigateur complète automatique en local. Les contrôles complets sont exécutés sur GitHub au push. En local, `python -m tools.check_model --full` et `--full --browser` restent disponibles sur demande explicite.
-
-Vérifier `git var GIT_AUTHOR_IDENT`. Indexer les chemins examinés, puis contrôler `git diff --cached --stat` et `git diff --cached --check`. Créer un message français décrivant le résultat ; un fichier UTF-8 sous `tmp/` et `git commit -F` évitent les erreurs PowerShell. Ne pas réécrire un historique ni créer un commit vide. Si rien n’a changé, le signaler et poursuivre l’envoi des commits existants si demandé.
-
-## Pousser et vérifier Pages
-
-Utiliser le script pour l’envoi des commits déjà validés :
+## Double push et suivi
 
 ```powershell
 python -m tools.git_push prepare
 python -m tools.git_push push
 ```
 
-Le plan fixe le SHA et la référence distante. Le script conserve les modifications et l’index en attente, envoie uniquement ce SHA sans tests locaux. GitHub produit les témoins et valide ce commit. Il ne crée pas de commit et ne force jamais. Un retard ou une divergence se résout avant de refaire la préparation, selon les règles ci-dessous.
+Utiliser ce workflow plutôt qu’un simple `git push origin`. La préparation contrôle les deux destinations et fixe le SHA ainsi que les références distantes. Elle ne lance pas de tests locaux. Le script conserve les modifications en attente et envoie ce SHA sur les deux `refs/heads/main`, sans forcer ni envoyer tous les tags. Un dépôt Beaumanoir initialement vide est accepté.
 
-`push --no-wait` confirme uniquement l’envoi. `python -m tools.git_push watch` suit ensuite le workflow exact, le job de déploiement, le SHA publié dans le manifeste après validation complète et simulations navigateur sur GitHub. Aucun navigateur local n’est lancé par le suivi. Après une interruption, reprendre `watch` au lieu de renvoyer les commits. Une demande de scripting seule n’exécute pas le push.
+Si une branche distante est en avance ou diverge, résoudre la situation en préservant les commits avant de refaire la préparation. Un retard simple avec un checkout propre peut être résolu en fast-forward. Une décision métier inconnue demande un arbitrage. Ne pas supprimer une branche ni contourner une protection.
 
+Les deux envois ne sont pas atomiques. Si un seul réussit, reprendre `python -m tools.git_push push` avec le même plan tant que HEAD et les remotes sont inchangés : le script vérifie les SHA et complète uniquement l’envoi manquant. Si les deux envois sont confirmés mais le suivi a été interrompu, reprendre :
 
-Faire `git fetch origin`, examiner les commits à envoyer et la relation avec `origin/main`. Si le dépôt est seulement en retard et propre, avancer en fast-forward. En cas de divergence, intégrer en préservant les commits et les règles du projet ; résoudre les conflits techniques dans le périmètre autorisé et revalider les parties touchées. Une décision métier inconnue nécessite un arbitrage. Ne pas forcer, supprimer une branche distante, envoyer tous les tags ou contourner une protection.
+```powershell
+python -m tools.git_push watch
+```
 
-Depuis `main`, pousser explicitement vers `refs/heads/main`. Définir l’upstream si nécessaire. Vérifier que le SHA distant correspond au SHA envoyé, puis suivre le workflow `pages.yml` de ce commit précis. Après déploiement réussi, vérifier l’URL retournée par Pages et le SHA du manifeste publié. Les tests des parcours et simulations sont exécutés sur GitHub. Ne pas confondre succès du push et succès du déploiement. En cas d’état réseau incertain, lire la référence distante avant toute relance ; en cas d’échec persistant, conserver le travail local et donner le diagnostic.
+`push --no-wait` confirme seulement les envois et ne satisfait pas une demande de push complète : poursuivre avec `watch`, sauf instruction explicite de ne pas attendre.
 
-Répondre brièvement : action exécutée, commit et sujet, résultat distant, contrôles utiles, état du déploiement et lien du site lorsqu’il est confirmé. Mentionner les modifications restantes sans annoncer une sauvegarde ou un déploiement non vérifié.
+## Critères de réussite des deux hébergements
 
+Ne déclarer la synchronisation et la publication terminées que lorsque :
 
-## Deux destinations de push
+- Les deux branches distantes `main` portent le SHA préparé.
+- Les deux workflows `pages.yml` de ce SHA ont réussi, notamment leurs jobs `deploy`. Les tests complets du modèle, les parcours navigateur et les simulations s’exécutent sur chaque GitHub.
+- Sur le site personnel, l’URL Pages correspond au site autorisé et `site-manifest.json` sert le SHA attendu.
+- Chez Beaumanoir, l’API authentifiée confirme l’URL Pages autorisée, `public: false`, et un déploiement `github-pages` réussi du SHA exact. Cette preuve API est distincte d’une lecture du manifeste dans un navigateur authentifié : ne pas prétendre l’avoir effectuée si `live_manifest_verified` vaut `false`.
 
-Le workflow envoie le même SHA vers `origin` (GitHub personnel public) et `beaumanoir` (`https://beaumanoir.ghe.com/solution-ai/FLOW-Etude-Economique.git`, interne). Le dépôt `FLOW-Program` reste distinct et ne doit jamais recevoir les commits de cette étude. GitHub CLI doit être connecté explicitement aux deux hôtes.
+Le workflow construit le site personnel sous `/FLOW-Etude-Economique/` et le site Beaumanoir sous `/`. Garder Vite, le générateur Python et la prévisualisation navigateur alignés sur `FLOW_PAGES_BASE`. L’option `--allow-root` du contrôle navigateur est activée seulement chez Beaumanoir via `FLOW_PAGES_ALLOW_ROOT`.
 
-Utiliser le script `tools.git_push` pour contrôler les deux branches avant l’envoi, accepter un miroir initialement vide, refuser les divergences sans forcer et reprendre un envoi partiel. Une reprise utilise le même plan tant que HEAD et les remotes sont inchangés. La réussite confirme les deux SHA distants et les deux déploiements Pages. Le site Beaumanoir est privé : vérifier sa CI, le job deploy et le statut du déploiement pour le SHA exact via l’API authentifiée. Cette preuve ne vaut pas consultation du site privé. Le manifeste servi reste vérifié directement sur le site personnel. Une demande de configuration seule ne déclenche ni commit ni push.
+En cas d’échec, lire les journaux du bon hôte et diagnostiquer avant de relancer. Corriger les erreurs techniques dans le périmètre autorisé, vérifier le correctif puis le committer et le pousser sur les deux dépôts lorsque cette correction est autorisée par la demande. Suivre le nouveau SHA sur les deux GitHub. Ne pas supprimer de tests pour faire passer la CI. Si un droit manquant, une politique d’entreprise ou une décision hors périmètre bloque la suite, conserver le travail et expliquer précisément le blocage, sans modifier les protections ni annoncer un succès partiel comme complet.
+
+## Compte rendu
+
+Indiquer le commit, l’égalité des deux branches, le résultat des deux CI et déploiements, et les deux liens Pages. Préciser l’accès privé Beaumanoir et la nature de sa vérification. Signaler les fichiers locaux restant hors envoi. Une mise à jour de ce skill seule ne publie aucun commit.
