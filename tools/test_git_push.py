@@ -16,6 +16,7 @@ class WorkflowTests(unittest.TestCase):
         workflow = yaml.load((ROOT/'.github/workflows/pages.yml').read_text(encoding='utf-8'), Loader=yaml.BaseLoader)
         self.assertIn('main', workflow['on']['push']['branches'])
         jobs = workflow['jobs']
+        self.assertEqual(jobs['build']['env']['FLOW_PAGES_ALLOW_ROOT'],"${{ github.server_url == 'https://beaumanoir.ghe.com' }}")
         self.assertNotIn('if',jobs['build'])
         self.assertIn("'/FLOW-Etude-Economique/' || '/'",jobs['build']['env']['FLOW_PAGES_BASE'])
         self.assertEqual(jobs['deploy']['needs'], 'build')
@@ -27,6 +28,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertLess(browser, artifact)
         self.assertTrue(any('--base "$FLOW_PAGES_BASE"' in c for c in commands))
         self.assertIn('8777${FLOW_PAGES_BASE}', commands[browser])
+        self.assertIn('--allow-root "$FLOW_PAGES_ALLOW_ROOT"',commands[browser])
         for step in steps:
             if step.get('run'):
                 self.assertNotEqual(step.get('continue-on-error'), 'true')

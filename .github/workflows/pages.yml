@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
+      FLOW_PAGES_ALLOW_ROOT: ${{ github.server_url == 'https://beaumanoir.ghe.com' }}
       FLOW_PAGES_BASE: ${{ github.server_url == 'https://github.com' && '/FLOW-Etude-Economique/' || '/' }}
     steps:
       - uses: actions/checkout@v7
@@ -67,7 +68,7 @@ jobs:
             if curl --fail --silent "http://127.0.0.1:8777${FLOW_PAGES_BASE}site-manifest.json" > /dev/null; then break; fi
             sleep 1
           done
-          node app/scripts/verify-pages.mjs --url "http://127.0.0.1:8777${FLOW_PAGES_BASE}" --cases tmp/pages-validation.json --output tmp/pages-validation-report.json
+          node app/scripts/verify-pages.mjs --url "http://127.0.0.1:8777${FLOW_PAGES_BASE}" --allow-root "$FLOW_PAGES_ALLOW_ROOT" --cases tmp/pages-validation.json --output tmp/pages-validation-report.json
       - name: Keep Pages browser reports
         if: always()
         uses: actions/upload-artifact@v4
