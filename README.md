@@ -24,12 +24,13 @@ Les anciens exports Excel sont retirés. Les classeurs fournisseur restent dans 
 
 - Répertoire de travail : `C:/Dev/FLOW-Etude-Economique`.
 - Dépôt public : [laurent-sintes/FLOW-Etude-Economique](https://github.com/laurent-sintes/FLOW-Etude-Economique).
+- Miroir interne Beaumanoir : [solution-ai/FLOW-Etude-Economique](https://beaumanoir.ghe.com/solution-ai/FLOW-Etude-Economique), remote `beaumanoir`. La commande de push du projet envoie le même commit aux deux dépôts.
 - Application : [GitHub Pages](https://laurent-sintes.github.io/FLOW-Etude-Economique/).
 - Branche de travail : `main`. Chaque commit local lance uniquement les contrôles incrémentaux du périmètre. Un push déclenche les tests complets et les simulations navigateur sur GitHub, puis le déploiement Pages après succès. Les tests complets restent disponibles en local sur demande avec `python -m tools.check_model --full` (ajouter `--browser` pour le navigateur).
 
 Le skill [flow-economie-git](skills/flow-economie-git/SKILL.md) distingue **commit** (local), **push** (commits existants) et **commit et push**. Les dépendances, caches et artefacts compilés ne sont pas versionnés ; les sources, preuves et audits utiles le sont. Les octets d’origine sont préservés par `.gitattributes`.
 
-GitHub Pages utilise le même moteur Python que l’application locale, exécuté dans le navigateur par Pyodide. Les calculs personnels restent dans le navigateur ; aucune API distante ne reçoit les paramètres de simulation. L’application complète et ses pièces déclarées sont publiques.
+GitHub Pages utilise le même moteur Python que l’application locale, exécuté dans le navigateur par Pyodide. Les calculs personnels restent dans le navigateur ; aucune API distante ne reçoit les paramètres de simulation. L’application complète et ses pièces déclarées sont publiques sur le site personnel. Le second hébergement Beaumanoir est privé, avec accès GitHub authentifié.
 
 Les sauvegardes locales et celles du site sont séparées par l’origine du navigateur. Utiliser l’export/import existant pour transférer un scénario. Le serveur local reste disponible sur `http://127.0.0.1:8766`, lancé depuis ce répertoire :
 
@@ -38,3 +39,5 @@ powershell -ExecutionPolicy Bypass -File tools/start_study_app.ps1 -NoOpen
 ```
 
 La compilation locale reste dans `app/dist/` ; le site publié est construit séparément dans `app/dist-pages/`. Voir [les commandes de construction et de vérification](tools/README.md#github-pages).
+
+Hébergement privé Beaumanoir : [Étude économique FLOW](https://solution-ai-flow-etude-economique.pages.beaumanoir.ghe.com/). Le double push déclenche les deux déploiements.

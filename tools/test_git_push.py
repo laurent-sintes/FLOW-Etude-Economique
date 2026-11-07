@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 from git_commit import CommitError, Git, REPOSITORY, write_json
-from git_push import SITE, PushError, prepare, push, remote_head, watch
+from git_push import SITE, PushError, prepare, push, remote_head, watch, MIRROR_REMOTE, MIRROR_REPOSITORY, MIRROR_SITE, enterprise_deployment
 from validate_stacks import ROOT
 
 
@@ -16,6 +16,8 @@ class WorkflowTests(unittest.TestCase):
         workflow = yaml.load((ROOT/'.github/workflows/pages.yml').read_text(encoding='utf-8'), Loader=yaml.BaseLoader)
         self.assertIn('main', workflow['on']['push']['branches'])
         jobs = workflow['jobs']
+        self.assertNotIn('if',jobs['build'])
+        self.assertIn("'/FLOW-Etude-Economique/' || '/'",jobs['build']['env']['FLOW_PAGES_BASE'])
         self.assertEqual(jobs['deploy']['needs'], 'build')
         steps = jobs['build']['steps']
         commands = [step.get('run', '') for step in steps]
@@ -23,6 +25,8 @@ class WorkflowTests(unittest.TestCase):
         browser = next(i for i, command in enumerate(commands) if 'node app/scripts/verify-pages.mjs' in command)
         artifact = next(i for i, step in enumerate(steps) if step.get('uses', '').startswith('actions/upload-pages-artifact@'))
         self.assertLess(browser, artifact)
+        self.assertTrue(any('--base "$FLOW_PAGES_BASE"' in c for c in commands))
+        self.assertIn('8777${FLOW_PAGES_BASE}', commands[browser])
         for step in steps:
             if step.get('run'):
                 self.assertNotEqual(step.get('continue-on-error'), 'true')
@@ -50,6 +54,41 @@ class API:
         raise AssertionError(path)
 
 
+class EnterpriseAPI(API):
+    def __call__(self,path):
+        if path=='':return dict(full_name=MIRROR_REPOSITORY,visibility='internal')
+        if path=='pages':return dict(html_url=MIRROR_SITE,public=False,build_type='workflow')
+        if path.startswith('deployments?'):return [dict(id=10,sha=self.sha,environment='github-pages')]
+        if path.startswith('deployments/'):return [dict(id=11,state='success',environment_url=MIRROR_SITE)]
+        return super().__call__(path)
+
+
+class EnterpriseDeploymentTests(unittest.TestCase):
+    def test_private_deployment_proof_is_distinct_from_live_read(self):
+        result=enterprise_deployment(EnterpriseAPI('abc'),'abc')
+        self.assertTrue(result['deployment_verified'])
+        self.assertFalse(result['live_manifest_verified'])
+        self.assertEqual(result['commit'],'abc')
+
+    def test_other_sha_does_not_confirm_deployment(self):
+        self.assertFalse(enterprise_deployment(EnterpriseAPI('old'),'new')['deployment_verified'])
+
+    def test_failed_enterprise_workflow_cannot_pass(self):
+        api=EnterpriseAPI('abc');api.conclusion='failure'
+        with self.assertRaisesRegex(PushError,'Beaumanoir'):enterprise_deployment(api,'abc')
+        api.conclusion='success';api.deploy='skipped'
+        with self.assertRaisesRegex(PushError,'deploy'):enterprise_deployment(api,'abc')
+
+    def test_wrong_visibility_and_deployment_status_are_rejected(self):
+        original=EnterpriseAPI('abc')
+        for endpoint,value in [('pages',dict(html_url=MIRROR_SITE,public=True,build_type='workflow')),
+            ('deployments/10/statuses?per_page=100',[dict(id=12,state='failure')]),
+            ('deployments/10/statuses?per_page=100',[dict(id=12,state='success',environment_url='https://wrong.invalid/')])]:
+            def api(path):return value if path==endpoint else original(path)
+            with self.subTest(endpoint=endpoint):
+                with self.assertRaises(PushError):enterprise_deployment(api,'abc')
+
+
 class PushTests(unittest.TestCase):
     def setUp(self):
         self.folder=tempfile.TemporaryDirectory(dir=ROOT/'tmp')
@@ -64,7 +103,7 @@ class PushTests(unittest.TestCase):
         self.git.raw('config','commit.gpgsign','false')
         (self.root/'empty-hooks').mkdir()
         self.git.raw('config','core.hooksPath',str(self.root/'empty-hooks'))
-        for name,value in {'.gitignore':'/tmp/\n/empty-hooks/\n','.github/workflows/pages.yml':'FLOW_DEPLOYMENT_COMMIT: source-sha\n','tools/build_pages.py':'# FLOW_DEPLOYMENT_COMMIT\n','file.txt':'initial'}.items():
+        for name,value in {'.gitignore':'/tmp/\n/empty-hooks/\n','.github/workflows/pages.yml':"FLOW_DEPLOYMENT_COMMIT: source-sha\nFLOW_PAGES_BASE: /\n",'tools/build_pages.py':'# FLOW_DEPLOYMENT_COMMIT\n','file.txt':'initial'}.items():
             path=self.root/name
             path.parent.mkdir(parents=True,exist_ok=True)
             path.write_text(value,encoding='utf-8')
@@ -75,6 +114,13 @@ class PushTests(unittest.TestCase):
         Git(self.remote).raw('init','--bare','--initial-branch=main')
         self.git.raw('remote','add','origin',str(self.remote))
         self.git.raw('push','origin','HEAD:refs/heads/main')
+        self.mirror=self.base/'enterprise.git'
+        self.mirror.mkdir()
+        Git(self.mirror).raw('init','--bare','--initial-branch=main')
+        self.git.raw('remote','add',MIRROR_REMOTE,str(self.mirror))
+        self.allowed_mirrors=patch('git_push.MIRROR_URLS',{str(self.mirror)})
+        self.allowed_mirrors.start()
+        self.addCleanup(self.allowed_mirrors.stop)
         self.original=remote_head(self.git)
         (self.root/'file.txt').write_text('committed',encoding='utf-8')
         self.git.raw('add','--','file.txt')
@@ -85,14 +131,15 @@ class PushTests(unittest.TestCase):
         write_json(self.report,dict(status='passed'))
 
     def plan(self,**kwargs):
-        return prepare(self.root,git=self.git,api=self.api,**kwargs)
+        return prepare(self.root,git=self.git,api=self.api,mirror_api=lambda _:dict(full_name=MIRROR_REPOSITORY,visibility='internal'),**kwargs)
     def watch(self,path,**kwargs):
+        for remote in ('origin',MIRROR_REMOTE):self.git.raw('push',remote,self.head+':refs/heads/main')
         ticks=[0]
         def sleep(seconds):ticks[0]+=max(seconds,.01)
         with patch('sys.stdout',io.StringIO()):
             return watch(self.root,path,timeout=2,poll=1,git=self.git,api=self.api,
                 manifest_reader=kwargs.pop('manifest_reader',lambda url:dict(deployment_commit=self.head)),
-                clock=lambda:ticks[0],sleep=sleep,**kwargs)
+                clock=lambda:ticks[0],sleep=sleep,mirror_api=EnterpriseAPI(self.head),**kwargs)
 
     def test_prepare_and_push_preserve_pending_work_and_use_exact_sha(self):
         (self.root/'file.txt').write_text('pending work',encoding='utf-8')
@@ -105,6 +152,8 @@ class PushTests(unittest.TestCase):
         result=push(self.root,path,git=self.git)
         self.assertEqual(remote_head(self.git),self.head)
         self.assertTrue(result['remote_verified'])
+        self.assertEqual(remote_head(self.git,MIRROR_REMOTE),self.head)
+        self.assertEqual(set(result['remotes']),{'origin',MIRROR_REMOTE})
         self.assertFalse(result['deployment_verified'])
         self.assertEqual((self.root/'file.txt').read_text(encoding='utf-8'),'pending work')
         self.assertEqual(self.git.entries(),before)
@@ -223,3 +272,60 @@ class PushTests(unittest.TestCase):
         ahead=self.advance_remote()
         with self.assertRaisesRegex(PushError,'retard'):self.plan()
         self.assertEqual(remote_head(self.git),ahead)
+
+    def test_partial_push_resumes_only_the_missing_destination(self):
+        path,_=self.plan()
+        raw=self.git.raw
+        def fail_mirror(*args,**kwargs):
+            if args[:2]==('push',MIRROR_REMOTE):raise CommitError('enterprise unavailable')
+            return raw(*args,**kwargs)
+        with patch.object(self.git,'raw',side_effect=fail_mirror):
+            with self.assertRaisesRegex(PushError,'non confirmé'):push(self.root,path,git=self.git)
+        self.assertEqual(remote_head(self.git),self.head)
+        self.assertIsNone(remote_head(self.git,MIRROR_REMOTE,True))
+        receipt=json.loads((self.root/'tmp/git-push/result.json').read_text())
+        self.assertTrue(receipt['remotes']['origin']['verified'])
+        result=push(self.root,path,git=self.git)
+        self.assertFalse(result['remotes']['origin']['sent'])
+        self.assertTrue(result['remotes'][MIRROR_REMOTE]['sent'])
+        self.assertEqual(remote_head(self.git,MIRROR_REMOTE),self.head)
+
+    def test_changed_mirror_blocks_both_pushes(self):
+        path,_=self.plan()
+        # A separately approved remote advance must never be overwritten.
+        self.git.raw('commit','--allow-empty','-m','foreign tip')
+        foreign=self.git.text('rev-parse','HEAD')
+        self.git.raw('push',MIRROR_REMOTE,foreign+':refs/heads/main')
+        self.git.raw('reset','--soft',self.head)
+        with self.assertRaisesRegex(PushError,'a avancé'):push(self.root,path,git=self.git)
+        self.assertEqual(remote_head(self.git),self.original)
+        self.assertEqual(remote_head(self.git,MIRROR_REMOTE),foreign)
+        with self.assertRaisesRegex(PushError,'divergé'):self.plan()
+
+    def test_mirror_url_change_and_visibility_are_rejected(self):
+        path,_=self.plan()
+        with patch('git_push.MIRROR_URLS',{'https://unexpected.invalid/repo.git'}):
+            with self.assertRaisesRegex(PushError,'exclusivement'):push(self.root,path,git=self.git)
+        with self.assertRaisesRegex(PushError,'interne'):
+            prepare(self.root,git=self.git,api=self.api,mirror_api=lambda _:dict(full_name=MIRROR_REPOSITORY,visibility='public'))
+        self.assertEqual(remote_head(self.git),self.original)
+
+    def test_existing_mirror_catches_up_without_changing_origin(self):
+        self.git.raw('push',MIRROR_REMOTE,self.original+':refs/heads/main')
+        self.git.raw('push','origin',self.head+':refs/heads/main')
+        path,data=self.plan()
+        self.assertEqual(data['commits'],[])
+        self.assertEqual(data['mirror']['remote_head'],self.original)
+        result=push(self.root,path,git=self.git)
+        self.assertFalse(result['remotes']['origin']['sent'])
+        self.assertEqual(remote_head(self.git,MIRROR_REMOTE),self.head)
+
+    def test_enterprise_workflow_guard_must_be_committed(self):
+        workflow=self.root/'.github/workflows/pages.yml'
+        workflow.write_text('FLOW_DEPLOYMENT_COMMIT',encoding='utf-8')
+        self.git.raw('add','--','.github/workflows/pages.yml')
+        self.git.raw('commit','-m','Missing enterprise guard')
+        with self.assertRaisesRegex(PushError,'workflow Pages'):self.plan()
+        _,data=self.plan(plan_only=True)
+        self.assertFalse(data['mirror_ready'])
+        self.assertFalse(data['ready'])

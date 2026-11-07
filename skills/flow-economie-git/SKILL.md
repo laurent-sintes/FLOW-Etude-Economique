@@ -21,7 +21,7 @@ Le flux courant est `main`, sans branche de brouillon ni release métier. Un pus
 
 Lire la racine Git, le statut, la branche, l’upstream et toutes les URL de lecture et d’envoi d’`origin`. Elles doivent cibler exclusivement le dépôt ci-dessus, en HTTPS ou SSH. Ne pas remplacer un remote pour rendre un autre checkout compatible. Une autre branche ou une HEAD détachée doit être résolue selon la demande avant l’envoi sur `main`.
 
-Plusieurs hôtes GitHub sont configurés sur ce poste. Pour `gh api` et `gh auth status`, utiliser explicitement `--hostname github.com`. Pour les commandes qui acceptent `--repo`, fournir `https://github.com/laurent-sintes/FLOW-Etude-Economique`. Ne jamais laisser la sélection basculer vers `beaumanoir.ghe.com`, afficher un jeton ou modifier l’identité Git globale. Vérifier le dépôt public par l’API ; un état différent doit être expliqué par une instruction utilisateur, sans changement automatique de visibilité.
+Plusieurs hôtes GitHub sont configurés sur ce poste. Pour `gh api` et `gh auth status`, utiliser explicitement `--hostname github.com` pour le dépôt personnel et `--hostname beaumanoir.ghe.com` pour le miroir interne. Pour les commandes qui acceptent `--repo`, fournir `https://github.com/laurent-sintes/FLOW-Etude-Economique`. Ne jamais laisser le compte par défaut choisir la destination, afficher un jeton ou modifier l’identité Git globale. Vérifier le dépôt public par l’API ; un état différent doit être expliqué par une instruction utilisateur, sans changement automatique de visibilité.
 
 ## Valider et committer
 
@@ -60,3 +60,10 @@ Faire `git fetch origin`, examiner les commits à envoyer et la relation avec `o
 Depuis `main`, pousser explicitement vers `refs/heads/main`. Définir l’upstream si nécessaire. Vérifier que le SHA distant correspond au SHA envoyé, puis suivre le workflow `pages.yml` de ce commit précis. Après déploiement réussi, vérifier l’URL retournée par Pages et le SHA du manifeste publié. Les tests des parcours et simulations sont exécutés sur GitHub. Ne pas confondre succès du push et succès du déploiement. En cas d’état réseau incertain, lire la référence distante avant toute relance ; en cas d’échec persistant, conserver le travail local et donner le diagnostic.
 
 Répondre brièvement : action exécutée, commit et sujet, résultat distant, contrôles utiles, état du déploiement et lien du site lorsqu’il est confirmé. Mentionner les modifications restantes sans annoncer une sauvegarde ou un déploiement non vérifié.
+
+
+## Deux destinations de push
+
+Le workflow envoie le même SHA vers `origin` (GitHub personnel public) et `beaumanoir` (`https://beaumanoir.ghe.com/solution-ai/FLOW-Etude-Economique.git`, interne). Le dépôt `FLOW-Program` reste distinct et ne doit jamais recevoir les commits de cette étude. GitHub CLI doit être connecté explicitement aux deux hôtes.
+
+Utiliser le script `tools.git_push` pour contrôler les deux branches avant l’envoi, accepter un miroir initialement vide, refuser les divergences sans forcer et reprendre un envoi partiel. Une reprise utilise le même plan tant que HEAD et les remotes sont inchangés. La réussite confirme les deux SHA distants et les deux déploiements Pages. Le site Beaumanoir est privé : vérifier sa CI, le job deploy et le statut du déploiement pour le SHA exact via l’API authentifiée. Cette preuve ne vaut pas consultation du site privé. Le manifeste servi reste vérifié directement sur le site personnel. Une demande de configuration seule ne déclenche ni commit ni push.

@@ -332,3 +332,17 @@ python -m tools.adopt_core recover
 Tant qu’un journal est en attente, un nouveau chargement du modèle est bloqué. Les simulations déjà chargées restent utilisables. La récupération refuse d’écraser des modifications étrangères à l’adoption. Le plan et son journal restent disponibles sous `tmp/core-adoptions/`. `--refresh` reconstruit une seule livraison après la validation et l’application. Un échec de livraison est signalé séparément d’une adoption déjà appliquée. Aucune commande ne committe ni ne pousse sur GitHub.
 
 Les tests des montants courants lisent `test_support.active_reference()`. Son pointeur unique est `tools/fixtures/active-adoption.json`, avec l’empreinte d’une référence figée liée à la décision adoptée. La commande renouvelle ce pointeur et sa référence dans la même transaction. Les exemples arithmétiques indépendants et les décisions historiques restent distincts des valeurs actives.
+
+
+### Double push personnel et Beaumanoir
+
+`python -m tools.git_push prepare` puis `python -m tools.git_push push` envoient le même commit sur `main` des deux dépôts :
+
+- `origin` : `https://github.com/laurent-sintes/FLOW-Etude-Economique.git` (public).
+- `beaumanoir` : `https://beaumanoir.ghe.com/solution-ai/FLOW-Etude-Economique.git` (interne).
+
+Sur un nouveau checkout, ajouter `git remote add beaumanoir https://beaumanoir.ghe.com/solution-ai/FLOW-Etude-Economique.git` et connecter GitHub CLI aux deux hôtes. Le dépôt entreprise peut être vide au premier envoi. Une branche en avance ou divergente bloque la préparation. Les URL et les SHA des deux destinations sont fixés dans le plan. Aucun push forcé ni publication de tags n’est effectué.
+
+Les deux envois ne sont pas atomiques. Si un seul a réussi, reprendre `python -m tools.git_push push` avec le même plan : le SHA déjà présent n’est pas renvoyé et le second dépôt est complété. Le reçu détaille les destinations confirmées. Une destination ayant changé bloque la reprise. `--no-wait` confirme les deux envois, sans annoncer un déploiement.
+
+La CI et Pages s’exécutent sur les deux GitHub. `FLOW_PAGES_BASE` vaut `/FLOW-Etude-Economique/` sur le GitHub personnel et `/` chez Beaumanoir, y compris pour les tests navigateur de la CI. `watch` vérifie les deux workflows, les jobs `deploy`, les branches distantes et le manifeste servi par le site public. Pour le site privé Beaumanoir, il vérifie via l’API authentifiée le SHA, le statut du déploiement et son URL. Le reçu distingue cette preuve du contrôle du manifeste servi (`live_manifest_verified: false` côté privé). Les anciens plans doivent être régénérés. Les changements de configuration doivent être committés avant le premier double push.

@@ -18,6 +18,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      FLOW_PAGES_BASE: ${{ github.server_url == 'https://github.com' && '/FLOW-Etude-Economique/' || '/' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -48,24 +50,24 @@ jobs:
         env:
           FLOW_DEPLOYMENT_COMMIT: ${{ github.sha }}
         run: |
-          pnpm --dir app exec vite build --outDir dist-pages --base /FLOW-Etude-Economique/
-          python -m tools.build_pages --output app/dist-pages --base /FLOW-Etude-Economique/
+          pnpm --dir app exec vite build --outDir dist-pages --base "$FLOW_PAGES_BASE"
+          python -m tools.build_pages --output app/dist-pages --base "$FLOW_PAGES_BASE"
           python -m tools.pages_validation --output tmp/pages-validation.json
       - name: Install Chromium
         run: pnpm --dir app exec playwright install chromium
       - name: Check Pages and Python simulations in the browser
         shell: bash
         run: |
-          mkdir -p tmp/pages-preview/FLOW-Etude-Economique
-          cp -R app/dist-pages/. tmp/pages-preview/FLOW-Etude-Economique/
+          mkdir -p "tmp/pages-preview${FLOW_PAGES_BASE}"
+          cp -R app/dist-pages/. "tmp/pages-preview${FLOW_PAGES_BASE}"
           python -m http.server 8777 --bind 127.0.0.1 --directory tmp/pages-preview > tmp/pages-preview.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
           for attempt in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:8777/FLOW-Etude-Economique/site-manifest.json > /dev/null; then break; fi
+            if curl --fail --silent "http://127.0.0.1:8777${FLOW_PAGES_BASE}site-manifest.json" > /dev/null; then break; fi
             sleep 1
           done
-          node app/scripts/verify-pages.mjs --url http://127.0.0.1:8777/FLOW-Etude-Economique/ --cases tmp/pages-validation.json --output tmp/pages-validation-report.json
+          node app/scripts/verify-pages.mjs --url "http://127.0.0.1:8777${FLOW_PAGES_BASE}" --cases tmp/pages-validation.json --output tmp/pages-validation-report.json
       - name: Keep Pages browser reports
         if: always()
         uses: actions/upload-artifact@v4
